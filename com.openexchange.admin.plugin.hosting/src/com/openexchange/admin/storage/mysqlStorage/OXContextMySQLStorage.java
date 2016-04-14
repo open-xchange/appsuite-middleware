@@ -118,6 +118,7 @@ import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
@@ -173,11 +174,21 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     // private Object criteriaMatch = null;
 
-    private int USE_UNIT = UNIT_CONTEXT;
+    private final int USE_UNIT;
 
-    private final OXContextMySQLStorageCommon contextCommon = new OXContextMySQLStorageCommon();
+    private final OXContextMySQLStorageCommon contextCommon;
 
+    private final PropertyHandlerExtended prop;
+
+    /**
+     * Initializes a new {@link OXContextMySQLStorage}.
+     */
     public OXContextMySQLStorage() {
+        super();
+        PropertyHandlerExtended prop = cache.getProperties();
+        this.prop = prop;
+        contextCommon = new OXContextMySQLStorageCommon();
+        int USE_UNIT = UNIT_CONTEXT;
         try {
             this.CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
             if (this.CONTEXTS_PER_SCHEMA <= 0) {
@@ -186,16 +197,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             final String unit = prop.getProp("CREATE_CONTEXT_USE_UNIT", "context");
             if (unit.trim().toLowerCase().equals("context")) {
-                this.USE_UNIT = UNIT_CONTEXT;
+                USE_UNIT = UNIT_CONTEXT;
             } else if (unit.trim().toLowerCase().equals("user")) {
-                this.USE_UNIT = UNIT_USER;
+                USE_UNIT = UNIT_USER;
             } else {
-                this.USE_UNIT = UNIT_CONTEXT;
+                USE_UNIT = UNIT_CONTEXT;
                 LOG.warn("unknown unit {}, using context", unit);
             }
         } catch (final OXContextException e) {
             LOG.error("Error init", e);
         }
+        this.USE_UNIT = USE_UNIT;
     }
 
     @Override

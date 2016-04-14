@@ -69,21 +69,10 @@ import com.openexchange.admin.tools.PropertyHandler;
  */
 public abstract class OXResourceStorageInterface {
 
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends OXResourceStorageInterface> implementingClass;
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXResourceStorageInterface.class);
 
-    protected static AdminCache cache = null;
 
-    protected static PropertyHandler prop = null;
-
-    static {
-        cache = ClientAdminThread.cache;
-        prop = cache.getProperties();
-    }
+    private static volatile OXResourceStorageInterface instance;
 
     /**
      * Creates a new instance implementing the group storage interface.
@@ -91,46 +80,56 @@ public abstract class OXResourceStorageInterface {
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXResourceStorageInterface getInstance() throws StorageException {
-        synchronized (OXResourceStorageInterface.class) {
-            if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandler.RESOURCE_STORAGE, null);
-                if (null != className) {
+        OXResourceStorageInterface inst = instance;
+        if (null == inst) {
+            synchronized (OXResourceStorageInterface.class) {
+                inst = instance;
+                if (null == inst) {
+                    Class<? extends OXResourceStorageInterface> implementingClass;
+                    AdminCache cache = ClientAdminThread.cache;
+                    PropertyHandler prop = cache.getProperties();
+                    final String className = prop.getProp(PropertyHandler.RESOURCE_STORAGE, null);
+                    if (null != className) {
+                        try {
+                            implementingClass = Class.forName(className).asSubclass(OXResourceStorageInterface.class);
+                        } catch (final ClassNotFoundException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    } else {
+                        final StorageException storageException = new StorageException("Property for resource_storage not defined");
+                        log.error("", storageException);
+                        throw storageException;
+                    }
+
+                    Constructor<? extends OXResourceStorageInterface> cons;
                     try {
-                        implementingClass = Class.forName(className).asSubclass(OXResourceStorageInterface.class);
-                    } catch (final ClassNotFoundException e) {
+                        cons = implementingClass.getConstructor(new Class[] {});
+                        inst = cons.newInstance(new Object[] {});
+                        instance = inst;
+                    } catch (final SecurityException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final NoSuchMethodException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalArgumentException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InstantiationException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalAccessException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InvocationTargetException e) {
                         log.error("", e);
                         throw new StorageException(e);
                     }
-                } else {
-                    final StorageException storageException = new StorageException("Property for resource_storage not defined");
-                    log.error("", storageException);
-                    throw storageException;
                 }
             }
         }
-        Constructor<? extends OXResourceStorageInterface> cons;
-        try {
-            cons = implementingClass.getConstructor(new Class[] {});
-            return cons.newInstance(new Object[] {});
-        } catch (final SecurityException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InstantiationException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        }
+        return inst;
     }
 
     public abstract int create(final Context ctx, final Resource res) throws StorageException;

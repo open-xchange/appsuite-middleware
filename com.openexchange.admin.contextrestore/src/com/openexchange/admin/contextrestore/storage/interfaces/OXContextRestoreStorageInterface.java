@@ -70,14 +70,9 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public abstract class OXContextRestoreStorageInterface {
 
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends OXContextRestoreStorageInterface> implementingClass;
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextRestoreStorageInterface.class);
 
-    protected static PropertyHandlerExtended prop = new PropertyHandlerExtended(System.getProperties());
+    private static volatile OXContextRestoreStorageInterface instance;
 
     /**
      * Creates a new instance implementing the group storage interface.
@@ -85,46 +80,55 @@ public abstract class OXContextRestoreStorageInterface {
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXContextRestoreStorageInterface getInstance() throws StorageException {
-        synchronized (OXContextRestoreStorageInterface.class) {
-            if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandlerExtended.CONTEXT_RESTORE_STORAGE, null);
-                if (null != className) {
+        OXContextRestoreStorageInterface inst = instance;
+        if (null == inst) {
+            synchronized (OXContextRestoreStorageInterface.class) {
+                inst = instance;
+                if (null == inst) {
+                    Class<? extends OXContextRestoreStorageInterface> implementingClass;
+                    PropertyHandlerExtended prop = new PropertyHandlerExtended(System.getProperties());
+                    final String className = prop.getProp(PropertyHandlerExtended.CONTEXT_RESTORE_STORAGE, null);
+                    if (null != className) {
+                        try {
+                            implementingClass = Class.forName(className).asSubclass(OXContextRestoreStorageInterface.class);
+                        } catch (final ClassNotFoundException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    } else {
+                        final StorageException storageException = new StorageException("Property for user_storage not defined");
+                        log.error("", storageException);
+                        throw storageException;
+                    }
+
+                    Constructor<? extends OXContextRestoreStorageInterface> cons;
                     try {
-                        implementingClass = Class.forName(className).asSubclass(OXContextRestoreStorageInterface.class);
-                    } catch (final ClassNotFoundException e) {
+                        cons = implementingClass.getConstructor(new Class[] {});
+                        inst = cons.newInstance(new Object[] {});
+                        instance = inst;
+                    } catch (final SecurityException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final NoSuchMethodException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalArgumentException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InstantiationException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalAccessException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InvocationTargetException e) {
                         log.error("", e);
                         throw new StorageException(e);
                     }
-                } else {
-                    final StorageException storageException = new StorageException("Property for user_storage not defined");
-                    log.error("", storageException);
-                    throw storageException;
                 }
             }
         }
-        Constructor<? extends OXContextRestoreStorageInterface> cons;
-        try {
-            cons = implementingClass.getConstructor(new Class[] {});
-            return cons.newInstance(new Object[] {});
-        } catch (final SecurityException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InstantiationException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        }
+        return inst;
     }
 
     public abstract String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema, String configdbname) throws SQLException, IOException, OXContextRestoreException, StorageException;

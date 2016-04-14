@@ -79,6 +79,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.collections.keyvalue.MultiKey;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -94,6 +95,7 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageUnregisterListener;
@@ -129,8 +131,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private static final Long MAX_FILESTORE_CAPACITY = new Long("8796093022208");
 
+    private final AdminCacheExtended cache;
+    private final PropertyHandlerExtended prop;
+
+    /**
+     * Initializes a new {@link OXUtilMySQLStorage}.
+     */
     public OXUtilMySQLStorage() {
         super();
+        cache = ClientAdminThreadExtended.cache;
+        prop = cache.getProperties();
     }
 
     @Override
@@ -1021,7 +1031,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         return stores.toArray(new Filestore[stores.size()]);
     }
 
-    private static List<Integer> listAllFilestoreIds() throws StorageException {
+    private List<Integer> listAllFilestoreIds() throws StorageException {
         final Connection con;
         try {
             con = cache.getReadConnectionForConfigDB();
@@ -2206,7 +2216,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
-    private static Collection<FilestoreContextBlock> makeBlocksFromFilestoreContexts() throws StorageException {
+    private Collection<FilestoreContextBlock> makeBlocksFromFilestoreContexts() throws StorageException {
+        final AdminCacheExtended cache = this.cache;
         final ConcurrentMap<MultiKey, FilestoreContextBlock> blocks = new ConcurrentHashMap<MultiKey, FilestoreContextBlock>();
 
         Connection con = null;
@@ -2245,7 +2256,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             int taskCount = 0;
 
             for (final PoolAndSchema poolAndSchema : retval) {
-                final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
                 completionService.submit(new Callable<Void>() {
 
                     @Override
@@ -2317,13 +2327,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         return blocks.values();
     }
 
-    protected static void updateBlocksInSameDBWithFilestoreUsage(Collection<FilestoreContextBlock> blocks) throws StorageException {
+    protected void updateBlocksInSameDBWithFilestoreUsage(Collection<FilestoreContextBlock> blocks) throws StorageException {
         for (FilestoreContextBlock block : blocks) {
             updateBlockWithFilestoreUsage(block);
         }
     }
 
-    private static void updateBlockWithFilestoreUsage(final FilestoreContextBlock block) throws StorageException {
+    private void updateBlockWithFilestoreUsage(final FilestoreContextBlock block) throws StorageException {
         if (block.isEmpty()) {
             return;
         }
@@ -2509,6 +2519,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
 
         // Get count and usage for given file storage
+        final AdminCacheExtended cache = this.cache;
         Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<PoolAndSchema, List<Integer>>();
         int count = 0;
 
@@ -2548,7 +2559,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         for (Map.Entry<PoolAndSchema, List<Integer>> entry : map.entrySet()) {
             final PoolAndSchema poolAndSchema = entry.getKey();
             final List<Integer> cids = entry.getValue();
-            final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
 
             completionService.submit(new Callable<Long>() {
 
@@ -2621,6 +2631,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @throws StorageException if some problem occurs loading the information.
      */
     private FilestoreUsage getUserUsage(final int filestoreId, boolean loadRealUsage, Collection<PoolAndSchema> pools, Connection readConfigdbCon) throws StorageException {
+        final AdminCacheExtended cache = this.cache;
         Collection<PoolAndSchema> retval = pools;
 
         if (null == retval) {
@@ -2658,10 +2669,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
 
         if (false == loadRealUsage) {
-
             ThreadPoolCompletionService<Integer> completionService = new ThreadPoolCompletionService<Integer>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
-
-            final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
             for (final PoolAndSchema poolAndSchema : retval) {
                 completionService.submit(new Callable<Integer>() {
 
@@ -2714,7 +2722,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         int taskCount = 0;
 
         for (final PoolAndSchema poolAndSchema : retval) {
-            final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
             completionService.submit(new Callable<FilestoreUsage>() {
 
                 @Override
@@ -2809,11 +2816,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @throws StorageException If operation fails
      */
     private Map<Integer, Integer> getFilestoreUserCounts(Collection<PoolAndSchema> pools) throws StorageException {
+        final AdminCacheExtended cache = this.cache;
         CompletionService<Map<Integer, Integer>> completionService = new ThreadPoolCompletionService<Map<Integer, Integer>>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
         int taskCount = 0;
 
         for (final PoolAndSchema poolAndSchema : pools) {
-            final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
             completionService.submit(new Callable<Map<Integer, Integer>>() {
 
                 @Override

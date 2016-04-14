@@ -88,6 +88,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.ServiceException;
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -103,6 +104,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -189,8 +191,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private static final String DEFAULT_IMAP_SERVER_CREATE = "imap://localhost:143";
 
+    private final AdminCache cache;
+    private final PropertyHandler prop;
+
+    /**
+     * Initializes a new {@link OXUserMySQLStorage}.
+     */
     public OXUserMySQLStorage() {
         super();
+        cache = ClientAdminThread.cache;
+        prop = cache.getProperties();
     }
 
     @Override
