@@ -123,8 +123,8 @@ public class FileStorageCapabilityTools {
             return Boolean.valueOf(FileStorageMultiMove.class.isAssignableFrom(fileAccessClass));
         case READ_ONLY:
             return Boolean.valueOf(FileStorageReadOnly.class.isAssignableFrom(fileAccessClass));
-        case MAIL_STORE:
-            return Boolean.valueOf(FileStorageMailStore.class.isAssignableFrom(fileAccessClass));
+        case MAIL_ATTACHMENTS:
+            return Boolean.valueOf(FileStorageMailAttachments.class.isAssignableFrom(fileAccessClass));
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return Boolean.FALSE;
@@ -172,8 +172,8 @@ public class FileStorageCapabilityTools {
             return FileStorageMultiMove.class.isInstance(fileAccess);
         case READ_ONLY:
             return FileStorageReadOnly.class.isInstance(fileAccess);
-        case MAIL_STORE:
-            return FileStorageMailStore.class.isInstance(fileAccess);
+        case MAIL_ATTACHMENTS:
+            return FileStorageMailAttachments.class.isInstance(fileAccess);
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return false;

@@ -180,9 +180,9 @@ public class AllAction extends AbstractFileStorageAccountAction {
             caps.add(FileStorageCapability.READ_ONLY.name());
         }
 
-        supported = capabilityAware.supports(FileStorageCapability.MAIL_STORE);
+        supported = capabilityAware.supports(FileStorageCapability.MAIL_ATTACHMENTS);
         if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.MAIL_STORE.name());
+            caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
         }
 
         return caps;

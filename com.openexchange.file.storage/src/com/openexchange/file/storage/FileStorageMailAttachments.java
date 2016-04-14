@@ -51,12 +51,12 @@ package com.openexchange.file.storage;
 
 
 /**
- * {@link FileStorageMailStore} - Associated file storage only supports read-only access.
+ * {@link FileStorageMailAttachments} - Associated file storage contains mail attachments.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface FileStorageMailStore {
+public interface FileStorageMailAttachments {
 
     // Marker interface
 }

@@ -137,9 +137,9 @@ public enum FileStorageCapability {
     READ_ONLY,
 
     /**
-     * File storage is backed by a mail store
+     * File storage contains mail attachments
      */
-    MAIL_STORE,
+    MAIL_ATTACHMENTS,
 
 
     ;

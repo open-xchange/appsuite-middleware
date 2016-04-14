@@ -51,7 +51,9 @@ package com.openexchange.file.storage.mail.settings;
 
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.mail.FullName;
+import com.openexchange.file.storage.mail.MailDriveConstants;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
 import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.groupware.contexts.Context;
@@ -108,7 +110,7 @@ public abstract class AbstractMailDriveSetting implements PreferencesItemService
 
     @Override
     public String[] getPath() {
-        return new String[] { "modules", "mail", nameInPath };
+        return new String[] { "folder", "mailattachments", nameInPath };
     }
 
     @Override
@@ -117,7 +119,8 @@ public abstract class AbstractMailDriveSetting implements PreferencesItemService
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(getFullName(session.getUserId(), session.getContextId()).getFolderId());
+                String folderId = getFullName(session.getUserId(), session.getContextId()).getFolderId();
+                setting.setSingleValue(new FolderID(MailDriveConstants.ID, MailDriveConstants.ACCOUNT_ID, folderId).toUniqueID());
             }
 
             @Override
@@ -138,11 +141,11 @@ public abstract class AbstractMailDriveSetting implements PreferencesItemService
 
     @Override
     public String getConfigTreePath() {
-        return "modules/mail/" + nameInPath;
+        return "folder/mailattachments/" + nameInPath;
     }
 
     @Override
     public String getJslobPath() {
-        return "io.ox/mail//" + nameInPath;
+        return "io.ox/core//folder/mailattachments/" + nameInPath;
     }
 }
