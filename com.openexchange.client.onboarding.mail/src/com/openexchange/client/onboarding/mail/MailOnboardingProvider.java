@@ -73,6 +73,7 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mail.transport.config.TransportAuthSupportAware;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -230,6 +231,10 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             }
             String smtpLogin = smtpConfig.getLogin();
             String smtpPassword = smtpConfig.getPassword();
+            if ((smtpConfig instanceof TransportAuthSupportAware) && (false == ((TransportAuthSupportAware) smtpConfig).isAuthSupported())) {
+                smtpLogin = null;
+                smtpPassword = null;
+            }
             smtpConfiguration = new Configuration(smtpServer, smtpPort.intValue(), smtpSecure.booleanValue(), smtpLogin, smtpPassword);
         }
 

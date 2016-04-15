@@ -53,9 +53,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.mail.transport.config.ITransportProperties;
+import com.openexchange.mail.transport.config.TransportAuthSupportAware;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
@@ -70,7 +72,7 @@ import com.openexchange.tools.net.URIParser;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPConfig extends TransportConfig {
+public final class SMTPConfig extends TransportConfig implements TransportAuthSupportAware {
 
     private static final String PROTOCOL_SMTP_SECURE = "smtps";
 
@@ -155,6 +157,15 @@ public final class SMTPConfig extends TransportConfig {
     @Override
     public ITransportProperties getTransportProperties() {
         return transportProperties;
+    }
+
+    @Override
+    public boolean isAuthSupported() throws OXException {
+        ISMTPProperties transportProperties = this.transportProperties;
+        if (null == transportProperties) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create("SMTP config not yet initialized");
+        }
+        return transportProperties.isSmtpAuth();
     }
 
     public ISMTPProperties getSMTPProperties() {
