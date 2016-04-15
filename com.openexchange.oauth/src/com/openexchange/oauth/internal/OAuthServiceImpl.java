@@ -306,10 +306,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 try {
                     URI uri = new URI(cbUrl);
 
-                    DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
-                    String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
-                    if (!path.startsWith("/")) {
-                        path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
+                    String path;
+                    {
+                        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+                        StringBuilder pathBuilder = new StringBuilder(prefixService.getPrefix()).append("defer");
+                        if (pathBuilder.charAt(0) != '/') {
+                            pathBuilder.insert(0, '/');
+                        }
+                        path = pathBuilder.toString();
                     }
 
                     String prevCbUrl = cbUrl;
