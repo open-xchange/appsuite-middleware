@@ -570,28 +570,6 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Type", "text/html", resp.getContentType());
     }
 
-    public void testSanitizingFileArguments() throws Exception {
-        ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(new byte[] {1,1,1,1});
-        fileHolder.setContentType("<pwn/ny");
-        fileHolder.setDelivery(Delivery.view.name());
-        fileHolder.setDisposition(Disposition.inline.name());
-        fileHolder.setName("<svg onload=alert(1)>");
-        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-        final AJAXRequestData requestData = new AJAXRequestData();
-        requestData.setSession(new SimServerSession(1, 1));
-        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-        final SimHttpServletRequest req = new SimHttpServletRequest();
-        final SimHttpServletResponse resp = new SimHttpServletResponse();
-        resp.setCharacterEncoding("UTF-8");
-        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
-        resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
-        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
-
-        String response = new String(servletOutputStream.toByteArray(), "UTF-8");
-        assertFalse("Response contains malicious content", response.indexOf("<svg onload=alert") >= 0);
-    }
-
     public void testContentLengthMailAttachments_Bug26926() {
         try {
             InputStream is = null;
