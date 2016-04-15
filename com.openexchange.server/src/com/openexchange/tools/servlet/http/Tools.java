@@ -59,6 +59,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -80,6 +81,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.httpclient.HttpStatus;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -138,6 +140,9 @@ public final class Tools {
     /*-
      * ------------------ Header values -------------------------
      */
+
+    /** The <code>"Accept"</code> header */
+    private static final @NonNull String ACCEPT = "Accept";
 
     /**
      * Expires HTTP header value.
@@ -792,6 +797,30 @@ public final class Tools {
         PrintWriter writer = httpResponse.getWriter();
         writer.write(getErrorPage(statusCode, null, desc));
         writer.flush();
+    }
+
+    private static final List<String> JSON_TYPES = Arrays.asList("application/json", "text/javascript");
+
+    /**
+     * Checks if the <code>"Accept"</code> header of specified HTTP request signals to expect JSON data.
+     *
+     * @param request The HTTP request
+     * @param interpretMissingAsTrue <code>true</code> to interpret a missing/empty <code>"Accept"</code> header as <code>true</code>; otherwise <code>false</code>
+     * @return <code>true</code> if JSON data is expected; otherwise <code>false</code>
+     */
+    public static boolean isJsonResponseExpected(HttpServletRequest request, boolean interpretMissingAsTrue) {
+        if (null == request) {
+            return false;
+        }
+
+        // E.g. "Accept: application/json, text/javascript, ..."
+        String acceptHdr = request.getHeader(ACCEPT);
+        if (Strings.isEmpty(acceptHdr)) {
+            return interpretMissingAsTrue;
+        }
+
+        float[] qualities = MIMEParse.qualities(JSON_TYPES, acceptHdr);
+        return qualities[0] == 1.0f || qualities[1] == 1.0f;
     }
 
     /**

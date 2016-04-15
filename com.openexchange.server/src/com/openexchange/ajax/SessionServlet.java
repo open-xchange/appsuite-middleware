@@ -50,9 +50,6 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,7 +61,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
-import com.openexchange.annotation.NonNull;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -73,7 +69,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Reply;
@@ -84,7 +79,6 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.http.MIMEParse;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
@@ -105,9 +99,6 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /** White-list file identifier */
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
-
-    /** The <code>"Accept"</code> header */
-    private static final @NonNull String ACCEPT = "Accept";
 
     // ------------------------------------------------------------------------------------------------------------------------------
 
@@ -330,7 +321,7 @@ public abstract class SessionServlet extends AJAXServlet {
             // An upload failed
             LOG.debug("", e);
             String sLoc = e.getProperty(OXExceptionConstants.PROPERTY_LOCALE);
-            resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(null == sLoc ? Locale.US : LocaleTools.getLocale(sLoc)));
+            writeErrorPage(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(null == sLoc ? Locale.US : LocaleTools.getLocale(sLoc)), resp);
         } else if (sessionErrorPrefix.equals(e.getPrefix())) {
             LOG.debug("", e);
             handleSessiondException(e, req, resp);
@@ -423,8 +414,6 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private static final List<String> JSON_TYPES = Arrays.asList("application/json", "text/javascript");
-
     /**
      * Checks if the <code>"Accept"</code> header of specified HTTP request signals to expect JSON data.
      *
@@ -433,18 +422,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return <code>true</code> if JSON data is expected; otherwise <code>false</code>
      */
     public static boolean isJsonResponseExpected(HttpServletRequest request, boolean interpretMissingAsTrue) {
-        if (null == request) {
-            return false;
-        }
-
-        // E.g. "Accept: application/json, text/javascript, ..."
-        String acceptHdr = request.getHeader(ACCEPT);
-        if (Strings.isEmpty(acceptHdr)) {
-            return interpretMissingAsTrue;
-        }
-
-        float[] qualities = MIMEParse.qualities(JSON_TYPES, acceptHdr);
-        return qualities[0] == 1.0f || qualities[1] == 1.0f;
+        return Tools.isJsonResponseExpected(request, interpretMissingAsTrue);
     }
 
     /**
@@ -456,11 +434,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws IOException If an I/O error occurs
      */
     public static void writeErrorPage(int statusCode, String desc, HttpServletResponse resp) throws IOException {
-        resp.setContentType("text/html; charset=UTF-8");
-        resp.setHeader("Content-Disposition", "inline");
-        PrintWriter writer = resp.getWriter();
-        writer.write(getErrorPage(statusCode, null, desc));
-        writer.flush();
+        Tools.sendErrorPage(resp, statusCode, desc);
     }
 
     /**
