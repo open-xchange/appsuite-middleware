@@ -51,10 +51,12 @@ package com.openexchange.mail.transport.config.impl;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
 import org.slf4j.Logger;
-import com.openexchange.config.cascade.ConfigProviderService;
+
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -62,7 +64,6 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
-import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -73,11 +74,13 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
 
-    private final ServiceLookup services;
+    private final ContextService contextService;
+    private final ConfigViewFactory configViewFactory;
 
-    public DefaultNoReplyConfigFactory(ServiceLookup services) {
+    public DefaultNoReplyConfigFactory(ContextService contextService, ConfigViewFactory configViewFactory) {
         super();
-        this.services = services;
+        this.contextService = contextService;
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
@@ -87,8 +90,6 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
 
     public NoReplyConfig loadNoReplyConfig(int contextId) throws OXException {
         Logger logger = org.slf4j.LoggerFactory.getLogger(NoReplyConfig.class);
-        ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
-        ConfigView view = factory.getView(ConfigProviderService.NO_USER, contextId);
 
         /*-
          * At least one user is needed from the specified context in order to properly support context-set-level properties:

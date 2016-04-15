@@ -622,7 +622,8 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 
-        registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
+        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
+        registerService(ContextService.class, contextService);
         // Register mail stuff
         MailServiceImpl mailService = new MailServiceImpl();
         {
@@ -655,7 +656,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             });
         }
-        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(this));
+        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(contextService, getService(ConfigViewFactory.class)));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new TransportLoginHandler());
