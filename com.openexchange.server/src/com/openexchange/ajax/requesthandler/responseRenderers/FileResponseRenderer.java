@@ -85,7 +85,6 @@ import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link FileResponseRenderer}
@@ -270,7 +269,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
         try {
-            Tools.sendErrorPage(resp, sc, msg);
+            resp.sendError(sc, null == msg ? HttpStatus.getStatusText(sc) : msg);
         } catch (final Exception e) {
             // Ignore
         }
