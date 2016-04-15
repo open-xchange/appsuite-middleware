@@ -686,7 +686,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
         try {
-            resp.sendError(sc, msg);
+            Tools.sendErrorPage(resp, sc, msg);
         } catch (final Exception e) {
             // Ignore
         }
