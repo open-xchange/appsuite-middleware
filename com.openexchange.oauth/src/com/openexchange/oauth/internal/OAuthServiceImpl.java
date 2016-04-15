@@ -85,6 +85,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
@@ -969,15 +970,12 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     @Override
     public void update(final String recrypted, final PWUpdate customizationNote) throws OXException {
-        final StringBuilder b = new StringBuilder();
-        b.append("UPDATE oauthAccounts SET ").append(customizationNote.field).append("= ? WHERE cid = ? AND id = ?");
-
         final Context context = getContext(customizationNote.cid);
         Connection con = null;
         PreparedStatement stmt = null;
         try {
             con = getConnection(false, context);
-            stmt = con.prepareStatement(b.toString());
+            stmt = con.prepareStatement(new StringBuilder("UPDATE oauthAccounts SET ").append(customizationNote.field).append("= ? WHERE cid = ? AND id = ?").toString());
             stmt.setString(1, recrypted);
             stmt.setInt(2, customizationNote.cid);
             stmt.setInt(3, customizationNote.id);
@@ -985,6 +983,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage());
         } finally {
+            Databases.closeSQLStuff(stmt);
             provider.releaseWriteConnection(context, con);
         }
     }
