@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-15 09:55+0100\n"
+"PO-Revision-Date: 2016-04-15 13:59+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -4540,8 +4540,8 @@ msgid "Sequence number is outdated."
 msgstr "Sequenznummer ist veraltet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
-msgid "Invalid E-Mail address."
-msgstr "Ungültige E-Mail-Adresse."
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr "Ungültige E-Mail-Adresse: '%s'. Bitte korrigieren Sie die E-Mail-Adresse."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -10891,6 +10891,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "Ungültige E-Mail-Adresse."
 
 # Drive Application
 #~ msgid "Drive Application"

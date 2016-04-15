@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-19 15:59+0100\n"
+"PO-Revision-Date: 2016-04-15 13:58+0100\n"
 "Last-Translator: Robert Kratky <kratky@rob.cz>\n"
 "Language-Team: Czech <>\n"
 "Language: cs\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Lokalize 2.0\n"
+"X-Generator: Poedit 1.7.7\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Lokalize 1.4\n"
 
@@ -5213,8 +5213,8 @@ msgid "Sequence number is outdated."
 msgstr "Číslo sekvence je zastaralé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
-msgid "Invalid E-Mail address."
-msgstr "Neplatná e-mailová adresa."
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr "Neplatná e-mailová adresa ‚%s‘. Opravte, prosím."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -9670,8 +9670,7 @@ msgid ""
 "%1$s hours"
 msgstr ""
 "Překročili jste maximální povolený počet zpráv SMS. Zkuste to, prosím, znovu "
-"po "
-"%1$s hodinách"
+"po %1$s hodinách"
 
 #. SMS limits apply. You can only send one more message in the next %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
@@ -12210,6 +12209,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "Neplatná e-mailová adresa."
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "Asie/Rijád87"
