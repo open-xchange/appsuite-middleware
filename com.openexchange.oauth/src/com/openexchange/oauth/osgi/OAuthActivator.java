@@ -63,6 +63,7 @@ import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.oauth.CallbackRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
@@ -175,6 +176,7 @@ public final class OAuthActivator extends HousekeepingActivator {
                 delegateServices.get(ContextService.class),
                 cbRegistry);
 
+            registerService(CallbackRegistry.class, cbRegistry);
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService);
             registerService(OAuthServiceMetaDataRegistry.class, registry);
