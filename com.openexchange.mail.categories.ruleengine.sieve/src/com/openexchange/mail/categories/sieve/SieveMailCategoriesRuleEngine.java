@@ -50,7 +50,6 @@
 package com.openexchange.mail.categories.sieve;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +60,7 @@ import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.Token;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Command;
 import com.openexchange.jsieve.commands.IfCommand;
@@ -159,19 +159,26 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
     }
 
     private Rule mailCategoryRule2SieveRule(MailCategoryRule rule) throws SieveException {
-        ArrayList<Object> argList = new ArrayList<>();
-        List<String> flagList = new ArrayList<>();
-        flagList.add(rule.getFlag());
-        argList.add(flagList);
-        List<ActionCommand> actionCommands = new ArrayList<>();
+        ArrayList<Object> argList = new ArrayList<>(1);
+        argList.add(Collections.singletonList(rule.getFlag()));
+        List<ActionCommand> actionCommands = new ArrayList<>(4);
         ActionCommand addFlagAction = new ActionCommand(ActionCommand.Commands.ADDFLAG, argList);
         actionCommands.add(addFlagAction);
+
         String[] flagsToRemove = rule.getFlagsToRemove();
-        if (flagsToRemove != null) {
-            ArrayList<Object> removeFlagArgList = new ArrayList<>();
-            removeFlagArgList.add(Arrays.asList(flagsToRemove));
-            actionCommands.add(0, new ActionCommand(ActionCommand.Commands.REMOVEFLAG, removeFlagArgList));
+        if (flagsToRemove != null && flagsToRemove.length > 0) {
+            ArrayList<Object> removeFlagArgList = new ArrayList<>(flagsToRemove.length);
+            for (int i = 0; i < flagsToRemove.length; i++) {
+                String flagToRemove = flagsToRemove[i];
+                if (Strings.isNotEmpty(flagToRemove)) {
+                    removeFlagArgList.add(flagToRemove);
+                }
+            }
+            if (false == removeFlagArgList.isEmpty()) {
+                actionCommands.add(0, new ActionCommand(ActionCommand.Commands.REMOVEFLAG, removeFlagArgList));
+            }
         }
+
         IfCommand ifCommand = new IfCommand(getCommand(rule), actionCommands);
         ArrayList<Command> commands = new ArrayList<Command>(Collections.singleton(ifCommand));
         int linenumber = 0;

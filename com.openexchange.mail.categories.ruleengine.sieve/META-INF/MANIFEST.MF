@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.mail.categories.sieve.osgi.Activator
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.jsieve.commands,
  com.openexchange.mail.categories,
  com.openexchange.mail.categories.ruleengine,
