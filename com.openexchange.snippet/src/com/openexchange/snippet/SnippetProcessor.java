@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import javax.mail.internet.MimeUtility;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -205,7 +206,7 @@ public class SnippetProcessor {
                     }
 
                     if (mf.getSize() > maxImageSize) {
-                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
+                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
                     }
 
                     String contentId = processLocalImage(mf, id, appendBodyPart, attachments);

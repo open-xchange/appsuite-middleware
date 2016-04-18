@@ -95,9 +95,13 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
      */
     MAXIMUM_IMAGES_COUNT("Maximum number of '%1$s' for signature images reached.", "The maximum allowed number of '%1$s' images in the signature is reached.", CATEGORY_ERROR, 8),
     /**
-     * Maximum size of '%1$s' for signature image is reached.
+     * The signature image exceeds the maximum allowed size of '%1$s' (%2$s bytes).
      */
-    MAXIMUM_IMAGE_SIZE("Maximum size of '%1$s' for signature image is reached.", "The maximum allowed size of '%1$s' for an image in the signature is reached.", CATEGORY_ERROR, 9),
+    MAXIMUM_IMAGE_SIZE("The signature image exceeds the maximum allowed size of '%1$s' (%2$s bytes).", SnippetStrings.MAXIMUM_IMAGE_SIZE_MSG, CATEGORY_ERROR, 9),
+    /**
+     * Invalid or harmful image data detected.
+     */
+    INVALID_IMAGE_DATA("Invalid or harmful image data detected.", SnippetStrings.INVALID_IMAGE_DATA_MSG, CATEGORY_ERROR, 10),
 
     ;
 
