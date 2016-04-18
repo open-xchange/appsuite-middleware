@@ -8859,8 +8859,7 @@ msgstr ""
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
-msgid ""
-"The maximum allowed size of '%1$s' for an image in the signature is reached."
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr ""
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
