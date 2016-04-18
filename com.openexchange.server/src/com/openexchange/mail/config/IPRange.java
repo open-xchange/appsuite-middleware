@@ -59,6 +59,22 @@ import java.util.Collection;
 public class IPRange {
 
     /**
+     * The special NULL IP range.
+     */
+    public static final IPRange NULL = new IPRange(null) {
+
+        @Override
+        public boolean contains(String ipAddress) {
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "null";
+        }
+    };
+
+    /**
      * Checks if specified IP address is contained in given collection of IP address ranges
      *
      * @param actual The IP address to check
@@ -93,7 +109,7 @@ public class IPRange {
     /**
      * Initializes a new {@link IPRange}.
      */
-    private IPRange(final com.openexchange.sessiond.impl.IPRange delegate) {
+    IPRange(final com.openexchange.sessiond.impl.IPRange delegate) {
         super();
         this.delegate = delegate;
     }
