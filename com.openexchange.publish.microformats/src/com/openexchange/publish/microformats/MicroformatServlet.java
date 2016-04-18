@@ -179,12 +179,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final Map<String, String> args = getPublicationArguments(req);
             final String module = args.get(MODULE);
 
-            final HtmlService htmlService = MicroformatServlet.htmlService;
             final OXMFPublicationService publisher = publishers.get(module);
             if (publisher == null) {
                 final PrintWriter writer = resp.getWriter();
-                String sanitized = htmlService.sanitize(module, null, false, null, null);
-                writer.println("The publication has either been revoked in the meantime or module \"" + sanitized + "\" is unknown.");
+                String escaped = StringEscapeUtils.escapeHtml(module);
+                writer.println("The publication has either been revoked in the meantime or module \"" + escaped + "\" is unknown.");
                 writer.flush();
                 return;
             }
@@ -193,6 +192,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             if (publication == null || !publication.isEnabled()) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 final PrintWriter writer = resp.getWriter();
+                final HtmlService htmlService = MicroformatServlet.htmlService;
                 writer.println("Unknown site " + (null == htmlService ? "" : htmlService.encodeForHTML(args.get(SITE))));
                 writer.flush();
                 return;
