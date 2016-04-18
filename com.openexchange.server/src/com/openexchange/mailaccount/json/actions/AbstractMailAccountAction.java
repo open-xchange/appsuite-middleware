@@ -371,7 +371,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                     cause = cause.getCause();
                 }
                 if (null != cause) {
-                    warnings.add(MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(cause, mailConfig.getServer(), mailConfig.getLogin()));
+                    warnings.add(MailAccountExceptionCodes.VALIDATE_FAILED_MAIL.create(cause, mailConfig.getServer(), mailConfig.getLogin()));
                 }
             } else {
                 e.setCategory(Category.CATEGORY_WARNING);
