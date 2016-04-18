@@ -78,11 +78,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.lang.ArrayUtils;
-import ch.qos.logback.classic.Level;
 import com.openexchange.exception.Category;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
 import com.openexchange.logging.mbean.LogbackMBeanResponse;
 import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
+import ch.qos.logback.classic.Level;
 
 /**
  * {@link LogbackCLT}
@@ -166,6 +166,8 @@ public class LogbackCLT {
             CommandLine cl = parser.parse(options, args);
             String method = null;
             List<Object> params = new ArrayList<Object>();
+
+            checkOptions(cl);
 
             String sessionID = null;
             int contextID = 0;
@@ -266,6 +268,13 @@ public class LogbackCLT {
         }
     }
 
+    private static void checkOptions(CommandLine commandLine) {
+        if (commandLine.hasOption('u') && !commandLine.hasOption('c')) {
+            System.err.println("The '-u' should only be used in conjunction with the '-c' in order to specify a context.");
+            printUsage(-1);
+        }
+    }
+
     private static void printRootAppenderStats(String jmxPort, String jmxUser, String jmxPassword) {
         boolean error = true;
         try {
@@ -285,6 +294,7 @@ public class LogbackCLT {
 
     /**
      * Convert array to map
+     * 
      * @param loggersLevels
      * @return
      */
@@ -309,6 +319,7 @@ public class LogbackCLT {
 
     /**
      * Convert array to list
+     * 
      * @param loggersArray
      * @return
      */
@@ -331,10 +342,7 @@ public class LogbackCLT {
     }
 
     private static ObjectName getObjectName() throws MalformedObjectNameException {
-        return new ObjectName(
-            LogbackConfigurationMBean.DOMAIN,
-            LogbackConfigurationMBean.KEY,
-            LogbackConfigurationMBean.VALUE);
+        return new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
     }
 
     /**
@@ -360,8 +368,8 @@ public class LogbackCLT {
                 }
             } else if (o instanceof LogbackMBeanResponse) {
                 LogbackMBeanResponse response = (LogbackMBeanResponse) o;
-                for(MessageType t : MessageType.values()) {
-                    List <String> msgs = response.getMessages(t);
+                for (MessageType t : MessageType.values()) {
+                    List<String> msgs = response.getMessages(t);
                     if (msgs.size() > 0) {
                         System.out.println(t.toString() + ": " + response.getMessages(t));
                     }
@@ -426,8 +434,7 @@ public class LogbackCLT {
             return true;
         }
         StringBuilder builder = new StringBuilder();
-        builder.append("Error: Unknown log level: \"").append(value).append("\".").append("Requires a valid log level: ").append(
-            validLogLevels).append("\n");
+        builder.append("Error: Unknown log level: \"").append(value).append("\".").append("Requires a valid log level: ").append(validLogLevels).append("\n");
         printUsage(-1);
 
         return false;
@@ -448,8 +455,7 @@ public class LogbackCLT {
             return true;
         } catch (IllegalArgumentException e) {
             StringBuilder builder = new StringBuilder();
-            builder.append("Error: Unknown category: \"").append(category).append("\".\"\n").append("Requires a valid category: ").append(
-                getValidCategories()).append("\n");
+            builder.append("Error: Unknown category: \"").append(category).append("\".\"\n").append("Requires a valid category: ").append(getValidCategories()).append("\n");
             System.out.println(builder.toString());
             printUsage(-1);
         }
@@ -495,11 +501,7 @@ public class LogbackCLT {
     private static final void printUsage(int exitCode) {
         HelpFormatter hf = new HelpFormatter();
         hf.setWidth(120);
-        hf.printHelp(
-            "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] [-U <JMX-User> -P <JMX-Password> [-p <JMX-Port>]]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]",
-            null,
-            options,
-            "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories());
+        hf.printHelp("logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] [-U <JMX-User> -P <JMX-Password> [-p <JMX-Port>]]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]", null, options, "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories());
         System.exit(exitCode);
     }
 
