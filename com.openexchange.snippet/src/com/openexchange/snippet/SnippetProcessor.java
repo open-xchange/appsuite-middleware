@@ -65,6 +65,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -267,7 +268,7 @@ public class SnippetProcessor {
 
             int contentLength = con.getContentLength();
             if (contentLength > 0 && contentLength > maxImageSize) {
-                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
             }
 
             String contentType = con.getHeaderField("content-type");
@@ -316,7 +317,7 @@ public class SnippetProcessor {
 
             int contentLength = httpCon.getContentLength();
             if (contentLength > 0 && contentLength > maxImageSize) {
-                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
             }
 
             String contentType = httpCon.getHeaderField("content-type");
@@ -436,7 +437,7 @@ public class SnippetProcessor {
                     }
 
                     if (mf.getSize() > maxImageSize) {
-                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
+                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
                     }
 
                     // Replace "src" attribute
