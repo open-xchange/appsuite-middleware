@@ -157,6 +157,8 @@ public class MimeMailException extends OXException {
 
     private static final String ERR_TMP = "temporary error, please try again later";
 
+    private static final String ERR_TMP_FLR = "temporary failure";
+
     private static final String ERR_AUTH_FAILED = "bad authentication failed";
 
     private static final String ERR_MSG_TOO_LARGE = "message too large";
@@ -429,7 +431,7 @@ public class MimeMailException extends OXException {
                     mailInterfaceMonitor.changeNumBrokenConnections(true);
                     return MimeMailExceptionCode.BROKEN_CONNECTION.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer());
                 }
-                return MimeMailExceptionCode.SOCKET_ERROR.create(e, appendInfo(e.getMessage(), folder));
+                return MimeMailExceptionCode.SOCKET_ERROR.create(e, new Object[0]);
             } else if (nextException instanceof java.net.UnknownHostException) {
                 return MimeMailExceptionCode.UNKNOWN_HOST.create(e, appendInfo(e.getMessage(), folder));
             } else if (nextException instanceof java.net.SocketTimeoutException) {
