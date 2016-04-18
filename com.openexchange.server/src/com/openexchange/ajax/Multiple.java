@@ -492,7 +492,7 @@ public class Multiple extends SessionServlet {
                     return state;
                 } finally {
                 	jsonWriter.endObject();
-                	AJAXRequestResult.cleanUp(requestResult);
+                	AJAXRequestResult.signalDone(requestResult);
                 }
                 return state;
             }

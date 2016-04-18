@@ -156,7 +156,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     // Omit result on error. Let the UI deal with this
                     handleOXException(x, RampUpKey.FOLDER_LIST.key);
                 } finally {
-                    AJAXRequestResult.cleanUp(requestResult);
+                    AJAXRequestResult.signalDone(requestResult);
                 }
                 return null;
             }
@@ -179,7 +179,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                         // Omit result on error. Let the UI deal with this
                         handleOXException(x, RampUpKey.FOLDER.key);
                     } finally {
-                        AJAXRequestResult.cleanUp(requestResult);
+                        AJAXRequestResult.signalDone(requestResult);
                     }
                 }
                 {
@@ -191,7 +191,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                         // Omit result on error. Let the UI deal with this
                         handleOXException(x, RampUpKey.FOLDER.key);
                     } finally {
-                        AJAXRequestResult.cleanUp(requestResult);
+                        AJAXRequestResult.signalDone(requestResult);
                     }
                 }
                 return folder;
@@ -217,7 +217,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     // Omit result on error. Let the UI deal with this
                     handleOXException(x, RampUpKey.JSLOBS.key);
                 } finally {
-                    AJAXRequestResult.cleanUp(requestResult);
+                    AJAXRequestResult.signalDone(requestResult);
                 }
                 return null;
             }
@@ -236,7 +236,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     // Omit result on error. Let the UI deal with this
                     handleOXException(x, RampUpKey.SERVER_CONFIG.key);
                 } finally {
-                    AJAXRequestResult.cleanUp(requestResult);
+                    AJAXRequestResult.signalDone(requestResult);
                 }
                 return null;
             }
@@ -259,7 +259,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     // Omit result on error. Let the UI deal with this
                     handleOXException(x, RampUpKey.OAUTH.key);
                 } finally {
-                    AJAXRequestResult.cleanUp(requestResult);
+                    AJAXRequestResult.signalDone(requestResult);
                 }
 
                 requestResult = null;
@@ -270,7 +270,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     // Omit result on error. Let the UI deal with this
                     handleOXException(x, RampUpKey.OAUTH.key);
                 } finally {
-                    AJAXRequestResult.cleanUp(requestResult);
+                    AJAXRequestResult.signalDone(requestResult);
                 }
 
                 requestResult = null;
@@ -281,7 +281,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     // Omit result on error. Let the UI deal with this
                     handleOXException(x, RampUpKey.OAUTH.key);
                 } finally {
-                    AJAXRequestResult.cleanUp(requestResult);
+                    AJAXRequestResult.signalDone(requestResult);
                 }
 
                 return oauth;
@@ -300,7 +300,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     // Omit result on error. Let the UI deal with this
                     handleOXException(x, RampUpKey.USER.key);
                 } finally {
-                    AJAXRequestResult.cleanUp(requestResult);
+                    AJAXRequestResult.signalDone(requestResult);
                 }
                 return null;
             }
@@ -318,7 +318,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     // Omit result on error. Let the UI deal with this
                     handleOXException(x, RampUpKey.ACCOUNTS.key);
                 } finally {
-                    AJAXRequestResult.cleanUp(requestResult);
+                    AJAXRequestResult.signalDone(requestResult);
                 }
                 return null;
             }

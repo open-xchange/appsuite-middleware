@@ -51,17 +51,17 @@ package com.openexchange.ajax.requesthandler;
 
 
 /**
- * {@link AJAXRequestResultCleanup} - Performs clean-up actions on a {@link AJAXRequestResult} instance.
+ * {@link AJAXRequestResultListener} - A listener for an {@link AJAXRequestResult} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface AJAXRequestResultCleanup {
+public interface AJAXRequestResultListener {
 
     /**
-     * Cleans-up specified request data.
+     * Invoked if associated {@link AJAXRequestResult} instance is done.
      *
-     * @param requestResult The request result to clean
+     * @param requestResult The request result that is done
      */
-    void cleanUp(AJAXRequestResult requestResult);
+    void done(AJAXRequestResult requestResult);
 }

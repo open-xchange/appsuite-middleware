@@ -488,7 +488,7 @@ public class DispatcherServlet extends SessionServlet {
             }
             super.handleOXException(oxe, httpRequest, httpResponse, false, false);
         } finally {
-            AJAXRequestResult.cleanUp(result);
+            AJAXRequestResult.signalDone(result);
             if (null != state) {
                 dispatcher.end(state);
             }

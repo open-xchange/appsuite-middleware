@@ -138,7 +138,7 @@ public class Request {
             result = dispatcher.perform(req, state, ServerSessionAdapter.valueOf(session));
             return result.getResultObject();
         } finally {
-            AJAXRequestResult.cleanUp(result);
+            AJAXRequestResult.signalDone(result);
             dispatcher.end(state);
         }
     }

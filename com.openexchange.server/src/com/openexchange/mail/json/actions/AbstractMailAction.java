@@ -67,7 +67,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.AJAXRequestResultCleanup;
+import com.openexchange.ajax.requesthandler.AJAXRequestResultListener;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.contactcollector.ContactCollectorService;
@@ -105,16 +105,16 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
-    private final class MailInterfaceCleanup implements AJAXRequestResultCleanup {
+    private final class MailInterfaceResultListener implements AJAXRequestResultListener {
 
         private final MailServletInterface newMailInterface;
 
-        MailInterfaceCleanup(MailServletInterface newMailInterface) {
+        MailInterfaceResultListener(MailServletInterface newMailInterface) {
             this.newMailInterface = newMailInterface;
         }
 
         @Override
-        public void cleanUp(AJAXRequestResult requestResult) {
+        public void done(AJAXRequestResult requestResult) {
             newMailInterface.close();
         }
     }
@@ -247,7 +247,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             if (null != result) {
                 MailServletInterface mailInterface = req.getMailServletInterface();
                 if (null != mailInterface) {
-                    result.addCleanUp(new MailInterfaceCleanup(mailInterface));
+                    result.addListener(new MailInterfaceResultListener(mailInterface));
                 }
             }
         }

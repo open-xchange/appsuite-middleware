@@ -199,9 +199,9 @@ public class AJAXRequestResult {
      *
      * @param requestResult The request result to clean-up or <code>null</code>
      */
-    public static void cleanUp(@Nullable AJAXRequestResult requestResult) {
+    public static void signalDone(@Nullable AJAXRequestResult requestResult) {
         if (null != requestResult) {
-            requestResult.cleanUp();
+            requestResult.signalDone();
         }
     }
 
@@ -240,7 +240,7 @@ public class AJAXRequestResult {
     private int httpStatusCode;
 
     /** The clean-up tasks */
-    private final @NonNull Queue<AJAXRequestResultCleanup> cleanUps;
+    private final @NonNull Queue<AJAXRequestResultListener> listeners;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -294,7 +294,7 @@ public class AJAXRequestResult {
         headers = new LinkedHashMap<String, String>(8);
         parameters = new HashMap<String, Object>(8);
         responseProperties = new HashMap<String, Object>(4);
-        cleanUps = new LinkedList<AJAXRequestResultCleanup>();
+        listeners = new LinkedList<AJAXRequestResultListener>();
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
         this.format = null == format ? JSON : format;
         if ("direct".equals(format)) {
@@ -324,7 +324,7 @@ public class AJAXRequestResult {
         resultObject = other.resultObject;
         resultType = other.resultType;
         timestamp = other.timestamp;
-        cleanUps = new LinkedList<AJAXRequestResultCleanup>(other.cleanUps);
+        listeners = new LinkedList<AJAXRequestResultListener>(other.listeners);
 
         if(other.headers != null) {
             headers =  new LinkedHashMap<String, String>(other.headers);
@@ -352,14 +352,14 @@ public class AJAXRequestResult {
     }
 
     /**
-     * Adds specified clean-up task.
+     * Adds specified listener.
      *
-     * @param cleanup The clean-up task
+     * @param listener The listener
      * @return This instance
      */
-    public @NonNull AJAXRequestResult addCleanUp(AJAXRequestResultCleanup cleanup) {
-        if (null != cleanup) {
-            this.cleanUps.offer(cleanup);
+    public @NonNull AJAXRequestResult addListener(AJAXRequestResultListener listener) {
+        if (null != listener) {
+            this.listeners.offer(listener);
         }
         return this;
     }
@@ -367,13 +367,13 @@ public class AJAXRequestResult {
     /**
      * Cleans-up this instance.
      */
-    public void cleanUp() {
-        for (AJAXRequestResultCleanup cleanup; (cleanup = this.cleanUps.poll()) != null;) {
+    public void signalDone() {
+        for (AJAXRequestResultListener listener; (listener = this.listeners.poll()) != null;) {
             try {
-                cleanup.cleanUp(this);
+                listener.done(this);
             } catch (Exception e) {
                 org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);
-                logger.warn("'{}' failed to perform clean-up", cleanup.getClass().getName(), e);
+                logger.warn("'{}' failed to perform 'done'", listener.getClass().getName(), e);
             }
         }
     }
