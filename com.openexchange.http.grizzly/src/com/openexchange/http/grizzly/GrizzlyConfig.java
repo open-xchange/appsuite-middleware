@@ -190,6 +190,8 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** Is autologin enabled in the session.d properties? */
     private boolean isSessionAutologin = false;
 
+    private List<String> enabledCiphers = null;
+
 
     @Override
     public void start() throws OXException {
@@ -264,6 +266,8 @@ public class GrizzlyConfig implements Initialization, Reloadable {
 
         // sessiond properties
         this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
+
+        this.enabledCiphers = configService.getProperty("com.openexchange.http.grizzly.enabledCipherSuites", "", ",");
 
     }
 
@@ -562,6 +566,10 @@ public class GrizzlyConfig implements Initialization, Reloadable {
 
     public String getKeystorePassword() {
         return keystorePassword;
+    }
+
+    public List<String> getEnabledCiphers() {
+        return enabledCiphers;
     }
 
     @Override

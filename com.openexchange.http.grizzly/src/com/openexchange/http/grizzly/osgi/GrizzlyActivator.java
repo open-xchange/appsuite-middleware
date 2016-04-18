@@ -50,6 +50,7 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
@@ -112,7 +113,12 @@ public class GrizzlyActivator extends HousekeepingActivator {
         sslContextConfig.setKeyStoreFile(grizzlyConfig.getKeystorePath());
         sslContextConfig.setKeyStorePass(grizzlyConfig.getKeystorePassword());
         // Create SSLEngine configurator
-        return new SSLEngineConfigurator(sslContextConfig.createSSLContext(), false, false, false);
+        SSLEngineConfigurator sslEngineConfigurator = new SSLEngineConfigurator(sslContextConfig.createSSLContext(), false, false, false);
+        List<String> enabledCipherSuites = grizzlyConfig.getEnabledCiphers();
+        if (null != enabledCipherSuites && !enabledCipherSuites.isEmpty()) {
+            sslEngineConfigurator.setEnabledCipherSuites(enabledCipherSuites.toArray(new String[enabledCipherSuites.size()]));
+        }
+        return sslEngineConfigurator;
     }
 
     @Override
