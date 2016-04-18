@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,8 +91,6 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class InfostoreWebdavFactory extends AbstractWebdavFactory implements BulkLoader {
 
@@ -496,7 +496,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
             while(iter.hasNext()) {
                 final DocumentMetadata docMeta = iter.next();
-                if(docMeta == null || null == docMeta.getFileName() || docMeta.getFileName().equals("")) {
+                if(null == docMeta.getFileName() || docMeta.getFileName().equals("")) {
                     continue;
                 }
                 DocumentMetadataResource res = s.resourcesById.get(docMeta.getId());
