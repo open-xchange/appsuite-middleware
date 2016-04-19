@@ -428,27 +428,52 @@ public final class HtmlProcessing {
         return str.substring(length - (maxWidth));
     }
 
-    private static void replaceBodyWithJericho0(Source source, OutputDocument outputDocument, List<Element> styleElements, String cssPrefix) {
+    private static String replaceBodyWithJericho0(Source source, OutputDocument outputDocument, List<Element> styleElements, String cssPrefix) {
         List<Element> bodyElements = source.getAllElements(HTMLElementName.BODY);
-        if (null == bodyElements || bodyElements.isEmpty()) {
+        if (null == bodyElements) {
             // No body
             outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
             outputDocument.insert(source.length(), "</div>");
-        } else {
-            for (Element bodyElement : bodyElements) {
-                Segment content = bodyElement.getContent();
-                StringBuilder sb = new StringBuilder(content.length());
-                sb.append(getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix));
-                if (null != styleElements) {
-                    for (Element element : styleElements) {
-                        sb.append(element);
-                    }
-                }
-                sb.append(content);
-                sb.append("</div>");
-                outputDocument.replace(bodyElement, sb);
-            }
+            return outputDocument.toString();
         }
+
+        int numOfBodies = bodyElements.size();
+        if (0 == numOfBodies) {
+            // No body
+            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
+            outputDocument.insert(source.length(), "</div>");
+            return outputDocument.toString();
+        }
+
+        if (1 == numOfBodies) {
+            Element bodyElement = bodyElements.get(0);
+            Segment content = bodyElement.getContent();
+            StringBuilder sb = new StringBuilder(content.length());
+            sb.append(getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix));
+            if (null != styleElements) {
+                for (Element element : styleElements) {
+                    sb.append(element);
+                }
+            }
+            sb.append(content);
+            sb.append("</div>");
+            return sb.toString();
+        }
+
+        for (Element bodyElement : bodyElements) {
+            Segment content = bodyElement.getContent();
+            StringBuilder sb = new StringBuilder(content.length());
+            sb.append(getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix));
+            if (null != styleElements) {
+                for (Element element : styleElements) {
+                    sb.append(element);
+                }
+            }
+            sb.append(content);
+            sb.append("</div>");
+            outputDocument.replace(bodyElement, sb);
+        }
+        return outputDocument.toString();
     }
 
     /**
@@ -478,8 +503,7 @@ public final class HtmlProcessing {
             }
         }
 
-        replaceBodyWithJericho0(source, outputDocument, styleElements, cssPrefix);
-        return outputDocument.toString();
+        return replaceBodyWithJericho0(source, outputDocument, styleElements, cssPrefix);
     }
 
     private static CharSequence getDivStartTagHTML(StartTag startTag, String cssPrefix) {
