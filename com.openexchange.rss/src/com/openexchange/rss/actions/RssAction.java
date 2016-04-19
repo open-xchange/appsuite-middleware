@@ -168,14 +168,13 @@ public class RssAction implements AJAXActionService {
                 try {
                     result = new RssResult().setAuthor(entry.getAuthor()).setSubject(sanitiseString(entry.getTitle())).setUrl(checkUrl(entry.getLink()));
                     result.setFeedUrl(checkUrl(feed.getLink())).setFeedTitle(sanitiseString(feed.getTitle())).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
-
                     // Check possible image
                     SyndImage image = feed.getImage();
                     if (image != null) {
                         result.setImageUrl(checkUrl(image.getUrl()));
                     }
                 } catch (MalformedURLException e) {
-                    throw RssExceptionCodes.INVALID_RSS.create(e, entry.getLink());
+                    throw RssExceptionCodes.INVALID_RSS.create(feed.getImage().getUrl());
                 }
 
                 // Add to results list
