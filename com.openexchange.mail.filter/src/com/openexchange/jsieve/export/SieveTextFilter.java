@@ -234,7 +234,7 @@ public final class SieveTextFilter {
 
     private static final Pattern PATTERN = Pattern.compile("^" + FLAG_TAG + MATCH_STRING + SEPARATOR_REGEX + UNIQUE_ID + MATCH_STRING + SEPARATOR_REGEX + RULENAME_TAG + "(.*?)$");
 
-    private static final Pattern REQUIRE_PATTERN = Pattern.compile("(\"[a-z0-9]+\")+");
+    private static final Pattern REQUIRE_PATTERN = Pattern.compile("(\"[a-z0-9\\.\\-]+\")+");
 
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
