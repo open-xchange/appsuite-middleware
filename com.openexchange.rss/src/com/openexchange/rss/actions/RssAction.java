@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,12 +69,13 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
-import com.openexchange.rss.RssServices;
+import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.preprocessors.RssPreprocessor;
 import com.openexchange.rss.preprocessors.SanitizingPreprocessor;
 import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
@@ -200,8 +202,13 @@ public class RssAction implements AJAXActionService {
                         LOG.warn("Could not load RSS feed from: {}", url, e);
                     }
                 } catch (IllegalArgumentException e) {
-                    if (!"Invalid document".equals(e.getMessage())) {
-                        throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
+                    String exceptionMessage = e.getMessage();
+                    if (exceptionMessage.contains("exceeds")) {
+                        ConfigurationService configService = Services.getService(ConfigurationService.class);
+                        int maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
+                        throw RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize);
+                    } else if (!"Invalid document".equals(exceptionMessage)) {
+                        throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, exceptionMessage);
                     }
                     // There is no parser for current document
                     LOG.warn("Could not load RSS feed from: {}", url);
@@ -227,13 +234,18 @@ public class RssAction implements AJAXActionService {
                 SyndEntry entry = (SyndEntry) obj;
 
                 // Create appropriate RssResult instance
-                RssResult result = new RssResult().setAuthor(entry.getAuthor()).setSubject(getTitle(entry)).setUrl(entry.getLink());
-                result.setFeedUrl(feed.getLink()).setFeedTitle(feed.getTitle()).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
+                RssResult result;
+                try {
+                    result = new RssResult().setAuthor(entry.getAuthor()).setSubject(sanitiseString(entry.getTitle())).setUrl(checkUrl(entry.getLink()));
+                    result.setFeedUrl(checkUrl(feed.getLink())).setFeedTitle(sanitiseString(feed.getTitle())).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
 
-                // Check possible image
-                SyndImage image = feed.getImage();
-                if (image != null) {
-                    result.setImageUrl(image.getUrl());
+                    // Check possible image
+                    SyndImage image = feed.getImage();
+                    if (image != null) {
+                        result.setImageUrl(checkUrl(image.getUrl()));
+                    }
+                } catch (MalformedURLException e) {
+                    throw RssExceptionCodes.INVALID_RSS.create(urlString);
                 }
 
                 // Add to results list
@@ -262,9 +274,19 @@ public class RssAction implements AJAXActionService {
         return new AJAXRequestResult(results, "rss").addWarnings(warnings);
     }
 
-    private static String getTitle(SyndEntry entry) {
-        final HtmlService htmlService = RssServices.getHtmlService();
-        return null == htmlService ? entry.getTitle() : htmlService.sanitize(entry.getTitle(), null, true, null, null);
+    /**
+     * Sanitises the specified string via the {@link HtmlService}
+     * 
+     * @param string The string to sanitise
+     * @return The sanitised string if the {@link HtmlService} is available
+     */
+    private static String sanitiseString(String string) {
+        final HtmlService htmlService = Services.getService(HtmlService.class);
+        if (htmlService == null) {
+            LOG.warn("The HTMLService is unavailable at the moment, thus the RSS string '{}' might not be sanitised", string);
+            return string;
+        }
+        return htmlService.sanitize(string, null, true, null, null);
     }
 
     private static String urlDecodeSafe(final String urlString) throws MalformedURLException {

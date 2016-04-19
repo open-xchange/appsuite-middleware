@@ -82,6 +82,10 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
      * Timeout while reading the RSS feed from URL: %1$s
      */
     TIMEOUT_ERROR("Timeout while reading the RSS feed from URL: %1$s", RssExceptionMessages.TIMEOUT_ERROR_MSG, CATEGORY_SERVICE_DOWN, 5),
+    /**
+     * The RSS feed is exceeding the maximum allowed size of '%1$s'
+     */
+    RSS_SIZE_EXCEEDED("The RSS feed is exceeding the maximum allowed size of '%1$s' (%1$s bytes)", RssExceptionMessages.RSS_SIZE_EXCEEDED, CATEGORY_USER_INPUT, 6),
 
     ;
 
