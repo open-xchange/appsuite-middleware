@@ -109,10 +109,10 @@ public class IPRange {
      * @param ipAddress The IP address to check
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
-    public boolean contains(final String ipAddress) {
+    public boolean contains(String ipAddress) {
         // Check for cached entry
         {
-            final Boolean cached = cache.get(ipAddress);
+            Boolean cached = cache.get(ipAddress);
             if (null != cached) {
                 return cached.booleanValue();
             }
@@ -124,7 +124,7 @@ public class IPRange {
             /*
              * IPv4
              */
-            final boolean ret = null != ipv4Range && ipv4Range.containsLong(ipToLong(octets));
+            boolean ret = null != ipv4Range && ipv4Range.containsLong(ipToLong(octets));
             cache.put(ipAddress, Boolean.valueOf(ret));
             return ret;
         }
@@ -135,9 +135,61 @@ public class IPRange {
         if (null == octets) {
             throw new IllegalArgumentException("Not an IP address: " + ipAddress);
         }
-        final boolean ret = null != ipv6Range && ipv6Range.containsNumber(ipToBigInteger(octets));
+        boolean ret = null != ipv6Range && ipv6Range.containsNumber(ipToBigInteger(octets));
         cache.put(ipAddress, Boolean.valueOf(ret));
         return ret;
+    }
+
+    /**
+     * Checks if specified IPv4 octets are covered by configured IP range.
+     *
+     * @param octets The IPv4 octets to check
+     * @param ipAddress The octets' IPv4 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv4(byte[] octets, String ipAddress) {
+        // Check for cached entry
+        if (null != ipAddress) {
+            Boolean cached = cache.get(ipAddress);
+            if (null != cached) {
+                return cached.booleanValue();
+            }
+        }
+
+        if (null != octets) {
+            boolean ret = null != ipv4Range && ipv4Range.containsLong(ipToLong(octets));
+            if (null != ipAddress) {
+                cache.put(ipAddress, Boolean.valueOf(ret));
+            }
+            return ret;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if specified IPv6 octets are covered by configured IP range.
+     *
+     * @param octets The IPv6 octets to check
+     * @param ipAddress The octets' IPv6 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv6(byte[] octets, String ipAddress) {
+        // Check for cached entry
+        if (null != ipAddress) {
+            Boolean cached = cache.get(ipAddress);
+            if (null != cached) {
+                return cached.booleanValue();
+            }
+        }
+
+        if (null != octets) {
+            boolean ret = null != ipv6Range && ipv6Range.containsNumber(ipToBigInteger(octets));
+            if (null != ipAddress) {
+                cache.put(ipAddress, Boolean.valueOf(ret));
+            }
+            return ret;
+        }
+        return false;
     }
 
     @Override
