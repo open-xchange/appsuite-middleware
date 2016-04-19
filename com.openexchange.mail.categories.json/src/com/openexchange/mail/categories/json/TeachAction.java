@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.categories.json;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -61,6 +64,7 @@ import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.ReorganizeParameter;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -69,10 +73,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.GET, name = "teach", description = "Teaches an existing mail user category.", parameters = {
+@Action(method = RequestMethod.PUT, name = "teach", description = "Teaches an existing mail user category.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "category_id", description = "The category identifier"),
-    @Parameter(name = "mail", description = "The mail address that should be trained"),
     @Parameter(name = "reorganize", description = "A optional flag indicating if old mails should be reorganized. Defaults to 'false'."),
 }, responseDescription = "Response: Empty")
 public class TeachAction extends AbstractCategoriesAction {
@@ -94,13 +97,26 @@ public class TeachAction extends AbstractCategoriesAction {
         }
 
         String category = requestData.requireParameter("category_id");
-        String mail = requestData.requireParameter("mail");
+
+        Object data = requestData.getData();
+
+        if (!(data instanceof JSONArray)) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
+
+        List<Object> objects = ((JSONArray) data).asList();
+        List<String> addresses = new ArrayList<>(objects.size());
+        for (Object obj : objects) {
+            if (obj instanceof String) {
+                addresses.add((String) obj);
+            }
+        }
 
         // Check for re-organize flag
         boolean reorganize = AJAXRequestDataTools.parseBoolParameter("reorganize", requestData);
         ReorganizeParameter reorganizeParameter = ReorganizeParameter.getParameterFor(reorganize);
 
-        mailCategoriesService.teachCategory(category, mail, reorganizeParameter, session);
+        mailCategoriesService.teachCategory(category, addresses, reorganizeParameter, session);
 
         AJAXRequestResult result = new AJAXRequestResult();
         if (reorganizeParameter.hasWarnings()) {

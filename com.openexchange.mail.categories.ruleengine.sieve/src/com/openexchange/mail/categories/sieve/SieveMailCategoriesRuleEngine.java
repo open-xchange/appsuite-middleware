@@ -167,14 +167,16 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
 
         String[] flagsToRemove = rule.getFlagsToRemove();
         if (flagsToRemove != null && flagsToRemove.length > 0) {
-            ArrayList<Object> removeFlagArgList = new ArrayList<>(flagsToRemove.length);
+            ArrayList<Object> removeFlagList = new ArrayList<>(flagsToRemove.length);
             for (int i = 0; i < flagsToRemove.length; i++) {
                 String flagToRemove = flagsToRemove[i];
                 if (Strings.isNotEmpty(flagToRemove)) {
-                    removeFlagArgList.add(flagToRemove);
+                    removeFlagList.add(flagToRemove);
                 }
             }
-            if (false == removeFlagArgList.isEmpty()) {
+            if (false == removeFlagList.isEmpty()) {
+                ArrayList<Object> removeFlagArgList = new ArrayList<>();
+                removeFlagArgList.add(removeFlagList);
                 actionCommands.add(0, new ActionCommand(ActionCommand.Commands.REMOVEFLAG, removeFlagArgList));
             }
         }

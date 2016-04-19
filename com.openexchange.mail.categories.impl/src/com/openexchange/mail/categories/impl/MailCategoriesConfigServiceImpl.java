@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
@@ -102,6 +103,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             return new ArrayList<>();
         }
         List<MailCategoryConfig> result = new ArrayList<>(categories.length);
+
+        String name = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + "general" + MailCategoriesConstants.MAIL_CATEGORIES_NAME, "General", session);
+        MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category("general").isSystemCategory(true).enabled(true).force(true).name(name).addLocalizedNames(getLocalizedNames(session, "general")).build();
+        result.add(generalConfig);
+
         for (String category : categories) {
             MailCategoryConfig config = getConfigByCategory(session, category);
             if (onlyEnabled && !config.isActive()) {
@@ -225,7 +231,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         for(String language: languages){
             String translation = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME + "." + language, null, session);
             if (translation != null && !translation.isEmpty()) {
-                result.put(new Locale(language), translation);
+                result.put(LocaleTools.getLocale(language), translation);
             }
         }
         return result;
@@ -280,7 +286,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     private void setRule(Session session, String category, MailCategoryRule rule) throws OXException {
-        if (!generateFlag(category).equals(rule.getFlag())) {
+        String flag = getFlagByCategory(session, category);
+        if (Strings.isEmpty(flag)) {
+            flag = generateFlag(category);
+        }
+        if (!flag.equals(rule.getFlag())) {
             throw MailCategoriesRuleEngineExceptionCodes.INVALID_RULE.create();
         }
         MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
@@ -346,41 +356,56 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     @Override
-    public void teachCategory(String category, String email, ReorganizeParameter reorganize, Session session) throws OXException {
-        String flag = generateFlag(category);
+    public void teachCategory(String category, List<String> addresses, ReorganizeParameter reorganize, Session session) throws OXException {
+        String flag = getFlagByCategory(session, category);
+        if (Strings.isEmpty(flag)) {
+            flag = generateFlag(category);
+        }
 
         // Remove from old rules
-        removeMailFromRules(session, email);
+        for (String mailAddress : addresses) {
+            removeMailFromRules(session, mailAddress);
+        }
 
         // Update rule
-
-        MailCategoryRule oldRule = getRule(session, category);
         MailCategoryRule newRule = null;
-        if (null == oldRule) {        // Create new rule
-            newRule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), Collections.singletonList(email), flag);
-        } else {
-            if(oldRule.getSubRules()!=null && !oldRule.getSubRules().isEmpty()){
-                if (oldRule.isAND()) {
-                    newRule = new MailCategoryRule(flag, false);
-                    newRule.addSubRule(oldRule);
-                    newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), Collections.singletonList(email), flag));
+        MailCategoryRule oldRule = getRule(session, category);
+        for (String mailAddress : addresses) {
+            if (newRule == null) {
+                if (null == oldRule) {        // Create new rule
+                    newRule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag);
                 } else {
-                    newRule = oldRule;
-                    newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), Collections.singletonList(email), flag));
+
+                    if (oldRule.getSubRules() != null && !oldRule.getSubRules().isEmpty()) {
+                        if (oldRule.isAND()) {
+                            newRule = new MailCategoryRule(flag, false);
+                            newRule.addSubRule(oldRule);
+                            newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag));
+                        } else {
+                            newRule = oldRule;
+                            newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag));
+                        }
+                    } else {
+                        if (!oldRule.getHeaders().contains(FROM_HEADER)) {
+                            oldRule.getHeaders().add(FROM_HEADER);
+                        }
+                        if (!oldRule.getValues().contains(mailAddress)) {
+                            oldRule.getValues().add(mailAddress);
+                        }
+                        newRule = oldRule;
+                    }
+
                 }
             } else {
-                if (!oldRule.getHeaders().contains(FROM_HEADER)) {
-                    oldRule.getHeaders().add(FROM_HEADER);
+                if (!newRule.getValues().contains(mailAddress)) {
+                    newRule.getValues().add(mailAddress);
                 }
-                if (!oldRule.getValues().contains(email)) {
-                    oldRule.getValues().add(email);
-                }
-                newRule = oldRule;
             }
         }
 
         // remove all previous category flags
-        newRule.addFlagsToRemove(getAllFlags(session, false, false));
+        String[] flagsToRemove = getAllFlags(session, false, false);
+        newRule.addFlagsToRemove(flagsToRemove);
 
         setRule(session, category, newRule);
 
@@ -391,7 +416,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 SearchTerm<?> searchTerm = getSearchTerm(newRule);
                 FullnameArgument fa = new FullnameArgument("INBOX");
                 if (searchTerm != null) {
-                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, true);
+                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, flagsToRemove);
                 }
             } catch (OXException e) {
                 if (warnings.isEmpty()) {

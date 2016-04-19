@@ -82,10 +82,10 @@ public class MailCategoriesOrganizer {
      * @param folder The folder id
      * @param searchTerm The search term
      * @param flag The flag
-     * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
+     * @param flagsToRemove The flags to remove
      * @throws OXException If retrieving or setting fails
      */
-    public static void organizeExistingMails(Session session, String folder, SearchTerm<?> searchTerm, String flag, boolean set) throws OXException {
+    public static void organizeExistingMails(Session session, String folder, SearchTerm<?> searchTerm, String flag, String[] flagsToRemove) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             FullnameArgument fa = prepareMailFolderParam(folder);
@@ -99,7 +99,10 @@ public class MailCategoriesOrganizer {
                 MailMessage message = messages[i];
                 mailIds[i] = null == message ? null : message.getMailId();
             }
-            messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, set);
+            if (flagsToRemove != null && flagsToRemove.length != 0) {
+                messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, flagsToRemove, false);
+            }
+            messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, true);
         } finally {
             if (mailAccess != null) {
                 mailAccess.close();
@@ -126,7 +129,7 @@ public class MailCategoriesOrganizer {
             String[] mailIds = new String[mailObjects.size()];
             int x = 0;
             for (MailObjectParameter mailObject : mailObjects) {
-                mailIds[x++] = String.valueOf(mailObject.getMailID());
+                mailIds[x++] = mailObject.getMailID();
             }
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, flagsToRemove, false);

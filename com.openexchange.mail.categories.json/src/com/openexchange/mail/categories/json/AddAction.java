@@ -88,7 +88,7 @@ public class AddAction extends AbstractCategoriesAction {
         super(services);
     }
 
-    private static final String FIELD_MAIL_ID = "mail_id";
+    private static final String FIELD_MAIL_ID = "id";
     private static final String FIELD_FOLDER_ID = "folder_id";
 
     @Override
@@ -115,8 +115,11 @@ public class AddAction extends AbstractCategoriesAction {
             if (!mailData.containsKey(FIELD_FOLDER_ID) || !mailData.containsKey(FIELD_MAIL_ID)) {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
             }
-            mails.add(new MailObjectParameter((int) mailData.get(FIELD_MAIL_ID), (String) mailData.get(FIELD_FOLDER_ID)));
-
+            try {
+                mails.add(new MailObjectParameter((String) mailData.get(FIELD_MAIL_ID), (String) mailData.get(FIELD_FOLDER_ID)));
+            } catch (ClassCastException e) {
+                throw AjaxExceptionCodes.BAD_REQUEST.create();
+            }
         }
 
         mailCategoriesService.addMails(session, mails, category);

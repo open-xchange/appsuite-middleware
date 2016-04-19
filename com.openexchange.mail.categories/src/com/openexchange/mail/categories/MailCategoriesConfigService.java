@@ -116,12 +116,12 @@ public interface MailCategoriesConfigService {
      * Teach the given category with the given mail address
      *
      * @param category The category identifier
-     * @param email The email address
+     * @param addresses The email addresses
      * @param reorganize Whether to re-organize existing messages
      * @param session The user session
      * @throws OXException if a category with this identifier does not exist
      */
-    void teachCategory(String category, String email, ReorganizeParameter reorganize, Session session) throws OXException;
+    void teachCategory(String category, List<String> addresses, ReorganizeParameter reorganize, Session session) throws OXException;
 
     /**
      * Enables or disables the mail categories feature for the given user

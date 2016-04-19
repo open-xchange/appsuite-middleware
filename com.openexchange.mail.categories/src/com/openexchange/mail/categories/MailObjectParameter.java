@@ -58,15 +58,15 @@ package com.openexchange.mail.categories;
  */
 public class MailObjectParameter {
 
-    private final int mailID;
+    private final String mailID;
     private final String folderID;
 
-    public MailObjectParameter(int mailID, String folderID) {
+    public MailObjectParameter(String mailID, String folderID) {
         this.mailID = mailID;
         this.folderID = folderID;
     }
 
-    public int getMailID() {
+    public String getMailID() {
         return mailID;
     }
 

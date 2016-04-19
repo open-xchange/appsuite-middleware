@@ -120,32 +120,30 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                     if (service != null) {
                         boolean mailCategoriesEnabled = service.isEnabled(session);
                         item.put(FIELD_FEATURE_ENABLED, mailCategoriesEnabled);
-                        if (mailCategoriesEnabled) {
-                            List<MailCategoryConfig> configs = service.getAllCategories(session, false);
-                            JSONArray categories = new JSONArray();
-                            for (MailCategoryConfig config : configs) {
-                                JSONObject categoryJSON = new JSONObject(3);
-                                categoryJSON.put(FIELD_ID, config.getCategory());
-                                String name = config.getNames().containsKey(user.getLocale()) ? config.getNames().get(user.getLocale()) : config.getName();
-                                categoryJSON.put(FIELD_NAME, name);
-                                categoryJSON.put(FIELD_ACTIVE, config.isActive());
-                                
-                                
-                                List<String> mailCategoryPermissions = new ArrayList<>();
-                                if(config.isForced()){
-                                    mailCategoryPermissions.add(PERMISSION_DISABLE);
-                                }
-                                if (!config.isSystemCategory()) {
-                                    mailCategoryPermissions.add(PERMISSION_RENAME);
-                                }
-                                
-                                mailCategoryPermissions.add(PERMISSION_TEACH);
-                                categoryJSON.put(FIELD_PERMISSIONS, mailCategoryPermissions);
-                                
-                                categories.put(categoryJSON);
+                        List<MailCategoryConfig> configs = service.getAllCategories(session, false);
+                        JSONArray categories = new JSONArray();
+
+                        for (MailCategoryConfig config : configs) {
+                            JSONObject categoryJSON = new JSONObject(3);
+                            categoryJSON.put(FIELD_ID, config.getCategory());
+                            String name = config.getNames().containsKey(user.getLocale()) ? config.getNames().get(user.getLocale()) : config.getName();
+                            categoryJSON.put(FIELD_NAME, name);
+                            categoryJSON.put(FIELD_ACTIVE, config.isActive());
+
+                            List<String> mailCategoryPermissions = new ArrayList<>();
+                            if (!config.isForced()) {
+                                mailCategoryPermissions.add(PERMISSION_DISABLE);
                             }
-                            item.put(FIELD_LIST, categories);
+                            if (!config.isSystemCategory()) {
+                                mailCategoryPermissions.add(PERMISSION_RENAME);
+                            }
+
+                            mailCategoryPermissions.add(PERMISSION_TEACH);
+                            categoryJSON.put(FIELD_PERMISSIONS, mailCategoryPermissions);
+
+                            categories.put(categoryJSON);
                         }
+                        item.put(FIELD_LIST, categories);
                     } else {
                         item.put(FIELD_FEATURE_ENABLED, false);
                     }
