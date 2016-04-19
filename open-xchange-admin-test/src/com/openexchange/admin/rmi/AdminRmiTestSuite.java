@@ -56,14 +56,13 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * RMI tests for core admin rmi
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
 @RunWith(Suite.class)
 @SuiteClasses({
     AdditionalRMITests.class,
-    AdminCoreTest.class,
     Bug16865Test.class,
     Bug19379Test.class,
     Bug27065Test.class,
