@@ -55,6 +55,7 @@ import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.HostList;
 
 /**
  * {@link MailAccountUtils} - Utility class for mail account module.

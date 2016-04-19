@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailaccount.utils;
+package com.openexchange.tools;
 
 import java.util.ArrayList;
 import java.util.Collections;
