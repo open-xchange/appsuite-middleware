@@ -55,7 +55,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
+import org.apache.commons.io.FileUtils;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.rss.osgi.Services;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.fetcher.FetcherEvent;
 import com.sun.syndication.fetcher.FetcherException;
@@ -72,13 +78,18 @@ import com.sun.syndication.io.XmlReader;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.1
  */
-public class TimoutHttpURLFeedFetcher extends HttpURLFeedFetcher {
+public class TimoutHttpURLFeedFetcher extends HttpURLFeedFetcher implements Reloadable {
 
     /** The timeout value, in milliseconds, to be used when opening a communications link to the resource */
     protected final int connectTimout;
 
     /** The read timeout to a specified timeout, in milliseconds */
     protected final int readTimout;
+
+    /**
+     * Defines the maximum feed size for an RSS feed in bytes
+     */
+    private long maximumAllowedSize;
 
     /**
      * Initializes a new {@link TimoutHttpURLFeedFetcher}.
@@ -90,6 +101,7 @@ public class TimoutHttpURLFeedFetcher extends HttpURLFeedFetcher {
         super();
         this.connectTimout = connectTimout;
         this.readTimout = readTimout;
+        reloadConfiguration(Services.getService(ConfigurationService.class));
     }
 
     /**
@@ -103,6 +115,7 @@ public class TimoutHttpURLFeedFetcher extends HttpURLFeedFetcher {
         super(feedInfoCache);
         this.connectTimout = connectTimout;
         this.readTimout = readTimout;
+        reloadConfiguration(Services.getService(ConfigurationService.class));
     }
 
     /**
@@ -125,7 +138,13 @@ public class TimoutHttpURLFeedFetcher extends HttpURLFeedFetcher {
         if (!(connection instanceof HttpURLConnection)) {
             throw new IllegalArgumentException(feedUrl.toExternalForm() + " is not a valid HTTP Url");
         }
-        HttpURLConnection httpConnection = (HttpURLConnection)connection;
+
+        long contentLength = connection.getContentLengthLong();
+        if (contentLength > maximumAllowedSize) {
+            throw new IllegalArgumentException("The size of the RSS feed from URL '" + feedUrl + "' is " + FileUtils.byteCountToDisplaySize(contentLength) + " and exceeds the maximum allowed size of " + FileUtils.byteCountToDisplaySize(maximumAllowedSize) + ".");
+        }
+
+        HttpURLConnection httpConnection = (HttpURLConnection) connection;
         // httpConnection.setInstanceFollowRedirects(true); // this is true by default, but can be changed on a claswide basis
         if (connectTimout > 0) {
             httpConnection.setConnectTimeout(connectTimout);
@@ -144,7 +163,7 @@ public class TimoutHttpURLFeedFetcher extends HttpURLFeedFetcher {
                 inputStream = httpConnection.getInputStream();
                 return getSyndFeedFromStream(inputStream, connection);
             } catch (java.io.IOException e) {
-                handleErrorCodes(((HttpURLConnection)connection).getResponseCode());
+                handleErrorCodes(((HttpURLConnection) connection).getResponseCode());
             } finally {
                 if (inputStream != null) {
                     inputStream.close();
@@ -217,6 +236,28 @@ public class TimoutHttpURLFeedFetcher extends HttpURLFeedFetcher {
         SyndFeed feed = readSyndFeedFromStream(inputStream, connection);
         fireEvent(FetcherEvent.EVENT_TYPE_FEED_RETRIEVED, connection, feed);
         return feed;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+     */
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#getConfigFileNames()
+     */
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> filenames = new HashMap<String, String[]>(1);
+        filenames.put("rssmessaging.propertes", new String[] { "com.openexchange.messaging.rss.feed.size" });
+        return filenames;
     }
 
 }

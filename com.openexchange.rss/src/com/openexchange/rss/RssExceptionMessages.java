@@ -73,6 +73,9 @@ public final class RssExceptionMessages implements LocalizableStrings {
 
     // Failed to read RSS feed from URL: %2$s
     public static final String GENERIC_ERROR_WITH_ARG2_MSG = "Failed to read RSS feed from URL: %2$s";
+    
+    // The RSS feed is exceeding the maximum allowed size of '%1$s'
+    public static final String RSS_SIZE_EXCEEDED = "The RSS feed is exceeding the maximum allowed size of '%1$s'";
 
     /**
      * Initializes a new {@link RssExceptionMessages}.
