@@ -53,9 +53,10 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
+import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class AllPluginsLoaded extends BasicCommandlineOptions {
 
@@ -63,14 +64,29 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
         super();
     }
 
-    public static void main(final String[] args) {
-        new AllPluginsLoaded().internalMain();
+    protected static final String OPT_NAME_ADMINPASS_DESCRIPTION = "Master admin password";
+    protected static final String OPT_NAME_ADMINUSER_DESCRIPTION = "Master admin username";
+
+    @Override
+    protected void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {
+        setAdminUserOption(parser, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION);
+        setAdminPassOption(parser, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION);
     }
 
-    private void internalMain() {
+    public static void main(final String[] args) {
+        new AllPluginsLoaded().internalMain(args);
+    }
+
+    private void internalMain(String[] args) {
+        AdminParser parser = new AdminParser("allpluginsloaded");
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+
         try {
+            parser.ownparse(args);
+            Credentials auth = credentialsparsing(parser);
+
             final OXAdminCoreInterface oxadmincore = (OXAdminCoreInterface) Naming.lookup(RMI_HOSTNAME+OXAdminCoreInterface.RMI_NAME);
-            if (oxadmincore.allPluginsLoaded()) {
+            if (oxadmincore.allPluginsLoaded(auth)) {
                 sysexit(0);
             } else {
                 sysexit(1);
@@ -88,6 +104,9 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
             printServerException(e,null);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
+            printServerException(e,null);
+            sysexit(1);
+        } catch (final Exception e) {
             printServerException(e,null);
             sysexit(1);
         }
