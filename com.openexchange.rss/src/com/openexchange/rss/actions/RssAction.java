@@ -227,13 +227,18 @@ public class RssAction implements AJAXActionService {
                 SyndEntry entry = (SyndEntry) obj;
 
                 // Create appropriate RssResult instance
-                RssResult result = new RssResult().setAuthor(entry.getAuthor()).setSubject(getTitle(entry)).setUrl(entry.getLink());
-                result.setFeedUrl(feed.getLink()).setFeedTitle(feed.getTitle()).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
-
-                // Check possible image
-                SyndImage image = feed.getImage();
-                if (image != null) {
-                    result.setImageUrl(image.getUrl());
+                RssResult result;
+                try {
+                    result = new RssResult().setAuthor(entry.getAuthor()).setSubject(sanitiseString(entry.getTitle())).setUrl(checkUrl(entry.getLink()));
+                    result.setFeedUrl(checkUrl(feed.getLink())).setFeedTitle(sanitiseString(feed.getTitle())).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
+                    
+                    // Check possible image
+                    SyndImage image = feed.getImage();
+                    if (image != null) {
+                        result.setImageUrl(checkUrl(image.getUrl()));
+                    }
+                } catch (MalformedURLException e) {
+                    throw RssExceptionCodes.INVALID_RSS.create(urlString);
                 }
 
                 // Add to results list
@@ -262,9 +267,19 @@ public class RssAction implements AJAXActionService {
         return new AJAXRequestResult(results, "rss").addWarnings(warnings);
     }
 
-    private static String getTitle(SyndEntry entry) {
+    /**
+     * Sanitises the specified string via the {@link HtmlService}
+     * 
+     * @param string The string to sanitise
+     * @return The sanitised string if the {@link HtmlService} is available
+     */
+    private static String sanitiseString(String string) {
         final HtmlService htmlService = RssServices.getHtmlService();
-        return null == htmlService ? entry.getTitle() : htmlService.sanitize(entry.getTitle(), null, true, null, null);
+        if (htmlService == null) {
+            LOG.warn("The HTMLService is unavailable at the moment, thus the RSS string '{}' might not be sanitised", string);
+            return string;
+        }
+        return htmlService.sanitize(string, null, true, null, null);
     }
 
     private static String urlDecodeSafe(final String urlString) throws MalformedURLException {
