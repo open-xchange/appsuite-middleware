@@ -47,103 +47,70 @@
  *
  */
 
-package com.openexchange.mail.json;
+package com.openexchange.mail.json.utils;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import gnu.trove.ConcurrentTIntObjectHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * {@link Column} - A column parameter.
+ * {@link ColumnCollection} - A column collection.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class Column {
+public class ColumnCollection {
 
-    private static final ConcurrentTIntObjectHashMap<Column> FIELDS = new ConcurrentTIntObjectHashMap<Column>(24);
-    private static final ConcurrentMap<String, Column> HEADERS = new ConcurrentHashMap<String, Column>(32, 0.9f, 1);
-
-    /**
-     * Gets the column for given field.
-     *
-     * @param field The field
-     * @return The column
-     */
-    public static Column field(int field) {
-        Column column = FIELDS.get(field);
-        if (null == column) {
-            // No need for synchronized
-            column = new Column(field);
-            FIELDS.put(field, column);
-        }
-        return column;
-    }
+    private final List<Column> columns;
 
     /**
-     * Gets the column for given header name.
-     *
-     * @param header The header name
-     * @return The column
+     * Initializes a new {@link ColumnCollection}.
      */
-    public static Column header(String header) {
-        Column column = HEADERS.get(header);
-        if (null == column) {
-            // No need for synchronized
-            column = new Column(header);
-            HEADERS.put(header, column);
-        }
-        return column;
-    }
-
-    // --------------------------------------------------------------------------------------------------------
-
-    private final int field;
-    private final String header;
-
-    /**
-     * Initializes a new {@link Column} for given field.
-     *
-     * @param field The field
-     */
-    private Column(int field) {
+    public ColumnCollection(List<Column> columns) {
         super();
-        this.field = field;
-        this.header = null;
+        this.columns = columns;
     }
 
     /**
-     * Initializes a new {@link Column} for given header.
+     * Gets the columns
      *
-     * @param header The header
+     * @return The columns
      */
-    private Column(String header) {
-        super();
-        this.field = -1;
-        this.header = header;
+    public List<Column> getColumns() {
+        return columns;
     }
 
     /**
-     * Gets the field
+     * Gets the contained fields
      *
-     * @return The field
+     * @return The fields or <code>null</code>
      */
-    public int getField() {
-        return field;
+    public int[] getFields() {
+        TIntList l = new TIntArrayList(columns.size());
+        for (Column column : columns) {
+            int field = column.getField();
+            if (field > 0) {
+                l.add(field);
+            }
+        }
+        return l.isEmpty() ? null : l.toArray();
     }
 
     /**
-     * Gets the header
+     * Gets the contained headers
      *
-     * @return The header
+     * @return The headers or <code>null</code>
      */
-    public String getHeader() {
-        return header;
-    }
-
-    @Override
-    public String toString() {
-        return field > 0 ? Integer.toString(field) : (null == header ? "null" : header);
+    public String[] getHeaders() {
+        List<String> l = new ArrayList<String>(columns.size());
+        for (Column column : columns) {
+            String header = column.getHeader();
+            if (null != header) {
+                l.add(header);
+            }
+        }
+        return l.isEmpty() ? null : l.toArray(new String[l.size()]);
     }
 
 }
