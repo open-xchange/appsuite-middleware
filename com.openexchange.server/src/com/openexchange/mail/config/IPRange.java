@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.config;
 
+import java.util.Collection;
 
 /**
  * {@link IPRange} - An IP range of either IPv4 or IPv6 addresses.
@@ -56,6 +57,38 @@ package com.openexchange.mail.config;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IPRange {
+
+    /**
+     * The special NULL IP range.
+     */
+    public static final IPRange NULL = new IPRange(null) {
+
+        @Override
+        public boolean contains(String ipAddress) {
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "null";
+        }
+    };
+
+    /**
+     * Checks if specified IP address is contained in given collection of IP address ranges
+     *
+     * @param actual The IP address to check
+     * @param ranges The collection of IP address ranges
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public static boolean isWhitelistedFromRateLimit(String actual, Collection<IPRange> ranges) {
+        for (IPRange range : ranges) {
+            if (range.contains(actual)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Parses specified string to an IP range.
@@ -76,9 +109,31 @@ public class IPRange {
     /**
      * Initializes a new {@link IPRange}.
      */
-    private IPRange(final com.openexchange.sessiond.impl.IPRange delegate) {
+    IPRange(final com.openexchange.sessiond.impl.IPRange delegate) {
         super();
         this.delegate = delegate;
+    }
+
+    /**
+     * Checks if specified IPv4 octets are covered by configured IP range.
+     *
+     * @param octets The IPv4 octets to check
+     * @param ipAddress The octets' IPv4 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv4(byte[] octets, String ipAddress) {
+        return delegate.containsIPv4(octets, ipAddress);
+    }
+
+    /**
+     * Checks if specified IPv6 octets are covered by configured IP range.
+     *
+     * @param octets The IPv6 octets to check
+     * @param ipAddress The octets' IPv6 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv6(byte[] octets, String ipAddress) {
+        return delegate.containsIPv6(octets, ipAddress);
     }
 
     /**
