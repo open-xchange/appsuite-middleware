@@ -127,9 +127,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     public static final @NonNull Column[] COLUMNS_ALL_ALIAS = new Column[] { Column.field(600), Column.field(601) };
 
-    public static final @NonNull Column[] COLUMNS_LIST_ALIAS = new Column[] { Column.field(600), Column.field(601), Column.field(614),
-        Column.field(602), Column.field(611), Column.field(603), Column.field(612), Column.field(607), Column.field(652), Column.field(610),
-        Column.field(608), Column.field(102) };
+    public static final @NonNull Column[] COLUMNS_LIST_ALIAS = new Column[] { Column.field(600), Column.field(601), Column.field(614), Column.field(602), Column.field(611), Column.field(603), Column.field(612), Column.field(607), Column.field(652), Column.field(610), Column.field(608), Column.field(102) };
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
@@ -146,9 +144,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     /**
      * Cachable formats: <code>"apiResponse"</code>, <code>"json"</code>.
      */
-    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "apiResponse",
-        "json")));
+    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("apiResponse", "json")));
 
     /**
      * Gets the service of specified type
@@ -489,5 +485,22 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         }
 
         return fields;
+    }
+
+    /**
+     * Extracts the mail uid (if available) from the specified {@link OXException}
+     * 
+     * @param e The {@link OXException}
+     * @return The extracted mail uid, if available, or <code>null</code>
+     */
+    String getUidFromException(OXException e) {
+        final Object[] args = e.getDisplayArgs();
+        final String uid;
+        if (null == args || 0 == args.length) {
+            uid = null;
+        } else {
+            uid = args[0] == null ? null : args[0].toString();
+        }
+        return uid;
     }
 }

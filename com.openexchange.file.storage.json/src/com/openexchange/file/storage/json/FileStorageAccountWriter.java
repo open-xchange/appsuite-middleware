@@ -252,7 +252,9 @@ public class FileStorageAccountWriter {
                 final JSONArray jArgs = new JSONArray(args.length);
                 for (int i = 0; i < args.length; i++) {
                     Object obj = args[i];
-                    jArgs.put(obj instanceof Localizable ? obj.toString() : obj);
+                    if (obj != null) {
+                        jArgs.put(obj instanceof Localizable ? obj.toString() : obj);
+                    }
                 }
                 json.put(ERROR_PARAMS, jArgs);
             }

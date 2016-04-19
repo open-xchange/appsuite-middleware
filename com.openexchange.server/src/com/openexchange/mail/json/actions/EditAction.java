@@ -178,8 +178,7 @@ public final class EditAction extends AbstractMailAction {
             result.addWarnings(warnings);
             return result;
         } catch (final OXException e) {
-            final Object[] args = e.getDisplayArgs();
-            final String uid = null == args || 0 == args.length ? null : args[0].toString();
+            final String uid = getUidFromException(e);
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) && "undefined".equalsIgnoreCase(uid)) {
                 throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
             }
