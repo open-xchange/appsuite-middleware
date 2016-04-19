@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-04-06 13:49+0100\n"
+"PO-Revision-Date: 2016-04-19 13:04+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1665,7 +1665,6 @@ msgid "The token \"%1$s\" is already registered."
 msgstr "Das Token \"%1$s\" ist bereits registriert."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:96
-#, fuzzy
 msgid "Empty files indicated for directory \"%1$s\"."
 msgstr "Leere Dateien für Verzeichnis \"%1$s\" angegeben."
 
@@ -1737,17 +1736,15 @@ msgstr "im Dateinamen"
 #. Displayed as: [Search for] 'user input' in From sender.
 #. The 'user input' part is always prepended, please heed this in translations.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:91
-#, fuzzy
 msgid "in From sender"
-msgstr "in Von-Absender"
+msgstr "in Absender (Von)"
 
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in To recipient.
 #. The 'user input' part is always prepended, please heed this in translations.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:96
-#, fuzzy
 msgid "in To recipient"
-msgstr "in An-Empfänger"
+msgstr "in Empfänger (An)"
 
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in subject.
@@ -3185,6 +3182,11 @@ msgstr "Das Limit für den Import wurde überschritten. Es wurden nur die ersten
 msgid "The character encoding \"%1$s\" is not supported. Please choose another one."
 msgstr "Die Zeichenkodierung \"%1$s\" wird nicht unterstützt. Bitte wählen Sie eine andere."
 
+#. The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:139
+msgid "The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s"
+msgstr "Der Kontakt mit der UID %1$s ist dem bestehenden Kontakt mit der UID %2$s im Ordner %3$s zu ähnlich"
+
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
@@ -3200,34 +3202,34 @@ msgstr "Die E-Mail-Adresse %1$s ist ungültig."
 
 #. Reorganizing of mails failed. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/impl/mailfilter/MailCategoriesOrganizeExceptionStrings.java:63
-#, fuzzy
 msgid "Reorganizing of mails failed. Please try again later."
 msgstr "Neuorganisieren von E-Mails ist fehlgeschlagen. Bitte versuchen Sie es später erneut."
 
-#. The user category %1$s already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:64
-msgid "The user category %1$s already exists."
-msgstr "Die Benutzerkategorie %1$s ist bereits vorhanden."
-
 #. The user category %1$s does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:63
 msgid "The user category %1$s does not exist."
 msgstr "Die Benutzerkategorie %1$s ist nicht vorhanden."
 
 #. Invalid configuration: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:69
 msgid "Invalid configuration: %1$s"
 msgstr "Ungültige Konfiguration: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:72
 msgid "The required service %1$s is temporary not available. Please try again later."
 msgstr "Der erforderliche Dienst %1$s ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut."
 
-#. Unable to create category. Missing parameter %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:76
-msgid "Unable to create category. Missing parameter %1$s."
-msgstr "Kategorie kann nicht erstellt werden. Fehlender Parameter %1$s."
+#. You are not allowed to change the name of the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:75
+msgid "You are not allowed to change the name of the category %1$s."
+msgstr "Sie haben keine Berechtigung, den Namen der Kategorie %1$s zu ändern."
+
+#. You are not allowed to enable or disable the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:78
+msgid "You are not allowed to enable or disable the category %1$s."
+msgstr "Sie haben keine Berechtigung, die Kategorie %1$s zu aktivieren oder deaktivieren."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
 msgid "The redirect address \"%1$s\" is not valid."
@@ -7294,7 +7296,6 @@ msgstr "Ungültiger Parameter-Wert: %1$s"
 
 #. The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:214
-#, fuzzy
 msgid "The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
 msgstr "Der Flag-Name %1$s ist nicht gültig. Flags können nicht mit ' \\' beginnen."
 
@@ -8536,8 +8537,8 @@ msgstr "Ungültige oder schädliche Bilddaten erkannt"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
-msgid "The maximum allowed size of '%1$s' for an image in the signature is reached."
-msgstr "Die maximal zulässige Größe von '%1$s' für ein Bild in der Signatur ist erreicht."
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
+msgstr "Das Signaturbild überschreitet die maximal zulässige Größe von '%1$s'."
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
@@ -10987,6 +10988,15 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The maximum allowed size of '%1$s' for an image in the signature is reached."
+#~ msgstr "Die maximal zulässige Größe von '%1$s' für ein Bild in der Signatur ist erreicht."
+
+#~ msgid "The user category %1$s already exists."
+#~ msgstr "Die Benutzerkategorie %1$s ist bereits vorhanden."
+
+#~ msgid "Unable to create category. Missing parameter %1$s."
+#~ msgstr "Kategorie kann nicht erstellt werden. Fehlender Parameter %1$s."
 
 #~ msgid "Invalid E-Mail address."
 #~ msgstr "Ungültige E-Mail-Adresse."
