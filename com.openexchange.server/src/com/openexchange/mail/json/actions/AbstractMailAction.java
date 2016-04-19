@@ -79,9 +79,9 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.json.Column;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -489,7 +489,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Extracts the mail uid (if available) from the specified {@link OXException}
-     * 
+     *
      * @param e The {@link OXException}
      * @return The extracted mail uid, if available, or <code>null</code>
      */

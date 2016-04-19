@@ -68,8 +68,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
