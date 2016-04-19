@@ -98,7 +98,7 @@ public class RedeemLoginLocationTokenServlet extends AbstractShareServlet {
                 return;
             }
 
-            LoginLocation location = LoginLocationRegistry.getInstance().getAndInvalidateIfPresent(token);
+            LoginLocation location = LoginLocationRegistry.getInstance().getIfPresent(token);
             if (null == location) {
                 new JSONObject(2).put("error", "No such token").write(response.getWriter());
                 return;
