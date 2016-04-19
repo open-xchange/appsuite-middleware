@@ -82,7 +82,8 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareAuthenticated;
-import com.openexchange.share.servlet.utils.LoginLocationBuilder;
+import com.openexchange.share.servlet.utils.LoginLocation;
+import com.openexchange.share.servlet.utils.LoginLocationRegistry;
 import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
@@ -136,8 +137,9 @@ public class PasswordResetServlet extends AbstractShareServlet {
             }
 
             if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
-                String redirectUrl = new LoginLocationBuilder().status("reset_password_info").message(MessageType.INFO, translator.translate(ShareServletStrings.NO_GUEST_PASSWORD_REQUIRED)).build();
-                response.sendRedirect(redirectUrl);
+                LoginLocation location = new LoginLocation().status("reset_password_info").message(MessageType.INFO, translator.translate(ShareServletStrings.NO_GUEST_PASSWORD_REQUIRED));
+                String locationToken = LoginLocationRegistry.getInstance().put(location);
+                response.sendRedirect(LoginLocation.buildRedirectWith(locationToken));
                 return;
             }
 
@@ -171,20 +173,21 @@ public class PasswordResetServlet extends AbstractShareServlet {
                 /*
                  * Redirect after notification was sent.
                  */
-                String redirectUrl = new LoginLocationBuilder()
+                LoginLocation location = new LoginLocation()
                     .status("reset_password_info")
                     .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.RESET_PASSWORD), guestInfo.getEmailAddress()))
-                    .share(guestInfo.getBaseToken())
-                    .build();
-                response.sendRedirect(redirectUrl);
+                    .share(guestInfo.getBaseToken());
+                String locationToken = LoginLocationRegistry.getInstance().put(location);
+                response.sendRedirect(LoginLocation.buildRedirectWith(locationToken));
             } else {
                 if (confirm.equals(hash)) {
-                    LoginLocationBuilder redirectUrl = new LoginLocationBuilder()
+                    LoginLocation location = new LoginLocation()
                         .status("reset_password")
                         .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.CHOOSE_PASSWORD), guestInfo.getEmailAddress()))
                         .parameter("confirm", confirm)
                         .share(guestInfo.getBaseToken());
-                    response.sendRedirect(redirectUrl.build());
+                    String locationToken = LoginLocationRegistry.getInstance().put(location);
+                    response.sendRedirect(LoginLocation.buildRedirectWith(locationToken));
                 } else {
 
                     sendInvalidRequest(translator, response);
@@ -312,13 +315,15 @@ public class PasswordResetServlet extends AbstractShareServlet {
     }
 
     private static void sendInvalidRequest(Translator translator, HttpServletResponse response) throws IOException {
-        String redirectUrl = new LoginLocationBuilder().status("invalid_request").message(MessageType.ERROR, translator.translate(ShareServletStrings.INVALID_REQUEST)).build();
-        response.sendRedirect(redirectUrl);
+        LoginLocation location = new LoginLocation().status("invalid_request").message(MessageType.ERROR, translator.translate(ShareServletStrings.INVALID_REQUEST));
+        String locationToken = LoginLocationRegistry.getInstance().put(location);
+        response.sendRedirect(LoginLocation.buildRedirectWith(locationToken));
     }
 
     private static void sendInternalError(Translator translator, HttpServletResponse response) throws IOException {
-        String redirectUrl = new LoginLocationBuilder().status("internal_error").message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY)).build();
-        response.sendRedirect(redirectUrl);
+        LoginLocation location = new LoginLocation().status("internal_error").message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
+        String locationToken = LoginLocationRegistry.getInstance().put(location);
+        response.sendRedirect(LoginLocation.buildRedirectWith(locationToken));
     }
 
 }

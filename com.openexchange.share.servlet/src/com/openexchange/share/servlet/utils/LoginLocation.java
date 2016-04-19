@@ -49,9 +49,8 @@
 
 package com.openexchange.share.servlet.utils;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.java.Charsets;
 import com.openexchange.share.AuthenticationMode;
@@ -59,20 +58,36 @@ import com.openexchange.share.ShareTargetPath;
 import com.openexchange.tools.encoding.URLCoder;
 
 /**
- * Builds a relative redirect location to the login page.
+ * Holds a relative redirect location to the login page.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class LoginLocationBuilder {
-
-    private final List<Entry<String, String>> parameters;
+public class LoginLocation {
 
     /**
-     * Initializes a new {@link LoginLocationBuilder}
+     * Builds the redirect location using specified token
+     *
+     * @param token The token
+     * @return The redirect location
      */
-    public LoginLocationBuilder() {
+    public static String buildRedirectWith(String token) {
+        StringBuilder sb = new StringBuilder(96);
+        sb.append(ShareRedirectUtils.getLoginLink()).append("#!");
+        sb.append("&token=").append(token);
+        return sb.toString();
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------
+
+    private final Map<String, String> parameters;
+
+    /**
+     * Initializes a new {@link LoginLocation}
+     */
+    public LoginLocation() {
         super();
-        parameters = new ArrayList<Entry<String,String>>();
+        parameters = new LinkedHashMap<String, String>(8);
     }
 
     /**
@@ -81,7 +96,7 @@ public class LoginLocationBuilder {
      * @param authentication The authentication mode
      * @return The builder
      */
-    public LoginLocationBuilder loginType(AuthenticationMode authentication) {
+    public LoginLocation loginType(AuthenticationMode authentication) {
         switch (authentication) {
             case GUEST:
                 return parameter("login_type", "guest");
@@ -100,7 +115,7 @@ public class LoginLocationBuilder {
      * @param token The share token to append
      * @return The builder
      */
-    public LoginLocationBuilder share(String token) {
+    public LoginLocation share(String token) {
         return parameter("share", token);
     }
 
@@ -110,7 +125,7 @@ public class LoginLocationBuilder {
      * @param targetPath The share target path to append, or <code>null</code> if not specified
      * @return The builder
      */
-    public LoginLocationBuilder target(ShareTargetPath targetPath) {
+    public LoginLocation target(ShareTargetPath targetPath) {
         return null != targetPath ? parameter("target", targetPath.get()) : this;
     }
 
@@ -120,7 +135,7 @@ public class LoginLocationBuilder {
      * @param status The message status
      * @return The builder
      */
-    public LoginLocationBuilder status(String status) {
+    public LoginLocation status(String status) {
         parameter("status", status);
         return this;
     }
@@ -132,7 +147,7 @@ public class LoginLocationBuilder {
      * @param message The message
      * @return The builder
      */
-    public LoginLocationBuilder message(MessageType type, String message) {
+    public LoginLocation message(MessageType type, String message) {
         parameter("message_type", type.toString());
         parameter("message", message);
         return this;
@@ -144,7 +159,7 @@ public class LoginLocationBuilder {
      * @param name The login name
      * @return
      */
-    public LoginLocationBuilder loginName(String name) {
+    public LoginLocation loginName(String name) {
         parameter("login_name", name);
         return this;
     }
@@ -156,9 +171,18 @@ public class LoginLocationBuilder {
      * @param value The parameter value
      * @return The builder
      */
-    public LoginLocationBuilder parameter(String name, String value) {
-        parameters.add(new AbstractMap.SimpleEntry<String, String>(name, value));
+    public LoginLocation parameter(String name, String value) {
+        parameters.put(name, value);
         return this;
+    }
+
+    /**
+     * Gets the map view for this login location
+     *
+     * @return The parameters map
+     */
+    public Map<String, String> asMap() {
+        return parameters;
     }
 
     /**
@@ -166,15 +190,14 @@ public class LoginLocationBuilder {
      *
      * @return The built redirect URL
      */
-    public String build() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(ShareRedirectUtils.getLoginLink()).append("#!");
-        if (0 < parameters.size()) {
-            for (int i = 0; i < parameters.size(); i++) {
-                stringBuilder.append('&').append(parameters.get(i).getKey()).append('=').append(URLCoder.encode(parameters.get(i).getValue(), Charsets.UTF_8));
-            }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append(ShareRedirectUtils.getLoginLink()).append("#!");
+        for (Entry<String, String> entry : parameters.entrySet()) {
+            sb.append('&').append(entry.getKey()).append('=').append(URLCoder.encode(entry.getValue(), Charsets.UTF_8));
         }
-        return stringBuilder.toString();
+        return sb.toString();
     }
 
 }
