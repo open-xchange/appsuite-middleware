@@ -73,6 +73,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.Strings;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
 import com.openexchange.rss.osgi.Services;
@@ -267,6 +268,15 @@ public class RssAction implements AJAXActionService {
             } catch (IOException e) {
                 throw RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
             } catch (ParsingFeedException parsingException) {
+                Throwable t = parsingException.getCause();
+                if (t != null && t instanceof IOException) {
+                    String exceptionMessage = t.getMessage();
+                    if (!Strings.isEmpty(exceptionMessage) && exceptionMessage.contains("exceeded")) {
+                        ConfigurationService configService = Services.getService(ConfigurationService.class);
+                        int maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
+                        throw RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize);
+                    }
+                }
                 final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
                 if (1 == urls.size()) {
                     throw oxe;
@@ -297,11 +307,7 @@ public class RssAction implements AJAXActionService {
                 }
             } catch (IllegalArgumentException e) {
                 String exceptionMessage = e.getMessage();
-                if (exceptionMessage.contains("exceeds")) {
-                    ConfigurationService configService = Services.getService(ConfigurationService.class);
-                    int maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
-                    throw RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize);
-                } else if (!"Invalid document".equals(exceptionMessage)) {
+                if (!"Invalid document".equals(exceptionMessage)) {
                     throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, exceptionMessage);
                 }
                 // There is no parser for current document
