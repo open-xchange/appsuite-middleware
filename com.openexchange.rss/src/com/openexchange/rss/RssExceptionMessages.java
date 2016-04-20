@@ -77,6 +77,9 @@ public final class RssExceptionMessages implements LocalizableStrings {
     // The RSS feed is exceeding the maximum allowed size of '%1$s'
     public static final String RSS_SIZE_EXCEEDED = "The RSS feed is exceeding the maximum allowed size of '%1$s'";
 
+    // Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+    public static final String RSS_CONNECTION_ERROR_MSG = "Cannot connect to RSS with URL: %1$s. Please change URL and try again.";
+
     /**
      * Initializes a new {@link RssExceptionMessages}.
      */

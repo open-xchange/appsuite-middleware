@@ -52,6 +52,10 @@ package com.openexchange.rss;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.rss.actions.RssActionTest;
+import com.openexchange.rss.actions.RssActionTestReconfiguredHosts;
+import com.openexchange.rss.actions.RssActionTestReconfiguredPorts;
+import com.openexchange.rss.actions.RssActionTestReconfiguredPortsAndHosts;
 import com.openexchange.rss.preprocessors.PreprocessorChainingTest;
 
 /**
@@ -62,7 +66,11 @@ import com.openexchange.rss.preprocessors.PreprocessorChainingTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    PreprocessorChainingTest.class
+    PreprocessorChainingTest.class,
+    RssActionTest.class,
+    RssActionTestReconfiguredHosts.class,
+    RssActionTestReconfiguredPorts.class,
+    RssActionTestReconfiguredPortsAndHosts.class
 })
 public class UnitTests {
 
