@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.utils;
 
+import com.openexchange.tools.HostList;
 import junit.framework.TestCase;
 
 /**
