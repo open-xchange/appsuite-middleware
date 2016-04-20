@@ -147,26 +147,24 @@ public class HostList {
         }
 
         String toCheck = Strings.asciiLowerCase(hostName);
-        char firstChar = toCheck.charAt(0);
-        if (Strings.isDigit(firstChar) || firstChar == '[') {
-            // Test for IP address
-            byte[] octets = IPAddressUtil.textToNumericFormatV4(toCheck);
-            if (null != octets) {
-                // IPv4
-                for (IPRange ipRange : ipRanges) {
-                    if (ipRange.containsIPv4(octets, toCheck)) {
-                        return true;
-                    }
+
+        // Test for IP address
+        byte[] octets = IPAddressUtil.textToNumericFormatV4(toCheck);
+        if (null != octets) {
+            // IPv4
+            for (IPRange ipRange : ipRanges) {
+                if (ipRange.containsIPv4(octets, toCheck)) {
+                    return true;
                 }
             }
+        }
 
-            octets = IPAddressUtil.textToNumericFormatV6(toCheck);
-            if (null != octets) {
-                // IPv6
-                for (IPRange ipRange : ipRanges) {
-                    if (ipRange.containsIPv6(octets, toCheck)) {
-                        return true;
-                    }
+        octets = IPAddressUtil.textToNumericFormatV6(toCheck);
+        if (null != octets) {
+            // IPv6
+            for (IPRange ipRange : ipRanges) {
+                if (ipRange.containsIPv6(octets, toCheck)) {
+                    return true;
                 }
             }
         }
