@@ -71,6 +71,7 @@ import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandlerReply;
 import com.openexchange.share.servlet.utils.LoginLocation;
 import com.openexchange.share.servlet.utils.LoginLocationRegistry;
+import com.openexchange.share.servlet.utils.LoginType;
 import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
@@ -191,10 +192,9 @@ public class ShareServlet extends AbstractShareServlet {
             } else {
                 LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
                 LoginLocation location = new LoginLocation()
-                    .status("internal_error")
+                    .loginType(LoginType.MESSAGE)
                     .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
-                String locationToken = LoginLocationRegistry.getInstance().put(location);
-                response.sendRedirect(LoginLocation.buildRedirectWith(locationToken));
+                LoginLocationRegistry.getInstance().putAndRedirect(location, response);
             }
         }
     }
@@ -226,10 +226,9 @@ public class ShareServlet extends AbstractShareServlet {
      */
     private static void sendNotFound(HttpServletResponse response, Translator translator) throws IOException {
         LoginLocation location = new LoginLocation()
-            .status("not_found")
+            .loginType(LoginType.MESSAGE)
             .message(MessageType.ERROR, translator.translate(ShareServletStrings.SHARE_NOT_FOUND));
-        String locationToken = LoginLocationRegistry.getInstance().put(location);
-        response.sendRedirect(LoginLocation.buildRedirectWith(locationToken));
+        LoginLocationRegistry.getInstance().putAndRedirect(location, response);
         return;
     }
 

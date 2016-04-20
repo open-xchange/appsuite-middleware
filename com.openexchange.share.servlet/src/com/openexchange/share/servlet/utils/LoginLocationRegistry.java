@@ -49,8 +49,10 @@
 
 package com.openexchange.share.servlet.utils;
 
+import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.http.HttpServletResponse;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.java.util.UUIDs;
@@ -108,10 +110,23 @@ public class LoginLocationRegistry {
      * @param loginLocation The associated login location
      * @return The token referring to the login location
      */
-    public String put(LoginLocation loginLocation) {
+    public String put2(LoginLocation loginLocation) {
         String token = UUIDs.getUnformattedString(UUID.randomUUID());
         cache.put(token, loginLocation);
         return token;
+    }
+
+    /**
+     * Puts specified login location into this registry and performs the redirect.
+     *
+     * @param loginLocation The associated login location
+     * @return The token referring to the login location
+     * @throws IOException If redirect fails due to an I/O error
+     */
+    public void putAndRedirect(LoginLocation loginLocation, HttpServletResponse response) throws IOException {
+        String token = UUIDs.getUnformattedString(UUID.randomUUID());
+        cache.put(token, loginLocation);
+        response.sendRedirect(LoginLocation.buildRedirectWith(token, loginLocation));
     }
 
     /**

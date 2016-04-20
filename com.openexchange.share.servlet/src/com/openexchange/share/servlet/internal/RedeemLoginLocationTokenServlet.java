@@ -57,7 +57,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
+import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.utils.LoginLocation;
 import com.openexchange.share.servlet.utils.LoginLocationRegistry;
 import com.openexchange.tools.servlet.http.Tools;
@@ -87,20 +91,30 @@ public class RedeemLoginLocationTokenServlet extends AbstractShareServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Tools.disableCaching(response);
+        Translator translator = Translator.EMPTY;
         try {
+            try {
+                TranslatorFactory translatorFactory = ShareServiceLookup.getService(TranslatorFactory.class, true);
+                translator = translatorFactory.translatorFor(determineLocale(request, null));
+            } catch (OXException e) {
+                LOG.error("", e);
+                new JSONObject(2).put("error", translator.translate(ShareServletStrings.INVALID_REQUEST)).write(response.getWriter());
+                return;
+            }
+
             request.getSession(true);
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("text/javascript; charset=UTF-8");
 
             String token = request.getParameter("token");
             if (Strings.isEmpty(token)) {
-                new JSONObject(2).put("error", "Missing parameter").write(response.getWriter());
+                new JSONObject(2).put("error", translator.translate(ShareServletStrings.INVALID_REQUEST)).write(response.getWriter());
                 return;
             }
 
             LoginLocation location = LoginLocationRegistry.getInstance().getIfPresent(token);
             if (null == location) {
-                new JSONObject(2).put("error", "No such token").write(response.getWriter());
+                new JSONObject(2).put("error", translator.translate(ShareServletStrings.INVALID_REQUEST)).write(response.getWriter());
                 return;
             }
 
@@ -126,7 +140,7 @@ public class RedeemLoginLocationTokenServlet extends AbstractShareServlet {
              */
             LOG.error("", e);
             try {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred");
             } catch (final IOException ioe) {
                 LOG.error("", ioe);
             }

@@ -53,6 +53,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.tools.encoding.URLCoder;
@@ -69,12 +70,27 @@ public class LoginLocation {
      * Builds the redirect location using specified token
      *
      * @param token The token
+     * @param location The associated login location
      * @return The redirect location
      */
-    public static String buildRedirectWith(String token) {
+    public static String buildRedirectWith(String token, LoginLocation location) {
+        return buildRedirectWith(token, location.asMap().get("login_type"));
+    }
+
+    /**
+     * Builds the redirect location using specified token
+     *
+     * @param token The token
+     * @param loginType The associated login type
+     * @return The redirect location
+     */
+    public static String buildRedirectWith(String token, String loginType) {
         StringBuilder sb = new StringBuilder(96);
         sb.append(ShareRedirectUtils.getLoginLink()).append("#!");
         sb.append("&token=").append(token);
+        if (false == Strings.isEmpty(loginType)) {
+            sb.append("&login_type=").append(loginType);
+        }
         return sb.toString();
     }
 
@@ -99,14 +115,24 @@ public class LoginLocation {
     public LoginLocation loginType(AuthenticationMode authentication) {
         switch (authentication) {
             case GUEST:
-                return parameter("login_type", "guest");
+                return loginType(LoginType.GUEST);
             case GUEST_PASSWORD:
-                return parameter("login_type", "guest_password");
+                return loginType(LoginType.GUEST_PASSWORD);
             case ANONYMOUS_PASSWORD:
-                return parameter("login_type", "anonymous_password");
+                return loginType(LoginType.ANONYMOUS_PASSWORD);
             default:
                 throw new UnsupportedOperationException("No login type for " + authentication);
         }
+    }
+
+    /**
+     * Appends the login type suitable for the supplied identifier.
+     *
+     * @param loginType The login type to set
+     * @return The builder
+     */
+    public LoginLocation loginType(LoginType loginType) {
+        return parameter("login_type", loginType.getId());
     }
 
     /**
@@ -127,17 +153,6 @@ public class LoginLocation {
      */
     public LoginLocation target(ShareTargetPath targetPath) {
         return null != targetPath ? parameter("target", targetPath.get()) : this;
-    }
-
-    /**
-     * Appends the status parameter to pass to the client along with the redirect location.
-     *
-     * @param status The message status
-     * @return The builder
-     */
-    public LoginLocation status(String status) {
-        parameter("status", status);
-        return this;
     }
 
     /**

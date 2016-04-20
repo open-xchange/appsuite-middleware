@@ -67,6 +67,7 @@ import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.share.servlet.utils.LoginLocation;
 import com.openexchange.share.servlet.utils.LoginLocationRegistry;
+import com.openexchange.share.servlet.utils.LoginType;
 import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.user.UserService;
@@ -134,15 +135,13 @@ public class WebUIShareHandler extends AbstractShareHandler {
                 LoginLocation location;
                 if (guestInfo.getAuthentication() == AuthenticationMode.GUEST) {
                     location = new LoginLocation()
-                        .status("not_found_continue")
+                        .loginType(LoginType.MESSAGE_CONTINUE)
                         .share(guestInfo.getBaseToken())
-                        .loginType(guestInfo.getAuthentication())
                         .target(targetPath)
                         .message(MessageType.INFO, translator.translate(ShareServletStrings.NO_ACCESS_TO_SHARE_CONTACT_OWNER_CONTINUE))
                         .loginName(guestInfo.getEmailAddress());
                 } else {
                     location = new LoginLocation()
-                        .status("not_found_continue")
                         .share(guestInfo.getBaseToken())
                         .loginType(guestInfo.getAuthentication())
                         .target(targetPath)
@@ -152,8 +151,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                     }
                 }
 
-                String token = LoginLocationRegistry.getInstance().put(location);
-                response.sendRedirect(LoginLocation.buildRedirectWith(token));
+                LoginLocationRegistry.getInstance().putAndRedirect(location, response);
                 return ShareHandlerReply.ACCEPT;
             }
 
@@ -172,8 +170,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             if (targetPath != null) {
                 location.target(targetPath);
             }
-            String token = LoginLocationRegistry.getInstance().put(location);
-            response.sendRedirect(LoginLocation.buildRedirectWith(token));
+            LoginLocationRegistry.getInstance().putAndRedirect(location, response);
             return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
