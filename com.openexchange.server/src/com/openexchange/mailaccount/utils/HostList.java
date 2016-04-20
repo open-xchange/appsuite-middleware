@@ -49,9 +49,13 @@
 
 package com.openexchange.mailaccount.utils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import com.openexchange.java.IPAddressUtil;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.config.IPRange;
 
@@ -66,13 +70,14 @@ public class HostList {
     /**
      * The empty host list.
      */
-    public static final HostList EMPTY = new HostList(IPRange.NULL, Collections.<String> emptySet());
+    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet());
 
     /**
      * Accepts a comma-separated list of IP addresses, IP address ranges, and host names.
      *
      * @param hostList The host list to parse
      * @return The resulting {@link HostList} instance
+     * @throws IllegalArgumentException If parsing fails
      */
     public static HostList valueOf(String hostList) {
         if (Strings.isEmpty(hostList)) {
@@ -80,38 +85,52 @@ public class HostList {
         }
 
         String[] tokens = Strings.splitByComma(hostList);
-        Set<String> hostNames = new HashSet<String>(tokens.length);
-        StringBuilder ipRanges = new StringBuilder(hostList.length());
+        Set<String> matchingHostNames = new HashSet<String>(tokens.length);
+        Set<String> matchingAppendixHostNames = new HashSet<String>(tokens.length);
+        List<IPRange> ipRanges = new ArrayList<IPRange>(tokens.length);
         for (String token : tokens) {
             if (false == Strings.isEmpty(token)) {
                 token = Strings.asciiLowerCase(token);
                 char firstChar = token.charAt(0);
                 if (Strings.isDigit(firstChar) || firstChar == '[') {
-                    if (ipRanges.length() > 0) {
-                        ipRanges.append(',');
-                    }
-                    ipRanges.append(token);
+                    ipRanges.add(IPRange.parseRange(token));
                 } else {
-                    hostNames.add(token);
+                    if (token.startsWith("*")) {
+                        // Wild-card host name; e.g. "*.open-xchange.com"
+                        String appendixToken = token.substring(1);
+                        if (Strings.isEmpty(appendixToken) || appendixToken.indexOf('*') >= 0) {
+                            throw new IllegalArgumentException("Invalid wild-card host name: " + token);
+                        }
+                        matchingAppendixHostNames.add(appendixToken);
+                    } else {
+                        if (token.indexOf('*') > 0) {
+                            // Wild-card only allowed at first position
+                            throw new IllegalArgumentException("Invalid wild-card host name: " + token);
+                        }
+                        // Exact match
+                        matchingHostNames.add(token);
+                    }
                 }
             }
         }
 
-        return new HostList(ipRanges.length() > 0 ? IPRange.parseRange(ipRanges.toString()) : IPRange.NULL, hostNames);
+        return new HostList(ipRanges, matchingAppendixHostNames, matchingHostNames);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
-    private final IPRange ipRange;
-    private final Set<String> hostNames;
+    private final List<IPRange> ipRanges;
+    private final Set<String> matchingAppendixHostNames;
+    private final Set<String> matchingHostNames;
 
     /**
      * Initializes a new {@link HostList}.
      */
-    private HostList(IPRange ipRange, Set<String> hostNames) {
+    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames) {
         super();
-        this.ipRange = ipRange;
-        this.hostNames = hostNames;
+        this.ipRanges = ipRanges;
+        this.matchingAppendixHostNames = matchingAppendixHostNames.isEmpty() ? null : matchingAppendixHostNames;
+        this.matchingHostNames = matchingHostNames;
     }
 
     /**
@@ -127,24 +146,62 @@ public class HostList {
             return false;
         }
 
-        char firstChar = hostName.charAt(0);
+        String toCheck = Strings.asciiLowerCase(hostName);
+        char firstChar = toCheck.charAt(0);
         if (Strings.isDigit(firstChar) || firstChar == '[') {
-            // Expect IP address
-            return ipRange.contains(hostName);
+            // Test for IP address
+            byte[] octets = IPAddressUtil.textToNumericFormatV4(toCheck);
+            if (null != octets) {
+                // IPv4
+                for (IPRange ipRange : ipRanges) {
+                    if (ipRange.containsIPv4(octets, toCheck)) {
+                        return true;
+                    }
+                }
+            }
+
+            octets = IPAddressUtil.textToNumericFormatV6(toCheck);
+            if (null != octets) {
+                // IPv6
+                for (IPRange ipRange : ipRanges) {
+                    if (ipRange.containsIPv6(octets, toCheck)) {
+                        return true;
+                    }
+                }
+            }
         }
 
-        return hostNames.contains(Strings.asciiLowerCase(hostName));
+        if (null != matchingAppendixHostNames) {
+            for (String appendixHostName : matchingAppendixHostNames) {
+                if (toCheck.endsWith(appendixHostName)) {
+                    return true;
+                }
+            }
+        }
+
+        return matchingHostNames.contains(Strings.asciiLowerCase(toCheck));
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(32);
         builder.append("[");
-        if (ipRange != null) {
-            builder.append("ipRange=[").append(ipRange).append("], ");
+        if (ipRanges != null) {
+            builder.append("ipRanges=").append(ipRanges).append(", ");
         }
-        if (hostNames != null) {
-            builder.append("hostNames=").append(hostNames);
+        if (matchingAppendixHostNames != null) {
+            builder.append("wild-card_hostNames=[");
+            Iterator<String> it = matchingAppendixHostNames.iterator();
+            if (it.hasNext()) {
+                builder.append('*').append(it.next());
+                while (it.hasNext()) {
+                    builder.append(", ").append('*').append(it.next());
+                }
+            }
+            builder.append("], ");
+        }
+        if (matchingHostNames != null) {
+            builder.append("hostNames=").append(matchingHostNames);
         }
         builder.append("]");
         return builder.toString();
