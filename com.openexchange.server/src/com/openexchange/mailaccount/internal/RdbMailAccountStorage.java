@@ -101,8 +101,6 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.IMailAccessCache;
-import com.openexchange.mail.config.IPRange;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.ProviderUtility;
@@ -118,6 +116,7 @@ import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
+import com.openexchange.mailaccount.utils.MailAccountUtils;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
@@ -2120,12 +2119,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final String name = mailAccount.getName();
         if (!isUnifiedMail) {
             // Check if black-listed
-            final List<IPRange> ranges = MailProperties.getInstance().getAccountBlacklistRanges();
-            if ((false == mailAccount.isDefaultFlag()) && (null != ranges) && !ranges.isEmpty()) {
-                // Check non-primary account against IP range restriction
-                checkHostIfBlacklisted(mailAccount.getMailServer(), ranges);
-                checkHostIfBlacklisted(mailAccount.getTransportServer(), ranges);
+            if ((false == mailAccount.isDefaultFlag())) {
+                checkHostIfBlacklisted(mailAccount.getMailServer(), mailAccount.getMailPort());
+                checkHostIfBlacklisted(mailAccount.getTransportServer(), mailAccount.getTransportPort());
             }
+
             // Check for duplicate
             if (-1 != getByPrimaryAddress(primaryAddress, userId, contextId, con)) {
                 throw MailAccountExceptionCodes.CONFLICT_ADDR.create(primaryAddress, I(userId), I(contextId));
@@ -2333,21 +2331,22 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return id;
     }
 
-    private void checkHostIfBlacklisted(final String host, final List<IPRange> ranges) throws OXException {
+    private void checkHostIfBlacklisted(String host, int port) throws OXException {
         if (!isEmpty(host)) {
-            boolean allowed = true;
+            boolean blacklisted = false;
             try {
-                final String hostAddress = InetAddress.getByName(host).getHostAddress();
-                for (int j = ranges.size(); allowed && j-- > 0;) {
-                    final IPRange ipRange = ranges.get(j);
-                    if (ipRange.contains(hostAddress)) {
-                        allowed = false;
-                    }
+                blacklisted = MailAccountUtils.isBlacklisted(host);
+                if (false == blacklisted) {
+                    String hostAddress = InetAddress.getByName(host).getHostAddress();
+                    blacklisted = MailAccountUtils.isBlacklisted(hostAddress);
+                }
+                if (false == blacklisted && port > 0) {
+                    blacklisted = false == MailAccountUtils.isAllowed(port);
                 }
             } catch (final Exception e) {
                 LOG.warn("Could not check host name \"" + host + "\" against IP range black-list", e);
             }
-            if (false == allowed) {
+            if (blacklisted) {
                 throw MailAccountExceptionCodes.BLACKLISTED_SERVER.create(host);
             }
         }
