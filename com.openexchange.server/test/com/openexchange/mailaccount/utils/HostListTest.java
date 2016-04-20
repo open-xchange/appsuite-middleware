@@ -83,4 +83,31 @@ public class HostListTest extends TestCase{
             fail(e.getMessage());
         }
     }
+
+    public void testHostListFailToParse() {
+        try {
+            String hostList = "www.google.*";
+            HostList.valueOf(hostList);
+            fail("Host list did not fail to parse: " + hostList);
+        } catch (IllegalArgumentException e) {
+            // Expected
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testHostListFailToParse2() {
+        try {
+            String hostList = "*.open-xchange.*";
+            HostList.valueOf(hostList);
+            fail("Host list did not fail to parse: " + hostList);
+        } catch (IllegalArgumentException e) {
+            // Expected
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
 }
