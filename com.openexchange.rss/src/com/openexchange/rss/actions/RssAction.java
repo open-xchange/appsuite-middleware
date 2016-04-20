@@ -301,11 +301,11 @@ public class RssAction implements AJAXActionService {
             try {
                 feeds.add(fetcher.retrieveFeed(url));
             } catch (java.net.SocketTimeoutException e) {
-                throw RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString());
+                warnings.add(RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString()));
             } catch (UnsupportedEncodingException e) {
                 /* yeah, right... not happening for UTF-8 */
             } catch (IOException e) {
-                throw RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
+                warnings.add(RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString()));
             } catch (ParsingFeedException parsingException) {
                 Throwable t = parsingException.getCause();
                 if (t != null && t instanceof IOException) {
@@ -313,7 +313,7 @@ public class RssAction implements AJAXActionService {
                     if (!Strings.isEmpty(exceptionMessage) && exceptionMessage.contains("exceeded")) {
                         ConfigurationService configService = Services.getService(ConfigurationService.class);
                         int maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
-                        throw RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize);
+                        warnings.add(RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize));
                     }
                 }
                 final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
