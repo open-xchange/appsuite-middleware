@@ -113,15 +113,16 @@ public interface MailCategoriesConfigService {
     boolean isSystemCategory(String category, Session session) throws OXException;
 
     /**
-     * Teach the given category with the given mail address
+     * Trains the given category with the given mail addresses
      *
      * @param category The category identifier
      * @param addresses The email addresses
+     * @param createRule Whether to create a rule or not
      * @param reorganize Whether to re-organize existing messages
      * @param session The user session
      * @throws OXException if a category with this identifier does not exist
      */
-    void teachCategory(String category, List<String> addresses, ReorganizeParameter reorganize, Session session) throws OXException;
+    void trainCategory(String category, List<String> addresses, boolean createRule, ReorganizeParameter reorganize, Session session) throws OXException;
 
     /**
      * Enables or disables the mail categories feature for the given user

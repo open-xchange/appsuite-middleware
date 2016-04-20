@@ -101,7 +101,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
     private static final String PERMISSION_RENAME = "rename";
     private static final String PERMISSION_DISABLE = "disable";
-    private static final String PERMISSION_TEACH = "teach";
+    private static final String PERMISSION_TRAIN = "train";
 
     @Override
     public IValueHandler getSharedValue() {
@@ -138,7 +138,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                                 mailCategoryPermissions.add(PERMISSION_RENAME);
                             }
 
-                            mailCategoryPermissions.add(PERMISSION_TEACH);
+                            mailCategoryPermissions.add(PERMISSION_TRAIN);
                             categoryJSON.put(FIELD_PERMISSIONS, mailCategoryPermissions);
 
                             categories.put(categoryJSON);

@@ -356,58 +356,83 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     @Override
-    public void teachCategory(String category, List<String> addresses, ReorganizeParameter reorganize, Session session) throws OXException {
+    public void trainCategory(String category, List<String> addresses, boolean createRule, ReorganizeParameter reorganize, Session session) throws OXException {
+        if (!createRule && !reorganize.isReorganize()) {
+            // nothing to do
+            return;
+        }
         String flag = getFlagByCategory(session, category);
         if (Strings.isEmpty(flag)) {
             flag = generateFlag(category);
         }
 
-        // Remove from old rules
-        for (String mailAddress : addresses) {
-            removeMailFromRules(session, mailAddress);
-        }
-
-        // Update rule
         MailCategoryRule newRule = null;
-        MailCategoryRule oldRule = getRule(session, category);
-        for (String mailAddress : addresses) {
-            if (newRule == null) {
-                if (null == oldRule) {        // Create new rule
-                    newRule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag);
-                } else {
+        if (createRule) {
+            // create new rule
 
-                    if (oldRule.getSubRules() != null && !oldRule.getSubRules().isEmpty()) {
-                        if (oldRule.isAND()) {
-                            newRule = new MailCategoryRule(flag, false);
-                            newRule.addSubRule(oldRule);
-                            newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag));
-                        } else {
-                            newRule = oldRule;
-                            newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag));
-                        }
+            // Remove from old rules
+            for (String mailAddress : addresses) {
+                removeMailFromRules(session, mailAddress);
+            }
+
+            // Update rule
+
+            MailCategoryRule oldRule = getRule(session, category);
+            for (String mailAddress : addresses) {
+                if (newRule == null) {
+                    if (null == oldRule) {        // Create new rule
+                        newRule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag);
                     } else {
-                        if (!oldRule.getHeaders().contains(FROM_HEADER)) {
-                            oldRule.getHeaders().add(FROM_HEADER);
-                        }
-                        if (!oldRule.getValues().contains(mailAddress)) {
-                            oldRule.getValues().add(mailAddress);
-                        }
-                        newRule = oldRule;
-                    }
 
-                }
-            } else {
-                if (!newRule.getValues().contains(mailAddress)) {
-                    newRule.getValues().add(mailAddress);
+                        if (oldRule.getSubRules() != null && !oldRule.getSubRules().isEmpty()) {
+                            if (oldRule.isAND()) {
+                                newRule = new MailCategoryRule(flag, false);
+                                newRule.addSubRule(oldRule);
+                                newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag));
+                            } else {
+                                newRule = oldRule;
+                                newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag));
+                            }
+                        } else {
+                            if (!oldRule.getHeaders().contains(FROM_HEADER)) {
+                                oldRule.getHeaders().add(FROM_HEADER);
+                            }
+                            if (!oldRule.getValues().contains(mailAddress)) {
+                                oldRule.getValues().add(mailAddress);
+                            }
+                            newRule = oldRule;
+                        }
+
+                    }
+                } else {
+                    if (!newRule.getValues().contains(mailAddress)) {
+                        newRule.getValues().add(mailAddress);
+                    }
                 }
             }
+
+            // remove all previous category flags
+            String[] flagsToRemove = getAllFlags(session, false, false);
+            newRule.addFlagsToRemove(flagsToRemove);
+
+            setRule(session, category, newRule);
+
+        } else {
+            // create rule for reorganize only
+            for (String mailAddress : addresses) {
+                if (newRule == null) {
+                    newRule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag);
+                } else {
+                    if (!newRule.getValues().contains(mailAddress)) {
+                        newRule.getValues().add(mailAddress);
+                    }
+                }
+            }
+
+            // remove all previous category flags
+            String[] flagsToRemove = getAllFlags(session, false, false);
+            newRule.addFlagsToRemove(flagsToRemove);
         }
-
-        // remove all previous category flags
-        String[] flagsToRemove = getAllFlags(session, false, false);
-        newRule.addFlagsToRemove(flagsToRemove);
-
-        setRule(session, category, newRule);
 
         // Reorganize if necessary
         if (reorganize.isReorganize()) {
@@ -416,7 +441,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 SearchTerm<?> searchTerm = getSearchTerm(newRule);
                 FullnameArgument fa = new FullnameArgument("INBOX");
                 if (searchTerm != null) {
-                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, flagsToRemove);
+                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, newRule.getFlagsToRemove());
                 }
             } catch (OXException e) {
                 if (warnings.isEmpty()) {

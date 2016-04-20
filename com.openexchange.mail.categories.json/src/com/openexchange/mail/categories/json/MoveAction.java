@@ -68,28 +68,30 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AddAction}
+ * {@link MoveAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "add", description = "Add given mails to the category", parameters = { 
+@Action(method = RequestMethod.PUT, name = "move", description = "Move given mails to the given category", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
     @Parameter(name = "category_id", description = "The category identifier"),
 }, responseDescription = "Response: Empty")
-public class AddAction extends AbstractCategoriesAction {
+public class MoveAction extends AbstractCategoriesAction {
+
+    private static final String CATEGORY_ID_PARAMETER = "category_id";
+    // Request body fields
+    private static final String FIELD_MAIL_ID = "id";
+    private static final String FIELD_FOLDER_ID = "folder_id";
 
     /**
-     * Initializes a new {@link AddAction}.
+     * Initializes a new {@link MoveAction}.
      * 
      * @param services
      */
-    protected AddAction(ServiceLookup services) {
+    protected MoveAction(ServiceLookup services) {
         super(services);
     }
-
-    private static final String FIELD_MAIL_ID = "id";
-    private static final String FIELD_FOLDER_ID = "folder_id";
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
@@ -98,7 +100,7 @@ public class AddAction extends AbstractCategoriesAction {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
         }
 
-        String category = requestData.requireParameter("category_id");
+        String category = requestData.requireParameter(CATEGORY_ID_PARAMETER);
 
         Object data = requestData.getData();
         if (!(data instanceof JSONArray)) {

@@ -68,24 +68,29 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link TeachAction}
+ * {@link TrainAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "teach", description = "Teaches an existing mail user category.", parameters = {
+@Action(method = RequestMethod.PUT, name = "train", description = "Teaches an existing mail user category.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "category_id", description = "The category identifier"),
-    @Parameter(name = "reorganize", description = "A optional flag indicating if old mails should be reorganized. Defaults to 'false'."),
+    @Parameter(name = "apply-for-existing", description = "A optional flag indicating wether old mails should be reorganized. Defaults to 'false'."),
+    @Parameter(name= "apply-for-future-ones", description = "A flag indicating wether a rule should be created or not. Defaults to 'true'.")
 }, responseDescription = "Response: Empty")
-public class TeachAction extends AbstractCategoriesAction {
+public class TrainAction extends AbstractCategoriesAction {
+
+    private static final String CREATE_RULE_PARAMETER = "apply-for-future-ones";
+    private static final String REORGANIZE_PARAMETER = "apply-for-existing";
+    private static final String CATEGORY_ID_PARAMETER = "category_id";
 
     /**
-     * Initializes a new {@link TeachAction}.
+     * Initializes a new {@link TrainAction}.
      *
      * @param services
      */
-    protected TeachAction(ServiceLookup services) {
+    protected TrainAction(ServiceLookup services) {
         super(services);
     }
 
@@ -96,7 +101,7 @@ public class TeachAction extends AbstractCategoriesAction {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
         }
 
-        String category = requestData.requireParameter("category_id");
+        String category = requestData.requireParameter(CATEGORY_ID_PARAMETER);
 
         Object data = requestData.getData();
 
@@ -112,11 +117,13 @@ public class TeachAction extends AbstractCategoriesAction {
             }
         }
 
+        boolean createRule = AJAXRequestDataTools.parseBoolParameter(CREATE_RULE_PARAMETER, requestData, true);
+
         // Check for re-organize flag
-        boolean reorganize = AJAXRequestDataTools.parseBoolParameter("reorganize", requestData);
+        boolean reorganize = AJAXRequestDataTools.parseBoolParameter(REORGANIZE_PARAMETER, requestData);
         ReorganizeParameter reorganizeParameter = ReorganizeParameter.getParameterFor(reorganize);
 
-        mailCategoriesService.teachCategory(category, addresses, reorganizeParameter, session);
+        mailCategoriesService.trainCategory(category, addresses, createRule, reorganizeParameter, session);
 
         AJAXRequestResult result = new AJAXRequestResult();
         if (reorganizeParameter.hasWarnings()) {
