@@ -91,10 +91,15 @@ public class HostList {
         for (String token : tokens) {
             if (false == Strings.isEmpty(token)) {
                 token = Strings.asciiLowerCase(token);
-                char firstChar = token.charAt(0);
-                if (Strings.isDigit(firstChar) || firstChar == '[') {
+                boolean isIp = false;
+                try {
                     ipRanges.add(IPRange.parseRange(token));
-                } else {
+                    isIp = true;
+                } catch (IllegalArgumentException e) {
+                    // Apparently no IP address
+                }
+
+                if (false == isIp) {
                     if (token.startsWith("*")) {
                         // Wild-card host name; e.g. "*.open-xchange.com"
                         String appendixToken = token.substring(1);
