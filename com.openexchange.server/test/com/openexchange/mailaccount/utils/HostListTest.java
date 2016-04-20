@@ -68,12 +68,13 @@ public class HostListTest extends TestCase{
 
     public void testHostList() {
         try {
-            HostList hl = HostList.valueOf("localhost, *.open-xchange.com, 127.0.0.1-127.255.255.255, 10.20.30.1-10.20.30.255");
+            HostList hl = HostList.valueOf("localhost, *.open-xchange.com, 127.0.0.1-127.255.255.255, 10.20.30.1-10.20.30.255, ::1");
 
             String shl = hl.toString();
             assertNotNull("Host-list's string representation is null", shl);
 
             assertTrue(hl.contains("127.168.32.4"));
+            assertTrue(hl.contains("::1"));
             assertTrue(hl.contains("barfoo.open-xchange.com"));
             assertTrue(hl.contains("12.open-xchange.com"));
             assertTrue(hl.contains("localhost"));
