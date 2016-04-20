@@ -193,9 +193,6 @@ public final class MailProperties implements IMailProperties {
     /** Indicates whether MSISDN addresses should be supported or not. */
     private boolean supportMsisdnAddresses;
 
-    /** The ranges for account black-list */
-    private List<IPRange> accountBlacklistRanges;
-
     private boolean enforceSecureConnection;
 
     private int defaultArchiveDays;
@@ -299,7 +296,6 @@ public final class MailProperties implements IMailProperties {
         maxDriveAttachments = 20;
         authProxyDelimiter = null;
         supportMsisdnAddresses = false;
-        accountBlacklistRanges = null;
         enforceSecureConnection = false;
         defaultArchiveDays = 90;
         ranges = Collections.emptyList();
@@ -734,22 +730,6 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            String tmp = configuration.getProperty("com.openexchange.mail.account.blacklist", "").trim();
-            if (!Strings.isEmpty(tmp)) {
-                tmp = Strings.unquote(tmp);
-                final List<IPRange> ranges = new LinkedList<IPRange>();
-                final String[] sRanges = Strings.splitByComma(tmp);
-                for (String sRange : sRanges) {
-                    sRange = sRange.replaceAll("\\s", "");
-                    if (!Strings.isEmpty(sRange)) {
-                        ranges.add(IPRange.parseRange(sRange));
-                    }
-                }
-                this.accountBlacklistRanges = ranges.isEmpty() ? null : ranges;
-            }
-        }
-
-        {
             this.mailStartTls = configuration.getBoolProperty("com.openexchange.mail.mailStartTls", false);
             this.transportStartTls = configuration.getBoolProperty("com.openexchange.mail.transportStartTls", false);
         }
@@ -834,15 +814,6 @@ public final class MailProperties implements IMailProperties {
     @Override
     public void setEnforceSecureConnection(boolean enforceSecureConnection) {
         throw new UnsupportedOperationException("setEnforceSecureConnection() not allowed for static MailProperties");
-    }
-
-    /**
-     * Gets the ranges for account black-list
-     *
-     * @return The black-list ranges or <code>null</code> if not set
-     */
-    public List<IPRange> getAccountBlacklistRanges() {
-        return accountBlacklistRanges;
     }
 
     /**
