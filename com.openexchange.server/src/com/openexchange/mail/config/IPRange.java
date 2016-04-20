@@ -115,6 +115,28 @@ public class IPRange {
     }
 
     /**
+     * Checks if specified IPv4 octets are covered by configured IP range.
+     *
+     * @param octets The IPv4 octets to check
+     * @param ipAddress The octets' IPv4 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv4(byte[] octets, String ipAddress) {
+        return delegate.containsIPv4(octets, ipAddress);
+    }
+
+    /**
+     * Checks if specified IPv6 octets are covered by configured IP range.
+     *
+     * @param octets The IPv6 octets to check
+     * @param ipAddress The octets' IPv6 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv6(byte[] octets, String ipAddress) {
+        return delegate.containsIPv6(octets, ipAddress);
+    }
+
+    /**
      * Checks if passed IP address is contained in this range.
      *
      * @param ipAddress The IP address to check
