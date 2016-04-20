@@ -50,6 +50,7 @@
 package com.openexchange.mail.categories;
 
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -66,18 +67,19 @@ public interface MailCategoriesConfigService {
      * Retrieves all category configurations for the given user
      *
      * @param session The user session
-     * @param onlyEnabled If true only returns enabled or forced configurations
+     * @param onlyEnabled Whether only enabled or forced configurations should be returned
+     * @param includeGeneral Whether the general category should be included or not
      * @return A list of category configurations
      * @throws OXException
      */
-    List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException;
+    List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled, boolean includeGeneral) throws OXException;
 
     /**
      * Retrieves all category flags for the given user
      *
      * @param session The user session
-     * @param onlyEnabled If true only returns enabled or forced categories
-     * @param onlyUserCategories If true only returns user categories
+     * @param onlyEnabled Whether only enabled or forced configurations should be returned
+     * @param onlyUserCategories Whether only user categories should be returned
      * @return String array of category flags
      * @throws OXException
      */
@@ -98,9 +100,10 @@ public interface MailCategoriesConfigService {
      *
      * @param configs A list of MailCategoryConfig's
      * @param session The user session
+     * @param locale The users locale
      * @throws OXException
      */
-    void updateConfigurations(List<MailCategoryConfig> configs, Session session) throws OXException;
+    void updateConfigurations(List<MailCategoryConfig> configs, Session session, Locale locale) throws OXException;
 
     /**
      * Tests if the given category is a system category or not

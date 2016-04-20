@@ -120,7 +120,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                     if (service != null) {
                         boolean mailCategoriesEnabled = service.isEnabled(session);
                         item.put(FIELD_FEATURE_ENABLED, mailCategoriesEnabled);
-                        List<MailCategoryConfig> configs = service.getAllCategories(session, false);
+                        List<MailCategoryConfig> configs = service.getAllCategories(session, false, true);
                         JSONArray categories = new JSONArray();
 
                         for (MailCategoryConfig config : configs) {
@@ -190,7 +190,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                     }
                     if (!newConfigs.isEmpty()) {
                         try {
-                            service.updateConfigurations(newConfigs, session);
+                            service.updateConfigurations(newConfigs, session, user.getLocale());
                         } catch (OXException e) {
                             throw SettingExceptionCodes.NOT_ALLOWED.create();
                         }

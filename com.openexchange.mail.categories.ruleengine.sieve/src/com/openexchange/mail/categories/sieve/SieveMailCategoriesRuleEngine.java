@@ -193,11 +193,20 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
 
     private TestCommand getCommand(MailCategoryRule rule) throws SieveException {
         if (!rule.hasSubRules()) {
+
+            List<TestCommand> commands = new ArrayList<>(2);
+
+            List<Object> flagArgList = new ArrayList<Object>(4);
+            flagArgList.add(createTagArgument("is"));
+            flagArgList.add(Collections.singletonList(rule.getFlag()));
+            commands.add(new TestCommand(Commands.NOT, new ArrayList<>(), Collections.singletonList(new TestCommand(Commands.HASFLAG, flagArgList, new ArrayList<TestCommand>()))));
+
             List<Object> argList = new ArrayList<Object>(4);
             argList.add(createTagArgument("contains"));
             argList.add(rule.getHeaders());
             argList.add(rule.getValues());
-            return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
+            commands.add(new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>()));
+            return new TestCommand(Commands.ALLOF, new ArrayList<>(), commands);
         }
 
         ArrayList<TestCommand> subCommands = new ArrayList<>(rule.getSubRules().size());
@@ -231,10 +240,30 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         List<Rule> rules = mailFilterService.listRules(creds, "category");
         for (Rule tmpRule : rules) {
             if (tmpRule.getRuleComment().getRulename().equals(flag)) {
-                return parseRule(tmpRule.getTestCommand(), flag);
+                return parseRootRule(tmpRule.getTestCommand(), flag);
             }
         }
         return null;
+    }
+
+    private MailCategoryRule parseRootRule(TestCommand command, String flag) throws OXException {
+        if (command == null) {
+            throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
+        }
+
+        //  assume command contains an ALLOF testcommand with a not hasflag test and another test
+        if (command.getTestCommands() == null || command.getTestCommands().isEmpty()) {
+            throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
+        } else {
+            List<TestCommand> twoCommands = command.getTestCommands();
+            if (twoCommands.size() != 2) {
+                throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
+            } else {
+                // assume command 0 is the not hasflag command
+                TestCommand realTest = twoCommands.get(1);
+                return parseRule(realTest, flag);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -303,6 +332,14 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
                     if (testCom.getTestCommands().isEmpty()) {
                         mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
                         continue;
+                    } else {
+                        if (testCom.getTestCommands().size() == 1 && testCom.getTestCommands().get(0).getCommand().equals(Commands.NOT)) {
+                            TestCommand com = testCom.getTestCommands().get(0);
+                            if (com.getTestCommands().size() == 1 && com.getTestCommands().get(0).getCommand().equals(Commands.HASFLAG)) {
+                                mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
+                                continue;
+                            }
+                        }
                     }
                 }
             } else {

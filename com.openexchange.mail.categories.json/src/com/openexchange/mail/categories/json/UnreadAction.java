@@ -118,7 +118,7 @@ public class UnreadAction extends AbstractCategoriesAction {
             idsList = Arrays.asList(ids);
         }
 
-        List<MailCategoryConfig> categories = categoriesConfigService.getAllCategories(session, true);
+        List<MailCategoryConfig> categories = categoriesConfigService.getAllCategories(session, true, false);
         String[] unkeywords = categoriesConfigService.getAllFlags(requestData.getSession(), true, true);
         String[] flags = getFlagsFrom(categories);
 
@@ -134,7 +134,7 @@ public class UnreadAction extends AbstractCategoriesAction {
             // General case
             searchTerm = new UserFlagTerm(flags, false);
             int unread = messageStorage.getUnreadCount("INBOX", searchTerm);
-            resultObject.put("General", unread);
+            resultObject.put("general", unread);
 
             for (MailCategoryConfig category : categories) {
                 if (idsList != null && !idsList.contains(category.getCategory())) {

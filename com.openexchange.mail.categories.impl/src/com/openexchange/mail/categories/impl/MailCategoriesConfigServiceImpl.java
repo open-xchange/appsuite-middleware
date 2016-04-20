@@ -78,7 +78,6 @@ import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link MailCategoriesConfigServiceImpl}
  *
@@ -96,17 +95,19 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     @Override
-    public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException {
+    public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled, boolean includeGeneral) throws OXException {
         String[] categories = getSystemCategoryNames(session);
         String[] userCategories = getUserCategoryNames(session);
-        if (categories.length == 0 && userCategories.length==0) {
+        if (categories.length == 0 && userCategories.length == 0) {
             return new ArrayList<>();
         }
         List<MailCategoryConfig> result = new ArrayList<>(categories.length);
 
-        String name = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + "general" + MailCategoriesConstants.MAIL_CATEGORIES_NAME, "General", session);
-        MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category("general").isSystemCategory(true).enabled(true).force(true).name(name).addLocalizedNames(getLocalizedNames(session, "general")).build();
-        result.add(generalConfig);
+        if (includeGeneral) {
+            String name = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + "general" + MailCategoriesConstants.MAIL_CATEGORIES_NAME, "General", session);
+            MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category("general").isSystemCategory(true).enabled(true).force(true).name(name).addLocalizedNames(getLocalizedNames(session, "general")).build();
+            result.add(generalConfig);
+        }
 
         for (String category : categories) {
             MailCategoryConfig config = getConfigByCategory(session, category);
@@ -149,7 +150,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         // Include system categories
         String[] categories = getSystemCategoryNames(session);
         String[] userCategories = getUserCategoryNames(session);
-        if (categories.length == 0 && userCategories.length==0) {
+        if (categories.length == 0 && userCategories.length == 0) {
             return new String[0];
         }
 
@@ -164,7 +165,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                     }
                 }
             }
-           result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+            result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         }
         for (String category : userCategories) {
             if (onlyEnabled) {
@@ -173,7 +174,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                     continue;
                 }
             }
-           result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+            result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         }
 
         return result.toArray(new String[result.size()]);
@@ -218,17 +219,17 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     private Map<Locale, String> getLocalizedNames(Session session, String category) throws OXException {
         String languagesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_LANGUAGES, "de_DE, cs_CZ, en_GB, es_ES, fr_FR, hu_HU, it_IT, jp_JP, lv_LV, nl_NL, pl_PL, sv_SV, sk_SK, zh_CN", session);
-        if (Strings.isEmpty(languagesString)){
+        if (Strings.isEmpty(languagesString)) {
             return java.util.Collections.emptyMap();
         }
 
         String languages[] = Strings.splitByComma(languagesString);
-        if (languages==null || languages.length==0){
+        if (languages == null || languages.length == 0) {
             return java.util.Collections.emptyMap();
         }
 
         Map<Locale, String> result = new HashMap<>(languages.length);
-        for(String language: languages){
+        for (String language : languages) {
             String translation = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME + "." + language, null, session);
             if (translation != null && !translation.isEmpty()) {
                 result.put(LocaleTools.getLocale(language), translation);
@@ -239,12 +240,12 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     private String[] getSystemCategoryNames(Session session) throws OXException {
         String categoriesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, null, session);
-        if (Strings.isEmpty(categoriesString)){
+        if (Strings.isEmpty(categoriesString)) {
             return new String[0];
         }
 
         String result[] = Strings.splitByComma(categoriesString);
-        return result==null ? new String[0] : result;
+        return result == null ? new String[0] : result;
     }
 
     private String[] getUserCategoryNames(Session session) throws OXException {
@@ -376,7 +377,6 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             }
 
             // Update rule
-
             MailCategoryRule oldRule = getRule(session, category);
             for (String mailAddress : addresses) {
                 if (newRule == null) {
@@ -453,8 +453,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     @Override
-    public void updateConfigurations(List<MailCategoryConfig> configs, Session session) throws OXException {
-        List<MailCategoryConfig> oldConfigs = getAllCategories(session, false);
+    public void updateConfigurations(List<MailCategoryConfig> configs, Session session, Locale locale) throws OXException {
+        List<MailCategoryConfig> oldConfigs = getAllCategories(session, false, true);
 
         for (MailCategoryConfig newConfig : configs) {
 
@@ -473,8 +473,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                     }
                     switchStatus = true;
                 }
-                
-                if (!newConfig.getName().equals(oldConfig.getName())) {
+                String name = oldConfig.getNames().containsKey(locale) ? oldConfig.getNames().get(locale) : oldConfig.getName();
+                if (!newConfig.getName().equals(name)) {
                     if (isSystemCategory(oldConfig.getCategory(), session)) {
                         throw MailCategoriesExceptionCodes.CHANGE_NAME_NOT_ALLOWED.create(oldConfig.getCategory());
                     }
