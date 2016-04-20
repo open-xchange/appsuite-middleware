@@ -68,7 +68,7 @@ public class RssProperties {
 
     public static final String HOST_BLACKLIST = "127.0.0.1-127.255.255.255,localhost";
 
-    public static final String PORT_WHITELIST = "80";
+    public static final String PORT_WHITELIST = "80,443";
 
     /**
      * Initializes a new {@link RssProperties}.
