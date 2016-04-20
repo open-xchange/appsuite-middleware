@@ -301,11 +301,19 @@ public class RssAction implements AJAXActionService {
             try {
                 feeds.add(fetcher.retrieveFeed(url));
             } catch (java.net.SocketTimeoutException e) {
-                warnings.add(RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString()));
+                OXException oxe = RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString());
+                if (1 == urls.size()) {
+                    throw oxe;
+                }
+                warnings.add(oxe);
             } catch (UnsupportedEncodingException e) {
                 /* yeah, right... not happening for UTF-8 */
             } catch (IOException e) {
-                warnings.add(RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString()));
+                OXException oxe = RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
+                if (1 == urls.size()) {
+                    throw oxe;
+                }
+                warnings.add(oxe);
             } catch (ParsingFeedException parsingException) {
                 Throwable t = parsingException.getCause();
                 if (t != null && t instanceof IOException) {
@@ -313,7 +321,11 @@ public class RssAction implements AJAXActionService {
                     if (!Strings.isEmpty(exceptionMessage) && exceptionMessage.contains("exceeded")) {
                         ConfigurationService configService = Services.getService(ConfigurationService.class);
                         int maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
-                        warnings.add(RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize));
+                        OXException oxe = RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize);
+                        if (1 == urls.size()) {
+                            throw oxe;
+                        }
+                        warnings.add(oxe);
                     }
                 }
                 final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
