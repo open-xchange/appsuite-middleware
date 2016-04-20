@@ -75,6 +75,7 @@ public class HostListTest extends TestCase{
 
             assertTrue(hl.contains("127.168.32.4"));
             assertTrue(hl.contains("barfoo.open-xchange.com"));
+            assertTrue(hl.contains("12.open-xchange.com"));
             assertTrue(hl.contains("localhost"));
             assertFalse(hl.contains("ox.io.com"));
         } catch (Exception e) {
