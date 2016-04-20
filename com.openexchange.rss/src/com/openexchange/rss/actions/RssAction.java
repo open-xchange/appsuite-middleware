@@ -72,6 +72,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.Strings;
 import com.openexchange.rss.FeedByDateSorter;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
@@ -251,10 +252,115 @@ public class RssAction implements AJAXActionService {
     }
 
     /**
-     * Replaces body tag with an appropriate &lt;div&gt; tag.
-     *
-     * @param htmlContent The HTML content
-     * @return The HTML content with replaced body tag
+     * Retrieves all RSS URLs wrapped in the given request.
+     * 
+     * @param request - the {@link AJAXRequestData} containing all feed URLs
+     * @return {@link List} with desired feed URLs for further processing
+     * @throws OXException
+     * @throws MalformedURLException
+     * @throws JSONException
+     */
+    protected List<URL> getUrls(AJAXRequestData request) throws OXException, MalformedURLException, JSONException {
+        List<URL> urls = new ArrayList<>();
+
+        String urlString = "";
+        JSONObject data = (JSONObject) request.requireData();
+        JSONArray test = data.optJSONArray("feedUrl");
+        if (test == null) {
+            urlString = request.checkParameter("feedUrl");
+            urlString = urlDecodeSafe(urlString);
+            urls = Collections.singletonList(new URL(prepareUrlString(urlString)));
+        } else {
+            final int length = test.length();
+            urls = new ArrayList<URL>(length);
+            for (int i = 0; i < length; i++) {
+                urlString = test.getString(i);
+                urls.add(new URL(prepareUrlString(urlString)));
+            }
+        }
+        return urls;
+    }
+
+    /**
+     * Checks given URLs for validity (esp. host name blacklisting and port whitelisting) and adds not accepted feeds to the provided warnings list. Returns a list of accepted feeds for further processing
+     * 
+     * @param urls - List of {@link URL}s to check
+     * @param warnings - List of {@link OXException} that might be enhanced by possible errors
+     * @return {@link List} of {@link SyndFeed}s that have been accepted for further processing
+     * @throws OXException
+     */
+    protected List<SyndFeed> getAcceptedFeeds(List<URL> urls, List<OXException> warnings) throws OXException {
+        List<SyndFeed> feeds = new LinkedList<SyndFeed>();
+
+        for (URL url : urls) {
+            if (RssProperties.isDenied(url.getHost(), url.getPort())) {
+                final OXException oxe = RssExceptionCodes.RSS_CONNECTION_ERROR.create(url.toString());
+                warnings.add(oxe);
+                continue;
+            }
+            try {
+                feeds.add(fetcher.retrieveFeed(url));
+            } catch (java.net.SocketTimeoutException e) {
+                throw RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString());
+            } catch (UnsupportedEncodingException e) {
+                /* yeah, right... not happening for UTF-8 */
+            } catch (IOException e) {
+                throw RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
+            } catch (ParsingFeedException parsingException) {
+                Throwable t = parsingException.getCause();
+                if (t != null && t instanceof IOException) {
+                    String exceptionMessage = t.getMessage();
+                    if (!Strings.isEmpty(exceptionMessage) && exceptionMessage.contains("exceeded")) {
+                        ConfigurationService configService = Services.getService(ConfigurationService.class);
+                        int maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
+                        throw RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize);
+                    }
+                }
+                final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
+                if (1 == urls.size()) {
+                    throw oxe;
+                }
+                oxe.setCategory(Category.CATEGORY_WARNING);
+                warnings.add(oxe);
+            } catch (FeedException e) {
+                LOG.warn("Could not load RSS feed from: {}", url, e);
+            } catch (FetcherException e) {
+                int responseCode = e.getResponseCode();
+                if (responseCode <= 0) {
+                    // No response code available
+                    LOG.warn("Could not load RSS feed from: {}", url, e);
+                }
+                if (NOT_FOUND == responseCode) {
+                    LOG.debug("Resource could not be found: {}", url, e);
+                } else if (FORBIDDEN == responseCode) {
+                    LOG.debug("Authentication required for resource: {}", url, e);
+                } else if (responseCode >= 500 && responseCode < 600) {
+                    OXException oxe = RssExceptionCodes.RSS_HTTP_ERROR.create(e, Integer.valueOf(responseCode), url);
+                    if (1 == urls.size()) {
+                        throw oxe;
+                    }
+                    oxe.setCategory(Category.CATEGORY_WARNING);
+                    warnings.add(oxe);
+                } else {
+                    LOG.warn("Could not load RSS feed from: {}", url, e);
+                }
+            } catch (IllegalArgumentException e) {
+                String exceptionMessage = e.getMessage();
+                if (!"Invalid document".equals(exceptionMessage)) {
+                    throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, exceptionMessage);
+                }
+                // There is no parser for current document
+                LOG.warn("Could not load RSS feed from: {}", url);
+            }
+        }
+        return feeds;
+    }
+
+    /**
+     * Sanitises the specified string via the {@link HtmlService}
+     * 
+     * @param string The string to sanitise
+     * @return The sanitised string if the {@link HtmlService} is available
      */
     private static String sanitiseString(String string) {
         final HtmlService htmlService = Services.getService(HtmlService.class);
@@ -262,7 +368,7 @@ public class RssAction implements AJAXActionService {
             LOG.warn("The HTMLService is unavailable at the moment, thus the RSS string '{}' might not be sanitised", string);
             return string;
         }
-        return sb.toString();
+        return htmlService.sanitize(string, null, true, null, null);
     }
 
     private static String urlDecodeSafe(final String urlString) throws MalformedURLException {
