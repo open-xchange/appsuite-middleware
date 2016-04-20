@@ -464,10 +464,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         try {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = this.mailAccess;
             if (mailAccess != null) {
+                this.mailAccess = null;
                 mailAccess.close(putIntoCache);
             }
         } finally {
-            mailAccess = null;
             init = false;
         }
     }
@@ -2666,25 +2666,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         int accountId = argument.getAccountId();
         String fullName = argument.getFullname();
 
-        int retval;
-
-        if (!init) {
-            mailAccess = MailAccess.getInstance(session, accountId);
-            retval = mailAccess.getUnreadMessagesCount(fullName);
-            mailConfig = mailAccess.getMailConfig();
-            this.accountId = accountId;
-            init = true;
-        } else if (accountId != mailAccess.getAccountId()) {
-            mailAccess.close(true);
-            mailAccess = MailAccess.getInstance(session, accountId);
-            retval = mailAccess.getUnreadMessagesCount(fullName);
-            mailConfig = mailAccess.getMailConfig();
-            this.accountId = accountId;
-        } else {
-            retval = mailAccess.getUnreadMessagesCount(fullName);
-        }
-
-        return retval;
+        initConnection(accountId);
+        return mailAccess.getUnreadMessagesCount(fullName);
     }
 
     @Override
@@ -2692,6 +2675,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int accountId = argument.getAccountId();
         initConnection(accountId);
+    }
+
+    @Override
+    public void applyAccess(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access) throws OXException {
+        if (null != access) {
+            if (!init) {
+                mailAccess = initMailAccess(accountId, access);
+                mailConfig = mailAccess.getMailConfig();
+                this.accountId = access.getAccountId();
+                init = true;
+            } else if (this.accountId != access.getAccountId()) {
+                mailAccess.close(true);
+                mailAccess = initMailAccess(accountId, access);
+                mailConfig = mailAccess.getMailConfig();
+                this.accountId = access.getAccountId();
+            }
+        }
     }
 
     void initConnection(int accountId) throws OXException {
@@ -2709,10 +2709,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private MailAccess<?, ?> initMailAccess(int accountId) throws OXException {
+        return initMailAccess(accountId, null);
+    }
+
+    private MailAccess<?, ?> initMailAccess(int accountId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access) throws OXException {
         /*
          * Fetch a mail access (either from cache or a new instance)
          */
-        MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+        MailAccess<?, ?> mailAccess = null == access ? MailAccess.getInstance(session, accountId) : access;
         if (!mailAccess.isConnected()) {
             /*
              * Get new mail configuration

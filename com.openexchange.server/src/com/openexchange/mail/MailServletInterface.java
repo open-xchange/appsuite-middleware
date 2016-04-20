@@ -569,7 +569,7 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Updates message's client-alterable system flags (e.g. //SEEN or //ANSWERED) and user flags. <code>flagVal</code> determines whether the affected
      * flags are set (<code>true</code>) or unset (<code>false</code>).
-     * 
+     *
      * @param folder The folder full name
      * @param mailIDs The mail IDs
      * @param flagBits The system flag bits
@@ -702,6 +702,14 @@ public abstract class MailServletInterface implements Closeable {
      * @throws OXException If opening the folder fails
      */
     public abstract void openFor(String folder) throws OXException;
+
+    /**
+     * Applies specified {@code MailAccess} instance to this {@link MailServletInterface}.
+     *
+     * @param mailAccess The mail access to apply
+     * @throws OXException If applying the mail access fails
+     */
+    public abstract void applyAccess(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException;
 
     /**
      * Gets the account ID to which the (primary) mail access is connected

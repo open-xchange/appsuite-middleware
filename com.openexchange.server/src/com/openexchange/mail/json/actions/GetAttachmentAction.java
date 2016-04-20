@@ -684,7 +684,13 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             }
         }
 
-        private InputStream getReconnectedStream() throws OXException {
+        private synchronized InputStream getReconnectedStream() throws OXException {
+            ThresholdFileHolder tfh = this.tfh;
+            if (null != tfh) {
+                // Already initialized
+                return tfh.getStream();
+            }
+
             FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
             ThresholdFileHolder newTfh = null;
