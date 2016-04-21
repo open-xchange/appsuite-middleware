@@ -1329,6 +1329,13 @@ ox_add_property com.openexchange.snippet.quota.limit -1 /opt/open-xchange/etc/sn
 # SoftwareChange_Request-3248
 ox_add_property com.openexchange.connector.networkSslListenerPort 8010 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-3254
+VALUE=$(ox_read_property com.openexchange.mail.account.blacklist /opt/open-xchange/etc/server.properties)
+if [ "" = "$VALUE" ]; then
+    ox_set_property com.openexchange.mail.account.blacklist "127.0.0.1-127.255.255.255,localhost" /opt/open-xchange/etc/server.properties
+fi
+ox_add_property com.openexchange.mail.account.whitelist.ports "143,993, 25,465,587, 110,995" /opt/open-xchange/etc/server.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
