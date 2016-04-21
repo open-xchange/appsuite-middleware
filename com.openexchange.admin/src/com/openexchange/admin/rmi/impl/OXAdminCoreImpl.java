@@ -56,9 +56,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class OXAdminCoreImpl implements OXAdminCoreInterface {
 
@@ -72,9 +69,7 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
     }
 
     @Override
-    public boolean allPluginsLoaded(Credentials credentials) throws RemoteException, InvalidCredentialsException {
-        authenticate(credentials);
-
+    public boolean allPluginsLoaded() throws RemoteException {
         Bundle[] bundles = context.getBundles();
         List<Bundle> fragments = new ArrayList<Bundle>();
         List<Bundle> notStarted = new ArrayList<Bundle>();
@@ -93,19 +88,6 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
         }
         log.error("The following bundles aren't started: {}", notStarted);
         return false;
-    }
-
-    private void authenticate(Credentials credentials) throws RemoteException, InvalidCredentialsException {
-        try {
-            if (credentials == null) {
-                credentials = new Credentials("", "");
-            }
-
-            new BasicAuthenticator().doAuthentication(credentials);
-        } catch (StorageException e) {
-            log.error("Error while authenticating master admin", e);
-            throw new RemoteException(e.getMessage());
-        }
     }
 
 }

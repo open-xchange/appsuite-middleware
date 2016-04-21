@@ -50,8 +50,6 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 
 /**
  *
@@ -86,5 +84,5 @@ public interface OXAdminCoreInterface extends Remote {
      * @return true if all plugins are loaded successfully, false if not
      * @throws RemoteException
      */
-    public boolean allPluginsLoaded(Credentials credentials) throws RemoteException, InvalidCredentialsException;
+    public boolean allPluginsLoaded() throws RemoteException;
 }

@@ -56,7 +56,6 @@ import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 public class AllPluginsLoaded extends BasicCommandlineOptions {
 
@@ -64,13 +63,9 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
         super();
     }
 
-    protected static final String OPT_NAME_ADMINPASS_DESCRIPTION = "Master admin password";
-    protected static final String OPT_NAME_ADMINUSER_DESCRIPTION = "Master admin username";
-
     @Override
     protected void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {
-        setAdminUserOption(parser, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION);
-        setAdminPassOption(parser, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION);
+        // Do nothing
     }
 
     public static void main(final String[] args) {
@@ -83,10 +78,9 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
 
         try {
             parser.ownparse(args);
-            Credentials auth = credentialsparsing(parser);
 
             final OXAdminCoreInterface oxadmincore = (OXAdminCoreInterface) Naming.lookup(RMI_HOSTNAME+OXAdminCoreInterface.RMI_NAME);
-            if (oxadmincore.allPluginsLoaded(auth)) {
+            if (oxadmincore.allPluginsLoaded()) {
                 sysexit(0);
             } else {
                 sysexit(1);
