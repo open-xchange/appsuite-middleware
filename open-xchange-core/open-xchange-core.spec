@@ -1326,6 +1326,9 @@ fi
 # SoftwareChange_Request-3159
 ox_add_property com.openexchange.snippet.quota.limit -1 /opt/open-xchange/etc/snippets.properties
 
+# SoftwareChange_Request-3248
+ox_add_property com.openexchange.connector.networkSslListenerPort 8010 /opt/open-xchange/etc/server.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do

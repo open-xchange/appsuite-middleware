@@ -65,6 +65,12 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property com.openexchange.http.grizzly.tcpNoDelay true $PFILE
     ox_add_property com.openexchange.http.grizzly.readTimeoutMillis 60000 $PFILE
     ox_add_property com.openexchange.http.grizzly.writeTimeoutMillis 60000 $PFILE
+
+    # SoftwareChange_Request-3248
+    ox_add_property com.openexchange.http.grizzly.hasSSLEnabled false $PFILE
+    ox_add_property com.openexchange.http.grizzly.enabledCipherSuites '' $PFILE
+    ox_add_property com.openexchange.http.grizzly.keystorePath '' $PFILE
+    ox_add_property com.openexchange.http.grizzly.keystorePassword '' $PFILE
 fi
 
 %clean
