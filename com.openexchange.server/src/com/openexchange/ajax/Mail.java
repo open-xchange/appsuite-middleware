@@ -2703,7 +2703,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                         (UploadEvent) null,
                         session,
                         MailAccount.DEFAULT_ID,
-                        null,
                         warnings);
                     response.addWarnings(warnings);
                     if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
@@ -4946,7 +4945,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 uploadEvent,
                                 session,
                                 accountId,
-                                null,
                                 warnings);
                             msgIdentifier = mailServletInterface.saveDraft(composedMail, false, accountId).toString();
                         } else {
@@ -4960,7 +4958,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 accountId,
                                 protocol,
                                 serverName,
-                                null,
                                 warnings);
                             final ComposeType sendType = jsonMailObj.hasAndNotNull(PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                             msgIdentifier = mailServletInterface.sendMessage(composedMails[0], sendType, accountId);
@@ -5050,7 +5047,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 uploadEvent,
                                 session,
                                 MailAccount.DEFAULT_ID,
-                                null,
                                 warnings);
                             /*
                              * ... and edit draft
@@ -5125,7 +5121,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                         accountId,
                         protocol,
                         serverName,
-                        null,
                         warnings);
                     mailServletInterface.sendFormMail(composedMails[0], Integer.parseInt(groupId), accountId);
                     for (int i = 1; i < composedMails.length; i++) {

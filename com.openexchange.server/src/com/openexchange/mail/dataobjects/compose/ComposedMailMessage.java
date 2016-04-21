@@ -60,7 +60,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -68,7 +67,6 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartTy
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -93,7 +91,6 @@ public abstract class ComposedMailMessage extends MailMessage {
     private UserSettingMail mailSettings;
     private boolean appendToSentFolder;
     private boolean transportToRecipients;
-    private String csid;
 
     /**
      * Default constructor
@@ -105,24 +102,6 @@ public abstract class ComposedMailMessage extends MailMessage {
         recipients = new LinkedHashSet<InternetAddress>();
         appendToSentFolder = true;
         transportToRecipients = true;
-    }
-
-    /**
-     * Gets the identifier of the associated composition space
-     *
-     * @return The identifier of the associated composition space
-     */
-    public String getCsid() {
-        return csid;
-    }
-
-    /**
-     * Sets the identifier of the associated composition space
-     *
-     * @param csid The identifier of the associated composition space to set
-     */
-    public void setCsid(String csid) {
-        this.csid = csid;
     }
 
     /**
@@ -300,28 +279,13 @@ public abstract class ComposedMailMessage extends MailMessage {
         }
         try {
             final int count = getEnclosedCount();
-            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             for (int i = 0; i < count; i++) {
                 if (getEnclosedMailPart(i) instanceof ComposedMailPart) {
                     final ComposedMailPart composedMailPart = (ComposedMailPart) getEnclosedMailPart(i);
                     if (ComposedPartType.REFERENCE.equals(composedMailPart.getType())) {
-                        final String fileId = ((ReferencedMailPart) (composedMailPart)).getFileID();
-                        if (null != fileId) {
-                            try {
-                                mfm.removeByID(fileId);
-                            } catch (final OXException e) {
-                                LOG.warn("", e);
-                            }
-                        }
+                        ((ReferencedMailPart) (composedMailPart)).close();
                     } else if (ComposedPartType.DATA.equals(composedMailPart.getType())) {
-                        final String fileId = ((DataMailPart) (composedMailPart)).getFileID();
-                        if (null != fileId) {
-                            try {
-                                mfm.removeByID(fileId);
-                            } catch (final OXException e) {
-                                LOG.warn("", e);
-                            }
-                        }
+                        ((DataMailPart) (composedMailPart)).close();
                     } else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
                         final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
                         if (f.exists() && !f.delete()) {

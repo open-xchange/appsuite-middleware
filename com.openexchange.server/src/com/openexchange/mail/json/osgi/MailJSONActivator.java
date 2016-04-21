@@ -97,12 +97,17 @@ import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
+import com.openexchange.mail.json.compose.ComposeHandler;
+import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
+import com.openexchange.mail.json.compose.abort.AbortComposeHandler;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.transport.config.TransportReloadable;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -200,7 +205,32 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                 context.ungetService(reference);
             }
         });
+
+        ComposeHandlerRegistry composeHandlerRegisty;
+        {
+            final AbortComposeHandler defaultComposeHandler = new AbortComposeHandler();
+            final RankingAwareNearRegistryServiceTracker<ComposeHandler> tracker = new RankingAwareNearRegistryServiceTracker<>(context, ComposeHandler.class);
+            rememberTracker(tracker);
+            composeHandlerRegisty = new ComposeHandlerRegistry() {
+
+                @Override
+                public ComposeHandler getComposeHandlerFor(Session session) {
+                    for (ComposeHandler composeHandler : tracker.getServiceList()) {
+                        if (composeHandler.serves(session)) {
+                            return composeHandler;
+                        }
+                    }
+
+                    // Otherwise return "default" one
+                    return defaultComposeHandler;
+                }
+            };
+        }
+
         openTrackers();
+
+        registerService(ComposeHandlerRegistry.class, composeHandlerRegisty);
+        ServerServiceRegistry.getInstance().addService(ComposeHandlerRegistry.class, composeHandlerRegisty);
 
         DefaultMailAttachmentStorageRegistry.initInstance(context);
         registerService(MailAttachmentStorageRegistry.class, DefaultMailAttachmentStorageRegistry.getInstance());
@@ -258,6 +288,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        ServerServiceRegistry.getInstance().removeService(ComposeHandlerRegistry.class);
         DefaultMailAttachmentStorageRegistry.dropInstance();
         MailActionFactory.releaseActionFactory();
         SERVICES.set(null);

@@ -102,7 +102,7 @@ public final class AutosaveAction extends AbstractMailAction {
                 /*
                  * Parse with default account's transport provider
                  */
-                ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, csid, warnings);
+                ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings);
                 if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
                     LOG.debug("Missing \\Draft flag on action=autosave in JSON message object");
                     composedMail.setFlag(MailMessage.FLAG_DRAFT, true);

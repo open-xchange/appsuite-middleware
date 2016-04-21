@@ -156,7 +156,7 @@ public final class EditAction extends AbstractMailAction {
                 /*
                  * Parse with default account's transport provider
                  */
-                ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, csid, warnings);
+                ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings);
                 MailPath msgref = composedMail.getMsgref();
                 /*
                  * ... and edit draft
