@@ -1164,6 +1164,9 @@ fi
 # SoftwareChange_Request-3159
 ox_add_property com.openexchange.snippet.quota.limit -1 /opt/open-xchange/etc/snippets.properties
 
+# SoftwareChange_Request-3219
+ox_remove_property com.openexchange.participant.MaximumNumberParticipants /opt/open-xchange/etc/participant.properties
+
 # SoftwareChange_Request-3248
 ox_add_property com.openexchange.connector.networkSslListenerPort 8010 /opt/open-xchange/etc/server.properties
 
