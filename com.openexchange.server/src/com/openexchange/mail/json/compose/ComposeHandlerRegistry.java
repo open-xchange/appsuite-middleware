@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.compose;
 
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -57,6 +58,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
+@SingletonService
 public interface ComposeHandlerRegistry {
 
     /**
