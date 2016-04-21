@@ -140,7 +140,7 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
                     stmt2.setInt(4, user);
                     stmt2.addBatch();
                 }
-                stmt.executeBatch();
+                stmt2.executeBatch();
             } finally {
                 DBUtils.closeSQLStuff(stmt2);
                 DBUtils.closeSQLStuff(rs, stmt);
