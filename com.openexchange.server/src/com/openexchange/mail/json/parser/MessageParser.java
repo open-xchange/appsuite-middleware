@@ -623,13 +623,13 @@ public final class MessageParser {
          * Sent & received date
          */
         if (jsonObj.hasAndNotNull(MailJSONField.SENT_DATE.getKey())) {
-            Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
-            int offset = timeZone.getOffset(date.getTime());
+            long date = jsonObj.getLong(MailJSONField.SENT_DATE.getKey());
+            int offset = timeZone.getOffset(date);
             mail.setSentDate(new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
         }
         if (jsonObj.hasAndNotNull(MailJSONField.RECEIVED_DATE.getKey())) {
-            Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
-            int offset = timeZone.getOffset(date.getTime());
+            long date = jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey());
+            int offset = timeZone.getOffset(date);
             mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
         }
         /*
