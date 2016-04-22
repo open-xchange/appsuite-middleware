@@ -220,3 +220,5 @@ com.openexchange.loxandra.hector/build
 com.openexchange.nosql.cassandra/build
 /com.openexchange.eav.storage.cassandra
 com.openexchange.file.storage/doc
+http-api/build
+http-api/codegen/*/clients
