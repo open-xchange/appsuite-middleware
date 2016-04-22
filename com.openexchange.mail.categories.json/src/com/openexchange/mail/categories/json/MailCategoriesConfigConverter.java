@@ -50,8 +50,6 @@
 package com.openexchange.mail.categories.json;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -141,13 +139,6 @@ public class MailCategoriesConfigConverter implements ResultConverter {
                 jsonWriter.key("flag").value(config.getFlag());
                 jsonWriter.key("active").value(config.isActive());
                 jsonWriter.key("name").value(config.getName());
-                Map<Locale, String> map = config.getNames();
-                JSONObject languages = new JSONObject(map.size());
-                for(Locale locale: config.getNames().keySet()) {
-                    languages.put(locale.getLanguage(), map.get(locale));
-                }
-                
-                jsonWriter.key("translations").value(languages);
                 jsonWriter.endObject();
             }
             jsonWriter.endArray();
@@ -163,13 +154,6 @@ public class MailCategoriesConfigConverter implements ResultConverter {
             jsonWriter.key("flag").value(config.getFlag());
             jsonWriter.key("active").value(config.isActive());
             jsonWriter.key("name").value(config.getName());
-            Map<Locale, String> map = config.getNames();
-            JSONObject languages = new JSONObject(map.size());
-            for (Locale locale : config.getNames().keySet()) {
-                languages.put(locale.getLanguage(), map.get(locale));
-            }
-
-            jsonWriter.key("translations").value(languages);
             jsonWriter.endObject();
             result.setResultObject(jsonWriter.getObject(), "json");
         }

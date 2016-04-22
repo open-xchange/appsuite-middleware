@@ -94,6 +94,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
     private static final String FIELD_LIST = "list";
     private static final String FIELD_FEATURE_ENABLED = "enabled";
+    private static final String FIELD_FEATURE_FORCED = "forced";
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_ACTIVE = "active";
@@ -119,15 +120,19 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                     MailCategoriesConfigService service = lookupService.getOptionalService(MailCategoriesConfigService.class);
                     if (service != null) {
                         boolean mailCategoriesEnabled = service.isEnabled(session);
+                        boolean mailCategoriesForced = service.isForced(session);
+                        if (mailCategoriesForced) {
+                            mailCategoriesEnabled = true;
+                        }
                         item.put(FIELD_FEATURE_ENABLED, mailCategoriesEnabled);
-                        List<MailCategoryConfig> configs = service.getAllCategories(session, false, true);
+                        item.put(FIELD_FEATURE_FORCED, mailCategoriesForced);
+                        List<MailCategoryConfig> configs = service.getAllCategories(session, user.getLocale(), false, true);
                         JSONArray categories = new JSONArray();
 
                         for (MailCategoryConfig config : configs) {
                             JSONObject categoryJSON = new JSONObject(3);
                             categoryJSON.put(FIELD_ID, config.getCategory());
-                            String name = config.getNames().containsKey(user.getLocale()) ? config.getNames().get(user.getLocale()) : config.getName();
-                            categoryJSON.put(FIELD_NAME, name);
+                            categoryJSON.put(FIELD_NAME, config.getName());
                             categoryJSON.put(FIELD_ACTIVE, config.isActive());
 
                             List<String> mailCategoryPermissions = new ArrayList<>();
@@ -170,7 +175,9 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                     }
                     
                     boolean featureEnabled = config.getBoolean(FIELD_FEATURE_ENABLED);
-                    service.enable(session, featureEnabled);                
+                    if (!service.isForced(session)) {
+                        service.enable(session, featureEnabled);
+                    }
                     
                     JSONArray mailCategories = getType(config.get(FIELD_LIST), JSONArray.class, setting.getSingleValue(), setting.getName());
                     List<MailCategoryConfig> newConfigs = new ArrayList<>();

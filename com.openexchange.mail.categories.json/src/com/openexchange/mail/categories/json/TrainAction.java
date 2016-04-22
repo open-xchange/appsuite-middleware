@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -85,6 +86,8 @@ public class TrainAction extends AbstractCategoriesAction {
     private static final String REORGANIZE_PARAMETER = "apply-for-existing";
     private static final String CATEGORY_ID_PARAMETER = "category_id";
 
+    private static final String BODY_FIELD_FROM = "from";
+
     /**
      * Initializes a new {@link TrainAction}.
      *
@@ -104,6 +107,14 @@ public class TrainAction extends AbstractCategoriesAction {
         String category = requestData.requireParameter(CATEGORY_ID_PARAMETER);
 
         Object data = requestData.getData();
+
+        if (!(data instanceof JSONObject)) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
+
+        JSONObject json = (JSONObject) data;
+
+        data = json.get(BODY_FIELD_FROM);
 
         if (!(data instanceof JSONArray)) {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();

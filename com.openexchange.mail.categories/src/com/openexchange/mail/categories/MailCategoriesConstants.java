@@ -64,10 +64,10 @@ public class MailCategoriesConstants {
     public static final String MAIL_CATEGORIES_SWITCH = "com.openexchange.mail.categories.enabled";
 
     /**
-     * The possible categories translation languages property name
+     * Read only property switch which overwrites the <code>MAIL_CATEGORIES_SWITCH</code> property.
      */
-    public static final String MAIL_CATEGORIES_LANGUAGES = "com.openexchange.mail.categories.languages";
-    
+    public static final String MAIL_CATEGORIES_FORCE_SWITCH = "com.openexchange.mail.categories.forced";
+
     /**
      * The system category identifiers property name
      */
@@ -84,9 +84,19 @@ public class MailCategoriesConstants {
     public static final String MAIL_CATEGORIES_PREFIX = "com.openexchange.mail.categories.";
 
     /**
-     * The en_US fall-back name parameter name suffix
+     * The current mail category name
      */
     public static final String MAIL_CATEGORIES_NAME = ".name";
+
+    /**
+     * The language prefix
+     */
+    public static final String MAIL_CATEGORIES_LANGUAGE_PREFIX = ".name.";
+
+    /**
+     * The fall-back name parameter name
+     */
+    public static final String MAIL_CATEGORIES_FALLBACK = ".name.fallback";
 
     /**
      * The flag parameter name suffix

@@ -118,7 +118,7 @@ public class UnreadAction extends AbstractCategoriesAction {
             idsList = Arrays.asList(ids);
         }
 
-        List<MailCategoryConfig> categories = categoriesConfigService.getAllCategories(session, true, false);
+        List<MailCategoryConfig> categories = categoriesConfigService.getAllCategories(session, session.getUser().getLocale(), true, false);
         String[] unkeywords = categoriesConfigService.getAllFlags(requestData.getSession(), true, true);
         String[] flags = getFlagsFrom(categories);
 

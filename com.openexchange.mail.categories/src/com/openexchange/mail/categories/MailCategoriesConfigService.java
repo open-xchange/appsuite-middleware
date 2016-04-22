@@ -67,12 +67,13 @@ public interface MailCategoriesConfigService {
      * Retrieves all category configurations for the given user
      *
      * @param session The user session
+     * @param locale The user's locale
      * @param onlyEnabled Whether only enabled or forced configurations should be returned
      * @param includeGeneral Whether the general category should be included or not
      * @return A list of category configurations
      * @throws OXException
      */
-    List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled, boolean includeGeneral) throws OXException;
+    List<MailCategoryConfig> getAllCategories(Session session, Locale locale, boolean onlyEnabled, boolean includeGeneral) throws OXException;
 
     /**
      * Retrieves all category flags for the given user
@@ -144,6 +145,15 @@ public interface MailCategoriesConfigService {
      * @throws OXException
      */
     boolean isEnabled(Session session) throws OXException;
+
+    /**
+     * Returns true if the mail categories feature is forced for the given user
+     *
+     * @param session The user session
+     * @return true if forced, otherwise false
+     * @throws OXException
+     */
+    boolean isForced(Session session) throws OXException;
 
     /**
      * Remove all old category flags from the given emails and add the new one.

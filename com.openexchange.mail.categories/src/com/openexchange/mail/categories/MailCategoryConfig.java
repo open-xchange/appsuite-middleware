@@ -73,7 +73,6 @@ public class MailCategoryConfig {
         private boolean force;
         private boolean enabled;
         private String name;
-        private Map<Locale, String> names;
         private boolean isSystemCategory = false;
 
         /**
@@ -151,49 +150,12 @@ public class MailCategoryConfig {
         }
 
         /**
-         * Adds specified localized name.
-         *
-         * @param locale The locale
-         * @param name The localized name
-         * @return This builder
-         */
-        public Builder addLocalizedName(Locale locale, String name) {
-            Map<Locale, String> ns = this.names;
-            if (null == ns) {
-                ns = new LinkedHashMap<Locale, String>(16, 0.9F);
-                this.names = ns;
-            }
-            ns.put(locale, name);
-            return this;
-        }
-
-        /**
-         * Adds specified localized names.
-         *
-         * @param names The localized names to add
-         * @return This builder
-         */
-        public Builder addLocalizedNames(Map<Locale, String> names) {
-            if (null == names || names.isEmpty()) {
-                return this;
-            }
-
-            Map<Locale, String> ns = this.names;
-            if (null == ns) {
-                ns = new LinkedHashMap<Locale, String>(16, 0.9F);
-                this.names = ns;
-            }
-            ns.putAll(names);
-            return this;
-        }
-
-        /**
          * Builds the {@link MailCategoryConfig} instance according to this builder's settings.
          *
          * @return The new {@link MailCategoryConfig} instance
          */
         public MailCategoryConfig build() {
-            return new MailCategoryConfig(category, flag, force, enabled, name, names, isSystemCategory);
+            return new MailCategoryConfig(category, flag, force, enabled, name, isSystemCategory);
         }
 
     }// End of class Builder
@@ -210,7 +172,7 @@ public class MailCategoryConfig {
             return null;
         }
 
-        return new MailCategoryConfig(categoryConfig.category, categoryConfig.flag, categoryConfig.force, active, categoryConfig.name, categoryConfig.names, categoryConfig.isSystemCategory);
+        return new MailCategoryConfig(categoryConfig.category, categoryConfig.flag, categoryConfig.force, active, categoryConfig.name, categoryConfig.isSystemCategory);
     }
 
     /**
@@ -231,12 +193,11 @@ public class MailCategoryConfig {
     private final boolean enabled;
     private final String name;
     private final boolean isSystemCategory;
-    private final Map<Locale, String> names;
 
     /**
      * Initializes a new {@link MailCategoryConfig}.
      */
-    MailCategoryConfig(String category, String flag, boolean force, boolean enabled, String name, Map<Locale, String> names, boolean isSystemCategory) {
+    MailCategoryConfig(String category, String flag, boolean force, boolean enabled, String name, boolean isSystemCategory) {
         super();
         this.category = category;
         this.flag = flag;
@@ -244,7 +205,6 @@ public class MailCategoryConfig {
         this.enabled = enabled;
         this.isSystemCategory = isSystemCategory;
         this.name = name;
-        this.names = null == names ? Collections.<Locale, String> emptyMap() : names;
 
     }
 
@@ -309,15 +269,6 @@ public class MailCategoryConfig {
      */
     public String getName() {
         return name;
-    }
-
-    /**
-     * Gets the localized names.
-     *
-     * @return The localized names
-     */
-    public Map<Locale, String> getNames() {
-        return names;
     }
 
     @Override
