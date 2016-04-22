@@ -101,6 +101,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -2208,6 +2209,11 @@ public final class MimeMessageConverter {
                 final String[] contentTypeHdr = mailPart.getHeader(CONTENT_TYPE);
                 if (null != contentTypeHdr && contentTypeHdr.length > 0) {
                     mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(contentTypeHdr[0]));
+                } else {
+                    String sct = part.getContentType();
+                    if (!Strings.isEmpty(sct)) {
+                        mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(sct));
+                    }
                 }
             }
             {
