@@ -51,13 +51,11 @@ package com.openexchange.mail.json.compose.share;
 
 import org.apache.commons.lang.Validate;
 import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.categories.MailCategoriesConstants;
-import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -79,7 +77,7 @@ public final class Utilities {
     private static ConfigViewFactory getConfigViewFactory() throws OXException {
         ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (null == viewFactory) {
-            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class);
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
         return viewFactory;
     }
@@ -231,40 +229,6 @@ public final class Utilities {
 
         String value = property.get();
         return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? true : ("false".equalsIgnoreCase(value.trim()) ? false : defaultValue));
-    }
-
-
-    /**
-     * Activates or deactivates the given category
-     *
-     * @param category The category identifier
-     * @param activate Flag indicating if the category should be activated or deactivated
-     * @param session The user session
-     * @throws OXException
-     */
-    public static void activateProperty(String category, boolean activate, Session session) throws OXException{
-        ConfigViewFactory viewFactory = getConfigViewFactory();
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        ConfigProperty<String> property = view.property("user", MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, String.class);
-        property.set(String.valueOf(activate));
-
-    }
-
-    /**
-     * Sets a user attribute
-     *
-     * @param property The name of the property
-     * @param value The new value of the property
-     * @param session The user session
-     * @throws OXException
-     */
-    public static void setProperty(String property, String value, Session session) throws OXException{
-        ConfigViewFactory viewFactory = getConfigViewFactory();
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        ConfigProperty<String> confProperty = view.property("user", property, String.class);
-        confProperty.set(value);
     }
 
 }
