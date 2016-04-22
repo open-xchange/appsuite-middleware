@@ -205,7 +205,12 @@ public final class Utilities {
         }
 
         String value = property.get();
-        return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? true : ("false".equalsIgnoreCase(value.trim()) ? false : defaultValue));
+        if (Strings.isEmpty(value)) {
+            return defaultValue;
+        }
+
+        value = value.trim();
+        return ("true".equalsIgnoreCase(value) ? true : ("false".equalsIgnoreCase(value) ? false : defaultValue));
     }
 
     /**
@@ -228,7 +233,14 @@ public final class Utilities {
         }
 
         String value = property.get();
-        return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? true : ("false".equalsIgnoreCase(value.trim()) ? false : defaultValue));
+        if (Strings.isEmpty(value)) {
+            return defaultValue;
+        }
+
+        value = value.trim();
+        return ("true".equalsIgnoreCase(value) ? true : ("false".equalsIgnoreCase(value) ? false : defaultValue));
     }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
 }

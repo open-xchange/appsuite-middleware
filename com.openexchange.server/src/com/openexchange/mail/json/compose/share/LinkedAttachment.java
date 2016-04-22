@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,23 +49,28 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import javax.mail.internet.InternetAddress;
 
 /**
- * {@link ShareComposeConstants}
+ * {@link LinkedAttachment}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareComposeConstants {
+public interface LinkedAttachment {
 
     /**
-     * Initializes a new {@link ShareComposeConstants}.
+     * Gets the linked attachment's name.
+     *
+     * @return The attachment name, or <code>null</code> if unknown or not applicable
      */
-    private ShareComposeConstants() {
-        super();
-    }
+    String getName();
 
-    /** The special header containing the share reference */
-    public static final String HEADER_SHARE_MAIL = "X-Open-Xchange-Share-Reference";
+    /**
+     * Gets a link to access the linked attachment.
+     *
+     * @param recipient The mail recipient to build the link for
+     * @return The link
+     */
+    String getLink(InternetAddress recipient);
 
 }

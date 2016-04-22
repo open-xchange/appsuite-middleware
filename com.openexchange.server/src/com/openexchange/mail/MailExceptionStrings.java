@@ -213,4 +213,6 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
     public static final String INVALID_FLAG_WITH_LEADING_BACKSLASH_MSG = "The flag name %1$s is not valid. Flags may not begin with a leading '\\'.";
 
+    public static final String USED_SHARING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachments with the E-Mail, the attachments are shared and the links are added to your E-Mail. Whoever receives the E-Mail can then access the attachments.";
+
 }

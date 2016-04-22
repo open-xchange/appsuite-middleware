@@ -49,18 +49,25 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStorageGuestPermission;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -70,7 +77,13 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.compose.AbstractComposeHandler;
 import com.openexchange.mail.json.compose.ComposeDraftResult;
@@ -78,13 +91,22 @@ import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.ComposeTransportResult;
 import com.openexchange.mail.json.compose.DefaultComposeDraftResult;
 import com.openexchange.mail.json.compose.DefaultComposeTransportResult;
+import com.openexchange.mail.json.parser.LinkedAttachment;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareLink;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tx.TransactionAware;
 
 
 /**
@@ -93,7 +115,7 @@ import com.openexchange.share.recipient.ShareRecipient;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeHandler extends AbstractComposeHandler<ShareComposeContext> {
+public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportComposeContext, ShareDraftComposeContext> {
 
     /**
      * Initializes a new {@link ShareComposeHandler}.
@@ -113,28 +135,71 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareComposeCont
     }
 
     @Override
-    protected ShareComposeContext createComposeContext(ComposeRequest request) throws OXException {
-        return new ShareComposeContext(request);
+    protected ShareDraftComposeContext createDraftComposeContext(ComposeRequest request) throws OXException {
+        return new ShareDraftComposeContext(request);
     }
 
     @Override
-    protected ComposeDraftResult doCreateDraftResult(ComposeRequest request, ShareComposeContext context) throws OXException {
-        if (false == context.isCreateShares()) {
-            ComposedMailMessage composeMessage = createRegularComposeMessage(context);
-            return new DefaultComposeDraftResult(composeMessage);
-        }
-
-        return null;
+    protected ShareTransportComposeContext createTransportComposeContext(ComposeRequest request) throws OXException {
+        return new ShareTransportComposeContext(request);
     }
 
     @Override
-    protected ComposeTransportResult doCreateTransportResult(ComposeRequest request, ShareComposeContext context) throws OXException {
+    protected ComposeDraftResult doCreateDraftResult(ComposeRequest request, ShareDraftComposeContext context) throws OXException {
+        ComposedMailMessage composeMessage = createRegularComposeMessage(context);
+        return new DefaultComposeDraftResult(composeMessage);
+    }
+
+    @Override
+    protected ComposeTransportResult doCreateTransportResult(ComposeRequest request, ShareTransportComposeContext context) throws OXException {
         if (false == context.isCreateShares()) {
             ComposedMailMessage composeMessage = createRegularComposeMessage(context);
             return new DefaultComposeTransportResult(Collections.singletonList(composeMessage), composeMessage);
         }
 
+        if (context.isAddWarning()) {
+            List<OXException> warnings = request.getWarnings();
+            if (null != warnings) {
+                warnings.add(MailExceptionCode.USED_SHARING_FEATURE.create());
+            }
+        }
+
+        ComposedMailMessage source = context.getSourceMessage();
+
+        // Get folder identifier
+        String folderID = createFolder(source, getPassword(request), getExpiratioDate(request), context.getSession());
+
+        // Save attachments into that folder
+        List<String> savedAttachments = saveAttachments(folderID, context.getAllParts(), context.getSession());
+
+        // Create share target
+        ShareTarget folderTarget = new ShareTarget(FileStorageContentType.getInstance().getModule(), folderID);
+        ShareLink folderLink = ServerServiceRegistry.getServize(ShareService.class).getLink(context.getSession(), folderTarget);
+
+        // Create linked attachments
+        LinkedShareAttachment linkedAttachment = new LinkedShareAttachment(null, folderLink.getGuest(), request.getRequest().getHostData(), folderTarget, null);
+
         return null;
+    }
+
+    protected String getPassword(ComposeRequest request) {
+        String value = request.getRequest().getParameter("password");
+        return Strings.isEmpty(value) ? null : value;
+    }
+
+    protected Date getExpiratioDate(ComposeRequest request) throws OXException {
+        String value = request.getRequest().getParameter("expires");
+        if (Strings.isEmpty(value)) {
+            return null;
+        }
+
+        try {
+            long millis = Long.parseLong(value);
+            int offset = TimeZoneUtils.getTimeZone(request.getSession().getUser().getTimeZone()).getOffset(millis);
+            return new Date(millis - offset);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "expires", value);
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------
@@ -171,6 +236,53 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareComposeCont
 
     // ------------------------------------------------------------------------------------------------------------------------------------
 
+    private List<String> saveAttachments(final String folderID, final List<MailPart> attachments, Session session) throws OXException {
+        IDBasedFileAccess fileAccess = getFileAccess(session);
+        final List<String> createdFiles = new ArrayList<String>(attachments.size());
+
+        Action<IDBasedFileAccess, Void> action = new Action<IDBasedFileAccess, Void>() {
+
+            @Override
+            public Void doAction(IDBasedFileAccess fileAccess) throws OXException {
+                for (MailPart attachment : attachments) {
+                    createdFiles.add(saveAttachment(fileAccess, folderID, attachment));
+                }
+                return null;
+            }
+        };
+        performWithinTransaction(action, fileAccess);
+
+        return createdFiles;
+    }
+
+    String saveAttachment(IDBasedFileAccess fileAccess, String folderID, MailPart attachment) throws OXException {
+        File file = prepareMetadata(attachment, folderID);
+        InputStream inputStream = null;
+        try {
+            inputStream = attachment.getInputStream();
+            return fileAccess.saveDocument(file, inputStream, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        } finally {
+            Streams.close(inputStream);
+        }
+    }
+
+    private File prepareMetadata(MailPart attachment, String folderID) {
+        String name = attachment.getFileName();
+        if (Strings.isEmpty(name)) {
+            name = "attachment";
+        }
+        final File file = new DefaultFile();
+        file.setId(FileStorageFileAccess.NEW);
+        file.setFolderId(folderID);
+        file.setFileName(name);
+        file.setFileMIMEType(attachment.getContentType().getBaseType());
+        file.setTitle(name);
+        file.setFileSize(attachment.getSize());
+        return file;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
     private String createFolder(ComposedMailMessage mail, String password, Date expiry, Session session) throws OXException {
         // Get or create base share attachments folder
         IDBasedFolderAccess folderAccess = getFolderAccess(session);
@@ -188,7 +300,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareComposeCont
 
         // Create folder, pre-shared to an anonymous recipient, for this message
         final DefaultFileStorageFolder folder = prepareFolder(mail, parentFolderID, password, expiry, session);
-        Action<String> createFolderAction = new Action<String>() {
+        Action<IDBasedFolderAccess, String> createFolderAction = new Action<IDBasedFolderAccess, String>() {
 
             @Override
             public String doAction(IDBasedFolderAccess folderAccess) throws OXException {
@@ -243,7 +355,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareComposeCont
         permission.setEntity(session.getUserId());
         folder.setPermissions(Collections.<FileStoragePermission>singletonList(permission));
         folder.setParentId(personalFolder.getId());
-        Action<String> createFolderAction = new Action<String>() {
+        Action<IDBasedFolderAccess, String> createFolderAction = new Action<IDBasedFolderAccess, String>() {
 
             @Override
             public String doAction(IDBasedFolderAccess folderAccess) throws OXException {
@@ -284,28 +396,76 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareComposeCont
         return new AnonymousRecipient(bits, password, expiryDate);
     }
 
-    private static interface Action<R> {
+    private static interface Action<S extends TransactionAware, R> {
 
-        R doAction(IDBasedFolderAccess folderAccess) throws OXException;
+        R doAction(S store) throws OXException;
     }
 
-    private <R> R performWithinTransaction(Action<R> action, IDBasedFolderAccess folderAccess) throws OXException {
+    private <S extends TransactionAware, R> R performWithinTransaction(Action<S, R> action, S store) throws OXException {
         boolean rollback = false;
         try {
-            folderAccess.startTransaction();
+            store.startTransaction();
             rollback = true;
 
-            R retval = action.doAction(folderAccess);
+            R retval = action.doAction(store);
 
-            folderAccess.commit();
+            store.commit();
             rollback = false;
             return retval;
         } finally {
             if (rollback) {
-                folderAccess.rollback();
+                store.rollback();
             }
-            folderAccess.finish();
+            store.finish();
         }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    private static boolean isEncodeRecipients() {
+        // TODO: Make extendible
+        return true;
+    }
+
+    private static final class LinkedShareAttachment implements LinkedAttachment {
+
+        private final GuestInfo guest;
+        private final ShareTarget sourceTarget;
+        private final HostData hostData;
+        private final String name;
+        private final String queryString;
+
+        LinkedShareAttachment(String name, GuestInfo guest, HostData hostData, ShareTarget sourceTarget, String queryString) {
+            super();
+            this.name = name;
+            this.guest = guest;
+            this.hostData = hostData;
+            this.sourceTarget = sourceTarget;
+            this.queryString = queryString;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getLink(InternetAddress recipient) {
+            ShareTargetPath targetPath;
+            if (isEncodeRecipients()) {
+                Map<String, String> additionals = new HashMap<String, String>(1);
+                additionals.put("recipient", recipient.getAddress());
+                targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem(), additionals);
+            } else {
+                targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem());
+            }
+            String url = guest.generateLink(hostData, targetPath);
+            if (Strings.isNotEmpty(queryString)) {
+                url = url + '?' + queryString;
+            }
+            return url;
+        }
+
     }
 
 }

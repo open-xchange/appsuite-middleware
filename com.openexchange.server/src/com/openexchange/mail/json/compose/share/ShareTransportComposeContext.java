@@ -47,65 +47,83 @@
  *
  */
 
-package com.openexchange.mail.json.compose.abort;
+package com.openexchange.mail.json.compose.share;
 
-import java.util.Collections;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.json.compose.AbstractComposeHandler;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.json.compose.ComposeDraftResult;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
+import com.openexchange.mail.json.compose.AbstractQuotaAwareComposeContext;
 import com.openexchange.mail.json.compose.ComposeRequest;
-import com.openexchange.mail.json.compose.ComposeTransportResult;
-import com.openexchange.mail.json.compose.DefaultComposeDraftResult;
-import com.openexchange.mail.json.compose.DefaultComposeTransportResult;
-import com.openexchange.session.Session;
-
 
 /**
- * {@link AbortComposeHandler} - The default compose handler that aborts processing if upload limit is exceeded.
+ * {@link ShareTransportComposeContext}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AbortComposeHandler extends AbstractComposeHandler<AbortComposeContext, AbortComposeContext> {
+public class ShareTransportComposeContext extends AbstractQuotaAwareComposeContext {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareTransportComposeContext.class);
+
+    private final boolean addWarning;
+    private boolean createShares;
+    private long consumed;
 
     /**
-     * Initializes a new {@link AbortComposeHandler}.
+     * Initializes a new {@link ShareTransportComposeContext}.
+     *
+     * @param request The compose request
+     * @throws OXException If initialization fails
      */
-    public AbortComposeHandler() {
-        super();
+    public ShareTransportComposeContext(ComposeRequest request) throws OXException {
+        super(request);
+        boolean initialCreateShared = AJAXRequestDataTools.parseBoolParameter("share_attachments", request.getRequest(), false);
+        createShares = initialCreateShared;
+        addWarning = !initialCreateShared;
+    }
+
+    /**
+     * Checks whether the initial warning is supposed to be added.
+     *
+     * @return <code>true</code> to add wrning; otherwise <code>false</code>
+     */
+    public boolean isAddWarning() {
+        return addWarning;
+    }
+
+    /**
+     * Checks whether shares are supposed to be created instead of sending a regular message
+     *
+     * @return <code>true</code> for creating shares; otherwise <code>false</code> for regular message
+     */
+    public boolean isCreateShares() {
+        return createShares;
     }
 
     @Override
-    public String getId() {
-        return "abort";
-    }
+    protected void onPartAdd(MailPart part, ComposedMailPart info) throws OXException {
+        if (createShares) {
+            return;
+        }
 
-    @Override
-    protected AbortComposeContext createDraftComposeContext(ComposeRequest request) throws OXException {
-        return new AbortComposeContext(request);
-    }
-
-    @Override
-    protected AbortComposeContext createTransportComposeContext(ComposeRequest request) throws OXException {
-        return new AbortComposeContext(request);
-    }
-
-    @Override
-    protected ComposeDraftResult doCreateDraftResult(ComposeRequest request, AbortComposeContext context) throws OXException {
-        ComposedMailMessage composeMessage = createRegularComposeMessage(context);
-        return new DefaultComposeDraftResult(composeMessage);
-    }
-
-    @Override
-    protected ComposeTransportResult doCreateTransportResult(ComposeRequest request, AbortComposeContext context) throws OXException {
-        ComposedMailMessage composeMessage = createRegularComposeMessage(context);
-        return new DefaultComposeTransportResult(Collections.singletonList(composeMessage), composeMessage);
-    }
-
-    @Override
-    public boolean serves(Session session) {
-        return true;
+        if (doAction) {
+            long size = part.getSize();
+            if (size <= 0) {
+                LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
+                return;
+            }
+            if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
+                createShares = true;
+            }
+            /*
+             * Add current file size
+             */
+            consumed += size;
+            if (uploadQuota > 0 && consumed > uploadQuota) {
+                createShares = true;
+            }
+        }
     }
 
 }

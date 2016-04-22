@@ -125,7 +125,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public abstract class AbstractComposeHandler<C extends AbstractComposeContext> implements ComposeHandler {
+public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D extends AbstractComposeContext> implements ComposeHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractComposeHandler.class);
 
@@ -147,7 +147,7 @@ public abstract class AbstractComposeHandler<C extends AbstractComposeContext> i
 
     @Override
     public ComposeDraftResult createDraftResult(ComposeRequest request) throws OXException {
-        C context = createComposeContext(request);
+        D context = createDraftComposeContext(request);
         try {
             prepare(request, context);
             return doCreateDraftResult(request, context);
@@ -160,7 +160,7 @@ public abstract class AbstractComposeHandler<C extends AbstractComposeContext> i
 
     @Override
     public ComposeTransportResult createTransportResult(ComposeRequest request) throws OXException {
-        C context = createComposeContext(request);
+        T context = createTransportComposeContext(request);
         try {
             prepare(request, context);
             return doCreateTransportResult(request, context);
@@ -172,13 +172,22 @@ public abstract class AbstractComposeHandler<C extends AbstractComposeContext> i
     }
 
     /**
-     * Creates a new compose context suitable for this compose handler.
+     * Creates a new compose context suitable for this compose handler to generate a draft result.
      *
      * @param request The compose request providing needed data
      * @return The new compose context
      * @throws OXException If new compose context cannot be created
      */
-    protected abstract C createComposeContext(ComposeRequest request) throws OXException;
+    protected abstract D createDraftComposeContext(ComposeRequest request) throws OXException;
+
+    /**
+     * Creates a new compose context suitable for this compose handler to generate a draft result.
+     *
+     * @param request The compose request providing needed data
+     * @return The new compose context
+     * @throws OXException If new compose context cannot be created
+     */
+    protected abstract T createTransportComposeContext(ComposeRequest request) throws OXException;
 
     /**
      * Creates the result for saving a message into standard Drafts folder.
@@ -188,7 +197,7 @@ public abstract class AbstractComposeHandler<C extends AbstractComposeContext> i
      * @return The draft result
      * @throws OXException If result cannot be created
      */
-    protected abstract ComposeDraftResult doCreateDraftResult(ComposeRequest request, C context) throws OXException;
+    protected abstract ComposeDraftResult doCreateDraftResult(ComposeRequest request, D context) throws OXException;
 
     /**
      * Creates the result for transporting one or more messages plus providing the message representation that is supposed to be saved into
@@ -199,7 +208,7 @@ public abstract class AbstractComposeHandler<C extends AbstractComposeContext> i
      * @return The transport result
      * @throws OXException If result cannot be created
      */
-    protected abstract ComposeTransportResult doCreateTransportResult(ComposeRequest request, C context) throws OXException;
+    protected abstract ComposeTransportResult doCreateTransportResult(ComposeRequest request, T context) throws OXException;
 
     /**
      * Creates the regular message containing all attachments as-is.
@@ -207,7 +216,7 @@ public abstract class AbstractComposeHandler<C extends AbstractComposeContext> i
      * @param context The associated compose context
      * @return The regular message
      */
-    protected ComposedMailMessage createRegularComposeMessage(C context) {
+    protected <C extends AbstractComposeContext> ComposedMailMessage createRegularComposeMessage(C context) {
         ComposedMailMessage sourceMessage = context.getSourceMessage();
         sourceMessage.setBodyPart(context.getTextPart());
         for (MailPart part : context.getAllParts()) {
@@ -224,7 +233,7 @@ public abstract class AbstractComposeHandler<C extends AbstractComposeContext> i
      * @throws OXException If preparing fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void prepare(ComposeRequest request, C context) throws OXException, JSONException {
+    protected <C extends AbstractComposeContext> void prepare(ComposeRequest request, C context) throws OXException, JSONException {
         // Create a new compose message
         ComposedMailMessage sourceMessage = newComposedMailMessage(context);
 

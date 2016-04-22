@@ -49,69 +49,42 @@
 
 package com.openexchange.mail.json.compose.share;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
-import com.openexchange.mail.json.compose.AbstractQuotaAwareComposeContext;
-import com.openexchange.mail.json.compose.ComposeRequest;
+import java.util.List;
 
 /**
- * {@link ShareComposeContext}
+ * {@link ShareReference} - References shared folder/items.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeContext extends AbstractQuotaAwareComposeContext {
+public class ShareReference {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareComposeContext.class);
+    private static final String DELIM = "?==?";
 
-    private boolean createShares;
-    private long consumed;
-
-    /**
-     * Initializes a new {@link ShareComposeContext}.
-     *
-     * @param request The compose request
-     * @throws OXException If initialization fails
-     */
-    public ShareComposeContext(ComposeRequest request) throws OXException {
-        super(request);
-        createShares = AJAXRequestDataTools.parseBoolParameter("share_attachments", request.getRequest(), false);
-    }
+    private final int contextId;
+    private final int userId;
+    private final String folderId;
+    private final List<String> itemIds;
+    private final String shareUrl;
 
     /**
-     * Checks whether shares are supposed to be created instead of sending a regular message
+     * Initializes a new {@link ShareReference}.
      *
-     * @return <code>true</code> for creating shares; otherwise <code>false</code> for regular message
+     * @param shareUrl The associated share URL
+     * @param itemIds The identifiers of the shared files
+     * @param folderId The folder containing the files
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public boolean isCreateShares() {
-        return createShares;
+    public ShareReference(String shareUrl, List<String> itemIds, String folderId, int userId, int contextId) {
+        super();
+        this.shareUrl = shareUrl;
+        this.itemIds = itemIds;
+        this.folderId = folderId;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
-    @Override
-    protected void onPartAdd(MailPart part, ComposedMailPart info) throws OXException {
-        if (createShares) {
-            return;
-        }
 
-        if (doAction) {
-            long size = part.getSize();
-            if (size <= 0) {
-                LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
-                return;
-            }
-            if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
-                createShares = true;
-            }
-            /*
-             * Add current file size
-             */
-            consumed += size;
-            if (uploadQuota > 0 && consumed > uploadQuota) {
-                createShares = true;
-            }
-        }
-    }
 
 }
