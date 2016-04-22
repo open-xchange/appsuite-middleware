@@ -1,0 +1,29 @@
+type: object
+properties:
+  name:
+    type: string
+    description: The name of the file version.
+  file_size:
+    type: integer
+    format: int64
+    description: The file size of the version in bytes.
+  created:
+    type: integer
+    format: int64
+    description: The file version's creation time (always UTC, not translated into user time).
+  modified:
+    type: integer
+    format: int64
+    description: The file version's last modification time (always UTC, not translated into user time).
+  created_by:
+    type: integer
+    description: The ID of the user who created this object.
+  modified_by:
+    type: integer
+    description: The ID of the user who last modified this object.
+  version:
+    type: string
+    description: The version identifier (usually, but not necessarily a numerical value) of the file version.
+  version_comment:
+    type: string
+    description: An additional comment for the file version.

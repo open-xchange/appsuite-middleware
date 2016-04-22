@@ -1,0 +1,22 @@
+/mail?action=zip_messages:
+  get:
+    operationId: getMailsAsZip
+    tags:
+      - mail
+    summary: Gets multiple mails as a ZIP file.
+    produces:
+      - application/zip
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - in: query
+        name: id
+        type: string
+        description:  A comma-separated list of Object IDs of the requested mails.
+        required: true
+    responses:
+      200:
+        description: The raw byte data of the ZIP file.
+        schema:
+          type: string
+          format: binary

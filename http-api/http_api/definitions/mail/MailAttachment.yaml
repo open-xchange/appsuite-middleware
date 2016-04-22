@@ -1,0 +1,21 @@
+type: object
+properties:
+  id:
+    type: string
+    description: Object ID (unique only inside the same message).
+  content_type:
+    type: string
+    description: MIME type.
+  content:
+    type: string
+    description: Content as text. Present only if easily convertible to text.
+  filename:
+    type: string
+    description: Displayed filename (mutually exclusive with content).
+  size:
+    type: integer
+    format: int64
+    description: Size of the attachment in bytes.
+  disp:
+    type: string
+    description: "Attachment's disposition: null, inline, attachment or alternative."

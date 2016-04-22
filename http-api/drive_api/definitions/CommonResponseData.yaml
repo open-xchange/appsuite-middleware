@@ -1,0 +1,32 @@
+error:
+  type: string
+  description: The translated error message. Present in case of errors.
+error_params:
+  type: array
+  description: "As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style)."
+  items:
+    type: string
+error_id:
+  type: string
+  description: Unique error identifier to help finding this error instance in the server logs.
+error_desc:
+  type: string
+  description: The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.
+error_stack:
+  type: array
+  description: If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.
+  items:
+    type: string
+code:
+  type: string
+  description: Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"
+categories:
+  type: string
+  description: Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.
+category:
+  type: integer
+  description: "Maintained for legacy reasons: The numeric representation of the first category."
+timestamp:
+  type: integer
+  format: int64
+  description: The latest timestamp of the returned data.

@@ -1,0 +1,11 @@
+type: object
+required:
+  - entities
+properties:
+  entities:
+    type: array
+    description: Array containing the entity ID(s) of the users or groups that shall be notified.
+    items:
+      type: string
+  notification:
+    $ref: "#/definitions/FolderBodyNotification"

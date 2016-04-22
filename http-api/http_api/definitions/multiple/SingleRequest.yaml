@@ -1,0 +1,258 @@
+type: object
+description: Contains all currently available (resp. possible) parameters that could be specified to perform a request in the multiple module except `action`, `module`, and `data` which are part of the actual request itself.
+required:
+  - module
+  - action
+properties:
+  module:
+    type: string
+    description: The name of the request's module like "mail", "folders", etc.
+  action:
+    type: string
+    description: The name of the request's action like "all", "list", etc.
+  data:
+    type: object
+    description: The request's body as a JSON object.
+  columns:
+    type: string
+    description: The "columns" parameter of a request.
+  tree:
+    type: string
+    description: The "tree" parameter of a request.
+  allowed_modules:
+    type: string
+    description: The "allowed_modules" parameter of a request.
+  parent:
+    type: string
+    description: The "parent" parameter of a request.
+  all:
+    type: integer
+    description: The "all" parameter of a request.
+  errorOnDuplicateName:
+    type: boolean
+    description: The "errorOnDuplicateName" parameter of a request.
+  id:
+    type: string
+    description: The "id" parameter of a request.
+  timestamp:
+    type: integer
+    format: int64
+    description: The "timestamp" parameter of a request.
+  ignore:
+    type: string
+    description: The "ignore" parameter of a request.
+  cascadePermissions:
+    type: string
+    description: The "cascadePermissions" parameter of a request.
+  hardDelete:
+    type: boolean
+    description: The "hardDelete" parameter of a request.
+  content_type:
+    type: string
+    description: The "content_type" parameter of a request.
+  sort:
+    type: string
+    description: The "sort" parameter of a request.
+  order:
+    type: string
+    description: The "order" parameter of a request.
+  folder:
+    type: string
+    description: The "folder" parameter of a request.
+  start:
+    type: integer
+    format: int64
+    description: The "start" parameter of a request.
+  end:
+    type: integer
+    format: int64
+    description: The "end" parameter of a request.
+  email:
+    type: string
+    description: The "email" parameter of a request.
+  query:
+    type: string
+    description: The "query" parameter of a request.
+  left_hand_limit:
+    type: integer
+    description: The "left_hand_limit" parameter of a request.
+  right_hand_limit:
+    type: integer
+    description: The "right_hand_limit" parameter of a request.
+  recurrence_master:
+    type: boolean
+    description: The "recurrence_master" parameter of a request.
+  showPrivate:
+    type: boolean
+    description: The "showPrivate" parameter of a request.
+  occurrence:
+    type: string
+    description: The "occurrence" parameter of a request.
+  type:
+    type: integer
+    description: The "type" parameter of a request.
+  limit:
+    type: integer
+    description: The "limit" parameter of a request.
+  uid:
+    type: string
+    description: The "uid" parameter of a request.
+  includeSent:
+    type: boolean
+    description: The "includeSent" parameter of a request.
+  headers:
+    type: string
+    description: The "headers" parameter of a request.
+  message_id:
+    type: string
+    description: The "message_id" parameter of a request.
+  edit:
+    type: integer
+    description: The "edit" parameter of a request.
+  hdr:
+    type: integer
+    description: The "hdr" parameter of a request.
+  src:
+    type: integer
+    description: The "src" parameter of a request.
+  save:
+    type: integer
+    description: The "save" parameter of a request.
+  view:
+    type: string
+    description: The "view" parameter of a request.
+  unseen:
+    type: boolean
+    description: The "unseen" parameter of a request.
+  max_size:
+    type: integer
+    description: The "max_size" parameter of a request.
+  attach_src:
+    type: boolean
+    description: The "attach_src" parameter of a request.
+  attachment:
+    type: string
+    description: The "attachment" parameter of a request.
+  cid:
+    type: string
+    description: The "cid" parameter of a request.
+  filter:
+    type: integer
+    description: The "filter" parameter of a request.
+  lineWrapAfter:
+    type: integer
+    description: The "lineWrapAfter" parameter of a request.
+  flags:
+    type: integer
+    description: The "falgs" parameter of a request.
+  force:
+    type: boolean
+    description: The "force" parameter of a request.
+  setFrom:
+    type: boolean
+    description: The "setFrom" parameter of a request.
+  version:
+    type: integer
+    description: The "version" parameter of a request.
+  recursive:
+    type: string
+    description: The "recursive" parameter of a request.
+  diff:
+    type: integer
+    format: int64
+    description: The "diff" parameter of a request.
+  attached:
+    type: integer
+    description: The "attached" parameter of a request.
+  accountId:
+    type: integer
+    description: The "accountId" parameter of a request.
+  password:
+    type: string
+    description: The "password" parameter of a request.
+  force_secure:
+    type: string
+    description: The "force_secure" parameter of a request.
+  name:
+    type: string
+    description: The "name" parameter of a request.
+  setIfAbsent:
+    type: string
+    description: The "setIfAbsent" parameter of a request.
+  serviceId:
+    type: string
+    description: The "serviceId" parameter of a request.
+  oauth_token:
+    type: string
+    description: The "oauth_token" parameter of a request.
+  uuid:
+    type: string
+    description: The "uuid" parameter of a request.
+  oauth_verifier:
+    type: string
+    description: The "oauth_verifier" parameter of a request.
+  displayName:
+    type: string
+    description: The "displayName" parameter of a request.
+  client:
+    type: string
+    description: The "client" parameter of a request.
+  participant:
+    type: string
+    description: The "participant" parameter of a request.
+  from:
+    type: integer
+    format: int64
+    description: The "from" parameter of a request.
+  until:
+    type: integer
+    format: int64
+    description: The "until" parameter of a request.
+  merged:
+    type: boolean
+    description: The "merged" parameter of a request.
+  messagingService:
+    type: string
+    description: The "messagingService" parameter of a request.
+  peek:
+    type: string
+    description: The "peek" parameter of a request.
+  recipients:
+    type: string
+    description: The "recipients" parameter of a request.
+  messageAction:
+    type: string
+    description: The "messageAction" parameter of a request.
+  attachmentid:
+    type: string
+    description: The "attachmentid" parameter of a request.
+  provider:
+    type: string
+    description: The "provider" parameter of a request.
+  timezone:
+    type: string
+    description: The "timezone" parameter of a request.
+  internal_userid:
+    type: integer
+    description: The "internal_userid" parameter of a request.
+  userid:
+    type: integer
+    description: The "userid" parameter of a request.
+  user_id:
+    type: integer
+    description: The "user_id" parameter of a request.
+  email1:
+    type: string
+    description: The "email1" parameter of a request.
+  email2:
+    type: string
+    description: The "email2" parameter of a request.
+  email3:
+    type: string
+    description: The "email3" parameter of a request.
+  system:
+    type: string
+    description: The "system" parameter of a request.
+  filestorageService:
+    type: string
+    description: The "filestorageService" parameter of a request.

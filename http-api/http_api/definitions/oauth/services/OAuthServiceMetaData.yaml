@@ -1,0 +1,8 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The identifier of the service meta data, e.g. "com.openexchange.oauth.twitter".
+  displayName:
+    type: string
+    description: The service's display name.

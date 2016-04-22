@@ -1,0 +1,18 @@
+/export?action=ICAL:
+  get:
+    operationId: exportAsICal
+    tags:
+      - export
+    summary: Exports appointment and task data to an iCalendar file.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder whose content shall be exported. This must be a calendar folder.
+        required: true
+    responses:
+      200:
+        description: An input stream containing the content of the iCal file with the MIME type `text/calendar`.
+        schema:
+          type: string

@@ -1,0 +1,14 @@
+type: object
+required:
+  - id
+  - folder
+properties:
+  id:
+    type: string
+    description: The object ID of the appointment.
+  folder:
+    type: string
+    description: The object ID of the related folder.
+  pos:
+    type: integer
+    description: Value of the field recurrence_position, if present in the appointment.

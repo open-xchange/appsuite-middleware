@@ -1,0 +1,37 @@
+# INFO: in the current Swagger spec it is not possible to add optional path parameters. Therefore, the parameter
+# "filename" is not included in the request. Instead, it is described in the description of the request.
+/infostore?action=document:
+  get:
+    operationId: getInfoItemDocument
+    tags:
+      - infostore
+    summary: Gets an infoitem document.
+    description: |
+      It is possible to add a filename to the request's URI like `/infostore/{filename}?action=document`.
+      The filename may be added to the customary infostore path to suggest a filename to a Save-As dialog.
+    produces:
+      - application/octet-stream
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamInfostoreFolder"
+      - in: query
+        name: id
+        type: string
+        description:  Object ID of the requested infoitem.
+        required: true
+      - in: query
+        name: version
+        type: integer
+        description: If present the infoitem data describes the given version. Otherwise the current version is returned.
+        required: false
+      - in: query
+        name: content_type
+        type: string
+        description: If present the response declares the given `content_type` in the Content-Type header.
+        required: false
+    responses:
+      200:
+        description: The raw byte data of the document. The response type for the HTTP request is set accordingly to the defined mimetype for this infoitem or the content_type given.
+        schema:
+          type: string
+          format: binary

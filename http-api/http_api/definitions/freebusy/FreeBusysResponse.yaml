@@ -1,0 +1,11 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: |
+      The free/busy data for all requested participants inside a JSON object with the participant IDs as keys,
+      like `{"data":{"3":{"data":[{"start_date":...},{"start_date":...]}},"19":{"data":[{"start_date":...}]}}}`. Besides a combined data
+      element for a requested group, all group members are resolved and listed separately in the result. If the `merged` parameter
+      is specified, an additional data element named `merged` representing a combined view for all requested participants is added
+      to the results implicity.

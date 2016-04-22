@@ -1,0 +1,10 @@
+type: object
+properties:
+  quota:
+    type: integer
+    format: int64
+    description: Represents the maximum storage (-1 represents an unlimited quota).
+  use:
+    type: integer
+    format: int64
+    description: Represents the used storage.

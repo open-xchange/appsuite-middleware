@@ -1,0 +1,14 @@
+type: object
+required:
+  - confirmation
+  - confirmmessage
+properties:
+  confirmation:
+    type: integer
+    description: '0 (none), 1 (accepted), 2 (declined), 3 (tentative).'
+  confirmmessage:
+    type: string
+    description: The confirmation message or comment.
+  id:
+    type: integer
+    description: User ID. Confirming for other users only works for appointments and not for tasks.

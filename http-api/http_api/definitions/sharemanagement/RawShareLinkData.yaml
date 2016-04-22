@@ -1,0 +1,19 @@
+url:
+  type: string
+  description: The link to share (read-only).
+entity:
+  type: integer
+  description: The identifier of the anonymous user entity for the share (read-only).
+is_new:
+  type: boolean
+  description: Whether the share link is new, i.e. it has been created by the `/share/management?action=getLink` request, or if it already existed (read-only).
+expiry_date:
+  type: integer
+  format: int64
+  description: The end date / expiration time after which the share link is no longer accessible.
+password:
+  type: string
+  description: An additional secret / pin number an anonymous user needs to enter when accessing the share.
+meta:
+  type: object
+  description: Can be used by the client to save arbitrary JSON data along with the share.

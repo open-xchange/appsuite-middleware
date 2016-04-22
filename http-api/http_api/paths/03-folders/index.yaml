@@ -1,0 +1,13 @@
+requests:
+  - RootRequest.yaml
+  - ListRequest.yaml
+  - PathRequest.yaml
+  - UpdatesRequest.yaml
+  - GetRequest.yaml
+  - UpdateRequest.yaml
+  - NewRequest.yaml
+  - DeleteRequest.yaml
+  - ClearRequest.yaml
+  - AllVisibleRequest.yaml
+  - SharesRequest.yaml
+  - NotifyRequest.yaml

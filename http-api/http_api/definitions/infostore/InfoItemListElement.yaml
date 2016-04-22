@@ -1,0 +1,11 @@
+type: object
+required:
+  - id
+  - folder
+properties:
+  id:
+    type: string
+    description: The object ID of the infoitem (e.g. "31841/36639").
+  folder:
+    type: string
+    description: The object ID of the related folder (e.g. "31841").

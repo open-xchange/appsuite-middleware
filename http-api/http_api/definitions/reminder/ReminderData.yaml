@@ -1,0 +1,32 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: The ID of the reminder.
+  target_id:
+    type: integer
+    description: The object ID of the target this reminder is attached to.
+  folder:
+    type: integer
+    description: The ID of the folder through that the object can be read.
+  alarm:
+    type: integer
+    format: int64
+    description: The time of the alarm.
+  module:
+    type: integer
+    description: "The module of the reminder's target object: 1 (appointment), 4 (task), 7 (contact), 137 (infostore)."
+  server_time:
+    type: integer
+    format: int64
+    description: The time on the server.
+  user_id:
+    type: integer
+    description: The ID of the user.
+  last_modified:
+    type: integer
+    format: int64
+    description: The last modification timestamp of the reminder.
+  recurrence_position:
+    type: integer
+    description: The recurrence position for series appointments or 0 if no series.

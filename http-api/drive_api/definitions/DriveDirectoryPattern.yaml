@@ -1,0 +1,11 @@
+type: object
+properties:
+  type:
+    type: string
+    description: The pattern type, currently one of `exact` or `glob`, see [Pattern types](#pattern-types), too.
+  path:
+    type: string
+    description: The path pattern, in a format depending on the pattern type.
+  caseSensitive:
+    type: boolean
+    description: An optional flag to enable case-sensitive matching, defaults to `false`.

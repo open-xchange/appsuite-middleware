@@ -1,0 +1,17 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The ID of the value. Must be unique within one facet.
+  name:
+    type: string
+    description: A displayable (and localized) name for this facet. If absent, an `item` attribute is present.
+  item:
+    $ref: "#/definitions/FindFacetValueItem"
+  filter:
+    $ref: "#/definitions/FindFacetValueFilter"
+  options:
+    type: array
+    description: An array of options to refine the search.
+    items:
+      $ref: "#/definitions/FindFacetValueOption"

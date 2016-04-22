@@ -1,0 +1,17 @@
+{
+  "name": "oxapi-documentations-build-script",
+  "version": "1.0.0",
+  "description": "Generates a big Swagger JSON file for OX API documentations as described by the Swagger YAML files in the corresponding API directory",
+  "main": "resolve.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Open-Xchange GmbH",
+  "license": "ISC",
+  "dependencies": {
+    "fs": "0.0.2",
+    "js-yaml": "^3.5.2",
+    "json-schema-ref-parser": "^2.2.0",
+    "path": "^0.12.7"
+  }
+}

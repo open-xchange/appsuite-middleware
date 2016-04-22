@@ -1,0 +1,32 @@
+type: object
+properties:
+  quota:
+    type: array
+    description: An array containing the quota restrictions. A size of zero represents unlimited quota.
+    items:
+      $ref: "#/definitions/DriveQuota"
+  quotaManageLink:
+    type: string
+    description: A hyperlink to an URL where the user could manage his quota restrictions.
+  helpLink:
+    type: string
+    description: A hyperlink to the online help.
+  serverVersion:
+    type: string
+    description: The server version, like "7.8.1-Rev8".
+  supportedApiVersion:
+    type: string
+    description: The API version suppirted by the server.
+  minApiVersion:
+    type: string
+    description: The API version required to synchronize with the server.
+  localizedFolderNames:
+    type: object
+    description: |
+      A JSON object mapping the (relative) paths of directories to their localized name (based on the supplied `language` or the user's locale),
+      like `{"/Drive/My Files": "Meine Dateien"}` (available since v7.8.1).
+  capabilities:
+    type: array
+    description: An array holding relevant capabilities of the user, like "invite_guests" (available since v7.8.1).
+    items:
+      type: string

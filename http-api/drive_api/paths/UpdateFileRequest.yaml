@@ -1,0 +1,42 @@
+/drive?action=updateFile:
+  put:
+    operationId: updateFile
+    tags:
+      - drive
+    summary: Updates a file's metadata (**available since API version 4**).
+    description: |
+      Updates specific metadata of a synchronized file. This currently only includes the object permissions - which
+      in turn is only allowed for files marked as `shareable`.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: "#/parameters/gblQueryParamPath"
+      - in: query
+        name: name
+        type: string
+        description: The name of the file version.
+        required: true
+      - in: query
+        name: checksum
+        type: string
+        description: The checksum of the directory to update.
+        required: true
+      - in: body
+        name: body
+        description: |
+          A JSON object containing the fields `file` and `notification`. The JSON object in field `file` describes
+          the updated file metadata (currently only the property `object_permissions` is considered) and the JSON object `notification`
+          may include a message to notify added permission entities. To notify with a default message, an empty `notification`
+          object should still be added.
+        required: true
+        schema:
+          $ref: "#/definitions/DriveFileUpdateBody"
+    responses:
+      200:
+        description: |
+          An empty JSON object. Any transport warnings that occurred during sending the notifications are available in
+          the `warnings` field. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveNotificationResponse"

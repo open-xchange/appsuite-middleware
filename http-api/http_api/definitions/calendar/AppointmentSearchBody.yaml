@@ -1,0 +1,8 @@
+type: object
+properties:
+  pattern:
+    type: string
+    description: Search pattern to find appointments. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.
+  startletter:
+    type: string
+    description: Search appointments with the given starting letter.

@@ -1,0 +1,72 @@
+type: object
+properties:
+  name:
+    type: string
+    description: The name of the file the metadata belongs to.
+  checksum:
+    type: string
+    description: The file's checksum. Only set if metadata is not retrieved through [Metadata synchronization](#metadata-synchronization).
+  path:
+    type: string
+    description: The path of the parent directory. Only set if metadata is not retrieved through [Metadata synchronization](#metadata-synchronization).
+  created:
+    type: integer
+    format: int64
+    description: The file's creation time (always UTC, not translated into user time).
+  modified:
+    type: integer
+    format: int64
+    description: The file's last modification time (always UTC, not translated into user time).
+  created_by:
+    type: integer
+    description: The ID of the user who created this object.
+  modified_by:
+    type: integer
+    description: The ID of the user who last modified this object.
+  content_type:
+    type: string
+    description: The content type of the file.
+  preview:
+    type: string
+    description: A URL to a preview image for the file.
+  thumbnail:
+    type: string
+    description: A URL to a thumbnail image for the file.
+  object_permissions:
+    type: array
+    description: An array of all file permissions.
+    items:
+      $ref: "#/definitions/ObjectPermission"
+  extended_object_permissions:
+    type: array
+    description: An array of all file permissions including some additional information.
+    items:
+      $ref: "#/definitions/ObjectExtendedPermission"
+  shared:
+    type: boolean
+    description: "`true` if the file is shared, `false` or not set, otherwise."
+  shareable:
+    type: boolean
+    description: "`true` if the file can be shared to others by the user, `false` or not set, otherwise."
+  locked:
+    type: boolean
+    description: "`true` if the file is locked, `false` or not set, otherwise."
+  jump:
+    type: array
+    description: An array containing the names of possible `jump` methods to use for the file, like "preview", etc.
+    items:
+      type: string
+  number_of_versions:
+    type: integer
+    description: The number of all versions of the file.
+  version:
+    type: string
+    description: The current version identifier (usally, but not necessarily a numerical value) of the file.
+  version_comment:
+    type: string
+    description: An additional comment for the file version.
+  versions:
+    type: array
+    description: Metadata for all versions of the file.
+    items:
+      $ref: "#/definitions/DriveFileVersionMetadata"

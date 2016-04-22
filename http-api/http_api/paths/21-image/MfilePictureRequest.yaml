@@ -1,0 +1,22 @@
+/image/mfile/picture:
+  get:
+    operationId: getManagedImageFile
+    tags:
+      - image
+    summary: Requests an image that was previously uploaded with the ajax file upload module.
+    produces:
+      - application/octet-stream
+    parameters:
+      - in: query
+        name: uid
+        type: string
+        description: The identifier of the uploaded image.
+        required: true
+    responses:
+      200:
+        description: The content of the requested image is directly written into output stream.
+        schema:
+          type: string
+          format: binary
+      400:
+        description: If request cannot be handled.

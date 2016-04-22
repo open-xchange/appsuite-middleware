@@ -1,0 +1,5 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: The ID of the reminder.

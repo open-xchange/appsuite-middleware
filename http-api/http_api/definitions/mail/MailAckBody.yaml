@@ -1,0 +1,11 @@
+type: object
+properties:
+  from:
+    type: string
+    description: The from email address.
+  folder:
+    type: string
+    description: The ID of the folder where the mail is placed.
+  id:
+    type: string
+    description: The ID of the mail.

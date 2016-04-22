@@ -1,0 +1,37 @@
+/drive?action=updateFolder:
+  put:
+    operationId: updateFolder
+    tags:
+      - drive
+    summary: Updates a directory's metadata (**available since API version 4**).
+    description: |
+      Updates specific metadata of a synchronized directory. This currently only includes the permissions - which
+      in turn is only allowed for directories marked as `shareable`.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: "#/parameters/gblQueryParamPath"
+      - in: query
+        name: checksum
+        type: string
+        description: The checksum of the directory to update.
+        required: true
+      - in: body
+        name: body
+        description: |
+          A JSON object containing the fields `folder` and `notification`. The JSON object in field `folder` describes
+          the updated directory metadata (currently only the property `permissions` is considered) and the JSON object `notification`
+          may include a message to notify added permission entities. To notify with a default message, an empty `notification`
+          object should still be added.
+        required: true
+        schema:
+          $ref: "#/definitions/DriveFolderUpdateBody"
+    responses:
+      200:
+        description: |
+          An empty JSON object. Any transport warnings that occurred during sending the notifications are available in
+          the `warnings` field. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveNotificationResponse"

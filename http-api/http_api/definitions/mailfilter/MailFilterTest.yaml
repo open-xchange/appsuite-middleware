@@ -1,0 +1,7 @@
+# The properties of the test-object are placed in RawMailFilterTest.yaml because
+# a not-test includes a test-object itself.
+type: object
+properties:
+  $ref: ./RawMailFilterTest.yaml
+  test:
+    $ref: "#/definitions/MailFilterNotTest"

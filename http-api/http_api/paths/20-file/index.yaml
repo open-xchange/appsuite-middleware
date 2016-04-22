@@ -1,0 +1,4 @@
+requests:
+  - NewRequest.yaml
+  - KeepAliveRequest.yaml
+  - GetRequest.yaml

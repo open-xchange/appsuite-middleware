@@ -1,0 +1,8 @@
+type: object
+required:
+  - file
+properties:
+  file:
+    $ref: "#/definitions/InfoItemData"
+  notification:
+    $ref: "#/definitions/InfoItemBodyNotification"

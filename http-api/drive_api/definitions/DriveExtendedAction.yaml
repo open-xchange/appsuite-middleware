@@ -1,0 +1,5 @@
+type: object
+properties:
+  $ref: ./RawDriveAction.yaml
+  data:
+    $ref: "#/definitions/DriveDirectoryMetadata"

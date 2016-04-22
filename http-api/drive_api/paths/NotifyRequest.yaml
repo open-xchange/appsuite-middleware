@@ -1,0 +1,28 @@
+/drive?action=notify:
+  put:
+    operationId: notifyAboutSharedItem
+    tags:
+      - drive
+    summary: Notifies users or groups about a shared file or folder (**available since API version 4**).
+    description: (Re-)Sends a share notification to one or more permission entities of a specific shared file or folder.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - in: body
+        name: body
+        description: |
+          A JSON object describing the target file- or directory version to send the notification for. The entity IDs of
+          the recipients are listed in a JSON array named `entities`. Optionally, an additional JSON object `notification` may
+          be included, inside of which a custom `message` can be passed (otherwise, some default message is used).
+        required: true
+        schema:
+          $ref: "#/definitions/DriveSharingNotificationBody"
+    responses:
+      200:
+        description: |
+          An empty JSON object. Any transport warnings that occurred during sending the notifications are available in
+          the `warnings` field. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveNotificationResponse"

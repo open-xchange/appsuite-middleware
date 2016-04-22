@@ -1,0 +1,38 @@
+id:
+  type: string
+  description: Object ID.
+created_by:
+  type: string
+  description: User ID of the user who created this object.
+modified_by:
+  type: string
+  description: User ID of the user who last modified this object.
+creation_date:
+  type: integer
+  format: int64
+  description: Date and time of creation.
+last_modified:
+  type: integer
+  format: int64
+  description: Date and time of the last modification.
+folder_id:
+  type: string
+  description: Object ID of the parent folder.
+categories:
+  type: string
+  description: String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.
+private_flag:
+  type: boolean
+  description: 'Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.'
+color_label:
+  type: integer
+  minimum: 0
+  maximum: 10
+  description: Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.
+number_of_attachments:
+  type: integer
+  description: Number of attachments.
+lastModifiedOfNewestAttachmentUTC:
+  type: integer
+  format: int64
+  description: Timestamp of the newest attachment written with UTC time zone.

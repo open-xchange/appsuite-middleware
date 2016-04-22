@@ -1,0 +1,11 @@
+type: object
+properties:
+  client:
+    $ref: "#/definitions/OAuthClientData"
+  scopes:
+    type: object
+    description: 'A mapping from scope tokens to translated, human-readable descriptions for every scope that was granted to the external service (example: {"read_contacts":"See all your contacts"}).'
+  date:
+    type: integer
+    format: int64
+    description: The time when the access was granted.

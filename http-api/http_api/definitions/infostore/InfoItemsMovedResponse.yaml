@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: Array of infoitem identifiers that could not be moved (due to a conflict).
+    items:
+      type: object

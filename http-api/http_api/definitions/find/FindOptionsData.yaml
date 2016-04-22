@@ -1,0 +1,8 @@
+type: object
+properties:
+  timezone:
+    type: string
+    description: The timezone to use if any dates are returned.
+  admin:
+    type: boolean
+    description: Indicates whether the context admin shall be included if it matches any search criteria. If the context admin shall always be ignored (i.e. not returned), `false` has to be set.

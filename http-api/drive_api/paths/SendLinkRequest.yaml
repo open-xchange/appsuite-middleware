@@ -1,0 +1,27 @@
+/drive?action=sendLink:
+  put:
+    operationId: sendShareLink
+    tags:
+      - drive
+    summary: Sends a share link (**available since API version 4**).
+    description: Sends a notification message for a share link to one or more recipients.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - in: body
+        name: body
+        description: |
+          A JSON object describing the target file- or directory version to send the link for. The recipients are listed
+          in field `recipients` and an optionally custom notification message may be specified in a `message` field.
+        required: true
+        schema:
+          $ref: "#/definitions/DriveShareLinkNotificationBody"
+    responses:
+      200:
+        description: |
+          An empty JSON object. Any transport warnings that occurred during sending the notifications are available in
+          the `warnings` field. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveNotificationResponse"

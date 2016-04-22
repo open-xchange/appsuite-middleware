@@ -1,0 +1,20 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: The group ID.
+  display_name:
+    type: string
+    description: Display name of the group.
+  name:
+    type: string
+    description: Internal name with character restrictions.
+  members:
+    type: array
+    description: The array contains identifiers of users that are member of the group.
+    items:
+      type: integer
+  last_modified_utc:
+    type: integer
+    format: int64
+    description: Timestamp of the last modification.

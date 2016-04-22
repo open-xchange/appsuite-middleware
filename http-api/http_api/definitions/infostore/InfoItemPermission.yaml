@@ -1,0 +1,33 @@
+type: object
+properties:
+  bits:
+    type: integer
+    description: 'A number specifying the permission flags: 0 (the numerical value indicating no object permissions), 1 (the numerical value indicating read object permissions), 2 (the numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask)).'
+  entity:
+    type: integer
+    description: User ID of the user or group to which this permission applies.
+  group:
+    type: boolean
+    description: Is true if entity refers to a group, false if it refers to a user.
+  type:
+    type: string
+    description: The recipient type, i.e. one of "user", "group", "guest", "anonymous" (required if no internal "entity" defined).
+  password:
+    type: string
+    description: An additional secret / pin number an anonymous user needs to enter when accessing the share (for type "anonymous", optional).
+  email_address:
+    type: string
+    description: The e-mail address of the recipient (for type "guest").
+  display_name:
+    type: string
+    description: The display name of the recipient (for type "guest", optional).
+  contact_id:
+    type: string
+    description: The object identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", optional).
+  contact_folder:
+    type: string
+    description: The folder identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", required if "contact_id" is set).
+  expiry_date:
+    type: integer
+    format: int64
+    description: The end date / expiration time after which the share link is no longer accessible (for type "anonymous", optional).

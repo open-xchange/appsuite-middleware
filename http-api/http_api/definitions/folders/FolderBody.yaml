@@ -1,0 +1,8 @@
+type: object
+required:
+  - folder
+properties:
+  folder:
+    $ref: "#/definitions/FolderData"
+  notification:
+    $ref: "#/definitions/FolderBodyNotification"

@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ./CommonResponseData.yaml
+  warnings:
+    type: array
+    description: Can contain any transport warnings that occurred during sending the notifications.
+    items:
+      type: object

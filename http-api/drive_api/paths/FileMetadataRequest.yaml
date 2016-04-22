@@ -1,0 +1,35 @@
+/drive?action=fileMetadata:
+  put:
+    operationId: getFileMetadata
+    tags:
+      - drive
+    summary: Gets file metadata (**deprecated, available until API version 2**).
+    description: Additional metadata of synchronized files is made available.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: "#/parameters/gblQueryParamPath"
+      - in: query
+        name: columns
+        type: string
+        description: A comma-separated list of numeric column identifiers representing additional metadata that is relevant for the client. See [File metadata](#file-metadata).
+        required: true
+      - in: body
+        name: body
+        description: A JSON array containing JSON objects representing the file versions to get metadata for. Each object in the array needs to be present in the referenced path.
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/DriveFileVersion"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with file metadata in the order of the requested file versions. Each array
+          element describes one file metadata and is itself an array. The elements of each array contain the information
+          specified by the corresponding identifiers in the `columns` parameter. In case of errors the responsible fields
+          in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveFileMetadataResponse"

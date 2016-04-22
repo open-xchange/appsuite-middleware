@@ -1,0 +1,17 @@
+type: object
+properties:
+  context_id:
+    type: integer
+    description: The unique identifier of the user's context.
+  user_id:
+    type: integer
+    description: The unique identifier of the user himself.
+  context_admin:
+    type: integer
+    description: The ID of the context's administrator user.
+  login_name:
+    type: string
+    description: The login name of the user.
+  display_name:
+    type: string
+    description: The display name of the user.

@@ -1,0 +1,12 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: Array of infoitems.
+    items:
+      type: object
+      description: |
+        An element can be an array itself for new and modified infoitems containing the information of an infoitem specified by the corresponding
+        identifiers in the `columns` parameter. Or the element can be a string representing the object ID of a deleted infoitem.
+        Therefore, the element types can be distinguished.

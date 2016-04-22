@@ -1,0 +1,28 @@
+/snippet?action=getattachment:
+  get:
+    operationId: getSnippetAttachment
+    tags:
+      - snippet
+    summary: Gets the attachment of a snippet (**available since v7.0.0/v6.22.0**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The identifier of the snippet.
+        required: true
+      - in: query
+        name: attachmentid
+        type: string
+        description: The identifier of the attachment.
+        required: true
+    responses:
+      200:
+        description: The attachment's raw data.
+        schema:
+          type: string
+          format: binary
+      500:
+        description: A HTML page in case of errors.
+        schema:
+          type: string

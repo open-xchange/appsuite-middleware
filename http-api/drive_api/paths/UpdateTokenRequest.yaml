@@ -1,0 +1,30 @@
+/drive?action=updateToken:
+  get:
+    operationId: updateSubscriptionToken
+    tags:
+      - drive
+    summary: Updates the subscription token.
+    description: Updates a device's registration token in case a new one was assigned by the service.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: service
+        type: string
+        description: The name of the underlying push service to use, currently one of gcm, apn, or apn.macos.
+        required: true
+      - in: query
+        name: token
+        type: string
+        description: The previous registration token as assigned by the service.
+        required: true
+      - in: query
+        name: newToken
+        type: string
+        description: The new registration token as assigned by the service.
+        required: true
+    responses:
+      200:
+        description: |
+          An empty JSON result. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/CommonResponse"

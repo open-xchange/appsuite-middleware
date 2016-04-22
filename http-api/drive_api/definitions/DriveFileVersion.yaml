@@ -1,0 +1,9 @@
+type: object
+description: A file in a directory is uniquely identified by its filename and the checksum of its content.
+properties:
+  name:
+    type: string
+    description: The name of the file, including its extension, e.g. "test.doc".
+  checksum:
+    type: string
+    description: The MD5 hash of the file, expressed as a lowercase hexadecimal number string, 32 characters long, e.g. "f8cacac95379527cd4fa15f0cb782a09".

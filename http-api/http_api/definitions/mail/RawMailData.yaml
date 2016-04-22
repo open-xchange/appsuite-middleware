@@ -1,0 +1,112 @@
+color_label:
+  type: integer
+  minimum: 0
+  maximum: 10
+  description: Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).
+id:
+  type: string
+  description: Object ID of the mail.
+folder_id:
+  type: string
+  description: Object ID of the parent folder.
+attachment:
+  type: boolean
+  description: Indicates whether this mail has attachments.
+from:
+  type: array
+  description: Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.
+  items:
+    type: array
+    items:
+      type: string
+to:
+  type: array
+  description: Each element is a two-element array (see the from field) specifying one receiver.
+  items:
+    type: array
+    items:
+      type: string
+cc:
+  type: array
+  description: Each element is a two-element array (see the from field) specifying one carbon-copy receiver.
+  items:
+    type: array
+    items:
+      type: string
+bcc:
+  type: array
+  description: Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.
+  items:
+    type: array
+    items:
+      type: string
+subject:
+  type: string
+  description: The mail's subject.
+size:
+  type: integer
+  format: int64
+  description: The size if the mail in bytes.
+sent_date:
+  type: integer
+  format: int64
+  description: Date and time as specified in the mail by the sending client.
+received_date:
+  type: integer
+  format: int64
+  description: Date and time as measured by the receiving server.
+flags:
+  type: integer
+  description: 'Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).'
+level:
+  type: integer
+  description: Zero-based nesting level in a thread.
+disp_notification_to:
+  type: string
+  description: Content of message's header "Disposition-Notification-To".
+priority:
+  type: integer
+  description: "Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high)."
+msg_ref:
+  type: string
+  description: Message reference on reply/forward.
+flag_seen:
+  type: string
+  description: Special field to sort mails by seen status.
+account_name:
+  type: string
+  description: Message's account name.
+account_id:
+  type: integer
+  description: Message's account identifier. Since v6.20.2.
+user:
+  type: array
+  description: An array with user-defined flags as strings.
+  items:
+    type: string
+headers:
+  type: object
+  description: A map with fields for every non-standard header. The header name is the field name. The header value is the value of the field as string.
+attachments:
+  type: array
+  description: Each element is an attachment. The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.
+  items:
+    $ref: "#/definitions/MailAttachment"
+truncated:
+  type: boolean
+  description: true/false if the mail content was trimmed. Since v7.6.1
+source:
+  type: string
+  description: RFC822 source of the mail. Only present for "?action=get&attach_src=true".
+cid:
+  type: string
+  description: The value of the "Content-ID" header, if the header is present.
+original_id:
+  type: string
+  description: The original mail identifier (e.g. if fetched from "virtual/all" folder).
+original_folder_id:
+  type: string
+  description: The original folder identifier (e.g. if fetched from "virtual/all" folder).
+content_type:
+  type: string
+  description: The MIME type of the mail.

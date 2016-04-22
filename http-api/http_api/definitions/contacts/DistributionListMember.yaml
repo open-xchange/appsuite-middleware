@@ -1,0 +1,17 @@
+type: object
+properties:
+  id:
+    type: string
+    description: Object ID of the member's contact if the member is an existing contact.
+  folder_id:
+    type: string
+    description: Parent folder ID of the member's contact if the member is an existing contact (preliminary, from 6.22 on).
+  display_name:
+    type: string
+    description: The display name.
+  mail:
+    type: string
+    description: The email address (mandatory before 6.22, afterwards optional if you are referring to an internal contact).
+  mail_field:
+    type: number
+    description: 'Which email field of an existing contact (if any) is used for the mail field: 0 (independent contact), 1 (default email field, email1), 2 (second email field, email2), 3 (third email field, email3).'

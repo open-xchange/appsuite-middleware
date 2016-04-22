@@ -1,0 +1,33 @@
+type: object
+properties:
+  $ref: ../common/CommonObjectData.yaml
+  full_time:
+    type: boolean
+    description: True if the event is a whole day appointment or task, false otherwise.
+  confirmations:
+    type: array
+    description: Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.
+    items:
+      $ref: "#/definitions/TaskConfirmation"
+  title:
+    type: string
+    description: Short description.
+  start_date:
+    type: integer
+    format: int64
+    description: Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).
+  end_date:
+    type: integer
+    format: int64
+    description: Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).
+  participants:
+    type: array
+    description: Each element identifies a participant, user, group or booked resource.
+    items:
+      $ref: "#/definitions/TaskParticipant"
+  recurrence_type:
+    type: integer
+    description: 'Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).'
+  shown_as:
+    type: integer
+    description: 'Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).'

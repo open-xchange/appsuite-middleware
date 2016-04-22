@@ -1,0 +1,23 @@
+requests:
+  - AllRequest.yaml
+  - ListRequest.yaml
+  - UpdatesRequest.yaml
+  - GetRequest.yaml
+  - SearchRequest.yaml
+  - DocumentRequest.yaml
+  - ZipFolderRequest.yaml
+  - VersionsRequest.yaml
+  - CheckNameRequest.yaml
+  - ZipDocumentsRequest.yaml
+  - MoveRequest.yaml
+  - UpdateRequest.yaml
+  - NewRequest.yaml
+  - SaveAsRequest.yaml
+  - DeleteRequest.yaml
+  - DetachRequest.yaml
+  - RevertRequest.yaml
+  - CopyRequest.yaml
+  - LockRequest.yaml
+  - UnlockRequest.yaml
+  - SharesRequest.yaml
+  - NotifyRequest.yaml

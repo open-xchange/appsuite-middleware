@@ -1,0 +1,27 @@
+/image/contact/picture:
+  get:
+    operationId: getContactProfileImage
+    tags:
+      - image
+    summary: Requests a contact's profile image.
+    produces:
+      - application/octet-stream
+    parameters:
+      - in: query
+        name: folder
+        type: string
+        description:  The folder ID in which the contact resides.
+        required: true
+      - in: query
+        name: id
+        type: integer
+        description: The object ID of the contact.
+        required: true
+    responses:
+      200:
+        description: The content of the requested image is directly written into output stream.
+        schema:
+          type: string
+          format: binary
+      400:
+        description: If request cannot be handled.

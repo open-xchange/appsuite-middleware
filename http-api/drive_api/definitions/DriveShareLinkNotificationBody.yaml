@@ -1,0 +1,20 @@
+type: object
+properties:
+  $ref: ./RawDriveShareTargetData.yaml
+  recipients:
+    type: array
+    description: |
+      An array containing two-element JSON arrays specifying the recipients. The first element of a nested array
+      is the personal name, the second element is the email address. Missing address parts are represented by
+      `null` values. Example: `[["Otto Example", "otto@example.com"],["Horst Example", "horst@example.com"]`.
+    items:
+      type: array
+      description: Describes one recipient, with its personal name as first element and the email address as second element.
+      items:
+        type: string
+  transport:
+    type: string
+    description: Can contain the transport mechanism to use, defaults to "mail".
+  message:
+    type: string
+    description: A custom notification message, if not set some default message is used.

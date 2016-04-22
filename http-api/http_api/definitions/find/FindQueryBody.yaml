@@ -1,0 +1,15 @@
+type: object
+properties:
+  facets:
+    type: array
+    description: An array of selected facets that shall be applied for search.
+    items:
+      $ref: "#/definitions/FindActiveFacet"
+  options:
+    $ref: "#/definitions/FindOptionsData"
+  start:
+    type: integer
+    description: The start of a pagination, if desired.
+  size:
+    type: integer
+    description: The page size of a pagination, if desired.

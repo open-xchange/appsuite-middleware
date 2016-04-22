@@ -1,0 +1,12 @@
+type: object
+properties:
+  prefix:
+    type: string
+    description: The user's search input.
+  facets:
+    type: array
+    description: An array of already selected facets, meaning categories the user has filtered by before.
+    items:
+      $ref: "#/definitions/FindFacetData"
+  options:
+    $ref: "#/definitions/FindOptionsData"

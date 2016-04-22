@@ -1,0 +1,100 @@
+# Common response containing the error fields and a timestamp
+CommonResponse:
+  type: object
+  properties:
+    $ref: ./CommonResponseData.yaml
+# Module: drive
+DriveDirectoryVersion:
+  $ref: ./DriveDirectoryVersion.yaml
+DriveFileVersion:
+  $ref: ./DriveFileVersion.yaml
+DriveFilePattern:
+  $ref: ./DriveFilePattern.yaml
+DriveDirectoryPattern:
+  $ref: ./DriveDirectoryPattern.yaml
+DriveSyncFoldersBody:
+  $ref: ./DriveSyncFoldersBody.yaml
+DriveSyncErrorData:
+  $ref: ./DriveSyncErrorData.yaml
+DriveAction:
+  $ref: ./DriveAction.yaml
+DriveActionsResponse:
+  $ref: ./DriveActionsResponse.yaml
+DriveSyncFilesBody:
+  $ref: ./DriveSyncFilesBody.yaml
+# DirectoryMetadata and FileMetadata use data structures from OX HTTP API, so import the necessary models
+# using a reference to the models' definitions in appropriate YAML file instead of redundantly redefine them
+FolderPermission:
+  $ref: ../../http_api/definitions/index.yaml#/FolderPermission
+FolderExtendedPermission:
+  $ref: ../../http_api/definitions/index.yaml#/FolderExtendedPermission
+ObjectPermission:
+  $ref: ../../http_api/definitions/index.yaml#/InfoItemPermission
+DistributionListMember:
+  $ref: ../../http_api/definitions/index.yaml#/DistributionListMember
+ContactData:
+  $ref: ../../http_api/definitions/index.yaml#/ContactData
+ObjectExtendedPermission:
+  $ref: ../../http_api/definitions/index.yaml#/InfoItemExtendedPermission
+DriveFileVersionMetadata:
+  $ref: ./DriveFileVersionMetadata.yaml
+DriveFileMetadata:
+  $ref: ./DriveFileMetadata.yaml
+DriveDirectoryMetadata:
+  $ref: ./DriveDirectoryMetadata.yaml
+DriveExtendedAction:
+  $ref: ./DriveExtendedAction.yaml
+DriveExtendedActionsResponse:
+  $ref: ./DriveExtendedActionsResponse.yaml
+DriveDownloadBody:
+  $ref: ./DriveDownloadBody.yaml
+DriveQuota:
+  $ref: ./DriveQuota.yaml
+DriveQuotaData:
+  $ref: ./DriveQuotaData.yaml
+DriveQuotaResponse:
+  $ref: ./DriveQuotaResponse.yaml
+DriveSettingsData:
+  $ref: ./DriveSettingsData.yaml
+DriveSettingsResponse:
+  $ref: ./DriveSettingsResponse.yaml
+DriveOldDirectoryMetadata:
+  $ref: ./DriveOldDirectoryMetadata.yaml
+DriveDirectoryMetadataResponse:
+  $ref: ./DriveDirectoryMetadataResponse.yaml
+DriveFileMetadataResponse:
+  $ref: ./DriveFileMetadataResponse.yaml
+DriveJumpData:
+  $ref: ./DriveJumpData.yaml
+DriveJumpResponse:
+  $ref: ./DriveJumpResponse.yaml
+DriveSubfoldersResponse:
+  $ref: ./DriveSubfoldersResponse.yaml
+DriveShareTargetData:
+  $ref: ./DriveShareTargetData.yaml
+DriveShareLinkData:
+  $ref: ./DriveShareLinkData.yaml
+DriveShareLinkResponse:
+  $ref: ./DriveShareLinkResponse.yaml
+DriveShareLinkUpdateBody:
+  $ref: ./DriveShareLinkUpdateBody.yaml
+DriveShareLinkNotificationBody:
+  $ref: ./DriveShareLinkNotificationBody.yaml
+DriveNotificationResponse:
+  $ref: ./DriveNotificationResponse.yaml
+DriveSharesData:
+  $ref: ./DriveSharesData.yaml
+DriveSharesResponse:
+  $ref: ./DriveSharesResponse.yaml
+DriveFolderResponse:
+  $ref: ./DriveFolderResponse.yaml
+DriveFileResponse:
+  $ref: ./DriveFileResponse.yaml
+DriveNotificationData:
+  $ref: ./DriveNotificationData.yaml
+DriveFolderUpdateBody:
+  $ref: ./DriveFolderUpdateBody.yaml
+DriveFileUpdateBody:
+  $ref: ./DriveFileUpdateBody.yaml
+DriveSharingNotificationBody:
+  $ref: ./DriveSharingNotificationBody.yaml

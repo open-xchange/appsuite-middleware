@@ -1,0 +1,7 @@
+type: object
+properties:
+  # import properties from OX HTTP API's share link data
+  $ref: ../../http_api/definitions/sharemanagement/RawShareLinkData.yaml
+  checksum:
+    type: string
+    description: The current checksum of the share target (available since v7.8.1).

@@ -1,0 +1,17 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: The numeric identifier of the OAuth account.
+  displayName:
+    type: string
+    description: The account's display name.
+  serviceId:
+    type: string
+    description: The identifier of the associated service meta data, e.g. "com.openexchange.oauth.twitter".
+  token:
+    type: string
+    description: The token.
+  secret:
+    type: string
+    description: The token secret.

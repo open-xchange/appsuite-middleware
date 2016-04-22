@@ -1,0 +1,25 @@
+/drive?action=updateLink:
+  put:
+    operationId: updateShareLink
+    tags:
+      - drive
+    summary: Updates a share link (**available since API version 4**).
+    description: Updates a previously created link for a file or folder. This action is only available for items marked as `shareable`.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - in: body
+        name: body
+        description: A JSON object containing the updated data of the share link as well as the share target. Only modified fields should be set.
+        required: true
+        schema:
+          $ref: "#/definitions/DriveShareLinkUpdateBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing details about the share link, including its URL. In case of errors the responsible
+          fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveShareLinkResponse"

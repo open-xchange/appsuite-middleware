@@ -1,0 +1,23 @@
+/drive?action=subfolders:
+  get:
+    operationId: getSynchronizableFolders
+    tags:
+      - drive
+    summary: Gets synchronizable folders.
+    description: |
+      Allows getting a list of folders that are available on the server for synchronization. This request should be used to
+      build up a folder tree and let the user select the root synchronization folder(s).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: parent
+        type: string
+        description: The ID of the parent folder to get the subfolders for as read from a previously fetched directory metadata object.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object holding metadata information for all subfolders. The `files` array of the directory metadata
+          objects will be left out. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveSubfoldersResponse"

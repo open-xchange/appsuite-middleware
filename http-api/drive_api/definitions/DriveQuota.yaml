@@ -1,0 +1,13 @@
+type: object
+properties:
+  type:
+    type: string
+    description: The kind of quota restriction, currently either `storage` (size of contained files in bytes) or `file` (number of files).
+  limit:
+    type: integer
+    format: int64
+    description: The allowed limit (either number of files or sum of file sizes in bytes).
+  use:
+    type: integer
+    format: int64
+    description: The current usage (again either number of files or sum of file sizes in bytes).

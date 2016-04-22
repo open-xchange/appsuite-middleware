@@ -1,0 +1,52 @@
+/drive?action=jump:
+  get:
+    operationId: generateDirectLink
+    tags:
+      - drive
+    summary: Gets a direct link for a folder or a file into AppSuite (**avalaible with API version 4**).
+    description: |
+      Generates a direct link into the AppSuite UI for a synchronized file or a synchronized folder and a
+      token for token-based login.
+      
+      #### Use direct link and token with token-based login
+      `GET [redirectUrl]`
+      
+      Login to AppSuite UI with token-based login via the link created with this request. Don't forget to append the `clientToken`
+      parameter with the value used to retrieve the redirect URL! Example: `GET http://localhost/appsuite#app=io.ox/editor&folder=273264&id=273264/307438&serverToken=7b90972628e34e89bb9a3946d1372c68&clientToken=47d74b1c-81df-11e4-b116-123b93f75cba`.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: "#/parameters/gblQueryParamPath"
+      - in: query
+        name: authId
+        type: string
+        description: Identifier for tracing every single login request passed between different systems in a cluster. The value should be some token that is unique for every login request.
+        required: true
+      - in: query
+        name: clientToken
+        type: string
+        description: Client-side identifier for accessing the session later. The value should be some token that is unique for every login request.
+        required: true
+      - in: query
+        name: name
+        type: string
+        description: The name of the file in the synchronized folder given in `path` parameter.
+        required: false
+      - in: query
+        name: method
+        type: string
+        description: "The method of the jump. Available are: edit (opens the file in AppSuite editor or in text/spreadsheet if available), permissions (opens the file's/folder's change-permission dialog), version_history (opens the file's version history summary), preview (opens the file's/folder's preview). Defaults to preview."
+        required: false
+        enum:
+          - edit
+          - permissions
+          - version_history
+          - preview
+        default: "preview"
+    responses:
+      200:
+        description: |
+          A JSON object containing the direct link to the file/folder including a server token for token based login.
+          In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveJumpResponse"

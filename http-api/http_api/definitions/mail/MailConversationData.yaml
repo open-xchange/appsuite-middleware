@@ -1,0 +1,10 @@
+type: object
+properties:
+  $ref: ./RawMailData.yaml
+  unreadCount:
+    type: integer
+  thread:
+    type: array
+    description: JSON array consisting of JSON objects, each representing a message in the conversation.
+    items:
+      $ref: "#/definitions/MailData"

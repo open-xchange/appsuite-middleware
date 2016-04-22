@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: An array with IDs of objects that could not be processed.
+    items:
+      type: string

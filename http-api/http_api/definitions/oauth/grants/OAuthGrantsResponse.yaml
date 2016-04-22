@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ../../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: An array containing one object for every granted access.
+    items:
+      $ref: "#/definitions/OAuthGrantData"

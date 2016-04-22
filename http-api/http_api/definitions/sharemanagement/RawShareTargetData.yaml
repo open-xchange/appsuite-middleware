@@ -1,0 +1,9 @@
+module:
+  type: string
+  description: The folder's module name, i.e. one of "tasks", "calendar", "contacts" or "infostore".
+folder:
+  type: string
+  description: The folder identifier.
+item:
+  type: string
+  description: The object identifier, in case the share target is a single item. This must not be present to share a complete folder.

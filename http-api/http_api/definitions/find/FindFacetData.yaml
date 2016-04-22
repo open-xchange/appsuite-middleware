@@ -1,0 +1,31 @@
+type: object
+properties:
+  style:
+    type: string
+    description: 'The facet style, which can be one of: simple, default, or exclusive. Dependent on the style some fields are present and others are not.'
+  id:
+    type: string
+    description: The ID of this facet. Must be unique within an autocomplete response. Can be used to distinguish and filter certain facets. (for simple, default, and exclusive)
+  name:
+    type: string
+    description: A displayable (and localized) name for this facet. If absent, an `item` attribute is present. (for simple, default, and exclusive)
+  item:
+    $ref: "#/definitions/FindFacetItem"
+  flags:
+    type: array
+    description: 'An array of flags. Available flags: conflicts (specified as "conflicts:<other-id>", facets carrying this flag must not be combined with a facet of type <other-id>). (for simple, default, and exclusive)'
+    items:
+      type: string
+  filter:
+    $ref: "#/definitions/FindFacetFilter"
+  values:
+    type: array
+    description: An array of facet values. (for default)
+    items:
+      $ref: "#/definitions/FindFacetValue"
+  options:
+    type: array
+    description: An array of facet values. (for exclusive)
+    items:
+      $ref: "#/definitions/FindFacetValue"
+  

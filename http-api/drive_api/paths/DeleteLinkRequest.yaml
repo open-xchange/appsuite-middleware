@@ -1,0 +1,23 @@
+/drive?action=deleteLink:
+  put:
+    operationId: deleteShareLink
+    tags:
+      - drive
+    summary: Deletes a share link (**available since API version 4**).
+    description: Deletes a previously created link for a file or folder. This action is only available for items marked as `shareable`.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - in: body
+        name: body
+        description: A JSON object describing the target file- or directory version to delete the link for.
+        required: true
+        schema:
+          $ref: "#/definitions/DriveShareTargetData"
+    responses:
+      200:
+        description: An empty JSON object. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/CommonResponse"

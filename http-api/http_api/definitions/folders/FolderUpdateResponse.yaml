@@ -1,0 +1,6 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: string
+    description: The object id of the folder.

@@ -1,0 +1,63 @@
+/halo/contact/picture:
+  get:
+    operationId: getHaloContactPicture
+    tags:
+      - halo
+    summary: Gets a contact picture.
+    description: |
+      At least one of the optional search parameters should be set. All parameters are connected by OR during
+      the search. More specific parameters like `user_id` or `id` are prioritized in case of multiple matches.
+    parameters:
+      - in: query
+        name: session
+        type: string
+        description: Falls back to the public session cookie.
+        required: false
+      - in: query
+        name: internal_userid
+        type: integer
+        description: The internal user ID of a user whose picture you want to load.
+        required: false
+      - in: query
+        name: userid
+        type: integer
+        description: An alias for `internal_userid`.
+        required: false
+      - in: query
+        name: user_id
+        type: integer
+        description: An alias for `internal_userid`.
+        required: false
+      - in: query
+        name: id
+        type: string
+        description: A contact ID.
+        required: false
+      - in: query
+        name: email
+        type: string
+        description: An email to searchz for. Will pick global address book matches before regular matches. After that picks the most recently changed contact.
+        required: false
+      - in: query
+        name: email1
+        type: string
+        description: An alias for `email`.
+        required: false
+      - in: query
+        name: email2
+        type: string
+        description: An alias for `email`.
+        required: false
+      - in: query
+        name: email3
+        type: string
+        description: An alias for `email`.
+        required: false
+    responses:
+      200:
+        description: The picture with proper ETag and caching headers set.
+        schema:
+          type: string
+          format: binary
+      404:
+        description: If no picture could be found.

@@ -1,0 +1,9 @@
+{
+	"modelPackage": "OpenExchange.ClientApi.Http.Models",
+	"apiPackage": "OpenExchange.ClientApi.Http.Modules",
+	"invokerPackage": "OpenExchange.ClientApi.Http.Invoker",
+	"packageName": "OpenExchange.ClientApi.Http",
+	"packageVersion": "0.0.1",
+	"artifactId": "OXHttpApi",
+	"optionalAssemblyInfo": false
+}

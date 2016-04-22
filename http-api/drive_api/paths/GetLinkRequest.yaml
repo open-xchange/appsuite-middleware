@@ -1,0 +1,27 @@
+/drive?action=getLink:
+  put:
+    operationId: getShareLink
+    tags:
+      - drive
+    summary: Gets a share link (**available since API version 4**).
+    description: |
+      Creates a new or gets the previously created link for a file or folder that can be used to access the item in a browser
+      by anyone. This request is only available for items marked as `shareable`.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - in: body
+        name: body
+        description: A JSON object describing the target file- or directory version to get the link for.
+        required: true
+        schema:
+          $ref: "#/definitions/DriveShareTargetData"
+    responses:
+      200:
+        description: |
+          A JSON object containing details about the share link, including its URL. In case of errors the responsible
+          fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveShareLinkResponse"

@@ -1,0 +1,331 @@
+$ref: ../common/CommonObjectData.yaml
+uid:
+  type: string
+  description: Can only be written when the object is created. Internal and external globally unique identifier of the contact. Is used to recognize contacts within vCard files. If this attribute is not written it contains an automatic generated UUID.
+display_name:
+  type: string
+  description: The display name.
+first_name:
+  type: string
+  description: The given name.
+last_name:
+  type: string
+  description: The sur name.
+second_name:
+  type: string
+  description: The middle name.
+suffix:
+  type: string
+  description: The suffix.
+title:
+  type: string
+  description: The title.
+street_home:
+  type: string
+  description: The street of the home address.
+postal_code_home:
+  type: string
+  description: The postal code of the home address.
+city_home:
+  type: string
+  description: The city of the home address.
+state_home:
+  type: string
+  description: The state of the home address.
+country_home:
+  type: string
+  description: The country of the home address.
+birthday:
+  type: integer
+  format: int64
+  description: The date of birth.
+marital_status:
+  type: string
+  description: The marital status.
+number_of_children:
+  type: string
+  description: The number of children.
+profession:
+  type: string
+  description: The profession.
+nickname:
+  type: string
+  description: The nickname.
+spouse_name:
+  type: string
+  description: The name of the spouse.
+anniversary:
+  type: integer
+  format: int64
+  description: The anniversary.
+note:
+  type: string
+  description: A note.
+department:
+  type: string
+  description: The department.
+position:
+  type: string
+  description: The position.
+employee_type:
+  type: string
+  description: The type of the employee.
+room_number:
+  type: string
+  description: The room number.
+street_business:
+  type: string
+  description: The street of the business address.
+postal_code_business:
+  type: string
+  description: The postal code of the business address.
+city_business:
+  type: string
+  description: The city of the business address.
+state_business:
+  type: string
+  description: The state of the business address.
+country_business:
+  type: string
+  description: The country of the business address.
+user_id:
+  type: integer
+  description: The internal user id.
+number_of_employees:
+  type: string
+  description: The number of employees.
+sales_volume:
+  type: string
+  description: The sales volume.
+tax_id:
+  type: string
+  description: The tax id.
+commercial_register:
+  type: string
+  description: The commercial register.
+branches:
+  type: string
+  description: The branches.
+business_category:
+  type: string
+  description: The business category.
+info:
+  type: string
+  description: An information.
+manager_name:
+  type: string
+  description: The manager's name.
+assistant_name:
+  type: string
+  description: The assistant's name.
+street_other:
+  type: string
+  description: The street of another address.
+postal_code_other:
+  type: string
+  description: The postal code of another address.
+city_other:
+  type: string
+  description: The city of another address.
+state_other:
+  type: string
+  description: The state of another address.
+country_other:
+  type: string
+  description: The country of another address.
+telephone_business1:
+  type: string
+  description: The business telephone number 1.
+telephone_business2:
+  type: string
+  description: The business telephone number 2.
+fax_business:
+  type: string
+  description: The business fax number.
+telephone_callback:
+  type: string
+  description: The callback telephone number.
+telephone_car:
+  type: string
+  description: The car telephone number.
+telephone_company:
+  type: string
+  description: The company telephone number.
+telephone_home1:
+  type: string
+  description: The home telephone number 1.
+telephone_home2:
+  type: string
+  description: The home telephone number 2.
+fax_home:
+  type: string
+  description: The home fax number.
+cellular_telephone1:
+  type: string
+  description: The cellular telephone number 1.
+cellular_telephone2:
+  type: string
+  description: The cellular telephone number 2.
+telephone_other:
+  type: string
+  description: The other telephone number.
+fax_other:
+  type: string
+  description: The other fax number.
+email1:
+  type: string
+  description: The email address 1.
+email2:
+  type: string
+  description: The email address 2.
+email3:
+  type: string
+  description: The email address 3.
+url:
+  type: string
+  description: The url address or homepage.
+telephone_isdn:
+  type: string
+  description: The ISDN telephone number.
+telephone_pager:
+  type: string
+  description: The pager telephone number.
+telephone_primary:
+  type: string
+  description: The primary telephone number.
+telephone_radio:
+  type: string
+  description: The radio telephone number.
+telephone_telex:
+  type: string
+  description: The telex telephone number.
+telephone_ttytdd:
+  type: string
+  description: The TTY/TDD telephone number.
+instant_messenger1:
+  type: string
+  description: The instant messenger address 1.
+instant_messenger2:
+  type: string
+  description: The instant messenger address 2.
+telephone_ip:
+  type: string
+  description: The IP telephone number.
+telephone_assistant:
+  type: string
+  description: The assistant telephone number.
+company:
+  type: string
+  description: The company name.
+image1:
+  type: string
+image1_content_type:
+  type: string
+  description: The content type of the image (like "image/png").
+image1_url:
+  type: string
+  description: The url to the image.
+number_of_images:
+  type: integer
+  description: The number of images.
+image_last_modified:
+  type: integer
+  format: int64
+  description: The last modification of the image.
+distribution_list:
+  type: array
+  description: If this contact is a distribution list, then this field is an array of objects. Each object describes a member of the list.
+  items:
+    $ref: "#/definitions/DistributionListMember"
+number_of_distribution_list:
+  type: integer
+  description: The number of objects in the distribution list.
+mark_as_distributionlist:
+  type: boolean
+file_as:
+  type: string
+  description: The file name.
+default_address:
+  type: integer
+  description: The default address.
+useCount:
+  type: integer
+  description: In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.
+yomiFirstName:
+  type: string
+  description: Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)
+yomiLastName:
+  type: string
+  description: Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)
+yomiCompany:
+  type: string
+  description: Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)
+addressHome:
+  type: string
+  description: Support for Outlook 'home' address field. (since 6.20.1)
+addressBusiness:
+  type: string
+  description: Support for Outlook 'business' address field. (since 6.20.1)
+addressOther:
+  type: string
+  description: Support for Outlook 'other' address field. (since 6.20.1)
+userfield01:
+  type: string
+  description: Dynamic Field 1.
+userfield02:
+  type: string
+  description: Dynamic Field 2.
+userfield03:
+  type: string
+  description: Dynamic Field 3.
+userfield04:
+  type: string
+  description: Dynamic Field 4.
+userfield05:
+  type: string
+  description: Dynamic Field 5.
+userfield06:
+  type: string
+  description: Dynamic Field 6.
+userfield07:
+  type: string
+  description: Dynamic Field 7.
+userfield08:
+  type: string
+  description: Dynamic Field 8.
+userfield09:
+  type: string
+  description: Dynamic Field 9.
+userfield10:
+  type: string
+  description: Dynamic Field 10.
+userfield11:
+  type: string
+  description: Dynamic Field 11.
+userfield12:
+  type: string
+  description: Dynamic Field 12.
+userfield13:
+  type: string
+  description: Dynamic Field 13.
+userfield14:
+  type: string
+  description: Dynamic Field 14.
+userfield15:
+  type: string
+  description: Dynamic Field 15.
+userfield16:
+  type: string
+  description: Dynamic Field 16.
+userfield17:
+  type: string
+  description: Dynamic Field 17.
+userfield18:
+  type: string
+  description: Dynamic Field 18.
+userfield19:
+  type: string
+  description: Dynamic Field 19.
+userfield20:
+  type: string
+  description: Dynamic Field 20.

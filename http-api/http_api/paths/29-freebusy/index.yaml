@@ -1,0 +1,3 @@
+requests:
+  - GetRequest.yaml
+  - ListRequest.yaml

@@ -1,0 +1,10 @@
+type: object
+properties:
+  quota:
+    type: array
+    description: An array of quota objects showing the quota limits and usage. A size of zero represents unlimited quota.
+    items:
+      $ref: "#/definitions/DriveQuota"
+  manageLink:
+    type: string
+    description: A hyperlink that points to an URL where the user can manage his quota restrictions.

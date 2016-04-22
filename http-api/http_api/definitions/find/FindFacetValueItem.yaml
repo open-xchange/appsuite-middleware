@@ -1,0 +1,12 @@
+type: object
+description: A more complex object to display this facet. Attributes are `name`, `detail` (optional), and `image_url` (optional).
+properties:
+  name:
+    type: string
+    description: A displayable (and localized) name for the facet.
+  detail:
+    type: string
+    description: A displayable (and localized) detail name, like "in mail text".
+  image_url:
+    type: string
+    description: An URL to a displayable image.

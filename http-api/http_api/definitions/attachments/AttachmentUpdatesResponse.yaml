@@ -1,0 +1,12 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: Array of attachments.
+    items:
+      type: object
+      description: |
+        An element can be an array itself for new attachments containing the information of an attachment specified by the corresponding
+        identifiers in the `columns` parameter. Or the element can be an integer representing the object ID of a deleted attachment.
+        Therefore, the element types can be distinguished.

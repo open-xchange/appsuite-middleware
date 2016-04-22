@@ -1,0 +1,28 @@
+type: object
+properties:
+  $ref: ../contacts/RawContactData.yaml
+  aliases:
+    type: array
+    description: The user's aliases.
+    items:
+      type: string
+  timezone:
+    type: string
+    description: The time zone.
+  locale:
+    type: string
+    description: The name of user's entire locale, with, language, country and variant separated by underbars (e.g. "en", "de_DE").
+  groups:
+    type: array
+    description: The IDs of user's groups.
+    items:
+      type: integer
+  contact_id:
+    type: string
+    description: The contact ID of the user.
+  login_info:
+    type: string
+    description: The user's login information.
+  guest_created_by:
+    type: integer
+    description: The ID of the user who has created this guest in case this user represents a guest user. 0 represents regular users. (preliminary, available since v7.8.0)

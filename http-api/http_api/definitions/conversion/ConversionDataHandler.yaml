@@ -1,0 +1,10 @@
+type: object
+properties:
+  identifier:
+    type: string
+    description: The identifier of the data handler.
+  args:
+    type: array
+    description: A JSON array of optional JSON objects containing the name-value-pairs.
+    items:
+      $ref: "#/definitions/ConversionDataHandlerPair"
