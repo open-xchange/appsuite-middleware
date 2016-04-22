@@ -47,59 +47,23 @@
  *
  */
 
-package com.openexchange.mail.json.compose.abort;
+package com.openexchange.mail.json.compose.share;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.impl.UploadUtility;
-import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
-import com.openexchange.mail.json.compose.AbstractQuotaAwareComposeContext;
-import com.openexchange.mail.json.compose.ComposeRequest;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link AbortComposeContext}
+ * {@link ShareComposeStrings} - The i18n string literals for share compose module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AbortComposeContext extends AbstractQuotaAwareComposeContext {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbortComposeContext.class);
-
-    /** Keeps track of already <i>consumed</i> bytes */
-    private long consumed;
+public class ShareComposeStrings implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link AbortComposeContext}.
-     *
-     * @param request The compose request associated with this context
-     * @throws OXException If initialization fails
+     * Initializes a new {@link ShareComposeStrings}.
      */
-    public AbortComposeContext(ComposeRequest request) throws OXException {
-        super(request);
-    }
-
-    @Override
-    protected void onPartAdd(MailPart part, ComposedMailPart info) throws OXException {
-        if (doAction) {
-            long size = part.getSize();
-            if (size <= 0) {
-                LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
-            }
-            if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
-                String fileName = part.getFileName();
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, UploadUtility.getSize(size));
-            }
-            /*
-             * Add current file size
-             */
-            consumed += size;
-            if (uploadQuota > 0 && consumed > uploadQuota) {
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
-            }
-        }
+    private ShareComposeStrings() {
+        super();
     }
 
 }

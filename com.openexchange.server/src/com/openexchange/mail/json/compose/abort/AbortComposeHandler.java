@@ -52,7 +52,6 @@ package com.openexchange.mail.json.compose.abort;
 import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.json.compose.AbstractComposeHandler;
-import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.compose.ComposeDraftResult;
 import com.openexchange.mail.json.compose.ComposeRequest;
@@ -82,15 +81,6 @@ public class AbortComposeHandler extends AbstractComposeHandler<AbortComposeCont
         return "abort";
     }
 
-    private ComposedMailMessage createComposeMessage(AbortComposeContext context) {
-        ComposedMailMessage sourceMessage = context.getSourceMessage();
-        sourceMessage.setBodyPart(context.getTextPart());
-        for (MailPart part : context.getAllParts()) {
-            sourceMessage.addEnclosedPart(part);
-        }
-        return sourceMessage;
-    }
-
     @Override
     protected AbortComposeContext createComposeContext(ComposeRequest request) throws OXException {
         return new AbortComposeContext(request);
@@ -98,13 +88,13 @@ public class AbortComposeHandler extends AbstractComposeHandler<AbortComposeCont
 
     @Override
     protected ComposeDraftResult doCreateDraftResult(ComposeRequest request, AbortComposeContext context) throws OXException {
-        ComposedMailMessage composeMessage = createComposeMessage(context);
+        ComposedMailMessage composeMessage = createRegularComposeMessage(context);
         return new DefaultComposeDraftResult(composeMessage);
     }
 
     @Override
     protected ComposeTransportResult doCreateTransportResult(ComposeRequest request, AbortComposeContext context) throws OXException {
-        ComposedMailMessage composeMessage = createComposeMessage(context);
+        ComposedMailMessage composeMessage = createRegularComposeMessage(context);
         return new DefaultComposeTransportResult(Collections.singletonList(composeMessage), composeMessage);
     }
 

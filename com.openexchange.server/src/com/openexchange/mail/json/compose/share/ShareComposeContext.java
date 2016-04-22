@@ -47,57 +47,69 @@
  *
  */
 
-package com.openexchange.mail.json.compose.abort;
+package com.openexchange.mail.json.compose.share;
 
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.impl.UploadUtility;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.json.compose.AbstractQuotaAwareComposeContext;
 import com.openexchange.mail.json.compose.ComposeRequest;
 
-
 /**
- * {@link AbortComposeContext}
+ * {@link ShareComposeContext}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AbortComposeContext extends AbstractQuotaAwareComposeContext {
+public class ShareComposeContext extends AbstractQuotaAwareComposeContext {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbortComposeContext.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareComposeContext.class);
 
-    /** Keeps track of already <i>consumed</i> bytes */
+    private boolean createShares;
     private long consumed;
 
     /**
-     * Initializes a new {@link AbortComposeContext}.
+     * Initializes a new {@link ShareComposeContext}.
      *
-     * @param request The compose request associated with this context
+     * @param request The compose request
      * @throws OXException If initialization fails
      */
-    public AbortComposeContext(ComposeRequest request) throws OXException {
+    public ShareComposeContext(ComposeRequest request) throws OXException {
         super(request);
+        createShares = AJAXRequestDataTools.parseBoolParameter("share_attachments", request.getRequest(), false);
+    }
+
+    /**
+     * Checks whether shares are supposed to be created instead of sending a regular message
+     *
+     * @return <code>true</code> for creating shares; otherwise <code>false</code> for regular message
+     */
+    public boolean isCreateShares() {
+        return createShares;
     }
 
     @Override
     protected void onPartAdd(MailPart part, ComposedMailPart info) throws OXException {
+        if (createShares) {
+            return;
+        }
+
         if (doAction) {
             long size = part.getSize();
             if (size <= 0) {
                 LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
+                return;
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
-                String fileName = part.getFileName();
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, UploadUtility.getSize(size));
+                createShares = true;
             }
             /*
              * Add current file size
              */
             consumed += size;
             if (uploadQuota > 0 && consumed > uploadQuota) {
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
+                createShares = true;
             }
         }
     }

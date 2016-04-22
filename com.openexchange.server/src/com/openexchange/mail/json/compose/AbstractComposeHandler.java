@@ -202,6 +202,21 @@ public abstract class AbstractComposeHandler<C extends AbstractComposeContext> i
     protected abstract ComposeTransportResult doCreateTransportResult(ComposeRequest request, C context) throws OXException;
 
     /**
+     * Creates the regular message containing all attachments as-is.
+     *
+     * @param context The associated compose context
+     * @return The regular message
+     */
+    protected ComposedMailMessage createRegularComposeMessage(C context) {
+        ComposedMailMessage sourceMessage = context.getSourceMessage();
+        sourceMessage.setBodyPart(context.getTextPart());
+        for (MailPart part : context.getAllParts()) {
+            sourceMessage.addEnclosedPart(part);
+        }
+        return sourceMessage;
+    }
+
+    /**
      * Generic preparation to fill-up specified compose context.
      *
      * @param request The compose request

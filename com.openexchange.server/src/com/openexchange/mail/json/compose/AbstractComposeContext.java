@@ -107,6 +107,8 @@ public abstract class AbstractComposeContext {
     /**
      * Initializes a new {@link AbstractComposeContext}.
      *
+     * @param accountId The account identifier
+     * @param session The associated session
      * @throws OXException If initialization fails
      */
     protected AbstractComposeContext(int accountId, ServerSession session) throws OXException {

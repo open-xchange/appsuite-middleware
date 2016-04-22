@@ -47,59 +47,68 @@
  *
  */
 
-package com.openexchange.mail.json.compose.abort;
+package com.openexchange.mail.json.compose.share;
 
+import java.util.Collections;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.impl.UploadUtility;
-import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
-import com.openexchange.mail.json.compose.AbstractQuotaAwareComposeContext;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.compose.AbstractComposeHandler;
+import com.openexchange.mail.json.compose.ComposeDraftResult;
 import com.openexchange.mail.json.compose.ComposeRequest;
+import com.openexchange.mail.json.compose.ComposeTransportResult;
+import com.openexchange.mail.json.compose.DefaultComposeDraftResult;
+import com.openexchange.mail.json.compose.DefaultComposeTransportResult;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link AbortComposeContext}
+ * {@link ShareComposeHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AbortComposeContext extends AbstractQuotaAwareComposeContext {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbortComposeContext.class);
-
-    /** Keeps track of already <i>consumed</i> bytes */
-    private long consumed;
+public class ShareComposeHandler extends AbstractComposeHandler<ShareComposeContext> {
 
     /**
-     * Initializes a new {@link AbortComposeContext}.
-     *
-     * @param request The compose request associated with this context
-     * @throws OXException If initialization fails
+     * Initializes a new {@link ShareComposeHandler}.
      */
-    public AbortComposeContext(ComposeRequest request) throws OXException {
-        super(request);
+    public ShareComposeHandler() {
+        super();
     }
 
     @Override
-    protected void onPartAdd(MailPart part, ComposedMailPart info) throws OXException {
-        if (doAction) {
-            long size = part.getSize();
-            if (size <= 0) {
-                LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
-            }
-            if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
-                String fileName = part.getFileName();
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, UploadUtility.getSize(size));
-            }
-            /*
-             * Add current file size
-             */
-            consumed += size;
-            if (uploadQuota > 0 && consumed > uploadQuota) {
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
-            }
+    public String getId() {
+        return "share";
+    }
+
+    @Override
+    public boolean serves(Session session) throws OXException {
+        return Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session);
+    }
+
+    @Override
+    protected ShareComposeContext createComposeContext(ComposeRequest request) throws OXException {
+        return new ShareComposeContext(request);
+    }
+
+    @Override
+    protected ComposeDraftResult doCreateDraftResult(ComposeRequest request, ShareComposeContext context) throws OXException {
+        if (false == context.isCreateShares()) {
+            ComposedMailMessage composeMessage = createRegularComposeMessage(context);
+            return new DefaultComposeDraftResult(composeMessage);
         }
+
+        return null;
+    }
+
+    @Override
+    protected ComposeTransportResult doCreateTransportResult(ComposeRequest request, ShareComposeContext context) throws OXException {
+        if (false == context.isCreateShares()) {
+            ComposedMailMessage composeMessage = createRegularComposeMessage(context);
+            return new DefaultComposeTransportResult(Collections.singletonList(composeMessage), composeMessage);
+        }
+
+        return null;
     }
 
 }

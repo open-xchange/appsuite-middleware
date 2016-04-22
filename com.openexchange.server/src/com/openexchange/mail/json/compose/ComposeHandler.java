@@ -91,7 +91,8 @@ public interface ComposeHandler {
      *
      * @param session The session providing user data
      * @return <code>true</code> if this compose handler is meant to be used; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
-    boolean serves(Session session);
+    boolean serves(Session session) throws OXException;
 
 }

@@ -47,59 +47,56 @@
  *
  */
 
-package com.openexchange.mail.json.compose.abort;
+package com.openexchange.mail.json.compose;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.impl.UploadUtility;
-import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
-import com.openexchange.mail.json.compose.AbstractQuotaAwareComposeContext;
-import com.openexchange.mail.json.compose.ComposeRequest;
-
+import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbortComposeContext}
+ * {@link AbstractQuotaAwareComposeContext} - A compose context; storing necessary state information.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AbortComposeContext extends AbstractQuotaAwareComposeContext {
+public abstract class AbstractQuotaAwareComposeContext extends AbstractComposeContext {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbortComposeContext.class);
+    /** Whether any quota limitation is enabled */
+    protected final boolean doAction;
 
-    /** Keeps track of already <i>consumed</i> bytes */
-    private long consumed;
+    /** The total quota limitation */
+    protected final long uploadQuota;
+
+    /** The quota limitation per file */
+    protected final long uploadQuotaPerFile;
 
     /**
-     * Initializes a new {@link AbortComposeContext}.
+     * Initializes a new {@link AbstractQuotaAwareComposeContext}.
      *
      * @param request The compose request associated with this context
      * @throws OXException If initialization fails
      */
-    public AbortComposeContext(ComposeRequest request) throws OXException {
+    protected AbstractQuotaAwareComposeContext(ComposeRequest request) throws OXException {
         super(request);
+        MailUploadQuotaChecker checker = new MailUploadQuotaChecker(request.getSession().getUserSettingMail());
+        uploadQuota = checker.getQuotaMax();
+        uploadQuotaPerFile = checker.getFileQuotaMax();
+        doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
     }
 
-    @Override
-    protected void onPartAdd(MailPart part, ComposedMailPart info) throws OXException {
-        if (doAction) {
-            long size = part.getSize();
-            if (size <= 0) {
-                LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
-            }
-            if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
-                String fileName = part.getFileName();
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, UploadUtility.getSize(size));
-            }
-            /*
-             * Add current file size
-             */
-            consumed += size;
-            if (uploadQuota > 0 && consumed > uploadQuota) {
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
-            }
-        }
+    /**
+     * Initializes a new {@link AbstractQuotaAwareComposeContext}.
+     *
+     * @param accountId The account identifier
+     * @param session The associated session
+     * @throws OXException If initialization fails
+     */
+    protected AbstractQuotaAwareComposeContext(int accountId, ServerSession session) throws OXException {
+        super(accountId, session);
+        MailUploadQuotaChecker checker = new MailUploadQuotaChecker(session.getUserSettingMail());
+        uploadQuota = checker.getQuotaMax();
+        uploadQuotaPerFile = checker.getFileQuotaMax();
+        doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
     }
 
 }

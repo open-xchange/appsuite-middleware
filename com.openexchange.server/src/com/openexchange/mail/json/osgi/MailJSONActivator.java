@@ -216,8 +216,12 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                 @Override
                 public ComposeHandler getComposeHandlerFor(Session session) {
                     for (ComposeHandler composeHandler : tracker.getServiceList()) {
-                        if (composeHandler.serves(session)) {
-                            return composeHandler;
+                        try {
+                            if (composeHandler.serves(session)) {
+                                return composeHandler;
+                            }
+                        } catch (Exception e) {
+                            LOG.warn("Failed to check compose handler {}", composeHandler.getClass().getName(), e);
                         }
                     }
 
