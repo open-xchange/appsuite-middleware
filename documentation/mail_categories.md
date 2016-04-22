@@ -15,7 +15,7 @@ They also have a fixed name and optional translations. Its possible for the host
 #### User categories
 In addition to the system categories the hoster is able to define user categories.
 User categories are very similar to system categories. In difference to the system categories they do not include any rules at the beginning and
-they can be renamed by the user. For this reason translations are also not available. It is also not possible to prevent deactivation of user categories.
+they can be renamed by the user. It is not possible to prevent deactivation of user categories.
 
 
 #### Customize categories
@@ -54,18 +54,20 @@ To properly configure the mail categories feature one has to do the following st
       * com.openexchange.mail.categories.[category].force
       Set to true if the user shouldn't be able to disable the category
       * com.openexchange.mail.categories.[category].active=true
-      * com.openexchange.mail.categories.[category].name
+      * com.openexchange.mail.categories.[category].name.fallback
       The fallback name of the category
-      * com.openexchange.mail.categories.[category].name.de_DE
-      A translation entry for each supported language. See also com.openexchange.mail.categories.languages.
+      * com.openexchange.mail.categories.[category].name.[language]
+      A translation entry for each supported language.
   * Define user categories
     * Add a category id ([category]) for each user category (e.g. "uc1, uc2, uc3") to com.openexchange.mail.user.categories.identifiers
     * Add the following configurations for each user category id
       * com.openexchange.mail.categories.[category].flag
       The id of the email flag.
       * com.openexchange.mail.categories.[category].active=true
-      * com.openexchange.mail.categories.[category].name
-      The default name of the category
+      * com.openexchange.mail.categories.[category].name.fallback
+      The fallback name of the category
+      * com.openexchange.mail.categories.[category].name.[language]
+      A translation entry for each supported language.
 
 In addition it is also possible to configure the fallback name and the translations for the general category. It is done in the exact same way as the other categories.
 One just has to use _general_ as the category identifier. In contrary to the other categories only the name and the translation fields are taken into account. Other fields will be ignored.
@@ -77,6 +79,7 @@ In addition the io.ox/mail tree is extended with an entry 'categories':
 
     "categories": {
          "enabled": true,
+         "forced": false,
          "list": [
            {
              "id": "offers",
@@ -107,7 +110,7 @@ In addition the io.ox/mail tree is extended with an entry 'categories':
          ]
        }
 
-The categories entry contains two main fields: 'enabled' and 'list'. The 'enabled' field is a boolean flag indicating if the categories should be shown or not and can be overwritten by the client.
+The categories entry contains three fields: 'enabled', 'forced' and 'list'. The 'enabled' field is a boolean flag indicating if the categories should be shown or not. It is writeable and can be overwritten by the forced field, which itself is read only.
 The 'list' field contains an array of single category configurations and always contains the 'general' category. Each category config has four fields: 'id', 'name', 'active' and 'permissions'.
 
 | Fieldname   |                                                                                                                                                                             Description |
@@ -167,7 +170,7 @@ Body:
 
 A JSON array of mail identifier, e.g.:
 
-[{"id":ID, "folder_id":FID},{"id":ID, "folder_id":FID}, {...}]
+    [{"id":ID, "folder_id":FID},{"id":ID2, "folder_id":FID2}, {...}]
 
 
 Response:  An empty response if everything went well or a JSON object containing the error information.
@@ -212,8 +215,8 @@ PUT /ajax/mail/categories?action=train
 
 Body:
 
-A JSON array of mail addresses, e.g.:
+A JSON object containing a "from" field which contains an array of mail addresses, e.g.:
 
-    ["email1@domain1.tld","email2@domain2.tld"]
+    { "from":["email1@domain1.tld","email2@domain2.tld"]}
 
 Response:  An empty response if everything went well or a JSON object containing the error information.
