@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.httpapi" basedir="." default="compile">
+
+	<description>
+        Builds the HTTP API client
+    </description>
+
+	<!-- Constants -->
+	<property name="mainSrcDir" value="src" />
+	<property name="libDir" value="lib" />
+	<property name="clientFileName" value="apiFile" />
+	<property name="binDir" value="build" />
+
+	<target name="clean">
+		<delete dir="${binDir}" />
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${binDir}/classes" />
+		<javac srcdir="${mainSrcDir}" destdir="${binDir}/classes">
+			<classpath>
+				<pathelement path="${libDir}/*.jar" />
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="${binDir}/jar" />
+		<jar destfile="${binDir}/jar/${clientFileName}" basedir="${binDir}/classes" />
+	</target>
+</project>
