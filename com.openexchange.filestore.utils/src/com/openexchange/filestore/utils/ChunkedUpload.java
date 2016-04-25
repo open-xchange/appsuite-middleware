@@ -141,7 +141,7 @@ public abstract class ChunkedUpload<I extends InputStream, C extends UploadChunk
             hasNext = false;
             return createChunkWith(fileHolder, true);
         } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e);
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
     }
 
