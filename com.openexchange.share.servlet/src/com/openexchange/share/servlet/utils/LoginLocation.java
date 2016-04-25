@@ -49,6 +49,9 @@
 
 package com.openexchange.share.servlet.utils;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -67,32 +70,44 @@ import com.openexchange.tools.encoding.URLCoder;
 public class LoginLocation {
 
     /**
-     * Builds the redirect location using specified token
-     *
-     * @param token The token
-     * @param location The associated login location
-     * @return The redirect location
+     * The default allowed attributes consisting of:
+     * <ul>
+     * <li><code>"login_type"</code></li>
+     * <li><code>"share"</code></li>
+     * <li><code>"target"</code></li>
+     * </ul>
      */
-    public static String buildRedirectWith(String token, LoginLocation location) {
-        return buildRedirectWith(token, location.asMap().get("login_type"));
-    }
+    public static final Collection<String> DEFAULT_ALLOWED_ATTRIBUTES = Collections.unmodifiableCollection(Arrays.asList("login_type", "share", "target"));
 
     /**
      * Builds the redirect location using specified token
      *
      * @param token The token
-     * @param loginType The associated login type
+     * @param location The associated login location
+     * @param allowedAttributes Specifies those attributes kept in given <code>LoginLocation</code> instance that are allowed to be passed to client
      * @return The redirect location
      */
-    public static String buildRedirectWith(String token, String loginType) {
+    public static String buildRedirectWith(String token, LoginLocation location, Collection<String> allowedAttributes) {
         StringBuilder sb = new StringBuilder(96);
         sb.append(ShareRedirectUtils.getLoginLink()).append("#!");
         sb.append("&token=").append(token);
-        if (false == Strings.isEmpty(loginType)) {
-            sb.append("&login_type=").append(loginType);
+
+        // Add attributes
+        if (null != allowedAttributes) {
+            Map<String, String> attributes = location.asMap();
+            for (String allowedAttribute : allowedAttributes) {
+                if (false == Strings.isEmpty(allowedAttribute)) {
+                    String value = attributes.get(allowedAttribute);
+                    if (false == Strings.isEmpty(value)) {
+                        sb.append('&').append(allowedAttribute).append('=').append(value);
+                    }
+                }
+            }
         }
+
         return sb.toString();
     }
+
 
     // ----------------------------------------------------------------------------------------------------------------------------
 

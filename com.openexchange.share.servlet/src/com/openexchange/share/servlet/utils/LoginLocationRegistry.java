@@ -50,6 +50,7 @@
 package com.openexchange.share.servlet.utils;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
@@ -117,16 +118,28 @@ public class LoginLocationRegistry {
     }
 
     /**
-     * Puts specified login location into this registry and performs the redirect.
+     * Puts specified login location into this registry and performs the redirect using {@link LoginLocation#DEFAULT_ALLOWED_ATTRIBUTES default allowed attributes}.
      *
      * @param loginLocation The associated login location
-     * @return The token referring to the login location
+     * @param response The associated HTTP response
      * @throws IOException If redirect fails due to an I/O error
      */
     public void putAndRedirect(LoginLocation loginLocation, HttpServletResponse response) throws IOException {
+        putAndRedirect(loginLocation, response, LoginLocation.DEFAULT_ALLOWED_ATTRIBUTES);
+    }
+
+    /**
+     * Puts specified login location into this registry and performs the redirect.
+     *
+     * @param loginLocation The associated login location
+     * @param response The associated HTTP response
+     * @param allowedAttributes Specifies those attributes kept in given <code>LoginLocation</code> instance that are allowed to be passed to client
+     * @throws IOException If redirect fails due to an I/O error
+     */
+    public void putAndRedirect(LoginLocation loginLocation, HttpServletResponse response, Collection<String> allowedAttributes) throws IOException {
         String token = UUIDs.getUnformattedString(UUID.randomUUID());
         cache.put(token, loginLocation);
-        response.sendRedirect(LoginLocation.buildRedirectWith(token, loginLocation));
+        response.sendRedirect(LoginLocation.buildRedirectWith(token, loginLocation, allowedAttributes));
     }
 
     /**
