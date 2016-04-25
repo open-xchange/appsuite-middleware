@@ -49,7 +49,21 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import org.apache.commons.codec.binary.Base64;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ShareReference} - References shared folder/items.
@@ -59,7 +73,38 @@ import java.util.List;
  */
 public class ShareReference {
 
-    private static final String DELIM = "?==?";
+    /**
+     * Parses a <code>ShareReference</code> from specified reference string.
+     *
+     * @param referenceString The reference string to parse
+     * @return The <code>ShareReference</code> instance
+     */
+    public static ShareReference parseFromReferenceString(String referenceString) {
+        if (Strings.isEmpty(referenceString)) {
+            return null;
+        }
+
+        try {
+            JSONObject jReference = new JSONObject(decompress(referenceString));
+            List<String> itemIds;
+            {
+                JSONArray jItemIds = jReference.getJSONArray("itemIds");
+                int length = jItemIds.length();
+                itemIds = new ArrayList<String>(length);
+                for (int i = 0; i < length; i++) {
+                    itemIds.add(jItemIds.getString(i));
+                }
+            }
+            return new ShareReference(jReference.getString("shareUrl"), itemIds, jReference.getString("folderId"), jReference.getInt("userId"), jReference.getInt("contextId"));
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            // Cannot occur
+            throw new IllegalStateException(e);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     private final int contextId;
     private final int userId;
@@ -85,6 +130,48 @@ public class ShareReference {
         this.contextId = contextId;
     }
 
+    /**
+     * Generates the reference string.
+     *
+     * @return The reference string
+     */
+    public String generateReferenceString() {
+        try {
+            JSONObject jReference = new JSONObject(8);
+            jReference.put("shareUrl", shareUrl);
+            jReference.put("contextId", contextId);
+            jReference.put("userId", userId);
+            jReference.put("folderId", folderId);
+            jReference.put("itemIds", new JSONArray(itemIds));
+            return compress(jReference.toString());
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            // Cannot occur
+            throw new IllegalStateException(e);
+        }
+    }
 
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
+    private static String compress(String str) throws IOException {
+        ByteArrayOutputStream byteSink = new ByteArrayOutputStream();
+        GZIPOutputStream gzip = new GZIPOutputStream(byteSink);
+        gzip.write(str.getBytes(Charsets.UTF_8));
+        gzip.flush();
+        gzip.close();
+        return Base64.encodeBase64String(byteSink.toByteArray());
+     }
+
+    private static String decompress(String str) throws UnsupportedEncodingException, IOException {
+        byte[] data = Base64.decodeBase64(str);
+        Reader reader = new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(data)), "UTF-8");
+        StringBuilder outStr = new StringBuilder(str.length());
+        char[] cbuf = new char[2048];
+        for (int read; (read = reader.read(cbuf, 0, 2048)) > 0;) {
+            outStr.append(cbuf, 0, read);
+        }
+        return outStr.toString();
+     }
 
 }

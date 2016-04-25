@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import static com.openexchange.mail.json.compose.share.ShareComposeConstants.HEADER_SHARE_MAIL;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -208,12 +209,16 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         // Save attachments into that folder
         List<String> savedAttachments = saveAttachments(folderID, context.getAllParts(), context.getSession());
 
-        // Create share compose reference
-        // TODO:
-
         // Create share target for that folder for an anonymous user
         ShareTarget folderTarget = new ShareTarget(FileStorageContentType.getInstance().getModule(), folderID);
         ShareLink folderLink = ServerServiceRegistry.getServize(ShareService.class).getLink(context.getSession(), folderTarget);
+
+        // Create share compose reference
+        ShareReference shareReference;
+        {
+            String basicShareUrl = folderLink.getShareURL(request.getRequest().getHostData());
+            shareReference = new ShareReference(basicShareUrl, savedAttachments, folderID, context.getSession().getUserId(), context.getSession().getContextId());
+        }
 
         // Create share link(s) for recipients
         Map<ShareComposeLink, Set<Recipient>> links = new LinkedHashMap<>(recipients.size());
@@ -241,18 +246,24 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         List<ComposedMailMessage> transportMessages = new LinkedList<>();
         ComposedMailMessage sentMessage;
         {
+            String referenceString = shareReference.generateReferenceString();
+
             MessageGeneratorRegistry generatorRegistry = ServerServiceRegistry.getInstance().getService(MessageGeneratorRegistry.class);
             MessageGenerator messageGenerator = generatorRegistry.getMessageGeneratorFor(context.getSession());
             for (Map.Entry<ShareComposeLink, Set<Recipient>> entry : links.entrySet()) {
                 ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<Recipient>(entry.getValue()), password, expirationDate, source, context);
                 List<ComposedMailMessage> messages = messageGenerator.generateTransportMessagesFor(messageInfo);
-                transportMessages.addAll(messages);
+                for (ComposedMailMessage transportMessage : messages) {
+                    transportMessage.setHeader(HEADER_SHARE_MAIL, referenceString);
+                    transportMessages.add(transportMessage);
+                }
             }
 
             String sendAddr = request.getSession().getUserSettingMail().getSendAddr();
             User user = request.getUser();
             Recipient userRecipient = Recipient.createInternalRecipient(user.getDisplayName(), sendAddr, user);
             sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context));
+            sentMessage.setHeader(HEADER_SHARE_MAIL, referenceString);
         }
 
         return new DefaultComposeTransportResult(transportMessages, sentMessage);

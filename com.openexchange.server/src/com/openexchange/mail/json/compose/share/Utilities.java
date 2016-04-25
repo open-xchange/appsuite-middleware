@@ -68,14 +68,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public final class Utilities {
-
-    /**
-     * Prevent initialization.
-     */
-    private Utilities() {
-        super();
-    }
+public enum Utilities {
+    ;
 
     private static ConfigViewFactory getConfigViewFactory() throws OXException {
         ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
