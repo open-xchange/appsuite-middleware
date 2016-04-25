@@ -133,12 +133,12 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             ArrayList<String> result = new ArrayList<>(userCategories.length);
             for (String category : userCategories) {
                 if (onlyEnabled) {
-                    boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                    boolean active = MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
                     if (!active) {
                         continue;
                     }
                 }
-                result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+                result.add(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
             }
 
             return result.toArray(new String[result.size()]);
@@ -154,24 +154,24 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         ArrayList<String> result = new ArrayList<>(categories.length + userCategories.length);
         for (String category : categories) {
             if (onlyEnabled) {
-                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                boolean active = MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
                 if (!active) {
-                    boolean forced = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
+                    boolean forced = MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
                     if (!forced) {
                         continue;
                     }
                 }
             }
-            result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+            result.add(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         }
         for (String category : userCategories) {
             if (onlyEnabled) {
-                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                boolean active = MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
                 if (!active) {
                     continue;
                 }
             }
-            result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+            result.add(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         }
 
         return result.toArray(new String[result.size()]);
@@ -180,14 +180,14 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     private MailCategoryConfig getConfigByCategory(Session session, Locale locale, String category) throws OXException {
         Builder builder = new Builder();
         builder.category(category);
-        String name = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
+        String name = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
         if (Strings.isEmpty(name)) {
             name = getLocalizedName(session, locale, category);
         }
         builder.name(name);
-        builder.enabled(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
-        builder.force(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session));
-        builder.flag(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+        builder.enabled(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
+        builder.force(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session));
+        builder.flag(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         builder.isSystemCategory(isSystemCategory(category, session));
         MailCategoryConfig result = builder.build();
         if (result.getFlag() == null) {
@@ -200,13 +200,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     private MailCategoryConfig getUserConfigByCategory(Session session, Locale locale, String category) throws OXException {
         Builder builder = new Builder();
         builder.category(category);
-        String name = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
+        String name = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
         if (Strings.isEmpty(name)) {
             name = getLocalizedName(session, locale, category);
         }
         builder.name(name);
-        builder.enabled(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
-        builder.flag(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+        builder.enabled(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
+        builder.flag(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         builder.isSystemCategory(false);
         MailCategoryConfig result = builder.build();
         return result;
@@ -214,20 +214,20 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     @Override
     public String getFlagByCategory(Session session, String category) throws OXException {
-        return MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
+        return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
     }
 
     private String getLocalizedName(Session session, Locale locale, String category) throws OXException {
 
-        String translation = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_LANGUAGE_PREFIX + locale.toString(), null, session);
+        String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_LANGUAGE_PREFIX + locale.toString(), null, session);
         if (translation != null && !translation.isEmpty()) {
             return translation;
         }
-        return MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FALLBACK, category, session);
+        return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FALLBACK, category, session);
     }
 
     private String[] getSystemCategoryNames(Session session) throws OXException {
-        String categoriesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, null, session);
+        String categoriesString = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, null, session);
         if (Strings.isEmpty(categoriesString)) {
             return new String[0];
         }
@@ -237,7 +237,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     private String[] getUserCategoryNames(Session session) throws OXException {
-        String categoriesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, null, session);
+        String categoriesString = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, null, session);
         if (Strings.isEmpty(categoriesString)) {
             return new String[0];
         }
@@ -260,17 +260,17 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     @Override
     public boolean isEnabled(Session session) throws OXException {
-        return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, true, session);
+        return MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, true, session);
     }
 
     @Override
     public boolean isForced(Session session) throws OXException {
-        return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_FORCE_SWITCH, false, session);
+        return MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_FORCE_SWITCH, false, session);
     }
 
     @Override
     public void enable(Session session, boolean enable) throws OXException {
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, String.valueOf(enable), session);
+        MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, String.valueOf(enable), session);
     }
 
     private String generateFlag(String category) {
@@ -303,7 +303,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         String flag = getFlagByCategory(session, category);
         if (Strings.isEmpty(flag)) {
             flag = generateFlag(category);
-            MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, flag, session);
+            MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, flag, session);
         }
         return ruleEngine.getRule(session, flag);
     }
@@ -471,10 +471,10 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 }
 
                 if (switchStatus) {
-                    MailCategories.activateProperty(oldConfig.getCategory(), newConfig.isEnabled(), session);
+                    MailCategoriesConfigUtil.activateProperty(oldConfig.getCategory(), newConfig.isEnabled(), session);
                 }
                 if (rename) {
-                    MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + oldConfig.getCategory() + MailCategoriesConstants.MAIL_CATEGORIES_NAME, newConfig.getName(), session);
+                    MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + oldConfig.getCategory() + MailCategoriesConstants.MAIL_CATEGORIES_NAME, newConfig.getName(), session);
                 }
             } else {
                 throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(newConfig.getCategory());

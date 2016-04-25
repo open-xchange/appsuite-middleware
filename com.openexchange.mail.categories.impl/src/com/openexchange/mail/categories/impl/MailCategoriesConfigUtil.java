@@ -49,7 +49,11 @@
 
 package com.openexchange.mail.categories.impl;
 
+import java.util.Collections;
+import java.util.Map;
 import org.apache.commons.lang.Validate;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -62,17 +66,25 @@ import com.openexchange.mail.categories.impl.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailCategories} - A utility class for mail categories aka. tabbed primary Inbox.
+ * {@link MailCategoriesConfigUtil} - A utility class for mail categories aka. tabbed primary Inbox.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public final class MailCategories {
+public final class MailCategoriesConfigUtil implements Reloadable {
+
+    private static final String CONFIG_FILE_NAME = "mail-categories.properties";
+    private final static String[] PROPERTIES = new String[] { "all properties in file" };
+    private static final MailCategoriesConfigUtil INSTANCE = new MailCategoriesConfigUtil();
+
+    public static MailCategoriesConfigUtil getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * Prevent initialization.
      */
-    private MailCategories() {
+    private MailCategoriesConfigUtil() {
         super();
     }
 
@@ -265,6 +277,16 @@ public final class MailCategories {
 
         ConfigProperty<String> confProperty = view.property("user", property, String.class);
         confProperty.set(value);
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        // nothing to do
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        return Collections.singletonMap(CONFIG_FILE_NAME, PROPERTIES);
     }
 
 }
