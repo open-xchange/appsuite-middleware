@@ -47,38 +47,48 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share;
+package com.openexchange.share;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.net.URI;
+import java.net.URISyntaxException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.java.Strings;
 
 /**
- * {@link ShareComposeStrings} - The i18n string literals for share compose module.
+ * {@link Links} - Utility class for generating links.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeStrings implements LocalizableStrings {
+public class Links {
 
     /**
-     * Initializes a new {@link ShareComposeStrings}.
+     * Initializes a new {@link Links}.
      */
-    private ShareComposeStrings() {
+    private Links() {
         super();
     }
 
-    // The name of the folder holding the attachments, which were shared to other recipients.
-    public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
+    /**
+     * Generates a share link for an internal user with a concrete target to jump to.
+     *
+     * @param module The module identifier
+     * @param folder The folder identifier
+     * @param item The optional item identifier or <code>null</code>
+     * @param hostData The host data
+     * @return The internal share link
+     */
+    public static String generateInternalLink(String module, String folder, String item, HostData hostData) {
+        try {
+            StringBuilder fragment = new StringBuilder(64).append("!&app=io.ox/").append(module).append("&folder=").append(folder);
+            if (Strings.isNotEmpty(item)) {
+                fragment.append("&id=").append(item);
+            }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link:";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the elapsed date for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on #DATE#";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments";
+            return new URI(hostData.isSecure() ? "https" : "http", null, hostData.getHost(), -1, "/appsuite/ui", null, fragment.toString()).toString();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Building URI failed", e);
+        }
+    }
 
 }

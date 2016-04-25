@@ -49,36 +49,90 @@
 
 package com.openexchange.mail.json.compose.share;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.Date;
+import java.util.List;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 
 /**
- * {@link ShareComposeStrings} - The i18n string literals for share compose module.
+ * {@link ShareComposeMessageInfo}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeStrings implements LocalizableStrings {
+public class ShareComposeMessageInfo {
+
+    private final ShareComposeLink shareLink;
+    private final List<Recipient> recipients;
+    private final ShareTransportComposeContext composeContext;
+    private final String password;
+    private final Date expirationDate;
+    private final ComposedMailMessage source;
 
     /**
-     * Initializes a new {@link ShareComposeStrings}.
+     * Initializes a new {@link ShareComposeMessageInfo}.
      */
-    private ShareComposeStrings() {
+    public ShareComposeMessageInfo(ShareComposeLink shareLink, List<Recipient> recipients, String password, Date expirationDate, ComposedMailMessage source, ShareTransportComposeContext context) {
         super();
+        this.shareLink = shareLink;
+        this.recipients = recipients;
+        this.password = password;
+        this.expirationDate = expirationDate;
+        this.source = source;
+        this.composeContext = context;
     }
 
-    // The name of the folder holding the attachments, which were shared to other recipients.
-    public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
+    /**
+     * Gets the source message
+     *
+     * @return The source message
+     */
+    public ComposedMailMessage getSource() {
+        return source;
+    }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link:";
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the elapsed date for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on #DATE#";
+    /**
+     * Gets the expiration date
+     *
+     * @return The expiration date
+     */
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments";
+    /**
+     * Gets the compose context
+     *
+     * @return The compose context
+     */
+    public ShareTransportComposeContext getComposeContext() {
+        return composeContext;
+    }
+
+    /**
+     * Gets the share link
+     *
+     * @return The share link
+     */
+    public ShareComposeLink getShareLink() {
+        return shareLink;
+    }
+
+    /**
+     * Gets the recipients that are supposed to receive the share link.
+     *
+     * @return The recipients
+     */
+    public List<Recipient> getRecipients() {
+        return recipients;
+    }
 
 }

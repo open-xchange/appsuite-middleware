@@ -47,38 +47,67 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share;
+package com.openexchange.mail.json.compose.share.internal;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.mail.json.compose.share.ShareComposeLink;
+
 
 /**
- * {@link ShareComposeStrings} - The i18n string literals for share compose module.
+ * {@link ShareComposeLinkImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeStrings implements LocalizableStrings {
+public class ShareComposeLinkImpl implements ShareComposeLink {
+
+    private final String name;
+    private final String link;
+    private final int hash;
 
     /**
-     * Initializes a new {@link ShareComposeStrings}.
+     * Initializes a new {@link ShareComposeLinkImpl}.
      */
-    private ShareComposeStrings() {
+    public ShareComposeLinkImpl(String name, String link) {
         super();
+        this.name = name;
+        this.link = link;
+
+        int prime = 31;
+        int result = prime * 1 + ((link == null) ? 0 : link.hashCode());
+        hash = result;
     }
 
-    // The name of the folder holding the attachments, which were shared to other recipients.
-    public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
+    @Override
+    public String getName() {
+        return name;
+    }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link:";
+    @Override
+    public String getLink() {
+        return link;
+    }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the elapsed date for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on #DATE#";
+    @Override
+    public int hashCode() {
+        return hash;
+    }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments";
-
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ShareComposeLinkImpl)) {
+            return false;
+        }
+        ShareComposeLinkImpl other = (ShareComposeLinkImpl) obj;
+        if (link == null) {
+            if (other.link != null) {
+                return false;
+            }
+        } else if (!link.equals(other.link)) {
+            return false;
+        }
+        return true;
+    }
 }

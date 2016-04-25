@@ -49,14 +49,13 @@
 
 package com.openexchange.mail.json.compose.share;
 
-import javax.mail.internet.InternetAddress;
-
 /**
- * {@link LinkedAttachment}
+ * {@link ShareComposeLink}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public interface LinkedAttachment {
+public interface ShareComposeLink {
 
     /**
      * Gets the linked attachment's name.
@@ -68,9 +67,8 @@ public interface LinkedAttachment {
     /**
      * Gets a link to access the linked attachment.
      *
-     * @param recipient The mail recipient to build the link for
      * @return The link
      */
-    String getLink(InternetAddress recipient);
+    String getLink();
 
 }

@@ -53,6 +53,8 @@ import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.tools.session.ServerSession;
@@ -85,6 +87,24 @@ public class ComposeRequest {
         this.uploadEvent = uploadEvent;
         this.request = request;
         this.warnings = warnings;
+    }
+
+    /**
+     * Gets the associated context
+     *
+     * @return The context
+     */
+    public Context getContext() {
+        return getSession().getContext();
+    }
+
+    /**
+     * Gets the associated user, which executed this request
+     *
+     * @return The user
+     */
+    public User getUser() {
+        return getSession().getUser();
     }
 
     /**

@@ -47,38 +47,56 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share;
+package com.openexchange.mail.json.compose.share.spi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.mail.json.compose.share.Recipient;
+import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ShareComposeStrings} - The i18n string literals for share compose module.
+ * {@link ShareLinkGenerator} - An interface that determines how a link to a shared folder is supposed to be generated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeStrings implements LocalizableStrings {
+public interface ShareLinkGenerator {
 
     /**
-     * Initializes a new {@link ShareComposeStrings}.
+     * Checks if applicable for specified session.
+     *
+     * @param session The session to check against
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
-    private ShareComposeStrings() {
-        super();
-    }
+    boolean applicableFor(Session session) throws OXException;
 
-    // The name of the folder holding the attachments, which were shared to other recipients.
-    public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
+    /**
+     * Generates the share link for specified recipient.
+     *
+     * @param recipient The recipient
+     * @param guest The guest
+     * @param sourceTarget The share target to the folder
+     * @param hostData The associated host data
+     * @param queryString The optional query string or <code>null</code>
+     * @param session The associated session
+     * @return The share link
+     * @throws OXException If generating the share link fails
+     */
+    String generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException;
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link:";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the elapsed date for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on #DATE#";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments";
-
+    /**
+     * Generates the personal share link for specified session's user.
+     *
+     * @param shareTarget The share target
+     * @param hostData The host data
+     * @param queryString The optional query string or <code>null</code>
+     * @param session The associated session
+     * @return The share link
+     * @throws OXException If generating the share link fails
+     */
+    String generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session);
 }

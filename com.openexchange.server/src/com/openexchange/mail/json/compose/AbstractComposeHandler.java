@@ -125,7 +125,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D extends AbstractComposeContext> implements ComposeHandler {
+public abstract class AbstractComposeHandler<T extends ComposeContext, D extends ComposeContext> implements ComposeHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractComposeHandler.class);
 
@@ -216,7 +216,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
      * @param context The associated compose context
      * @return The regular message
      */
-    protected <C extends AbstractComposeContext> ComposedMailMessage createRegularComposeMessage(C context) {
+    protected <C extends ComposeContext> ComposedMailMessage createRegularComposeMessage(C context) {
         ComposedMailMessage sourceMessage = context.getSourceMessage();
         sourceMessage.setBodyPart(context.getTextPart());
         for (MailPart part : context.getAllParts()) {
@@ -233,7 +233,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
      * @throws OXException If preparing fails
      * @throws JSONException If a JSON error occurred
      */
-    protected <C extends AbstractComposeContext> void prepare(ComposeRequest request, C context) throws OXException, JSONException {
+    protected <C extends ComposeContext> void prepare(ComposeRequest request, C context) throws OXException, JSONException {
         // Create a new compose message
         ComposedMailMessage sourceMessage = newComposedMailMessage(context);
 
@@ -328,7 +328,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
      * @throws OXException If parsing fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void parseDriveParts(JSONArray jDriveIds, AbstractComposeContext context) throws OXException, JSONException {
+    protected void parseDriveParts(JSONArray jDriveIds, ComposeContext context) throws OXException, JSONException {
         int length = jDriveIds.length();
         if (length > 0) {
             // Check max. allowed Drive attachments
@@ -350,7 +350,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
      * @throws OXException If parsing fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void parseDataSources(JSONArray jDataSources, AbstractComposeContext context) throws OXException, JSONException {
+    protected void parseDataSources(JSONArray jDataSources, ComposeContext context) throws OXException, JSONException {
         int length = jDataSources.length();
         if (length > 0) {
             // Check max. allowed Drive attachments
@@ -445,7 +445,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
      * @throws OXException If parsing fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, AbstractComposeContext context) throws OXException, JSONException {
+    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, ComposeContext context) throws OXException, JSONException {
         // Get the identifier of the referenced message
         MailPath parentMsgRef = composeMessage.getMsgref();
 
@@ -476,7 +476,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
      * @throws OXException If handling fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void handleReferencedPart(MailPath parentMsgRef, String seqId, Map<String, ReferencedMailPart> referencedParts, JSONObject jAttachment, AbstractComposeContext context) throws OXException, JSONException {
+    protected void handleReferencedPart(MailPath parentMsgRef, String seqId, Map<String, ReferencedMailPart> referencedParts, JSONObject jAttachment, ComposeContext context) throws OXException, JSONException {
         // Prefer "msgref" from attachment if present, otherwise from superior mail
         MailPath msgref;
         boolean isMail;
@@ -517,7 +517,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
      * @throws OXException If handling fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void handleDataPart(JSONObject jAttachment, AbstractComposeContext context) throws OXException, JSONException {
+    protected void handleDataPart(JSONObject jAttachment, ComposeContext context) throws OXException, JSONException {
         String contentType = parseContentType(jAttachment.getString(CONTENT_TYPE));
         String charsetName = "UTF-8";
         byte[] content;
@@ -566,7 +566,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
      * @throws OXException If loading the parts fails
      * @throws JSONException If a JSON error occurred
      */
-    protected Map<String, ReferencedMailPart> loadReferencedParts(JSONArray jAttachments, Set<String> contentIds, MailPath parentMsgRef, AbstractComposeContext context) throws OXException, JSONException {
+    protected Map<String, ReferencedMailPart> loadReferencedParts(JSONArray jAttachments, Set<String> contentIds, MailPath parentMsgRef, ComposeContext context) throws OXException, JSONException {
         if (null == parentMsgRef) {
             return Collections.emptyMap();
         }
@@ -604,7 +604,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
         }
     }
 
-    protected Map<String, ReferencedMailPart> loadMultipleRefs(Map<String, String> groupedSeqIDs, MailPath parentMsgRef, Set<String> contentIds, MailAccess<?, ?> access, AbstractComposeContext context) throws OXException {
+    protected Map<String, ReferencedMailPart> loadMultipleRefs(Map<String, String> groupedSeqIDs, MailPath parentMsgRef, Set<String> contentIds, MailAccess<?, ?> access, ComposeContext context) throws OXException {
         MailMessage referencedMail = access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
         if (null == referencedMail) {
             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
@@ -639,7 +639,7 @@ public abstract class AbstractComposeHandler<T extends AbstractComposeContext, D
      * @return A new {@code ComposedMailMessage} instance
      * @throws OXException If a new {@code ComposedMailMessage} instance cannot be returned
      */
-    protected ComposedMailMessage newComposedMailMessage(AbstractComposeContext composeContext) throws OXException {
+    protected ComposedMailMessage newComposedMailMessage(ComposeContext composeContext) throws OXException {
         // Create a new instance
         ServerSession session = composeContext.getSession();
         ComposedMailMessage composedMail = composeContext.getProvider().getNewComposedMailMessage(session, session.getContext());

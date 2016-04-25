@@ -55,9 +55,12 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.compose.ComposeContext;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Utilities} - A utility class for share compose module.
@@ -242,5 +245,82 @@ public final class Utilities {
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Creates a copy of compose context's source message
+     *
+     * @param composeContext The compose context
+     * @return The copy
+     * @throws OXException If a copy cannot be created
+     */
+    public static ComposedMailMessage copyOfSourceMessage(ComposeContext composeContext) throws OXException {
+        ServerSession session = composeContext.getSession();
+        ComposedMailMessage composedMail = composeContext.getProvider().getNewComposedMailMessage(session, session.getContext());
+        ComposedMailMessage source = composeContext.getSourceMessage();
+        if (source.containsFlags()) {
+            composedMail.setFlags(source.getFlags());
+        }
+        if (source.containsThreadLevel()) {
+            composedMail.setThreadLevel(source.getThreadLevel());
+        }
+        if (source.containsUserFlags()) {
+            composedMail.addUserFlags(source.getUserFlags());
+        }
+        if (source.containsUserFlags()) {
+            composedMail.addUserFlags(source.getUserFlags());
+        }
+        if (source.containsHeaders()) {
+            composedMail.addHeaders(source.getHeaders());
+        }
+        if (source.containsFrom()) {
+            composedMail.addFrom(source.getFrom());
+        }
+        if (source.containsTo()) {
+            composedMail.addTo(source.getTo());
+        }
+        if (source.containsCc()) {
+            composedMail.addCc(source.getCc());
+        }
+        if (source.containsBcc()) {
+            composedMail.addBcc(source.getBcc());
+        }
+        if (source.containsReplyTo()) {
+            composedMail.addReplyTo(source.getReplyTo());
+        }
+        if (source.containsDispositionNotification()) {
+            composedMail.setDispositionNotification(source.getDispositionNotification());
+        }
+        if (source.containsDispositionNotification()) {
+            composedMail.setDispositionNotification(source.getDispositionNotification());
+        }
+        if (source.containsPriority()) {
+            composedMail.setPriority(source.getPriority());
+        }
+        if (source.containsColorLabel()) {
+            composedMail.setColorLabel(source.getColorLabel());
+        }
+        if (source.containsAppendVCard()) {
+            composedMail.setAppendVCard(source.isAppendVCard());
+        }
+        if (source.containsMsgref()) {
+            composedMail.setMsgref(source.getMsgref());
+        }
+        if (source.containsSubject()) {
+            composedMail.setSubject(source.getSubject());
+        }
+        if (source.containsSize()) {
+            composedMail.setSize(source.getSize());
+        }
+        if (source.containsSentDate()) {
+            composedMail.setSentDate(source.getSentDate());
+        }
+        if (source.containsReceivedDate()) {
+            composedMail.setReceivedDate(source.getReceivedDate());
+        }
+        if (source.containsContentType()) {
+            composedMail.setContentType(source.getContentType());
+        }
+        return composedMail;
+    } // End of copyOfSourceMessage()
 
 }

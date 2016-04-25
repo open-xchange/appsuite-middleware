@@ -47,38 +47,42 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share;
+package com.openexchange.mail.json.compose.share.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.share.DefaultShareLinkGenerator;
+import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
+import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.session.Session;
 
 /**
- * {@link ShareComposeStrings} - The i18n string literals for share compose module.
+ * {@link ShareLinkGeneratorRegistryImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeStrings implements LocalizableStrings {
+public class ShareLinkGeneratorRegistryImpl implements ShareLinkGeneratorRegistry {
+
+    private final ServiceListing<ShareLinkGenerator> generators;
 
     /**
-     * Initializes a new {@link ShareComposeStrings}.
+     * Initializes a new {@link ShareLinkGeneratorRegistryImpl}.
      */
-    private ShareComposeStrings() {
+    public ShareLinkGeneratorRegistryImpl(ServiceListing<ShareLinkGenerator> generators) {
         super();
+        this.generators = generators;
     }
 
-    // The name of the folder holding the attachments, which were shared to other recipients.
-    public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
+    @Override
+    public ShareLinkGenerator getShareLinkGeneratorFor(Session session) throws OXException {
+        for (ShareLinkGenerator shareLinkGenerator : generators.getServiceList()) {
+            if (shareLinkGenerator.applicableFor(session)) {
+                return shareLinkGenerator;
+            }
+        }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link:";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the elapsed date for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on #DATE#";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments";
+        return DefaultShareLinkGenerator.getInstance();
+    }
 
 }

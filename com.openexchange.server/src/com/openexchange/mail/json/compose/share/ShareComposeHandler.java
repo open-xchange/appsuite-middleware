@@ -51,12 +51,18 @@ package com.openexchange.mail.json.compose.share;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -78,6 +84,9 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -91,7 +100,9 @@ import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.ComposeTransportResult;
 import com.openexchange.mail.json.compose.DefaultComposeDraftResult;
 import com.openexchange.mail.json.compose.DefaultComposeTransportResult;
-import com.openexchange.mail.json.parser.LinkedAttachment;
+import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
+import com.openexchange.mail.json.compose.share.internal.ShareComposeLinkGenerator;
+import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
@@ -101,12 +112,12 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareLink;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tx.TransactionAware;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -164,22 +175,87 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             }
         }
 
+        // Get the basic source message
         ComposedMailMessage source = context.getSourceMessage();
 
+        // Collect recipients
+        Set<Recipient> recipients;
+        {
+            Set<InternetAddress> addresses = new HashSet<InternetAddress>();
+            addresses.addAll(Arrays.asList(source.getTo()));
+            addresses.addAll(Arrays.asList(source.getCc()));
+            addresses.addAll(Arrays.asList(source.getBcc()));
+
+            UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+            Context ctx = request.getContext();
+
+            recipients = new LinkedHashSet<>(addresses.size());
+            for (InternetAddress address : addresses) {
+                User user = resolveToUser(address, ctx, userService);
+                String personal = address.getPersonal();
+                String sAddress = address.getAddress();
+                recipients.add(null == user ? Recipient.createExternalRecipient(personal, sAddress) : Recipient.createInternalRecipient(personal, sAddress, user));
+            }
+        }
+
+        // Optional password and expiration date
+        String password = getPassword(request);
+        Date expirationDate = getExpirationDate(request);
+
         // Get folder identifier
-        String folderID = createFolder(source, getPassword(request), getExpiratioDate(request), context.getSession());
+        String folderID = createFolder(source, password, expirationDate, context.getSession());
 
         // Save attachments into that folder
         List<String> savedAttachments = saveAttachments(folderID, context.getAllParts(), context.getSession());
 
-        // Create share target
+        // Create share compose reference
+        // TODO:
+
+        // Create share target for that folder for an anonymous user
         ShareTarget folderTarget = new ShareTarget(FileStorageContentType.getInstance().getModule(), folderID);
         ShareLink folderLink = ServerServiceRegistry.getServize(ShareService.class).getLink(context.getSession(), folderTarget);
 
-        // Create linked attachments
-        LinkedShareAttachment linkedAttachment = new LinkedShareAttachment(null, folderLink.getGuest(), request.getRequest().getHostData(), folderTarget, null);
+        // Create share link(s) for recipients
+        Map<ShareComposeLink, Set<Recipient>> links = new LinkedHashMap<>(recipients.size());
+        {
+            GuestInfo guest = folderLink.getGuest();
+            HostData hostData = request.getRequest().getHostData();
+            for (Recipient recipient : recipients) {
+                ShareComposeLink linkedAttachment = ShareComposeLinkGenerator.getInstance().createShareLink(recipient, folderTarget, guest, hostData, null, context.getSession());
+                Set<Recipient> associatedRecipients = links.get(linkedAttachment);
+                if (null == associatedRecipients) {
+                    associatedRecipients = new LinkedHashSet<>(recipients.size());
+                    links.put(linkedAttachment, associatedRecipients);
+                }
+                associatedRecipients.add(recipient);
+            }
+        }
 
-        return null;
+        // Create personal share link
+        ShareComposeLink personalLink;
+        {
+            personalLink = ShareComposeLinkGenerator.getInstance().createPersonalShareLink(folderTarget, request.getRequest().getHostData(), null, context.getSession());
+        }
+
+        // Generate messages from links
+        List<ComposedMailMessage> transportMessages = new LinkedList<>();
+        ComposedMailMessage sentMessage;
+        {
+            MessageGeneratorRegistry generatorRegistry = ServerServiceRegistry.getInstance().getService(MessageGeneratorRegistry.class);
+            MessageGenerator messageGenerator = generatorRegistry.getMessageGeneratorFor(context.getSession());
+            for (Map.Entry<ShareComposeLink, Set<Recipient>> entry : links.entrySet()) {
+                ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<Recipient>(entry.getValue()), password, expirationDate, source, context);
+                List<ComposedMailMessage> messages = messageGenerator.generateTransportMessagesFor(messageInfo);
+                transportMessages.addAll(messages);
+            }
+
+            String sendAddr = request.getSession().getUserSettingMail().getSendAddr();
+            User user = request.getUser();
+            Recipient userRecipient = Recipient.createInternalRecipient(user.getDisplayName(), sendAddr, user);
+            sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context));
+        }
+
+        return new DefaultComposeTransportResult(transportMessages, sentMessage);
     }
 
     protected String getPassword(ComposeRequest request) {
@@ -187,7 +263,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         return Strings.isEmpty(value) ? null : value;
     }
 
-    protected Date getExpiratioDate(ComposeRequest request) throws OXException {
+    protected Date getExpirationDate(ComposeRequest request) throws OXException {
         String value = request.getRequest().getParameter("expires");
         if (Strings.isEmpty(value)) {
             return null;
@@ -420,52 +496,21 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
     }
 
-    // ----------------------------------------------------------------------------------------------------------------------------------
-
-    private static boolean isEncodeRecipients() {
-        // TODO: Make extendible
-        return true;
-    }
-
-    private static final class LinkedShareAttachment implements LinkedAttachment {
-
-        private final GuestInfo guest;
-        private final ShareTarget sourceTarget;
-        private final HostData hostData;
-        private final String name;
-        private final String queryString;
-
-        LinkedShareAttachment(String name, GuestInfo guest, HostData hostData, ShareTarget sourceTarget, String queryString) {
-            super();
-            this.name = name;
-            this.guest = guest;
-            this.hostData = hostData;
-            this.sourceTarget = sourceTarget;
-            this.queryString = queryString;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String getLink(InternetAddress recipient) {
-            ShareTargetPath targetPath;
-            if (isEncodeRecipients()) {
-                Map<String, String> additionals = new HashMap<String, String>(1);
-                additionals.put("recipient", recipient.getAddress());
-                targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem(), additionals);
-            } else {
-                targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem());
+    private User resolveToUser(InternetAddress address, Context ctx, UserService userService) throws OXException {
+        User user;
+        try {
+            user = userService.searchUser(IDNA.toIDN(address.getAddress()), ctx);
+        } catch (final OXException e) {
+            /*
+             * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
+             * Therefore check for this special error code and throw an exception if it is not equal.
+             */
+            if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(e)) {
+                throw e;
             }
-            String url = guest.generateLink(hostData, targetPath);
-            if (Strings.isNotEmpty(queryString)) {
-                url = url + '?' + queryString;
-            }
-            return url;
+            user = null;
         }
-
+        return user;
     }
 
 }

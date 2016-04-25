@@ -47,38 +47,47 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share;
+package com.openexchange.mail.json.compose.share.spi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.compose.share.ShareComposeMessageInfo;
+import com.openexchange.session.Session;
 
 /**
- * {@link ShareComposeStrings} - The i18n string literals for share compose module.
+ * {@link MessageGenerator} - Generates appropriate compose messages for internal/external recipients.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeStrings implements LocalizableStrings {
+public interface MessageGenerator {
 
     /**
-     * Initializes a new {@link ShareComposeStrings}.
+     * Generates the transport messages for given attributes.
+     *
+     * @param info The message info providing the link and target recipients
+     * @return The generated messages
+     * @throws OXException If messages cannot be generated
      */
-    private ShareComposeStrings() {
-        super();
-    }
+    List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info) throws OXException;
 
-    // The name of the folder holding the attachments, which were shared to other recipients.
-    public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
+    /**
+     * Generates the messages, that is supposed to be added to standard sent folder.
+     *
+     * @param info The message info providing the link and user's recipient
+     * @return The generated message
+     * @throws OXException If message cannot be generated
+     */
+    ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info) throws OXException;
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link:";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the elapsed date for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on #DATE#";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments";
+    /**
+     * Checks if this generator is applicable for specified session.
+     *
+     * @param session The session
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean applicableFor(Session session) throws OXException;
 
 }

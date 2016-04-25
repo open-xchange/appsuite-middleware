@@ -47,38 +47,55 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share;
+package com.openexchange.mail.json.compose.share.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
+import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
+import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
+import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.server.services.ServerServiceRegistry;
+
 
 /**
- * {@link ShareComposeStrings} - The i18n string literals for share compose module.
+ * {@link ShareComposeActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeStrings implements LocalizableStrings {
+public class ShareComposeActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link ShareComposeStrings}.
+     * Initializes a new {@link ShareComposeActivator}.
      */
-    private ShareComposeStrings() {
+    public ShareComposeActivator() {
         super();
     }
 
-    // The name of the folder holding the attachments, which were shared to other recipients.
-    public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link:";
+    @Override
+    protected void startBundle() throws Exception {
+        RankingAwareNearRegistryServiceTracker<ShareLinkGenerator> shareLinkGeneratorTracker = new RankingAwareNearRegistryServiceTracker<>(context, ShareLinkGenerator.class);
+        rememberTracker(shareLinkGeneratorTracker);
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the elapsed date for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on #DATE#";
+        RankingAwareNearRegistryServiceTracker<MessageGenerator> messageGeneratorTracker = new RankingAwareNearRegistryServiceTracker<>(context, MessageGenerator.class);
+        rememberTracker(messageGeneratorTracker);
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments";
+        openTrackers();
+
+        ServerServiceRegistry.getInstance().addService(ShareLinkGeneratorRegistry.class, new ShareLinkGeneratorRegistryImpl(shareLinkGeneratorTracker));
+        ServerServiceRegistry.getInstance().addService(MessageGeneratorRegistry.class, new MessageGeneratorRegistryImpl(messageGeneratorTracker));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        ServerServiceRegistry.getInstance().removeService(ShareLinkGeneratorRegistry.class);
+        super.stopBundle();
+    }
 
 }

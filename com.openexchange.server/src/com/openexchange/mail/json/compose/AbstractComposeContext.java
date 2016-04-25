@@ -78,7 +78,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public abstract class AbstractComposeContext {
+public abstract class AbstractComposeContext implements ComposeContext {
 
     /* Final members */
     private final int accountId;
@@ -128,74 +128,42 @@ public abstract class AbstractComposeContext {
      */
     protected abstract void onPartAdd(MailPart part, ComposedMailPart info) throws OXException;
 
-    /**
-     * Sets the source compose message providing basic information.
-     *
-     * @param sourceMessage The compose message to set
-     */
+    @Override
     public void setSourceMessage(ComposedMailMessage sourceMessage) {
         this.sourceMessage = sourceMessage;
     }
 
-    /**
-     * Gets the source compose message providing basic information.
-     *
-     * @return The compose message
-     */
+    @Override
     public ComposedMailMessage getSourceMessage() {
         return sourceMessage;
     }
 
-    /**
-     * Gets the transport provider
-     *
-     * @return The transport provider
-     */
+    @Override
     public TransportProvider getProvider() {
         return provider;
     }
 
-    /**
-     * Gets the account identifier
-     *
-     * @return The account identifier
-     */
+    @Override
     public int getAccountId() {
         return accountId;
     }
 
-    /**
-     * Gets the session
-     *
-     * @return The session
-     */
+    @Override
     public ServerSession getSession() {
         return session;
     }
 
-    /**
-     * Gets the text part
-     *
-     * @return The text part
-     */
+    @Override
     public TextBodyMailPart getTextPart() {
         return textPart;
     }
 
-    /**
-     * Sets the text part
-     *
-     * @param textPart The text part to set
-     */
+    @Override
     public void setTextPart(TextBodyMailPart textPart) {
         this.textPart = textPart;
     }
 
-    /**
-     * Gets a listing of all parts in this context.
-     *
-     * @return All parts
-     */
+    @Override
     public List<MailPart> getAllParts() {
         List<MailPart> parts = new LinkedList<>();
         parts.addAll(getReferencedParts());
@@ -205,12 +173,7 @@ public abstract class AbstractComposeContext {
         return parts;
     }
 
-    /**
-     * Adds specified referenced part
-     *
-     * @param referencedPart The referenced part
-     * @throws OXException If part cannot be added
-     */
+    @Override
     public void addReferencedPart(ReferencedMailPart referencedPart) throws OXException {
         if (null != referencedPart) {
             List<ReferencedMailPart> referencedParts = this.referencedParts;
@@ -223,21 +186,12 @@ public abstract class AbstractComposeContext {
         }
     }
 
-    /**
-     * Gets the referenced parts
-     *
-     * @return The referenced parts or an empty list
-     */
+    @Override
     public List<ReferencedMailPart> getReferencedParts() {
         return null == referencedParts ? Collections.<ReferencedMailPart> emptyList() : referencedParts;
     }
 
-    /**
-     * Adds specified data part
-     *
-     * @param dataPart The data part
-     * @throws OXException If part cannot be added
-     */
+    @Override
     public void addDataPart(DataMailPart dataPart) throws OXException {
         if (null != dataPart) {
             List<DataMailPart> dataParts = this.dataParts;
@@ -250,21 +204,12 @@ public abstract class AbstractComposeContext {
         }
     }
 
-    /**
-     * Gets the data parts
-     *
-     * @return The data parts or an empty list
-     */
+    @Override
     public List<DataMailPart> getDataParts() {
         return null == dataParts ? Collections.<DataMailPart> emptyList() : dataParts;
     }
 
-    /**
-     * Adds specified upload part
-     *
-     * @param uploadPart The upload part
-     * @throws OXException If part cannot be added
-     */
+    @Override
     public void addUploadPart(UploadFileMailPart uploadPart) throws OXException {
         if (null != uploadPart) {
             List<UploadFileMailPart> uploadedParts = this.uploadedParts;
@@ -277,21 +222,12 @@ public abstract class AbstractComposeContext {
         }
     }
 
-    /**
-     * Gets the upload parts
-     *
-     * @return The upload parts or an empty list
-     */
+    @Override
     public List<UploadFileMailPart> getUploadParts() {
         return null == uploadedParts ? Collections.<UploadFileMailPart> emptyList() : uploadedParts;
     }
 
-    /**
-     * Adds specified drive part
-     *
-     * @param drivePart The drive part
-     * @throws OXException If part cannot be added
-     */
+    @Override
     public void addDrivePart(InfostoreDocumentMailPart drivePart) throws OXException {
         if (null != drivePart) {
             List<InfostoreDocumentMailPart> driveParts = this.driveParts;
@@ -304,33 +240,17 @@ public abstract class AbstractComposeContext {
         }
     }
 
-    /**
-     * Gets the drive parts
-     *
-     * @return The drive parts or an empty list
-     */
+    @Override
     public List<InfostoreDocumentMailPart> getDriveParts() {
         return null == driveParts ? Collections.<InfostoreDocumentMailPart> emptyList() : driveParts;
     }
 
-    /**
-     * Gets the connected mail access associated with this context.
-     *
-     * @param accountId The identifier of the target account for which to return a connected mail access
-     * @return The connected mail access
-     * @throws OXException If mail access cannot be returned
-     */
+    @Override
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getConnectedMailAccess(int accountId) throws OXException {
         return getMailAccess0(accountId, false);
     }
 
-    /**
-     * Reconnects the mail access associated with specified account identifier.
-     *
-     * @param accountId The identifier of the target account for which to return a connected mail access
-     * @return The (reconnected) mail access
-     * @throws OXException If mail access cannot be returned
-     */
+    @Override
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> reconnectMailAccess(int accountId) throws OXException {
         return getMailAccess0(accountId, true);
     }
@@ -353,9 +273,7 @@ public abstract class AbstractComposeContext {
         return mailAccess;
     }
 
-    /**
-     * Disposes this context.
-     */
+    @Override
     public void dispose() {
         TIntObjectIterator<MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> it = mailAccesses.iterator();
         for (int i = mailAccesses.size(); i-- > 0;) {

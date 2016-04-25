@@ -49,36 +49,64 @@
 
 package com.openexchange.mail.json.compose.share;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
+import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.Links;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link ShareComposeStrings} - The i18n string literals for share compose module.
+ * {@link DefaultShareLinkGenerator} - The default share link generator having no recipient-specific additionals.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeStrings implements LocalizableStrings {
+public class DefaultShareLinkGenerator implements ShareLinkGenerator {
+
+    private static final DefaultShareLinkGenerator INSTANCE = new DefaultShareLinkGenerator();
 
     /**
-     * Initializes a new {@link ShareComposeStrings}.
+     * Gets the instance
+     *
+     * @return The instance
      */
-    private ShareComposeStrings() {
+    public static DefaultShareLinkGenerator getInstance() {
+        return INSTANCE;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link DefaultShareLinkGenerator}.
+     */
+    protected DefaultShareLinkGenerator() {
         super();
     }
 
-    // The name of the folder holding the attachments, which were shared to other recipients.
-    public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
+    @Override
+    public boolean applicableFor(Session session) {
+        return true;
+    }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link:";
+    @Override
+    public String generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException {
+        ShareTargetPath targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem());
+        String url = guest.generateLink(hostData, targetPath);
+        return Strings.isEmpty(queryString) ? url : new StringBuilder(url).append('?').append(queryString).toString();
+    }
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the elapsed date for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on #DATE#";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments";
+    @Override
+    public String generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session) {
+        String module = Module.getForFolderConstant(shareTarget.getModule()).getName();
+        String url = Links.generateInternalLink(module, shareTarget.getFolder(), shareTarget.getItem(), hostData);
+        return Strings.isEmpty(queryString) ? url : new StringBuilder(url).append('?').append(queryString).toString();
+    }
 
 }
