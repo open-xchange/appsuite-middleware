@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class FolderEqualsWrapper implements Cloneable {
+public class FolderEqualsWrapper implements Cloneable, Comparable<FolderEqualsWrapper> {
 
     private FolderObject folder;
 
@@ -169,5 +169,18 @@ public class FolderEqualsWrapper implements Cloneable {
     @Override
     public String toString() {
         return "Folder: " + folder.getObjectID() + ", Parent: " + folder.getParentFolderID();
+    }
+
+    @Override
+    public int compareTo(FolderEqualsWrapper o) {
+        if (this.getObjectID() == o.getObjectID()) {
+            return 0;
+        }
+
+        if (this.getObjectID() < o.getObjectID()) {
+            return -1;
+        }
+
+        return 1;
     }
 }
