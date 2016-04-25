@@ -127,12 +127,13 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
             try {
                 stmt = con.prepareStatement("SELECT id, cid, user, url FROM " + table + " WHERE id <> 0 FOR UPDATE");
                 rs = stmt.executeQuery();
+                stmt2 = con.prepareStatement("UPDATE " + table + " SET starttls = ? WHERE id = ? AND cid = ? AND user = ?");
                 while (rs.next()) {
                     int id = rs.getInt(1);
                     int cid = rs.getInt(2);
                     int user = rs.getInt(3);
                     String url = rs.getString(4);
-                    boolean secure = !checkSecureUrl(url) || forceSecure;
+                    boolean secure = checkSecureUrl(url) || forceSecure;
                     stmt2 = con.prepareStatement("UPDATE " + table + " SET starttls = ? WHERE id = ? AND cid = ? AND user = ?");
                     stmt2.setBoolean(1, secure);
                     stmt2.setInt(2, id);
