@@ -86,6 +86,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link ListByAliasDomain }
+     *
+     */
+    public ListByAliasDomain createListByAliasDomain() {
+        return new ListByAliasDomain();
+    }
+
+    /**
      * Create an instance of {@link GetModuleAccess }
      *
      */
@@ -219,6 +227,14 @@ public class ObjectFactory {
      */
     public ListAllResponse createListAllResponse() {
         return new ListAllResponse();
+    }
+
+    /**
+     * Create an instance of {@link ListByAliasDomainResponse }
+     *
+     */
+    public ListByAliasDomainResponse createListByAliasDomainResponse() {
+        return new ListByAliasDomainResponse();
     }
 
     /**
