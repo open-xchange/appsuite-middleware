@@ -77,6 +77,7 @@ import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.ComposeTransportResult;
 import com.openexchange.mail.json.compose.DefaultComposeDraftResult;
 import com.openexchange.mail.json.compose.DefaultComposeTransportResult;
+import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareComposeLinkGenerator;
@@ -115,7 +116,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
     @Override
     public boolean applicableFor(Session session) throws OXException {
-        return Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session);
+        return Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session) && Utilities.hasCapability("drive", session);
     }
 
     @Override

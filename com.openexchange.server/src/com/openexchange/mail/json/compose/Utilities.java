@@ -47,23 +47,23 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share;
+package com.openexchange.mail.json.compose;
 
 import org.apache.commons.lang.Validate;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.json.compose.ComposeContext;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Utilities} - A utility class for share compose module.
+ * {@link Utilities} - A utility class for compose module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
@@ -79,10 +79,33 @@ public enum Utilities {
         return viewFactory;
     }
 
+    private static CapabilityService getCapabilityService() throws OXException {
+        CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+        return capabilityService;
+    }
+
+    /**
+     * Checks if the capabilities associated with given session contain the denoted capability.
+     *
+     * @param capability The capability to check by
+     * @param session The session for which to check
+     * @return <code>true</code> if session-associated capabilities contain the denoted capability; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public static boolean hasCapability(String capability, Session session) throws OXException {
+        if (Strings.isEmpty(capability)) {
+            return false;
+        }
+        return getCapabilityService().getCapabilities(session).contains(capability);
+    }
+
     /**
      * Gets the value for specified property; returns default value if such a property does not exist.
      *
-     * @param propertyName The property name for the i18n string to translate
+     * @param propertyName The property name
      * @param defaultValue The default value to return
      * @param session The session from requesting user
      * @return The value or <code>defaultValue</code>
@@ -106,7 +129,7 @@ public enum Utilities {
     /**
      * Gets the value for specified property; returns default value if such a property does not exist.
      *
-     * @param propertyName The property name for the i18n string to translate
+     * @param propertyName The property name
      * @param defaultValue The default value to return
      * @param userId The user id
      * @param contextId The context id
@@ -129,7 +152,7 @@ public enum Utilities {
     /**
      * Gets the integer value for specified property; returns default value if such a property does not exist.
      *
-     * @param propertyName The property name for the i18n string to translate
+     * @param propertyName The property name
      * @param defaultValue The default value to return
      * @param session The session from requesting user
      * @return The integer value or <code>defaultValue</code>
@@ -157,7 +180,7 @@ public enum Utilities {
     /**
      * Gets the integer value for specified property; returns default value if such a property does not exist.
      *
-     * @param propertyName The property name for the i18n string to translate
+     * @param propertyName The property name
      * @param defaultValue The default value to return
      * @param userId The user id
      * @param contextId The context id
@@ -184,7 +207,7 @@ public enum Utilities {
     /**
      * Gets the boolean value for specified property; returns default value if such a property does not exist.
      *
-     * @param propertyName The property name for the i18n string to translate
+     * @param propertyName The property name
      * @param defaultValue The default value to return
      * @param session The session from requesting user
      * @return The boolean value or <code>defaultValue</code>
@@ -213,7 +236,7 @@ public enum Utilities {
     /**
      * Gets the boolean value for specified property; returns default value if such a property does not exist.
      *
-     * @param propertyName The property name for the i18n string to translate
+     * @param propertyName The property name
      * @param defaultValue The default value to return
      * @param userId The user id
      * @param contextId The context id

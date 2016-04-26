@@ -69,6 +69,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
