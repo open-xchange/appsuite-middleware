@@ -65,7 +65,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -73,7 +75,6 @@ import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -233,9 +234,18 @@ public class DefaultMessageGenerator implements MessageGenerator {
      */
     protected ComposedMailMessage generateExternalVersion(Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate) throws OXException {
         ComposedMailMessage composedMessage = Utilities.copyOfSourceMessage(composeContext);
-        Locale locale = TransportProperties.getInstance().getExternalRecipientsLocale();
-        if (null == locale) {
-            locale = getSessionUserLocale(composeContext.getSession());
+        Locale locale;
+        {
+            ServerSession session = composeContext.getSession();
+            String sLocale = Utilities.getValueFromProperty("com.openexchange.mail.compose.share.externalRecipientsLocale", "user-defined", session);
+            if (Strings.isEmpty(sLocale) || "user-defined".equalsIgnoreCase(sLocale)) {
+                locale = session.getUser().getLocale();
+            } else {
+                locale = LocaleTools.getLocale(sLocale);
+                if (null == locale) {
+                    locale = session.getUser().getLocale();
+                }
+            }
         }
 
         // Alter text content to include share reference

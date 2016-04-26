@@ -85,8 +85,8 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.compose.ComposeContext;
+import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -349,8 +349,8 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     protected String discoverEMailAttachmentsFolderID(DefaultAttachmentStorageContext storageContext) throws OXException {
         Session session = storageContext.session;
 
-        String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
-        if ("i18n-defined".equals(name)) {
+        String name = Utilities.getValueFromProperty("com.openexchange.mail.compose.share.folderName", "i18n-defined", session);
+        if ("i18n-defined".equalsIgnoreCase(name)) {
             name = StringHelper.valueOf(getSessionUserLocale(session)).getString(ShareComposeStrings.FOLDER_NAME_SHARED_MAIL_ATTACHMENTS);
         }
 
