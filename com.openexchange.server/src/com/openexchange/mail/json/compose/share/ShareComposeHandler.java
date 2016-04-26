@@ -83,6 +83,7 @@ import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistr
 import com.openexchange.mail.json.compose.share.internal.ShareComposeLinkGenerator;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
@@ -160,7 +161,10 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             addresses.addAll(Arrays.asList(source.getCc()));
             addresses.addAll(Arrays.asList(source.getBcc()));
 
-            UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+            UserService userService = ServerServiceRegistry.getServize(UserService.class);
+            if (null == userService) {
+                throw ServiceExceptionCode.absentService(UserService.class);
+            }
             Context ctx = request.getContext();
 
             recipients = new LinkedHashSet<>(addresses.size());
@@ -177,7 +181,10 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         Date expirationDate = getExpirationDate(request);
 
         // Determine attachment storage to use
-        AttachmentStorageRegistry storageRegistry = ServerServiceRegistry.getInstance().getService(AttachmentStorageRegistry.class);
+        AttachmentStorageRegistry storageRegistry = ServerServiceRegistry.getServize(AttachmentStorageRegistry.class);
+        if (null == storageRegistry) {
+            throw ServiceExceptionCode.absentService(AttachmentStorageRegistry.class);
+        }
         AttachmentStorage attachmentStorage = storageRegistry.getAttachmentStorageFor(context.getSession());
 
         // Some state variables
@@ -189,7 +196,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
             // The share target for an anonymous user
             ShareTarget folderTarget = attachmentsControl.getFolderTarget();
-            ShareLink folderLink = ServerServiceRegistry.getServize(ShareService.class).getLink(context.getSession(), folderTarget);
+            ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
+            if (null == shareService) {
+                throw ServiceExceptionCode.absentService(ShareService.class);
+            }
+            ShareLink folderLink = shareService.getLink(context.getSession(), folderTarget);
 
             // Create share compose reference
             ShareReference shareReference;
@@ -231,7 +242,10 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             {
                 String referenceString = shareReference.generateReferenceString();
 
-                MessageGeneratorRegistry generatorRegistry = ServerServiceRegistry.getInstance().getService(MessageGeneratorRegistry.class);
+                MessageGeneratorRegistry generatorRegistry = ServerServiceRegistry.getServize(MessageGeneratorRegistry.class);
+                if (null == generatorRegistry) {
+                    throw ServiceExceptionCode.absentService(MessageGeneratorRegistry.class);
+                }
                 MessageGenerator messageGenerator = generatorRegistry.getMessageGeneratorFor(context.getSession());
                 for (Map.Entry<ShareComposeLink, Set<Recipient>> entry : links.entrySet()) {
                     ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<Recipient>(entry.getValue()), password, expirationDate, source, context);
