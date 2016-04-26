@@ -51,10 +51,12 @@ package com.openexchange.mail.transport.config.impl;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
 import org.slf4j.Logger;
-import com.openexchange.config.cascade.ConfigProviderService;
+
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -62,7 +64,6 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
-import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -73,11 +74,13 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
 
-    private final ServiceLookup services;
+    private final ContextService contextService;
+    private final ConfigViewFactory configViewFactory;
 
-    public DefaultNoReplyConfigFactory(ServiceLookup services) {
+    public DefaultNoReplyConfigFactory(ContextService contextService, ConfigViewFactory configViewFactory) {
         super();
-        this.services = services;
+        this.contextService = contextService;
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
@@ -87,8 +90,25 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
 
     public NoReplyConfig loadNoReplyConfig(int contextId) throws OXException {
         Logger logger = org.slf4j.LoggerFactory.getLogger(NoReplyConfig.class);
-        ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
-        ConfigView view = factory.getView(ConfigProviderService.NO_USER, contextId);
+
+        /*-
+         * At least one user is needed from the specified context in order to properly support context-set-level properties:
+         *
+         * Seems to be "as designed".
+         *
+         * - "server", "context", "user" is set as precedence; consciously ignoring "contextSets"
+         * - Even directly accessing the provider for "contextSets" statically returns special constant "com.openexchange.config.cascade.ConfigProviderService.NO_PROPERTY"
+         *   when invoking "com.openexchange.config.cascade.context.ContextSetConfigProvider.get(String, Context, int)"
+         *
+         *
+         * The reason is determined by the implementation logic for "com.openexchange.config.cascade.context.ContextSetConfigProvider.get(String, Context, int)":
+         *
+         * The user-sensitive UserPermissionBits instance is needed in order to retrieve the applicable "specification" (the set of tags that do apply).
+         *
+         */
+
+        int contextAdminId = contextService.getContext(contextId).getMailadmin();
+        ConfigView view = configViewFactory.getView(contextAdminId, contextId);
         DefaultNoReplyConfig config = new DefaultNoReplyConfig();
 
         {
@@ -113,8 +133,7 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
         {
             String str = view.get("com.openexchange.noreply.login", String.class);
             if (Strings.isEmpty(str)) {
-                String msg = "Missing no-reply login";
-                logger.error(msg, new Throwable(msg));
+                config.setLogin(null);
             } else {
                 config.setLogin(str.trim());
             }
@@ -123,8 +142,7 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
         {
             String str = view.get("com.openexchange.noreply.password", String.class);
             if (Strings.isEmpty(str)) {
-                String msg = "Missing no-reply password";
-                logger.error(msg, new Throwable(msg));
+                config.setPassword(null);
             } else {
                 config.setPassword(str.trim());
             }

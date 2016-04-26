@@ -392,16 +392,19 @@ public class MimeMessageFiller {
             /*
              * Get from
              */
-            InternetAddress from = mail.getFrom()[0];
-            mimeMessage.setFrom(from);
+            InternetAddress[] fromAddresses = mail.getFrom();
+            if (fromAddresses.length > 0) {
+                InternetAddress from = fromAddresses[0];
+                mimeMessage.setFrom(from);
 
-            /*
-             * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
-             * Field.
-             */
-            InternetAddress sender = compositionParameters.getSenderAddress(from);
-            if (sender != null) {
-                mimeMessage.setSender(sender);
+                /*
+                 * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
+                 * Field.
+                 */
+                InternetAddress sender = compositionParameters.getSenderAddress(from);
+                if (sender != null) {
+                    mimeMessage.setSender(sender);
+                }
             }
         }
         /*

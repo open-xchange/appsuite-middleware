@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 28
+%define        ox_release 29
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -85,10 +85,6 @@ if [ ${1:-0} -eq 2 ]; then
     PFILE=/opt/open-xchange/etc/xingoauth.properties
     ox_add_property com.openexchange.oauth.xing.consumerKey REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_KEY /opt/open-xchange/etc/xingoauth.properties
     ox_add_property com.openexchange.oauth.xing.consumerSecret REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_SECRET /opt/open-xchange/etc/xingoauth.properties
-    VALUE=$(ox_read_property com.openexchange.oauth.xing $PFILE)
-    if [ "$VALUE" = "false" ]; then
-        ox_set_property com.openexchange.oauth.xing true $PFILE
-    fi
 
     # SoftwareChange_Request-2410
     VALUE=$(ox_read_property com.openexchange.twitter.consumerKey /opt/open-xchange/etc/twitter.properties)
@@ -131,6 +127,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
+* Fri Apr 15 2016 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2016-04-25 (3238)
 * Tue Apr 05 2016 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2016-04-11 (3214)
 * Wed Mar 23 2016 Steffen Templin <marcus.klein@open-xchange.com>

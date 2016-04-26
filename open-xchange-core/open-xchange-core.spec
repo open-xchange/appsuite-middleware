@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 28
+%define        ox_release 29
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1215,6 +1215,10 @@ ox_add_property com.openexchange.contact.maxVCardSize 4194304 /opt/open-xchange/
 # SoftwareChange_Request-2575
 ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
+# SoftwareChange_Request-2630
+ox_add_property com.openexchange.capability.share_links true /opt/open-xchange/etc/permissions.properties
+ox_add_property com.openexchange.capability.invite_guests true /opt/open-xchange/etc/permissions.properties
+
 # SoftwareChange_Request-2652
 ox_add_property com.openexchange.contact.image.scaleImages true /opt/open-xchange/etc/contact.properties
 ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/etc/contact.properties
@@ -1231,7 +1235,7 @@ ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xcha
 ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
 
-#SoftwareChange_Request-2698
+# SoftwareChange_Request-2698
 ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
 
 # SoftwareChange_Request-2811
@@ -1316,6 +1320,8 @@ exit 0
 %doc com.openexchange.server/doc/examples
 
 %changelog
+* Fri Apr 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-04-25 (3238)
 * Tue Apr 05 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-04-11 (3214)
 * Wed Mar 23 2016 Marcus Klein <marcus.klein@open-xchange.com>
