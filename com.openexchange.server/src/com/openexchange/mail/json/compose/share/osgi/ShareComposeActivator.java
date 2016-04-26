@@ -93,9 +93,17 @@ public class ShareComposeActivator extends HousekeepingActivator {
 
         openTrackers();
 
-        ServerServiceRegistry.getInstance().addService(ShareLinkGeneratorRegistry.class, new ShareLinkGeneratorRegistryImpl(shareLinkGeneratorTracker));
-        ServerServiceRegistry.getInstance().addService(MessageGeneratorRegistry.class, new MessageGeneratorRegistryImpl(messageGeneratorTracker));
-        ServerServiceRegistry.getInstance().addService(AttachmentStorageRegistry.class, new AttachmentStorageRegistryImpl(attachmentStorageTracker));
+        ShareLinkGeneratorRegistryImpl shareLinkGeneratorRegistry = new ShareLinkGeneratorRegistryImpl(shareLinkGeneratorTracker);
+        registerService(ShareLinkGeneratorRegistry.class, shareLinkGeneratorRegistry);
+        ServerServiceRegistry.getInstance().addService(ShareLinkGeneratorRegistry.class, shareLinkGeneratorRegistry);
+
+        MessageGeneratorRegistryImpl messageGeneratorRegistry = new MessageGeneratorRegistryImpl(messageGeneratorTracker);
+        registerService(MessageGeneratorRegistry.class, messageGeneratorRegistry);
+        ServerServiceRegistry.getInstance().addService(MessageGeneratorRegistry.class, messageGeneratorRegistry);
+
+        AttachmentStorageRegistryImpl attachmentStorageRegistry = new AttachmentStorageRegistryImpl(attachmentStorageTracker);
+        registerService(AttachmentStorageRegistry.class, attachmentStorageRegistry);
+        ServerServiceRegistry.getInstance().addService(AttachmentStorageRegistry.class, attachmentStorageRegistry);
     }
 
     @Override
