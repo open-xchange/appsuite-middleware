@@ -216,7 +216,6 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         openTrackers();
 
         registerService(ComposeHandlerRegistry.class, composeHandlerRegisty);
-        ServerServiceRegistry.getInstance().addService(ComposeHandlerRegistry.class, composeHandlerRegisty);
 
         DefaultMailAttachmentStorageRegistry.initInstance(context);
         registerService(MailAttachmentStorageRegistry.class, DefaultMailAttachmentStorageRegistry.getInstance());

@@ -183,6 +183,10 @@ import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
+import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
+import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
+import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
+import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -420,6 +424,11 @@ public final class ServerActivator extends HousekeepingActivator {
         track(MailcapCommandMap.class, new MailcapServiceTracker(context));
         track(CapabilityService.class, new MailCapabilityServiceTracker(context));
         track(AttachmentTokenService.class, new RegistryCustomizer<AttachmentTokenService>(context, AttachmentTokenService.class));
+        // Mail compose stuff
+        track(ComposeHandlerRegistry.class, new RegistryCustomizer<ComposeHandlerRegistry>(context, ComposeHandlerRegistry.class));
+        track(ShareLinkGeneratorRegistry.class, new RegistryCustomizer<ShareLinkGeneratorRegistry>(context, ShareLinkGeneratorRegistry.class));
+        track(MessageGeneratorRegistry.class, new RegistryCustomizer<MessageGeneratorRegistry>(context, MessageGeneratorRegistry.class));
+        track(AttachmentStorageRegistry.class, new RegistryCustomizer<AttachmentStorageRegistry>(context, AttachmentStorageRegistry.class));
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));

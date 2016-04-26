@@ -100,21 +100,20 @@ public class ShareComposeActivator extends HousekeepingActivator {
 
         ShareLinkGeneratorRegistryImpl shareLinkGeneratorRegistry = new ShareLinkGeneratorRegistryImpl(shareLinkGeneratorTracker);
         registerService(ShareLinkGeneratorRegistry.class, shareLinkGeneratorRegistry);
-        ServerServiceRegistry.getInstance().addService(ShareLinkGeneratorRegistry.class, shareLinkGeneratorRegistry);
 
         MessageGeneratorRegistryImpl messageGeneratorRegistry = new MessageGeneratorRegistryImpl(messageGeneratorTracker);
         registerService(MessageGeneratorRegistry.class, messageGeneratorRegistry);
-        ServerServiceRegistry.getInstance().addService(MessageGeneratorRegistry.class, messageGeneratorRegistry);
 
         AttachmentStorageRegistryImpl attachmentStorageRegistry = new AttachmentStorageRegistryImpl(attachmentStorageTracker);
         registerService(AttachmentStorageRegistry.class, attachmentStorageRegistry);
-        ServerServiceRegistry.getInstance().addService(AttachmentStorageRegistry.class, attachmentStorageRegistry);
 
         registerService(ComposeHandler.class, new ShareComposeHandler());
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        ServerServiceRegistry.getInstance().removeService(AttachmentStorageRegistry.class);
+        ServerServiceRegistry.getInstance().removeService(MessageGeneratorRegistry.class);
         ServerServiceRegistry.getInstance().removeService(ShareLinkGeneratorRegistry.class);
         super.stopBundle();
     }
