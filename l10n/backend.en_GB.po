@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-18 17:44-0700\n"
+"PO-Revision-Date: 2016-04-15 13:59+0100\n"
 "Last-Translator: Timothy <tjfriese@gmail.com>\n"
 "Language-Team: English <kde-i18n-doc@kde.org>\n"
 "Language: en_GB\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 2.0\n"
+"X-Generator: Poedit 1.7.7\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -5235,8 +5235,8 @@ msgid "Sequence number is outdated."
 msgstr "Sequence number is outdated."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
-msgid "Invalid E-Mail address."
-msgstr "Invalid E-Mail address."
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr "Invalid email address: '%s'. Please correct the email address."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -12282,6 +12282,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "Invalid E-Mail address."
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "Asia/Riyadh87"

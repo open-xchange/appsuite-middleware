@@ -191,14 +191,24 @@ public final class PListSignerImpl implements PListSigner {
 
     private Certificate[] getCertificateChain(String storeName, String password, String alias) throws Exception {
         KeyStore store = KeyStore.getInstance("PKCS12");
-        store.load(new FileInputStream(storeName), password.toCharArray());
-        return store.getCertificateChain(alias);
+        FileInputStream fis = new FileInputStream(storeName);
+        try {
+            store.load(fis, password.toCharArray());
+            return store.getCertificateChain(alias);
+        } finally {
+            Streams.close(fis);
+        }
     }
 
     private PrivateKey getPrivateKey(String storeName, String password, String alias) throws Exception {
         KeyStore store = KeyStore.getInstance("PKCS12");
-        store.load(new FileInputStream(storeName), password.toCharArray());
-        return (PrivateKey) store.getKey(alias, password.toCharArray());
+        FileInputStream fis = new FileInputStream(storeName);
+        try {
+            store.load(fis, password.toCharArray());
+            return (PrivateKey) store.getKey(alias, password.toCharArray());
+        } finally {
+            Streams.close(fis);
+        }
     }
 
 }

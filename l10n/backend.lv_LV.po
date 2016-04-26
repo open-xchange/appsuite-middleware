@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-17 15:27+0200\n"
+"PO-Revision-Date: 2016-04-15 14:04+0100\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.7\n"
+"X-Generator: Poedit 1.7.7\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -5232,8 +5232,8 @@ msgid "Sequence number is outdated."
 msgstr "Sekvences numura vērtība ir novecojusi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
-msgid "Invalid E-Mail address."
-msgstr "Nepareiza e-pasta adrese."
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr "Nepareiza e-pasta adrese: '%s'. Lūdzu veiciet atbilstošos labojumus."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -12258,6 +12258,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "Nepareiza e-pasta adrese."
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "Asia/Riyadh87"

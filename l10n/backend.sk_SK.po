@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-15 15:44+0200\n"
+"PO-Revision-Date: 2016-04-15 14:06+0100\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Virtaal 0.7.1\n"
+"X-Generator: Poedit 1.7.7\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -5249,8 +5249,8 @@ msgid "Sequence number is outdated."
 msgstr "Poradové číslo je zastarané."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
-msgid "Invalid E-Mail address."
-msgstr "Neplatná emailová adresa."
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr "Neplatná emailová adresa: „%s“. Prosím, opravte emailovú adresu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -9724,8 +9724,8 @@ msgid ""
 "You have exceeded the maximum number of sms allowed. Please try again after "
 "%1$s hours"
 msgstr ""
-"Prekročili ste maximálny počet povolených SMS. Prosím, skúste to znovu o %1$"
-"s hodín"
+"Prekročili ste maximálny počet povolených SMS. Prosím, skúste to znovu o "
+"%1$s hodín"
 
 #. SMS limits apply. You can only send one more message in the next %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
@@ -12265,6 +12265,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "Neplatná emailová adresa."
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "Ázia/Rijád87"

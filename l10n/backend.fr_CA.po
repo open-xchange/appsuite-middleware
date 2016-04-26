@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-20 21:41+0100\n"
+"PO-Revision-Date: 2016-04-15 14:02+0100\n"
 "Last-Translator: Nicolas Ternisien <nicolas@bureau-cornavin.com>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_CA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Poedit 1.7.7\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -4731,8 +4731,8 @@ msgid ""
 "Quota exceeded for signatures. Quota limit: %2$s. Quota used: %1$s. Please "
 "delete some signatures in order to create new ones."
 msgstr ""
-"Quota atteint pour les signatures. Limite du quota : %2$s. Quota utilisé : %"
-"1$s. Veuillez supprimer certaines signatures afin de pouvoir en créer à "
+"Quota atteint pour les signatures. Limite du quota : %2$s. Quota utilisé : "
+"%1$s. Veuillez supprimer certaines signatures afin de pouvoir en créer à "
 "nouveau."
 
 #. Could not send stanza to resource. Resource was offline: %1$s
@@ -5419,8 +5419,10 @@ msgid "Sequence number is outdated."
 msgstr "Le numéro de séquence est obsolète."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
-msgid "Invalid E-Mail address."
-msgstr "Adresse de courrier électronique invalide."
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr ""
+"Adresse électronique invalide : « %s ». Veuillez corriger l'adresse "
+"électronique."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -8681,7 +8683,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:196
 msgid "Timeout while trying to send to the following recipient: %1$s"
 msgstr ""
-"Délai dépassé lors de la tentative d'envoi vers le destinataire suivant : %1$s"
+"Délai dépassé lors de la tentative d'envoi vers le destinataire suivant : "
+"%1$s"
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -12640,6 +12643,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zoulou"
+
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "Adresse de courrier électronique invalide."
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "Asie / Riyad"

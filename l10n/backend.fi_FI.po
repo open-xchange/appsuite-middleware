@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-16 17:02+0200\n"
+"PO-Revision-Date: 2016-04-15 14:01+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.6.9\n"
+"X-Generator: Poedit 1.7.7\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -5241,8 +5241,8 @@ msgid "Sequence number is outdated."
 msgstr "Sarjanumero on vanhentunut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
-msgid "Invalid E-Mail address."
-msgstr "Epäkelpo sähköpostiosoite."
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr "Sähköpostiosoite '%s' ei kelpaa. Ole hyvä ja korjaa osoite."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -12269,6 +12269,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "Epäkelpo sähköpostiosoite."
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "Asia/Riyadh87"
