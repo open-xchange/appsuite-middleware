@@ -122,7 +122,7 @@ public abstract class ChunkedUpload<I extends InputStream, C extends UploadChunk
      */
     public C next() throws OXException {
         if (false == hasNext) {
-            throw FileStorageCodes.IOERROR.create(new EOFException("End of input reached"));
+            throw FileStorageCodes.IOERROR.create(new EOFException("End of input reached"), "End of input reached");
         }
 
         try {

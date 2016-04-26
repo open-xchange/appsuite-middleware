@@ -76,7 +76,7 @@ public class S3ChunkedUpload extends com.openexchange.filestore.utils.ChunkedUpl
             }
             return digestStream;
         } catch (NoSuchAlgorithmException e) {
-            throw FileStorageCodes.IOERROR.create(e);
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
     }
 
@@ -135,7 +135,7 @@ public class S3ChunkedUpload extends com.openexchange.filestore.utils.ChunkedUpl
             setHasNext(false);
             return new S3UploadChunk(fileHolder, null);
         } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e);
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
     }
 
