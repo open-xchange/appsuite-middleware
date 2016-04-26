@@ -269,6 +269,7 @@ public class RdbUserStorage extends UserStorage {
                 writeLoginInfo(con, user, context, userId);
             }
             writeUserAttributes(con, user.getAttributes(), context, userId);
+            writeUserAliases(con, user.getAliases(), context, userId);
             return userId;
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -469,6 +470,17 @@ public class RdbUserStorage extends UserStorage {
             stmt.executeBatch();
         } finally {
             closeSQLStuff(stmt);
+        }
+    }
+
+    private static void writeUserAliases(Connection con, String[] aliases, Context context, int userId) throws OXException {
+        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+        if (aliases != null && aliases.length > 0) {
+            for (String tmp_mail : aliases) {
+                if (tmp_mail.length() > 0) {
+                    userAlias.createAlias(con, context.getContextId(), userId, tmp_mail);
+                }
+            }
         }
     }
 
@@ -811,9 +823,6 @@ public class RdbUserStorage extends UserStorage {
                             tmp.add(alias);
                         }
                     }
-                    // For compatibility reason; also add alias to user attributes
-                    attrs.put("alias", new UserAttribute("alias", aliases));
-
                     user.setAliases(tmp.toArray(new String[tmp.size()]));
                 } else {
                     user.setAliases(new String[0]);
