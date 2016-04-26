@@ -177,14 +177,6 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         CalendarSql calendarSql = new CalendarSql(new TargetFolderSession(target));
         userInfo.put(SQL_INTERFACE, calendarSql);
         userInfo.put(TARGET, target);
-        // Clear Folder
-
-        try {
-            calendarSql.deleteAppointmentsInFolder(target.getFolderIdAsInt());
-        } catch (SQLException e) {
-
-        }
-
 
         return userInfo;
     }
