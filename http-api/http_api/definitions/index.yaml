@@ -528,3 +528,10 @@ FileAccountCreationResponse:
   $ref: ./filestorage/accounts/FileAccountCreationResponse.yaml
 FileAccountUpdateResponse:
   $ref: ./filestorage/accounts/FileAccountUpdateResponse.yaml
+# Module: mail_categories
+Mail_CategoriesUnreadResponse:
+  $ref: ./mail_categories/Mail_CategoriesUnreadResponse.yaml
+Mail_CategoriesMoveBody:
+  $ref: ./mail_categories/Mail_CategoriesMoveBody.yaml
+Mail_CategoriesTrainBody:
+  $ref: ./mail_categories/Mail_CategoriesTrainBody.yaml

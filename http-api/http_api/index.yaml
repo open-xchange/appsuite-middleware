@@ -134,6 +134,8 @@ tags:
     description: Via the passwordchange module the users can change their password.
   - name: filestorage
     description: The file storage module provides access to file storage backends, e.g. Drive, Dropbox, etc.
+  - name: mail_categories
+    description: The module mail_categories allows to manage mail categories.
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml
