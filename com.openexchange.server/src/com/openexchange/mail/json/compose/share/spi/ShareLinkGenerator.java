@@ -51,6 +51,7 @@ package com.openexchange.mail.json.compose.share.spi;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.mail.json.compose.Applicable;
 import com.openexchange.mail.json.compose.share.Recipient;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;

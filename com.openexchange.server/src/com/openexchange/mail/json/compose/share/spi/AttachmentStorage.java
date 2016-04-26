@@ -52,6 +52,7 @@ package com.openexchange.mail.json.compose.share.spi;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.compose.Applicable;
 import com.openexchange.mail.json.compose.ComposeContext;
 import com.openexchange.mail.json.compose.share.StoredAttachmentsControl;
 

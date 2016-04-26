@@ -104,7 +104,7 @@ public class AbortComposeHandler extends AbstractComposeHandler<AbortComposeCont
     }
 
     @Override
-    public boolean serves(Session session) {
+    public boolean applicableFor(Session session) throws OXException {
         return true;
     }
 

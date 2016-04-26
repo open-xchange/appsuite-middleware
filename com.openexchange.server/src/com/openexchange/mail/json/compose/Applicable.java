@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share.spi;
+package com.openexchange.mail.json.compose;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;

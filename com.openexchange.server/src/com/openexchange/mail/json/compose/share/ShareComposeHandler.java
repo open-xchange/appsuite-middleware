@@ -114,7 +114,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     }
 
     @Override
-    public boolean serves(Session session) throws OXException {
+    public boolean applicableFor(Session session) throws OXException {
         return Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session);
     }
 

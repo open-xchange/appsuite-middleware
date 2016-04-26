@@ -50,7 +50,6 @@
 package com.openexchange.mail.json.compose;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link ComposeHandler} - A handler for composing a message.
@@ -58,7 +57,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface ComposeHandler {
+public interface ComposeHandler extends Applicable {
 
     /**
      * Gets the identifier
@@ -85,14 +84,5 @@ public interface ComposeHandler {
      * @throws OXException If result cannot be created
      */
     ComposeTransportResult createTransportResult(ComposeRequest request) throws OXException;
-
-    /**
-     * Indicates whether this compose handler is meant to be used for session-associated user.
-     *
-     * @param session The session providing user data
-     * @return <code>true</code> if this compose handler is meant to be used; otherwise <code>false</code>
-     * @throws OXException If check fails
-     */
-    boolean serves(Session session) throws OXException;
 
 }
