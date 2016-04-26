@@ -192,7 +192,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         Locale locale = recipient.getUser().getLocale();
 
         // Alter text content to include share reference
-        TextBodyMailPart textPart = composeContext.getTextPart();
+        TextBodyMailPart textPart = composeContext.getTextPart().copy();
         textPart.setPlainText(null);
         StringHelper stringHelper = StringHelper.valueOf(locale);
 
@@ -239,7 +239,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         }
 
         // Alter text content to include share reference
-        TextBodyMailPart textPart = composeContext.getTextPart();
+        TextBodyMailPart textPart = composeContext.getTextPart().copy();
         textPart.setPlainText(null);
         StringHelper stringHelper = StringHelper.valueOf(locale);
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import java.util.Collections;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -90,6 +92,22 @@ public class DefaultShareLinkGenerator implements ShareLinkGenerator {
         super();
     }
 
+    /**
+     * Gets optional additional information that is supposed to be added to recipient's share link.
+     * <p>
+     * Serves as a hook for sub-classes.
+     *
+     * @param recipient The recipient to which the share link is ought to be sent
+     * @param guest The guest
+     * @param sourceTarget The share target for the folder
+     * @param session The associated session
+     * @return The optional additional information
+     * @throws OXException If an error occurs while attempting to return optional additional information
+     */
+    protected Map<String, String> getAdditionals(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, Session session) throws OXException {
+        return Collections.emptyMap();
+    }
+
     @Override
     public boolean applicableFor(Session session) {
         return true;
@@ -97,7 +115,18 @@ public class DefaultShareLinkGenerator implements ShareLinkGenerator {
 
     @Override
     public String generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException {
-        ShareTargetPath targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem());
+        // Generate share target path
+        ShareTargetPath targetPath;
+        {
+            Map<String, String> additionals = getAdditionals(recipient, guest, sourceTarget, session);
+            if (null == additionals || additionals.isEmpty()) {
+                targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem());
+            } else {
+                targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem(), additionals);
+            }
+        }
+
+        // Generate associated share link
         String url = guest.generateLink(hostData, targetPath);
         return Strings.isEmpty(queryString) ? url : new StringBuilder(url).append('?').append(queryString).toString();
     }

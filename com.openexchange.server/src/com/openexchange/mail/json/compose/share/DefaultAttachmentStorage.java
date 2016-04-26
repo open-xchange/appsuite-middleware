@@ -54,20 +54,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStorageGuestPermission;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountManager;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -75,6 +74,11 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -118,7 +122,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     /**
      * Initializes a new {@link DefaultAttachmentStorage}.
      */
-    private DefaultAttachmentStorage() {
+    protected DefaultAttachmentStorage() {
         super();
     }
 
@@ -254,6 +258,45 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     // ------------------------------------------------------------------------------------------------------------------------------------
 
     /**
+     * Gets the context associated with specified session
+     *
+     * @param session The session
+     * @return The context
+     * @throws OXException If context cannot be returned
+     */
+    protected Context getContext(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getContext();
+        }
+        return ContextStorage.getStorageContext(session.getContextId());
+    }
+
+    /**
+     * Gets the user associated with specified session
+     *
+     * @param session The session
+     * @return The user
+     * @throws OXException If user cannot be returned
+     */
+    protected User getSessionUser(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+        return UserStorage.getInstance().getUser(session.getUserId(), getContext(session));
+    }
+
+    /**
+     * Gets the locale associated with specified session's user.
+     *
+     * @param session The session
+     * @return The locale of session-associated user
+     * @throws OXException If locale cannot be returned
+     */
+    protected Locale getSessionUserLocale(Session session) throws OXException {
+        return getSessionUser(session).getLocale();
+    }
+
+    /**
      * Creates the folder that is supposed to contain the attachments' files.
      *
      * @param source The source message
@@ -304,16 +347,15 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      * @throws OXException If standard folder cannot be discovered
      */
     protected String discoverEMailAttachmentsFolderID(DefaultAttachmentStorageContext storageContext) throws OXException {
+        Session session = storageContext.session;
+
         String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
         if ("i18n-defined".equals(name)) {
-            name = ShareComposeStrings.FOLDER_NAME_SHARED_MAIL_ATTACHMENTS;
+            name = StringHelper.valueOf(getSessionUserLocale(session)).getString(ShareComposeStrings.FOLDER_NAME_SHARED_MAIL_ATTACHMENTS);
         }
 
-        Session session = storageContext.session;
-        FileStorageAccount defaultAccount = getDefaultAccount(session);
-
         IDBasedFolderAccess folderAccess = storageContext.folderAccess;
-        FolderID placeholderID = new FolderID(defaultAccount.getFileStorageService().getId(), defaultAccount.getId(), "0");
+        FolderID placeholderID = new FolderID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID, "0");
         FileStorageFolder personalFolder = folderAccess.getPersonalFolder(placeholderID.toString());
         // TODO: FileStorageFolder personalFolder = folderAccess.getPersonalFolder(String serviceID, String accountID);
 
@@ -338,15 +380,6 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         folder.setPermissions(Collections.<FileStoragePermission>singletonList(permission));
         folder.setParentId(personalFolder.getId());
         return folderAccess.createFolder(folder);
-    }
-
-    private FileStorageAccount getDefaultAccount(Session session) throws OXException {
-        FileStorageAccountManagerLookupService lookupService = ServerServiceRegistry.getInstance().getService(FileStorageAccountManagerLookupService.class);
-        if (null == lookupService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageAccountManagerLookupService.class.getName());
-        }
-        FileStorageAccountManager accountManager = lookupService.getAccountManagerFor("com.openexchange.infostore");
-        return accountManager.getAccount("infostore", session);
     }
 
     private DefaultFileStorageFolder prepareFolder(ComposedMailMessage source, String parent, String password, Date expiry, Session session) {
