@@ -64,8 +64,8 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum FileStorageCodes implements DisplayableOXExceptionCode {
 
-    /** An IO error occurred: %s */
-    IOERROR("An IO error occurred: %s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 3),
+    /** An I/O error occurred: %1$s */
+    IOERROR("An I/O error occurred: %1$s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 3),
     /** May be used to turn the IOException of getInstance into a proper OXException */
     INSTANTIATIONERROR("File store could not be accessed: %s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 4),
     /** Cannot create directory "%1$s" in file storage. */
