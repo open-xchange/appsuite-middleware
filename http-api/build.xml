@@ -5,11 +5,10 @@
         Builds the HTTP API client
     </description>
 
-	<!-- Constants -->
-	<property name="mainSrcDir" value="src" />
-	<property name="libDir" value="lib" />
-	<property name="clientFileName" value="apiFile" />
-	<property name="binDir" value="build" />
+	<property name="mainSrcDir" value="${src}" />
+	<property name="libDir" value="${lib}" />
+	<property name="clientFileName" value="${apiFile}" />
+	<property name="binDir" value="${build}" />
 
 	<target name="clean">
 		<delete dir="${binDir}" />
