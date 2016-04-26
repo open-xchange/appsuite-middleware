@@ -49,7 +49,19 @@
 
 package com.openexchange.mail.json.compose.share.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.capabilities.DependentCapabilityChecker;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.json.compose.ComposeHandler;
+import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistryImpl;
@@ -63,6 +75,9 @@ import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -95,6 +110,65 @@ public class ShareComposeActivator extends HousekeepingActivator {
 
         RankingAwareNearRegistryServiceTracker<AttachmentStorage> attachmentStorageTracker = new RankingAwareNearRegistryServiceTracker<>(context, AttachmentStorage.class);
         rememberTracker(attachmentStorageTracker);
+
+        // Tracker for CapabilityService that declares "publish_mail_attachments" capability
+        final BundleContext context = this.context;
+        track(CapabilityService.class, new ServiceTrackerCustomizer<CapabilityService, CapabilityService>() {
+
+            private volatile ServiceRegistration<CapabilityChecker> serviceRegistration;
+
+            @Override
+            public CapabilityService addingService(ServiceReference<CapabilityService> reference) {
+                CapabilityService service = context.getService(reference);
+                final String sCapability = "share_mail_attachments";
+
+                // Register CapabilityChecker for "publish_mail_attachments"
+                Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+                properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+                DependentCapabilityChecker capabilityChecker = new DependentCapabilityChecker() {
+
+                    @Override
+                    public boolean isEnabled(String capability, Session ses, CapabilitySet capabilitySet) throws OXException {
+                        if (sCapability.equals(capability)) {
+                            ServerSession session = ServerSessionAdapter.valueOf(ses);
+                            if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
+                                return false;
+                            }
+
+                            if (false == Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session)) {
+                                return false;
+                            }
+
+                            return Utilities.hasCapabilities(capabilitySet, "drive", "share_links");
+                        }
+
+                        return true;
+                    }
+                };
+                serviceRegistration = context.registerService(CapabilityChecker.class, capabilityChecker, properties);
+
+                // Declare "share_mail_attachments" capability
+                service.declareCapability(sCapability);
+
+                // Return tracked service
+                return service;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<CapabilityService> reference, CapabilityService service) {
+                // Ignore
+            }
+
+            @Override
+            public void removedService(ServiceReference<CapabilityService> reference, CapabilityService service) {
+                ServiceRegistration<CapabilityChecker> serviceRegistration = this.serviceRegistration;
+                if (null != serviceRegistration) {
+                    this.serviceRegistration = null;
+                    serviceRegistration.unregister();
+                }
+                context.ungetService(reference);
+            }
+        });
 
         openTrackers();
 

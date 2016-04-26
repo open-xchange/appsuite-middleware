@@ -51,6 +51,7 @@ package com.openexchange.mail.json.compose;
 
 import org.apache.commons.lang.Validate;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -88,18 +89,45 @@ public enum Utilities {
     }
 
     /**
-     * Checks if the capabilities associated with given session contain the denoted capability.
+     * Checks if the capabilities associated with given session contain the named capabilities.
      *
-     * @param capability The capability to check by
      * @param session The session for which to check
-     * @return <code>true</code> if session-associated capabilities contain the denoted capability; otherwise <code>false</code>
+     * @param capabilities The capabilities to check by
+     * @return <code>true</code> if session-associated capabilities contain the denoted capabilities; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    public static boolean hasCapability(String capability, Session session) throws OXException {
-        if (Strings.isEmpty(capability)) {
+    public static boolean hasCapabilities(Session session, String... capabilities) throws OXException {
+        if (null == capabilities || 0 == capabilities.length) {
             return false;
         }
-        return getCapabilityService().getCapabilities(session).contains(capability);
+
+        CapabilitySet capabilitySet = getCapabilityService().getCapabilities(session);
+        for (String capability : capabilities) {
+            if (Strings.isEmpty(capability) || false == capabilitySet.contains(capability)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the capability set contain the specified capabilities.
+     *
+     * @param capabilitySet The capability set
+     * @param capabilities The capabilities to check by
+     * @return <code>true</code> if session-associated capabilities contain the denoted capabilities; otherwise <code>false</code>
+     */
+    public static boolean hasCapabilities(CapabilitySet capabilitySet, String... capabilities) {
+        if (null == capabilities || 0 == capabilities.length) {
+            return false;
+        }
+
+        for (String capability : capabilities) {
+            if (Strings.isEmpty(capability) || false == capabilitySet.contains(capability)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

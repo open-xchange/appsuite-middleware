@@ -563,6 +563,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      */
     USED_SHARING_FEATURE("The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the" +
         " attachments are shared and the links added to your email. Whoever receives the email can then access the attachments.",  MailExceptionStrings.USED_SHARING_FEATURE_MSG, CATEGORY_WARNING, 105),
+    /**
+     * User %1$s in context %2$s is not allowed to compose a share message.
+     */
+    SHARING_NOT_POSSIBLE("", MailExceptionStrings.SHARING_NOT_POSSIBLE_MSG, CATEGORY_PERMISSION_DENIED, 106),
     ;
 
     private static String PREFIX = "MSG";

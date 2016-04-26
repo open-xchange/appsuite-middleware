@@ -74,11 +74,11 @@ public class ShareTransportComposeContext extends AbstractQuotaAwareComposeConte
      * Initializes a new {@link ShareTransportComposeContext}.
      *
      * @param request The compose request
+     * @param initialCreateShared <code>true</code> if a shre compose message is supposed to be created regardless of quota; otherwise <code>false</code>
      * @throws OXException If initialization fails
      */
-    public ShareTransportComposeContext(ComposeRequest request) throws OXException {
+    public ShareTransportComposeContext(ComposeRequest request, boolean initialCreateShared) throws OXException {
         super(request);
-        boolean initialCreateShared = AJAXRequestDataTools.parseBoolParameter("share_attachments", request.getRequest(), false);
         createShares = initialCreateShared;
         addWarning = !initialCreateShared;
     }

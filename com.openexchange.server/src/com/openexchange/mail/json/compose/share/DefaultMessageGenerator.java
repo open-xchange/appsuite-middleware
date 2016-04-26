@@ -71,6 +71,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.mime.MimeMailException;
@@ -134,7 +135,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
     }
 
     @Override
-    public boolean applicableFor(Session session) throws OXException {
+    public boolean applicableFor(ComposeRequest composeRequest) throws OXException {
         return true;
     }
 

@@ -50,8 +50,8 @@
 package com.openexchange.mail.json.compose.share.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
-import com.openexchange.session.Session;
 
 /**
  * {@link MessageGeneratorRegistry} - The registry for message generators.
@@ -62,12 +62,12 @@ import com.openexchange.session.Session;
 public interface MessageGeneratorRegistry {
 
     /**
-     * Gets the message generator applicable for specified session.
+     * Gets the message generator applicable for specified compose request.
      *
-     * @param session The session
+     * @param composeRequest The compose request
      * @return The message generator
      * @throws OXException If message generator cannot be returned
      */
-    MessageGenerator getMessageGeneratorFor(Session session) throws OXException;
+    MessageGenerator getMessageGeneratorFor(ComposeRequest composeRequest) throws OXException;
 
 }

@@ -50,10 +50,10 @@
 package com.openexchange.mail.json.compose.share.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
 import com.openexchange.osgi.ServiceListing;
-import com.openexchange.session.Session;
 
 /**
  * {@link AttachmentStorageRegistryImpl}
@@ -74,9 +74,9 @@ public class AttachmentStorageRegistryImpl implements AttachmentStorageRegistry 
     }
 
     @Override
-    public AttachmentStorage getAttachmentStorageFor(Session session) throws OXException {
+    public AttachmentStorage getAttachmentStorageFor(ComposeRequest composeRequest) throws OXException {
         for (AttachmentStorage attachmentStorage : storages.getServiceList()) {
-            if (attachmentStorage.applicableFor(session)) {
+            if (attachmentStorage.applicableFor(composeRequest)) {
                 return attachmentStorage;
             }
         }

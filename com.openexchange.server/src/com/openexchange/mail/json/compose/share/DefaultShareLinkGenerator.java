@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
@@ -109,7 +110,7 @@ public class DefaultShareLinkGenerator implements ShareLinkGenerator {
     }
 
     @Override
-    public boolean applicableFor(Session session) {
+    public boolean applicableFor(ComposeRequest composeRequest) {
         return true;
     }
 

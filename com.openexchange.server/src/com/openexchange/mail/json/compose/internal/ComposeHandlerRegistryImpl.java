@@ -52,9 +52,9 @@ package com.openexchange.mail.json.compose.internal;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.json.compose.ComposeHandler;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.abort.AbortComposeHandler;
 import com.openexchange.osgi.ServiceListing;
-import com.openexchange.session.Session;
 
 
 /**
@@ -76,9 +76,9 @@ public class ComposeHandlerRegistryImpl implements ComposeHandlerRegistry {
     }
 
     @Override
-    public ComposeHandler getComposeHandlerFor(Session session) throws OXException {
+    public ComposeHandler getComposeHandlerFor(ComposeRequest composeRequest) throws OXException {
         for (ComposeHandler handler : handlers.getServiceList()) {
-            if (handler.applicableFor(session)) {
+            if (handler.applicableFor(composeRequest)) {
                 return handler;
             }
         }

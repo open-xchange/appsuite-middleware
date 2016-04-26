@@ -85,6 +85,7 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.compose.ComposeContext;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
 import com.openexchange.server.ServiceExceptionCode;
@@ -127,7 +128,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     }
 
     @Override
-    public boolean applicableFor(Session session) throws OXException {
+    public boolean applicableFor(ComposeRequest composeRequest) throws OXException {
         return true;
     }
 

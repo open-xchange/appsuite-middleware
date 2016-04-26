@@ -50,8 +50,8 @@
 package com.openexchange.mail.json.compose.share.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
-import com.openexchange.session.Session;
 
 /**
  * {@link AttachmentStorageRegistry} - The registry for attachment storages.
@@ -62,12 +62,12 @@ import com.openexchange.session.Session;
 public interface AttachmentStorageRegistry {
 
     /**
-     * Gets the attachment storage applicable for specified session.
+     * Gets the attachment storage applicable for specified compose request.
      *
-     * @param session The session
+     * @param composeRequest The compose request
      * @return The attachment storage
      * @throws OXException If attachment storage cannot be returned
      */
-    AttachmentStorage getAttachmentStorageFor(Session session) throws OXException;
+    AttachmentStorage getAttachmentStorageFor(ComposeRequest composeRequest) throws OXException;
 
 }

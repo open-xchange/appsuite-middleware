@@ -789,8 +789,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             for (CapabilityChecker checker : list) {
                 try {
                     if (checker instanceof DependentCapabilityChecker) {
-                        DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
-                        if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
+                        if (!((DependentCapabilityChecker) checker).isEnabled(cap, session, allCapabilities)) {
                             return false;
                         }
                     } else if (!checker.isEnabled(cap, session)) {

@@ -51,7 +51,6 @@ package com.openexchange.mail.json.compose;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
 
 /**
  * {@link ComposeHandlerRegistry} - A registry for {@link ComposeHandler compose handlers}.
@@ -63,12 +62,12 @@ import com.openexchange.session.Session;
 public interface ComposeHandlerRegistry {
 
     /**
-     * Gets the compose handler suitable for session-associated user.
+     * Gets the compose handler suitable for given compose request.
      *
-     * @param session The session providing user data
+     * @param composeRequest The compose request
      * @return The appropriate compose handler
      * @throws OXException If a suitable compose handler cannot be returned
      */
-    ComposeHandler getComposeHandlerFor(Session session) throws OXException;
+    ComposeHandler getComposeHandlerFor(ComposeRequest composeRequest) throws OXException;
 
 }

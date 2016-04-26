@@ -59,7 +59,6 @@ import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.ComposeTransportResult;
 import com.openexchange.mail.json.compose.DefaultComposeDraftResult;
 import com.openexchange.mail.json.compose.DefaultComposeTransportResult;
-import com.openexchange.session.Session;
 
 
 /**
@@ -120,7 +119,7 @@ public class AbortComposeHandler extends AbstractComposeHandler<AbortComposeCont
     }
 
     @Override
-    public boolean applicableFor(Session session) throws OXException {
+    public boolean applicableFor(ComposeRequest composeRequest) throws OXException {
         return true;
     }
 

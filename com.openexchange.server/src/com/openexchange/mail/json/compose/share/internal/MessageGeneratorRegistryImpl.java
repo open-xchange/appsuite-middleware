@@ -50,10 +50,10 @@
 package com.openexchange.mail.json.compose.share.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.share.DefaultMessageGenerator;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.osgi.ServiceListing;
-import com.openexchange.session.Session;
 
 /**
  * {@link MessageGeneratorRegistryImpl}
@@ -74,9 +74,9 @@ public class MessageGeneratorRegistryImpl implements MessageGeneratorRegistry {
     }
 
     @Override
-    public MessageGenerator getMessageGeneratorFor(Session session) throws OXException {
+    public MessageGenerator getMessageGeneratorFor(ComposeRequest composeRequest) throws OXException {
         for (MessageGenerator messageGenerator : generators.getServiceList()) {
-            if (messageGenerator.applicableFor(session)) {
+            if (messageGenerator.applicableFor(composeRequest)) {
                 return messageGenerator;
             }
         }

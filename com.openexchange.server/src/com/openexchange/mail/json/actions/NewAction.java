@@ -244,14 +244,23 @@ public final class NewAction extends AbstractMailAction {
                 accountId = MailAccount.DEFAULT_ID;
             }
 
-            ComposeHandlerRegistry handlerRegistry = ServerServiceRegistry.getInstance().getService(ComposeHandlerRegistry.class);
-            ComposeHandler composeHandler = handlerRegistry.getComposeHandlerFor(session);
-
             boolean newMessageId = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.ACTION_NEW, request);
-            if ((jMail.optInt(FLAGS, 0) & MailMessage.FLAG_DRAFT) > 0) {
+            boolean isDraft = (jMail.optInt(FLAGS, 0) & MailMessage.FLAG_DRAFT) > 0;
+
+            // Determine send type
+            ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : (isDraft ? null : ComposeType.NEW);
+
+            // Create compose request to process
+            ComposeRequest composeRequest = new ComposeRequest(accountId, jMail, sendType, uploadEvent, request, warnings);
+
+            // Determine appropriate compose handler
+            ComposeHandlerRegistry handlerRegistry = ServerServiceRegistry.getInstance().getService(ComposeHandlerRegistry.class);
+            ComposeHandler composeHandler = handlerRegistry.getComposeHandlerFor(composeRequest);
+
+            // Process compose request
+            if (isDraft) {
                 // Save as draft
-                ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
-                ComposeDraftResult draftResult = composeHandler.createDraftResult(new ComposeRequest(accountId, jMail, sendType, uploadEvent, request, warnings));
+                ComposeDraftResult draftResult = composeHandler.createDraftResult(composeRequest);
                 ComposedMailMessage composedMail = draftResult.getDraftMessage();
                 UserSettingMail usm = session.getUserSettingMail();
                 usm.setNoSave(true);
@@ -291,8 +300,7 @@ public final class NewAction extends AbstractMailAction {
             }
 
             // As new/transport message
-            ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
-            ComposeTransportResult transportResult = composeHandler.createTransportResult(new ComposeRequest(accountId, jMail, sendType, uploadEvent, request, warnings));
+            ComposeTransportResult transportResult = composeHandler.createTransportResult(composeRequest);
             List<? extends ComposedMailMessage> composedMails = transportResult.getTransportMessages();
             ComposedMailMessage sentMessage = transportResult.getSentMessage();
 

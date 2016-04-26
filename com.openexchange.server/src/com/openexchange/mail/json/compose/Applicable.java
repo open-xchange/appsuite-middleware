@@ -50,7 +50,6 @@
 package com.openexchange.mail.json.compose;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link Applicable} - Checks for applicability to a certain session.
@@ -61,12 +60,12 @@ import com.openexchange.session.Session;
 public interface Applicable {
 
     /**
-     * Checks if this instance is applicable for specified session.
+     * Checks if this instance is applicable for specified compose request.
      *
-     * @param session The session
+     * @param composeRequest The compose request
      * @return <code>true</code> if applicable; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    boolean applicableFor(Session session) throws OXException;
+    boolean applicableFor(ComposeRequest composeRequest) throws OXException;
 
 }

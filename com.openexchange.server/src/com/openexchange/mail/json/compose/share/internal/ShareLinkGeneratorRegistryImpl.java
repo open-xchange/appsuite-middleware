@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.compose.share.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.share.DefaultShareLinkGenerator;
 import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
 import com.openexchange.osgi.ServiceListing;
@@ -74,9 +75,9 @@ public class ShareLinkGeneratorRegistryImpl implements ShareLinkGeneratorRegistr
     }
 
     @Override
-    public ShareLinkGenerator getShareLinkGeneratorFor(Session session) throws OXException {
+    public ShareLinkGenerator getShareLinkGeneratorFor(ComposeRequest composeRequest) throws OXException {
         for (ShareLinkGenerator shareLinkGenerator : generators.getServiceList()) {
-            if (shareLinkGenerator.applicableFor(session)) {
+            if (shareLinkGenerator.applicableFor(composeRequest)) {
                 return shareLinkGenerator;
             }
         }

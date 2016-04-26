@@ -50,8 +50,8 @@
 package com.openexchange.mail.json.compose.share.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
-import com.openexchange.session.Session;
 
 /**
  * {@link ShareLinkGeneratorRegistry} - The registry for share link generators.
@@ -62,12 +62,12 @@ import com.openexchange.session.Session;
 public interface ShareLinkGeneratorRegistry {
 
     /**
-     * Gets the share link generator applicable for specified session.
+     * Gets the share link generator applicable for specified compose request.
      *
-     * @param session The session
+     * @param composeRequest The compose request
      * @return The share link generator
      * @throws OXException If share link generator cannot be returned
      */
-    ShareLinkGenerator getShareLinkGeneratorFor(Session session) throws OXException;
+    ShareLinkGenerator getShareLinkGeneratorFor(ComposeRequest composeRequest) throws OXException;
 
 }
