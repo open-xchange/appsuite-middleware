@@ -59,6 +59,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -226,7 +227,7 @@ public abstract class CardDAVResource extends AbstractResource {
 	public InputStream getBody() throws WebdavProtocolException {
 	    String body = this.getVCard();
 	    LOG.trace(body);
-        return null != body ? new ByteArrayInputStream(body.getBytes()) : null;
+        return null != body ? new ByteArrayInputStream(body.getBytes(Charsets.UTF_8)) : null;
 	}
 
 	@Override

@@ -85,6 +85,7 @@ import org.bouncycastle.mail.smime.SMIMESigned;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CountingOutputStream;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -336,7 +337,7 @@ public final class MailMessageParser {
              * Parse content
              */
             final ContentType contentType = mail.getContentType();
-            if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+            if (contentType.startsWith("multipart/related") && ("application/smil".equals(Strings.asciiLowerCase(contentType.getParameter("type"))))) {
                 parseMailContent(MimeSmilFixer.getInstance().process(mail), handler, prefix, 1);
             } else {
                 parseMailContent(mail, handler, prefix, 1);
@@ -906,7 +907,7 @@ public final class MailMessageParser {
         // Check for "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data"
         SMIMESigned smimeSigned = null;
         try {
-            if ("multipart/signed".equals(lcct)) {
+            if (isMultipartSigned(lcct, contentType)) {
                 smimeSigned = new SMIMESigned((MimeMultipart) ((MimeRawSource) mailPart).getPart().getContent());
             } else if (isSigned(lcct, contentType)) {
                 smimeSigned = new SMIMESigned(((MimeRawSource) mailPart).getPart());
@@ -1201,29 +1202,12 @@ public final class MailMessageParser {
         return false;
     }
 
-    private static boolean isWinmailDat(final String fileName) {
-        if (isEmptyString(fileName)) {
-            return false;
-        }
-        final String toCheck = LocaleTools.toLowerCase(fileName);
-        return toCheck.startsWith("winmail", 0) && toCheck.endsWith(".dat");
-    }
-
-    static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
+    private static boolean isMultipartSigned(String lcct, ContentType ct) {
+        return "multipart/signed".equals(lcct) && "application/pkcs7-signature".equals(Strings.asciiLowerCase(ct.getParameter("protocol")));
     }
 
     private static boolean isSigned(String lcct, ContentType ct) {
-        return "application/pkcs7-mime".equals(lcct) && "signed-data".equals(ct.getParameter("smime-type")) && "smime.p7m".equals(ct.getNameParameter());
+        return "application/pkcs7-mime".equals(lcct) && "signed-data".equals(Strings.asciiLowerCase(ct.getParameter("smime-type"))) && "smime.p7m".equals(Strings.asciiLowerCase(ct.getNameParameter()));
     }
 
 }
