@@ -47,61 +47,71 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share.osgi;
+package com.openexchange.mail.json.compose.share;
 
-import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
-import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
-import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
-import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
-import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
-import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.server.services.ServerServiceRegistry;
-
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.tx.TransactionAware;
+import com.openexchange.tx.TransactionAwares;
 
 /**
- * {@link ShareComposeActivator}
+ * {@link DefaultStoredAttachmentsControl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeActivator extends HousekeepingActivator {
+public class DefaultStoredAttachmentsControl implements StoredAttachmentsControl {
+
+    private final List<String> attachmentIds;
+    private final String folderId;
+    private final ShareTarget folderTarget;
+    private final TransactionAware transaction;
 
     /**
-     * Initializes a new {@link ShareComposeActivator}.
+     * Initializes a new {@link DefaultStoredAttachmentsControl}.
+     *
+     * @param attachmentIds The identifiers of the stored attachments
+     * @param folderId The folder identifier
+     * @param folderTarget The share target pointing to the folder/directory containing the attachments
+     * @param transaction The associated transaction
      */
-    public ShareComposeActivator() {
+    public DefaultStoredAttachmentsControl(List<String> attachmentIds, String folderId, ShareTarget folderTarget, TransactionAware transaction) {
         super();
+        this.attachmentIds = attachmentIds;
+        this.folderId = folderId;
+        this.folderTarget = folderTarget;
+        this.transaction = transaction;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public String getFolderId() {
+        return folderId;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        RankingAwareNearRegistryServiceTracker<ShareLinkGenerator> shareLinkGeneratorTracker = new RankingAwareNearRegistryServiceTracker<>(context, ShareLinkGenerator.class);
-        rememberTracker(shareLinkGeneratorTracker);
-
-        RankingAwareNearRegistryServiceTracker<MessageGenerator> messageGeneratorTracker = new RankingAwareNearRegistryServiceTracker<>(context, MessageGenerator.class);
-        rememberTracker(messageGeneratorTracker);
-
-        RankingAwareNearRegistryServiceTracker<AttachmentStorage> attachmentStorageTracker = new RankingAwareNearRegistryServiceTracker<>(context, AttachmentStorage.class);
-        rememberTracker(attachmentStorageTracker);
-
-        openTrackers();
-
-        ServerServiceRegistry.getInstance().addService(ShareLinkGeneratorRegistry.class, new ShareLinkGeneratorRegistryImpl(shareLinkGeneratorTracker));
-        ServerServiceRegistry.getInstance().addService(MessageGeneratorRegistry.class, new MessageGeneratorRegistryImpl(messageGeneratorTracker));
-        ServerServiceRegistry.getInstance().addService(AttachmentStorageRegistry.class, new AttachmentStorageRegistryImpl(attachmentStorageTracker));
+    public List<String> getAttachmentIds() {
+        return attachmentIds;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        ServerServiceRegistry.getInstance().removeService(ShareLinkGeneratorRegistry.class);
-        super.stopBundle();
+    public ShareTarget getFolderTarget() {
+        return folderTarget;
+    }
+
+    @Override
+    public void commit() throws OXException {
+        transaction.commit();
+    }
+
+    @Override
+    public void rollback() throws OXException {
+        TransactionAwares.rollbackSafe(transaction);
+    }
+
+    @Override
+    public void finish() throws OXException {
+        TransactionAwares.finishSafe(transaction);
     }
 
 }

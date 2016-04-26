@@ -50,44 +50,23 @@
 package com.openexchange.mail.json.compose.share.spi;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.mail.json.compose.share.Recipient;
 import com.openexchange.session.Session;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ShareLinkGenerator} - An interface that determines how a link to a shared folder is supposed to be generated.
+ * {@link Applicable} - Checks for applicability to a certain session.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface ShareLinkGenerator extends Applicable {
+public interface Applicable {
 
     /**
-     * Generates the share link for specified recipient.
+     * Checks if this instance is applicable for specified session.
      *
-     * @param recipient The recipient
-     * @param guest The guest
-     * @param sourceTarget The share target to the folder
-     * @param hostData The associated host data
-     * @param queryString The optional query string or <code>null</code>
-     * @param session The associated session
-     * @return The share link
-     * @throws OXException If generating the share link fails
+     * @param session The session
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
-    String generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException;
+    boolean applicableFor(Session session) throws OXException;
 
-    /**
-     * Generates the personal share link for specified session's user.
-     *
-     * @param shareTarget The share target
-     * @param hostData The host data
-     * @param queryString The optional query string or <code>null</code>
-     * @param session The associated session
-     * @return The share link
-     * @throws OXException If generating the share link fails
-     */
-    String generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session);
 }

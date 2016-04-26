@@ -53,7 +53,6 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.compose.share.ShareComposeMessageInfo;
-import com.openexchange.session.Session;
 
 /**
  * {@link MessageGenerator} - Generates appropriate compose messages for internal/external recipients.
@@ -61,7 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface MessageGenerator {
+public interface MessageGenerator extends Applicable {
 
     /**
      * Generates the transport messages for given attributes.
@@ -80,14 +79,5 @@ public interface MessageGenerator {
      * @throws OXException If message cannot be generated
      */
     ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info) throws OXException;
-
-    /**
-     * Checks if this generator is applicable for specified session.
-     *
-     * @param session The session
-     * @return <code>true</code> if applicable; otherwise <code>false</code>
-     * @throws OXException If check fails
-     */
-    boolean applicableFor(Session session) throws OXException;
 
 }

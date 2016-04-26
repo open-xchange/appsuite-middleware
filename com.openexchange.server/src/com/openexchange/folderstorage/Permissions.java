@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage;
 
+import com.openexchange.server.impl.OCLPermission;
 import gnu.trove.map.hash.TIntIntHashMap;
 
 
@@ -125,16 +126,25 @@ public class Permissions {
     }
 
     /**
-     * Creates a permission bit mask from the given partial permissions.
+     * Creates a read-only permission bit mask.
      *
-     * @param fp folder permission
-     * @param rp read permission
-     * @param wp write permission
-     * @param dp delete permission
-     * @param adminFlag folder admin?
      * @return The bit mask
      */
-    public static int createPermissionBits(final int fp, final int rp, final int wp, final int dp, final boolean adminFlag) {
+    public static int createReadOnlyPermissionBits() {
+        return createPermissionBits(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, false);
+    }
+
+    /**
+     * Creates a permission bit mask from the given partial permissions.
+     *
+     * @param fp The folder permission
+     * @param rp The read permission
+     * @param wp The write permission
+     * @param dp The delete permission
+     * @param adminFlag The folder admin flag
+     * @return The bit mask
+     */
+    public static int createPermissionBits(int fp, int rp, int wp, int dp, boolean adminFlag) {
         int retval = 0;
         int i = 4;
         retval += (adminFlag ? 1 : 0) << (i-- * 7)/* Number of bits to be shifted */;

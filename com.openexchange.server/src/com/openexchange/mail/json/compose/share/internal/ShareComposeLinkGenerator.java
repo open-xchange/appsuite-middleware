@@ -96,7 +96,7 @@ public class ShareComposeLinkGenerator {
      * @param shareTarget The share target
      * @param guest The guest
      * @param hostData The host data
-     * @param queryString The optional query string
+     * @param queryString The optional query string or <code>null</code>
      * @param session The associated session
      * @return The link
      * @throws OXException If link cannot be returned
@@ -118,7 +118,7 @@ public class ShareComposeLinkGenerator {
      *
      * @param shareTarget The share target
      * @param hostData The host data
-     * @param queryString The optional query string
+     * @param queryString The optional query string or <code>null</code>
      * @param session The associated session
      * @return The link
      * @throws OXException If link cannot be returned

@@ -56,6 +56,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -78,6 +79,7 @@ public class ShareReference {
      *
      * @param referenceString The reference string to parse
      * @return The <code>ShareReference</code> instance
+     * @throws IllegalArgumentException If specified reference string is invalid
      */
     public static ShareReference parseFromReferenceString(String referenceString) {
         if (Strings.isEmpty(referenceString)) {
@@ -95,7 +97,14 @@ public class ShareReference {
                     itemIds.add(jItemIds.getString(i));
                 }
             }
-            return new ShareReference(jReference.getString("shareUrl"), itemIds, jReference.getString("folderId"), jReference.getInt("userId"), jReference.getInt("contextId"));
+            Date expiration = null;
+            if (jReference.hasAndNotNull("expiration")) {
+                expiration = new Date(jReference.getLong("expiration"));
+            }
+            return new ShareReference(jReference.getString("shareUrl"), itemIds, jReference.getString("folderId"), expiration, jReference.getInt("userId"), jReference.getInt("contextId"));
+        } catch (java.util.zip.ZipException e) {
+            // A GZIP format error has occurred or the compression method used is unsupported
+            throw new IllegalArgumentException("Invalid reference string", e);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -106,11 +115,92 @@ public class ShareReference {
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * A builder for a share reference.
+     */
+    public static class Builder {
+
+        private final int contextId;
+        private final int userId;
+        private String folderId;
+        private List<String> itemIds;
+        private String shareUrl;
+        private Date expiration;
+
+        /**
+         * Initializes a new {@link Builder}.
+         *
+         * @param userId The user identifier
+         * @param contextId The context identifier
+         */
+        public Builder(int userId, int contextId) {
+            super();
+            this.userId = userId;
+            this.contextId = contextId;
+        }
+
+        /**
+         * Sets the folder identifier
+         *
+         * @param folderId The folder identifier
+         * @return This builder instance
+         */
+        public Builder folderId(String folderId) {
+            this.folderId = folderId;
+            return this;
+        }
+
+        /**
+         * Sets the item identifiers
+         *
+         * @param itemIds The item identifiers
+         * @return This builder instance
+         */
+        public Builder itemIds(List<String> itemIds) {
+            this.itemIds = itemIds;
+            return this;
+        }
+
+        /**
+         * Sets the share URL
+         *
+         * @param shareUrl The share URL
+         * @return This builder instance
+         */
+        public Builder shareUrl(String shareUrl) {
+            this.shareUrl = shareUrl;
+            return this;
+        }
+
+        /**
+         * Sets the expiration date
+         *
+         * @param expiration The expiration date
+         * @return This builder instance
+         */
+        public Builder expiration(Date expiration) {
+            this.expiration = expiration;
+            return this;
+        }
+
+        /**
+         * Creates the appropriate {@code ShareReference} instance according to this builder's arguments.
+         *
+         * @return The {@code ShareReference} instance
+         */
+        public ShareReference build() {
+            return new ShareReference(shareUrl, itemIds, folderId, expiration, userId, contextId);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
     private final int contextId;
     private final int userId;
     private final String folderId;
     private final List<String> itemIds;
     private final String shareUrl;
+    private final Date expiration;
 
     /**
      * Initializes a new {@link ShareReference}.
@@ -121,13 +211,68 @@ public class ShareReference {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public ShareReference(String shareUrl, List<String> itemIds, String folderId, int userId, int contextId) {
+    private ShareReference(String shareUrl, List<String> itemIds, String folderId, Date expiration, int userId, int contextId) {
         super();
         this.shareUrl = shareUrl;
         this.itemIds = itemIds;
         this.folderId = folderId;
+        this.expiration = expiration;
         this.userId = userId;
         this.contextId = contextId;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the folder identifier
+     *
+     * @return The folder identifier
+     */
+    public String getFolderId() {
+        return folderId;
+    }
+
+    /**
+     * Gets the item identifiers
+     *
+     * @return The item identifiers
+     */
+    public List<String> getItemIds() {
+        return itemIds;
+    }
+
+    /**
+     * Gets the share URL
+     *
+     * @return The share URL
+     */
+    public String getShareUrl() {
+        return shareUrl;
+    }
+
+    /**
+     * Gets the optional expiration date
+     *
+     * @return The expiration date or <code>null</code>
+     */
+    public Date getExpiration() {
+        return expiration;
     }
 
     /**
@@ -152,6 +297,26 @@ public class ShareReference {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("[contextId=").append(contextId).append(", userId=").append(userId).append(", ");
+        if (folderId != null) {
+            sb.append("folderId=").append(folderId).append(", ");
+        }
+        if (itemIds != null) {
+            sb.append("itemIds=").append(itemIds).append(", ");
+        }
+        if (shareUrl != null) {
+            sb.append("shareUrl=").append(shareUrl).append(", ");
+        }
+        if (expiration != null) {
+            sb.append("expiration=").append(expiration);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
     // -----------------------------------------------------------------------------------------------------------------------------------
 
     private static String compress(String str) throws IOException {
@@ -161,7 +326,7 @@ public class ShareReference {
         gzip.flush();
         gzip.close();
         return Base64.encodeBase64String(byteSink.toByteArray());
-     }
+    }
 
     private static String decompress(String str) throws UnsupportedEncodingException, IOException {
         byte[] data = Base64.decodeBase64(str);
@@ -172,6 +337,6 @@ public class ShareReference {
             outStr.append(cbuf, 0, read);
         }
         return outStr.toString();
-     }
+    }
 
 }

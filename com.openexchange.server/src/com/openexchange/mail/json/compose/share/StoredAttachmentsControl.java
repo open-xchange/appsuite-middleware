@@ -47,47 +47,60 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share.spi;
+package com.openexchange.mail.json.compose.share;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.mail.json.compose.share.Recipient;
-import com.openexchange.session.Session;
-import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ShareLinkGenerator} - An interface that determines how a link to a shared folder is supposed to be generated.
+ * {@link StoredAttachmentsControl} - The control for stored attachments.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface ShareLinkGenerator extends Applicable {
+public interface StoredAttachmentsControl {
 
     /**
-     * Generates the share link for specified recipient.
+     * Gets the folder identifier
      *
-     * @param recipient The recipient
-     * @param guest The guest
-     * @param sourceTarget The share target to the folder
-     * @param hostData The associated host data
-     * @param queryString The optional query string or <code>null</code>
-     * @param session The associated session
-     * @return The share link
-     * @throws OXException If generating the share link fails
+     * @return The folder identifier
      */
-    String generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException;
+    String getFolderId();
 
     /**
-     * Generates the personal share link for specified session's user.
+     * Gets the attachment identifiers
      *
-     * @param shareTarget The share target
-     * @param hostData The host data
-     * @param queryString The optional query string or <code>null</code>
-     * @param session The associated session
-     * @return The share link
-     * @throws OXException If generating the share link fails
+     * @return The attachment identifiers
      */
-    String generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session);
+    List<String> getAttachmentIds();
+
+    /**
+     * Gets the share target for the folder
+     *
+     * @return The share target for the folder
+     */
+    ShareTarget getFolderTarget();
+
+    /**
+     * Commits the attachment store operation.
+     *
+     * @throws OXException If commit fails
+     */
+    void commit() throws OXException;
+
+    /**
+     * Rolls-back the attachment store operation.
+     *
+     * @throws OXException If roll-back fails
+     */
+    void rollback() throws OXException;
+
+    /**
+     * Performs possible clean-up operations after a commit/roll-back.
+     *
+     * @throws OXException If clean-up fails
+     */
+    void finish() throws OXException;
+
 }

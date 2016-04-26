@@ -49,45 +49,30 @@
 
 package com.openexchange.mail.json.compose.share.spi;
 
+import java.util.Date;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.mail.json.compose.share.Recipient;
-import com.openexchange.session.Session;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.compose.ComposeContext;
+import com.openexchange.mail.json.compose.share.StoredAttachmentsControl;
 
 /**
- * {@link ShareLinkGenerator} - An interface that determines how a link to a shared folder is supposed to be generated.
+ * {@link AttachmentStorage} - The storage for attachments.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface ShareLinkGenerator extends Applicable {
+public interface AttachmentStorage extends Applicable {
 
     /**
-     * Generates the share link for specified recipient.
+     * Stores the attachments associated with specified compose context.
      *
-     * @param recipient The recipient
-     * @param guest The guest
-     * @param sourceTarget The share target to the folder
-     * @param hostData The associated host data
-     * @param queryString The optional query string or <code>null</code>
-     * @param session The associated session
-     * @return The share link
-     * @throws OXException If generating the share link fails
+     * @param sourceMessage The source message providing basic information
+     * @param password The optional password to protect the attachments
+     * @param expiry The optional expiration date
+     * @param context The associated compose context; e.g. providing the attachments to store
+     * @return The result for stored attachments
+     * @throws OXException If attachments cannot be stored for any reason
      */
-    String generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException;
+    StoredAttachmentsControl storeAttachments(ComposedMailMessage sourceMessage, String password, Date expiry, ComposeContext context) throws OXException;
 
-    /**
-     * Generates the personal share link for specified session's user.
-     *
-     * @param shareTarget The share target
-     * @param hostData The host data
-     * @param queryString The optional query string or <code>null</code>
-     * @param session The associated session
-     * @return The share link
-     * @throws OXException If generating the share link fails
-     */
-    String generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session);
 }

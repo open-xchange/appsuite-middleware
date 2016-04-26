@@ -49,59 +49,40 @@
 
 package com.openexchange.mail.json.compose.share.osgi;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
-import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
-import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
-import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
-import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.server.services.ServerServiceRegistry;
-
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.session.Session;
 
 /**
- * {@link ShareComposeActivator}
+ * {@link AttachmentStorageRegistryImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareComposeActivator extends HousekeepingActivator {
+public class AttachmentStorageRegistryImpl implements AttachmentStorageRegistry {
+
+    private final ServiceListing<AttachmentStorage> storages;
 
     /**
-     * Initializes a new {@link ShareComposeActivator}.
+     * Initializes a new {@link AttachmentStorageRegistryImpl}.
      */
-    public ShareComposeActivator() {
+    public AttachmentStorageRegistryImpl(ServiceListing<AttachmentStorage> storages) {
         super();
+        this.storages = storages;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    public AttachmentStorage getAttachmentStorageFor(Session session) throws OXException {
+        for (AttachmentStorage attachmentStorage : storages.getServiceList()) {
+            if (attachmentStorage.applicableFor(session)) {
+                return attachmentStorage;
+            }
+        }
 
-    @Override
-    protected void startBundle() throws Exception {
-        RankingAwareNearRegistryServiceTracker<ShareLinkGenerator> shareLinkGeneratorTracker = new RankingAwareNearRegistryServiceTracker<>(context, ShareLinkGenerator.class);
-        rememberTracker(shareLinkGeneratorTracker);
-
-        RankingAwareNearRegistryServiceTracker<MessageGenerator> messageGeneratorTracker = new RankingAwareNearRegistryServiceTracker<>(context, MessageGenerator.class);
-        rememberTracker(messageGeneratorTracker);
-
-        RankingAwareNearRegistryServiceTracker<AttachmentStorage> attachmentStorageTracker = new RankingAwareNearRegistryServiceTracker<>(context, AttachmentStorage.class);
-        rememberTracker(attachmentStorageTracker);
-
-        openTrackers();
-
-        ServerServiceRegistry.getInstance().addService(ShareLinkGeneratorRegistry.class, new ShareLinkGeneratorRegistryImpl(shareLinkGeneratorTracker));
-        ServerServiceRegistry.getInstance().addService(MessageGeneratorRegistry.class, new MessageGeneratorRegistryImpl(messageGeneratorTracker));
-        ServerServiceRegistry.getInstance().addService(AttachmentStorageRegistry.class, new AttachmentStorageRegistryImpl(attachmentStorageTracker));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        ServerServiceRegistry.getInstance().removeService(ShareLinkGeneratorRegistry.class);
-        super.stopBundle();
+        return DefaultAttachmentStorage.getInstance();
     }
 
 }
