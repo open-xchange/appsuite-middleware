@@ -86,7 +86,7 @@ public class ShareTransportComposeContext extends AbstractQuotaAwareComposeConte
     /**
      * Checks whether the initial warning is supposed to be added.
      *
-     * @return <code>true</code> to add wrning; otherwise <code>false</code>
+     * @return <code>true</code> to add warning; otherwise <code>false</code>
      */
     public boolean isAddWarning() {
         return addWarning;

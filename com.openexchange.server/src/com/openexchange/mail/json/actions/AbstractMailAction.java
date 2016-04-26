@@ -292,11 +292,32 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @throws OXException
      */
     public static void triggerContactCollector(ServerSession session, MailMessage mail, boolean incrementUseCount) throws OXException {
+        triggerContactCollector(session, Collections.singletonList(mail), incrementUseCount);
+    }
+
+    /**
+     * Triggers the contact collector for specified mail's addresses.
+     *
+     * @param session The session
+     * @param mails The mails
+     * @param incrementUseCount Whether the associated contacts' use-count is supposed to be incremented
+     * @throws OXException
+     */
+    public static void triggerContactCollector(ServerSession session, Collection<? extends MailMessage> mails, boolean incrementUseCount) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
-            Set<InternetAddress> addrs = AddressUtility.getAddresses(mail, session);
+            Set<InternetAddress> addrs = null;
+            for (MailMessage mail : mails) {
+                if (null != mail) {
+                    if (null == addrs) {
+                        addrs = AddressUtility.getAddresses(mail, session);
+                    } else {
+                        addrs.addAll(AddressUtility.getAddresses(mail, session));
+                    }
+                }
+            }
 
-            if (!addrs.isEmpty()) {
+            if (null != addrs && !addrs.isEmpty()) {
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), incrementUseCount, session);
             }
         }
