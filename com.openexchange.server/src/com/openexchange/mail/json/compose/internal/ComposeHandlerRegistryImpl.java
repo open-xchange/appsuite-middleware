@@ -47,42 +47,44 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share.osgi;
+package com.openexchange.mail.json.compose.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.json.compose.share.DefaultMessageGenerator;
-import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
-import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
+import com.openexchange.mail.json.compose.ComposeHandler;
+import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
+import com.openexchange.mail.json.compose.abort.AbortComposeHandler;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
 
+
 /**
- * {@link MessageGeneratorRegistryImpl}
+ * {@link ComposeHandlerRegistryImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class MessageGeneratorRegistryImpl implements MessageGeneratorRegistry {
+public class ComposeHandlerRegistryImpl implements ComposeHandlerRegistry {
 
-    private final ServiceListing<MessageGenerator> generators;
+    private final ServiceListing<ComposeHandler> handlers;
 
     /**
-     * Initializes a new {@link MessageGeneratorRegistryImpl}.
+     * Initializes a new {@link ComposeHandlerRegistryImpl}.
      */
-    public MessageGeneratorRegistryImpl(ServiceListing<MessageGenerator> generators) {
+    public ComposeHandlerRegistryImpl(ServiceListing<ComposeHandler> handlers) {
         super();
-        this.generators = generators;
+        this.handlers = handlers;
     }
 
     @Override
-    public MessageGenerator getMessageGeneratorFor(Session session) throws OXException {
-        for (MessageGenerator messageGenerator : generators.getServiceList()) {
-            if (messageGenerator.applicableFor(session)) {
-                return messageGenerator;
+    public ComposeHandler getComposeHandlerFor(Session session) throws OXException {
+        for (ComposeHandler handler : handlers.getServiceList()) {
+            if (handler.applicableFor(session)) {
+                return handler;
             }
         }
 
-        return DefaultMessageGenerator.getInstance();
+        // Return "default" handler
+        return AbortComposeHandler.getInstance();
     }
 
 }

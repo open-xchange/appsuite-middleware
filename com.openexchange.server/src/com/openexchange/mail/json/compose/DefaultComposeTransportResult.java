@@ -60,20 +60,20 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
  */
 public class DefaultComposeTransportResult implements ComposeTransportResult {
 
-    private final List<ComposedMailMessage> transportMessages;
+    private final List<? extends ComposedMailMessage> transportMessages;
     private final ComposedMailMessage sentMessage;
 
     /**
      * Initializes a new {@link DefaultComposeTransportResult}.
      */
-    public DefaultComposeTransportResult(List<ComposedMailMessage> transportMessages, ComposedMailMessage sentMessage) {
+    public DefaultComposeTransportResult(List<? extends ComposedMailMessage> transportMessages, ComposedMailMessage sentMessage) {
         super();
         this.transportMessages = transportMessages;
         this.sentMessage = sentMessage;
     }
 
     @Override
-    public List<ComposedMailMessage> getTransportMessages() {
+    public List<? extends ComposedMailMessage> getTransportMessages() {
         return transportMessages;
     }
 

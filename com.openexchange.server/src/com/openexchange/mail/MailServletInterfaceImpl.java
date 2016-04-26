@@ -3142,155 +3142,174 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String sendMessage(ComposedMailMessage composedMail, ComposeType type, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException {
+        List<String> ids = sendMessages(Collections.singletonList(composedMail), null, type, accountId, optUserSetting, statusInfo, remoteAddress);
+        return null == ids || ids.isEmpty() ? null : ids.get(0);
+    }
+
+    @Override
+    public List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage mailToAppend, ComposeType type, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException {
         /*
          * Initialize
          */
         initConnection(accountId);
         MailTransport transport = MailTransport.getInstance(session, accountId);
-        boolean mailSent = false;
         try {
-            /*
-             * Send mail
-             */
-            MailMessage sentMail;
-            OXException oxError = null;
-            Collection<InternetAddress> validRecipients = null;
-            long startTransport = System.currentTimeMillis();
-            try {
-                if (composedMail.isTransportToRecipients()) {
-                    MailProperties properties = MailProperties.getInstance();
-                    String remoteAddr = null == remoteAddress ? session.getLocalIp() : remoteAddress;
-                    if (isWhitelistedFromRateLimit(remoteAddr, properties.getDisabledRateLimitRanges())) {
-                        sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
-                    } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
-                        int rateLimit = properties.getRateLimit();
-                        LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", rateLimit, remoteAddr, null == remoteAddress ? "from session" : "from request", session.getUserId(), session.getContextId());
-                        rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
-                        sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
-                        setRateLimitTime(rateLimit);
-                    } else {
-                        sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
-                    }
-                    mailSent = true;
-                } else {
-                    javax.mail.Address[] poison = new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS };
-                    sentMail = transport.sendMailMessage(composedMail, type, poison, statusInfo);
-                }
-            } catch (OXException e) {
-                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e) && !MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.equals(e)) {
-                    throw e;
-                }
-
-                MailMessage ma = (MailMessage) e.getArgument("sent_message");
-                if (null == ma) {
-                    throw e;
-                }
-
-                sentMail = ma;
-                oxError = e;
-                mailSent = true;
-                if (e.getCause() instanceof SMTPSendFailedException) {
-                    SMTPSendFailedException sendFailed = (SMTPSendFailedException) e.getCause();
-                    Address[] validSentAddrs = sendFailed.getValidSentAddresses();
-                    if (validSentAddrs != null && validSentAddrs.length > 0) {
-                        validRecipients = new ArrayList<InternetAddress>(validSentAddrs.length);
-                        for (Address validAddr : validSentAddrs) {
-                            validRecipients.add((InternetAddress) validAddr);
-                        }
-                    }
-                }
-            }
-            /*
-             * Email successfully sent, trigger data retention
-             */
-            DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
-            if (null != retentionService) {
-                triggerDataRetention(transport, startTransport, sentMail, validRecipients, retentionService);
-            }
-            /*
-             * Check for a reply/forward
-             */
-            try {
-                if (ComposeType.REPLY.equals(type)) {
-                    setFlagReply(composedMail.getMsgref());
-                } else if (ComposeType.FORWARD.equals(type)) {
-                    MailPath supPath = composedMail.getMsgref();
-                    if (null == supPath) {
-                        int count = composedMail.getEnclosedCount();
-                        List<MailPath> paths = new LinkedList<MailPath>();
-                        for (int i = 0; i < count; i++) {
-                            MailPart part = composedMail.getEnclosedMailPart(i);
-                            MailPath path = part.getMsgref();
-                            if ((path != null) && part.getContentType().isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
-                                paths.add(path);
-                            }
-                        }
-                        if (!paths.isEmpty()) {
-                            setFlagMultipleForward(paths);
-                        }
-                    } else {
-                        setFlagForward(supPath);
-                    }
-                } else if (ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT.equals(type)) {
-                    // Do not delete draft!
-                } else if (ComposeType.DRAFT.equals(type)) {
-                    ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                    if (null != configViewFactory) {
-                        try {
-                            ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
-                            ComposedConfigProperty<Boolean> property = view.property(
-                                "com.openexchange.mail.deleteDraftOnTransport",
-                                boolean.class);
-                            if (property.isDefined() && property.get().booleanValue()) {
-                                deleteDraft(composedMail.getMsgref());
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Draft mail cannot be deleted.", e);
-                        }
-                    }
-                } else if (ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(type)) {
-                    try {
-                        deleteDraft(composedMail.getMsgref());
-                    } catch (Exception e) {
-                        LOG.warn("Draft mail cannot be deleted.", e);
-                    }
-                }
-            } catch (OXException e) {
-                mailAccess.addWarnings(Collections.singletonList(MailExceptionCode.FLAG_FAIL.create(e, new Object[0])));
-            }
             UserSettingMail usm = null == optUserSetting ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : optUserSetting;
-            if (usm.isNoCopyIntoStandardSentFolder() || false == composedMail.isAppendToSentFolder()) {
-                /*
-                 * No copy in sent folder
-                 */
-                return null;
+            List<String> ids = new ArrayList<>(transportMails.size());
+            OXException oxError = null;
+            boolean first = true;
+            for (ComposedMailMessage composedMail : transportMails) {
+                boolean mailSent = false;
+                try {
+                    /*
+                     * Send mail
+                     */
+                    MailMessage sentMail;
+                    Collection<InternetAddress> validRecipients = null;
+                    long startTransport = System.currentTimeMillis();
+                    try {
+                        if (composedMail.isTransportToRecipients()) {
+                            if (first) {
+                                MailProperties properties = MailProperties.getInstance();
+                                String remoteAddr = null == remoteAddress ? session.getLocalIp() : remoteAddress;
+                                if (isWhitelistedFromRateLimit(remoteAddr, properties.getDisabledRateLimitRanges())) {
+                                    sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
+                                    int rateLimit = properties.getRateLimit();
+                                    LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", rateLimit, remoteAddr, null == remoteAddress ? "from session" : "from request", session.getUserId(), session.getContextId());
+                                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
+                                    sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                                    setRateLimitTime(rateLimit);
+                                } else {
+                                    sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                                }
+                            } else {
+                                sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                            }
+                            mailSent = true;
+                        } else {
+                            javax.mail.Address[] poison = new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS };
+                            sentMail = transport.sendMailMessage(composedMail, type, poison, statusInfo);
+                        }
+                    } catch (OXException e) {
+                        if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e) && !MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.equals(e)) {
+                            throw e;
+                        }
+
+                        MailMessage ma = (MailMessage) e.getArgument("sent_message");
+                        if (null == ma) {
+                            throw e;
+                        }
+
+                        sentMail = ma;
+                        oxError = e;
+                        mailSent = true;
+                        if (e.getCause() instanceof SMTPSendFailedException) {
+                            SMTPSendFailedException sendFailed = (SMTPSendFailedException) e.getCause();
+                            Address[] validSentAddrs = sendFailed.getValidSentAddresses();
+                            if (validSentAddrs != null && validSentAddrs.length > 0) {
+                                validRecipients = new ArrayList<InternetAddress>(validSentAddrs.length);
+                                for (Address validAddr : validSentAddrs) {
+                                    validRecipients.add((InternetAddress) validAddr);
+                                }
+                            }
+                        }
+                    }
+
+                    // Email successfully sent, trigger data retention
+                    if (mailSent) {
+                        DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
+                        if (null != retentionService) {
+                            triggerDataRetention(transport, startTransport, sentMail, validRecipients, retentionService);
+                        }
+                    }
+
+                    // Check for a reply/forward
+                    if (first) {
+                        try {
+                            if (ComposeType.REPLY.equals(type)) {
+                                setFlagReply(composedMail.getMsgref());
+                            } else if (ComposeType.FORWARD.equals(type)) {
+                                MailPath supPath = composedMail.getMsgref();
+                                if (null == supPath) {
+                                    int count = composedMail.getEnclosedCount();
+                                    List<MailPath> paths = new LinkedList<MailPath>();
+                                    for (int i = 0; i < count; i++) {
+                                        MailPart part = composedMail.getEnclosedMailPart(i);
+                                        MailPath path = part.getMsgref();
+                                        if ((path != null) && part.getContentType().isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
+                                            paths.add(path);
+                                        }
+                                    }
+                                    if (!paths.isEmpty()) {
+                                        setFlagMultipleForward(paths);
+                                    }
+                                } else {
+                                    setFlagForward(supPath);
+                                }
+                            } else if (ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT.equals(type)) {
+                                // Do not delete draft!
+                            } else if (ComposeType.DRAFT.equals(type)) {
+                                ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+                                if (null != configViewFactory) {
+                                    try {
+                                        ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+                                        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.deleteDraftOnTransport", boolean.class);
+                                        if (property.isDefined() && property.get().booleanValue()) {
+                                            deleteDraft(composedMail.getMsgref());
+                                        }
+                                    } catch (Exception e) {
+                                        LOG.warn("Draft mail cannot be deleted.", e);
+                                    }
+                                }
+                            } else if (ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(type)) {
+                                try {
+                                    deleteDraft(composedMail.getMsgref());
+                                } catch (Exception e) {
+                                    LOG.warn("Draft mail cannot be deleted.", e);
+                                }
+                            }
+                        } catch (OXException e) {
+                            mailAccess.addWarnings(Collections.singletonList(MailExceptionCode.FLAG_FAIL.create(e, new Object[0])));
+                        }
+                    }
+
+                    if (!usm.isNoCopyIntoStandardSentFolder() && composedMail.isAppendToSentFolder()) {
+                        /*
+                         * If mail identifier and folder identifier is already available, assume it has already been stored in Sent folder
+                         */
+                        if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
+                            ids.add(new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString());
+                        } else {
+                            ids.add(append2SentFolder(sentMail).toString());
+                        }
+                    }
+                } catch (OXException e) {
+                    if (!mailSent) {
+                        throw e;
+                    }
+                    e.setCategory(Category.CATEGORY_WARNING);
+                    warnings.add(e);
+                } catch (RuntimeException e) {
+                    OXException oxe = MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    if (!mailSent) {
+                        throw oxe;
+                    }
+                    oxe.setCategory(Category.CATEGORY_WARNING);
+                    warnings.add(oxe);
+                }
+                first = false;
             }
-            /*
-             * If mail identifier and folder identifier is already available, assume is has already been stored in Sent folder
-             */
-            if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
-                return new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString();
+
+            if (null != mailToAppend && !usm.isNoCopyIntoStandardSentFolder()) {
+                ids.add(append2SentFolder(mailToAppend).toString());
             }
-            String mailPath = append2SentFolder(sentMail).toString();
+
             if (null != oxError) {
                 throw oxError;
             }
-            return mailPath;
-        } catch (OXException e) {
-            if (!mailSent) {
-                throw e;
-            }
-            e.setCategory(Category.CATEGORY_WARNING);
-            warnings.add(e);
-            return null;
-        } catch (RuntimeException e) {
-            OXException oxe = MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-            if (!mailSent) {
-                throw oxe;
-            }
-            oxe.setCategory(Category.CATEGORY_WARNING);
-            warnings.add(oxe);
-            return null;
+
+            return ids;
         } finally {
             transport.close();
         }

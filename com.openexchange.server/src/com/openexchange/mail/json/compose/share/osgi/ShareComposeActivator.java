@@ -49,9 +49,14 @@
 
 package com.openexchange.mail.json.compose.share.osgi;
 
+import com.openexchange.mail.json.compose.ComposeHandler;
+import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
+import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistryImpl;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
+import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistryImpl;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
+import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistryImpl;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
@@ -104,6 +109,8 @@ public class ShareComposeActivator extends HousekeepingActivator {
         AttachmentStorageRegistryImpl attachmentStorageRegistry = new AttachmentStorageRegistryImpl(attachmentStorageTracker);
         registerService(AttachmentStorageRegistry.class, attachmentStorageRegistry);
         ServerServiceRegistry.getInstance().addService(AttachmentStorageRegistry.class, attachmentStorageRegistry);
+
+        registerService(ComposeHandler.class, new ShareComposeHandler());
     }
 
     @Override

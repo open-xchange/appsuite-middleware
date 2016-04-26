@@ -53,6 +53,7 @@ import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.json.compose.AbstractComposeHandler;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.DelegatingComposedMailMessage;
 import com.openexchange.mail.json.compose.ComposeDraftResult;
 import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.ComposeTransportResult;
@@ -69,10 +70,23 @@ import com.openexchange.session.Session;
  */
 public class AbortComposeHandler extends AbstractComposeHandler<AbortComposeContext, AbortComposeContext> {
 
+    private static final AbortComposeHandler INSTANCE = new AbortComposeHandler();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static AbortComposeHandler getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
     /**
      * Initializes a new {@link AbortComposeHandler}.
      */
-    public AbortComposeHandler() {
+    private AbortComposeHandler() {
         super();
     }
 
@@ -100,7 +114,9 @@ public class AbortComposeHandler extends AbstractComposeHandler<AbortComposeCont
     @Override
     protected ComposeTransportResult doCreateTransportResult(ComposeRequest request, AbortComposeContext context) throws OXException {
         ComposedMailMessage composeMessage = createRegularComposeMessage(context);
-        return new DefaultComposeTransportResult(Collections.singletonList(composeMessage), composeMessage);
+        DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
+        transportMessage.setAppendToSentFolder(false);
+        return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage);
     }
 
     @Override

@@ -47,42 +47,41 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share.osgi;
+package com.openexchange.mail.json.compose.share.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.json.compose.share.DefaultShareLinkGenerator;
-import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
-import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
+import com.openexchange.mail.json.compose.share.DefaultMessageGenerator;
+import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
 
 /**
- * {@link ShareLinkGeneratorRegistryImpl}
+ * {@link MessageGeneratorRegistryImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class ShareLinkGeneratorRegistryImpl implements ShareLinkGeneratorRegistry {
+public class MessageGeneratorRegistryImpl implements MessageGeneratorRegistry {
 
-    private final ServiceListing<ShareLinkGenerator> generators;
+    private final ServiceListing<MessageGenerator> generators;
 
     /**
-     * Initializes a new {@link ShareLinkGeneratorRegistryImpl}.
+     * Initializes a new {@link MessageGeneratorRegistryImpl}.
      */
-    public ShareLinkGeneratorRegistryImpl(ServiceListing<ShareLinkGenerator> generators) {
+    public MessageGeneratorRegistryImpl(ServiceListing<MessageGenerator> generators) {
         super();
         this.generators = generators;
     }
 
     @Override
-    public ShareLinkGenerator getShareLinkGeneratorFor(Session session) throws OXException {
-        for (ShareLinkGenerator shareLinkGenerator : generators.getServiceList()) {
-            if (shareLinkGenerator.applicableFor(session)) {
-                return shareLinkGenerator;
+    public MessageGenerator getMessageGeneratorFor(Session session) throws OXException {
+        for (MessageGenerator messageGenerator : generators.getServiceList()) {
+            if (messageGenerator.applicableFor(session)) {
+                return messageGenerator;
             }
         }
 
-        return DefaultShareLinkGenerator.getInstance();
+        return DefaultMessageGenerator.getInstance();
     }
 
 }

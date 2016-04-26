@@ -47,42 +47,41 @@
  *
  */
 
-package com.openexchange.mail.json.compose.share.osgi;
+package com.openexchange.mail.json.compose.share.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage;
-import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
-import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
+import com.openexchange.mail.json.compose.share.DefaultShareLinkGenerator;
+import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
 
 /**
- * {@link AttachmentStorageRegistryImpl}
+ * {@link ShareLinkGeneratorRegistryImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AttachmentStorageRegistryImpl implements AttachmentStorageRegistry {
+public class ShareLinkGeneratorRegistryImpl implements ShareLinkGeneratorRegistry {
 
-    private final ServiceListing<AttachmentStorage> storages;
+    private final ServiceListing<ShareLinkGenerator> generators;
 
     /**
-     * Initializes a new {@link AttachmentStorageRegistryImpl}.
+     * Initializes a new {@link ShareLinkGeneratorRegistryImpl}.
      */
-    public AttachmentStorageRegistryImpl(ServiceListing<AttachmentStorage> storages) {
+    public ShareLinkGeneratorRegistryImpl(ServiceListing<ShareLinkGenerator> generators) {
         super();
-        this.storages = storages;
+        this.generators = generators;
     }
 
     @Override
-    public AttachmentStorage getAttachmentStorageFor(Session session) throws OXException {
-        for (AttachmentStorage attachmentStorage : storages.getServiceList()) {
-            if (attachmentStorage.applicableFor(session)) {
-                return attachmentStorage;
+    public ShareLinkGenerator getShareLinkGeneratorFor(Session session) throws OXException {
+        for (ShareLinkGenerator shareLinkGenerator : generators.getServiceList()) {
+            if (shareLinkGenerator.applicableFor(session)) {
+                return shareLinkGenerator;
             }
         }
 
-        return DefaultAttachmentStorage.getInstance();
+        return DefaultShareLinkGenerator.getInstance();
     }
 
 }

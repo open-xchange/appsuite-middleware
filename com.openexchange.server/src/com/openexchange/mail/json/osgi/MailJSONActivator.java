@@ -99,7 +99,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.compose.ComposeHandler;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
-import com.openexchange.mail.json.compose.abort.AbortComposeHandler;
+import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -208,27 +208,9 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         ComposeHandlerRegistry composeHandlerRegisty;
         {
-            final AbortComposeHandler defaultComposeHandler = new AbortComposeHandler();
-            final RankingAwareNearRegistryServiceTracker<ComposeHandler> tracker = new RankingAwareNearRegistryServiceTracker<>(context, ComposeHandler.class);
+            RankingAwareNearRegistryServiceTracker<ComposeHandler> tracker = new RankingAwareNearRegistryServiceTracker<>(context, ComposeHandler.class);
             rememberTracker(tracker);
-            composeHandlerRegisty = new ComposeHandlerRegistry() {
-
-                @Override
-                public ComposeHandler getComposeHandlerFor(Session session) {
-                    for (ComposeHandler composeHandler : tracker.getServiceList()) {
-                        try {
-                            if (composeHandler.applicableFor(session)) {
-                                return composeHandler;
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Failed to check compose handler {}", composeHandler.getClass().getName(), e);
-                        }
-                    }
-
-                    // Otherwise return "default" one
-                    return defaultComposeHandler;
-                }
-            };
+            composeHandlerRegisty = new ComposeHandlerRegistryImpl(tracker);
         }
 
         openTrackers();

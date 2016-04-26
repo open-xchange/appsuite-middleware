@@ -238,6 +238,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                     for (ComposedMailMessage transportMessage : messages) {
                         // TODO: Apply header to transport messages, too?
                         // transportMessage.setHeader(HEADER_SHARE_MAIL, referenceString);
+                        transportMessage.setAppendToSentFolder(false);
                         transportMessages.add(transportMessage);
                     }
                 }

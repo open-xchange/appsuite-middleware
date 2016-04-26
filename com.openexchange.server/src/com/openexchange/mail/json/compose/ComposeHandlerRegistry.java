@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.compose;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
@@ -66,7 +67,8 @@ public interface ComposeHandlerRegistry {
      *
      * @param session The session providing user data
      * @return The appropriate compose handler
+     * @throws OXException If a suitable compose handler cannot be returned
      */
-    ComposeHandler getComposeHandlerFor(Session session);
+    ComposeHandler getComposeHandlerFor(Session session) throws OXException;
 
 }

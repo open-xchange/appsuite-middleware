@@ -47,32 +47,41 @@
  *
  */
 
-package com.openexchange.mail.json.compose;
+package com.openexchange.mail.json.compose.share.internal;
 
-import java.util.List;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage;
+import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.session.Session;
 
 /**
- * {@link ComposeTransportResult} - The result for transporting one or more messages plus providing the message representation that is
- * supposed to be saved into standard Sent folder.
+ * {@link AttachmentStorageRegistryImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface ComposeTransportResult {
+public class AttachmentStorageRegistryImpl implements AttachmentStorageRegistry {
+
+    private final ServiceListing<AttachmentStorage> storages;
 
     /**
-     * Gets the messages that shall be transported.
-     *
-     * @return The messages to transport
+     * Initializes a new {@link AttachmentStorageRegistryImpl}.
      */
-    List<? extends ComposedMailMessage> getTransportMessages();
+    public AttachmentStorageRegistryImpl(ServiceListing<AttachmentStorage> storages) {
+        super();
+        this.storages = storages;
+    }
 
-    /**
-     * Gets the message representation that is supposed to be saved into standard Sent folder.
-     *
-     * @return The sent message
-     */
-    ComposedMailMessage getSentMessage();
+    @Override
+    public AttachmentStorage getAttachmentStorageFor(Session session) throws OXException {
+        for (AttachmentStorage attachmentStorage : storages.getServiceList()) {
+            if (attachmentStorage.applicableFor(session)) {
+                return attachmentStorage;
+            }
+        }
+
+        return DefaultAttachmentStorage.getInstance();
+    }
 
 }
