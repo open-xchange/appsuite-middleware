@@ -183,7 +183,7 @@ public final class FilenameValidationUtils {
                     sb.append(group);
                 } else {
                     if (sb.lastIndexOf(group) == -1) {
-                        sb.append(',').append(group);
+                        sb.append(group);
                     }
                 }
             }
