@@ -555,6 +555,16 @@ public class Strings {
     }
 
     /**
+     * Checks for an empty string.
+     *
+     * @param str The string
+     * @return <code>true</code> if input is <code>null</code>, empty or only consists of white-space characters; else <code>false</code>
+     */
+    public static boolean isEmptyString(final String str) {
+        return isEmpty(str);
+    }
+
+    /**
      * Checks for an empty character sequence.
      *
      * @param charSeq The character sequence
