@@ -77,7 +77,7 @@ public abstract class DefaultFileStorage implements FileStorage {
 
     private static final String READ_WRITE = "rw";
 
-    /** The storage's root file */
+    /** The storage's root path */
     protected final File storage;
 
     /**

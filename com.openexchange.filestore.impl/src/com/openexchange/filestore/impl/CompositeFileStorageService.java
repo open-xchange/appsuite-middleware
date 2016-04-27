@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.FileStorages;
 
 /**
  * {@link CompositeFileStorageService}
@@ -85,25 +86,26 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
 
     @Override
     public FileStorage getFileStorage(URI uri) throws OXException {
-        if (null== uri) {
+        if (null == uri) {
             return null;
         }
 
+        URI fsUri = FileStorages.ensureScheme(uri);
         FileStorageProvider candidate = null;
         for (FileStorageProvider fac : providers) {
-            if (fac.supports(uri) && (null == candidate || fac.getRanking() > candidate.getRanking())) {
+            if (fac.supports(fsUri) && (null == candidate || fac.getRanking() > candidate.getRanking())) {
                 candidate = fac;
             }
         }
         if (null != candidate && candidate.getRanking() >= DEFAULT_RANKING) {
-            return new CloseableTrackingFileStorage(candidate.getFileStorage(uri));
+            return new CloseableTrackingFileStorage(candidate.getFileStorage(fsUri));
         }
 
         /*
          * Fall back to default implementation
          */
 
-        return new CloseableTrackingFileStorage(getInternalFileStorage(uri));
+        return new CloseableTrackingFileStorage(getInternalFileStorage(fsUri));
     }
 
     @Override
@@ -122,7 +124,7 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
             cStorage.setSavePrefix("hashed");
             return cStorage;
         } catch (IllegalArgumentException e) {
-            throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". Wrong or missing FileStorage bundle for scheme " + uri.getScheme() + "?", e);
+            throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". That URI does not hold the preconditions to be absolute, hierarchical with a scheme equal to \"file\", a non-empty path component, and undefined authority, query, and fragment components.", e);
         }
     }
 

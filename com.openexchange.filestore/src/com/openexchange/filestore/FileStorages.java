@@ -204,7 +204,7 @@ public final class FileStorages {
     // -------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Gets the fully qualifying URI for given context.
+     * Gets the fully qualifying URI for given context; sets returned URI's scheme to <code>"file"</code> if absent in base URI.
      *
      * @param contextId The context identifier
      * @param baseUri The file storage's base URI
@@ -212,7 +212,8 @@ public final class FileStorages {
      */
     public static URI getFullyQualifyingUriForContext(int contextId, URI baseUri) {
         try {
-            return new URI(baseUri.getScheme(), baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getContextAppendix(contextId), baseUri.getQuery(), baseUri.getFragment());
+            String scheme = baseUri.getScheme();
+            return new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getContextAppendix(contextId), baseUri.getQuery(), baseUri.getFragment());
         } catch (URISyntaxException e) {
             // Cannot occur
             return null;
@@ -220,7 +221,7 @@ public final class FileStorages {
     }
 
     /**
-     * Gets the fully qualifying URI for given user.
+     * Gets the fully qualifying URI for given user; sets returned URI's scheme to <code>"file"</code> if absent in base URI.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -229,7 +230,8 @@ public final class FileStorages {
      */
     public static URI getFullyQualifyingUriForUser(int userId, int contextId, URI baseUri) {
         try {
-            return new URI(baseUri.getScheme(), baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getUserAppendix(userId, contextId), baseUri.getQuery(), baseUri.getFragment());
+            String scheme = baseUri.getScheme();
+            return new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getUserAppendix(userId, contextId), baseUri.getQuery(), baseUri.getFragment());
         } catch (URISyntaxException e) {
             // Cannot occur
             return null;
@@ -237,6 +239,29 @@ public final class FileStorages {
     }
 
     // -------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks specified URI for having a non-<code>null</code> scheme; falls-back to <code>"file"</code>.
+     *
+     * @param uri The URI to check
+     * @return An URI with a scheme set
+     */
+    public static URI ensureScheme(URI uri) {
+        if (null == uri) {
+            return uri;
+        }
+
+        if (null == uri.getScheme()) {
+            try {
+                return new URI("file", uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
+            } catch (URISyntaxException e) {
+                // Cannot occur...
+                throw new IllegalArgumentException("URI syntax error.", e);
+            }
+        }
+
+        return uri;
+    }
 
     /**
      * Ensures URI's path component does end with a slash <code>'/'</code> character
