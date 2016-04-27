@@ -15,8 +15,13 @@
 	</target>
 
 	<target name="compile">
+	    <path id="ant3rdPartyLib">
+	        <fileset dir="lib" includes="${libDir}/*.jar"/>
+	    </path>
 		<mkdir dir="${binDir}/classes" />
 		<javac srcdir="${mainSrcDir}" destdir="${binDir}/classes">
+	        <classpath refid="ant3rdPartyLib"/>
+
 			<classpath>
 				<pathelement path="${libDir}/*.jar" />
 			</classpath>
