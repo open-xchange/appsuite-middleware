@@ -174,7 +174,7 @@ public class RssAction implements AJAXActionService {
                         result.setImageUrl(checkUrl(image.getUrl()));
                     }
                 } catch (MalformedURLException e) {
-                    throw RssExceptionCodes.INVALID_RSS.create(feed.getImage().getUrl());
+                    throw RssExceptionCodes.INVALID_RSS.create(e, entry.getLink());
                 }
 
                 // Add to results list
