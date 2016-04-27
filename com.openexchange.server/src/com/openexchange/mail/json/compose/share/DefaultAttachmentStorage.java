@@ -255,33 +255,39 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         return file;
     }
 
-    private String sanitizeName(String fileName) {
-        String name = fileName;
-        if (Strings.isEmpty(name)) {
-            name = "attachment";
+    /**
+     * Utility method to sanitize file/folder name.
+     *
+     * @param name The name to sanitize
+     * @return The santitized name
+     */
+    protected String sanitizeName(String name) {
+        String toSanitize = name;
+        if (Strings.isEmpty(toSanitize)) {
+            toSanitize = "attachment";
         } else {
-            name = name.trim();
+            toSanitize = toSanitize.trim();
             boolean sanitize = true;
             while (sanitize) {
                 sanitize = false;
 
-                String illegalCharacters = FilenameValidationUtils.getIllegalCharacters(name);
+                String illegalCharacters = FilenameValidationUtils.getIllegalCharacters(toSanitize);
                 if (illegalCharacters != null) {
                     sanitize = true;
                     int length = illegalCharacters.length();
                     for (int i = length; i-- > 0;) {
-                        name = name.replace(illegalCharacters.charAt(i), '_');
+                        toSanitize = toSanitize.replace(illegalCharacters.charAt(i), '_');
                     }
                 } else {
-                    ValidityResult validity = FilenameValidationUtils.getValidityFor(name);
+                    ValidityResult validity = FilenameValidationUtils.getValidityFor(toSanitize);
                     if (!validity.isValid()) {
                         sanitize = true;
-                        name = "attachment";
+                        toSanitize = "attachment";
                     }
                 }
             }
         }
-        return name;
+        return toSanitize;
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------------
@@ -414,7 +420,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     private DefaultFileStorageFolder prepareFolder(ComposedMailMessage source, String parent, String password, Date expiry, Session session) {
         DefaultFileStorageFolder folder = new DefaultFileStorageFolder();
         folder.setParentId(parent);
-        folder.setName(source.getSubject());
+        folder.setName(sanitizeName(source.getSubject()));
         List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>(2);
         DefaultFileStoragePermission userPermission = DefaultFileStoragePermission.newInstance();
         userPermission.setMaxPermissions();
