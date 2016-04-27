@@ -66,6 +66,14 @@ public class ShareComposeStrings implements LocalizableStrings {
         super();
     }
 
+    // The default name for a folder
+    public static final String DEFAULT_NAME_FOLDER = "Folder";
+
+    // The default name for a file
+    public static final String DEFAULT_NAME_FILE = "File";
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
     // The name of the folder holding the attachments, which were shared to other recipients.
     public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
 

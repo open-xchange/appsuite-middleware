@@ -145,11 +145,13 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             storageContext.startTransaction();
             rollback = true;
 
+            Locale locale = session.getUser().getLocale();
+
             // Get folder identifier
-            String folderID = createFolder(sourceMessage, password, expiry, storageContext);
+            String folderID = createFolder(sourceMessage, password, expiry, locale, storageContext);
 
             // Save attachments into that folder
-            List<String> fileIds = saveAttachments(context.getAllParts(), folderID, storageContext);
+            List<String> fileIds = saveAttachments(context.getAllParts(), folderID, locale, storageContext);
 
             // Create share target for that folder for an anonymous user
             ShareTarget folderTarget = new ShareTarget(FileStorageContentType.getInstance().getModule(), folderID);
@@ -201,14 +203,15 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      *
      * @param attachments The attachments to save
      * @param folderId The identifier of the folder to save to
+     * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @return The identifiers of the saved attachments
      * @throws OXException If save attempt fails
      */
-    protected List<String> saveAttachments(final List<MailPart> attachments, final String folderId, DefaultAttachmentStorageContext storageContext) throws OXException {
+    protected List<String> saveAttachments(final List<MailPart> attachments, final String folderId, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
         List<String> createdFiles = new ArrayList<String>(attachments.size());
         for (MailPart attachment : attachments) {
-            createdFiles.add(saveAttachment(attachment, folderId, storageContext));
+            createdFiles.add(saveAttachment(attachment, folderId, locale, storageContext));
         }
         return createdFiles;
     }
@@ -218,12 +221,13 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      *
      * @param attachment The attachment to save
      * @param folderId The folder identifier
+     * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @return The identifier of the saved attachment
      * @throws OXException If save attempt fails
      */
-    protected String saveAttachment(MailPart attachment, String folderId, DefaultAttachmentStorageContext storageContext) throws OXException {
-        File file = prepareMetadata(attachment, folderId);
+    protected String saveAttachment(MailPart attachment, String folderId, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+        File file = prepareMetadata(attachment, folderId, locale);
         InputStream inputStream = null;
         try {
             inputStream = attachment.getInputStream();
@@ -238,11 +242,12 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      *
      * @param attachment The attachment
      * @param folderId The folder identifier
+     * @param locale The locale of session-associated user
      * @return The resulting <code>File</code> instance
      */
-    protected File prepareMetadata(MailPart attachment, String folderId) {
+    protected File prepareMetadata(MailPart attachment, String folderId, Locale locale) {
         // Determine attachment file name
-        String name = sanitizeName(attachment.getFileName());
+        String name = sanitizeName(attachment.getFileName(), StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE));
 
         // Create a file instance for it
         File file = new DefaultFile();
@@ -259,12 +264,12 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      * Utility method to sanitize file/folder name.
      *
      * @param name The name to sanitize
-     * @return The santitized name
+     * @return The sanitized name
      */
-    protected String sanitizeName(String name) {
+    protected String sanitizeName(String name, String defaultName) {
         String toSanitize = name;
         if (Strings.isEmpty(toSanitize)) {
-            toSanitize = "attachment";
+            toSanitize = defaultName;
         } else {
             toSanitize = toSanitize.trim();
             boolean sanitize = true;
@@ -282,7 +287,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
                     ValidityResult validity = FilenameValidationUtils.getValidityFor(toSanitize);
                     if (!validity.isValid()) {
                         sanitize = true;
-                        toSanitize = "attachment";
+                        toSanitize = defaultName;
                     }
                 }
             }
@@ -337,11 +342,12 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      * @param source The source message
      * @param password The optional password or <code>null</code>
      * @param expiry The optional expiration date or <code>null</code>
+     * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @return The identifier of the newly created folder
      * @throws OXException If folder cannot be created
      */
-    protected String createFolder(ComposedMailMessage source, String password, Date expiry, DefaultAttachmentStorageContext storageContext) throws OXException {
+    protected String createFolder(ComposedMailMessage source, String password, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
         // Get or create base share attachments folder
         Session session = storageContext.session;
         String parentFolderID;
@@ -357,7 +363,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         }
 
         // Create folder, pre-shared to an anonymous recipient, for this message
-        DefaultFileStorageFolder folder = prepareFolder(source, parentFolderID, password, expiry, session);
+        DefaultFileStorageFolder folder = prepareFolder(source, parentFolderID, password, expiry, session, locale);
         IDBasedFolderAccess folderAccess = storageContext.folderAccess;
         int counter = 1;
         do {
@@ -417,10 +423,10 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         return folderAccess.createFolder(folder);
     }
 
-    private DefaultFileStorageFolder prepareFolder(ComposedMailMessage source, String parent, String password, Date expiry, Session session) {
+    private DefaultFileStorageFolder prepareFolder(ComposedMailMessage source, String parent, String password, Date expiry, Session session, Locale locale) {
         DefaultFileStorageFolder folder = new DefaultFileStorageFolder();
         folder.setParentId(parent);
-        folder.setName(sanitizeName(source.getSubject()));
+        folder.setName(sanitizeName(source.getSubject(), StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FOLDER)));
         List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>(2);
         DefaultFileStoragePermission userPermission = DefaultFileStoragePermission.newInstance();
         userPermission.setMaxPermissions();
