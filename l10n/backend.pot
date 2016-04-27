@@ -7455,6 +7455,11 @@ msgid ""
 "can then access the attachments."
 msgstr ""
 
+#. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:219
+msgid "You are not allowed to compose a message containing share links"
+msgstr ""
+
 #. The name of the folder holding the attachments, which were shared to other recipients.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:70
 msgid "My shared mail attachments"
