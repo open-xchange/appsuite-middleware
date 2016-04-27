@@ -67,6 +67,8 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
+import com.openexchange.file.storage.composition.FilenameValidationUtils.ValidityResult;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -240,10 +242,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      */
     protected File prepareMetadata(MailPart attachment, String folderId) {
         // Determine attachment file name
-        String name = attachment.getFileName();
-        if (Strings.isEmpty(name)) {
-            name = "attachment";
-        }
+        String name = sanitizeName(attachment.getFileName());
 
         // Create a file instance for it
         File file = new DefaultFile();
@@ -254,6 +253,35 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         file.setTitle(name);
         file.setFileSize(attachment.getSize());
         return file;
+    }
+
+    private String sanitizeName(String fileName) {
+        String name = fileName;
+        if (Strings.isEmpty(name)) {
+            name = "attachment";
+        } else {
+            name = name.trim();
+            boolean sanitize = true;
+            while (sanitize) {
+                sanitize = false;
+
+                String illegalCharacters = FilenameValidationUtils.getIllegalCharacters(name);
+                if (illegalCharacters != null) {
+                    sanitize = true;
+                    int length = illegalCharacters.length();
+                    for (int i = length; i-- > 0;) {
+                        name = name.replace(illegalCharacters.charAt(i), '_');
+                    }
+                } else {
+                    ValidityResult validity = FilenameValidationUtils.getValidityFor(name);
+                    if (!validity.isValid()) {
+                        sanitize = true;
+                        name = "attachment";
+                    }
+                }
+            }
+        }
+        return name;
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------------
