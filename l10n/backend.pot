@@ -2465,7 +2465,9 @@ msgstr ""
 msgid "Folder type"
 msgstr ""
 
+#. The default name for a folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:70
 msgid "Folder"
 msgstr ""
 
@@ -7449,26 +7451,32 @@ msgstr ""
 msgid "You are not allowed to compose a message containing share links"
 msgstr ""
 
+#. The default name for a file
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
+msgid "File"
+msgstr ""
+
+#. -----------------------------------------------------------------------------------------------------------------------------------
 #. The name of the folder holding the attachments, which were shared to other recipients.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:78
 msgid "My shared mail attachments"
 msgstr ""
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
 msgid "The available attachments for this E-Mail can be accessed via the link:"
 msgstr ""
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
 msgid "The link will expire on #DATE#"
 msgstr ""
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the password for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
 msgid "Please use the following password to access the attachments"
 msgstr ""
 
