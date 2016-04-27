@@ -42,6 +42,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.log,
  com.openexchange.oauth.provider.resourceserver.annotations,
  com.openexchange.oauth.provider.resourceserver.scope,
+ com.openexchange.objectusecount,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
@@ -60,6 +61,7 @@ Import-Package: com.fasterxml.jackson.core,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
+ org.osgi.util.tracker;version="1.5.1",
  org.slf4j
 Bundle-Activator: com.openexchange.calendar.json.osgi.AppointmentJSONActivator
 Export-Package: com.openexchange.calendar.json

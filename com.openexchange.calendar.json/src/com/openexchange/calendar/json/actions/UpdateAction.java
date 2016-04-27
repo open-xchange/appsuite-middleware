@@ -137,6 +137,7 @@ public final class UpdateAction extends AppointmentAction {
         if (conflicts == null) {
             jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
+            countObjectUse(session, appointmentObj);
         } else {
             final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
             final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());

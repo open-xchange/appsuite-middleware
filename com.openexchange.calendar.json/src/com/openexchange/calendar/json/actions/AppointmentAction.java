@@ -53,9 +53,12 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -64,17 +67,22 @@ import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.CollectionDelta;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -85,6 +93,8 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public abstract class AppointmentAction implements AJAXActionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppointmentAction.class);
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
@@ -97,15 +107,7 @@ public abstract class AppointmentAction implements AJAXActionService {
 
     protected static final int DAY_MILLIS = 24 * 60 * 60 * 1000;
 
-    protected final static int[] _appointmentFields = {
-        DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
-        FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION,
-        CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
-        CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.RECURRENCE_POSITION,
-        CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.DELETE_EXCEPTIONS,
-        Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.ORGANIZER, Appointment.ORGANIZER_ID, Appointment.PRINCIPAL, Appointment.PRINCIPAL_ID,
-        Appointment.UID, Appointment.SEQUENCE, Appointment.CONFIRMATIONS, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
-        Appointment.NUMBER_OF_ATTACHMENTS };
+    protected final static int[] _appointmentFields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.RECURRENCE_POSITION, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.ORGANIZER, Appointment.ORGANIZER_ID, Appointment.PRINCIPAL, Appointment.PRINCIPAL_ID, Appointment.UID, Appointment.SEQUENCE, Appointment.CONFIRMATIONS, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, Appointment.NUMBER_OF_ATTACHMENTS };
 
     private static final Pattern PATTERN_SPLIT = Pattern.compile(" *, *");
 
@@ -114,6 +116,11 @@ public abstract class AppointmentAction implements AJAXActionService {
     }
 
     private final ServiceLookup services;
+    
+    private static final AtomicReference<ObjectUseCountService> OBJECT_USE_COUNT_SERVICE = new AtomicReference<ObjectUseCountService>();
+    public static final void setObjectUseCountService(ObjectUseCountService service) {
+        OBJECT_USE_COUNT_SERVICE.set(service);
+    }
 
     /**
      * Initializes a new {@link AbstractAppointmentAction}.
@@ -306,4 +313,41 @@ public abstract class AppointmentAction implements AJAXActionService {
         }
     }
 
+    /**
+     * Increments the object use count
+     * 
+     * @param session The {@link Session}
+     * @param cdao The {@link CalendarDataObject}
+     * @throws OXException if the object count cannot be incremented
+     */
+    void countObjectUse(Session session, CalendarDataObject cdao) throws OXException {
+        if (null == cdao) {
+            return;
+        }
+        ObjectUseCountService service = services.getService(ObjectUseCountService.class);
+        if (null == service) {
+            LOGGER.debug("The 'ObjectUseCountService' is unavailable at the moment");
+            return;
+        }
+        if (!cdao.containsParticipants()) {
+            return;
+        }
+        for (Participant p : cdao.getParticipants()) {
+            switch (p.getType()) {
+                case Participant.USER:
+                    if (p.getIdentifier() != session.getUserId()) {
+                        IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier(), FolderObject.SYSTEM_LDAP_FOLDER_ID).build();
+                        service.incrementObjectUseCount(session, arguments);
+                    }
+                    break;
+                case Participant.EXTERNAL_USER:
+                    IncrementArguments arguments = new IncrementArguments.Builder(p.getEmailAddress()).build();
+                    service.incrementObjectUseCount(session, arguments);
+                    break;
+                default:
+                    LOGGER.debug("Skipping participant type '{}'", p.getType());
+                    break;
+            }
+        }
+    }
 }

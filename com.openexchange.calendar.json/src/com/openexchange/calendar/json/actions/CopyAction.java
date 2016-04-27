@@ -148,6 +148,7 @@ public final class CopyAction extends AppointmentAction {
         } else {
             jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
+            countObjectUse(session, appointmentObj);
         }
 
         return new AJAXRequestResult(jsonResponseObj, timestamp, "json");

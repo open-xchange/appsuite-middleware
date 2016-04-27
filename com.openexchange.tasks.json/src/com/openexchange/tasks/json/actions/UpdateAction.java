@@ -111,6 +111,7 @@ public class UpdateAction extends TaskAction {
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         sqlinterface.updateTaskObject(task, inFolder, timestamp);
+        countObjectUse(session, task);
         timestamp = task.getLastModified();
 
         return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
