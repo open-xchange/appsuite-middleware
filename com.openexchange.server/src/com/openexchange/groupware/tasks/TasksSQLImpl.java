@@ -65,8 +65,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.objectusecount.IncrementArguments;
-import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
@@ -211,7 +209,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         insert.sentEvent(session);
 
         collectAddresses(task, false);
-        countObjectUse(task);
     }
 
     /**
@@ -246,37 +243,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
-    private void countObjectUse(Task task) throws OXException {
-        if (null == task) {
-            return;
-        }
-        ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
-        if (null == service) {
-            return;
-        }
-        if (task.containsParticipants()) {
-            for (Participant p : task.getParticipants()) {
-                switch (p.getType()) {
-                    case Participant.USER:
-                        if (p.getIdentifier() != session.getUserId()) {
-                            //TODO Get contact id
-                            IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier(), FolderObject.SYSTEM_LDAP_FOLDER_ID).build();
-                            service.incrementObjectUseCount(session, arguments);
-                        }
-                        break;
-                    case Participant.EXTERNAL_USER:
-                        {
-                            IncrementArguments arguments = new IncrementArguments.Builder(p.getEmailAddress()).build();
-                            service.incrementObjectUseCount(session, arguments);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
     @Override
     public void updateTaskObject(Task task, int folderId, Date lastRead) throws OXException {
         final Context ctx;
@@ -302,7 +268,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
             update.makeNextRecurrence(session);
 
             collectAddresses(update, false);
-            countObjectUse(task);
         } catch (final OXException e) {
             throw e;
         }

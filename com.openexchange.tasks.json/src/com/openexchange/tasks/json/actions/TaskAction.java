@@ -50,10 +50,10 @@
 package com.openexchange.tasks.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -61,16 +61,22 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link TaskAction}
@@ -79,6 +85,8 @@ import com.openexchange.user.UserService;
  */
 
 public abstract class TaskAction implements AJAXActionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskAction.class);
 
     public static final int[] COLUMNS_ALL_ALIAS = new int[] { 20, 1, 2, 5, 4 };
 
@@ -138,7 +146,7 @@ public abstract class TaskAction implements AJAXActionService {
         for (final int col : columns) {
             if (Task.START_TIME == col) {
                 tmp.add(CalendarObject.START_DATE);
-            } else  if (Task.END_TIME == col) {
+            } else if (Task.END_TIME == col) {
                 tmp.add(CalendarObject.END_DATE);
             } else if (col != DataObject.LAST_MODIFIED_UTC) {
                 tmp.add(col);
@@ -146,7 +154,7 @@ public abstract class TaskAction implements AJAXActionService {
         }
         return tmp.toArray();
     }
-    
+
     /**
      * Gets the column identifier to use for sorting the results if defined. If a virtual identifier is passed from the client, it is
      * implicitly mapped to the corresponding real column identifier.
@@ -202,4 +210,43 @@ public abstract class TaskAction implements AJAXActionService {
         appointmentObj.setParticipants(participants);
     }
 
+    /**
+     * Increments the object use count
+     * 
+     * @param session The {@link Session}
+     * @param task The {@link Task}
+     * @throws OXException if the object count cannot be incremented
+     */
+    void countObjectUse(Session session, Task task) throws OXException {
+        if (null == task) {
+            return;
+        }
+        ObjectUseCountService service = services.getService(ObjectUseCountService.class);
+        if (null == service) {
+            LOGGER.debug("The 'ObjectUseCountService' is unavailable at the moment");
+            return;
+        }
+        if (!task.containsParticipants()) {
+            return;
+        }
+        for (Participant p : task.getParticipants()) {
+            switch (p.getType()) {
+                case Participant.USER:
+                    if (p.getIdentifier() != session.getUserId()) {
+                        //TODO Get contact id
+                        IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier(), FolderObject.SYSTEM_LDAP_FOLDER_ID).build();
+                        service.incrementObjectUseCount(session, arguments);
+                    }
+                    break;
+                case Participant.EXTERNAL_USER: {
+                    IncrementArguments arguments = new IncrementArguments.Builder(p.getEmailAddress()).build();
+                    service.incrementObjectUseCount(session, arguments);
+                }
+                    break;
+                default:
+                    LOGGER.debug("Skipping participant type '{}'", p.getType());
+                    break;
+            }
+        }
+    }
 }

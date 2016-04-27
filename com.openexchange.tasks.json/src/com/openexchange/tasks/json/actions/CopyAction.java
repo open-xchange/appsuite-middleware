@@ -97,6 +97,7 @@ public class CopyAction extends TaskAction {
         taskObj.removeObjectID();
         taskObj.setParentFolderID(folderId);
         taskInterface.insertTaskObject(taskObj);
+        countObjectUse(req.getSession(), taskObj);
 
         Date timestamp = new Date(0);
 

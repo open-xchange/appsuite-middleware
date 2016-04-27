@@ -99,6 +99,7 @@ public class NewAction extends TaskAction {
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         convertExternalToInternalUsersIfPossible(task, req.getSession().getContext(), LOG);
         sqlinterface.insertTaskObject(task);
+        countObjectUse(session, task);
         final Date timestamp = task.getLastModified();
         final JSONObject jsonResponseObject = new JSONObject();
         jsonResponseObject.put(DataFields.ID, task.getObjectID());
