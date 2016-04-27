@@ -64,6 +64,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -178,7 +179,12 @@ public class ServerConfigServiceImpl implements ServerConfigService {
          * Add computed values after configview values
          */
         for (ComputedServerConfigValueService computed : serverConfigServicesLookup.getComputed()) {
-            computed.addValue(serverConfiguration, hostName, userID, contextID);
+            try {
+                computed.addValue(serverConfiguration, hostName, userID, contextID);
+            } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
+                LOG.error("Failed to add value from '{}' to server configuration", computed.getClass().getName(), t);
+            }
         }
 
         serverConfiguration = correctLanguageConfiguration(serverConfiguration);
@@ -191,8 +197,8 @@ public class ServerConfigServiceImpl implements ServerConfigService {
      * The languages config item in the as-config.yml can be:
      *  - A String "all" which then gets replaced with an ArrayList containing all installed langauges
      *  - A Hash as shown in Bug 24171, 41992 specifying a set of languages
-     *  - Missing which gets replaced with an ArrayList containing all installed languages 
-     *  
+     *  - Missing which gets replaced with an ArrayList containing all installed languages
+     *
      * What we have to deliver is an ArrayList of entries like [{de_DE=Deutsch},{en_US=English}]. As customers might be using this kind
      * of configuration already we have to stay backwards compatible and thus rewrite the entry as workaround.
      *
