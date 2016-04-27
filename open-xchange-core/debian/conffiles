@@ -36,6 +36,7 @@ opt/open-xchange/etc/logback.xml
 opt/open-xchange/etc/login.properties
 opt/open-xchange/etc/mailcache.ccf
 opt/open-xchange/etc/mail.properties
+opt/open-xchange/etc/mail-compose.properties
 opt/open-xchange/etc/mail-push.properties
 opt/open-xchange/etc/mailresolver.properties
 opt/open-xchange/etc/management.properties
