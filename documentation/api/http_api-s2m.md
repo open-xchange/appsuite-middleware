@@ -449,6 +449,7 @@ Preliminary, available since v7.8.0.
 
 * passwordchange: Via the passwordchange module the users can change their password.
 * filestorage: The file storage module provides access to file storage backends, e.g. Drive, Dropbox, etc.
+* mail_categories: The module mail_categories allows to manage mail categories.
 
 
 ### Consumes
@@ -1364,37 +1365,6 @@ filled (see [Error handling](#error-handling)).
 
 * capabilities
 
-### Gets data of a configuration node.
-```
-GET /config/{path}
-```
-
-#### Description
-
-The configuration is stored in a tree. Each node of the tree has a name and a value.
-The values of leaf nodes are strings which store the actual configuration data. The
-values of inner nodes are defined recursively as objects with one field for each child node.
-The name and the value of each field is the name and the value of the corresponding child
-node, respectively.
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|PathParameter|path|The path to the node.|true|enum (gui, fastgui, context_id, cookielifetime, identifier, contact_id, language, timezone, availableTimeZones, calendarnotification, tasknotification, reloadTimes, serverVersion, currentTime, maxUploadIdleTimeout, search, folder, folder/tasks, folder/calendar, folder/contacts, folder/infostore, folder/eas, mail, mail/addresses, mail/defaultaddress, mail/sendaddress, mail/folder, mail/folder/inbox, mail/folder/drafts, mail/folder/trash, mail/folder/spam, mail/folder/sent, mail/htmlinline, mail/colorquote, mail/emoticons, mail/harddelete, mail/inlineforward, mail/vcard, mail/notifyonreadack, mail/msgpreview, mail/ignorereplytext, mail/nocopytosent, mail/spambutton, participants, participants/autoSearch, participants/maximumNumberParticipants, participants/showWithoutEmail, participants/showDialog, availableModules, minimumSearchCharacters, modules, modules/portal, modules/portal/gui, modules/portal/module, modules/mail, modules/mail/addresses, modules/mail/appendmailtext, modules/mail/allowhtmlimages, modules/mailcolorquoted, modules/mail/contactCollectFolder, modules/mail/contactCollectEnabled, modules/mail/contactCollectOnMailAccess, modules/mail/contactCollectOnMailTransport, modules/mail/defaultaddress, modules/mail/deletemail, modules/mail/emoticons, modules/mail/defaultFolder, modules/mail/defaultFolder/drafts, modules/mail/defaultFolder/inbox, modules/mail/defaultFolder/sent, modules/mail/defaultFolder/spam, modules/mail/defaultFolder/trash, modules/mail/forwardmessage, modules/mail/gui, modules/mail/inlineattachments, modules/mail/linewrap, modules/mail/module, modules/mail/phishingheaders, modules/mail/replyallcc, modules/mail/sendaddress, modules/mail/spambutton, modules/mail/vcard, modules/calendar, modules/calendar/calendar_conflict, modules/calendar/calendar_freebusy, modules/calendar/calendar_teamview, modules/calendar/gui, modules/calendar/module, modules/calendar/notifyNewModifiedDeleted, modules/calendar/notifyAcceptedDeclinedAsCreator, modules/calendar/notifyAcceptedDeclinedAsParticipant, modules/calendar/defaultStatusPrivate, modules/calendar/defaultStatusPublic, modules/contacts, modules/contacts/gui, modules/contacts/mailAddressAutoSearch, modules/contacts/module, modules/contacts/singleFolderSearch, modules/contacts/characterSearch, modules/contacts/allFoldersForAutoComplete, modules/tasks, modules/tasks/gui, modules/tasks/module, modules/tasks/delegate_tasks, modules/tasks/notifyNewModifiedDeleted, modules/tasks/notifyAcceptedDeclinedAsCreator, modules/tasks/notifyAcceptedDeclinedAsParticipant, modules/infostore, modules/infostore/gui, modules/infostore/folder, modules/infostore/folder/trash, modules/infostore/folder/pictures, modules/infostore/folder/documents, modules/infostore/folder/music, modules/infostore/folder/videos, modules/infostore/folder/templates, modules/infostore/module, modules/interfaces, modules/interfaces/ical, modules/interfaces/vcard, modules/interfaces/syncml, modules/folder, modules/folder/gui, modules/folder/public_folders, modules/folder/read_create_shared_folders, modules/folder/tree, modules/com.openexchange.extras, modules/com.openexchange.extras/module, modules/com.openexchange.user.passwordchange, modules/com.openexchange.user.passwordchange/module, modules/com.openexchange.user.personaldata, modules/com.openexchange.user.personaldata/module, modules/com.openexchange.group, modules/com.openexchange.group/enabled, modules/com.openexchange.resource, modules/com.openexchange.resource/enabled, modules/com.openexchange.publish, modules/com.openexchange.publish/enabled, modules/com.openexchange.subscribe, modules/com.openexchange.subscribe/enabled, modules/olox20, modules/olox20/active, modules/olox20/module, modules/com.openexchange.oxupdater, modules/com.openexchange.oxupdater/module, modules/com.openexchange.oxupdater/active, modules/com.openexchange.passwordchange, modules/com.openexchange.passwordchange/showStrength, modules/com.openexchange.passwordchange/minLength, modules/com.openexchange.passwordchange/maxLength, modules/com.openexchange.passwordchange/regexp, modules/com.openexchange.passwordchange/special)||
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|Value of the node specified by path. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).|ConfigResponse|
-
-
-#### Tags
-
-* config
-
 ### Sets the value of a configuration node.
 ```
 PUT /config/{path}
@@ -1426,6 +1396,37 @@ node, respectively.
 #### Consumes
 
 * application/json
+
+#### Tags
+
+* config
+
+### Gets data of a configuration node.
+```
+GET /config/{path}
+```
+
+#### Description
+
+The configuration is stored in a tree. Each node of the tree has a name and a value.
+The values of leaf nodes are strings which store the actual configuration data. The
+values of inner nodes are defined recursively as objects with one field for each child node.
+The name and the value of each field is the name and the value of the corresponding child
+node, respectively.
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|PathParameter|path|The path to the node.|true|enum (gui, fastgui, context_id, cookielifetime, identifier, contact_id, language, timezone, availableTimeZones, calendarnotification, tasknotification, reloadTimes, serverVersion, currentTime, maxUploadIdleTimeout, search, folder, folder/tasks, folder/calendar, folder/contacts, folder/infostore, folder/eas, mail, mail/addresses, mail/defaultaddress, mail/sendaddress, mail/folder, mail/folder/inbox, mail/folder/drafts, mail/folder/trash, mail/folder/spam, mail/folder/sent, mail/htmlinline, mail/colorquote, mail/emoticons, mail/harddelete, mail/inlineforward, mail/vcard, mail/notifyonreadack, mail/msgpreview, mail/ignorereplytext, mail/nocopytosent, mail/spambutton, participants, participants/autoSearch, participants/maximumNumberParticipants, participants/showWithoutEmail, participants/showDialog, availableModules, minimumSearchCharacters, modules, modules/portal, modules/portal/gui, modules/portal/module, modules/mail, modules/mail/addresses, modules/mail/appendmailtext, modules/mail/allowhtmlimages, modules/mailcolorquoted, modules/mail/contactCollectFolder, modules/mail/contactCollectEnabled, modules/mail/contactCollectOnMailAccess, modules/mail/contactCollectOnMailTransport, modules/mail/defaultaddress, modules/mail/deletemail, modules/mail/emoticons, modules/mail/defaultFolder, modules/mail/defaultFolder/drafts, modules/mail/defaultFolder/inbox, modules/mail/defaultFolder/sent, modules/mail/defaultFolder/spam, modules/mail/defaultFolder/trash, modules/mail/forwardmessage, modules/mail/gui, modules/mail/inlineattachments, modules/mail/linewrap, modules/mail/module, modules/mail/phishingheaders, modules/mail/replyallcc, modules/mail/sendaddress, modules/mail/spambutton, modules/mail/vcard, modules/calendar, modules/calendar/calendar_conflict, modules/calendar/calendar_freebusy, modules/calendar/calendar_teamview, modules/calendar/gui, modules/calendar/module, modules/calendar/notifyNewModifiedDeleted, modules/calendar/notifyAcceptedDeclinedAsCreator, modules/calendar/notifyAcceptedDeclinedAsParticipant, modules/calendar/defaultStatusPrivate, modules/calendar/defaultStatusPublic, modules/contacts, modules/contacts/gui, modules/contacts/mailAddressAutoSearch, modules/contacts/module, modules/contacts/singleFolderSearch, modules/contacts/characterSearch, modules/contacts/allFoldersForAutoComplete, modules/tasks, modules/tasks/gui, modules/tasks/module, modules/tasks/delegate_tasks, modules/tasks/notifyNewModifiedDeleted, modules/tasks/notifyAcceptedDeclinedAsCreator, modules/tasks/notifyAcceptedDeclinedAsParticipant, modules/infostore, modules/infostore/gui, modules/infostore/folder, modules/infostore/folder/trash, modules/infostore/folder/pictures, modules/infostore/folder/documents, modules/infostore/folder/music, modules/infostore/folder/videos, modules/infostore/folder/templates, modules/infostore/module, modules/interfaces, modules/interfaces/ical, modules/interfaces/vcard, modules/interfaces/syncml, modules/folder, modules/folder/gui, modules/folder/public_folders, modules/folder/read_create_shared_folders, modules/folder/tree, modules/com.openexchange.extras, modules/com.openexchange.extras/module, modules/com.openexchange.user.passwordchange, modules/com.openexchange.user.passwordchange/module, modules/com.openexchange.user.personaldata, modules/com.openexchange.user.personaldata/module, modules/com.openexchange.group, modules/com.openexchange.group/enabled, modules/com.openexchange.resource, modules/com.openexchange.resource/enabled, modules/com.openexchange.publish, modules/com.openexchange.publish/enabled, modules/com.openexchange.subscribe, modules/com.openexchange.subscribe/enabled, modules/olox20, modules/olox20/active, modules/olox20/module, modules/com.openexchange.oxupdater, modules/com.openexchange.oxupdater/module, modules/com.openexchange.oxupdater/active, modules/com.openexchange.passwordchange, modules/com.openexchange.passwordchange/showStrength, modules/com.openexchange.passwordchange/minLength, modules/com.openexchange.passwordchange/maxLength, modules/com.openexchange.passwordchange/regexp, modules/com.openexchange.passwordchange/special)||
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|Value of the node specified by path. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).|ConfigResponse|
+
 
 #### Tags
 
@@ -1802,6 +1803,40 @@ filled (see [Error handling](#error-handling)).
 
 ### Creates a contact.
 ```
+PUT /contacts?action=new
+```
+
+#### Description
+
+Creates a new contact. This request cannot add contact images. Therefor it
+is necessary to use the `POST` method.
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|BodyParameter|body|A JSON object containing the contact's data. The field id is not included.|true|ContactData||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object containing the ID of the newly created contact. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|ContactUpdateResponse|
+
+
+#### Consumes
+
+* application/json
+
+#### Tags
+
+* contacts
+
+### Creates a contact.
+```
 POST /contacts?action=new
 ```
 
@@ -1839,40 +1874,6 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 
 * contacts
 
-### Creates a contact.
-```
-PUT /contacts?action=new
-```
-
-#### Description
-
-Creates a new contact. This request cannot add contact images. Therefor it
-is necessary to use the `POST` method.
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|BodyParameter|body|A JSON object containing the contact's data. The field id is not included.|true|ContactData||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object containing the ID of the newly created contact. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|ContactUpdateResponse|
-
-
-#### Consumes
-
-* application/json
-
-#### Tags
-
-* contacts
-
 ### Search for contacts.
 ```
 PUT /contacts?action=search
@@ -1896,6 +1897,43 @@ PUT /contacts?action=search
 information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
 responsible fields in the response are filled (see [Error handling](#error-handling)).
 |ContactsResponse|
+
+
+#### Consumes
+
+* application/json
+
+#### Tags
+
+* contacts
+
+### Updates a contact.
+```
+PUT /contacts?action=update
+```
+
+#### Description
+
+Updates a contact's data. This request cannot change or add contact images. Therefore it
+is necessary to use the `POST` method.
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|folder|Object ID of the folder who contains the contacts.|true|string||
+|QueryParameter|id|Object ID of the contact that shall be updated.|true|string||
+|QueryParameter|timestamp|Timestamp of the updated contact. If the contact was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
+|BodyParameter|body|A JSON object containing the contact's data. Only modified fields must be specified. To remove some contact image send the image attribute set to null.|true|ContactData||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object with a timestamp. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|ContactUpdateResponse|
 
 
 #### Consumes
@@ -1943,43 +1981,6 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 #### Produces
 
 * text/html
-
-#### Tags
-
-* contacts
-
-### Updates a contact.
-```
-PUT /contacts?action=update
-```
-
-#### Description
-
-Updates a contact's data. This request cannot change or add contact images. Therefore it
-is necessary to use the `POST` method.
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|folder|Object ID of the folder who contains the contacts.|true|string||
-|QueryParameter|id|Object ID of the contact that shall be updated.|true|string||
-|QueryParameter|timestamp|Timestamp of the updated contact. If the contact was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
-|BodyParameter|body|A JSON object containing the contact's data. Only modified fields must be specified. To remove some contact image send the image attribute set to null.|true|ContactData||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object with a timestamp. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|ContactUpdateResponse|
-
-
-#### Consumes
-
-* application/json
 
 #### Tags
 
@@ -3728,6 +3729,40 @@ response are filled (see [Error handling](#error-handling)).
 
 ### Copies an infoitem.
 ```
+PUT /infostore?action=copy
+```
+
+#### Description
+
+This request cannot change or add files. Therefore it is necessary to use the `POST` method.
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|id|Object ID of the infoitem that shall be copied.|true|string||
+|BodyParameter|body|A JSON object containing the modified fields of the destination infoitem. The field `id` must not be present.|true|InfoItemData||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|InfoItemUpdateResponse|
+
+
+#### Consumes
+
+* application/json
+
+#### Tags
+
+* infostore
+
+### Copies an infoitem.
+```
 POST /infostore?action=copy
 ```
 
@@ -3761,40 +3796,6 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 #### Produces
 
 * text/html
-
-#### Tags
-
-* infostore
-
-### Copies an infoitem.
-```
-PUT /infostore?action=copy
-```
-
-#### Description
-
-This request cannot change or add files. Therefore it is necessary to use the `POST` method.
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|id|Object ID of the infoitem that shall be copied.|true|string||
-|BodyParameter|body|A JSON object containing the modified fields of the destination infoitem. The field `id` must not be present.|true|InfoItemData||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|InfoItemUpdateResponse|
-
-
-#### Consumes
-
-* application/json
 
 #### Tags
 
@@ -4014,6 +4015,42 @@ filled (see [Error handling](#error-handling)).
 
 ### Creates an infoitem.
 ```
+PUT /infostore?action=new
+```
+
+#### Description
+
+Creates a new contact. This request cannot add a file to the infoitem. Therefor it
+is necessary to use the `POST` method.
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|id|Object ID of the infoitem that shall be updated.|true|string||
+|QueryParameter|timestamp|Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
+|BodyParameter|body|A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.|true|InfoItemBody array||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|InfoItemUpdateResponse|
+
+
+#### Consumes
+
+* application/json
+
+#### Tags
+
+* infostore
+
+### Creates an infoitem.
+```
 POST /infostore?action=new
 ```
 
@@ -4046,42 +4083,6 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 #### Produces
 
 * text/html
-
-#### Tags
-
-* infostore
-
-### Creates an infoitem.
-```
-PUT /infostore?action=new
-```
-
-#### Description
-
-Creates a new contact. This request cannot add a file to the infoitem. Therefor it
-is necessary to use the `POST` method.
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|id|Object ID of the infoitem that shall be updated.|true|string||
-|QueryParameter|timestamp|Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
-|BodyParameter|body|A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.|true|InfoItemBody array||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|InfoItemUpdateResponse|
-
-
-#### Consumes
-
-* application/json
 
 #### Tags
 
@@ -4269,6 +4270,42 @@ GET /infostore?action=unlock
 
 ### Updates an infoitem.
 ```
+PUT /infostore?action=update
+```
+
+#### Description
+
+Updates an infoitem's data. This request cannot change or add files. Therefore it
+is necessary to use the `POST` method.
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|id|Object ID of the infoitem that shall be updated.|true|string||
+|QueryParameter|timestamp|Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
+|BodyParameter|body|A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.|true|InfoItemBody array||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object with the object ID of the updated infoitem. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|InfoItemUpdateResponse|
+
+
+#### Consumes
+
+* application/json
+
+#### Tags
+
+* infostore
+
+### Updates an infoitem.
+```
 POST /infostore?action=update
 ```
 
@@ -4304,42 +4341,6 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 #### Produces
 
 * text/html
-
-#### Tags
-
-* infostore
-
-### Updates an infoitem.
-```
-PUT /infostore?action=update
-```
-
-#### Description
-
-Updates an infoitem's data. This request cannot change or add files. Therefore it
-is necessary to use the `POST` method.
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|id|Object ID of the infoitem that shall be updated.|true|string||
-|QueryParameter|timestamp|Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
-|BodyParameter|body|A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.|true|InfoItemBody array||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object with the object ID of the updated infoitem. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|InfoItemUpdateResponse|
-
-
-#### Consumes
-
-* application/json
 
 #### Tags
 
@@ -4967,6 +4968,96 @@ and the locale of the user.  In case of errors the responsible fields in the res
 
 * login
 
+### Moves mails to the given category
+```
+PUT /mail/categories?action=move
+```
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|category_id|The identifier of a category.|true|string||
+|BodyParameter|body|'A JSON array of mail identifier, e.g.: [{"id":ID, "folder_id":FID},{"id":ID2, "folder_id":FID2}, {...}]' 
+|true|Mail_CategoriesMoveBody array||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|'An empty response if everything went well. In case of errors the responsible fields in the
+response are filled (see [Error handling](#error-handling)).'
+|CommonResponse|
+
+
+#### Consumes
+
+* application/json
+
+#### Tags
+
+* mail_categories
+
+### Add a new rule
+```
+PUT /mail/categories?action=train
+```
+
+#### Description
+
+Adds a new rule with the given mail addresses to the given category and optionally reorganize all existing mails in the inbox.
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|category_id|The identifier of a category.|true|string||
+|QueryParameter|apply-for-existing|A flag indicating whether old mails should be reorganized. Defaults to 'false'.|false|boolean||
+|QueryParameter|apply-for-future-ones|A flag indicating whether a rule should be created or not. Defaults to 'true'.|false|boolean||
+|BodyParameter|body|'A JSON object containing a "from" field which contains an array of mail addresses.' 
+|true|Mail_CategoriesTrainBody||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|'An empty response if everything went well. In case of errors the responsible fields in the
+response are filled (see [Error handling](#error-handling)).'
+|CommonResponse|
+
+
+#### Consumes
+
+* application/json
+
+#### Tags
+
+* mail_categories
+
+### Retrieves the unread counts of active mail categories
+```
+GET /mail/categories?action=unread
+```
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|category_ids|A comma separated list of category identifiers. If set only the unread counters of this categories are retrieved.|false|string||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|'A JSON object with a field for each active category containing the number of unread messages. In case of errors the responsible fields in the
+response are filled (see [Error handling](#error-handling)).'
+|Mail_CategoriesUnreadResponse|
+
+
+#### Tags
+
+* mail_categories
+
 ### Gets all mails.
 ```
 GET /mail?action=all
@@ -4983,6 +5074,7 @@ GET /mail?action=all
 |QueryParameter|left_hand_limit|A positive integer number to specify the "left-hand" limit of the range to return.|false|integer||
 |QueryParameter|right_hand_limit|A positive integer number to specify the "right-hand" limit of the range to return.|false|integer||
 |QueryParameter|limit|A positive integer number to specify how many items shall be returned according to given sorting; overrides `left_hand_limit`/`right_hand_limit` parameters and is equal to `left_hand_limit=0` and `right_hand_limit=<limit>`.|false|integer||
+|QueryParameter|filter|The category id to filter for. If set to "general" all mails which does not belong to any other category are retrieved.|false|||
 
 
 #### Responses
@@ -5372,6 +5464,41 @@ response are filled (see [Error handling](#error-handling)).'
 
 * mail
 
+### Sends or saves a mail as MIME data block (RFC822) (**available since SP5**).
+```
+PUT /mail?action=new
+```
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|folder|In case the mail should not be sent out, but saved in a specific folder, the "folder" parameter
+can be used. If the mail should be sent out to the recipient, the "folder" parameter must not be
+included and the mail is stored in the folder "Sent Items".
+|false|string||
+|QueryParameter|flags|In case the mail should be stored with status "read" (e.g. mail has been read already in the client
+inbox), the parameter "flags" has to be included. If no `folder` parameter is specified, this parameter
+must not be included. For information about mail flags see [Mail data](#/definitions/MailData) model.
+|false|string||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object containing the folder ID and the object ID of the mail. In case of errors the
+responsible fields in the response are filled (see [Error handling](#error-handling)).
+|MailDestinationResponse|
+
+
+#### Consumes
+
+* text/plain
+
+#### Tags
+
+* mail
+
 ### Sends a mail.
 ```
 POST /mail?action=new
@@ -5422,41 +5549,6 @@ message (referenced by `msgref` field) being deleted after successful transport)
 #### Produces
 
 * text/html
-
-#### Tags
-
-* mail
-
-### Sends or saves a mail as MIME data block (RFC822) (**available since SP5**).
-```
-PUT /mail?action=new
-```
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|folder|In case the mail should not be sent out, but saved in a specific folder, the "folder" parameter
-can be used. If the mail should be sent out to the recipient, the "folder" parameter must not be
-included and the mail is stored in the folder "Sent Items".
-|false|string||
-|QueryParameter|flags|In case the mail should be stored with status "read" (e.g. mail has been read already in the client
-inbox), the parameter "flags" has to be included. If no `folder` parameter is specified, this parameter
-must not be included. For information about mail flags see [Mail data](#/definitions/MailData) model.
-|false|string||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object containing the folder ID and the object ID of the mail. In case of errors the
-responsible fields in the response are filled (see [Error handling](#error-handling)).
-|MailDestinationResponse|
-
-
-#### Consumes
-
-* text/plain
 
 #### Tags
 
