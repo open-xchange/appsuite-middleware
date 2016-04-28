@@ -78,7 +78,6 @@ import com.openexchange.imap.IMAPMessageStorage;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
-import com.openexchange.imap.threader.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
@@ -198,74 +197,15 @@ public final class Threadables {
      * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
      */
     public static ThreadableResult getThreadableFor(final IMAPFolder imapFolder, final boolean sorted, final boolean cache, final int lookAhead, final int accountId, final Session session) throws MessagingException {
-        if (!ThreadableCache.isThreadableCacheEnabled()) {
-            Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
-            if (sorted) {
-                if (useCommonsNetThreader()) {
-                    threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
-                } else {
-                    threadable = new Threader().thread(threadable);
-                }
-            }
-            return new ThreadableResult(threadable, false);
-        }
-        /*
-         * Fetch from cache (if present)
-         */
-        final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(imapFolder.getFullName(), accountId, session);
-        synchronized (entry) {
-            TLongCollection uids = null;
-            if (null == entry.getThreadable() || sorted != entry.isSorted()) {
-                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
-                if (sorted) {
-                    if (useCommonsNetThreader()) {
-                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
-                    } else {
-                        threadable = new Threader().thread(threadable);
-                    }
-                }
-                entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(imapFolder)), threadable, sorted);
-            } else if (entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
-                final TLongHashSet uidsSet = new TLongHashSet(uids);
-                if (cache) {
-                    // Immediately return cached state & reconstruct ansynchronously
-                    final Threadable retval = (Threadable) entry.getThreadable().clone();
-                    // Runnable instance
-                    final Runnable task = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            try {
-                                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
-                                if (sorted) {
-                                    if (useCommonsNetThreader()) {
-                                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(
-                                            threadable))).getDelegatee();
-                                    } else {
-                                        threadable = new Threader().thread(threadable);
-                                    }
-                                }
-                                entry.set(uidsSet, threadable, sorted);
-                            } catch (final Exception e) {
-                                entry.set(null, null, sorted);
-                            }
-                        }
-                    };
-                    ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(task));
-                    return new ThreadableResult((Threadable) retval.clone(), true);
-                }
-                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
-                if (sorted) {
-                    if (useCommonsNetThreader()) {
-                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
-                    } else {
-                        threadable = new Threader().thread(threadable);
-                    }
-                }
-                entry.set(uidsSet, threadable, sorted);
+        Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
+        if (sorted) {
+            if (useCommonsNetThreader()) {
+                threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+            } else {
+                threadable = new Threader().thread(threadable);
             }
         }
-        return new ThreadableResult((Threadable) entry.getThreadable().clone(), false);
+        return new ThreadableResult(threadable, false);
     }
 
     private static interface HeaderHandler {
