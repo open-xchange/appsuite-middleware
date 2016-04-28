@@ -1018,14 +1018,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, propagateClientIp, checkConnectivityIfPolled);
     }
 
-    private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws OXException, IMAPException {
-        final MailConfig mailConfig = getMailConfig();
-        final HostAndPort key = new HostAndPort(mailConfig.getServer(), mailConfig.getPort());
-        final Map<HostAndPort, Long> map = timedOutServers;
+    private void checkTemporaryDown(IIMAPProperties imapConfProps) throws OXException, IMAPException {
+        Map<HostAndPort, Long> map = timedOutServers;
         if (null == map) {
             return;
         }
-        final Long range = map.get(key);
+
+        MailConfig mailConfig = getMailConfig();
+        HostAndPort key = new HostAndPort(mailConfig.getServer(), mailConfig.getPort());
+        Long range = map.get(key);
         if (range != null) {
             if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
                 /*
