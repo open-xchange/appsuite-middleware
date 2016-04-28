@@ -1,22 +1,5 @@
-
 package liquibase.database;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
@@ -25,11 +8,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -37,57 +16,34 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.DateParseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.EmptyDatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.*;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
-import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.MarkChangeSetRanStatement;
-import liquibase.statement.core.ModifyDataTypeStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
-import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
-import liquibase.statement.core.SetNullableStatement;
-import liquibase.statement.core.TagDatabaseStatement;
-import liquibase.statement.core.UpdateChangeSetChecksumStatement;
-import liquibase.statement.core.UpdateStatement;
+import liquibase.statement.*;
+import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.structure.core.View;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Pattern;
+
 
 /**
  * AbstractJdbcDatabase is extended by all supported databases as a facade to the underlying database.
@@ -231,6 +187,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected abstract String getDefaultDatabaseProductName();
 
+
     @Override
     public String getDatabaseProductVersion() throws DatabaseException {
         if (connection == null) {
@@ -341,7 +298,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(quotingEndCharacter))) {
+        if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null
+                || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
+                quotingEndCharacter))) {
             return objectName;
         } else if (unquotedObjectsAreUppercased == Boolean.TRUE) {
             return objectName.toUpperCase();
@@ -367,6 +326,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             defaultSchemaName = getConnectionSchemaName();
         }
 
+
         return defaultSchemaName;
     }
 
@@ -379,33 +339,14 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection == null) {
             return null;
         }
-        CallableStatement prepareCall = null;
-        ResultSet resultSet = null;
         try {
-            prepareCall = ((JdbcConnection) connection).prepareCall("call current_schema");
-            resultSet = prepareCall.executeQuery();
+            ResultSet resultSet = ((JdbcConnection) connection).prepareCall("call current_schema").executeQuery();
             resultSet.next();
             return resultSet.getString(1);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
-        } finally {
-            if (prepareCall != null) {
-                try {
-                    prepareCall.close();
-                } catch (final SQLException e) {
-                    LogFactory.getLogger().warning("", e);
-                }
-            }
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (final SQLException e) {
-                    LogFactory.getLogger().warning("", e);
-                }
-            }
         }
         return null;
-
     }
 
     @Override
@@ -424,6 +365,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected Set<String> getSystemTables() {
         return new HashSet<String>();
     }
+
 
     /**
      * Returns system (undroppable) views.
@@ -475,19 +417,20 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (isDateOnly(isoDate) || isTimeOnly(isoDate)) {
             return "'" + isoDate + "'";
         } else if (isDateTime(isoDate)) {
-            //            StringBuffer val = new StringBuffer();
-            //            val.append("'");
-            //            val.append(isoDate.substring(0, 10));
-            //            val.append(" ");
-            ////noinspection MagicNumber
-            //            val.append(isoDate.substring(11));
-            //            val.append("'");
-            //            return val.toString();
+//            StringBuffer val = new StringBuffer();
+//            val.append("'");
+//            val.append(isoDate.substring(0, 10));
+//            val.append(" ");
+////noinspection MagicNumber
+//            val.append(isoDate.substring(11));
+//            val.append("'");
+//            return val.toString();
             return "'" + isoDate.replace('T', ' ') + "'";
         } else {
             return "BAD_DATE_FORMAT:" + isoDate;
         }
     }
+
 
     @Override
     public String getDateTimeLiteral(java.sql.Timestamp date) {
@@ -548,6 +491,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return isoDate.length() == "hh:mm:ss".length();
     }
 
+
     /**
      * Returns database-specific line comment string.
      */
@@ -598,11 +542,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
-        return startWith != null && !startWith.equals(defaultAutoIncrementStartWith);
+        return startWith != null
+                && !startWith.equals(defaultAutoIncrementStartWith);
     }
 
     protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
-        return incrementBy != null && !incrementBy.equals(defaultAutoIncrementBy);
+        return incrementBy != null
+                && !incrementBy.equals(defaultAutoIncrementBy);
     }
 
     protected String getAutoIncrementOpening() {
@@ -631,7 +577,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return returnString.toString().replaceFirst(" \\|\\| $", "");
     }
 
-    // ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
+// ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
 
     /**
      * @see liquibase.database.Database#getDatabaseChangeLogTableName()
@@ -769,16 +715,19 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
 
+
         } else if (!changeLogCreateAttempted) {
             executor.comment("Create Database Change Log Table");
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
-                throw new DatabaseException("Cannot create " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" + "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" + createTableStatement);
+                throw new DatabaseException("Cannot create " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
+                        "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
+                        createTableStatement);
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
             LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
-            //                }
+//                }
         }
 
         for (SqlStatement sql : statementsToExecute) {
@@ -786,7 +735,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 executor.execute(sql);
                 this.commit();
             } else {
-                LogFactory.getLogger().info("Cannot run " + sql.getClass().getSimpleName() + " on " + this.getShortName() + " when checking databasechangelog table");
+                LogFactory.getLogger().info("Cannot run "+sql.getClass().getSimpleName()+" on "+this.getShortName()+" when checking databasechangelog table");
             }
         }
 
@@ -804,6 +753,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             this.ranChangeSetList = null;
         }
     }
+
 
     protected boolean canCreateChangeLogTable() throws DatabaseException {
         return true;
@@ -922,21 +872,21 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isCaseSensitive() {
-        if (caseSensitive == null) {
+    	if (caseSensitive == null) {
             if (connection != null) {
                 try {
-                    caseSensitive = Boolean.valueOf(((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers());
+                	caseSensitive = Boolean.valueOf(((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers());
                 } catch (SQLException e) {
                     LogFactory.getLogger().warning("Cannot determine case sensitivity from JDBC driver", e);
                 }
             }
         }
-
-        if (caseSensitive == null) {
+    	
+    	if (caseSensitive == null) {
             return false;
-        } else {
-            return caseSensitive.booleanValue();
-        }
+    	} else {
+    		return caseSensitive.booleanValue();
+    	}
     }
 
     @Override
@@ -945,13 +895,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     /*
-     * Check if given string starts with numeric values that may cause problems and should be escaped.
-     */
+    * Check if given string starts with numeric values that may cause problems and should be escaped.
+    */
     protected boolean startsWithNumeric(String objectName) {
         return startsWithNumberPattern.matcher(objectName).matches();
     }
 
-    // ------- DATABASE OBJECT DROPPING METHODS ---- //
+// ------- DATABASE OBJECT DROPPING METHODS ---- //
 
     /**
      * Drops all objects owned by the connected user.
@@ -963,31 +913,31 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             DatabaseSnapshot snapshot;
             try {
-                final SnapshotControl snapshotControl = new SnapshotControl(this);
-                final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
+	            final SnapshotControl snapshotControl = new SnapshotControl(this);
+	            final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
 
-                //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
-                //as part of tables.
-                typesToInclude.remove(Index.class);
-                typesToInclude.remove(PrimaryKey.class);
-                typesToInclude.remove(UniqueConstraint.class);
+	            //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
+	            //as part of tables.
+	            typesToInclude.remove(Index.class);
+	            typesToInclude.remove(PrimaryKey.class);
+	            typesToInclude.remove(UniqueConstraint.class);
 
-                if (supportsForeignKeyDisable()) {
-                    //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
-                    typesToInclude.remove(ForeignKey.class);
-                }
+	            if (supportsForeignKeyDisable()) {
+		            //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
+		            typesToInclude.remove(ForeignKey.class);
+	            }
 
-                final long createSnapshotStarted = System.currentTimeMillis();
-                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-                LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+	            final long createSnapshotStarted = System.currentTimeMillis();
+	            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
+	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            final long changeSetStarted = System.currentTimeMillis();
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+	        final long changeSetStarted = System.currentTimeMillis();
+	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
-            LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
+	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
             try {
@@ -1021,7 +971,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean supportsDropTableCascadeConstraints() {
-        return (this instanceof SQLiteDatabase || this instanceof SybaseDatabase || this instanceof SybaseASADatabase || this instanceof PostgresDatabase || this instanceof OracleDatabase);
+        return (this instanceof SQLiteDatabase
+                || this instanceof SybaseDatabase
+                || this instanceof SybaseASADatabase
+                || this instanceof PostgresDatabase
+                || this instanceof OracleDatabase
+        );
     }
 
     @Override
@@ -1089,7 +1044,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 this.markChangeSetExecStatus(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
             }
 
-            //            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
+//            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
             executor.execute(new TagDatabaseStatement(tagString));
             this.commit();
 
@@ -1114,6 +1069,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return getConnection().getConnectionUserName() + " @ " + getConnection().getURL() + (getDefaultSchemaName() == null ? "" : " (Default Schema: " + getDefaultSchemaName() + ")");
     }
 
+
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = correctSchema(schema);
@@ -1131,9 +1087,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        //        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
-        //        catalogName = catalogAndSchema.getCatalogName();
-        //        schemaName = catalogAndSchema.getSchemaName();
+//        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
+//        catalogName = catalogAndSchema.getCatalogName();
+//        schemaName = catalogAndSchema.getSchemaName();
 
         if (supportsSchemas()) {
             catalogName = StringUtils.trimToNull(catalogName);
@@ -1323,7 +1279,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         return ChangeSet.RunStatus.RUN_AGAIN;
                     } else {
                         return ChangeSet.RunStatus.INVALID_MD5SUM;
-                        //                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
+//                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
                     }
                 }
             }
@@ -1410,6 +1366,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
 
+
         ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, execType));
         commit();
         getRanChangeSetList().add(new RanChangeSet(changeSet, execType));
@@ -1452,10 +1409,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         AbstractJdbcDatabase that = (AbstractJdbcDatabase) o;
 
@@ -1545,9 +1500,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Executes the statements passed as argument to a target {@link Database}
      *
      * @param statements an array containing the SQL statements to be issued
-     * 
      * @param database the target {@link Database}
-     * 
      * @throws DatabaseException if there were problems issuing the statements
      */
     @Override
@@ -1560,6 +1513,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
         }
     }
+
 
     @Override
     public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
@@ -1709,12 +1663,14 @@ public abstract class AbstractJdbcDatabase implements Database {
             return getCurrentDateTimeFunction();
         } else if (databaseFunction instanceof SequenceNextValueFunction) {
             if (sequenceNextValueFunction == null) {
-                throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s", getDefaultDatabaseProductName()));
+                throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
+                        getDefaultDatabaseProductName()));
             }
             return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
             if (sequenceCurrentValueFunction == null) {
-                throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s", getDefaultDatabaseProductName()));
+                throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s",
+                        getDefaultDatabaseProductName()));
             }
             return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
         } else {
@@ -1723,19 +1679,21 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     private boolean isCurrentTimeFunction(String functionValue) {
-        return functionValue.startsWith("current_timestamp") || functionValue.startsWith("current_datetime") || getCurrentDateTimeFunction().equalsIgnoreCase(functionValue);
+        return functionValue.startsWith("current_timestamp")
+                || functionValue.startsWith("current_datetime")
+                || getCurrentDateTimeFunction().equalsIgnoreCase(functionValue);
     }
 
     @Override
     public String getCurrentDateTimeFunction() {
         return currentDateTimeFunction;
     }
-
-    @Override
+    
+ 	@Override
     public void setOutputDefaultSchema(boolean outputDefaultSchema) {
-        this.outputDefaultSchema = outputDefaultSchema;
-
-    }
+		this.outputDefaultSchema = outputDefaultSchema;
+ 		
+ 	}
 
     @Override
     public boolean isDefaultSchema(String catalog, String schema) {
@@ -1759,10 +1717,10 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     }
 
-    @Override
+ 	@Override
     public boolean getOutputDefaultSchema() {
-        return outputDefaultSchema;
-    }
+ 		return outputDefaultSchema;
+ 	}
 
     @Override
     public boolean getOutputDefaultCatalog() {
