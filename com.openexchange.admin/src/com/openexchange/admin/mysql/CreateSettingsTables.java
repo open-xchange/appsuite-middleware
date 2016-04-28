@@ -124,7 +124,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "cid INT4 UNSIGNED NOT NULL,"
        + "user_id INT4 UNSIGNED NOT NULL,"
        + "path_id INT4 UNSIGNED NOT NULL,"
-       + "value TEXT,"
+       + "value MEDIUMTEXT,"
        + "PRIMARY KEY (cid, user_id, path_id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 

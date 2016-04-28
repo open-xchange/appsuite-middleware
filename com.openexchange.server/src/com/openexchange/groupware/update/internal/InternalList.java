@@ -601,12 +601,16 @@ public final class InternalList {
         // Checks and drops obsolete tables possibly created for managing POP3 accounts
         list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTaskV2());
 
-        //(Re-)adds department index in prg_contacts for "auto-complete" queries
+        // (Re-)adds department index in prg_contacts for "auto-complete" queries
         list.add(new com.openexchange.groupware.update.tasks.ContactsAddDepartmentIndex4AutoCompleteSearch());
 
         // +++++++++++++++++++++++++++++++++ Version 7.8.2 starts here. +++++++++++++++++++++++++++++++++
 
+        // Adds "starttls" column to "user_mail_account" and "user_transport_account" tables and attempts to set a reasonable default value for that column dependent on mail account data
         list.add(new AddStartTLSColumnForMailAccountTablesTask());
+
+        // Applies MEDIUM TEXT to "user_setting" table.
+        list.add(new com.openexchange.groupware.update.tasks.UserSettingMediumTextTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
