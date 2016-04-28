@@ -3148,14 +3148,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage mailToAppend, ComposeType type, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException {
-        /*
-         * Initialize
-         */
+        // Initialize
         initConnection(accountId);
         MailTransport transport = MailTransport.getInstance(session, accountId);
         try {
+            // Invariants
             UserSettingMail usm = null == optUserSetting ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : optUserSetting;
             List<String> ids = new ArrayList<>(transportMails.size());
+            boolean settingsAllowAppendToSend = !usm.isNoCopyIntoStandardSentFolder();
+
+            // State variables
             OXException oxError = null;
             boolean first = true;
             for (ComposedMailMessage composedMail : transportMails) {
@@ -3274,7 +3276,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         }
                     }
 
-                    if (!usm.isNoCopyIntoStandardSentFolder() && composedMail.isAppendToSentFolder()) {
+                    if (settingsAllowAppendToSend && composedMail.isAppendToSentFolder()) {
                         /*
                          * If mail identifier and folder identifier is already available, assume it has already been stored in Sent folder
                          */
@@ -3301,7 +3303,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 first = false;
             }
 
-            if (null != mailToAppend && !usm.isNoCopyIntoStandardSentFolder()) {
+            // Append to Sent folder
+            if (settingsAllowAppendToSend && null != mailToAppend) {
                 ids.add(append2SentFolder(mailToAppend).toString());
             }
 
