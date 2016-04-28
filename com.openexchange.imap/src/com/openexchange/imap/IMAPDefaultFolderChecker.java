@@ -307,6 +307,19 @@ public class IMAPDefaultFolderChecker {
         MailSessionCache cache = MailSessionCache.getInstance(session);
         String key = MailSessionParameterNames.getParamDefaultFolderChecked();
         if (!isDefaultFoldersChecked(key, cache)) {
+
+            /*-
+             * ----------------------------------------------------------- NOTE -----------------------------------------------------------
+             *
+             * In case there are switching standard folder; e.g. change from next to INBOX to below INBOX.
+             * Please check for following prominent WARN logging:
+             *   "NAMESPACE from IMAP server <imap-host> indicates to use root level for login <imap-login>, but IMAP server denies to create such folders!"
+             *
+             * This hints to a failed probe whether IMAP server allows to create folders on root level; see IMAPCommandsCollection.canCreateSubfolder()
+             *
+             * ----------------------------------------------------------------------------------------------------------------------------
+             */
+
             Lock lock = getSessionLock();
             lock.lock();
             try {
