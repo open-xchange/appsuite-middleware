@@ -1,4 +1,3 @@
-
 package liquibase.snapshot;
 
 import liquibase.database.Database;
@@ -6,15 +5,14 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
-import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
 class ResultSetCache {
-
     private int timesSingleQueried = 0;
     private boolean didBulkQuery = false;
 
@@ -29,7 +27,7 @@ class ResultSetCache {
             String schemaKey = resultSetExtractor.wantedKeyParameters().createSchemaKey(resultSetExtractor.database);
 
             Map<String, List<CachedRow>> cache = cacheBySchema.get(schemaKey);
-            if (cache == null) {
+            if (cache == null ) {
                 cache = new HashMap<String, List<CachedRow>>();
                 cacheBySchema.put(schemaKey, cache);
             }
@@ -67,6 +65,9 @@ class ResultSetCache {
             }
             return returnList;
 
+
+
+
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
@@ -81,7 +82,6 @@ class ResultSetCache {
     }
 
     public static class RowData {
-
         private Database database;
         private String[] parameters;
         private String catalog;
@@ -113,7 +113,9 @@ class ResultSetCache {
             String[] nullVersion = Arrays.copyOf(params, params.length);
             nullVersion[fromIndex] = null;
             if (params.length == fromIndex + 1) {
-                return new String[] { createKey(database, params), createKey(database, nullVersion)
+                return new String[] {
+                        createKey(database, params),
+                        createKey(database, nullVersion)
                 };
             } else {
                 List<String> permutations = new ArrayList<String>();
@@ -126,10 +128,10 @@ class ResultSetCache {
         }
 
         public String createSchemaKey(Database database) {
-            if (!database.supportsCatalogs() && !database.supportsSchemas()) {
+            if (!database.supportsCatalogs() && ! database.supportsSchemas()) {
                 return "all";
             } else if (database.supportsCatalogs() && database.supportsSchemas()) {
-                return (catalog + "." + schema).toLowerCase();
+                return (catalog+"."+schema).toLowerCase();
             } else {
                 if (catalog == null && schema != null) {
                     return schema.toLowerCase();
@@ -168,19 +170,9 @@ class ResultSetCache {
         }
 
         ResultSet executeQuery(String sql, Database database) throws DatabaseException, SQLException {
-            Statement statement = null;
-            try {
-                statement = ((JdbcConnection) database.getConnection()).createStatement();
-                return statement.executeQuery(sql);
-            } finally {
-                if (statement != null) {
-                    try {
-                        statement.close();
-                    } catch (final SQLException e) {
-                        LogFactory.getLogger().warning("", e);
-                    }
-                }
-            }
+            Statement statement = ((JdbcConnection) database.getConnection()).createStatement();
+            return statement.executeQuery(sql);
+
         }
 
         public boolean equals(Object expectedValue, Object foundValue) {
@@ -198,12 +190,12 @@ class ResultSetCache {
             return expectedValue.equals(foundValue);
         }
 
+
         public abstract RowData rowKeyParameters(CachedRow row);
 
         public abstract RowData wantedKeyParameters();
 
         public abstract List<CachedRow> fastFetch() throws SQLException, DatabaseException;
-
         public abstract List<CachedRow> bulkFetch() throws SQLException, DatabaseException;
 
         protected List<CachedRow> extract(ResultSet resultSet) throws SQLException {
@@ -211,7 +203,6 @@ class ResultSetCache {
             List<CachedRow> returnList = new ArrayList<CachedRow>();
             try {
                 result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
-
                     @Override
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);
@@ -231,6 +222,7 @@ class ResultSetCache {
             return returnList;
         }
 
+
     }
 
     public abstract static class SingleResultSetExtractor extends ResultSetExtractor {
@@ -240,13 +232,13 @@ class ResultSetCache {
         }
 
         public abstract ResultSet fastFetchQuery() throws SQLException, DatabaseException;
-
         public abstract ResultSet bulkFetchQuery() throws SQLException, DatabaseException;
 
         @Override
         public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
             return extract(fastFetchQuery());
         }
+
 
         @Override
         public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
@@ -255,7 +247,6 @@ class ResultSetCache {
     }
 
     public abstract static class UnionResultSetExtractor extends ResultSetExtractor {
-
         protected UnionResultSetExtractor(Database database) {
             super(database);
         }
