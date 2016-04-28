@@ -3383,9 +3383,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         String[] uidArr;
         try {
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if (messageStorage instanceof IMailMessageStorageMimeSupport) {
+            if ((sentMail instanceof MimeRawSource) && (messageStorage instanceof IMailMessageStorageMimeSupport)) {
                 IMailMessageStorageMimeSupport mimeSupport = (IMailMessageStorageMimeSupport) messageStorage;
-                if (mimeSupport.isMimeSupported() && (sentMail instanceof MimeRawSource)) {
+                if (mimeSupport.isMimeSupported()) {
                     uidArr = mimeSupport.appendMimeMessages(sentFullname, new Message[] { (Message) ((MimeRawSource) sentMail).getPart() });
                 } else {
                     uidArr = messageStorage.appendMessages(sentFullname, new MailMessage[] { sentMail });
