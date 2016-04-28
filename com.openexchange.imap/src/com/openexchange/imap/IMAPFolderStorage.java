@@ -2411,6 +2411,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             // Try NAMESPACE command
+            boolean detectedByNamespace = false;
             String prefix = null;
             try {
                 final String[] namespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
@@ -2421,6 +2422,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     return prefixByInferiors;
                 }
                 prefix = namespaces[0];
+                detectedByNamespace = true;
             } catch (final MessagingException e) {
                 String prefixByInferiors = prefixByInferiors();
                 LOG.info("NAMESPACE command failed for any reason on IMAP server {} for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
@@ -2433,7 +2435,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             // The empty prefix so far; verify against root-folder capability
             DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
             if (!RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, defaultFolder)) {
-                // Impossible to create folders on root level; hence adjust prefix to be:  "INBOX" + <separator>
+                // Impossible to create folders on root level; hence adjust prefix to be: "INBOX" + <separator>
+                if (detectedByNamespace) {
+                    // Strange... Since NAMESPACE tells to use root level, but IMAP server denies to create such folders.
+                    LOG.warn("\n\n\tNAMESPACE from IMAP server {} indicates to use root level for login {}, but IMAP server denies to create such folders!\n", imapConfig.getServer(), imapConfig.getLogin());
+                }
                 return new StringBuilder(STR_INBOX).append(defaultFolder.getSeparator()).toString();
             }
 
