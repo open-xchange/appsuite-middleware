@@ -59,9 +59,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.UnifiedInboxUID;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 
@@ -250,6 +248,8 @@ public final class CompositionSpaces {
             return;
         }
 
+        /*-
+         *
         int unifiedMailId = -1;
         {
             UnifiedInboxManagement uim = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
@@ -257,6 +257,7 @@ public final class CompositionSpaces {
                 unifiedMailId = uim.getUnifiedINBOXAccountID(session);
             }
         }
+         */
 
         Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
