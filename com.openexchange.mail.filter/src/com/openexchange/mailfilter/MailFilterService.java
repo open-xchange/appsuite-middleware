@@ -111,6 +111,15 @@ public interface MailFilterService {
     public void deleteFilterRule(final Credentials credentials, final int uid) throws OXException;
 
     /**
+     * Delete the specified rules
+     *
+     * @param credentials user's credentials
+     * @param uids UIDs of the mail filter rules to delete
+     * @throws OXException
+     */
+    public void deleteFilterRules(final Credentials credentials, final int... uids) throws OXException;
+
+    /**
      * Delete all filters for the specified user
      *
      * @param credentials the user's credentials

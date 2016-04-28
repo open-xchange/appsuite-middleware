@@ -52,9 +52,11 @@ package com.openexchange.mail.categories.impl.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.impl.MailCategoriesConfigServiceImpl;
 import com.openexchange.mail.categories.impl.MailCategoriesConfigUtil;
+import com.openexchange.mail.categories.impl.MailCategoriesLoginHandler;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -74,9 +76,9 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl());
+        registerService(MailCategoriesConfigService.class, MailCategoriesConfigServiceImpl.getInstance());
         registerService(Reloadable.class, MailCategoriesConfigUtil.getInstance());
-
+        registerService(LoginHandlerService.class, new MailCategoriesLoginHandler(this));
     }
 
     @Override

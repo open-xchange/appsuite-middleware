@@ -47,40 +47,27 @@
  *
  */
 
-package com.openexchange.mail.categories.sieve.osgi;
+package com.openexchange.mail.categories.ruleengine;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
-import com.openexchange.mail.categories.sieve.SieveMailCategoriesRuleEngine;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link Activator}
+ * {@link RuleType} defines the types of mail category rules
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class Activator extends HousekeepingActivator {
+public enum RuleType {
 
-    /**
-     * Initializes a new {@link Activator}.
-     */
-    public Activator() {
-        super();
+    CATEGORY("category"),
+    SYSTEM_CATEGORY("syscategory");
+
+    String name;
+
+    RuleType(String name) {
+        this.name = name;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MailCategoriesRuleEngine.class, new SieveMailCategoriesRuleEngine(this));
+    public String getName() {
+        return name;
     }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { MailFilterService.class, ConfigurationService.class, ConfigViewFactory.class, ThreadPoolService.class };
-    }
-
 }

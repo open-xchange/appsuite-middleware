@@ -102,6 +102,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MailFilterServiceImpl.class);
     
     private static final String CATEGORY_FLAG = "category";
+    private static final String SYSTEM_CATEGORY_FLAG = "syscategory";
 
     private static final class RuleAndPosition {
 
@@ -290,8 +291,14 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
     }
 
+
     @Override
     public void deleteFilterRule(Credentials credentials, int uid) throws OXException {
+        deleteFilterRules(credentials, uid);
+    }
+
+    @Override
+    public void deleteFilterRules(Credentials credentials, int... uids) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
@@ -309,12 +316,13 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rulesandid.getRulelist(), null, rulesandid.isError());
 
                 List<Rule> rules = clientrulesandrequire.getRules();
-                RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
-                if (deletedrule == null) {
-                    throw MailFilterExceptionCode.BAD_POSITION.create(uid);
+                for (int uid : uids) {
+                    RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
+                    if (deletedrule == null) {
+                        throw MailFilterExceptionCode.BAD_POSITION.create(uid);
+                    }
+                    rules.remove(deletedrule.rule);
                 }
-                rules.remove(deletedrule.position);
-
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeback = sieveTextFilter.rewriteRequire(writeback, script);
                 writeScript(sieveHandler, activeScript, writeback);
@@ -400,9 +408,13 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag, rules.isError());
                 List<Rule> clientRules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientRules);
-                if (!flag.equals("category")) {
-                    removeCategoryRules(clientRules);
+                if (!flag.equals(CATEGORY_FLAG)) {
+                    removeRules(clientRules, CATEGORY_FLAG);
                 }
+                if (!flag.equals(SYSTEM_CATEGORY_FLAG)) {
+                    removeRules(clientRules, SYSTEM_CATEGORY_FLAG);
+                }
+
                 removeNestedRules(clientRules);
 
                 return clientRules;
@@ -422,13 +434,16 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
     }
     
-    private void removeCategoryRules(List<Rule> rules) {
+    private void removeRules(List<Rule> rules, String... flagsToRemove) {
         Iterator<Rule> iterator = rules.iterator();
         while (iterator.hasNext()) {
             Rule r = iterator.next();
             List<String> flags = r.getRuleComment().getFlags();
-            if (flags != null && flags.contains(CATEGORY_FLAG)) {
-                iterator.remove();
+            for (String flagToRemove : flagsToRemove) {
+                if (flags != null && flags.contains(flagToRemove)) {
+                    iterator.remove();
+                    break;
+                }
             }
         }
     }
@@ -452,7 +467,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     return exclude(splittedRules.getFlaggedRules(), exclusionFlags);
                 }
                 List<Rule> splitRules = splittedRules.getRules();
-                removeCategoryRules(splitRules);
+                removeRules(splitRules, CATEGORY_FLAG, SYSTEM_CATEGORY_FLAG);
                 removeNestedRules(splitRules);
                 return splitRules;
             } catch (SieveException e) {
@@ -520,6 +535,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
     
     private List<MailFilterGroup> getMailFilterGroups(int[] ids) {
         ArrayList<MailFilterGroup> result = new ArrayList<>(2);
+        result.add(new PredefinedSystemCategoriesMailFilterGroup());
         result.add(new CategoriesMailFilterGroup());
         result.add(new GeneralMailFilterGroup(ids));
         return result;

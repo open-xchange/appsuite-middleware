@@ -47,40 +47,62 @@
  *
  */
 
-package com.openexchange.mail.categories.sieve.osgi;
+package com.openexchange.mailfilter.internal;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
-import com.openexchange.mail.categories.sieve.SieveMailCategoriesRuleEngine;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.Rule;
 
 /**
- * {@link Activator}
+ * {@link PredefinedSystemCategoriesMailFilterGroup}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class Activator extends HousekeepingActivator {
+public class PredefinedSystemCategoriesMailFilterGroup implements MailFilterGroup {
+
+    private static final String SYSTEM_CATEGORY_FLAG = "syscategory";
+
+    private static final Comparator<Rule> RULE_COMPARATOR = new Comparator<Rule>() {
+
+        @Override
+        public int compare(Rule o1, Rule o2) {
+            if (o1 == null) {
+                return o2 == null ? 0 : -1;
+            } else if (o2 == null) {
+                return 1;
+            }
+            int uniqueid1 = o1.getRuleComment().getUniqueid();
+            int uniqueid2 = o2.getRuleComment().getUniqueid();
+            return (uniqueid1 < uniqueid2) ? -1 : ((uniqueid1 == uniqueid2) ? 0 : 1);
+        }
+    };
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link PredefinedSystemCategoriesMailFilterGroup}.
      */
-    public Activator() {
+    public PredefinedSystemCategoriesMailFilterGroup() {
         super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(MailCategoriesRuleEngine.class, new SieveMailCategoriesRuleEngine(this));
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { MailFilterService.class, ConfigurationService.class, ConfigViewFactory.class, ThreadPoolService.class };
+    public List<Rule> getOrderedRules(List<Rule> rules) throws OXException {
+        Iterator<Rule> iterator = rules.iterator();
+        List<Rule> result = new ArrayList<Rule>(rules.size());
+        while (iterator.hasNext()) {
+            Rule rule = iterator.next();
+            List<String> flags = rule.getRuleComment().getFlags();
+            if (flags != null && flags.contains(SYSTEM_CATEGORY_FLAG)) {
+                result.add(rule);
+                iterator.remove();
+            }
+        }
+        Collections.sort(result, RULE_COMPARATOR);
+        return result;
     }
 
 }

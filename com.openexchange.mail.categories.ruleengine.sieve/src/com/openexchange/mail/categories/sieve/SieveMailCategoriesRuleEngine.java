@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
@@ -72,11 +73,15 @@ import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExceptionCodes;
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
+import com.openexchange.mail.categories.ruleengine.RuleType;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link SieveMailCategoriesRuleEngine}
@@ -89,6 +94,7 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
 
     private final ServiceLookup services;
 
+
     /**
      * Initializes a new {@link SieveMailCategoriesRuleEngine}.
      */
@@ -98,7 +104,11 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
     }
 
     @Override
-    public void setRule(Session session, MailCategoryRule rule) throws OXException {
+    public void setRule(Session session, MailCategoryRule rule, RuleType type) throws OXException {
+        setRule(session, rule, type, true);
+    }
+
+    public void setRule(Session session, MailCategoryRule rule, RuleType type, boolean reorder) throws OXException {
         MailFilterService mailFilterService = services.getService(MailFilterService.class);
         if (mailFilterService == null) {
             throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
@@ -108,7 +118,7 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         Credentials creds = getCredentials(session);
         try {
 
-            List<Rule> rules = mailFilterService.listRules(creds, "category");
+            List<Rule> rules = mailFilterService.listRules(creds, type.getName());
             for (Rule tmpRule : rules) {
                 if (tmpRule.getRuleComment().getRulename().equals(rule.getFlag())) {
                     oldRule = tmpRule;
@@ -116,13 +126,15 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
                 }
             }
 
-            Rule newRule = mailCategoryRule2SieveRule(rule);
+            Rule newRule = mailCategoryRule2SieveRule(rule, type);
 
             if (oldRule != null) {
                 mailFilterService.updateFilterRule(creds, newRule, oldRule.getUniqueId());
             } else {
                 mailFilterService.createFilterRule(creds, newRule);
-                mailFilterService.reorderRules(creds, new int[0]);
+                if (reorder) {
+                    mailFilterService.reorderRules(creds, new int[0]);
+                }
             }
         } catch (SieveException e) {
             throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_SET_RULE.create(e.getMessage());
@@ -158,7 +170,7 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         return new Credentials(loginName, session.getPassword(), session.getUserId(), session.getContextId(), null, subject);
     }
 
-    private Rule mailCategoryRule2SieveRule(MailCategoryRule rule) throws SieveException {
+    private Rule mailCategoryRule2SieveRule(MailCategoryRule rule, RuleType type) throws SieveException {
         ArrayList<Object> argList = new ArrayList<>(1);
         argList.add(Collections.singletonList(rule.getFlag()));
         List<ActionCommand> actionCommands = new ArrayList<>(4);
@@ -186,7 +198,7 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         int linenumber = 0;
         boolean commented = false;
         RuleComment comment = new RuleComment(rule.getFlag());
-        comment.setFlags(Collections.singletonList("category"));
+        comment.setFlags(Collections.singletonList(type.getName()));
         Rule result = new Rule(comment, commands, linenumber, commented);
         return result;
     }
@@ -394,4 +406,102 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         return result;
     }
 
+    @Override
+    public void initRuleEngineForUser(final Session session, final List<MailCategoryRule> rules) throws OXException {
+        final MailFilterService mailFilterService = services.getService(MailFilterService.class);
+        if (mailFilterService == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
+        }
+        final Credentials creds = getCredentials(session);
+
+        // Get old rules
+        List<Rule> oldRules = mailFilterService.listRules(creds, RuleType.SYSTEM_CATEGORY.getName());
+        final int[] uids = new int[oldRules.size()];
+        int x = 0;
+        for (Rule rule : oldRules) {
+            uids[x++] = rule.getUniqueId();
+        }
+
+        // Run task
+        if (!rules.isEmpty()) {
+
+            ThreadPoolService threadPoolService = services.getService(ThreadPoolService.class);
+            try {
+                boolean success = threadPoolService.submit(new InitTask(uids, mailFilterService, creds, rules, session)).get();
+                if (!success) {
+                    throw new OXException();
+                }
+            } catch (ExecutionException | InterruptedException e) {
+                throw new OXException(e);
+            }
+        }
+    }
+
+    /**
+     * 
+     * {@link InitTask} initializes the rule engine for the given user
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.8.2
+     */
+    private class InitTask implements Task<Boolean> {
+
+        private int[] uids;
+        private MailFilterService mailFilterService;
+        private Credentials creds;
+        private List<MailCategoryRule> rules;
+        private Session session;
+        private Boolean success = false;
+
+        /**
+         * Initializes a new {@link InitTask}.
+         * 
+         * @param runnable
+         */
+        public InitTask(int[] uids, MailFilterService mailFilterService, Credentials creds, List<MailCategoryRule> rules, Session session) {
+            super();
+            this.uids = uids;
+            this.mailFilterService = mailFilterService;
+            this.creds = creds;
+            this.rules = rules;
+            this.session = session;
+        }
+
+        final Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    // Remove possible old rules
+                    if (uids.length > 0) {
+                        mailFilterService.deleteFilterRules(creds, uids);
+                    }
+                    // Create new rules
+                    for (MailCategoryRule rule : rules) {
+                        setRule(session, rule, RuleType.SYSTEM_CATEGORY, false);
+                    }
+                    mailFilterService.reorderRules(creds, new int[] {});
+                } catch (OXException e1) {
+                    return;
+                }
+                success = true;
+            }
+        };
+
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {}
+
+        @Override
+        public void beforeExecute(Thread t) {}
+
+        @Override
+        public void afterExecute(Throwable t) {}
+
+        @Override
+        public Boolean call() throws Exception {
+            runnable.run();
+            return success;
+        }
+
+    }
 }

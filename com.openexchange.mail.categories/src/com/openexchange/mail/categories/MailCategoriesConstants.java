@@ -113,4 +113,9 @@ public class MailCategoriesConstants {
      */
     public static final String MAIL_CATEGORIES_ACTIVE = ".active";
 
+    /**
+     * The apply ox rules property name
+     */
+    public static final String APPLY_OX_RULES_PROPERTY = "com.openexchange.mail.categories.apply.ox.rules";
+
 }

@@ -69,6 +69,7 @@ import com.openexchange.mail.categories.impl.osgi.Services;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExceptionCodes;
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
+import com.openexchange.mail.categories.ruleengine.RuleType;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.ORTerm;
@@ -87,7 +88,16 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     private static final String FROM_HEADER = "from";
 
-    public MailCategoriesConfigServiceImpl() {
+    private static MailCategoriesConfigServiceImpl INSTANCE;
+
+    public static MailCategoriesConfigServiceImpl getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new MailCategoriesConfigServiceImpl();
+        }
+        return INSTANCE;
+    }
+
+    private MailCategoriesConfigServiceImpl() {
         super();
     }
 
@@ -226,7 +236,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FALLBACK, category, session);
     }
 
-    private String[] getSystemCategoryNames(Session session) throws OXException {
+    String[] getSystemCategoryNames(Session session) throws OXException {
         String categoriesString = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, null, session);
         if (Strings.isEmpty(categoriesString)) {
             return new String[0];
@@ -273,7 +283,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, String.valueOf(enable), session);
     }
 
-    private String generateFlag(String category) {
+    String generateFlag(String category) {
         StringBuilder builder = new StringBuilder(FLAG_PREFIX);
         builder.append(category.hashCode());
         return builder.toString();
@@ -291,7 +301,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         if (ruleEngine == null) {
             throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
         }
-        ruleEngine.setRule(session, rule);
+        ruleEngine.setRule(session, rule, RuleType.CATEGORY);
     }
 
     private MailCategoryRule getRule(Session session, String category) throws OXException {

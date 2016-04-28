@@ -7,6 +7,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.mail.categories.sieve.osgi.Activator
 Import-Package: com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.jsieve.commands,
@@ -18,6 +19,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.osgi.util,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.threadpool,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
