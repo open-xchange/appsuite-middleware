@@ -88,21 +88,25 @@ public final class UserSettingMediumTextTask extends UpdateTaskAdapter {
         final int cid = params.getContextId();
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         final Connection con = dbService.getForUpdateTask(cid);
+        boolean rollback = false;
         try {
             DBUtils.startTransaction(con);
+            rollback = true;
             final String typeName = Tools.getColumnTypeName(con, "user_setting", "value");
             if (!"MEDIUMTEXT".equalsIgnoreCase(typeName)) {
                 final Column column = new Column("value", "MEDIUMTEXT COLLATE utf8_unicode_ci");
                 Tools.modifyColumns(con, "user_setting", column);
             }
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
             Database.backNoTimeout(cid, true, con);
         }
