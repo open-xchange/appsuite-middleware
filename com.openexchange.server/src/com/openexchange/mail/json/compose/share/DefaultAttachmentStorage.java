@@ -49,12 +49,16 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.HOURS;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -96,6 +100,8 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionAwares;
@@ -109,24 +115,76 @@ import com.openexchange.tx.TransactionAwares;
  */
 public class DefaultAttachmentStorage implements AttachmentStorage {
 
-    private static final DefaultAttachmentStorage INSTANCE = new DefaultAttachmentStorage();
+    /** The periodic cleaner for expired files */
+    protected static class PeriodicCleaner implements Runnable {
+
+        protected PeriodicCleaner() {
+            super();
+        }
+
+        @Override
+        public void run() {
+            // TODO Auto-generated method stub
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
+    private static volatile DefaultAttachmentStorage instance;
 
     /**
-     * Gets the instance
+     * Gets the instance.
      *
      * @return The instance
+     * @throws OXException If instance cannot be returned
      */
-    public static DefaultAttachmentStorage getInstance() {
-        return INSTANCE;
+    public static DefaultAttachmentStorage getInstance() throws OXException {
+        DefaultAttachmentStorage tmp = instance;
+        if (null == tmp) {
+            synchronized (DefaultAttachmentStorage.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    ScheduledTimerTask timerTask;
+                    long cleanerInterval = Utilities.parseTimespanProperty("com.openexchange.mail.compose.share.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true);
+                    if (0 < cleanerInterval) {
+                        // TODO:
+                        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                        timerTask = null;
+                    } else {
+                        timerTask = null;
+                    }
+                    tmp = new DefaultAttachmentStorage(timerTask);
+                    instance = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Shuts down this attachment storage.
+     */
+    public static void shutDown() {
+        DefaultAttachmentStorage tmp = instance;
+        if (null != tmp) {
+            instance = null;
+            ScheduledTimerTask timerTask = tmp.timerTask;
+            if (null != timerTask) {
+                timerTask.cancel();
+            }
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
+    private final ScheduledTimerTask timerTask;
+
     /**
      * Initializes a new {@link DefaultAttachmentStorage}.
      */
-    protected DefaultAttachmentStorage() {
+    protected DefaultAttachmentStorage(ScheduledTimerTask timerTask) {
         super();
+        this.timerTask = timerTask;
     }
 
     @Override
@@ -135,7 +193,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     }
 
     @Override
-    public StoredAttachmentsControl storeAttachments(ComposedMailMessage sourceMessage, String password, Date expiry, ComposeContext context) throws OXException {
+    public StoredAttachmentsControl storeAttachments(ComposedMailMessage sourceMessage, String password, Date expiry, boolean filesAutoExpire, ComposeContext context) throws OXException {
         ServerSession session = context.getSession();
 
         // Generate transaction instance providing folder and file access
@@ -151,7 +209,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             String folderID = createFolder(sourceMessage, password, expiry, locale, storageContext);
 
             // Save attachments into that folder
-            List<String> fileIds = saveAttachments(context.getAllParts(), folderID, locale, storageContext);
+            List<String> fileIds = saveAttachments(context.getAllParts(), folderID, filesAutoExpire ? expiry : null, locale, storageContext);
 
             // Create share target for that folder for an anonymous user
             ShareTarget folderTarget = new ShareTarget(FileStorageContentType.getInstance().getModule(), folderID);
@@ -203,15 +261,16 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      *
      * @param attachments The attachments to save
      * @param folderId The identifier of the folder to save to
+     * @param expiry The optional expiration date or <code>null</code>
      * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @return The identifiers of the saved attachments
      * @throws OXException If save attempt fails
      */
-    protected List<String> saveAttachments(final List<MailPart> attachments, final String folderId, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+    protected List<String> saveAttachments(List<MailPart> attachments, String folderId, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
         List<String> createdFiles = new ArrayList<String>(attachments.size());
         for (MailPart attachment : attachments) {
-            createdFiles.add(saveAttachment(attachment, folderId, locale, storageContext));
+            createdFiles.add(saveAttachment(attachment, folderId, expiry, locale, storageContext));
         }
         return createdFiles;
     }
@@ -221,13 +280,14 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      *
      * @param attachment The attachment to save
      * @param folderId The folder identifier
+     * @param expiry The optional expiration date or <code>null</code>
      * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @return The identifier of the saved attachment
      * @throws OXException If save attempt fails
      */
-    protected String saveAttachment(MailPart attachment, String folderId, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
-        File file = prepareMetadata(attachment, folderId, locale);
+    protected String saveAttachment(MailPart attachment, String folderId, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+        File file = prepareMetadata(attachment, folderId, expiry, locale);
         InputStream inputStream = null;
         try {
             inputStream = attachment.getInputStream();
@@ -242,10 +302,11 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      *
      * @param attachment The attachment
      * @param folderId The folder identifier
+     * @param expiry The optional expiration date or <code>null</code>
      * @param locale The locale of session-associated user
      * @return The resulting <code>File</code> instance
      */
-    protected File prepareMetadata(MailPart attachment, String folderId, Locale locale) {
+    protected File prepareMetadata(MailPart attachment, String folderId, Date expiry, Locale locale) {
         // Determine attachment file name
         String name = sanitizeName(attachment.getFileName(), StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE));
 
@@ -257,6 +318,9 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         file.setFileMIMEType(attachment.getContentType().getBaseType());
         file.setTitle(name);
         file.setFileSize(attachment.getSize());
+        if (null != expiry) {
+            file.setMeta(mapFor("expires", Long.valueOf(expiry.getTime())));
+        }
         return file;
     }
 
@@ -445,7 +509,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
 
     // --------------------------------------------------------------------------------------------------------------------------------
 
-    private static final class DefaultAttachmentStorageContext implements TransactionAware {
+    protected static class DefaultAttachmentStorageContext implements TransactionAware {
 
         final IDBasedFolderAccess folderAccess;
         final IDBasedFileAccess fileAccess;
@@ -454,7 +518,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         /**
          * Initializes a new {@link DefaultAttachmentStorageContext}.
          */
-        DefaultAttachmentStorageContext(IDBasedFileAccess fileAccess, IDBasedFolderAccess folderAccess, Session session) {
+        protected DefaultAttachmentStorageContext(IDBasedFileAccess fileAccess, IDBasedFolderAccess folderAccess, Session session) {
             super();
             this.fileAccess = fileAccess;
             this.folderAccess = folderAccess;
@@ -509,6 +573,29 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
                 TransactionAwares.finishSafe(storageContext);
             }
         }
+    }
+
+    /**
+     * Gets a map for specified arguments.
+     *
+     * @param args The arguments
+     * @return The resulting map
+     */
+    protected static Map<String, Object> mapFor(Object... args) {
+        if (null == args) {
+            return null;
+        }
+
+        int length = args.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+
+        Map<String, Object> map = new LinkedHashMap<String, Object>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(args[i].toString(), args[i+1]);
+        }
+        return map;
     }
 
 }

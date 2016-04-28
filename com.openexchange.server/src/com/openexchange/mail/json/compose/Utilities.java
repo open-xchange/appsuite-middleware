@@ -52,9 +52,11 @@ package com.openexchange.mail.json.compose;
 import org.apache.commons.lang.Validate;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -62,6 +64,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link Utilities} - A utility class for compose module.
@@ -71,6 +74,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public enum Utilities {
     ;
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utilities.class);
+
+    private static ConfigurationService getConfigurationService() throws OXException {
+        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == configService) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+        return configService;
+    }
 
     private static ConfigViewFactory getConfigViewFactory() throws OXException {
         ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
@@ -128,6 +141,41 @@ public enum Utilities {
             }
         }
         return true;
+    }
+
+    /**
+     * Parses a time span property.
+     *
+     * @param propertyName The property name
+     * @param defaultValue The default value to return if property is absent
+     * @param minimumValue The minimum allowed value
+     * @param allowDisabling Whether it is allowed that the property is effectively disabled
+     * @return The parsed time span
+     * @throws OXException If parsing fails
+     */
+    public static long parseTimespanProperty(String propertyName, long defaultValue, long minimumValue, boolean allowDisabling) throws OXException  {
+        String value = getConfigurationService().getProperty(propertyName);
+        if (Strings.isEmpty(value)) {
+            return defaultValue;
+        }
+
+        long timespan;
+        try {
+            timespan = TimeSpanParser.parseTimespan(value).longValue();
+        } catch (IllegalArgumentException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, propertyName);
+        }
+
+        if (allowDisabling && 0 >= timespan) {
+            return 0;
+        }
+
+        if (0 < minimumValue && minimumValue > timespan) {
+            LOG.warn("Ignoring too low value of \"{}\" for \"{}\", falling back to defaults.", value, propertyName);
+            return defaultValue;
+        }
+
+        return timespan;
     }
 
     /**

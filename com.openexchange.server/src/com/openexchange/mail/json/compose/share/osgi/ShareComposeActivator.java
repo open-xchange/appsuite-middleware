@@ -62,6 +62,7 @@ import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.json.compose.ComposeHandler;
 import com.openexchange.mail.json.compose.Utilities;
+import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistryImpl;
@@ -189,6 +190,7 @@ public class ShareComposeActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().removeService(AttachmentStorageRegistry.class);
         ServerServiceRegistry.getInstance().removeService(MessageGeneratorRegistry.class);
         ServerServiceRegistry.getInstance().removeService(ShareLinkGeneratorRegistry.class);
+        DefaultAttachmentStorage.shutDown();
         super.stopBundle();
     }
 

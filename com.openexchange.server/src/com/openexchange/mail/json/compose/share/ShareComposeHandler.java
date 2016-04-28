@@ -188,6 +188,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         // Optional password and expiration date
         String password = getPassword(composeRequest);
         Date expirationDate = getExpirationDate(composeRequest);
+        boolean filesAutoExpire = null == expirationDate ? false : isFilesAutoExpire(composeRequest);
 
         // Determine attachment storage to use
         AttachmentStorageRegistry storageRegistry = ServerServiceRegistry.getServize(AttachmentStorageRegistry.class);
@@ -201,7 +202,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         boolean rollback = true;
         try {
             // Store attachments associated with compose context
-            attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, context);
+            attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, filesAutoExpire, context);
 
             // The share target for an anonymous user
             ShareTarget folderTarget = attachmentsControl.getFolderTarget();
@@ -289,7 +290,17 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     }
 
     /**
-     * Gets the password from given compose request
+     * Checks whether created files are supposed to expire as well (provided that an expiration date is set)
+     *
+     * @param request The compose request
+     * @return <code>true</code> for auto-expiration; otherwise <code>false</code>
+     */
+    protected boolean isFilesAutoExpire(ComposeRequest request) {
+        return AJAXRequestDataTools.parseBoolParameter("files_auto_expire", request.getRequest(), false);
+    }
+
+    /**
+     * Gets the password from given compose request.
      *
      * @param request The compose request
      * @return The password or <code>null</code>
@@ -300,7 +311,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     }
 
     /**
-     * Gets the expiration date from given compose request
+     * Gets the expiration date from given compose request.
      *
      * @param request The compose request
      * @return The expiration date or <code>null</code>
@@ -313,11 +324,29 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
 
         try {
-            long millis = Long.parseLong(value);
-            int offset = TimeZoneUtils.getTimeZone(request.getSession().getUser().getTimeZone()).getOffset(millis);
-            return new Date(millis - offset);
-        } catch (NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "expires", value);
+            value = value.trim();
+
+            // Value is required to start with a digit in either way
+            if (!Strings.isDigit(value.charAt(0))) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expires", value);
+            }
+
+            if (value.indexOf('-') > 0) {
+                // Expect a date in ISO8601 format
+                return com.openexchange.java.ISO8601Utils.parse(value);
+            }
+
+            // Expect a date in milliseconds
+            try {
+                long millis = Long.parseLong(value);
+                int offset = TimeZoneUtils.getTimeZone(request.getSession().getUser().getTimeZone()).getOffset(millis);
+                return new Date(millis - offset);
+            } catch (NumberFormatException e) {
+                // Else expect a date in ISO8601 format
+                return com.openexchange.java.ISO8601Utils.parse(value);
+            }
+        } catch (IllegalArgumentException iso8601ParsingFailed) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(iso8601ParsingFailed, "expires", value);
         }
     }
 
