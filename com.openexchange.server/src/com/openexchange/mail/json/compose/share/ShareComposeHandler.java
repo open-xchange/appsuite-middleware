@@ -71,6 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.DelegatingComposedMailMessage;
 import com.openexchange.mail.json.compose.AbstractComposeHandler;
 import com.openexchange.mail.json.compose.ComposeDraftResult;
 import com.openexchange.mail.json.compose.ComposeRequest;
@@ -149,7 +150,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     protected ComposeTransportResult doCreateTransportResult(ComposeRequest composeRequest, ShareTransportComposeContext context) throws OXException {
         if (false == context.isCreateShares()) {
             ComposedMailMessage composeMessage = createRegularComposeMessage(context);
-            return new DefaultComposeTransportResult(Collections.singletonList(composeMessage), composeMessage);
+            DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
+            transportMessage.setAppendToSentFolder(false);
+            return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage);
         }
 
         if (context.isAddWarning()) {
