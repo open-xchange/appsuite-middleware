@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 53
+%define        ox_release 52
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -60,8 +60,6 @@ ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
 /sbin/rcopen-xchange
 
 %changelog
-* Mon Apr 18 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-04-28 (3253)
 * Tue Apr 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-04-19 (3241)
 * Wed Mar 23 2016 Marcus Klein <marcus.klein@open-xchange.com>
