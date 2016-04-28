@@ -49,8 +49,11 @@
 
 package com.openexchange.mail.json.compose;
 
+import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.Validate;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.DelegatingComposedMailMessage;
 
 /**
  * {@link DefaultComposeTransportResult}
@@ -64,12 +67,35 @@ public class DefaultComposeTransportResult implements ComposeTransportResult {
     private final ComposedMailMessage sentMessage;
 
     /**
-     * Initializes a new {@link DefaultComposeTransportResult}.
+     * Initializes a new {@link DefaultComposeTransportResult} with sanitizing passed messages.
      */
     public DefaultComposeTransportResult(List<? extends ComposedMailMessage> transportMessages, ComposedMailMessage sentMessage) {
+        this(transportMessages, sentMessage, true);
+    }
+
+    /**
+     * Initializes a new {@link DefaultComposeTransportResult}.
+     */
+    public DefaultComposeTransportResult(List<? extends ComposedMailMessage> transportMessages, ComposedMailMessage sentMessage, boolean sanitize) {
         super();
-        this.transportMessages = transportMessages;
-        this.sentMessage = sentMessage;
+        Validate.notNull(transportMessages, "Transport messages must not be null");
+        Validate.notNull(sentMessage, "Sent message must not be null");
+
+        if (sanitize) {
+            List<ComposedMailMessage> tmp = new ArrayList<>(transportMessages.size());
+            for (ComposedMailMessage transportMessage : transportMessages) {
+                tmp.add(sanitize(transportMessage, false));
+            }
+            this.transportMessages = tmp;
+        } else {
+            this.transportMessages = transportMessages;
+        }
+
+        if (sanitize) {
+            this.sentMessage = sanitize(sentMessage, true);
+        } else {
+            this.sentMessage = sentMessage;
+        }
     }
 
     @Override
@@ -80,6 +106,27 @@ public class DefaultComposeTransportResult implements ComposeTransportResult {
     @Override
     public ComposedMailMessage getSentMessage() {
         return sentMessage;
+    }
+
+    private static ComposedMailMessage sanitize(ComposedMailMessage toSanitize, boolean expect) {
+        if (expect) {
+            if (false == toSanitize.isAppendToSentFolder()) {
+                // Adjust append-to-sent flag
+                DelegatingComposedMailMessage wrappingMessage = new DelegatingComposedMailMessage(toSanitize);
+                wrappingMessage.setAppendToSentFolder(true);
+                return wrappingMessage;
+            }
+        } else {
+            if (toSanitize.isAppendToSentFolder()) {
+                // Adjust append-to-sent flag
+                DelegatingComposedMailMessage wrappingMessage = new DelegatingComposedMailMessage(toSanitize);
+                wrappingMessage.setAppendToSentFolder(false);
+                return wrappingMessage;
+            }
+        }
+
+        // Return as-is
+        return toSanitize;
     }
 
 }
