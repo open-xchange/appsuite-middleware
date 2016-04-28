@@ -32,22 +32,31 @@
  	
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
-            <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%message%n%lmdc%exception{full}</pattern>
+            <pattern>%yellow(%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"}) %highlight(%-5level) %cyan([%thread]) %green(%class.%method\(%class{0}.java:%line\)) %n%message%n%lmdc%exception{full}</pattern>
         </encoder>
     </appender>
     
     <!-- Logstash appender -->
-    <!--<property scope="context" name="com.openexchange.logback.extensions.logstash.enabled" value="true" />
+    <property scope="context" name="com.openexchange.logback.extensions.logstash.enabled" value="true" />
    	<property scope="context" name="com.openexchange.logback.extensions.logstash.alwaysPersistEvents" value="true" />
    	<property scope="context" name="com.openexchange.logback.extensions.logstash.loadFactor" value="0.67" />
+   	<newRule pattern="*/encoder/customFields/field" actionClass="com.openexchange.logback.extensions.logstash.CustomFieldsAction"/>
     <appender name="LOGSTASH" class="com.openexchange.logback.extensions.logstash.LogstashSocketAppender">
         <remoteHost>localhost</remoteHost>
         <port>31337</port>
         <reconnectionDelay>10000</reconnectionDelay>
         <eventDelayLimit>30000</eventDelayLimit>
-        <encoder class="com.openexchange.logback.extensions.logstash.LogstashEncoder"/>
+        <encoder class="com.openexchange.logback.extensions.logstash.LogstashEncoder">
+        	<customFields>
+        		<field name="originatingHost" value="1.2.3.4"/>
+        		<field name="foo" value="bar"/>
+        		<field name="thx" value="1137"/>
+        		<field name="π" value="3.14"/>
+        		<field name="φ" value="1.618"/>
+        	</customFields>
+        </encoder>
         <queueSize>2048</queueSize>
-    </appender>-->
+    </appender>
 	
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>2048</queueSize>
@@ -58,7 +67,7 @@
 
     <root level="INFO">
        	<appender-ref ref="ASYNC" />
-        <!--<appender-ref ref="LOGSTASH" />-->
+       	<appender-ref ref="LOGSTASH" />
     </root>
 
     <!--

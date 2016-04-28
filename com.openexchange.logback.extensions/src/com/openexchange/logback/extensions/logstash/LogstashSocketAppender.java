@@ -65,10 +65,10 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.SocketFactory;
+import com.openexchange.exception.OXException;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.net.AbstractSocketAppender;
 import ch.qos.logback.core.net.DefaultSocketConnector;
@@ -76,11 +76,10 @@ import ch.qos.logback.core.net.SocketConnector;
 import ch.qos.logback.core.net.SocketConnector.ExceptionHandler;
 import ch.qos.logback.core.util.CloseUtil;
 import ch.qos.logback.core.util.Duration;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link LogstashSocketAppender}. Replica class of {@link AbstractSocketAppender}. The method {@link #dispatchEvents()} does the actual
- * work and is rewritten. Instead of sending serialized objects to the stream, a special {@link LogstashEncoder} is used to format all
+ * work and is rewritten. Instead of sending serialised objects to the stream, a special {@link LogstashEncoder} is used to format all
  * logging events as JSON objects before sending them over the wire.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>

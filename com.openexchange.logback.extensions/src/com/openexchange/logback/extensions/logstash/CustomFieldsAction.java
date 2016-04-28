@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,57 +49,51 @@
 
 package com.openexchange.logback.extensions.logstash;
 
-import java.io.IOException;
-import org.apache.commons.io.IOUtils;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.CoreConstants;
-import ch.qos.logback.core.encoder.EncoderBase;
+import java.util.Stack;
+import org.xml.sax.Attributes;
+import ch.qos.logback.core.joran.action.Action;
+import ch.qos.logback.core.joran.spi.ActionException;
+import ch.qos.logback.core.joran.spi.InterpretationContext;
 
 /**
- * {@link LogstashEncoder}. Uses the {@link LogstashFormatter} to format {@link ILoggingEvent} objects as JSON objects and flushes them to
- * the stream.
+ * {@link CustomFieldsAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class LogstashEncoder extends EncoderBase<ILoggingEvent> {
-
-    private final LogstashFormatter formatter;
+public class CustomFieldsAction extends Action {
 
     /**
-     * Initialises a new {@link LogstashEncoder}.
+     * Initialises a new {@link CustomFieldsAction}.
      */
-    public LogstashEncoder() {
+    public CustomFieldsAction() {
         super();
-        formatter = new LogstashFormatter();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see ch.qos.logback.core.encoder.Encoder#doEncode(java.lang.Object)
+     * @see ch.qos.logback.core.joran.action.Action#begin(ch.qos.logback.core.joran.spi.InterpretationContext, java.lang.String, org.xml.sax.Attributes)
      */
     @Override
-    public void doEncode(ILoggingEvent event) throws IOException {
-        formatter.writeToStream(event, outputStream);
-        IOUtils.write(CoreConstants.LINE_SEPARATOR, outputStream);
+    public void begin(InterpretationContext ic, String name, Attributes attributes) throws ActionException {
+        Stack<Object> objectStack = ic.getObjectStack();
+        for (Object o : objectStack) {
+            if (!(o instanceof LogstashEncoder)) {
+                continue;
+            }
+            LogstashEncoder encoder = (LogstashEncoder) o;
+            encoder.addCustomField(new CustomField(attributes.getValue("name"), attributes.getValue("value")));
+            break;
+        }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see ch.qos.logback.core.encoder.Encoder#close()
+     * @see ch.qos.logback.core.joran.action.Action#end(ch.qos.logback.core.joran.spi.InterpretationContext, java.lang.String)
      */
     @Override
-    public void close() throws IOException {
-        IOUtils.write(CoreConstants.LINE_SEPARATOR, outputStream);
-    }
-
-    /**
-     * Adds the specified {@link CustomField} to the {@link LogstashFormatter}
-     *
-     * @param customField the {@link CustomField} to add
-     */
-    public void addCustomField(CustomField customField) {
-        formatter.addCustomField(customField);
+    public void end(InterpretationContext ic, String name) throws ActionException {
+        // no-op
     }
 }

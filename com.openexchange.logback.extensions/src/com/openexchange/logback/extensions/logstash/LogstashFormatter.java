@@ -51,14 +51,16 @@ package com.openexchange.logback.extensions.logstash;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.time.FastDateFormat;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.spi.ThrowableProxyUtil;
-import ch.qos.logback.core.spi.LifeCycle;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.ThrowableProxyUtil;
+import ch.qos.logback.core.spi.LifeCycle;
 
 /**
  * {@link LogstashFormatter}. Formats {@link ILoggingEvent} objects as JSON objects.
@@ -71,8 +73,19 @@ public class LogstashFormatter implements LifeCycle {
 
     public static final FastDateFormat LOGSTASH_TIMEFORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
 
+    private List<CustomField> customFields;
+
+    /**
+     * Initialises a new {@link LogstashFormatter}.
+     */
+    public LogstashFormatter() {
+        super();
+        customFields = new ArrayList<CustomField>();
+    }
+
     /*
      * (non-Javadoc)
+     * 
      * @see ch.qos.logback.core.spi.LifeCycle#start()
      */
     @Override
@@ -82,6 +95,7 @@ public class LogstashFormatter implements LifeCycle {
 
     /*
      * (non-Javadoc)
+     * 
      * @see ch.qos.logback.core.spi.LifeCycle#stop()
      */
     @Override
@@ -91,6 +105,7 @@ public class LogstashFormatter implements LifeCycle {
 
     /*
      * (non-Javadoc)
+     * 
      * @see ch.qos.logback.core.spi.LifeCycle#isStarted()
      */
     @Override
@@ -126,9 +141,7 @@ public class LogstashFormatter implements LifeCycle {
 
         // Stacktraces
         if (event.getThrowableProxy() != null) {
-            generator.writeStringField(
-                LogstashFieldName.stacktrace.getLogstashName(),
-                ThrowableProxyUtil.asString(event.getThrowableProxy()));
+            generator.writeStringField(LogstashFieldName.stacktrace.getLogstashName(), ThrowableProxyUtil.asString(event.getThrowableProxy()));
         }
 
         // MDC
@@ -138,7 +151,21 @@ public class LogstashFormatter implements LifeCycle {
             generator.writeObject(mdc.get(key));
         }
 
+        for (CustomField customField : customFields) {
+            generator.writeFieldName(customField.getKey());
+            generator.writeObject(customField.getValue());
+        }
+
         generator.writeEndObject();
         generator.flush();
+    }
+
+    /**
+     * Adds the specified custom field
+     *
+     * @param customField the custom field to add
+     */
+    public void addCustomField(CustomField customField) {
+        customFields.add(customField);
     }
 }

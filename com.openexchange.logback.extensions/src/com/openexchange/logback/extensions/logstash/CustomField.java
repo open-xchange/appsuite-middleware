@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,57 +49,49 @@
 
 package com.openexchange.logback.extensions.logstash;
 
-import java.io.IOException;
-import org.apache.commons.io.IOUtils;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.CoreConstants;
-import ch.qos.logback.core.encoder.EncoderBase;
-
 /**
- * {@link LogstashEncoder}. Uses the {@link LogstashFormatter} to format {@link ILoggingEvent} objects as JSON objects and flushes them to
- * the stream.
+ * {@link CustomField}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class LogstashEncoder extends EncoderBase<ILoggingEvent> {
+class CustomField {
 
-    private final LogstashFormatter formatter;
+    private final String key;
+    private final String value;
 
     /**
-     * Initialises a new {@link LogstashEncoder}.
+     * Initialises a new {@link CustomField}.
+     * 
+     * @param key The custom field's key
+     * @param value The custom field's value
      */
-    public LogstashEncoder() {
+    public CustomField(String key, String value) {
         super();
-        formatter = new LogstashFormatter();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see ch.qos.logback.core.encoder.Encoder#doEncode(java.lang.Object)
-     */
-    @Override
-    public void doEncode(ILoggingEvent event) throws IOException {
-        formatter.writeToStream(event, outputStream);
-        IOUtils.write(CoreConstants.LINE_SEPARATOR, outputStream);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see ch.qos.logback.core.encoder.Encoder#close()
-     */
-    @Override
-    public void close() throws IOException {
-        IOUtils.write(CoreConstants.LINE_SEPARATOR, outputStream);
+        if (key == null) {
+            throw new IllegalArgumentException("The 'key' of the custom field can not be 'null'");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("The 'value' of the custom field can not be 'null'");
+        }
+        this.key = key;
+        this.value = value;
     }
 
     /**
-     * Adds the specified {@link CustomField} to the {@link LogstashFormatter}
+     * Gets the key
      *
-     * @param customField the {@link CustomField} to add
+     * @return The key
      */
-    public void addCustomField(CustomField customField) {
-        formatter.addCustomField(customField);
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * Gets the value
+     *
+     * @return The value
+     */
+    public String getValue() {
+        return value;
     }
 }
