@@ -67,7 +67,8 @@ import com.openexchange.tools.update.Tools;
 
 
 /**
- * {@link AddStartTLSColumnForMailAccountTablesTask}
+ * {@link AddStartTLSColumnForMailAccountTablesTask} - Adds "starttls" column to "user_mail_account" and "user_transport_account" tables and
+ * attempts to set a reasonable default value for that column dependent on mail account data
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.2
