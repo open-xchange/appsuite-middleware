@@ -72,6 +72,7 @@ import javax.xml.transform.stream.StreamResult;
 import net.htmlparser.jericho.Attribute;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Segment;
@@ -459,7 +460,10 @@ public final class HtmlProcessing {
             if (null != headElement) {
                 outputDocument.remove(headElement);
             }
-            outputDocument.remove(htmlElement.getEndTag());
+            EndTag endTag = htmlElement.getEndTag();
+            if (null != endTag) {
+                outputDocument.remove(endTag);
+            }
         }
         return outputDocument.toString().trim();
     }
