@@ -117,7 +117,7 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
 
     @Override
     public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.ContactsAddDepartmentIndex4AutoCompleteSearch.class.getName() };
+        return new String[] { com.openexchange.groupware.update.tasks.Release781UpdateTask.class.getName() };
     }
 
     private void activateStartTLS(Connection con, boolean forceSecure) throws SQLException {

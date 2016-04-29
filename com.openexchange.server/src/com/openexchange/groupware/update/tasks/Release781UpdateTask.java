@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2016-2016 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,67 +49,43 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+
 
 /**
- * {@link UserSettingMediumTextTask} - Applies <code>MEDIUM TEXT</code> to <code>"user_setting"</code> table.
+ * {@link Release781UpdateTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.2
  */
-public final class UserSettingMediumTextTask extends UpdateTaskAdapter {
+public class Release781UpdateTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link UserSettingMediumTextTask}.
+     * Initializes a new {@link Release781UpdateTask}.
      */
-    public UserSettingMediumTextTask() {
+    public Release781UpdateTask() {
         super();
     }
 
     @Override
-    public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.Release781UpdateTask.class.getName() };
+    public void perform(PerformParameters params) {
+        // nothing to do
+
     }
 
     @Override
-    public void perform(final PerformParameters params) throws OXException {
-        final int cid = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection con = dbService.getForUpdateTask(cid);
-        boolean rollback = false;
-        try {
-            DBUtils.startTransaction(con);
-            rollback = true;
-            final String typeName = Tools.getColumnTypeName(con, "user_setting", "value");
-            if (!"MEDIUMTEXT".equalsIgnoreCase(typeName)) {
-                final Column column = new Column("value", "MEDIUMTEXT COLLATE utf8_unicode_ci");
-                Tools.modifyColumns(con, "user_setting", column);
-            }
-            con.commit();
-            rollback = false;
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                rollback(con);
-            }
-            autocommit(con);
-            Database.backNoTimeout(cid, true, con);
-        }
+    public String[] getDependencies() {
+        return new String[] {
+            com.openexchange.groupware.update.tasks.DropVersionTableTask.class.getName(),
+            com.openexchange.groupware.update.tasks.MigrateUUIDsForUserAliasTable.class.getName(),
+            com.openexchange.groupware.update.tasks.RemoveAliasInUserAttributesTable.class.getName(),
+            com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableTask.class.getName(),
+            com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTaskV2.class.getName(),
+            com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask.class.getName(),
+            com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTaskV2.class.getName(),
+            com.openexchange.groupware.update.tasks.ContactsAddDepartmentIndex4AutoCompleteSearch.class.getName()
+        };
     }
 
 }

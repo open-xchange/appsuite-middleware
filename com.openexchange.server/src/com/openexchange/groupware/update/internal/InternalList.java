@@ -102,6 +102,7 @@ import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTa
 import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.Release781UpdateTask;
 import com.openexchange.groupware.update.tasks.RemoveAliasInUserAttributesTable;
 import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
 import com.openexchange.groupware.update.tasks.ResourceClearDelTablesTask;
@@ -605,6 +606,8 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.ContactsAddDepartmentIndex4AutoCompleteSearch());
 
         // +++++++++++++++++++++++++++++++++ Version 7.8.2 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new Release781UpdateTask());
 
         // Adds "starttls" column to "user_mail_account" and "user_transport_account" tables and attempts to set a reasonable default value for that column dependent on mail account data
         list.add(new AddStartTLSColumnForMailAccountTablesTask());
