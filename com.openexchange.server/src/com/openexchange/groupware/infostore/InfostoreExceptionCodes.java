@@ -217,8 +217,11 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The search took too long to accomplish the following query for user %1$s in context %2$s: %3$s
      */
-    SEARCH_TOOK_TOO_LONG("The search took too long to accomplish the following query for user %1$s in context %2$s: %3$s", CATEGORY_USER_INPUT, 2106, InfostoreExceptionMessages.SEARCH_TOOK_TOO_LONG_MSG_DISPLAY)
-
+    SEARCH_TOOK_TOO_LONG("The search took too long to accomplish the following query for user %1$s in context %2$s: %3$s", CATEGORY_USER_INPUT, 2106, InfostoreExceptionMessages.SEARCH_TOOK_TOO_LONG_MSG_DISPLAY),
+    /**
+     * Group %1$s can't be used for object permissions.
+     */
+    VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_GUEST_GROUP("Group %1$s can't be used for object permissions.", CATEGORY_USER_INPUT, 2107, InfostoreExceptionMessages.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_GUEST_GROUP_MSG_DISPLAY),
     ;
 
     private final String message;
