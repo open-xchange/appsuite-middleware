@@ -49,15 +49,18 @@
 
 package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.base.CharMatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
@@ -69,6 +72,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.VacationActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -106,7 +110,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
         final String subjectFieldname = VacationActionField.subject.getFieldName();
         if (jsonObject.has(subjectFieldname)) {
             String subject = jsonObject.getString(subjectFieldname);
-            subject = MimeMessageUtility.quotePhrase(subject, true);
+            subject = encode(subject, VacationActionField.subject);
             arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.subject));
             arrayList.add(CommandParserJSONUtil.stringToList(subject));
         }
@@ -172,7 +176,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
         }
         final List<String> subject = tagArguments.get(VacationActionField.subject.getTagName());
         if (null != subject) {
-            String decodedSubject = MimeMessageUtility.decodeEnvelopeSubject(subject.get(0));
+            String decodedSubject = decode(subject.get(0), VacationActionField.subject);
             jsonObject.put(VacationActionField.subject.getFieldName(), decodedSubject);
         }
         final List<String> from = tagArguments.get(VacationActionField.from.getTagName());
@@ -181,5 +185,46 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
             jsonObject.put(VacationActionField.from.getFieldName(), decodedFrom);
         }
         jsonObject.put(VacationActionField.text.getFieldName(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
+    }
+
+    /**
+     * Encodes the specified UTF-8 string if necessary and returns the encoded string
+     * 
+     * @param string The string to encode
+     * @param field The field
+     * @return The encoded string
+     * @throws OXException if the string cannot be decoded
+     */
+    private String encode(String string, VacationActionField field) throws OXException {
+        if (CharMatcher.ASCII.matchesAllOf(string)) {
+            return string;
+        }
+        try {
+            return MimeUtility.encodeText(string);
+        } catch (UnsupportedEncodingException e) {
+            throw CommandParserExceptionCodes.UNABLE_TO_ENCODE.create(field.name(), "Vacation");
+        }
+    }
+
+    /**
+     * Decodes the specified UTF-8 string if necessary and returns the decoded string
+     * 
+     * @param utf8 The UTF-8 encoded string
+     * @param field The field
+     * @return The decoded string
+     * @throws OXException if the string cannot be decoded
+     */
+    private String decode(String utf8, VacationActionField field) throws OXException {
+        if (Strings.isEmpty(utf8)) {
+            return utf8;
+        }
+        if (!utf8.startsWith("=?UTF")) {
+            return utf8;
+        }
+        try {
+            return MimeUtility.decodeText(utf8);
+        } catch (UnsupportedEncodingException e) {
+            throw CommandParserExceptionCodes.UNABLE_TO_DECODE.create(field.name(), "Vacation");
+        }
     }
 }
