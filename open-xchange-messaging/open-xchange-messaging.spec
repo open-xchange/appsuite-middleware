@@ -83,6 +83,9 @@ if [ ${1:-0} -eq 2 ]; then
     if ox_exists_property com.openexchange.twitter.http.useSSL $PFILE; then
         ox_remove_property com.openexchange.twitter.http.useSSL $PFILE
     fi
+
+    # SoftwareChange_Request-3255
+    ox_add_property com.openexchange.messaging.rss.feed.size 4194304 /opt/open-xchange/etc/rssmessaging.properties
 fi
 
 %clean
