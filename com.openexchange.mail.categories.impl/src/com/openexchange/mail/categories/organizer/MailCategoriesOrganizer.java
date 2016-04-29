@@ -132,7 +132,9 @@ public class MailCategoriesOrganizer {
                 mailIds[x++] = mailObject.getMailID();
             }
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, flagsToRemove, false);
+            if (flagsToRemove != null && flagsToRemove.length != 0) {
+                messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, flagsToRemove, false);
+            }
             if (flag != null) {
                 messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, true);
             }
