@@ -508,7 +508,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Server %1$s does not support being accessed using a secure connection.
      */
-    NON_SECURE_DENIED("Server %1$s does not support being accessed using a secure connection.", MailExceptionStrings.NON_SECURE_DENIED_MSG, CATEGORY_WARNING, 92),
+    NON_SECURE_DENIED("Server %1$s does not support being accessed using a secure connection.", MailExceptionStrings.NON_SECURE_DENIED_MSG, CATEGORY_PERMISSION_DENIED, 92),
     /**
      * Invalid argument(s) supplied
      */
