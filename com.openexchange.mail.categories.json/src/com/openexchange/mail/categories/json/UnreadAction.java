@@ -66,6 +66,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.BooleanTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.server.ServiceExceptionCode;
@@ -132,8 +133,13 @@ public class UnreadAction extends AbstractCategoriesAction {
             SearchTerm<?> searchTerm = null;
 
             // General case
-            searchTerm = new UserFlagTerm(flags, false);
-            int unread = messageStorage.getUnreadCount("INBOX", searchTerm);
+            int unread = 0;
+            if (flags != null && flags.length != 0) {
+                searchTerm = new UserFlagTerm(flags, false);
+                unread = messageStorage.getUnreadCount("INBOX", searchTerm);
+            } else {
+                unread = messageStorage.getUnreadCount("INBOX", BooleanTerm.TRUE);
+            }
             resultObject.put("general", unread);
 
             for (MailCategoryConfig category : categories) {
