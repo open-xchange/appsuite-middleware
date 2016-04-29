@@ -98,6 +98,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
     private static final String FIELD_LIST = "list";
     private static final String FIELD_FEATURE_ENABLED = "enabled";
     private static final String FIELD_FEATURE_FORCED = "forced";
+    private static final String FIELD_FEATURE_INITIALIZED = "initialized";
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_ACTIVE = "active";
@@ -129,6 +130,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                         }
                         item.put(FIELD_FEATURE_ENABLED, mailCategoriesEnabled);
                         item.put(FIELD_FEATURE_FORCED, mailCategoriesForced);
+                        item.put(FIELD_FEATURE_INITIALIZED, service.getInitStatus(session));
                         List<MailCategoryConfig> configs = service.getAllCategories(session, user.getLocale(), false, true);
                         JSONArray categories = new JSONArray();
 

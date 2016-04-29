@@ -84,6 +84,8 @@ import com.openexchange.session.Session;
  */
 public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigService {
 
+    static final String INIT_TASK_STATUS_PROPERTY = "com.openexchange.mail.categories.ruleengine.sieve.init.run";
+
     private final static String FLAG_PREFIX = "$ox_";
 
     private static final String FROM_HEADER = "from";
@@ -500,6 +502,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         String flag = getFlagByCategory(session, category);
         String[] allFlags = getAllFlags(session, false, false);
         MailCategoriesOrganizer.organizeMails(session, fa.getFullName(), mails, flag, allFlags);
+    }
+
+    @Override
+    public String getInitStatus(Session session) throws OXException {
+        return MailCategoriesConfigUtil.getValueFromProperty(INIT_TASK_STATUS_PROPERTY, "notyetstarted", session);
     }
 
 }

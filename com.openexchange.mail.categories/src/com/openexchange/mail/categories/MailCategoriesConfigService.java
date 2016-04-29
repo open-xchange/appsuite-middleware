@@ -165,4 +165,13 @@ public interface MailCategoriesConfigService {
      */
     void addMails(Session session, List<MailObjectParameter> mails, String category) throws OXException;
 
+    /**
+     * Retrieves the init status, which can be 'notyetstarted', 'running' or 'finished';
+     * 
+     * @param session The user session
+     * @return The status of the init process
+     * @throws OXException
+     */
+    String getInitStatus(Session session) throws OXException;
+
 }

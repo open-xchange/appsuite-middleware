@@ -78,10 +78,14 @@ import com.openexchange.session.Session;
  */
 public class MailCategoriesLoginHandler implements LoginHandlerService {
 
-    private static final String INIT_TASK_RUN_PROPERTY = "com.openexchange.mail.categories.ruleengine.sieve.init.run";
+
     private static final String RULE_DEFINITION_PROPERTY_PREFIX = "com.openexchange.mail.categories.rules.";
     private static final String FROM_HEADER = "from";
     private ServiceLookup services;
+
+    private static final String STATUS_NOT_YET_STARTED = "notyetstarted";
+    private static final String STATUS_RUNNING = "running";
+    private static final String STATUS_FINISHED = "finished";
 
 
     /**
@@ -94,7 +98,6 @@ public class MailCategoriesLoginHandler implements LoginHandlerService {
 
     @Override
     public void handleLogin(LoginResult login) throws OXException {
-
         Session session = login.getSession();
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         if (configViewFactory == null) {
@@ -107,11 +110,11 @@ public class MailCategoriesLoginHandler implements LoginHandlerService {
             return;
         }
 
-        final ConfigProperty<Boolean> hasRun = view.property("user", INIT_TASK_RUN_PROPERTY, Boolean.class);
-        if (hasRun.isDefined() && hasRun.get()) {
+        final ConfigProperty<String> hasRun = view.property("user", MailCategoriesConfigServiceImpl.INIT_TASK_STATUS_PROPERTY, String.class);
+        if (hasRun.isDefined() && !hasRun.get().equals(STATUS_NOT_YET_STARTED)) {
             return;
         } else {
-            hasRun.set(true);
+            hasRun.set(STATUS_RUNNING);
         }
         try {
             MailCategoriesRuleEngine engine = services.getService(MailCategoriesRuleEngine.class);
@@ -141,9 +144,10 @@ public class MailCategoriesLoginHandler implements LoginHandlerService {
                 SearchTerm<?> searchTerm = mailCategoriesService.getSearchTerm(rule);
                 MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullname(), searchTerm, rule.getFlag(), null);
             }
+            hasRun.set(STATUS_FINISHED);
         } catch (Exception e) {
             try {
-                hasRun.set(false);
+                hasRun.set(STATUS_NOT_YET_STARTED);
             } catch (OXException ox) {
             }
         }
