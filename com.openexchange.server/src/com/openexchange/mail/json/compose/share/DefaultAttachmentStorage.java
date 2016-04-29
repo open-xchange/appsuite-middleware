@@ -59,6 +59,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -108,83 +109,100 @@ import com.openexchange.tx.TransactionAwares;
 
 
 /**
- * {@link DefaultAttachmentStorage}
+ * {@link DefaultAttachmentStorage} - The default attachment storage using Drive module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
 public class DefaultAttachmentStorage implements AttachmentStorage {
 
-    /** The periodic cleaner for expired files */
-    protected static class PeriodicCleaner implements Runnable {
-
-        protected PeriodicCleaner() {
-            super();
-        }
-
-        @Override
-        public void run() {
-            // TODO Auto-generated method stub
-        }
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------------------
-
     private static volatile DefaultAttachmentStorage instance;
 
     /**
      * Gets the instance.
      *
-     * @return The instance
+     * @return The instance or <code>null</code> if not yet initialized
+     */
+    public static DefaultAttachmentStorage getInstance() {
+        return instance;
+    }
+
+    /**
+     * Initializes this attachment storage.
+     *
+     * @param configService The config service
+     * @param timerService The timer service
+     * @return The initialized instance
      * @throws OXException If instance cannot be returned
      */
-    public static DefaultAttachmentStorage getInstance() throws OXException {
+    public static synchronized void startInstance(ConfigurationService configService, TimerService timerService) throws OXException {
         DefaultAttachmentStorage tmp = instance;
         if (null == tmp) {
-            synchronized (DefaultAttachmentStorage.class) {
-                tmp = instance;
-                if (null == tmp) {
-                    ScheduledTimerTask timerTask;
-                    long cleanerInterval = Utilities.parseTimespanProperty("com.openexchange.mail.compose.share.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true);
-                    if (0 < cleanerInterval) {
-                        // TODO:
-                        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                        timerTask = null;
-                    } else {
-                        timerTask = null;
-                    }
-                    tmp = new DefaultAttachmentStorage(timerTask);
-                    instance = tmp;
-                }
+            tmp = new DefaultAttachmentStorage("default");
+
+            long cleanerInterval = Utilities.parseTimespanProperty("com.openexchange.mail.compose.share.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true, configService);
+            if (0 < cleanerInterval) {
+                DefaultAttchmentStoragePeriodicCleaner cleaner = new DefaultAttchmentStoragePeriodicCleaner(tmp.id);
+                ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(cleaner, cleanerInterval, cleanerInterval);
+                tmp.setCleanerInfo(cleaner, timerTask);
             }
+
+            instance = tmp;
         }
-        return tmp;
     }
 
     /**
      * Shuts down this attachment storage.
      */
-    public static void shutDown() {
+    public static synchronized void shutDown() {
         DefaultAttachmentStorage tmp = instance;
         if (null != tmp) {
             instance = null;
-            ScheduledTimerTask timerTask = tmp.timerTask;
-            if (null != timerTask) {
-                timerTask.cancel();
-            }
+            tmp.halt();
         }
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
-    private final ScheduledTimerTask timerTask;
+    private final String id;
+    private volatile ScheduledTimerTask timerTask;
+    private volatile DefaultAttchmentStoragePeriodicCleaner cleaner;
 
     /**
      * Initializes a new {@link DefaultAttachmentStorage}.
      */
-    protected DefaultAttachmentStorage(ScheduledTimerTask timerTask) {
+    protected DefaultAttachmentStorage(String id) {
         super();
+        this.id = id;
         this.timerTask = timerTask;
+    }
+
+    private void setCleanerInfo(DefaultAttchmentStoragePeriodicCleaner cleaner, ScheduledTimerTask timerTask) {
+        this.cleaner = cleaner;
+        this.timerTask = timerTask;
+    }
+
+    private void halt() {
+        DefaultAttchmentStoragePeriodicCleaner cleaner = this.cleaner;
+        if (null != cleaner) {
+            this.cleaner = null;
+            cleaner.stop();
+        }
+
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            this.timerTask = null;
+            timerTask.cancel(true);
+        }
+    }
+
+    /**
+     * Gets the identifier.
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -206,7 +224,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             Locale locale = session.getUser().getLocale();
 
             // Get folder identifier
-            String folderID = createFolder(sourceMessage, password, expiry, locale, storageContext);
+            String folderID = createFolder(sourceMessage, password, expiry, filesAutoExpire, locale, storageContext);
 
             // Save attachments into that folder
             List<String> fileIds = saveAttachments(context.getAllParts(), folderID, filesAutoExpire ? expiry : null, locale, storageContext);
@@ -319,7 +337,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         file.setTitle(name);
         file.setFileSize(attachment.getSize());
         if (null != expiry) {
-            file.setMeta(mapFor("expires", Long.valueOf(expiry.getTime())));
+            file.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
         }
         return file;
     }
@@ -406,12 +424,13 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      * @param source The source message
      * @param password The optional password or <code>null</code>
      * @param expiry The optional expiration date or <code>null</code>
+     * @param filesAutoExpire <code>true</code> to have the files being cleansed provided that <code>expiry</code> is given; otherwise <code>false</code> to leave them
      * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @return The identifier of the newly created folder
      * @throws OXException If folder cannot be created
      */
-    protected String createFolder(ComposedMailMessage source, String password, Date expiry, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+    protected String createFolder(ComposedMailMessage source, String password, Date expiry, boolean filesAutoExpire, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
         // Get or create base share attachments folder
         Session session = storageContext.session;
         String parentFolderID;
@@ -427,7 +446,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         }
 
         // Create folder, pre-shared to an anonymous recipient, for this message
-        DefaultFileStorageFolder folder = prepareFolder(source, parentFolderID, password, expiry, session, locale);
+        DefaultFileStorageFolder folder = prepareFolder(source, parentFolderID, password, expiry, filesAutoExpire, session, locale);
         IDBasedFolderAccess folderAccess = storageContext.folderAccess;
         int counter = 1;
         do {
@@ -487,9 +506,21 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         return folderAccess.createFolder(folder);
     }
 
-    private DefaultFileStorageFolder prepareFolder(ComposedMailMessage source, String parent, String password, Date expiry, Session session, Locale locale) {
+    /**
+     * Prepares a new folder holding the anonymous guest permission for the share.
+     *
+     * @param source The source message
+     * @param parentId The identifier of the parent folder
+     * @param password The optional password for the share
+     * @param expiry The optional expiration date for the share
+     * @param filesAutoExpire <code>true</code> to have the files being cleansed provided that <code>expiry</code> is given; otherwise <code>false</code> to leave them
+     * @param session The associated session
+     * @param locale The locale to use
+     * @return A new folder instance (not yet created)
+     */
+    protected DefaultFileStorageFolder prepareFolder(ComposedMailMessage source, String parentId, String password, Date expiry, boolean filesAutoExpire, Session session, Locale locale) {
         DefaultFileStorageFolder folder = new DefaultFileStorageFolder();
-        folder.setParentId(parent);
+        folder.setParentId(parentId);
         folder.setName(sanitizeName(source.getSubject(), StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FOLDER)));
         List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>(2);
         DefaultFileStoragePermission userPermission = DefaultFileStoragePermission.newInstance();
@@ -500,6 +531,9 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         guestPermission.setAllPermissions(FileStoragePermission.READ_FOLDER, FileStoragePermission.READ_ALL_OBJECTS, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS);
         permissions.add(guestPermission);
         folder.setPermissions(permissions);
+        if (filesAutoExpire && null != expiry) {
+            folder.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
+        }
         return folder;
     }
 

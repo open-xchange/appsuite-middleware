@@ -80,7 +80,7 @@ public enum Utilities {
     private static ConfigurationService getConfigurationService() throws OXException {
         ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (null == configService) {
-            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+            throw ServiceExceptionCode.absentService(ConfigurationService.class);
         }
         return configService;
     }
@@ -150,11 +150,12 @@ public enum Utilities {
      * @param defaultValue The default value to return if property is absent
      * @param minimumValue The minimum allowed value
      * @param allowDisabling Whether it is allowed that the property is effectively disabled
+     * @param configService The config service to use
      * @return The parsed time span
      * @throws OXException If parsing fails
      */
-    public static long parseTimespanProperty(String propertyName, long defaultValue, long minimumValue, boolean allowDisabling) throws OXException  {
-        String value = getConfigurationService().getProperty(propertyName);
+    public static long parseTimespanProperty(String propertyName, long defaultValue, long minimumValue, boolean allowDisabling, ConfigurationService configService) throws OXException  {
+        String value = (null == configService ? getConfigurationService() : configService).getProperty(propertyName);
         if (Strings.isEmpty(value)) {
             return defaultValue;
         }

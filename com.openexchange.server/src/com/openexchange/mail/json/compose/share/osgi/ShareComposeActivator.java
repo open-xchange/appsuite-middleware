@@ -59,6 +59,7 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.DependentCapabilityChecker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.json.compose.ComposeHandler;
 import com.openexchange.mail.json.compose.Utilities;
@@ -77,6 +78,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -98,7 +100,7 @@ public class ShareComposeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ConfigurationService.class, TimerService.class };
     }
 
     @Override
@@ -172,6 +174,9 @@ public class ShareComposeActivator extends HousekeepingActivator {
         });
 
         openTrackers();
+
+        // Initialize DefaultAttachmentStorage
+        DefaultAttachmentStorage.startInstance(getService(ConfigurationService.class), getService(TimerService.class));
 
         ShareLinkGeneratorRegistryImpl shareLinkGeneratorRegistry = new ShareLinkGeneratorRegistryImpl(shareLinkGeneratorTracker);
         registerService(ShareLinkGeneratorRegistry.class, shareLinkGeneratorRegistry);

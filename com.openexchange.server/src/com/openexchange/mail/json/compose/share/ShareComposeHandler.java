@@ -190,8 +190,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
         // Optional password and expiration date
         String password = getPassword(composeRequest);
-        Date expirationDate = getExpirationDate(composeRequest);
-        boolean filesAutoExpire = null == expirationDate ? false : isFilesAutoExpire(composeRequest);
+        Date expirationDate = true ? com.openexchange.java.ISO8601Utils.parse("2016-04-10") : getExpirationDate(composeRequest);
+        boolean filesAutoExpire = null == expirationDate ? false : true ? true : isFilesAutoExpire(composeRequest);
 
         // Determine attachment storage to use
         AttachmentStorageRegistry storageRegistry = ServerServiceRegistry.getServize(AttachmentStorageRegistry.class);
