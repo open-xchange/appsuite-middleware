@@ -86,6 +86,10 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3255
     ox_add_property com.openexchange.messaging.rss.feed.size 4194304 /opt/open-xchange/etc/rssmessaging.properties
+
+    # SoftwareChange_Request-3260
+    ox_add_property com.openexchange.messaging.rss.feed.blacklist "127.0.0.1-127.255.255.255, localhost"  /opt/open-xchange/etc/rssmessaging.properties
+    ox_add_property com.openexchange.messaging.rss.feed.whitelist.ports "80,443"  /opt/open-xchange/etc/rssmessaging.properties
 fi
 
 %clean
