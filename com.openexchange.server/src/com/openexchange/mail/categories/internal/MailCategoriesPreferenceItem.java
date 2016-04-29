@@ -55,6 +55,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -92,6 +93,8 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
         return new String[] { "modules", "mail", "categories" };
     }
 
+    private static final String MAIL_CATEGORIES_CAPABILTY = "mail_categories";
+
     private static final String FIELD_LIST = "list";
     private static final String FIELD_FEATURE_ENABLED = "enabled";
     private static final String FIELD_FEATURE_FORCED = "forced";
@@ -110,7 +113,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
             @Override
             public boolean isAvailable(UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
+                return userConfig.hasWebMail() && userConfig.getExtendedPermissions().contains(MAIL_CATEGORIES_CAPABILTY);
             }
 
             @Override
@@ -165,6 +168,11 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
             @Override
             public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
+
+                CapabilityService capabilityService = lookupService.getService(CapabilityService.class);
+                if (capabilityService == null || !capabilityService.getCapabilities(session).contains(MAIL_CATEGORIES_CAPABILTY)) {
+                    return;
+                }
 
                 JSONObject config = getType(setting.getSingleValue(), JSONObject.class, setting.getSingleValue(), setting.getName());
                 try {

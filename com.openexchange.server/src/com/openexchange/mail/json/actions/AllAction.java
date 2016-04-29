@@ -109,7 +109,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Detailed mail data. The alias \\\"all\\\" uses the predefined columnset [600, 601]."),
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response or the string \u201cthread\u201d to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified."),
     @Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
-    @Parameter(name = "filter", optional = true, description = "The identifier of a category if only mails of the given category should be returned. Allows the use of 'none' if the mails shouldn't be filtered.")
+    @Parameter(name = "categoryid", optional = true, description = "The identifier of a category if only mails of the given category should be returned. Allows the use of 'none' if the mails shouldn't be filtered.")
 }, responseDescription = "Response (not IMAP: with timestamp): An array with mail data. Each array element describes one mail and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
@@ -326,7 +326,10 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     } catch (NumberFormatException e) {
                         throw MailExceptionCode.INVALID_INT_VALUE.create(e, AJAXServlet.PARAMETER_SORT);
                     }
-                    String category_filter = req.getParameter("filter");
+                    String category_filter = req.getParameter("categoryid");
+                    if (category_filter == null) { //TODO remove after ui update
+                        category_filter = req.getParameter("filter");
+                    }
                     if (filterApplied || category_filter != null) {
                         mailInterface.openFor(folderId);
                         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();

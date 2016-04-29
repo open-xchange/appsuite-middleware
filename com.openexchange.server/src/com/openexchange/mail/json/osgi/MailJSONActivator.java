@@ -143,7 +143,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { MailCategoriesConfigService.class };
+        return new Class<?>[] { MailCategoriesConfigService.class, CapabilityService.class };
     }
 
     @Override
