@@ -60,9 +60,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.categories.MailCategoriesConstants;
+import com.openexchange.mail.categories.organizer.MailCategoriesOrganizer;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
+import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -133,6 +136,11 @@ public class MailCategoriesLoginHandler implements LoginHandlerService {
                 rules.add(rule);
             }
             engine.initRuleEngineForUser(session, rules);
+            FullnameArgument fa = new FullnameArgument("INBOX");
+            for (MailCategoryRule rule : rules) {
+                SearchTerm<?> searchTerm = mailCategoriesService.getSearchTerm(rule);
+                MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullname(), searchTerm, rule.getFlag(), null);
+            }
         } catch (Exception e) {
             try {
                 hasRun.set(false);

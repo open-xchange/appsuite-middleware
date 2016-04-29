@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories.impl.mailfilter;
+package com.openexchange.mail.categories.organizer;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.List;

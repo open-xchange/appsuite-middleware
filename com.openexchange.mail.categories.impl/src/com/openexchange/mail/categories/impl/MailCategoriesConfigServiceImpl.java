@@ -63,9 +63,9 @@ import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.categories.MailCategoryConfig.Builder;
 import com.openexchange.mail.categories.MailObjectParameter;
 import com.openexchange.mail.categories.ReorganizeParameter;
-import com.openexchange.mail.categories.impl.mailfilter.MailCategoriesOrganizeExceptionCodes;
-import com.openexchange.mail.categories.impl.mailfilter.MailCategoriesOrganizer;
 import com.openexchange.mail.categories.impl.osgi.Services;
+import com.openexchange.mail.categories.organizer.MailCategoriesOrganizeExceptionCodes;
+import com.openexchange.mail.categories.organizer.MailCategoriesOrganizer;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExceptionCodes;
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
@@ -105,15 +105,16 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     public List<MailCategoryConfig> getAllCategories(Session session, Locale locale, boolean onlyEnabled, boolean includeGeneral) throws OXException {
         String[] categories = getSystemCategoryNames(session);
         String[] userCategories = getUserCategoryNames(session);
-        if (categories.length == 0 && userCategories.length == 0) {
-            return new ArrayList<>();
-        }
         List<MailCategoryConfig> result = new ArrayList<>(categories.length);
 
         if (includeGeneral) {
             String name = getLocalizedName(session, locale, "general");
             MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category("general").isSystemCategory(true).enabled(true).force(true).name(name).build();
             result.add(generalConfig);
+        }
+
+        if (categories.length == 0 && userCategories.length == 0) {
+            return new ArrayList<>();
         }
 
         for (String category : categories) {
@@ -326,7 +327,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         ruleEngine.removeValueFromHeader(session, mailAddress, "from");
     }
 
-    private SearchTerm<?> getSearchTerm(MailCategoryRule rule) {
+    SearchTerm<?> getSearchTerm(MailCategoryRule rule) {
         if (!rule.hasSubRules()) {
             if (rule.getHeaders().size() == 1 && rule.getValues().size() == 1) {
 

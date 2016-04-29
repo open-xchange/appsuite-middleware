@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories.impl.mailfilter;
+package com.openexchange.mail.categories.organizer;
 
 import com.openexchange.i18n.LocalizableStrings;
 
