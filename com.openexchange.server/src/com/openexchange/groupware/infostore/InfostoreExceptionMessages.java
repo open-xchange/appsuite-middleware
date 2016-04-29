@@ -130,6 +130,9 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
     public static final String VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_MSG_DISPLAY = "Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.";
 
+    // Group %1$s can't be used for object permissions.
+    public static final String VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_GUEST_GROUP_MSG_DISPLAY = "Group %1$s can't be used for object permissions.";
+
     // Concurrent write attempt. Please await the previous save operation to terminate.
     public static final String CONCURRENT_VERSION_CREATION_MSG_DISPLA = "Concurrent write attempt. Please await the previous save operation to terminate.";
 

@@ -230,7 +230,7 @@ public class ObjectPermissionValidator implements InfostoreValidator {
                     if (GroupStorage.GUEST_GROUP_IDENTIFIER == group.getIdentifier()) {
                         // invalid group
                         validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "Group " + group.getDisplayName() + " can't be used for object permissions.");
-                        validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(groupID)));
+                        validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_GUEST_GROUP.create(group.getDisplayName()));
                         return false;
                     }
 
