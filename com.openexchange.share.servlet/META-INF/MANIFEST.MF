@@ -7,7 +7,6 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
- com.fasterxml.jackson.core.filter,
  com.fasterxml.jackson.core.format,
  com.fasterxml.jackson.core.io,
  com.fasterxml.jackson.core.json,
