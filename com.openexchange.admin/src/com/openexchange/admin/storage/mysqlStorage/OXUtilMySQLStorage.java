@@ -2830,7 +2830,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     ResultSet result = null;
                     try {
                         con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
-                        stmt = con.prepareStatement("SELECT u.filestore_id, u.id FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id>0");
+                        stmt = con.prepareStatement("SELECT filestore_id FROM user WHERE filestore_id>0");
                         result = stmt.executeQuery();
 
                         if (false == result.next()) {
