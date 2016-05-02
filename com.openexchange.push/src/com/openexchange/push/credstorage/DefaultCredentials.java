@@ -159,9 +159,13 @@ public class DefaultCredentials implements Credentials {
         builder.append("DefaultCredentials [userId=").append(userId).append(", contextId=").append(contextId).append(", ");
         if (password != null) {
             builder.append("password=").append(password).append(", ");
+        } else {
+            builder.append("no-password").append(", ");
         }
         if (login != null) {
             builder.append("login=").append(login);
+        } else {
+            builder.append("no-login");
         }
         builder.append(']');
         return builder.toString();
