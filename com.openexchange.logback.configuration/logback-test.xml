@@ -32,12 +32,12 @@
  	
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
-            <pattern>%yellow(%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"}) %highlight(%-5level) %cyan([%thread]) %green(%class.%method\(%class{0}.java:%line\)) %n%message%n%lmdc%exception{full}</pattern>
+            <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%message%n%lmdc%exception{full}</pattern>
         </encoder>
     </appender>
     
     <!-- Logstash appender -->
-    <property scope="context" name="com.openexchange.logback.extensions.logstash.enabled" value="true" />
+    <!-- <property scope="context" name="com.openexchange.logback.extensions.logstash.enabled" value="true" />
    	<property scope="context" name="com.openexchange.logback.extensions.logstash.alwaysPersistEvents" value="true" />
    	<property scope="context" name="com.openexchange.logback.extensions.logstash.loadFactor" value="0.67" />
    	<newRule pattern="*/encoder/customFields/field" actionClass="com.openexchange.logback.extensions.logstash.CustomFieldsAction"/>
@@ -56,7 +56,7 @@
         	</customFields>
         </encoder>
         <queueSize>2048</queueSize>
-    </appender>
+    </appender> -->
 	
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>2048</queueSize>
@@ -67,7 +67,7 @@
 
     <root level="INFO">
        	<appender-ref ref="ASYNC" />
-       	<appender-ref ref="LOGSTASH" />
+       	<!-- <appender-ref ref="LOGSTASH" /> -->
     </root>
 
     <!--
