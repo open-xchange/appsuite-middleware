@@ -55,16 +55,12 @@ import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link XingOAuthServiceMetaData}
@@ -177,58 +173,8 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl, final String currentHost, final Session session) {
-        if (null == callbackUrl) {
-            return super.modifyCallbackURL(callbackUrl, currentHost, session);
-        }
-
-        final DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        if (null != deferrer && deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
-            final String retval = deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
-            LOGGER.debug("Initializing XING OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
-            return retval;
-        }
-
-        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).append('/').toString());
-        LOGGER.debug("Initializing XING OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
-        return retval;
-    }
-
-    private String extractProtocol(final String url) {
-        return Strings.toLowerCase(url).startsWith("https") ? "https" : "http";
-    }
-
-    private String deferredURLUsing(final String url, final String domain) {
-        if (url == null) {
-            return null;
-        }
-        if (Strings.isEmpty(domain)) {
-            return url;
-        }
-        String deferrerURL = domain.trim();
-        final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
-        if (!path.startsWith("/")) {
-            path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
-        }
-        if (seemsAlreadyDeferred(url, deferrerURL, path)) {
-            // Already deferred
-            return url;
-        }
-        // Return deferred URL
-        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtility.encodeUrl(url, false, false)).toString();
-    }
-
-    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {
-        final String str = "://";
-        final int pos1 = url.indexOf(str);
-        final int pos2 = deferrerURL.indexOf(str);
-        if (pos1 > 0 && pos2 > 0) {
-            final String deferrerPrefix = new StringBuilder(deferrerURL.substring(pos2)).append(path).toString();
-            return url.substring(pos1).startsWith(deferrerPrefix);
-        }
-        final String deferrerPrefix = new StringBuilder(deferrerURL).append(path).toString();
-        return url.startsWith(deferrerPrefix);
+    public boolean needsRequestToken() {
+        return true;
     }
 
 }

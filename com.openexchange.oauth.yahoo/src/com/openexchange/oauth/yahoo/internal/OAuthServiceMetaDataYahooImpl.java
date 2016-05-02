@@ -58,7 +58,6 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
-import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataYahooImpl}
@@ -86,11 +85,13 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData 
     }
 
     @Override
-    public String modifyCallbackURL(String callbackUrl, String currentHost, Session session) {
-        if (deferrer == null) {
-            return callbackUrl;
-        }
-        return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
+    public boolean registerTokenBasedDeferrer() {
+        return true;
+    }
+
+    @Override
+    public boolean needsRequestToken() {
+        return true;
     }
 
     @Override
