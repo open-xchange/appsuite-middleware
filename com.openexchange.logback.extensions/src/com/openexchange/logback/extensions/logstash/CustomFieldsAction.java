@@ -78,12 +78,11 @@ public class CustomFieldsAction extends Action {
     public void begin(InterpretationContext ic, String name, Attributes attributes) throws ActionException {
         Stack<Object> objectStack = ic.getObjectStack();
         for (Object o : objectStack) {
-            if (!(o instanceof LogstashEncoder)) {
-                continue;
+            if (o instanceof LogstashEncoder) {
+                LogstashEncoder encoder = (LogstashEncoder) o;
+                encoder.addCustomField(new CustomField(attributes.getValue("name"), attributes.getValue("value")));
+                break;
             }
-            LogstashEncoder encoder = (LogstashEncoder) o;
-            encoder.addCustomField(new CustomField(attributes.getValue("name"), attributes.getValue("value")));
-            break;
         }
     }
 
