@@ -4113,6 +4113,26 @@ msgstr ""
 msgid "Timeout while reading the RSS feed from URL: %1$s"
 msgstr ""
 
+#. Failed to read RSS feed from URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:72
+msgid "Failed to read RSS feed from URL: %1$s"
+msgstr ""
+
+#. Failed to read RSS feed from URL: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:75
+msgid "Failed to read RSS feed from URL: %2$s"
+msgstr ""
+
+#. The RSS feed is exceeding the maximum allowed size of '%1$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
+msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
+msgstr ""
+
+#. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
+msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr ""
+
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -8429,6 +8449,22 @@ msgstr ""
 msgid ""
 "The following recipient is not allowed: %1$s. Please remove associated "
 "address and try again."
+msgstr ""
+
+#. Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:71
+msgid "Invalid or harmful image data detected"
+msgstr ""
+
+#. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
+msgstr ""
+
+#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
+msgid ""
+"The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr ""
 
 #. The message displayed if the requested subscription cannot be found from the server.
