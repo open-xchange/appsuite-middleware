@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamexperts (7.6.2-54) stable; urgency=medium
+
+  * Build for patch 2016-05-09 (3269)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 02 May 2016 10:24:36 +0200
+
 open-xchange-spamhandler-spamexperts (7.6.2-53) stable; urgency=medium
 
   * Build for patch 2016-04-28 (3253)
