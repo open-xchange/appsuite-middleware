@@ -4499,6 +4499,26 @@ msgstr ""
 msgid "Timeout while reading the RSS feed from URL: %1$s"
 msgstr ""
 
+#. Failed to read RSS feed from URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:72
+msgid "Failed to read RSS feed from URL: %1$s"
+msgstr ""
+
+#. Failed to read RSS feed from URL: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:75
+msgid "Failed to read RSS feed from URL: %2$s"
+msgstr ""
+
+#. The RSS feed is exceeding the maximum allowed size of '%1$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
+msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
+msgstr ""
+
+#. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
+msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr ""
+
 #. *
 #. * The value you inserted for %2$s is not correct
 #.
