@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-04-29 10:14+0100\n"
+"PO-Revision-Date: 2016-05-03 10:58+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -2292,7 +2292,8 @@ msgstr "Serie"
 msgid "Folder type"
 msgstr "Ordnertyp"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:73
+#. The default name for a folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:73 /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:70
 msgid "Folder"
 msgstr "Ordner"
 
@@ -3201,7 +3202,7 @@ msgid "The E-Mail address %1$s is invalid."
 msgstr "Die E-Mail-Adresse %1$s ist ungültig."
 
 #. Reorganizing of mails failed. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/impl/mailfilter/MailCategoriesOrganizeExceptionStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:63
 msgid "Reorganizing of mails failed. Please try again later."
 msgstr "Neuorganisieren von E-Mails ist fehlgeschlagen. Bitte versuchen Sie es später erneut."
 
@@ -6385,13 +6386,18 @@ msgstr "Nicht unterstütztes Zeichen. Bitte korrigieren Sie Ihre Eingabe."
 msgid "Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes."
 msgstr "Aufgrund eingeschränkter Nutzungsmöglichkeiten des Benutzers \"%1$s\" können die Berechtigungsänderungen nicht angewendet werden."
 
-#. Concurrent write attempt. Please await the previous save operation to terminate.
+#. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid "Group %1$s can't be used for object permissions."
+msgstr "Gruppe %1$s kann nicht für Objektberechtigungen verwendet werden."
+
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
 msgid "Concurrent write attempt. Please await the previous save operation to terminate."
 msgstr "Gleichzeitiger Schreibversuch. Bitte warten Sie, bis der vorherige Speichervorgang abgeschlossen wurde."
 
 #. Your search took too long in order to be accomplished.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
 msgstr "Ihre Suche dauerte zu lange, um durchgeführt werden zu können."
 
@@ -7313,26 +7319,37 @@ msgstr "Der Flag-Name %1$s ist nicht gültig. Flags können nicht mit ' \\' begi
 msgid "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachments with the E-Mail, the attachments are shared and the links are added to your E-Mail. Whoever receives the E-Mail can then access the attachments."
 msgstr "Die Anhänge zu dieser E-Mail haben die Größenbeschränkung für Anhänge überschritten. Anstatt die Anhänge mit der E-Mail zu senden, werden die Anhänge freigegeben und die Links zu Ihrer E-Mail hinzugefügt. Wer die E-Mail erhält, kann dann auf die Anhänge zugreifen."
 
+#. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:219
+msgid "You are not allowed to compose a message containing share links"
+msgstr "Sie haben keine Berechtigung, eine Nachricht mit Freigabe-Links zu erstellen"
+
+#. The default name for a file
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
+msgid "File"
+msgstr "Datei"
+
+#. -----------------------------------------------------------------------------------------------------------------------------------
 #. The name of the folder holding the attachments, which were shared to other recipients.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:78
 msgid "My shared mail attachments"
 msgstr "Meine freigegebenen E-Mail-Anhänge"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
 msgid "The available attachments for this E-Mail can be accessed via the link:"
 msgstr "Die zur Verfügung stehenden Anhänge für diese E-Mail können über den Link aufgerufen werden:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
 msgid "The link will expire on #DATE#"
 msgstr "Der Link läuft ab am #DATE#"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the password for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
 msgid "Please use the following password to access the attachments"
 msgstr "Bitte verwenden Sie das folgende Passwort zum Zugriff auf die Anhänge"
 
