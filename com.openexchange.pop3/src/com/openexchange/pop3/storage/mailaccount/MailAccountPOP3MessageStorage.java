@@ -72,7 +72,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
@@ -113,10 +113,9 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
     private MailAccount getMailAccount() throws OXException {
         if (mailAccount == null) {
             try {
-                final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
-                    MailAccountStorageService.class,
+                final MailAccountFacade mailAccountFacade = POP3ServiceRegistry.getServiceRegistry().getService(MailAccountFacade.class,
                     true);
-                mailAccount = storageService.getMailAccount(pop3AccountId, session.getUserId(), session.getContextId());
+                mailAccount = mailAccountFacade.getMailAccount(pop3AccountId, session.getUserId(), session.getContextId());
             } catch (final OXException e) {
                 throw e;
             }

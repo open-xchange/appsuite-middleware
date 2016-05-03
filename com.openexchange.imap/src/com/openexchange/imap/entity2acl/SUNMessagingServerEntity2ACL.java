@@ -55,7 +55,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.user.UserService;
@@ -114,7 +114,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
         if (OCLPermission.ALL_GROUPS_AND_USERS == userId) {
             return ALIAS_ANYONE;
         }
-        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+        final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
         final String userLoginInfo;
         {
             final UserService userService = Services.getService(UserService.class);
@@ -134,7 +134,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
             throw Entity2ACLExceptionCode.MISSING_ARG.create(e, new Object[0]);
         }
         try {
-            return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo);
+            return MailConfig.getMailLogin(mailAccountFacade.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo);
         } catch (final OXException e) {
             throw Entity2ACLExceptionCode.UNKNOWN_USER.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), args[1].toString());
         }

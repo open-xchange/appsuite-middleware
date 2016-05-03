@@ -108,7 +108,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -324,10 +324,8 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                             final StorageParameters params = newStorageParameters(storageParameters);
                             params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
                             if (userPermissionBits.isMultipleMailAccounts()) {
-                                MailAccountStorageService storageService = serviceRegistry.getService(
-                                    MailAccountStorageService.class,
-                                    true);
-                                MailAccount[] accounts = storageService.getUserMailAccounts(
+                                MailAccountFacade mailAccountFacade = serviceRegistry.getService(MailAccountFacade.class, true);
+                                MailAccount[] accounts = mailAccountFacade.getUserMailAccounts(
                                     userId,
                                     contextId);
                                 /*

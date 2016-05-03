@@ -65,7 +65,7 @@ import com.openexchange.mail.cache.queue.MailAccessQueueImpl;
 import com.openexchange.mail.cache.queue.SingletonMailAccessQueue;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -330,9 +330,8 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         final int user = session.getUserId();
         final int cid = session.getContextId();
         if (null == service || null == service.getAnyActiveSessionForUser(user, cid)) {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
+            final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+            final MailAccount[] accounts = mailAccountFacade.getUserMailAccounts(user, cid);
             for (final MailAccount mailAccount : accounts) {
                 orderlyClearQueue(keyFor(mailAccount.getId(), session));
             }

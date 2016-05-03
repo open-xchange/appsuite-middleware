@@ -78,7 +78,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -230,7 +230,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            /*
 	             * Load primary account and check its protocol to be IMAP
 	             */
-	            MailAccount defaultMailAccount = services.getService(MailAccountStorageService.class).getDefaultMailAccount(userId, ctxId);
+                MailAccount defaultMailAccount = services.getService(MailAccountFacade.class).getDefaultMailAccount(userId, ctxId);
 	            String mailProtocol = defaultMailAccount.getMailProtocol();
 	            if (!mailProtocol.toLowerCase().startsWith("imap")) {
 	                throw UNKNOWN.create(new StringBuilder(128).append(

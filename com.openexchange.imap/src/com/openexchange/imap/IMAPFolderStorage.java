@@ -133,7 +133,7 @@ import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -1439,11 +1439,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (accountId == MailAccount.DEFAULT_ID) {
                 name = MailFolder.DEFAULT_FOLDER_NAME;
             } else {
-                final MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
-                if (null == mass) {
+                final MailAccountFacade maf = Services.getService(MailAccountFacade.class);
+                if (null == maf) {
                     name = MailFolder.DEFAULT_FOLDER_NAME;
                 } else {
-                    name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
+                    name = maf.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
                 }
 
             }

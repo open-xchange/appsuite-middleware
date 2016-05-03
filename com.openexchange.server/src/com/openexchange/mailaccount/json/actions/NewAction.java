@@ -83,13 +83,12 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -154,7 +153,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             }
         }
 
-        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountFacade mailAccountFacade = getAccountFacade();
 
         // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
         boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
@@ -209,10 +208,10 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 rollback = true;
 
                 // Insert account
-                id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session, wcon);
+                id = mailAccountFacade.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session, wcon);
 
                 // Check full names after successful creation
-                newAccount = storageService.getMailAccount(id, session.getUserId(), cid, wcon);
+                newAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), cid, wcon);
                 if (null == newAccount) {
                     throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
@@ -230,7 +229,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 }
 
                 if (valid) {
-                    newAccount = checkFullNames(newAccount, storageService, session, wcon, defaultFolderNames);
+                    newAccount = checkFullNames(newAccount, mailAccountFacade, session, wcon, defaultFolderNames);
                 }
                 wcon.commit();
                 rollback = false;
@@ -269,7 +268,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             Connection wcon = Database.get(cid, true);
             try {
                 // Insert account
-                newAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId(), wcon);
+                newAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId(), wcon);
             } finally {
                 Database.backAfterReading(cid, wcon);
             }
@@ -285,11 +284,11 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
         JSONObject jsonAccount;
         if (null == newAccount) {
-            MailAccount loadedMailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            MailAccount loadedMailAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
             if (null == loadedMailAccount) {
                 throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
             }
-            jsonAccount = MailAccountWriter.write(checkFullNames(loadedMailAccount, storageService, session));
+            jsonAccount = MailAccountWriter.write(checkFullNames(loadedMailAccount, mailAccountFacade, session));
         } else {
             jsonAccount = MailAccountWriter.write(newAccount);
         }

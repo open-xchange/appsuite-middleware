@@ -121,7 +121,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -409,19 +409,19 @@ public final class MimeReply extends AbstractMimeProcessing {
                         if (realAccountId == MailAccount.DEFAULT_ID) {
                             addUserAddresses(filter, mailSession, session, ctx);
                         } else {
-                            MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
-                            if (null == mass) {
+                            MailAccountFacade maf = registry.getService(MailAccountFacade.class);
+                            if (null == maf) {
                                 addUserAddresses(filter, mailSession, session, ctx);
                             } else {
-                                filter.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                                filter.add(new QuotedInternetAddress(maf.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
                             }
                         }
                     } else {
-                        MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
-                        if (null == mass) {
+                        MailAccountFacade maf = registry.getService(MailAccountFacade.class);
+                        if (null == maf) {
                             addUserAddresses(filter, mailSession, session, ctx);
                         } else {
-                            filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                            filter.add(new QuotedInternetAddress(maf.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
                         }
                     }
                 }

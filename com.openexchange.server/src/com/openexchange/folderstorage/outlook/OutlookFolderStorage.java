@@ -150,7 +150,7 @@ import com.openexchange.mail.messaging.MailMessagingService;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingFolder;
@@ -2173,11 +2173,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         final List<String> accountSubfolderIDs;
         int unifiedMailIndex = -1;
         if (userPermissionBits.isMultipleMailAccounts()) {
-            final MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
-            if (null == mass) {
+            final MailAccountFacade maf = Services.getService(MailAccountFacade.class);
+            if (null == maf) {
                 accountSubfolderIDs = Collections.emptyList();
             } else {
-                final List<MailAccount> accounts = Arrays.asList(mass.getUserMailAccounts(user.getId(), contextId));
+                final List<MailAccount> accounts = Arrays.asList(maf.getUserMailAccounts(user.getId(), contextId));
                 Collections.sort(accounts, new MailAccountComparator(locale));
                 if (accounts.isEmpty()) {
                     accountSubfolderIDs = Collections.emptyList();

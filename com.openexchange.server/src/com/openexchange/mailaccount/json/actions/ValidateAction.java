@@ -80,7 +80,7 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.utils.MailAccountUtils;
@@ -143,8 +143,8 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
 
         if (accountDescription.getId() >= 0) {
-            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            MailAccount storageMailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
+            final MailAccountFacade mailAccountFacade = getAccountFacade();
+            MailAccount storageMailAccount = mailAccountFacade.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
 
             boolean checkPassword = true;
             if (null == accountDescription.getPassword()) {
@@ -160,8 +160,8 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
                     if (!CryptoErrorMessage.BadPassword.equals(e)) {
                         throw e;
                     }
-                    storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
-                    storageMailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
+                    mailAccountFacade.invalidateMailAccounts(session.getUserId(), session.getContextId());
+                    storageMailAccount = mailAccountFacade.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
                     String decryptedPassword = MailPasswordUtil.decrypt(storageMailAccount.getPassword(), session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
                     accountDescription.setPassword(decryptedPassword);
                 }
@@ -466,11 +466,11 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
         if (accountId >= 0 && (isEmpty(login) || isEmpty(password))) {
             /* ID is delivered, but password not set. Thus load from storage version.*/
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            final MailAccount mailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
+            final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+            final MailAccount mailAccount = mailAccountFacade.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
 
             if (invalidate) {
-                storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
+                mailAccountFacade.invalidateMailAccounts(session.getUserId(), session.getContextId());
             }
             accountDescription.setLogin(mailAccount.getLogin());
             String encPassword = mailAccount.getPassword();
@@ -486,10 +486,10 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         String password = accountDescription.getTransportPassword();
 
         if (accountId >= 0 && (isEmpty(login) || isEmpty(password))) {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            final MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+            final MailAccount mailAccount = mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId());
             if (invalidate) {
-                storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
+                mailAccountFacade.invalidateMailAccounts(session.getUserId(), session.getContextId());
             }
             if (isEmpty(login)) {
                 login = mailAccount.getTransportLogin();

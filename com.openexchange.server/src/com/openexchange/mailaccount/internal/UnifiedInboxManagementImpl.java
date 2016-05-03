@@ -64,7 +64,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -101,8 +101,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     @Override
     public void createUnifiedINBOX(int userId, int contextId, Connection con) throws OXException {
         try {
-            MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
             // Check if Unified Mail account already exists for given user
             if (exists(userId, contextId, con)) {
                 // User already has the Unified Mail account set
@@ -144,9 +143,9 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             mailAccountDescription.setArchive("archive");
             // Create it
             if (null == con) {
-                storageService.insertMailAccount(mailAccountDescription, userId, ctx, null);
+                mailAccountFacade.insertMailAccount(mailAccountDescription, userId, ctx, null);
             } else {
-                storageService.insertMailAccount(mailAccountDescription, userId, ctx, null, con);
+                mailAccountFacade.insertMailAccount(mailAccountDescription, userId, ctx, null, con);
             }
             // Drop session parameters
             try {
@@ -173,10 +172,10 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
     @Override
     public void deleteUnifiedINBOX(int userId, int contextId, Connection con) throws OXException {
         try {
-            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
 
             // Determine the ID of the Unified Mail account for given user
-            MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId);
+            MailAccount[] existingAccounts = mailAccountFacade.getUserMailAccounts(userId, contextId);
             int id = -1;
             for (int i = 0; i < existingAccounts.length && id < 0; i++) {
                 MailAccount mailAccount = existingAccounts[i];
@@ -188,9 +187,9 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             if (id >= 0) {
                 dropSessionParameter(userId, contextId);
                 if (null == con) {
-                    storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false);
+                    mailAccountFacade.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false);
                 } else {
-                    storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false, con);
+                    mailAccountFacade.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false, con);
                 }
             }
         } catch (OXException e) {

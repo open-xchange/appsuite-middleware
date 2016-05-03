@@ -52,14 +52,14 @@ package com.openexchange.halo.mail.osgi;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.mail.EmailContactHalo;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.osgi.HousekeepingActivator;
 
 public class MailHaloActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class[]{ MailService.class, MailAccountStorageService.class };
+        return new Class[] { MailService.class, MailAccountFacade.class };
 	}
 
 	@Override

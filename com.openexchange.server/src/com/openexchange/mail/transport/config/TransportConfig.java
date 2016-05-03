@@ -57,7 +57,7 @@ import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -95,11 +95,11 @@ public abstract class TransportConfig extends MailConfig {
         int contextId = session.getContextId();
         MailAccount mailAccount;
         {
-            MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
             if (accountId == MailAccount.DEFAULT_ID) {
-                mailAccount = storage.getDefaultMailAccount(userId, contextId);
+                mailAccount = mailAccountFacade.getDefaultMailAccount(userId, contextId);
             } else {
-                mailAccount = storage.getMailAccount(accountId, userId, contextId);
+                mailAccount = mailAccountFacade.getMailAccount(accountId, userId, contextId);
             }
         }
         transportConfig.accountId = accountId;
@@ -153,8 +153,8 @@ public abstract class TransportConfig extends MailConfig {
      * @throws OXException If transport server URL cannot be returned
      */
     public static UrlInfo getTransportServerURL(final Session session, final int accountId) throws OXException {
-        final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        return getTransportServerURL(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+        return getTransportServerURL(mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
     @Override

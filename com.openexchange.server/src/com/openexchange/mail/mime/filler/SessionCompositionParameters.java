@@ -78,7 +78,7 @@ import com.openexchange.mail.mime.filler.MimeMessageFiller.ImageProvider;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -132,14 +132,14 @@ public final class SessionCompositionParameters implements CompositionParameters
     @Override
     public InternetAddress getSenderAddress(InternetAddress from) throws OXException, AddressException {
         InternetAddress sender = null;
-        final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-        if (null != mass) {
+        final MailAccountFacade maf = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
+        if (null != maf) {
             try {
                 final int userId = session.getUserId();
                 final int contextId = session.getContextId();
-                int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
+                int id = maf.getByPrimaryAddress(from.getAddress(), userId, contextId);
                 if (id < 0) {
-                    id = mass.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), userId, contextId);
+                    id = maf.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), userId, contextId);
                     if (id < 0) {
                         /*
                          * No appropriate mail account found which matches from address
@@ -203,9 +203,9 @@ public final class SessionCompositionParameters implements CompositionParameters
     public String getReplyToAddress() throws OXException {
         String replyTo = usm.getReplyToAddr();
         if (isEmpty(replyTo)) {
-            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            if (null != mass) {
-                final MailAccount mailAccount = mass.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            final MailAccountFacade maf = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
+            if (null != maf) {
+                final MailAccount mailAccount = maf.getMailAccount(accountId, session.getUserId(), session.getContextId());
                 if (!UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                     final String sReplyTo = mailAccount.getReplyTo();
                     if (!isEmpty(sReplyTo) && !toLowerCase(sReplyTo).startsWith("null")) {

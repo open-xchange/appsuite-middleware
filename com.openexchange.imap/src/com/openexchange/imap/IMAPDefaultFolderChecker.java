@@ -87,7 +87,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
@@ -188,8 +188,8 @@ public class IMAPDefaultFolderChecker {
         }
 
         if (checkArchive) {
-            MailAccountStorageService storageService = com.openexchange.imap.services.Services.getService(MailAccountStorageService.class);
-            MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            MailAccountFacade mailAccountFacade = com.openexchange.imap.services.Services.getService(MailAccountFacade.class);
+            MailAccount mailAccount = mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId());
             String archiveFullName = optArchiveFullName(mailAccount, imapAccess);
             if (null != archiveFullName && archiveFullName.equals(folderFullName)) {
                 return true;
@@ -1075,16 +1075,16 @@ public class IMAPDefaultFolderChecker {
      */
     protected MailAccount clearAccountFullNames(int[] indexes) {
         // Invalidate mail account settings as obviously wrong
-        MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
-        if (null != mass) {
+        MailAccountFacade maf = Services.optService(MailAccountFacade.class);
+        if (null != maf) {
             try {
                 if (null == indexes) {
-                    mass.clearFullNamesForMailAccount(accountId, session.getUserId(), session.getContextId());
+                    maf.clearFullNamesForMailAccount(accountId, session.getUserId(), session.getContextId());
                 } else {
-                    mass.clearFullNamesForMailAccount(accountId, indexes, session.getUserId(), session.getContextId());
+                    maf.clearFullNamesForMailAccount(accountId, indexes, session.getUserId(), session.getContextId());
                 }
 
-                return mass.getRawMailAccount(accountId, session.getUserId(), session.getContextId());
+                return maf.getRawMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (Exception x) {
                 LOG.warn("Failed to clear full names for mail account {}", Integer.valueOf(accountId), x);
             }
@@ -1099,8 +1099,8 @@ public class IMAPDefaultFolderChecker {
      */
     protected MailAccount setAccountFullNames(TIntObjectMap<String> map) {
         // Invalidate mail account settings as obviously wrong
-        MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
-        if (null != mass) {
+        MailAccountFacade maf = Services.optService(MailAccountFacade.class);
+        if (null != maf) {
             try {
                 TIntList indexes = new TIntArrayList(map.size());
                 List<String> fullNames = new ArrayList<String>(map.size());
@@ -1109,8 +1109,8 @@ public class IMAPDefaultFolderChecker {
                     fullNames.add(map.get(index));
                 }
 
-                mass.setFullNamesForMailAccount(accountId, indexes.toArray(), fullNames.toArray(new String[fullNames.size()]), session.getUserId(), session.getContextId());
-                return mass.getRawMailAccount(accountId, session.getUserId(), session.getContextId());
+                maf.setFullNamesForMailAccount(accountId, indexes.toArray(), fullNames.toArray(new String[fullNames.size()]), session.getUserId(), session.getContextId());
+                return maf.getRawMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (Exception x) {
                 LOG.warn("Failed to set full names for mail account {}", Integer.valueOf(accountId), x);
             }
@@ -1125,8 +1125,8 @@ public class IMAPDefaultFolderChecker {
      */
     protected MailAccount setAccountNames(TIntObjectMap<String> map) {
         // Invalidate mail account settings as obviously wrong
-        MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
-        if (null != mass) {
+        MailAccountFacade maf = Services.optService(MailAccountFacade.class);
+        if (null != maf) {
             try {
                 TIntList indexes = new TIntArrayList(map.size());
                 List<String> names = new ArrayList<String>(map.size());
@@ -1135,8 +1135,8 @@ public class IMAPDefaultFolderChecker {
                     names.add(map.get(index));
                 }
 
-                mass.setNamesForMailAccount(accountId, indexes.toArray(), names.toArray(new String[names.size()]), session.getUserId(), session.getContextId());
-                return mass.getRawMailAccount(accountId, session.getUserId(), session.getContextId());
+                maf.setNamesForMailAccount(accountId, indexes.toArray(), names.toArray(new String[names.size()]), session.getUserId(), session.getContextId());
+                return maf.getRawMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (Exception x) {
                 LOG.warn("Failed to set full names for mail account {}", Integer.valueOf(accountId), x);
             }

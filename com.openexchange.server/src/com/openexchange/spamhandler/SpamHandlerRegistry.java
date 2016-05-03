@@ -57,7 +57,7 @@ import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -174,9 +174,8 @@ public final class SpamHandlerRegistry {
          */
         final MailAccount mailAccount;
         try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+            mailAccount = mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId());
         } catch (final OXException e) {
             throw e;
         }

@@ -54,7 +54,7 @@ import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
@@ -76,7 +76,7 @@ public class MailOnboardingConfigurationActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserService.class, MailService.class, MailAccountStorageService.class, SessiondService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserService.class, MailService.class, MailAccountFacade.class, SessiondService.class };
     }
 
     @Override

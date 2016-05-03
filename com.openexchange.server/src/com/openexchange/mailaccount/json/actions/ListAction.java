@@ -60,9 +60,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -87,8 +86,7 @@ public final class ListAction extends AbstractMailAccountAction {
         final String colString = requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS);
 
         final List<Attribute> attributes = getColumns(colString);
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountFacade mailAccountFacade = getAccountFacade();
 
         final JSONArray ids = jData.toArray();
         final int len = ids.length();
@@ -97,7 +95,7 @@ public final class ListAction extends AbstractMailAccountAction {
 
         for (int i = 0, size = len; i < size; i++) {
             final int id = ids.getInt(i);
-            final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            final MailAccount account = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
             if (!isUnifiedINBOXAccount(account) && (multipleEnabled || isDefaultMailAccount(account))) {
                 accounts.add(account);
                 // accounts.add(checkFullNames(account, storageService, session));

@@ -89,7 +89,7 @@ import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.config.POP3Config;
@@ -181,10 +181,8 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
             final int pos = trashFullname.lastIndexOf(sep);
             final String accountName;
             try {
-                final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
-                    MailAccountStorageService.class,
-                    true);
-                accountName = stripSpecials(storageService.getMailAccount(pop3AccountId, user, cid).getName());
+                final MailAccountFacade mailAccountFacade = POP3ServiceRegistry.getServiceRegistry().getService(MailAccountFacade.class, true);
+                accountName = stripSpecials(mailAccountFacade.getMailAccount(pop3AccountId, user, cid).getName());
             } catch (final OXException e) {
                 throw e;
             }

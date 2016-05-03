@@ -50,7 +50,7 @@
 package com.openexchange.secret.recovery.mail.osgi;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
@@ -66,7 +66,7 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class };
+        return new Class<?>[] { MailAccountFacade.class };
     }
 
     @Override
@@ -81,12 +81,12 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final MailAccountStorageService mailAccountStorage = getService(MailAccountStorageService.class);
+        final MailAccountFacade mailAccountFacade = getService(MailAccountFacade.class);
         registerService(EncryptedItemDetectorService.class, new EncryptedItemDetectorService() {
 
             @Override
             public boolean hasEncryptedItems(final ServerSession session) throws OXException {
-                return mailAccountStorage.hasAccounts(session);
+                return mailAccountFacade.hasAccounts(session);
             }
 
         });
@@ -94,7 +94,7 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
 
             @Override
             public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-                mailAccountStorage.migratePasswords(oldSecret, newSecret, session);
+                mailAccountFacade.migratePasswords(oldSecret, newSecret, session);
             }
 
         });
@@ -102,12 +102,12 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
 
             @Override
             public void cleanUpEncryptedItems(final String secret, final ServerSession session) throws OXException {
-                mailAccountStorage.cleanUp(secret, session);
+                mailAccountFacade.cleanUp(secret, session);
             }
 
             @Override
             public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
-                mailAccountStorage.removeUnrecoverableItems(secret, session);
+                mailAccountFacade.removeUnrecoverableItems(secret, session);
 
             }
 

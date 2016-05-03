@@ -85,7 +85,7 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
@@ -400,8 +400,8 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    protected static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session) throws OXException {
-        return checkFullNames(account, storageService, session, null, null);
+    protected static MailAccount checkFullNames(final MailAccount account, final MailAccountFacade mailAccountFacade, final ServerSession session) throws OXException {
+        return checkFullNames(account, mailAccountFacade, session, null, null);
     }
 
     /**
@@ -414,13 +414,17 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final Map<String, String> folderNames) throws OXException {
-        return Tools.checkFullNames(account, storageService, session, con, folderNames);
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountFacade mailAccountFacade, final ServerSession session, final Connection con, final Map<String, String> folderNames) throws OXException {
+        return Tools.checkFullNames(account, mailAccountFacade, session, con, folderNames);
     }
 
     /** Checks for an empty string */
     protected static boolean isEmpty(final String string) {
         return com.openexchange.java.Strings.isEmpty(string);
+    }
+
+    protected MailAccountFacade getAccountFacade() throws OXException {
+        return ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
     }
 
 }

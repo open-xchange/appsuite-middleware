@@ -55,7 +55,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.user.UserService;
@@ -104,7 +104,7 @@ public final class CyrusEntity2ACL extends Entity2ACL {
         if (OCLPermission.ALL_GROUPS_AND_USERS == userId) {
             return AUTH_ID_ANYONE;
         }
-        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+        final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
         final String userLoginInfo;
         {
             final UserService userService = Services.getService(UserService.class);
@@ -118,7 +118,7 @@ public final class CyrusEntity2ACL extends Entity2ACL {
             throw Entity2ACLExceptionCode.MISSING_ARG.create();
         }
         try {
-            return MailConfig.getMailLogin(storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()), userLoginInfo);
+            return MailConfig.getMailLogin(mailAccountFacade.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()), userLoginInfo);
         } catch (final OXException e) {
             throw Entity2ACLExceptionCode.UNKNOWN_USER.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), args[1].toString());
         }

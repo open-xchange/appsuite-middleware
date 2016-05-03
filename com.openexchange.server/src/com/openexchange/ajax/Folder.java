@@ -127,7 +127,7 @@ import com.openexchange.mail.messaging.MailMessagingService;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.MessagingAccount;
@@ -646,10 +646,9 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                              */
                             final List<MailAccount> accounts;
                             if (session.getUserPermissionBits().isMultipleMailAccounts()) {
-                                final MailAccountStorageService storageService =
-                                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+                                final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
                                 final MailAccount[] accountsArr =
-                                    storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                                    mailAccountFacade.getUserMailAccounts(session.getUserId(), session.getContextId());
                                 final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
                                 tmp.addAll(Arrays.asList(accountsArr));
                                 // Sort them
@@ -657,9 +656,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 accounts = tmp;
                             } else {
                                 accounts = new ArrayList<MailAccount>(1);
-                                final MailAccountStorageService storageService =
-                                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-                                accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
+                                final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+                                accounts.add(mailAccountFacade.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                             }
                             /*
                              * Messaging accounts; except mail
@@ -1165,10 +1163,9 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                              */
                             final MailFolder defaultFolder = mailInterface.getFolder(preparedFullname, true);
                             if (defaultFolder != null) {
-                                final MailAccountStorageService storageService =
-                                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+                                final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
                                 final MailAccount mailAccount =
-                                    storageService.getMailAccount(accountID, session.getUserId(), session.getContextId());
+                                    mailAccountFacade.getMailAccount(accountID, session.getUserId(), session.getContextId());
                                 final JSONArray ja = new JSONArray();
                                 putter.setJSONArray(ja);
                                 for (final MailFolderFieldWriter w : writers) {
@@ -1510,9 +1507,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                  */
                 final List<MailAccount> accounts;
                 if (session.getUserPermissionBits().isMultipleMailAccounts()) {
-                    final MailAccountStorageService storageService =
-                        ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-                    final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                    final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+                    final MailAccount[] accountsArr = mailAccountFacade.getUserMailAccounts(session.getUserId(), session.getContextId());
                     final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
                     tmp.addAll(Arrays.asList(accountsArr));
                     // Sort them
@@ -1520,9 +1516,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     accounts = tmp;
                 } else {
                     accounts = new ArrayList<MailAccount>(1);
-                    final MailAccountStorageService storageService =
-                        ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-                    accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
+                    final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+                    accounts.add(mailAccountFacade.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                 }
                 /*
                  * Messaging accounts; except mail

@@ -68,7 +68,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.session.Session;
@@ -115,10 +115,8 @@ public final class POP3MessageStorage extends MailMessageStorage implements ISim
     private MailAccount getMailAccount() throws OXException {
         if (mailAccount == null) {
             try {
-                final MailAccountStorageService storageService = POP3ServiceRegistry.getServiceRegistry().getService(
-                    MailAccountStorageService.class,
-                    true);
-                mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                final MailAccountFacade mailAccountFacade = POP3ServiceRegistry.getServiceRegistry().getService(MailAccountFacade.class, true);
+                mailAccount = mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (final OXException e) {
                 throw e;
             }

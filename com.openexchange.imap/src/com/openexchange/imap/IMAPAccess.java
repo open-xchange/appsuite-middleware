@@ -111,7 +111,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -831,11 +831,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return true;
         }
 
-        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-        if (null == storageService) {
+        final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
+        if (null == mailAccountFacade) {
             return false;
         }
-        final int[] ids = storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
+        final int[] ids = mailAccountFacade.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
         return Arrays.binarySearch(ids, accountId) >= 0;
     }
 
@@ -1265,8 +1265,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
-        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-        return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
+        return new MailAccountIMAPProperties(mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
     private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass, final boolean forceSecure) throws OXException {

@@ -137,7 +137,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.server.impl.OCLPermission;
@@ -246,8 +246,8 @@ public final class MailFolderStorage implements FolderStorage {
             }
         }
 
-        MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-        MailAccount mailAccount = storageService.getMailAccount(mailAccess.getAccountId(), session.getUserId(), session.getContextId());
+        MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
+        MailAccount mailAccount = mailAccountFacade.getMailAccount(mailAccess.getAccountId(), session.getUserId(), session.getContextId());
         if (isArchiveFolder(fullName, mailAccess, mailAccount)) {
             return true;
         }
@@ -353,8 +353,8 @@ public final class MailFolderStorage implements FolderStorage {
                             final List<MailAccount> accountList;
                             final Object property = decorator.getProperty("mailRootFolders");
                             if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts()) {
-                                final MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
-                                final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
+                                final MailAccountFacade maf = Services.getService(MailAccountFacade.class);
+                                final MailAccount[] accounts = maf.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
                                 accountList = new ArrayList<MailAccount>(accounts.length);
                                 for (final MailAccount mailAccount : accounts) {
                                     if (!mailAccount.isDefaultAccount()) {
@@ -428,8 +428,8 @@ public final class MailFolderStorage implements FolderStorage {
                 final List<MailAccount> accountList;
                 final Object property = decorator.getProperty("mailRootFolders");
                 if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts()) {
-                    final MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
-                    final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
+                    final MailAccountFacade maf = Services.getService(MailAccountFacade.class);
+                    final MailAccount[] accounts = maf.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
                     accountList = new ArrayList<MailAccount>(accounts.length);
                     for (final MailAccount mailAccount : accounts) {
                         if (!mailAccount.isDefaultAccount()) {
@@ -906,8 +906,8 @@ public final class MailFolderStorage implements FolderStorage {
                 }
                 MailAccount mailAccount = accounts.get(argument.getAccountId());
                 if (null == mailAccount) {
-                    MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-                    mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
+                    MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
+                    mailAccount = mailAccountFacade.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
                     accounts.put(accountId, mailAccount);
                 }
                 ret.add(getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount, translatePrimaryAccountDefaultFolders));
@@ -937,8 +937,8 @@ public final class MailFolderStorage implements FolderStorage {
             }
             final MailAccount mailAccount;
             {
-                final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-                mailAccount = storageService.getMailAccount(argument.getAccountId(), storageParameters.getUserId(), storageParameters.getContextId());
+                final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
+                mailAccount = mailAccountFacade.getMailAccount(argument.getAccountId(), storageParameters.getUserId(), storageParameters.getContextId());
             }
             mailAccess = mailAccessFor(session, argument.getAccountId());
 
@@ -1221,8 +1221,8 @@ public final class MailFolderStorage implements FolderStorage {
                  */
                 final List<MailAccount> accounts;
                 if (session.getUserPermissionBits().isMultipleMailAccounts()) {
-                    final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-                    final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                    final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
+                    final MailAccount[] accountsArr = mailAccountFacade.getUserMailAccounts(session.getUserId(), session.getContextId());
                     final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
                     tmp.addAll(Arrays.asList(accountsArr));
                     Collections.sort(tmp, new MailAccountComparator(session.getUser().getLocale()));
@@ -1244,9 +1244,9 @@ public final class MailFolderStorage implements FolderStorage {
                     }
                 } else {
                     accounts = new ArrayList<MailAccount>(1);
-                    final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+                    final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
                     try {
-                        accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
+                        accounts.add(mailAccountFacade.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                     } catch (OXException e) {
                         if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
                             throw e;
@@ -1301,8 +1301,8 @@ public final class MailFolderStorage implements FolderStorage {
                              */
                             boolean reverse;
                             {
-                                MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-                                MailAccount mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
+                                MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
+                                MailAccount mailAccount = mailAccountFacade.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
                                 String archiveFullName = optArchiveFullName(mailAccount, mailAccess);
                                 reverse = null != archiveFullName && archiveFullName.equals(fullname);
                             }
@@ -1379,8 +1379,8 @@ public final class MailFolderStorage implements FolderStorage {
                  */
                 boolean reverse;
                 {
-                    MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-                    MailAccount mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
+                    MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
+                    MailAccount mailAccount = mailAccountFacade.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
                     String archiveFullName = optArchiveFullName(mailAccount, mailAccess);
                     reverse = null != archiveFullName && archiveFullName.equals(fullname);
                 }
