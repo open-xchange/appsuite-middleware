@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.mail.categories.impl
 Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.capabilities,
+ com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.i18n,
@@ -21,6 +22,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.threadpool,
  org.apache.commons.lang,
  org.osgi.framework,
  org.slf4j

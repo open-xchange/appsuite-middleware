@@ -55,7 +55,6 @@ import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.mail.categories.sieve.SieveMailCategoriesRuleEngine;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link Activator}
@@ -80,7 +79,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { MailFilterService.class, ConfigurationService.class, ConfigViewFactory.class, ThreadPoolService.class };
+        return new Class[] { MailFilterService.class, ConfigurationService.class, ConfigViewFactory.class };
     }
 
 }

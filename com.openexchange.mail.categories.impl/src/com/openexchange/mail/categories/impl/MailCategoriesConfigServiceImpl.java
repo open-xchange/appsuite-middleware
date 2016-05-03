@@ -50,9 +50,15 @@
 package com.openexchange.mail.categories.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
@@ -74,7 +80,11 @@ import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link MailCategoriesConfigServiceImpl}
@@ -87,8 +97,12 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     static final String INIT_TASK_STATUS_PROPERTY = "com.openexchange.mail.categories.ruleengine.sieve.init.run";
 
     private final static String FLAG_PREFIX = "$ox_";
-
     private static final String FROM_HEADER = "from";
+
+    private static final String RULE_DEFINITION_PROPERTY_PREFIX = "com.openexchange.mail.categories.rules.";
+    private static final String STATUS_NOT_YET_STARTED = "notyetstarted";
+    private static final String STATUS_RUNNING = "running";
+    private static final String STATUS_FINISHED = "finished";
 
     private static MailCategoriesConfigServiceImpl INSTANCE;
 
@@ -284,6 +298,9 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     @Override
     public void enable(Session session, boolean enable) throws OXException {
         MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, String.valueOf(enable), session);
+        if (enable) {
+            initMailCategories(session);
+        }
     }
 
     String generateFlag(String category) {
@@ -507,6 +524,103 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     @Override
     public String getInitStatus(Session session) throws OXException {
         return MailCategoriesConfigUtil.getValueFromProperty(INIT_TASK_STATUS_PROPERTY, "notyetstarted", session);
+    }
+
+    void initMailCategories(Session session) throws OXException {
+
+        CapabilityService capService = Services.getService(CapabilityService.class);
+        Boolean capability = capService.getCapabilities(session).contains(new Capability("mail_categories"));
+        if (!capability) {
+            return;
+        }
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        if (configViewFactory == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class);
+        }
+        ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+
+
+        Boolean apply = view.get(MailCategoriesConstants.APPLY_OX_RULES_PROPERTY, Boolean.class);
+
+
+        if (!apply) {
+            return;
+        }
+
+        final ConfigProperty<String> hasRun = view.property("user", MailCategoriesConfigServiceImpl.INIT_TASK_STATUS_PROPERTY, String.class);
+        if (hasRun.isDefined() && !hasRun.get().equals(STATUS_NOT_YET_STARTED)) {
+            return;
+        }
+        ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
+        threadPoolService.submit(new InitTask(session, hasRun));
+
+    }
+
+    private class InitTask implements Task<Boolean> {
+
+        /**
+         * Initializes a new {@link MailCategoriesConfigServiceImpl.InitTask}.
+         */
+        public InitTask(Session session, ConfigProperty<String> hasRun) {
+            super();
+            this.session = session;
+            this.hasRun = hasRun;
+        }
+
+        Session session;
+        ConfigProperty<String> hasRun;
+
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {}
+
+        @Override
+        public void beforeExecute(Thread t) {}
+
+        @Override
+        public void afterExecute(Throwable t) {}
+
+        @Override
+        public Boolean call() throws Exception {
+            try {
+                hasRun.set(STATUS_RUNNING);
+                MailCategoriesRuleEngine engine = Services.getService(MailCategoriesRuleEngine.class);
+                if (engine == null) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class);
+                }
+
+                MailCategoriesConfigServiceImpl mailCategoriesService = MailCategoriesConfigServiceImpl.getInstance();
+                String categoryNames[] = mailCategoriesService.getSystemCategoryNames(session);
+                List<MailCategoryRule> rules = new ArrayList<>();
+                for (String categoryName : categoryNames) {
+                    String propValue = MailCategoriesConfigUtil.getValueFromProperty(RULE_DEFINITION_PROPERTY_PREFIX + categoryName, "", session);
+                    if (propValue.length() == 0) {
+                        continue;
+                    }
+                    String addresses[] = Strings.splitByComma(propValue.trim());
+                    String flag = mailCategoriesService.getFlagByCategory(session, categoryName);
+                    if (flag == null) {
+                        flag = mailCategoriesService.generateFlag(categoryName);
+                    }
+                    MailCategoryRule rule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), Arrays.asList(addresses), flag);
+                    rules.add(rule);
+                }
+                engine.initRuleEngineForUser(session, rules);
+                FullnameArgument fa = new FullnameArgument("INBOX");
+                for (MailCategoryRule rule : rules) {
+                    SearchTerm<?> searchTerm = mailCategoriesService.getSearchTerm(rule);
+                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullname(), searchTerm, rule.getFlag(), null);
+                }
+                hasRun.set(STATUS_FINISHED);
+            } catch (Exception e) {
+                try {
+                    hasRun.set(STATUS_NOT_YET_STARTED);
+                } catch (OXException ox) {
+                }
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }

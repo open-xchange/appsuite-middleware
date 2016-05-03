@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
@@ -79,9 +78,6 @@ import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.Task;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link SieveMailCategoriesRuleEngine}
@@ -424,84 +420,15 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
 
         // Run task
         if (!rules.isEmpty()) {
-
-            ThreadPoolService threadPoolService = services.getService(ThreadPoolService.class);
-            try {
-                boolean success = threadPoolService.submit(new InitTask(uids, mailFilterService, creds, rules, session)).get();
-                if (!success) {
-                    throw new OXException();
-                }
-            } catch (ExecutionException | InterruptedException e) {
-                throw new OXException(e);
+            // Remove possible old rules
+            if (uids.length > 0) {
+                mailFilterService.deleteFilterRules(creds, uids);
             }
-        }
-    }
-
-    /**
-     * 
-     * {@link InitTask} initializes the rule engine for the given user
-     *
-     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-     * @since v7.8.2
-     */
-    private class InitTask implements Task<Boolean> {
-
-        private int[] uids;
-        private MailFilterService mailFilterService;
-        private Credentials creds;
-        private List<MailCategoryRule> rules;
-        private Session session;
-        private Boolean success = false;
-
-        /**
-         * Initializes a new {@link InitTask}.
-         * 
-         * @param runnable
-         */
-        public InitTask(int[] uids, MailFilterService mailFilterService, Credentials creds, List<MailCategoryRule> rules, Session session) {
-            super();
-            this.uids = uids;
-            this.mailFilterService = mailFilterService;
-            this.creds = creds;
-            this.rules = rules;
-            this.session = session;
-        }
-
-        final Runnable runnable = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    // Remove possible old rules
-                    if (uids.length > 0) {
-                        mailFilterService.deleteFilterRules(creds, uids);
-                    }
-                    // Create new rules
-                    for (MailCategoryRule rule : rules) {
-                        setRule(session, rule, RuleType.SYSTEM_CATEGORY, false);
-                    }
-                    mailFilterService.reorderRules(creds, new int[] {});
-                } catch (OXException e1) {
-                    return;
-                }
-                success = true;
+            // Create new rules
+            for (MailCategoryRule rule : rules) {
+                setRule(session, rule, RuleType.SYSTEM_CATEGORY, false);
             }
-        };
-
-        @Override
-        public void setThreadName(ThreadRenamer threadRenamer) {}
-
-        @Override
-        public void beforeExecute(Thread t) {}
-
-        @Override
-        public void afterExecute(Throwable t) {}
-
-        @Override
-        public Boolean call() throws Exception {
-            runnable.run();
-            return success;
+            mailFilterService.reorderRules(creds, new int[] {});
         }
-
     }
 }

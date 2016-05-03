@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.categories.impl.osgi;
 
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -59,6 +60,7 @@ import com.openexchange.mail.categories.impl.MailCategoriesConfigUtil;
 import com.openexchange.mail.categories.impl.MailCategoriesLoginHandler;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link Activator}
@@ -70,7 +72,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailCategoriesRuleEngine.class };
+        return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailCategoriesRuleEngine.class, ThreadPoolService.class, CapabilityService.class };
     }
 
     @Override
@@ -78,7 +80,7 @@ public class Activator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         registerService(MailCategoriesConfigService.class, MailCategoriesConfigServiceImpl.getInstance());
         registerService(Reloadable.class, MailCategoriesConfigUtil.getInstance());
-        registerService(LoginHandlerService.class, new MailCategoriesLoginHandler(this));
+        registerService(LoginHandlerService.class, new MailCategoriesLoginHandler());
     }
 
     @Override
