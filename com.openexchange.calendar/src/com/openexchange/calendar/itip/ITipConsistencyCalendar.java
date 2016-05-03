@@ -628,7 +628,6 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
             }
         }
 
-        organizer = organizer.toLowerCase();
         if (organizer.startsWith("mailto:")) {
             organizer = organizer.substring(7);
         }
