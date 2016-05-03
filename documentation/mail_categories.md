@@ -3,12 +3,12 @@
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [Quickstart guide](#quickstart-guide)
-		- [1. Install the open-xchange-mail-categories package.](#1-install-the-open-xchange-mail-categories-package)
-		- [2. Add 'mail_categories' capability](#2-add-mailcategories-capability)
-		- [3. Add category identifiers](#3-add-category-identifiers)
-		- [4. Add category configurations](#4-add-category-configurations)
-		- [5. Setup the initiale system category rules (optional)](#5-setup-the-initiale-system-category-rules-optional)
-		- [6. Check properties and restart the server](#6-check-properties-and-restart-the-server)
+	- [1. Install the open-xchange-mail-categories package.](#1-install-the-open-xchange-mail-categories-package)
+	- [2. Add 'mail_categories' capability](#2-add-mailcategories-capability)
+	- [3. Add category identifiers](#3-add-category-identifiers)
+	- [4. Add category configurations](#4-add-category-configurations)
+	- [5. Setup the initiale system category rules (optional)](#5-setup-the-initiale-system-category-rules-optional)
+	- [6. Check properties and restart the server](#6-check-properties-and-restart-the-server)
 - [Introduction](#introduction)
 - [Configuration](#configuration)
 	- [Server](#server)
@@ -437,4 +437,4 @@ This chapter contains a list of recommendations, which should be considered in o
 * Define meaningful names for every category
 * Define translations for all supported languages
 * Define at least two user categories
-* Define 4 - 6 categories in total. If you only want to use one kind of categories you should define 2~3 categories instead. 
+* Define 4 - 6 categories in total. If you only want to use one kind of categories you should define 2~3 categories instead.
