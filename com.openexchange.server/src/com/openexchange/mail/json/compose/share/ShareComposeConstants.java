@@ -66,6 +66,15 @@ public class ShareComposeConstants {
     }
 
     /** The special header containing the share reference */
-    public static final String HEADER_SHARE_MAIL = "X-Open-Xchange-Share-Reference";
+    public static final String HEADER_SHARE_REFERENCE = "X-Open-Xchange-Share-Reference";
+
+    /** The special header containing the share type */
+    public static final String HEADER_SHARE_TYPE = "X-Open-Xchange-Share-Type";
+
+    /** The special header containing the share URL */
+    public static final String HEADER_SHARE_URL = "X-Open-Xchange-Share-URL";
+
+    /** The special user flag to mark a message having a share reference */
+    public static final String USER_SHARE_REFERENCE = "$ShareReference";
 
 }

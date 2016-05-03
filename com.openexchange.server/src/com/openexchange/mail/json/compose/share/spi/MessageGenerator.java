@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.compose.Applicable;
 import com.openexchange.mail.json.compose.share.ShareComposeMessageInfo;
+import com.openexchange.mail.json.compose.share.ShareReference;
 
 /**
  * {@link MessageGenerator} - Generates appropriate compose messages for internal/external recipients.
@@ -76,9 +77,10 @@ public interface MessageGenerator extends Applicable {
      * Generates the messages, that is supposed to be added to standard sent folder.
      *
      * @param info The message info providing the link and user's recipient
+     * @param shareReference The share reference to apply
      * @return The generated message
      * @throws OXException If message cannot be generated
      */
-    ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info) throws OXException;
+    ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException;
 
 }

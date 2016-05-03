@@ -3414,6 +3414,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Mark appended sent mail as seen
              */
             mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
+
+            String[] userFlags = sentMail.getUserFlags();
+            if (null != userFlags && userFlags.length > 0) {
+                mailAccess.getMessageStorage().updateMessageUserFlags(sentFullname, uidArr, userFlags, true);
+            }
         }
         MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, uidArr[0]);
         LOG.debug("Mail copy ({}) appended in {}msec", retval, System.currentTimeMillis() - start);

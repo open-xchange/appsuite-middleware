@@ -97,24 +97,24 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
 
 /**
- * {@link DefaultAttchmentStoragePeriodicCleaner} - The periodic cleaner for default attachment storage.
+ * {@link DefaultAttachmentStoragePeriodicCleaner} - The periodic cleaner for default attachment storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class DefaultAttchmentStoragePeriodicCleaner implements Runnable {
+public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAttchmentStoragePeriodicCleaner.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAttachmentStoragePeriodicCleaner.class);
 
     private final String id;
     private final AtomicBoolean active;
 
     /**
-     * Initializes a new {@link DefaultAttchmentStoragePeriodicCleaner}.
+     * Initializes a new {@link DefaultAttachmentStoragePeriodicCleaner}.
      *
      * @param id The attachment storage's identifier
      */
-    public DefaultAttchmentStoragePeriodicCleaner(String id) {
+    public DefaultAttachmentStoragePeriodicCleaner(String id) {
         super();
         this.id = id;
         active = new AtomicBoolean(true);

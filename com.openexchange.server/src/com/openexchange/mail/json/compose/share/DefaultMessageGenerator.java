@@ -49,14 +49,20 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import static com.openexchange.mail.json.compose.share.ShareComposeConstants.HEADER_SHARE_REFERENCE;
+import static com.openexchange.mail.json.compose.share.ShareComposeConstants.HEADER_SHARE_TYPE;
+import static com.openexchange.mail.json.compose.share.ShareComposeConstants.HEADER_SHARE_URL;
+import static com.openexchange.mail.json.compose.share.ShareComposeConstants.USER_SHARE_REFERENCE;
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -101,6 +107,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         return INSTANCE;
     }
 
+
     // ------------------------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -115,14 +122,15 @@ public class DefaultMessageGenerator implements MessageGenerator {
         ShareComposeLink shareLink = info.getShareLink();
         String password = info.getPassword();
         Date expirationDate = info.getExpirationDate();
+        Map<String, String> headers = mapFor(HEADER_SHARE_TYPE, shareLink.getType(), HEADER_SHARE_URL, shareLink.getLink());
 
         Collection<Recipient> recipients = info.getRecipients();
         List<ComposedMailMessage> messages = new ArrayList<>(recipients.size());
         for (Recipient recipient : recipients) {
             if (recipient.isUser()) {
-                messages.add(generateInternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate));
+                messages.add(generateInternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate, headers));
             } else {
-                messages.add(generateExternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate));
+                messages.add(generateExternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate, headers));
             }
         }
 
@@ -130,8 +138,11 @@ public class DefaultMessageGenerator implements MessageGenerator {
     }
 
     @Override
-    public ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info) throws OXException {
-        return generateInternalVersion(info.getRecipients().get(0), info.getComposeContext(), info.getShareLink(), info.getPassword(), info.getExpirationDate());
+    public ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
+        Map<String, String> headers = mapFor(HEADER_SHARE_REFERENCE, shareReference.generateReferenceString());
+        ComposedMailMessage sentMessage = generateInternalVersion(info.getRecipients().get(0), info.getComposeContext(), info.getShareLink(), info.getPassword(), info.getExpirationDate(), headers);
+        sentMessage.addUserFlag(USER_SHARE_REFERENCE);
+        return sentMessage;
     }
 
     @Override
@@ -186,10 +197,11 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @param link The link to insert
      * @param password The optional password
      * @param elapsedDate The optional expiration date
+     * @param shareHeaders The optional share headers to set
      * @return The compose message
      * @throws OXException If compose message cannot be returned
      */
-    protected ComposedMailMessage generateInternalVersion(Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate) throws OXException {
+    protected ComposedMailMessage generateInternalVersion(Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, Map<String, String> shareHeaders) throws OXException {
         ComposedMailMessage composedMessage = Utilities.copyOfSourceMessage(composeContext);
         Locale locale = recipient.getUser().getLocale();
 
@@ -218,6 +230,13 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Set specified recipient
         composedMessage.addRecipient(addressFor(recipient));
 
+        // Set share headers
+        if (null != shareHeaders) {
+            for (Map.Entry<String, String> header : shareHeaders.entrySet()) {
+                composedMessage.setHeader(header.getKey(), header.getValue());
+            }
+        }
+
         // Return composed message
         return composedMessage;
     }
@@ -230,10 +249,11 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @param link The link to insert
      * @param password The optional password
      * @param elapsedDate The optional expiration date
+     * @param shareHeaders The optional share headers to set
      * @return The compose message
      * @throws OXException If compose message cannot be returned
      */
-    protected ComposedMailMessage generateExternalVersion(Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate) throws OXException {
+    protected ComposedMailMessage generateExternalVersion(Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, Map<String, String> shareHeaders) throws OXException {
         ComposedMailMessage composedMessage = Utilities.copyOfSourceMessage(composeContext);
         Locale locale;
         {
@@ -274,6 +294,13 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Set specified recipient
         composedMessage.addRecipient(addressFor(recipient));
 
+        // Set share headers
+        if (null != shareHeaders) {
+            for (Map.Entry<String, String> header : shareHeaders.entrySet()) {
+                composedMessage.setHeader(header.getKey(), header.getValue());
+            }
+        }
+
         // Return composed message
         return composedMessage;
     }
@@ -310,6 +337,29 @@ public class DefaultMessageGenerator implements MessageGenerator {
         } catch (UnsupportedEncodingException e) {
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets a map for specified arguments.
+     *
+     * @param args The arguments
+     * @return The resulting map
+     */
+    protected static Map<String, String> mapFor(String... args) {
+        if (null == args) {
+            return null;
+        }
+
+        int length = args.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+
+        Map<String, String> map = new LinkedHashMap<String, String>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(args[i], args[i+1]);
+        }
+        return map;
     }
 
 }

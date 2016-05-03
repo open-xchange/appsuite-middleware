@@ -61,6 +61,8 @@ import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.json.compose.ComposeHandler;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage;
@@ -71,6 +73,11 @@ import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistr
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistryImpl;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistryImpl;
+import com.openexchange.mail.json.compose.share.settings.AbstractShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.EnabledShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.FilesAutoExpireShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.NameShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.RequiredExpirationShareComposeSetting;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
@@ -187,7 +194,25 @@ public class ShareComposeActivator extends HousekeepingActivator {
         AttachmentStorageRegistryImpl attachmentStorageRegistry = new AttachmentStorageRegistryImpl(attachmentStorageTracker);
         registerService(AttachmentStorageRegistry.class, attachmentStorageRegistry);
 
-        registerService(ComposeHandler.class, new ShareComposeHandler());
+        ShareComposeHandler handler = new ShareComposeHandler();
+        registerService(ComposeHandler.class, handler);
+
+        // Register settings
+        AbstractShareComposeSetting<?> setting = new EnabledShareComposeSetting(handler);
+        registerService(PreferencesItemService.class, setting, null);
+        registerService(ConfigTreeEquivalent.class, setting, null);
+
+        setting = new NameShareComposeSetting(handler);
+        registerService(PreferencesItemService.class, setting, null);
+        registerService(ConfigTreeEquivalent.class, setting, null);
+
+        setting = new RequiredExpirationShareComposeSetting(handler);
+        registerService(PreferencesItemService.class, setting, null);
+        registerService(ConfigTreeEquivalent.class, setting, null);
+
+        setting = new FilesAutoExpireShareComposeSetting(handler);
+        registerService(PreferencesItemService.class, setting, null);
+        registerService(ConfigTreeEquivalent.class, setting, null);
     }
 
     @Override

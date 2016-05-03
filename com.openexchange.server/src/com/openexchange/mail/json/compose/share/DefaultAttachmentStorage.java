@@ -142,7 +142,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
 
             long cleanerInterval = Utilities.parseTimespanProperty("com.openexchange.mail.compose.share.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true, configService);
             if (0 < cleanerInterval) {
-                DefaultAttchmentStoragePeriodicCleaner cleaner = new DefaultAttchmentStoragePeriodicCleaner(tmp.id);
+                DefaultAttachmentStoragePeriodicCleaner cleaner = new DefaultAttachmentStoragePeriodicCleaner(tmp.id);
                 ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(cleaner, cleanerInterval, cleanerInterval);
                 tmp.setCleanerInfo(cleaner, timerTask);
             }
@@ -166,7 +166,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
 
     private final String id;
     private volatile ScheduledTimerTask timerTask;
-    private volatile DefaultAttchmentStoragePeriodicCleaner cleaner;
+    private volatile DefaultAttachmentStoragePeriodicCleaner cleaner;
 
     /**
      * Initializes a new {@link DefaultAttachmentStorage}.
@@ -177,13 +177,13 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         this.timerTask = timerTask;
     }
 
-    private void setCleanerInfo(DefaultAttchmentStoragePeriodicCleaner cleaner, ScheduledTimerTask timerTask) {
+    private void setCleanerInfo(DefaultAttachmentStoragePeriodicCleaner cleaner, ScheduledTimerTask timerTask) {
         this.cleaner = cleaner;
         this.timerTask = timerTask;
     }
 
     private void halt() {
-        DefaultAttchmentStoragePeriodicCleaner cleaner = this.cleaner;
+        DefaultAttachmentStoragePeriodicCleaner cleaner = this.cleaner;
         if (null != cleaner) {
             this.cleaner = null;
             cleaner.stop();
@@ -473,9 +473,13 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     protected String discoverEMailAttachmentsFolderID(DefaultAttachmentStorageContext storageContext) throws OXException {
         Session session = storageContext.session;
 
-        String name = Utilities.getValueFromProperty("com.openexchange.mail.compose.share.folderName", "i18n-defined", session);
-        if ("i18n-defined".equalsIgnoreCase(name)) {
-            name = StringHelper.valueOf(getSessionUserLocale(session)).getString(ShareComposeStrings.FOLDER_NAME_SHARED_MAIL_ATTACHMENTS);
+        Locale locale = getSessionUserLocale(session);
+        String name = Utilities.getValueFromProperty("com.openexchange.mail.compose.share.folderName." + locale.getLanguage() + "_" + locale.getCountry(), null, session);
+        if (Strings.isEmpty(name)) {
+            name = Utilities.getValueFromProperty("com.openexchange.mail.compose.share.folderName", "i18n-defined", session);
+            if ("i18n-defined".equalsIgnoreCase(name)) {
+                name = StringHelper.valueOf(locale).getString(ShareComposeStrings.FOLDER_NAME_SHARED_MAIL_ATTACHMENTS);
+            }
         }
 
         IDBasedFolderAccess folderAccess = storageContext.folderAccess;

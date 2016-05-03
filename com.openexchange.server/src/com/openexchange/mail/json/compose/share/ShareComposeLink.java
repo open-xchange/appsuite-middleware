@@ -71,4 +71,13 @@ public interface ShareComposeLink {
      */
     String getLink();
 
+    /**
+     * Gets the type identifier.
+     * <p>
+     * Please check <code>com.openexchange.share.notification.impl.NotificationType</code> enumeration for reasonable values.
+     *
+     * @return The type identifier
+     */
+    String getType();
+
 }

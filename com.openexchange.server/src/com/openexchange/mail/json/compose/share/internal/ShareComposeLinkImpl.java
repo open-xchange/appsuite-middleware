@@ -63,18 +63,25 @@ public class ShareComposeLinkImpl implements ShareComposeLink {
     private final String name;
     private final String link;
     private final int hash;
+    private final String type;
 
     /**
      * Initializes a new {@link ShareComposeLinkImpl}.
      */
-    public ShareComposeLinkImpl(String name, String link) {
+    public ShareComposeLinkImpl(String name, String link, String type) {
         super();
         this.name = name;
         this.link = link;
+        this.type = type;
 
         int prime = 31;
         int result = prime * 1 + ((link == null) ? 0 : link.hashCode());
         hash = result;
+    }
+
+    @Override
+    public String getType() {
+        return type;
     }
 
     @Override

@@ -101,13 +101,11 @@ public class ShareComposeLinkGenerator {
     public ShareComposeLink createShareLink(Recipient recipient, ShareTarget shareTarget, GuestInfo guest, String queryString, ComposeRequest composeRequest) throws OXException {
         ShareLinkGeneratorRegistry registry = ServerServiceRegistry.getInstance().getService(ShareLinkGeneratorRegistry.class);
         if (null == registry) {
-            String link = DefaultShareLinkGenerator.getInstance().generateShareLink(recipient, guest, shareTarget, composeRequest.getRequest().getHostData(), queryString, composeRequest.getSession());
-            return new ShareComposeLinkImpl(null, link);
+            return DefaultShareLinkGenerator.getInstance().generateShareLink(recipient, guest, shareTarget, composeRequest.getRequest().getHostData(), queryString, composeRequest.getSession());
         }
 
         ShareLinkGenerator generator = registry.getShareLinkGeneratorFor(composeRequest);
-        String link = generator.generateShareLink(recipient, guest, shareTarget, composeRequest.getRequest().getHostData(), queryString, composeRequest.getSession());
-        return new ShareComposeLinkImpl(null, link);
+        return generator.generateShareLink(recipient, guest, shareTarget, composeRequest.getRequest().getHostData(), queryString, composeRequest.getSession());
     }
 
     /**
@@ -122,13 +120,11 @@ public class ShareComposeLinkGenerator {
     public ShareComposeLink createPersonalShareLink(ShareTarget shareTarget, String queryString, ComposeRequest composeRequest) throws OXException {
         ShareLinkGeneratorRegistry registry = ServerServiceRegistry.getInstance().getService(ShareLinkGeneratorRegistry.class);
         if (null == registry) {
-            String link = DefaultShareLinkGenerator.getInstance().generatePersonalShareLink(shareTarget, composeRequest.getRequest().getHostData(), queryString, composeRequest.getSession());
-            return new ShareComposeLinkImpl(null, link);
+            return DefaultShareLinkGenerator.getInstance().generatePersonalShareLink(shareTarget, composeRequest.getRequest().getHostData(), queryString, composeRequest.getSession());
         }
 
         ShareLinkGenerator generator = registry.getShareLinkGeneratorFor(composeRequest);
-        String link = generator.generatePersonalShareLink(shareTarget, composeRequest.getRequest().getHostData(), queryString, composeRequest.getSession());
-        return new ShareComposeLinkImpl(null, link);
+        return generator.generatePersonalShareLink(shareTarget, composeRequest.getRequest().getHostData(), queryString, composeRequest.getSession());
     }
 
 }

@@ -53,7 +53,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.json.compose.AbstractQuotaAwareComposeContext;
 import com.openexchange.mail.json.compose.ComposeRequest;
 
@@ -66,11 +65,6 @@ import com.openexchange.mail.json.compose.ComposeRequest;
  */
 public class ShareDraftComposeContext extends AbstractQuotaAwareComposeContext {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareDraftComposeContext.class);
-
-    /** Keeps track of already <i>consumed</i> bytes */
-    private long consumed;
-
     /**
      * Initializes a new {@link ShareDraftComposeContext}.
      *
@@ -82,24 +76,14 @@ public class ShareDraftComposeContext extends AbstractQuotaAwareComposeContext {
     }
 
     @Override
-    protected void onPartAdd(MailPart part, ComposedMailPart info) throws OXException {
-        if (doAction) {
-            long size = part.getSize();
-            if (size <= 0) {
-                LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
-            }
-            if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
-                String fileName = part.getFileName();
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, UploadUtility.getSize(size));
-            }
-            /*
-             * Add current file size
-             */
-            consumed += size;
-            if (uploadQuota > 0 && consumed > uploadQuota) {
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
-            }
-        }
+    protected void onFileUploadQuotaExceeded(long uploadQuotaPerFile, long size, MailPart part) throws OXException {
+        String fileName = part.getFileName();
+        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, UploadUtility.getSize(size));
+    }
+
+    @Override
+    protected void onTotalUploadQuotaExceeded(long uploadQuota, long consumed) throws OXException {
+        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
     }
 
 }

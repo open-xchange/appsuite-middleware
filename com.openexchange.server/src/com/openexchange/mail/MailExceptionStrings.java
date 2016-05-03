@@ -218,4 +218,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
     public static final String SHARING_NOT_POSSIBLE_MSG = "You are not allowed to compose a message containing share links";
 
+    // User wants to compose a share message but does not specify an expiration date which is required
+    public static final String EXPIRATION_DATE_MISSING_MSG = "Please specify an expiration date in order to compose a message containing share links";
+
 }

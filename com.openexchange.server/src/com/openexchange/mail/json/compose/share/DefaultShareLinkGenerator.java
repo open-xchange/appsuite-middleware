@@ -56,6 +56,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.json.compose.ComposeRequest;
+import com.openexchange.mail.json.compose.share.internal.ShareComposeLinkImpl;
 import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
@@ -115,7 +116,7 @@ public class DefaultShareLinkGenerator implements ShareLinkGenerator {
     }
 
     @Override
-    public String generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException {
+    public ShareComposeLink generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException {
         // Generate share target path
         ShareTargetPath targetPath;
         {
@@ -129,14 +130,22 @@ public class DefaultShareLinkGenerator implements ShareLinkGenerator {
 
         // Generate associated share link
         String url = guest.generateLink(hostData, targetPath);
-        return Strings.isEmpty(queryString) ? url : new StringBuilder(url).append('?').append(queryString).toString();
+        if (!Strings.isEmpty(queryString)) {
+            url = new StringBuilder(url).append('?').append(queryString).toString();
+        }
+
+        return new ShareComposeLinkImpl(null, url, "link-created");
     }
 
     @Override
-    public String generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session) {
+    public ShareComposeLink generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session) {
         String module = Module.getForFolderConstant(shareTarget.getModule()).getName();
         String url = Links.generateInternalLink(module, shareTarget.getFolder(), shareTarget.getItem(), hostData);
-        return Strings.isEmpty(queryString) ? url : new StringBuilder(url).append('?').append(queryString).toString();
+        if (!Strings.isEmpty(queryString)) {
+            url = new StringBuilder(url).append('?').append(queryString).toString();
+        }
+
+        return new ShareComposeLinkImpl(null, url, "link-created");
     }
 
 }

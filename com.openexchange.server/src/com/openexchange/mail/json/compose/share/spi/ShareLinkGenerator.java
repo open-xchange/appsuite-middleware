@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.mail.json.compose.Applicable;
 import com.openexchange.mail.json.compose.share.Recipient;
+import com.openexchange.mail.json.compose.share.ShareComposeLink;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
@@ -78,7 +79,7 @@ public interface ShareLinkGenerator extends Applicable {
      * @return The share link
      * @throws OXException If generating the share link fails
      */
-    String generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException;
+    ShareComposeLink generateShareLink(Recipient recipient, GuestInfo guest, ShareTarget sourceTarget, HostData hostData, String queryString, Session session) throws OXException;
 
     /**
      * Generates the personal share link for specified session's user.
@@ -90,5 +91,5 @@ public interface ShareLinkGenerator extends Applicable {
      * @return The share link
      * @throws OXException If generating the share link fails
      */
-    String generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session);
+    ShareComposeLink generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session);
 }

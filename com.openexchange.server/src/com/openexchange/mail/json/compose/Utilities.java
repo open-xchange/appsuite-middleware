@@ -282,6 +282,61 @@ public enum Utilities {
     }
 
     /**
+     * Gets the long value for specified property; returns default value if such a property does not exist.
+     *
+     * @param propertyName The property name
+     * @param defaultValue The default value to return
+     * @param session The session from requesting user
+     * @return The long value or <code>defaultValue</code>
+     * @throws OXException If value cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
+     */
+    public static Long getLongFromProperty(String propertyName, Long defaultValue, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
+        ConfigViewFactory viewFactory = getConfigViewFactory();
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        try {
+            String value = property.get();
+            return Strings.isEmpty(value) ? defaultValue : Long.valueOf(value.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Gets the long value for specified property; returns default value if such a property does not exist.
+     *
+     * @param propertyName The property name
+     * @param defaultValue The default value to return
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The long value or <code>defaultValue</code>
+     * @throws OXException If value cannot be returned
+     */
+    public static Long getLongFromProperty(String propertyName, Long defaultValue, int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = getConfigViewFactory();
+        ConfigView view = viewFactory.getView(userId, contextId);
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        try {
+            String value = property.get();
+            return Strings.isEmpty(value) ? defaultValue : Long.valueOf(value.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
      * Gets the boolean value for specified property; returns default value if such a property does not exist.
      *
      * @param propertyName The property name

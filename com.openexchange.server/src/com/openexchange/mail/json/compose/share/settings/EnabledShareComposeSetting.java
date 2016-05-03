@@ -47,43 +47,34 @@
  *
  */
 
-package com.openexchange.mail.json.compose.abort;
+package com.openexchange.mail.json.compose.share.settings;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.impl.UploadUtility;
-import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.json.compose.AbstractQuotaAwareComposeContext;
-import com.openexchange.mail.json.compose.ComposeRequest;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.json.compose.share.ShareComposeHandler;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link AbortComposeContext}
+ * {@link EnabledShareComposeSetting}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AbortComposeContext extends AbstractQuotaAwareComposeContext {
+public class EnabledShareComposeSetting extends AbstractShareComposeSetting<Boolean> {
 
     /**
-     * Initializes a new {@link AbortComposeContext}.
-     *
-     * @param request The compose request associated with this context
-     * @throws OXException If initialization fails
+     * Initializes a new {@link EnabledShareComposeSetting}.
      */
-    public AbortComposeContext(ComposeRequest request) throws OXException {
-        super(request);
+    public EnabledShareComposeSetting(ShareComposeHandler shareComposeHandler) {
+        super("enabled", shareComposeHandler);
     }
 
     @Override
-    protected void onFileUploadQuotaExceeded(long uploadQuotaPerFile, long size, MailPart part) throws OXException {
-        String fileName = part.getFileName();
-        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, UploadUtility.getSize(size));
-    }
-
-    @Override
-    protected void onTotalUploadQuotaExceeded(long uploadQuota, long consumed) throws OXException {
-        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
+    protected Boolean getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        return Boolean.valueOf(shareComposeHandler.isEnabled(session));
     }
 
 }

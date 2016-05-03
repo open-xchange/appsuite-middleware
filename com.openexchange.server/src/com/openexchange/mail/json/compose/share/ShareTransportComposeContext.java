@@ -49,10 +49,10 @@
 
 package com.openexchange.mail.json.compose.share;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.impl.UploadUtility;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.json.compose.AbstractQuotaAwareComposeContext;
 import com.openexchange.mail.json.compose.ComposeRequest;
 
@@ -64,66 +64,25 @@ import com.openexchange.mail.json.compose.ComposeRequest;
  */
 public class ShareTransportComposeContext extends AbstractQuotaAwareComposeContext {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareTransportComposeContext.class);
-
-    private final boolean addWarning;
-    private boolean createShares;
-    private long consumed;
-
     /**
      * Initializes a new {@link ShareTransportComposeContext}.
      *
      * @param request The compose request
-     * @param initialCreateShared <code>true</code> if a shre compose message is supposed to be created regardless of quota; otherwise <code>false</code>
      * @throws OXException If initialization fails
      */
-    public ShareTransportComposeContext(ComposeRequest request, boolean initialCreateShared) throws OXException {
+    public ShareTransportComposeContext(ComposeRequest request) throws OXException {
         super(request);
-        createShares = initialCreateShared;
-        addWarning = !initialCreateShared;
-    }
-
-    /**
-     * Checks whether the initial warning is supposed to be added.
-     *
-     * @return <code>true</code> to add warning; otherwise <code>false</code>
-     */
-    public boolean isAddWarning() {
-        return addWarning;
-    }
-
-    /**
-     * Checks whether shares are supposed to be created instead of sending a regular message
-     *
-     * @return <code>true</code> for creating shares; otherwise <code>false</code> for regular message
-     */
-    public boolean isCreateShares() {
-        return createShares;
     }
 
     @Override
-    protected void onPartAdd(MailPart part, ComposedMailPart info) throws OXException {
-        if (createShares) {
-            return;
-        }
+    protected void onFileUploadQuotaExceeded(long uploadQuotaPerFile, long size, MailPart part) throws OXException {
+        String fileName = part.getFileName();
+        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, UploadUtility.getSize(size));
+    }
 
-        if (doAction) {
-            long size = part.getSize();
-            if (size <= 0) {
-                LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
-                return;
-            }
-            if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
-                createShares = true;
-            }
-            /*
-             * Add current file size
-             */
-            consumed += size;
-            if (uploadQuota > 0 && consumed > uploadQuota) {
-                createShares = true;
-            }
-        }
+    @Override
+    protected void onTotalUploadQuotaExceeded(long uploadQuota, long consumed) throws OXException {
+        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
     }
 
 }

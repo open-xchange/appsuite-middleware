@@ -564,9 +564,13 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     USED_SHARING_FEATURE("The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the" +
         " attachments are shared and the links added to your email. Whoever receives the email can then access the attachments.",  MailExceptionStrings.USED_SHARING_FEATURE_MSG, CATEGORY_WARNING, 105),
     /**
-     * User %1$s in context %2$s is not allowed to compose a share message.
+     * User %1$s in context %2$s is not allowed to compose a share message
      */
-    SHARING_NOT_POSSIBLE("", MailExceptionStrings.SHARING_NOT_POSSIBLE_MSG, CATEGORY_PERMISSION_DENIED, 106),
+    SHARING_NOT_POSSIBLE("User %1$s in context %2$s is not allowed to compose a share message", MailExceptionStrings.SHARING_NOT_POSSIBLE_MSG, CATEGORY_PERMISSION_DENIED, 106),
+    /**
+     * User %1$s in context %2$s did not specify an expiration date for a share compose message, but is required to do so
+     */
+    EXPIRATION_DATE_MISSING("User %1$s in context %2$s did not specify an expiration date for a share compose message, but is required to do so", MailExceptionStrings.EXPIRATION_DATE_MISSING_MSG, CATEGORY_USER_INPUT, 107),
     ;
 
     private static String PREFIX = "MSG";
