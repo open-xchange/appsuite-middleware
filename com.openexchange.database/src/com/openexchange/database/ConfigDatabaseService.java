@@ -103,6 +103,14 @@ public interface ConfigDatabaseService {
      */
     void backForUpdateTask(Connection con);
 
+    /**
+     * Returns a writable connection to the config database to the pool. It should be used to return a writable connection if it was only
+     * used for reading information from the master database server.This method must be used if the connection is obtained with
+     * {@link #getForUpdateTask()}.
+     * @param con Writable connection to return.
+     */
+    void backForUpdateTaskAfterReading(Connection con);
+
     int[] listContexts(int poolId) throws OXException;
 
     int getServerId() throws OXException;

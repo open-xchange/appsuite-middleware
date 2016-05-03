@@ -159,6 +159,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public void backForUpdateTaskAfterReading(Connection con) {
+        configDatabaseService.backForUpdateTaskAfterReading(con);
+    }
+
+    @Override
     public int[] listContexts(final int poolId) throws OXException {
         return configDatabaseService.listContexts(poolId);
     }

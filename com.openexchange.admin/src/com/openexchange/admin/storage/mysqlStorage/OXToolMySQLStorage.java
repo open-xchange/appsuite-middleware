@@ -83,6 +83,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.caching.Cache;
@@ -1785,7 +1786,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean storeInUse(final int store_id) throws StorageException {
-        return selectwithint(-1, "SELECT cid FROM context WHERE filestore_id = ?", store_id);
+        boolean retval = selectwithint(-1, "SELECT cid FROM context WHERE filestore_id = ?", store_id);
+        if (!retval) {
+            retval = hasUsers(store_id);
+        }
+        return retval;
+    }
+
+    private boolean hasUsers(int id) throws StorageException {
+        return Filestore2UserUtil.getUserCountFor(id, cache) > 0;
     }
 
     @Override
@@ -2646,7 +2655,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
     }
-    
+
     @Override
     public boolean isMasterFilestoreOwner(Context context, int userId) throws StorageException {
         int contextId = context.getId().intValue();
@@ -2681,7 +2690,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#fetchSlaveUsersOfMasterFilestore(com.openexchange.admin.rmi.dataobjects.Context, int)
      */
     @Override
@@ -2739,13 +2748,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet result = null;
         try {
             con = cache.getConnectionForConfigDB();
-            
+
             // Fetch the schema name
             stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE cid = ?");
             stmt.setInt(1, contextId);
-            
+
             result = stmt.executeQuery();
-            
+
             String schemaName;
             if (result.next()) {
                 schemaName = result.getString(1);
@@ -2754,13 +2763,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             stmt.close();
             result.close();
-            
+
             // Count the contexts that the schema contains
             stmt = con.prepareStatement("SELECT COUNT(cid) FROM context_server2db_pool WHERE db_schema = ?");
             stmt.setString(1, schemaName);
-            
+
             result = stmt.executeQuery();
-            
+
             if (result.next()) {
                 int count = result.getInt(1);
                 return count == 1;

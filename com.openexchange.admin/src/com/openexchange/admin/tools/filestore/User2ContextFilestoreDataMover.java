@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -65,6 +66,7 @@ import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -236,6 +238,7 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(user, ctx);
+            Filestore2UserUtil.removeFilestore2UserEntry(contextId, user.getId().intValue(), ClientAdminThreadExtended.cache);
             error = false;
 
             try {
