@@ -89,6 +89,7 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.ServiceException;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -103,6 +104,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
@@ -1579,6 +1581,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
         // Find file storage for user if a valid quota is specified
         Long maxQuota = usrdata.getMaxQuota();
+        Integer filestoreId = null;
         if (maxQuota != null) {
             long quota_max_temp = maxQuota.longValue();
             if (quota_max_temp != -1) {
@@ -1589,7 +1592,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
                     int fileStorageToPrefer = oxutil.getFilestoreIdFromContext(contextId);
                     Filestore filestoreForUser = oxutil.findFilestoreForUser(fileStorageToPrefer);
-                    usrdata.setFilestoreId(filestoreForUser.getId());
+                    filestoreId = filestoreForUser.getId();
+                    usrdata.setFilestoreId(filestoreId);
                 } else {
                     if (!OXToolStorageInterface.getInstance().existsStore(i(fsId))) {
                         throw new StorageException("Filestore with identifier " + fsId + " does not exist.");
@@ -2049,6 +2053,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             storeUISettings(ctx, con, usrdata, userId);
             // Set wanted folder tree.
             storeFolderTree(ctx, con, usrdata, userId);
+            // Remember filestore-to-user association
+            if (null != filestoreId) {
+                Filestore2UserUtil.addFilestore2UserEntry(contextId, userId, filestoreId.intValue(), ClientAdminThreadExtended.cache);
+            }
             return userId;
         } catch (final ServiceException e) {
             log.error("Required service not found.", e);

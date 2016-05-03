@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,8 +85,8 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage.PoolAndSchema;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
+import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.GenericChecks;
@@ -1802,34 +1801,22 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     private boolean hasUsers(int id) throws StorageException {
-        Connection con = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Set<PoolAndSchema> pools = new LinkedHashSet<PoolAndSchema>();
-        try {
-            con = cache.getReadConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id, db_schema FROM context_server2db_pool WHERE server_id=?");
-            stmt.setInt(1, cache.getServerId());
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                pools.add(new PoolAndSchema(rs.getInt(1), rs.getString(2)));
-            }
-        } catch (PoolException e) {
-            log.error("Pooling Error", e);
-            throw new StorageException(e);
-        } catch (SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e);
-        } finally {
-            closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-
-            if (null != con) {
-                try {
-                    cache.pushReadConnectionForConfigDB(con);
-                } catch (PoolException e) {
-                    log.error("Failed to push back read-only connection to configdb.", e);
+        Set<PoolAndSchema> pools;
+        {
+            Connection con = null;
+            try {
+                con = cache.getReadConnectionForConfigDB();
+                pools = PoolAndSchema.determinePoolsAndSchemas(cache.getServerId(), con);
+            } catch (PoolException e) {
+                log.error("Pooling Error", e);
+                throw new StorageException(e);
+            } finally {
+                if (null != con) {
+                    try {
+                        cache.pushReadConnectionForConfigDB(con);
+                    } catch (PoolException e) {
+                        log.error("Failed to push back read-only connection to configdb.", e);
+                    }
                 }
             }
         }
@@ -1841,8 +1828,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         CompletionService<Boolean> completionService = new ThreadPoolCompletionService<Boolean>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
         int taskCount = 0;
 
+        final AdminCacheExtended cache = ClientAdminThreadExtended.cache;
         for (final PoolAndSchema poolAndSchema : pools) {
-            final AdminCacheExtended cache = ClientAdminThreadExtended.cache;
             completionService.submit(new Callable<Boolean>() {
 
                 @Override
@@ -1851,7 +1838,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     PreparedStatement stmt = null;
                     ResultSet result = null;
                     try {
-                        con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
+                        con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.getPoolId(), poolAndSchema.getSchema());
                         stmt = con.prepareStatement("SELECT u.filestore_id, u.id FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id=?");
                         stmt.setInt(1, id);
                         result = stmt.executeQuery();
@@ -1867,7 +1854,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         closeSQLStuff(result, stmt);
                         if (null != con) {
                             try {
-                                cache.pushWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, con);
+                                cache.pushWRITENoTimeoutConnectionForPoolId(poolAndSchema.getPoolId(), con);
                             } catch (PoolException e) {
                                 log.error("Error pushing connection to pool!", e);
                             }
@@ -1883,7 +1870,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
         boolean retval = false;
         for (Boolean bool : counts) {
-            if (bool) {
+            if (bool.booleanValue()) {
                 return true;
             }
         }
