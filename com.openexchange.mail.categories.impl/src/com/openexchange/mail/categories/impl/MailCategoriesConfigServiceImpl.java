@@ -543,7 +543,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         Boolean apply = view.get(MailCategoriesConstants.APPLY_OX_RULES_PROPERTY, Boolean.class);
 
 
-        if (!apply) {
+        if (apply == null || !apply) {
             return;
         }
 
