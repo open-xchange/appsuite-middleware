@@ -7456,6 +7456,13 @@ msgstr ""
 msgid "You are not allowed to compose a message containing share links"
 msgstr ""
 
+#. User wants to compose a share message but does not specify an expiration date which is required
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
+msgid ""
+"Please specify an expiration date in order to compose a message containing "
+"share links"
+msgstr ""
+
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
