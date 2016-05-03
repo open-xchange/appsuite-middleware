@@ -198,19 +198,13 @@ public class ShareComposeActivator extends HousekeepingActivator {
         registerService(ComposeHandler.class, handler);
 
         // Register settings
-        AbstractShareComposeSetting<?> setting = new EnabledShareComposeSetting(handler);
-        registerService(PreferencesItemService.class, setting, null);
-        registerService(ConfigTreeEquivalent.class, setting, null);
+        registerSetting(new EnabledShareComposeSetting(handler));
+        registerSetting(new NameShareComposeSetting(handler));
+        registerSetting(new RequiredExpirationShareComposeSetting(handler));
+        registerSetting(new FilesAutoExpireShareComposeSetting(handler));
+    }
 
-        setting = new NameShareComposeSetting(handler);
-        registerService(PreferencesItemService.class, setting, null);
-        registerService(ConfigTreeEquivalent.class, setting, null);
-
-        setting = new RequiredExpirationShareComposeSetting(handler);
-        registerService(PreferencesItemService.class, setting, null);
-        registerService(ConfigTreeEquivalent.class, setting, null);
-
-        setting = new FilesAutoExpireShareComposeSetting(handler);
+    private <V> void registerSetting(AbstractShareComposeSetting<V> setting) {
         registerService(PreferencesItemService.class, setting, null);
         registerService(ConfigTreeEquivalent.class, setting, null);
     }
