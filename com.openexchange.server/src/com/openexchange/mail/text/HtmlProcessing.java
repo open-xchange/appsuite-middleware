@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.text;
 
-import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.isWhitespace;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -1208,6 +1207,18 @@ public final class HtmlProcessing {
         } finally {
             Streams.close(writer);
         }
+    }
+
+    private static boolean isEmpty(final CharSequence charSeq) {
+        if (null == charSeq) {
+            return true;
+        }
+        final int len = charSeq.length();
+        boolean isWhitespace = true;
+        for (int i = len; isWhitespace && i-- > 0;) {
+            isWhitespace = isWhitespace(charSeq.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**
