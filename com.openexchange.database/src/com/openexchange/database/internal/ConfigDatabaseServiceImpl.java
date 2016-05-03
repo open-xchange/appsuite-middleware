@@ -203,6 +203,11 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
+    public void backForUpdateTaskAfterReading(Connection con) {
+        back(con, true);
+    }
+
+    @Override
     public int[] listContexts(final int poolId) throws OXException {
         return contextAssignment.getContextsInDatabase(poolId);
     }

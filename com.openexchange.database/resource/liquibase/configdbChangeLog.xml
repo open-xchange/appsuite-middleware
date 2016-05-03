@@ -142,5 +142,29 @@
             <dropTable tableName="replicationMonitor" />
         </rollback>
     </changeSet>
+    
+    <!-- ******************************************************* -->
+    <!-- ************** Release 7.8.2 starts here ************** -->
+    <!-- ******************************************************* -->
+    
+    <changeSet id="7.8.2:filestore2user" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="filestore2user" />
+            </not>
+        </preConditions>
+        <comment>Creates the 'filestore2user' table</comment>
+        <sql>
+        	CREATE TABLE filestore2user (
+    		cid INT4 UNSIGNED NOT NULL,
+    		user INT4 UNSIGNED NOT NULL,
+    		filestore_id INT4 UNSIGNED,
+    		PRIMARY KEY (cid, user, filestore_id)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="filestore2user" />
+        </rollback>
+    </changeSet>
 
 </databaseChangeLog>
