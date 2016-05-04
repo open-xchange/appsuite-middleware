@@ -49,61 +49,22 @@
 
 package com.openexchange.mailaccount.json.actions;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link MailAccountActionFactory}
+ * {@link MailAccountActionProvider}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
  */
-@Module(name = "mailaccount", description = "The mail account module is used to manage multiple mail accounts held by a user.")
-public final class MailAccountActionFactory implements AJAXActionServiceFactory {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MailAccountActionFactory.class);
-
-    private static final MailAccountActionFactory SINGLETON = new MailAccountActionFactory();
-
-    private MailAccountActionFactory() {
-        super();
-    }
+public interface MailAccountActionProvider {
 
     /**
-     * Gets the {@link MailAccountActionFactory} instance.
-     *
-     * @return The {@link MailAccountActionFactory} instance
+     * Retrieves a mapping of actions strings to AJAXActionService's.
+     * 
+     * @return the mapping
      */
-    public static final MailAccountActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        Map<String, AJAXActionService> actions = ServerServiceRegistry.getInstance().getService(MailAccountActionProvider.class, true).getActions();
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
-        }
-        return retval;
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        try {
-            return ServerServiceRegistry.getInstance().getService(MailAccountActionProvider.class, true).getActions().values();
-        } catch (OXException e) {
-            LOG.error("Unable to load supported services. MailAccountActionProvider is missing!");
-        }
-        return Collections.emptySet();
-    }
+    public Map<String, AJAXActionService> getActions();
 
 }

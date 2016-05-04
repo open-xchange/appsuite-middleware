@@ -57,6 +57,8 @@ import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.mailaccount.Constants;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.mailaccount.json.actions.MailAccountActionFactory;
+import com.openexchange.mailaccount.json.actions.MailAccountActionProvider;
+import com.openexchange.mailaccount.json.actions.MailAccountActionProviderImpl;
 
 
 /**
@@ -80,6 +82,7 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        registerService(MailAccountActionProvider.class, new MailAccountActionProviderImpl());
         registerModule(MailAccountActionFactory.getInstance(), Constants.getModule());
         final BundleContext context = this.context;
         track(JSlobStorageRegistry.class, new ServiceTrackerCustomizer<JSlobStorageRegistry, JSlobStorageRegistry>() {

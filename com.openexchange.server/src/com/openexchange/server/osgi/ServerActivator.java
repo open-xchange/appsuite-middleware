@@ -204,6 +204,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
+import com.openexchange.mailaccount.json.actions.MailAccountActionProvider;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.Managements;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -304,7 +305,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechFactory.class };
+        UserAgentParser.class, PasswordMechFactory.class, MailAccountActionProvider.class };
 
     private static volatile BundleContext CONTEXT;
 
