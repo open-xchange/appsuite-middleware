@@ -51,7 +51,6 @@ package com.openexchange.mailaccount.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.Initialization;
@@ -82,7 +81,6 @@ public final class MailAccountStorageInit implements Initialization {
             return;
         }
         // Simulate bundle start
-        ServerServiceRegistry.getInstance().addService(MailAccountFacade.class, new MailAccountFacadeImpl());
         ServerServiceRegistry.getInstance().addService(MailAccountStorageService.class, newMailAccountStorageService());
         ServerServiceRegistry.getInstance().addService(UnifiedInboxManagement.class, newUnifiedINBOXManagement());
         DeleteListenerRegistry.initInstance();
