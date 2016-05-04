@@ -94,6 +94,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
+import com.openexchange.servlet.StatusKnowing;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
@@ -103,6 +104,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.StatusKnowingHttpServletResponse;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -424,7 +426,10 @@ public class DispatcherServlet extends SessionServlet {
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         */
+
+        // Disable caching and create wrapper
         Tools.disableCaching(httpResponse);
+        HttpServletResponse httpResp = StatusKnowing.class.isInstance(httpResponse) ? httpResponse : new StatusKnowingHttpServletResponse(httpResponse);
 
         ServerSession session = null;
         AJAXState state = null;
@@ -432,7 +437,7 @@ public class DispatcherServlet extends SessionServlet {
         Exception exc = null;
         Dispatcher dispatcher = DISPATCHER.get();
         try {
-            AJAXRequestData requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
+            AJAXRequestData requestData = initializeRequestData(httpRequest, httpResp, preferStream);
 
             // Acquire session
             session = requestData.getSession();
@@ -448,7 +453,7 @@ public class DispatcherServlet extends SessionServlet {
             result = dispatcher.perform(requestData, state, requestData.getSession());
 
             // Render the request's result
-            if (renderResponse(requestData, result, httpRequest, httpResponse)) {
+            if (renderResponse(requestData, result, httpRequest, httpResp)) {
                 /*-
                  * A common result
                  *
@@ -458,14 +463,14 @@ public class DispatcherServlet extends SessionServlet {
                 /*
                  * ... and send response
                  */
-                sendResponse(requestData, result, httpRequest, httpResponse);
+                sendResponse(requestData, result, httpRequest, httpResp);
             }
         } catch (UploadException e) {
             exc = e;
             if (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e)) {
                 // An upload failed
                 if (null == session || !Client.OX6_UI.getClientId().equals(session.getClient())) {
-                    httpResponse.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(getLocaleFrom(session, Locale.US)));
+                    httpResp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(getLocaleFrom(session, Locale.US)));
                     logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
                     return;
                 }
@@ -474,14 +479,14 @@ public class DispatcherServlet extends SessionServlet {
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
-            handleOXException(e, httpRequest, httpResponse);
+            handleOXException(e, httpRequest, httpResp);
         } catch (OXException e) {
             exc = e;
             Locale locale = getLocaleFrom(session, null);
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
-            handleOXException(e, httpRequest, httpResponse);
+            handleOXException(e, httpRequest, httpResp);
         } catch (RuntimeException e) {
             exc = e;
             logException(e);
@@ -490,7 +495,7 @@ public class DispatcherServlet extends SessionServlet {
             if (null != locale) {
                 oxe.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
-            super.handleOXException(oxe, httpRequest, httpResponse, false, false);
+            super.handleOXException(oxe, httpRequest, httpResp, false, false);
         } finally {
             Dispatchers.signalDone(result, exc);
             if (null != state) {

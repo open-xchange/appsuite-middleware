@@ -59,10 +59,12 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
 import org.json.JSONValue;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
+import com.openexchange.servlet.StatusKnowing;
 
 /**
  * {@link AJAXRequestResult} - Simple container for a {@link JSONValue result}.
@@ -384,7 +386,19 @@ public class AJAXRequestResult {
     public void signalDone(Exception e) {
         for (AJAXRequestResultPostProcessor postProcessor; (postProcessor = this.postProcessors.poll()) != null;) {
             try {
-                postProcessor.doPostProcessing(requestData, this, e);
+                Exception exc = e;
+                AJAXRequestData requestData = this.requestData;
+                if (null == exc && null != requestData) {
+                    HttpServletResponse servletResponse = requestData.optHttpServletResponse();
+                    if (servletResponse instanceof StatusKnowing) {
+                        int status = ((StatusKnowing) servletResponse).getStatus();
+                        if ((status >= 400 && status <= 499) || (status >= 500 && status <= 599)) {
+                            // Assume error was returned
+                            exc = new HttpErrorCodeException(status);
+                        }
+                    }
+                }
+                postProcessor.doPostProcessing(requestData, this, exc);
             } catch (Exception x) {
                 org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);
                 logger.warn("'{}' failed to perform post-processing", postProcessor.getClass().getName(), x);

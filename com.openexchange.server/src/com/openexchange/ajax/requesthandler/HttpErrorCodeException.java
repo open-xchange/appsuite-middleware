@@ -51,27 +51,39 @@ package com.openexchange.ajax.requesthandler;
 
 
 /**
- * {@link AJAXRequestResultPostProcessor} - A processor for an {@link AJAXRequestResult} instance that performs post-processing tasks.
- * <p>
- * A post-processor is added to an instance of {@code AJAXRequestResult} using the
- * {@link AJAXRequestResult#addPostProcessor(AJAXRequestResultPostProcessor) addPostProcessor} method when currently executing the
- * {@link AJAXActionService#perform(AJAXRequestData, com.openexchange.tools.session.ServerSession) perform} routine of an
- * {@code AJAXActionService} instance.
- * <p>
- * Special {@link HttpErrorCodeException} might be passed in case HTTP flow terminated without an error, but an HHTP error code was returned
- * to the client.
+ * {@link HttpErrorCodeException} - A special exception signaling an HTTP error code.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface AJAXRequestResultPostProcessor {
+public class HttpErrorCodeException extends Exception {
+
+    private static final long serialVersionUID = -4650371611189986875L;
+
+    private final int statusCode;
 
     /**
-     * Invoked if associated {@link AJAXRequestResult} instance is done and this processor's post-processing tasks are ready being performed.
+     * Initializes a new {@link HttpErrorCodeException}.
      *
-     * @param requestData The request data associated with the result or <code>null</code>
-     * @param requestResult The request result that is done
-     * @param e The exception (or <code>HttpErrorCodeException</code>) that caused termination, or <code>null</code> if execution completed normally
+     * @param statusCode The HTTP status code signaling an error
      */
-    void doPostProcessing(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
+    public HttpErrorCodeException(int statusCode) {
+        super("HTTP error code");
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * Gets the HTTP status code
+     *
+     * @return The status code
+     */
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+        return this;
+    }
+
 }

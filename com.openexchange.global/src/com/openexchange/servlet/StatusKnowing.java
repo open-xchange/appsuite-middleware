@@ -47,31 +47,22 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.servlet;
 
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * {@link AJAXRequestResultPostProcessor} - A processor for an {@link AJAXRequestResult} instance that performs post-processing tasks.
- * <p>
- * A post-processor is added to an instance of {@code AJAXRequestResult} using the
- * {@link AJAXRequestResult#addPostProcessor(AJAXRequestResultPostProcessor) addPostProcessor} method when currently executing the
- * {@link AJAXActionService#perform(AJAXRequestData, com.openexchange.tools.session.ServerSession) perform} routine of an
- * {@code AJAXActionService} instance.
- * <p>
- * Special {@link HttpErrorCodeException} might be passed in case HTTP flow terminated without an error, but an HHTP error code was returned
- * to the client.
+ * {@link StatusKnowing} - Extends <code>HttpServletResponse</code> ny {@link #getStatus()} method.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface AJAXRequestResultPostProcessor {
+public interface StatusKnowing extends HttpServletResponse {
 
     /**
-     * Invoked if associated {@link AJAXRequestResult} instance is done and this processor's post-processing tasks are ready being performed.
+     * Gets the status code for this response.
      *
-     * @param requestData The request data associated with the result or <code>null</code>
-     * @param requestResult The request result that is done
-     * @param e The exception (or <code>HttpErrorCodeException</code>) that caused termination, or <code>null</code> if execution completed normally
+     * @return The status code
      */
-    void doPostProcessing(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
+    int getStatus();
 }
