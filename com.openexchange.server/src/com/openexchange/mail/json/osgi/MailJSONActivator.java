@@ -111,6 +111,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -267,7 +268,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(this));
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
-        registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));
+        registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields, this));
     }
 
     @Override
@@ -279,18 +280,20 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         SERVICES.set(null);
     }
 
-    private final class DecoratorImpl implements AJAXResultDecorator {
+    private static final class DecoratorImpl implements AJAXResultDecorator {
 
         private final MailConverter converter;
-
         private final ContactField[] fields;
+        private final ServiceLookup services;
 
         /**
          * Initializes a new {@link DecoratorImpl}.
          */
-        protected DecoratorImpl(final MailConverter converter, final ContactField[] fields) {
+        protected DecoratorImpl(MailConverter converter, ContactField[] fields, ServiceLookup services) {
+            super();
             this.converter = converter;
             this.fields = fields;
+            this.services = services;
         }
 
         @Override
@@ -305,28 +308,30 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         @Override
         public void decorate(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
-            final Object resultObject = result.getResultObject();
+            Object resultObject = result.getResultObject();
             if (null == resultObject) {
                 LOG.warn("Result object is null.");
                 result.setResultObject(JSONObject.NULL, "json");
                 return;
             }
-            final String action = requestData.getAction();
-            if ("get".equals(action) && resultObject instanceof MailMessage) {
+
+            if ("get".equals(requestData.getAction()) && (resultObject instanceof MailMessage)) {
                 try {
-                    final MailMessage mailMessage = (MailMessage) resultObject;
-                    final InternetAddress[] from = mailMessage.getFrom();
+                    MailMessage mailMessage = (MailMessage) resultObject;
+                    InternetAddress[] from = mailMessage.getFrom();
                     if (null == from || 0 == from.length) {
                         return;
                     }
-                    /*
-                     * discover image URL for 'from' address
-                     */
+
+                    // Discover image URL for 'from' address
+                    ContactService contactService = services.getService(ContactService.class);
+                    if (null == contactService) {
+                        return;
+                    }
                     SearchIterator<Contact> searchIterator = null;
                     String imageURL = null;
                     try {
-                        searchIterator = getService(ContactService.class).searchContacts(
-                            session, createContactSearchObject(from[0]), fields, new SortOptions(ContactField.FOLDER_ID, Order.ASCENDING));
+                        searchIterator = contactService.searchContacts(session, createContactSearchObject(from[0]), fields, new SortOptions(ContactField.FOLDER_ID, Order.ASCENDING));
                         if (null != searchIterator) {
                             while (null == imageURL && searchIterator.hasNext()) {
                                 final Contact contact = searchIterator.next();
@@ -334,19 +339,16 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                             }
                         }
                     } finally {
-                        if (null != searchIterator) {
-                            searchIterator.close();
-                        }
+                        SearchIterators.close(searchIterator);
                     }
-                    /*
-                     * convert to JSON, decorate with image URL
-                     */
+
+                    // Convert to JSON, decorate with image URL
                     converter.convert2JSON(requestData, result, session);
-                    final JSONArray fromImageURLs = new JSONArray();
+                    JSONArray fromImageURLs = new JSONArray(2);
                     if (null != imageURL) {
                         fromImageURLs.put(imageURL);
                     }
-                    ((JSONObject)result.getResultObject()).put("from_image_urls", fromImageURLs);
+                    ((JSONObject) result.getResultObject()).put("from_image_urls", fromImageURLs);
                 } catch (final JSONException e) {
                     throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
                 }
