@@ -52,6 +52,11 @@ package com.openexchange.ajax.requesthandler;
 
 /**
  * {@link AJAXRequestResultPostProcessor} - A processor for an {@link AJAXRequestResult} instance that performs post-processing tasks.
+ * <p>
+ * A post-processor is added to an instance of {@code AJAXRequestResult} using the
+ * {@link AJAXRequestResult#addPostProcessor(AJAXRequestResultPostProcessor) addPostProcessor} method when currently executing the
+ * {@link AJAXActionService#perform(AJAXRequestData, com.openexchange.tools.session.ServerSession) perform} routine of an
+ * {@code AJAXActionService} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
