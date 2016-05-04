@@ -58,8 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,10 +83,9 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException, JSONException {
         final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountFacade mailAccountFacade = getMailAccountFacade();
 
-        final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+        final MailAccount mailAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
 
         if (isUnifiedINBOXAccount(mailAccount)) {
             // Treat as no hit

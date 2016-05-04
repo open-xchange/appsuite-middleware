@@ -47,62 +47,71 @@
  *
  */
 
-package com.openexchange.mailaccount.json.actions;
+package com.openexchange.mailaccount.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONValue;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.sql.Connection;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountFacade;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link ListAction}
+ * {@link MailAccountFacadeImpl}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
  */
-public final class ListAction extends AbstractMailAccountAction {
+public class MailAccountFacadeImpl implements MailAccountFacade {
 
-    public static final String ACTION = AJAXServlet.ACTION_LIST;
-
-    /**
-     * Initializes a new {@link ListAction}.
-     */
-    public ListAction() {
-        super();
+    private static MailAccountStorageService getStorageService() {
+        return ServerServiceRegistry.getServize(MailAccountStorageService.class);
     }
 
     @Override
-    protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
-        final String colString = requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+    public void deleteMailAccount(int accountId, Map<String, Object> properties, int userId, int contextId) throws OXException {
+        getStorageService().deleteMailAccount(accountId, properties, userId, contextId);
+    }
 
-        final List<Attribute> attributes = getColumns(colString);
-        final MailAccountFacade mailAccountFacade = getMailAccountFacade();
+    @Override
+    public MailAccount getDefaultMailAccount(int userId, int contextId) throws OXException {
+        return getStorageService().getDefaultMailAccount(userId, contextId);
+    }
 
-        final JSONArray ids = jData.toArray();
-        final int len = ids.length();
-        final boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
-        final List<MailAccount> accounts = new ArrayList<MailAccount>(len);
+    @Override
+    public MailAccount getMailAccount(int accountId, int userId, int contextId) throws OXException {
+        return getStorageService().getMailAccount(accountId, userId, contextId);
+    }
 
-        for (int i = 0, size = len; i < size; i++) {
-            final int id = ids.getInt(i);
-            final MailAccount account = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
-            if (!isUnifiedINBOXAccount(account) && (multipleEnabled || isDefaultMailAccount(account))) {
-                accounts.add(account);
-                // accounts.add(checkFullNames(account, storageService, session));
-            }
-        }
+    @Override
+    public MailAccount getMailAccount(int accountId, int userId, int contextId, Connection con) throws OXException {
+        return getStorageService().getMailAccount(accountId, userId, contextId, con);
+    }
 
-        return new AJAXRequestResult(MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes, session));
+    @Override
+    public MailAccount[] getUserMailAccounts(int userId, int contextId) throws OXException {
+        return getStorageService().getUserMailAccounts(userId, contextId);
+    }
+
+    @Override
+    public int insertMailAccount(MailAccountDescription mailAccount, int userId, Context context, ServerSession session, Connection wcon) throws OXException {
+        return getStorageService().insertMailAccount(mailAccount, userId, context, session, wcon);
+    }
+
+    @Override
+    public void invalidateMailAccounts(int userId, int contextId) throws OXException {
+        getStorageService().invalidateMailAccounts(userId, contextId);
+    }
+
+    @Override
+    public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, ServerSession session, Connection wcon, boolean changePrimary) throws OXException {
+        getStorageService().updateMailAccount(mailAccount, attributes, userId, contextId, session, wcon, changePrimary);
     }
 
 }

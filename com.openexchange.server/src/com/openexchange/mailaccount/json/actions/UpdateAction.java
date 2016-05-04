@@ -86,13 +86,12 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -171,11 +170,10 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             }
         }
 
-        // Acquire storage service
-        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountFacade mailAccountFacade = getMailAccountFacade();
 
         // Get & check the account to update
-        final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), contextId);
+        final MailAccount toUpdate = mailAccountFacade.getMailAccount(id, session.getUserId(), contextId);
         if (isUnifiedINBOXAccount(toUpdate)) {
             // Treat as no hit
             throw MailAccountExceptionCodes.NOT_FOUND.create(Integer.valueOf(id), Integer.valueOf(session.getUserId()), Integer.valueOf(contextId));
@@ -224,7 +222,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 rollback = true;
 
                 // Invoke update
-                storageService.updateMailAccount(accountDescription, fieldsToUpdate, session.getUserId(), contextId, session, wcon, false);
+                mailAccountFacade.updateMailAccount(accountDescription, fieldsToUpdate, session.getUserId(), contextId, session, wcon, false);
 
                 // Clear standard folder information from session caches
                 {
@@ -240,11 +238,11 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 }
 
                 // Reload
-                updatedAccount = storageService.getMailAccount(id, session.getUserId(), contextId, wcon);
+                updatedAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), contextId, wcon);
 
                 // Any standard folders changed?
                 if ((null != updatedAccount) && (fieldsToUpdate.removeAll(DEFAULT))) {
-                    updatedAccount = checkFullNames(updatedAccount, storageService, session, wcon, null);
+                    updatedAccount = checkFullNames(updatedAccount, mailAccountFacade, session, wcon, null);
                 }
 
                 // Clear POP3 account's time stamp
@@ -293,7 +291,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         // Write to JSON structure
         final JSONObject jsonAccount;
         if (null == updatedAccount) {
-            jsonAccount = MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
+            jsonAccount = MailAccountWriter.write(mailAccountFacade.getMailAccount(id, session.getUserId(), contextId));
         } else {
             jsonAccount = MailAccountWriter.write(updatedAccount);
         }

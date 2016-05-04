@@ -62,9 +62,8 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -94,10 +93,8 @@ public final class AllAction extends AbstractMailAccountAction {
 
         final List<Attribute> attributes = getColumns(colString);
 
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-
-        MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+        final MailAccountFacade mailAccountFacade = getMailAccountFacade();
+        MailAccount[] userMailAccounts = mailAccountFacade.getUserMailAccounts(session.getUserId(), session.getContextId());
 
         final boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
         final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);

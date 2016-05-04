@@ -202,7 +202,7 @@ public final class Tools {
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session) throws OXException {
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountFacade mailAccountFacade, final Session session) throws OXException {
         if (MailAccount.DEFAULT_ID == account.getId()) {
             /*
              * No check for primary account
@@ -213,7 +213,7 @@ public final class Tools {
         final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
         final Connection wcon = databaseService.getWritable(contextId);
         try {
-            return checkFullNames(account, storageService, session, wcon, null);
+            return checkFullNames(account, mailAccountFacade, session, wcon, null);
         } finally {
             databaseService.backWritable(contextId, wcon);
         }
@@ -230,7 +230,7 @@ public final class Tools {
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session, final Connection con, final Map<String, String> folderNames) throws OXException {
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountFacade mailAccountFacade, final Session session, final Connection con, final Map<String, String> folderNames) throws OXException {
 
         Map<String, String> given_names = folderNames;
         if (null == given_names) {
@@ -277,7 +277,7 @@ public final class Tools {
                 String name = account.getConfirmedHam();
                 if (null == name) {
                     locale = serverSession.getUser().getLocale();
-                    primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
+                    primaryAccount = mailAccountFacade.getDefaultMailAccount(userId, contextId);
                     name = getName(StorageUtility.INDEX_CONFIRMED_HAM, primaryAccount, locale, Policy.BY_LOCALE);
 
                     mad.setConfirmedHam(name);
@@ -305,7 +305,7 @@ public final class Tools {
                         locale = serverSession.getUser().getLocale();
                     }
                     if (null == primaryAccount) {
-                        primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
+                        primaryAccount = mailAccountFacade.getDefaultMailAccount(userId, contextId);
                     }
                     name = getName(StorageUtility.INDEX_CONFIRMED_SPAM, primaryAccount, locale, Policy.BY_LOCALE);
 
@@ -487,14 +487,14 @@ public final class Tools {
                 final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
                 final Connection wcon = databaseService.getWritable(contextId);
                 try {
-                    storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, wcon, false);
-                    return storageService.getMailAccount(accountId, userId, contextId, con);
+                    mailAccountFacade.updateMailAccount(mad, attributes, userId, contextId, serverSession, wcon, false);
+                    return mailAccountFacade.getMailAccount(accountId, userId, contextId, con);
                 } finally {
                     databaseService.backWritable(contextId, wcon);
                 }
             }
-            storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
-            return storageService.getMailAccount(accountId, userId, contextId, con);
+            mailAccountFacade.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
+            return mailAccountFacade.getMailAccount(accountId, userId, contextId, con);
         } catch (final OXException e) {
             /*
              * Checking full names failed

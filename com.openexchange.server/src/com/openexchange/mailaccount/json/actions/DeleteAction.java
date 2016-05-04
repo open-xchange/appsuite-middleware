@@ -62,8 +62,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -108,14 +107,13 @@ public final class DeleteAction extends AbstractMailAccountAction {
                     }
                 }
             }
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            final MailAccountFacade mailAccountFacade = getMailAccountFacade();
             for (int i = 0; i < len; i++) {
                 final int id = jsonArray.getInt(i);
-                final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+                final MailAccount mailAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
 
                 if (!isUnifiedINBOXAccount(mailAccount)) {
-                    storageService.deleteMailAccount(
+                    mailAccountFacade.deleteMailAccount(
                         id,
                         Collections.<String, Object> emptyMap(),
                         session.getUserId(),
