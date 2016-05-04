@@ -195,9 +195,9 @@ public class AJAXRequestResult {
     public static final Object DIRECT_OBJECT = new Object();
 
     /**
-     * Cleans-up specified request result.
+     * Triggers post-processing for specified request result.
      *
-     * @param requestResult The request result to clean-up or <code>null</code>
+     * @param requestResult The request result or <code>null</code>
      */
     public static void signalDone(@Nullable AJAXRequestResult requestResult) {
         if (null != requestResult) {
@@ -239,8 +239,8 @@ public class AJAXRequestResult {
 
     private int httpStatusCode;
 
-    /** The clean-up tasks */
-    private final @NonNull Queue<AJAXRequestResultListener> listeners;
+    /** The post-processing tasks */
+    private final @NonNull Queue<AJAXRequestResultPostProcessor> postProcessors;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -294,7 +294,7 @@ public class AJAXRequestResult {
         headers = new LinkedHashMap<String, String>(8);
         parameters = new HashMap<String, Object>(8);
         responseProperties = new HashMap<String, Object>(4);
-        listeners = new LinkedList<AJAXRequestResultListener>();
+        postProcessors = new LinkedList<AJAXRequestResultPostProcessor>();
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
         this.format = null == format ? JSON : format;
         if ("direct".equals(format)) {
@@ -324,7 +324,7 @@ public class AJAXRequestResult {
         resultObject = other.resultObject;
         resultType = other.resultType;
         timestamp = other.timestamp;
-        listeners = new LinkedList<AJAXRequestResultListener>(other.listeners);
+        postProcessors = new LinkedList<AJAXRequestResultPostProcessor>(other.postProcessors);
 
         if(other.headers != null) {
             headers =  new LinkedHashMap<String, String>(other.headers);
@@ -354,26 +354,26 @@ public class AJAXRequestResult {
     /**
      * Adds specified listener.
      *
-     * @param listener The listener
-     * @return This instance
+     * @param postProcessor The post processor
+     * @return This result instance
      */
-    public @NonNull AJAXRequestResult addListener(AJAXRequestResultListener listener) {
-        if (null != listener) {
-            this.listeners.offer(listener);
+    public @NonNull AJAXRequestResult addPostProcessor(AJAXRequestResultPostProcessor postProcessor) {
+        if (null != postProcessor) {
+            this.postProcessors.offer(postProcessor);
         }
         return this;
     }
 
     /**
-     * Cleans-up this instance.
+     * Triggers post-processing for this instance.
      */
     public void signalDone() {
-        for (AJAXRequestResultListener listener; (listener = this.listeners.poll()) != null;) {
+        for (AJAXRequestResultPostProcessor postProcessor; (postProcessor = this.postProcessors.poll()) != null;) {
             try {
-                listener.done(this);
+                postProcessor.doPostProcessing(this);
             } catch (Exception e) {
                 org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);
-                logger.warn("'{}' failed to perform 'done'", listener.getClass().getName(), e);
+                logger.warn("'{}' failed to perform post-processing", postProcessor.getClass().getName(), e);
             }
         }
     }

@@ -51,17 +51,17 @@ package com.openexchange.ajax.requesthandler;
 
 
 /**
- * {@link AJAXRequestResultListener} - A listener for an {@link AJAXRequestResult} instance.
+ * {@link AJAXRequestResultPostProcessor} - A processor for an {@link AJAXRequestResult} instance that performs post-processing tasks.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface AJAXRequestResultListener {
+public interface AJAXRequestResultPostProcessor {
 
     /**
-     * Invoked if associated {@link AJAXRequestResult} instance is done.
+     * Invoked if associated {@link AJAXRequestResult} instance is done and this processor's post-processing tasks are ready being performed.
      *
      * @param requestResult The request result that is done
      */
-    void done(AJAXRequestResult requestResult);
+    void doPostProcessing(AJAXRequestResult requestResult);
 }
