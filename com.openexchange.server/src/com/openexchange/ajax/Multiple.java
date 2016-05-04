@@ -455,6 +455,7 @@ public class Multiple extends SessionServlet {
                 final AJAXRequestData request = parse(req, moduleCandidate.toString(), module.substring(moduleCandidate.length()), action, jsonObj, session, Tools.considerSecure(req));
                 jsonWriter.object();
                 AJAXRequestResult requestResult = null;
+                Exception exc = null;
                 try {
                     if (action == null || action.length() == 0) {
                     	request.setAction("GET"); // Backwards Compatibility
@@ -481,18 +482,20 @@ public class Multiple extends SessionServlet {
                     if (false == requestResult.getWarnings().isEmpty()) {
                         ResponseWriter.writeWarnings(new ArrayList<OXException>(requestResult.getWarnings()), jsonWriter, localeFrom(session));
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
+                    exc = e;
                     logError(e.getMessage(), session, e);
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
                     return state;
-                } catch (final RuntimeException rte) {
+                } catch (RuntimeException rte) {
+                    exc = rte;
                     logError(rte.getMessage(), session, rte);
                     final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
                     return state;
                 } finally {
                 	jsonWriter.endObject();
-                	AJAXRequestResult.signalDone(requestResult);
+                	Dispatchers.signalDone(requestResult, exc);
                 }
                 return state;
             }

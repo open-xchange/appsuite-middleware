@@ -49,26 +49,37 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import java.util.Queue;
 
 /**
- * {@link AJAXRequestResultPostProcessor} - A processor for an {@link AJAXRequestResult} instance that performs post-processing tasks.
- * <p>
- * A post-processor is added to an instance of {@code AJAXRequestResult} using the
- * {@link AJAXRequestResult#addPostProcessor(AJAXRequestResultPostProcessor) addPostProcessor} method when currently executing the
- * {@link AJAXActionService#perform(AJAXRequestData, com.openexchange.tools.session.ServerSession) perform} routine of an
- * {@code AJAXActionService} instance.
+ * {@link DispatcherListenerPostProcessor} - The special post-processor triggering dispatcher listeners for final call-back.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface AJAXRequestResultPostProcessor {
+public class DispatcherListenerPostProcessor implements AJAXRequestResultPostProcessor {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DispatcherListenerPostProcessor.class);
+
+    private final Queue<DispatcherListener> dispatcherListeners;
 
     /**
-     * Invoked if associated {@link AJAXRequestResult} instance is done and this processor's post-processing tasks are ready being performed.
-     *
-     * @param requestData The request data associated with the result or <code>null</code>
-     * @param requestResult The request result that is done
-     * @param e The exception that caused termination, or <code>null</code> if execution completed normally
+     * Initializes a new {@link DispatcherListenerPostProcessor}.
      */
-    void doPostProcessing(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
+    public DispatcherListenerPostProcessor(Queue<DispatcherListener> dispatcherListeners) {
+        super();
+        this.dispatcherListeners = dispatcherListeners;
+    }
+
+    @Override
+    public void doPostProcessing(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
+        for (DispatcherListener dispatcherListener : dispatcherListeners) {
+            try {
+                dispatcherListener.onResultRendered(requestData, requestResult, e);
+            } catch (Exception x) {
+                LOG.error("Failed to execute dispatcher listener {}", dispatcherListener.getClass().getSimpleName(), x);
+            }
+        }
+    }
+
 }

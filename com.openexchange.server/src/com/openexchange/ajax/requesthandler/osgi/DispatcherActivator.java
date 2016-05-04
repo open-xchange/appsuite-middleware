@@ -69,6 +69,7 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.DispatcherListener;
 import com.openexchange.ajax.requesthandler.DispatcherNotesProcessor;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.Dispatchers;
@@ -354,6 +355,20 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
 			}
 		});
+
+        track(DispatcherListener.class, new SimpleRegistryListener<DispatcherListener>() {
+
+            @Override
+            public void added(ServiceReference<DispatcherListener> ref, DispatcherListener listener) {
+                dispatcher.addDispatcherListener(listener);
+            }
+
+            @Override
+            public void removed(ServiceReference<DispatcherListener> ref, DispatcherListener listener) {
+                dispatcher.removeDispatcherListener(listener);
+
+            }
+        });
 
         openTrackers();
 

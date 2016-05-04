@@ -194,17 +194,6 @@ public class AJAXRequestResult {
      */
     public static final Object DIRECT_OBJECT = new Object();
 
-    /**
-     * Triggers post-processing for specified request result.
-     *
-     * @param requestResult The request result or <code>null</code>
-     */
-    public static void signalDone(@Nullable AJAXRequestResult requestResult) {
-        if (null != requestResult) {
-            requestResult.signalDone();
-        }
-    }
-
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     private @NonNull ResultType resultType;
@@ -241,6 +230,8 @@ public class AJAXRequestResult {
 
     /** The post-processing tasks */
     private final @NonNull Queue<AJAXRequestResultPostProcessor> postProcessors;
+
+    private @Nullable AJAXRequestData requestData;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -324,6 +315,7 @@ public class AJAXRequestResult {
         resultObject = other.resultObject;
         resultType = other.resultType;
         timestamp = other.timestamp;
+        requestData = other.requestData;
         postProcessors = new LinkedList<AJAXRequestResultPostProcessor>(other.postProcessors);
 
         if(other.headers != null) {
@@ -352,6 +344,26 @@ public class AJAXRequestResult {
     }
 
     /**
+     * Sets the associated request data
+     *
+     * @param requestData The request data to set
+     * @return This result instance
+     */
+    public AJAXRequestResult setRequestData(AJAXRequestData requestData) {
+        this.requestData = requestData;
+        return this;
+    }
+
+    /**
+     * Gets the request data
+     *
+     * @return The request data or <code>null</code>
+     */
+    public @Nullable AJAXRequestData getRequestData() {
+        return requestData;
+    }
+
+    /**
      * Adds specified listener.
      *
      * @param postProcessor The post processor
@@ -366,14 +378,16 @@ public class AJAXRequestResult {
 
     /**
      * Triggers post-processing for this instance.
+     *
+     * @param e The exception that caused termination, or <code>null</code> if execution completed normally
      */
-    public void signalDone() {
+    public void signalDone(Exception e) {
         for (AJAXRequestResultPostProcessor postProcessor; (postProcessor = this.postProcessors.poll()) != null;) {
             try {
-                postProcessor.doPostProcessing(this);
-            } catch (Exception e) {
+                postProcessor.doPostProcessing(requestData, this, e);
+            } catch (Exception x) {
                 org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);
-                logger.warn("'{}' failed to perform post-processing", postProcessor.getClass().getName(), e);
+                logger.warn("'{}' failed to perform post-processing", postProcessor.getClass().getName(), x);
             }
         }
     }

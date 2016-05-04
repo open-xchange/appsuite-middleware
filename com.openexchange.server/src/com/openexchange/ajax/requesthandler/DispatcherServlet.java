@@ -429,6 +429,7 @@ public class DispatcherServlet extends SessionServlet {
         ServerSession session = null;
         AJAXState state = null;
         AJAXRequestResult result = null;
+        Exception exc = null;
         Dispatcher dispatcher = DISPATCHER.get();
         try {
             AJAXRequestData requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
@@ -460,6 +461,7 @@ public class DispatcherServlet extends SessionServlet {
                 sendResponse(requestData, result, httpRequest, httpResponse);
             }
         } catch (UploadException e) {
+            exc = e;
             if (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e)) {
                 // An upload failed
                 if (null == session || !Client.OX6_UI.getClientId().equals(session.getClient())) {
@@ -474,12 +476,14 @@ public class DispatcherServlet extends SessionServlet {
             }
             handleOXException(e, httpRequest, httpResponse);
         } catch (OXException e) {
+            exc = e;
             Locale locale = getLocaleFrom(session, null);
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
             handleOXException(e, httpRequest, httpResponse);
         } catch (RuntimeException e) {
+            exc = e;
             logException(e);
             OXException oxe = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             Locale locale = getLocaleFrom(session, null);
@@ -488,7 +492,7 @@ public class DispatcherServlet extends SessionServlet {
             }
             super.handleOXException(oxe, httpRequest, httpResponse, false, false);
         } finally {
-            AJAXRequestResult.signalDone(result);
+            Dispatchers.signalDone(result, exc);
             if (null != state) {
                 dispatcher.end(state);
             }

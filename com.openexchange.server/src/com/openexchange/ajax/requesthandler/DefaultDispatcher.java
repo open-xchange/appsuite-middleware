@@ -62,6 +62,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
@@ -101,6 +102,10 @@ public class DefaultDispatcher implements Dispatcher {
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
     private final Queue<AJAXActionAnnotationProcessor> annotationProcessors;
 
+    private final AtomicBoolean hasAnyListener;
+    private final Queue<DispatcherListener> dispatcherListeners;
+    private final DispatcherListenerPostProcessor listenerPostProcessor;
+
     /**
      * Initializes a new {@link DefaultDispatcher}.
      */
@@ -114,6 +119,11 @@ public class DefaultDispatcher implements Dispatcher {
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>(64, 0.9f, 1);
         customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
         annotationProcessors = new ConcurrentLinkedQueue<AJAXActionAnnotationProcessor>();
+
+        hasAnyListener = new AtomicBoolean(false);
+        ConcurrentLinkedQueue<DispatcherListener> dispatcherListeners = new ConcurrentLinkedQueue<DispatcherListener>();
+        this.dispatcherListeners = dispatcherListeners;
+        listenerPostProcessor = new DispatcherListenerPostProcessor(dispatcherListeners);
     }
 
     @Override
@@ -196,10 +206,11 @@ public class DefaultDispatcher implements Dispatcher {
             AJAXRequestResult result = callAction(action, modifiedRequestData, session);
             if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
                 // No further processing
-                return result;
+                return contributeDispatcherListeners(result);
             }
 
-            return customizeResult(modifiedRequestData, result, customizers, session);
+            result = customizeResult(modifiedRequestData, result, customizers, session);
+            return contributeDispatcherListeners(result);
         } catch (OXException e) {
             for (AJAXActionCustomizer customizer : customizers) {
                 if (customizer instanceof AJAXExceptionHandler) {
@@ -271,7 +282,7 @@ public class DefaultDispatcher implements Dispatcher {
             modifiedRequestData.cleanUploads();
         }
 
-        return result;
+        return result.setRequestData(modifiedRequestData);
     }
 
     private void before(AJAXRequestData requestData) throws OXException {
@@ -404,6 +415,13 @@ public class DefaultDispatcher implements Dispatcher {
         customizers.clear();
         customizers.addAll(outgoing);
         return modifiedRequestData;
+    }
+
+    private AJAXRequestResult contributeDispatcherListeners(AJAXRequestResult requestResult) {
+        if (null != requestResult && hasAnyListener.get()) {
+            requestResult.addPostProcessor(listenerPostProcessor);
+        }
+        return requestResult;
     }
 
     /**
@@ -630,9 +648,32 @@ public class DefaultDispatcher implements Dispatcher {
 
     /**
      * Removes the specified customizer factory
+     *
+     * @param factory The customizer factory
      */
     public void removeCustomizer(AJAXActionCustomizerFactory factory) {
         this.customizerFactories.remove(factory);
+    }
+
+    /**
+     * Adds specified dispatcher listener.
+     *
+     * @param listener The listener
+     */
+    public synchronized void addDispatcherListener(DispatcherListener listener) {
+        dispatcherListeners.add(listener);
+        hasAnyListener.set(true);
+    }
+
+    /**
+     * Removes the specified dispatcher listener.
+     *
+     * @param listener The listener
+     */
+    public synchronized void removeDispatcherListener(DispatcherListener listener) {
+        Queue<DispatcherListener> dispatcherListeners = this.dispatcherListeners;
+        dispatcherListeners.remove(listener);
+        hasAnyListener.set(!dispatcherListeners.isEmpty());
     }
 
     /**

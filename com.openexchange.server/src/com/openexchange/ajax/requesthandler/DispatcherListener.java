@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,69 +49,21 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.io.Closeable;
 
 /**
- * {@link DispatcherResult} - A closeable dispatcher result.
+ * {@link DispatcherListener} - A listener which receives various call-backs during a {@link Dispatcher} processing.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class DispatcherResult implements Closeable {
-
-    private final AJAXRequestData requestData;
-    private final AJAXRequestResult requestResult;
-    private final AJAXState state;
-    private final Dispatcher dispatcher;
+public interface DispatcherListener {
 
     /**
-     * Initializes a new {@link DispatcherResult}.
+     * Called when a result has been successfully created and an attempt was made returning it to requesting client (by responsible {@link ResponseRenderer renderer}).
      *
-     * @param requestData The AJAX request data
-     * @param requestResult The AJAX request result
-     * @param state The AJAX state
-     * @param dispatcher The dispatcher
+     * @param requestData The associated request data
+     * @param requestResult The request result that has been returned
+     * @param e The exception that caused termination, or <code>null</code> if execution completed normally
      */
-    public DispatcherResult(AJAXRequestData requestData, AJAXRequestResult requestResult, AJAXState state, Dispatcher dispatcher) {
-        super();
-        this.requestData = requestData;
-        this.requestResult = requestResult;
-        this.state = state;
-        this.dispatcher = dispatcher;
-    }
-
-    /**
-     * Gets the requestData
-     *
-     * @return The requestData
-     */
-    public AJAXRequestData getRequestData() {
-        return requestData;
-    }
-
-    /**
-     * Gets the requestResult
-     *
-     * @return The requestResult
-     */
-    public AJAXRequestResult getRequestResult() {
-        return requestResult;
-    }
-
-    /**
-     * Gets the state
-     *
-     * @return The state or <code>null</code>
-     */
-    public AJAXState getState() {
-        return state;
-    }
-
-    @Override
-    public void close() {
-        AJAXRequestResult.signalDone(requestResult);
-        if (null != state) {
-            dispatcher.end(state);
-        }
-    }
-
+    void onResultRendered(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
 }

@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.templating.TemplateErrorMessage;
@@ -132,13 +133,20 @@ public class Request {
 
         AJAXState state = null;
         AJAXRequestResult result = null;
+        Exception exc = null;
         try {
             state = dispatcher.begin();
             req.setFormat("native");
             result = dispatcher.perform(req, state, ServerSessionAdapter.valueOf(session));
             return result.getResultObject();
+        } catch (OXException e) {
+            exc = e;
+            throw e;
+        } catch (RuntimeException e) {
+            exc = e;
+            throw OXException.general(e.getMessage(), e);
         } finally {
-            AJAXRequestResult.signalDone(result);
+            Dispatchers.signalDone(result, exc);
             dispatcher.end(state);
         }
     }

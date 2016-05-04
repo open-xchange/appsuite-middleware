@@ -114,7 +114,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         }
 
         @Override
-        public void doPostProcessing(AJAXRequestResult requestResult) {
+        public void doPostProcessing(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
             newMailInterface.close();
         }
     }
