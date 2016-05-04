@@ -58,12 +58,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -170,7 +172,7 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
 
                     try {
                         cleanupSchema(contextIdInSchema, start, schemaName, databaseService);
-                        break;
+                        retry = 0;
                     } catch (OXException e) {
                         if (Category.CATEGORY_TRY_AGAIN.equals(e.getCategory()) && retry > 0) {
                             long delay = 10000 + retry * 20000;
@@ -178,7 +180,7 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
                             Thread.sleep(delay);
                         } else {
                             LOG.error("Error during periodic cleanup task for shared mail attachments for schema {}", schemaName, e);
-                            break;
+                            retry = 0;
                         }
                     }
                 }
@@ -208,19 +210,38 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
      * @param databaseService The database service to use
      */
     private void cleanupSchema(int contextIdInSchema, long threshold, String schemaName, DatabaseService databaseService) throws OXException {
-        Map<Integer, Map<Integer, List<ExpiredFolder>>> contextExpiredFolders = null;
+        Map<Integer, Map<Integer, List<ExpiredFolder>>> expiredFoldersInSchema;
+        {
+            Connection con = databaseService.getReadOnly(contextIdInSchema);
+            try {
+                expiredFoldersInSchema = determineExpiredFoldersInSchema(threshold, schemaName, con);
+            } finally {
+                databaseService.backReadOnly(contextIdInSchema, con);
+            }
+        }
 
-        Connection con = databaseService.getReadOnly(contextIdInSchema);
+        cleanupExpiredFolders(expiredFoldersInSchema, threshold);
+    }
+
+    /**
+     * Determines obsolete shared mail attachments in context-associated schema.
+     *
+     * @param threshold The threshold date
+     * @param schemaName The name of the processed database schema
+     * @param con The schema-associated connection to use
+     * @return The expired folder in given schema
+     */
+    private Map<Integer, Map<Integer, List<ExpiredFolder>>> determineExpiredFoldersInSchema(long threshold, String schemaName, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT cid, fuid, created_from, meta FROM oxfolder_tree WHERE meta LIKE '%\"expiration-date-%'");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
-                return;
+                return Collections.emptyMap();
             }
 
-            contextExpiredFolders = new LinkedHashMap<Integer, Map<Integer, List<ExpiredFolder>>>();
+            Map<Integer, Map<Integer, List<ExpiredFolder>>> expiredFoldersInSchema = new LinkedHashMap<Integer, Map<Integer, List<ExpiredFolder>>>();
             do {
                 int contextId = rs.getInt(1);
                 int fuid = rs.getInt(2);
@@ -228,10 +249,10 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
                 Map<String, Object> meta = parseMeta(rs, fuid, contextId);
                 Long millis = parseExpirationMillis(meta);
                 if ((null != millis) && (millis.longValue() < threshold)) {
-                    Map<Integer, List<ExpiredFolder>> userExpiredFolders = contextExpiredFolders.get(I(contextId));
+                    Map<Integer, List<ExpiredFolder>> userExpiredFolders = expiredFoldersInSchema.get(I(contextId));
                     if (null == userExpiredFolders) {
                         userExpiredFolders = new LinkedHashMap<>();
-                        contextExpiredFolders.put(I(contextId), userExpiredFolders);
+                        expiredFoldersInSchema.put(I(contextId), userExpiredFolders);
                     }
 
                     List<ExpiredFolder> folderIds = userExpiredFolders.get(I(owner));
@@ -242,23 +263,25 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
 
                     folderIds.add(new ExpiredFolder(fuid, meta));
                 }
-            } while (rs.next());
+            } while (rs.next() && active.get());
+            return expiredFoldersInSchema;
         } catch (OXException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, "Unexpected error during cleanup of shared mail attachments in schema \"" + schemaName + "\"");
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, "Unexpected error during cleanup of shared mail attachments in schema \"" + schemaName + "\"");
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(contextIdInSchema, con);
         }
-
-        cleanupExpiredFolders(contextExpiredFolders, threshold);
     }
 
-    private void cleanupExpiredFolders(Map<Integer, Map<Integer, List<ExpiredFolder>>> contextExpiredFolders, long threshold) throws OXException {
-        for (Map.Entry<Integer, Map<Integer, List<ExpiredFolder>>> contextEntry : contextExpiredFolders.entrySet()) {
+    private void cleanupExpiredFolders(Map<Integer, Map<Integer, List<ExpiredFolder>>> expiredFoldersInSchema, long threshold) throws OXException {
+        for (Iterator<Entry<Integer, Map<Integer, List<ExpiredFolder>>>> schemaEntryIter = expiredFoldersInSchema.entrySet().iterator(); active.get() && schemaEntryIter.hasNext();) {
+            Map.Entry<Integer, Map<Integer, List<ExpiredFolder>>> contextEntry = schemaEntryIter.next();
             int contextId = contextEntry.getKey().intValue();
-            for (Map.Entry<Integer, List<ExpiredFolder>> userEntry : contextEntry.getValue().entrySet()) {
+            for (Iterator<Entry<Integer, List<ExpiredFolder>>> ctxEntryIter = contextEntry.getValue().entrySet().iterator(); active.get() && ctxEntryIter.hasNext();) {
+                Map.Entry<Integer, List<ExpiredFolder>> userEntry = ctxEntryIter.next();
                 int userId = userEntry.getKey().intValue();
                 FakeSession session = new FakeSession(userId, contextId);
 
@@ -274,7 +297,8 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
             context.startTransaction();
             rollback = true;
 
-            for (ExpiredFolder expiredFolder : folders) {
+            for (Iterator<ExpiredFolder> it = folders.iterator(); active.get() && it.hasNext();) {
+                ExpiredFolder expiredFolder = it.next();
                 FolderID folderId = createFolderIDFor(expiredFolder.folderId);
                 SearchIterator<File> si = context.fileAccess.getDocuments(folderId.toUniqueID(), Arrays.asList(Field.ID, Field.META)).results();
                 List<String> toDelete = new LinkedList<>();

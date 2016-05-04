@@ -117,39 +117,6 @@ public class DefaultMessageGenerator implements MessageGenerator {
         super();
     }
 
-    @Override
-    public List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info) throws OXException {
-        ShareComposeLink shareLink = info.getShareLink();
-        String password = info.getPassword();
-        Date expirationDate = info.getExpirationDate();
-        Map<String, String> headers = mapFor(HEADER_SHARE_TYPE, shareLink.getType(), HEADER_SHARE_URL, shareLink.getLink());
-
-        Collection<Recipient> recipients = info.getRecipients();
-        List<ComposedMailMessage> messages = new ArrayList<>(recipients.size());
-        for (Recipient recipient : recipients) {
-            if (recipient.isUser()) {
-                messages.add(generateInternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate, headers));
-            } else {
-                messages.add(generateExternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate, headers));
-            }
-        }
-
-        return messages;
-    }
-
-    @Override
-    public ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
-        Map<String, String> headers = mapFor(HEADER_SHARE_REFERENCE, shareReference.generateReferenceString());
-        ComposedMailMessage sentMessage = generateInternalVersion(info.getRecipients().get(0), info.getComposeContext(), info.getShareLink(), info.getPassword(), info.getExpirationDate(), headers);
-        sentMessage.addUserFlag(USER_SHARE_REFERENCE);
-        return sentMessage;
-    }
-
-    @Override
-    public boolean applicableFor(ComposeRequest composeRequest) throws OXException {
-        return true;
-    }
-
     /**
      * Gets the context associated with specified session
      *
@@ -190,71 +157,13 @@ public class DefaultMessageGenerator implements MessageGenerator {
     }
 
     /**
-     * Generates the compose message for an internal recipient.
+     * Determines the locale to use when composing a message for external recipients.
      *
-     * @param recipient The internal recipient
-     * @param composeContext The associated compose context
-     * @param link The link to insert
-     * @param password The optional password
-     * @param elapsedDate The optional expiration date
-     * @param shareHeaders The optional share headers to set
-     * @return The compose message
-     * @throws OXException If compose message cannot be returned
+     * @param composeContext The compose context
+     * @return The locale for external recipients
+     * @throws OXException If locale for external recipients cannot be returned
      */
-    protected ComposedMailMessage generateInternalVersion(Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, Map<String, String> shareHeaders) throws OXException {
-        ComposedMailMessage composedMessage = Utilities.copyOfSourceMessage(composeContext);
-        Locale locale = recipient.getUser().getLocale();
-
-        // Alter text content to include share reference
-        TextBodyMailPart textPart = composeContext.getTextPart().copy();
-        textPart.setPlainText(null);
-        StringHelper stringHelper = StringHelper.valueOf(locale);
-
-        {
-            String text = (String) textPart.getContent();
-            StringBuilder textBuilder = new StringBuilder(text.length() + 512);
-            textBuilder.append(htmlFormat(stringHelper.getString(ShareComposeStrings.SHARED_ATTACHMENTS_PREFIX))).append("<br>");
-            appendLink(link, textBuilder);
-            if (password != null) {
-                textBuilder.append(htmlFormat(stringHelper.getString(ShareComposeStrings.SHARED_ATTACHMENTS_PASSWORD))).append(": ").append(htmlFormat(password)).append("<br>");
-            }
-            if (elapsedDate != null) {
-                textBuilder.append(htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION)).replaceFirst(DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br>");
-            }
-            textBuilder.append("<br>");
-            textBuilder.append(text);
-            textPart.setText(textBuilder.toString());
-            composedMessage.setBodyPart(textPart);
-        }
-
-        // Set specified recipient
-        composedMessage.addRecipient(addressFor(recipient));
-
-        // Set share headers
-        if (null != shareHeaders) {
-            for (Map.Entry<String, String> header : shareHeaders.entrySet()) {
-                composedMessage.setHeader(header.getKey(), header.getValue());
-            }
-        }
-
-        // Return composed message
-        return composedMessage;
-    }
-
-    /**
-     * Generates the compose message for an external recipient.
-     *
-     * @param recipient The external recipient
-     * @param composeContext The associated compose context
-     * @param link The link to insert
-     * @param password The optional password
-     * @param elapsedDate The optional expiration date
-     * @param shareHeaders The optional share headers to set
-     * @return The compose message
-     * @throws OXException If compose message cannot be returned
-     */
-    protected ComposedMailMessage generateExternalVersion(Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, Map<String, String> shareHeaders) throws OXException {
-        ComposedMailMessage composedMessage = Utilities.copyOfSourceMessage(composeContext);
+    protected Locale determineLocaleForExternalRecipients(ShareTransportComposeContext composeContext) throws OXException {
         Locale locale;
         {
             ServerSession session = composeContext.getSession();
@@ -268,6 +177,169 @@ public class DefaultMessageGenerator implements MessageGenerator {
                 }
             }
         }
+        return locale;
+    }
+
+    /**
+     * Checks whether this message generator is supposed to create equal messages by locale; otherwise it generates an individual message
+     * for each recipient.
+     *
+     * @return <code>true</code> for equal messages by locale; otherwise <code>false</code> to generate an individual ones
+     */
+    protected boolean equalMessagesByLocale() {
+        return true;
+    }
+
+    @Override
+    public boolean applicableFor(ComposeRequest composeRequest) throws OXException {
+        return true;
+    }
+
+    @Override
+    public List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info) throws OXException {
+        ShareComposeLink shareLink = info.getShareLink();
+        Map<String, String> headers = mapFor(HEADER_SHARE_TYPE, shareLink.getType(), HEADER_SHARE_URL, shareLink.getLink());
+        return equalMessagesByLocale() ? generateEqualMessagesByLocale(info, shareLink, headers) : generateIndividualMessages(info, shareLink, headers);
+    }
+
+    /**
+     * Generates equal messages by locale.
+     *
+     * @param info The message info providing the link and target recipients
+     * @param shareLink The share link to use
+     * @param headers The headers to apply
+     * @return The generated messages
+     * @throws OXException If messages cannot be generated
+     */
+    protected List<ComposedMailMessage> generateEqualMessagesByLocale(ShareComposeMessageInfo info, ShareComposeLink shareLink, Map<String, String> headers) throws OXException {
+        String password = info.getPassword();
+        Date expirationDate = info.getExpirationDate();
+        Collection<Recipient> recipients = info.getRecipients();
+
+        Map<Locale, ComposedMailMessage> internalMessages = new LinkedHashMap<Locale, ComposedMailMessage>(recipients.size());
+        Map<Locale, ComposedMailMessage> externalMessages = new LinkedHashMap<Locale, ComposedMailMessage>(recipients.size());
+
+        Locale localeForExternalRecipients = null;
+        for (Recipient recipient : recipients) {
+            if (recipient.isUser()) {
+                Locale locale = recipient.getUser().getLocale();
+                ComposedMailMessage composedMessage = internalMessages.get(locale);
+                if (null == composedMessage) {
+                    composedMessage = generateInternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate, headers);
+                    internalMessages.put(locale, composedMessage);
+                } else {
+                    // Adds specified recipient
+                    composedMessage.addRecipient(addressFor(recipient));
+                }
+            } else {
+                if (null == localeForExternalRecipients) {
+                    localeForExternalRecipients = determineLocaleForExternalRecipients(info.getComposeContext());
+                }
+                ComposedMailMessage composedMessage = externalMessages.get(localeForExternalRecipients);
+                if (null == composedMessage) {
+                    composedMessage = generateExternalVersion(localeForExternalRecipients, recipient, info.getComposeContext(), shareLink, password, expirationDate, headers);
+                    externalMessages.put(localeForExternalRecipients, composedMessage);
+                } else {
+                    // Adds specified recipient
+                    composedMessage.addRecipient(addressFor(recipient));
+                }
+            }
+        }
+        List<ComposedMailMessage> messages = new ArrayList<ComposedMailMessage>(internalMessages.size() + externalMessages.size());
+        messages.addAll(internalMessages.values());
+        messages.addAll(externalMessages.values());
+        return messages;
+    }
+
+    /**
+     * Generates individual messages for each recipient.
+     *
+     * @param info The message info providing the link and target recipients
+     * @param shareLink The share link to use
+     * @param headers The headers to apply
+     * @return The individually generated messages
+     * @throws OXException If messages cannot be generated
+     */
+    protected List<ComposedMailMessage> generateIndividualMessages(ShareComposeMessageInfo info, ShareComposeLink shareLink, Map<String, String> headers) throws OXException {
+        String password = info.getPassword();
+        Date expirationDate = info.getExpirationDate();
+        Collection<Recipient> recipients = info.getRecipients();
+
+        List<ComposedMailMessage> messages = new ArrayList<ComposedMailMessage>(recipients.size());
+
+        Locale localeForExternalRecipients = null;
+        for (Recipient recipient : recipients) {
+            if (recipient.isUser()) {
+                messages.add(generateInternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate, headers));
+            } else {
+                if (null == localeForExternalRecipients) {
+                    localeForExternalRecipients = determineLocaleForExternalRecipients(info.getComposeContext());
+                }
+                messages.add(generateExternalVersion(localeForExternalRecipients, recipient, info.getComposeContext(), shareLink, password, expirationDate, headers));
+            }
+        }
+        return messages;
+    }
+
+    @Override
+    public ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
+        Map<String, String> headers = mapFor(HEADER_SHARE_REFERENCE, shareReference.generateReferenceString());
+        ComposedMailMessage sentMessage = generateInternalVersion(info.getRecipients().get(0), info.getComposeContext(), info.getShareLink(), info.getPassword(), info.getExpirationDate(), headers);
+        sentMessage.addUserFlag(USER_SHARE_REFERENCE);
+        return sentMessage;
+    }
+
+    /**
+     * Generates the compose message for an internal recipient.
+     *
+     * @param recipient The internal recipient
+     * @param composeContext The associated compose context
+     * @param link The link to insert
+     * @param password The optional password
+     * @param elapsedDate The optional expiration date
+     * @param shareHeaders The optional share headers to set
+     * @return The compose message
+     * @throws OXException If compose message cannot be returned
+     */
+    protected ComposedMailMessage generateInternalVersion(Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, Map<String, String> shareHeaders) throws OXException {
+        // Generate locale-specific version using user's locale
+        Locale locale = recipient.getUser().getLocale();
+        return generateLocaleSpecificVersion(locale, recipient, composeContext, link, password, elapsedDate, shareHeaders);
+    }
+
+    /**
+     * Generates the compose message for an external recipient.
+     *
+     * @param localeForExternalRecipients The configured locale for external recipients
+     * @param recipient The external recipient
+     * @param composeContext The associated compose context
+     * @param link The link to insert
+     * @param password The optional password
+     * @param elapsedDate The optional expiration date
+     * @param shareHeaders The optional share headers to set
+     * @return The compose message
+     * @throws OXException If compose message cannot be returned
+     */
+    protected ComposedMailMessage generateExternalVersion(Locale localeForExternalRecipients, Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, Map<String, String> shareHeaders) throws OXException {
+        // Generate locale-specific version using the configured locale for external recipients
+        return generateLocaleSpecificVersion(localeForExternalRecipients, recipient, composeContext, link, password, elapsedDate, shareHeaders);
+    }
+
+    /**
+     * Generates the locale-specific compose message.
+     *
+     * @param locale The locale
+     * @param recipient The recipient
+     * @param composeContext The compose context
+     * @param link The share link to insert
+     * @param password The optional password associated with the share link
+     * @param elapsedDate The optional expiration date associated with the share link
+     * @param shareHeaders The share headers to add
+     * @return The generated message for specified locale
+     * @throws OXException If message cannot be generated
+     */
+    protected ComposedMailMessage generateLocaleSpecificVersion(Locale locale, Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, Map<String, String> shareHeaders) throws OXException {
+        ComposedMailMessage composedMessage = Utilities.copyOfSourceMessage(composeContext);
 
         // Alter text content to include share reference
         TextBodyMailPart textPart = composeContext.getTextPart().copy();

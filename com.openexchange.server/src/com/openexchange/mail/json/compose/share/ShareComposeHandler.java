@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -103,6 +104,8 @@ import com.openexchange.user.UserService;
  */
 public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportComposeContext, ShareDraftComposeContext> {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareComposeHandler.class);
+
     /**
      * Initializes a new {@link ShareComposeHandler}.
      */
@@ -140,7 +143,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         ServerSession session = composeRequest.getSession();
         boolean applicable = isEnabled(session);
         if (!applicable) {
-            throw MailExceptionCode.SHARING_NOT_POSSIBLE.create(session.getUserId(), session.getContextId());
+            throw MailExceptionCode.SHARING_NOT_POSSIBLE.create(I(session.getUserId()), I(session.getContextId()));
         }
         return applicable;
     }
@@ -164,6 +167,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     @Override
     protected ComposeTransportResult doCreateTransportResult(ComposeRequest composeRequest, ShareTransportComposeContext context) throws OXException {
         // Get the basic source message
+        ServerSession session = composeRequest.getSession();
         ComposedMailMessage source = context.getSourceMessage();
 
         // Collect recipients
@@ -194,8 +198,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
         // Optional expiration date
         Date expirationDate = getExpirationDate(composeRequest);
-        if (null == expirationDate && Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.requiredExpiration", false, context.getSession())) {
-            throw MailExceptionCode.EXPIRATION_DATE_MISSING.create(context.getSession().getUserId(), context.getSession().getContextId());
+        if (null == expirationDate && Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.requiredExpiration", false, session)) {
+            throw MailExceptionCode.EXPIRATION_DATE_MISSING.create(I(session.getUserId()), I(session.getContextId()));
         }
 
         // Optional auto-expiration of folder/files
@@ -203,7 +207,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         if (null == expirationDate) {
             filesAutoExpire = false;
         } else {
-            filesAutoExpire = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.filesAutoExpire", false, context.getSession()) || isFilesAutoExpire(composeRequest);
+            filesAutoExpire = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.filesAutoExpire", false, session) || isFilesAutoExpire(composeRequest);
         }
 
         // Determine attachment storage to use
@@ -226,13 +230,13 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             if (null == shareService) {
                 throw ServiceExceptionCode.absentService(ShareService.class);
             }
-            ShareLink folderLink = shareService.getLink(context.getSession(), folderTarget);
+            ShareLink folderLink = shareService.getLink(session, folderTarget);
 
             // Create share compose reference
             ShareReference shareReference;
             {
                 String basicShareUrl = folderLink.getShareURL(composeRequest.getRequest().getHostData());
-                shareReference = new ShareReference.Builder(context.getSession().getUserId(), context.getSession().getContextId())
+                shareReference = new ShareReference.Builder(session.getUserId(), session.getContextId())
                     .expiration(expirationDate)
                     .folderId(attachmentsControl.getFolderId())
                     .itemIds(attachmentsControl.getAttachmentIds())
@@ -281,7 +285,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                     }
                 }
 
-                String sendAddr = composeRequest.getSession().getUserSettingMail().getSendAddr();
+                String sendAddr = session.getUserSettingMail().getSendAddr();
                 User user = composeRequest.getUser();
                 Recipient userRecipient = Recipient.createInternalRecipient(user.getDisplayName(), sendAddr, user);
                 sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context), shareReference);
@@ -356,6 +360,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 return new Date(millis - offset);
             } catch (NumberFormatException e) {
                 // Else expect a date in ISO8601 format
+                LOG.trace("NaN: {}", value, e);
                 return com.openexchange.java.ISO8601Utils.parse(value);
             }
         } catch (IllegalArgumentException iso8601ParsingFailed) {

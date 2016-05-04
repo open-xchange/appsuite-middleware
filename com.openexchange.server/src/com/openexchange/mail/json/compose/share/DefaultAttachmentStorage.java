@@ -59,6 +59,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -143,7 +144,8 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             long cleanerInterval = Utilities.parseTimespanProperty("com.openexchange.mail.compose.share.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true, configService);
             if (0 < cleanerInterval) {
                 DefaultAttachmentStoragePeriodicCleaner cleaner = new DefaultAttachmentStoragePeriodicCleaner(tmp.id);
-                ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(cleaner, cleanerInterval, cleanerInterval);
+                long shiftMillis = TimeUnit.MILLISECONDS.convert((long)(Math.random() * 100), TimeUnit.MINUTES);
+                ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(cleaner, cleanerInterval + shiftMillis, cleanerInterval);
                 tmp.setCleanerInfo(cleaner, timerTask);
             }
 
