@@ -76,9 +76,11 @@ import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.log.LogProperties;
+import com.openexchange.server.services.ActionLimiterServices;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.servlet.limit.ActionLimiter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -249,12 +251,14 @@ public class DefaultDispatcher implements Dispatcher {
     private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData modifiedRequestData, ServerSession session) throws OXException {
         AJAXRequestResult result;
         try {
+            before(modifiedRequestData);
             result = action.perform(modifiedRequestData, session);
             if (null == result) {
                 // Huh...?!
                 addLogProperties(modifiedRequestData, true);
                 throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(AJAXRequestResult.class.getSimpleName(), "null");
             }
+            after(modifiedRequestData, result);
         } catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -268,6 +272,36 @@ public class DefaultDispatcher implements Dispatcher {
         }
 
         return result;
+    }
+
+    private void before(AJAXRequestData requestData) throws OXException {
+        String module = requestData.getModule();
+        String action = requestData.getAction();
+        
+        int userId = requestData.getSession().getUserId();
+        int contextId = requestData.getSession().getContextId();
+        
+        List<ActionLimiter> actionLimiter = ActionLimiterServices.getActionLimiter();
+        for (ActionLimiter limiter : actionLimiter) {
+            if (limiter.handles(module, action) && limiter.handles(contextId, userId)) {
+                limiter.check(requestData);
+            }
+        }
+    }
+
+    private void after(AJAXRequestData requestData, AJAXRequestResult result) throws OXException {
+        String module = requestData.getModule();
+        String action = requestData.getAction();
+        
+        int userId = requestData.getSession().getUserId();
+        int contextId = requestData.getSession().getContextId();
+        
+        List<ActionLimiter> actionLimiter = ActionLimiterServices.getActionLimiter();
+        for (ActionLimiter limiter : actionLimiter) {
+            if (limiter.handles(module, action) && limiter.handles(contextId, userId)) {
+                limiter.after(requestData, result);
+            }
+        }
     }
 
     /**

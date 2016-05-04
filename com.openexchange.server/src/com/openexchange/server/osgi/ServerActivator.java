@@ -229,6 +229,7 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.reloadable.GenericReloadable;
+import com.openexchange.server.services.ActionLimiterServices;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -239,6 +240,7 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.servlet.limit.ActionLimiter;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
@@ -407,10 +409,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * Add service trackers
          */
         // Configuration service load
-        final ServiceTracker<ConfigurationService, ConfigurationService> confTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(
-            context,
-            ConfigurationService.class,
-            new ConfigurationCustomizer(context));
+        final ServiceTracker<ConfigurationService, ConfigurationService> confTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ConfigurationCustomizer(context));
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
 
@@ -526,9 +525,7 @@ public final class ServerActivator extends HousekeepingActivator {
          */
 
         // Search for ConfigJumpService
-        track(
-            ConfigJumpService.class,
-            new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class));
+        track(ConfigJumpService.class, new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class));
         // Search for extensions of the preferences tree interface
         track(PreferencesItemService.class, new PreferencesCustomizer(context));
         // Search for UserPasswordChange service
@@ -621,6 +618,20 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
+
+        track(ActionLimiter.class, new SimpleRegistryListener<ActionLimiter>() {
+
+            @Override
+            public void added(ServiceReference<ActionLimiter> ref, ActionLimiter service) {
+                ActionLimiterServices.add(service);
+            }
+
+            @Override
+            public void removed(ServiceReference<ActionLimiter> ref, ActionLimiter service) {
+                ActionLimiterServices.remove(service);
+            }
+
+        });
 
         // Start up server the usual way
         starter.start();
