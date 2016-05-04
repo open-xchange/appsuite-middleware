@@ -149,14 +149,19 @@ public class ZipDocumentsAction extends AbstractFileAction {
             }
 
             // Write ZIP archive
+            long bytesWritten = 0;
             try {
-                zipMaker.writeZipArchive(ajaxRequestData.optOutputStream());
+                bytesWritten = zipMaker.writeZipArchive(ajaxRequestData.optOutputStream());
             } catch (IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
 
             // Signal direct response
-            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+            AJAXRequestResult result = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+            if (bytesWritten != 0) {
+                result.setResponseProperty("X-Content-Size", bytesWritten);
+            }
+            return result;
         }
 
         // No direct response possible
