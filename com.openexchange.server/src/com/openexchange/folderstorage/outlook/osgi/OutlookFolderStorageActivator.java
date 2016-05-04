@@ -70,7 +70,7 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -97,7 +97,7 @@ public class OutlookFolderStorageActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            DatabaseService.class, MailAccountFacade.class, ThreadPoolService.class, MessagingServiceRegistry.class,
+            DatabaseService.class, MailAccountStorageService.class, ThreadPoolService.class, MessagingServiceRegistry.class,
             UnifiedInboxManagement.class, ConfigurationService.class, FileStorageServiceRegistry.class, SessiondService.class,
             EventAdmin.class };
     }

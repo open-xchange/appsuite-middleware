@@ -72,7 +72,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.config.MailAccountPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3SessionProperties;
@@ -586,8 +586,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         try {
-            final MailAccountFacade mailAccountFacade = POP3ServiceRegistry.getServiceRegistry().getService(MailAccountFacade.class, true);
-            return new MailAccountPOP3Properties(mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+            final MailAccountStorageService storageService =
+                POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+            return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
             throw e;
         }

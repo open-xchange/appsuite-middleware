@@ -83,7 +83,7 @@ import com.openexchange.imap.util.ExtAccountFolderField;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -120,7 +120,7 @@ public final class IMAPActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountFacade.class,
+            ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
             EventAdmin.class, GroupService.class, ContextService.class, ConfigViewFactory.class };
     }

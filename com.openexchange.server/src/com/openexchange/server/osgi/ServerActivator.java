@@ -200,7 +200,6 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.mail.transport.config.impl.DefaultNoReplyConfigFactory;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
-import com.openexchange.mailaccount.MailAccountFacade;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
@@ -695,9 +694,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // TODO: Register server's Unified Mail management here until its encapsulated in an own bundle
         registerService(UnifiedInboxManagement.class, ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class));
         // TODO: Register server's Unified Mail management here until its encapsulated in an own bundle
-        MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
-        registerService(MailAccountFacade.class, mailAccountFacade);
-        registerService(QuotaProvider.class, new MailQuotaProvider(mailAccountFacade, mailService));
+        registerService(QuotaProvider.class, new MailQuotaProvider(mailAccountStorageService, mailService));
         // Register ID generator
         registerService(IDGeneratorService.class, ServerServiceRegistry.getInstance().getService(IDGeneratorService.class));
         /*

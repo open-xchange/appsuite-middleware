@@ -100,7 +100,7 @@ import com.openexchange.mail.threader.Conversations;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.session.Session;
@@ -212,7 +212,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private static List<MailAccount> getAccounts(boolean onlyEnabled, int unifiedMailAccountId, int userId, int contextId) throws OXException {
-        MailAccount[] tmp = Services.getService(MailAccountFacade.class).getUserMailAccounts(userId, contextId);
+        MailAccount[] tmp = Services.getService(MailAccountStorageService.class).getUserMailAccounts(userId, contextId);
         List<MailAccount> accounts = new ArrayList<MailAccount>(tmp.length);
         int thisAccountId = unifiedMailAccountId;
 
@@ -226,8 +226,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private MailAccount getAccount(int accountId) throws OXException {
-        MailAccountFacade maf = Services.getService(MailAccountFacade.class);
-        return maf.getMailAccount(accountId, user, cid);
+        MailAccountStorageService srv = Services.getService(MailAccountStorageService.class);
+        return srv.getMailAccount(accountId, user, cid);
     }
 
     @Override

@@ -88,7 +88,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.MailAccountSMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
@@ -322,8 +322,8 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
     @Override
     protected ITransportProperties createNewMailProperties() throws OXException {
         try {
-            final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
-            return new MailAccountSMTPProperties(mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+            return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
             throw e;
         }

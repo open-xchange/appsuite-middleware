@@ -66,7 +66,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.api.unified.UnifiedViewService;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceLookup;
@@ -99,7 +99,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CacheService.class, UserService.class, MailAccountFacade.class, ContextService.class, ThreadPoolService.class, ConfigViewFactory.class, UnifiedInboxManagement.class, CapabilityService.class };
+        return new Class<?>[] { ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class, ThreadPoolService.class, ConfigViewFactory.class, UnifiedInboxManagement.class, CapabilityService.class };
     }
 
     @Override

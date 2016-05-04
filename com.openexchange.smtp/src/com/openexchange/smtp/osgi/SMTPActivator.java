@@ -61,7 +61,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.mail.transport.listener.MailTransportListener;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.smtp.ListenerChain;
@@ -89,7 +89,7 @@ public final class SMTPActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountFacade.class, ConfigViewFactory.class, ThreadPoolService.class, ContextService.class, UserService.class };
+        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class, ThreadPoolService.class, ContextService.class, UserService.class };
     }
 
     @Override

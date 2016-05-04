@@ -61,7 +61,7 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.user.UserService;
@@ -198,9 +198,9 @@ public class CourierEntity2ACL extends Entity2ACL {
     }
 
     private static final String getACLNameInternal(final int userId, final Context ctx, final int accountId, final String serverUrl) throws OXException {
-        final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
-        if (null == mailAccountFacade) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountFacade.class.getName());
+        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+        if (null == storageService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( MailAccountStorageService.class.getName());
         }
         final String userLoginInfo;
         {
@@ -211,7 +211,7 @@ public class CourierEntity2ACL extends Entity2ACL {
             userLoginInfo = userService.getUser(userId, ctx).getLoginInfo();
         }
         try {
-            return MailConfig.getMailLogin(mailAccountFacade.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo);
+            return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo);
         } catch (final OXException e) {
             throw Entity2ACLExceptionCode.UNKNOWN_USER.create(
                 Integer.valueOf(userId),

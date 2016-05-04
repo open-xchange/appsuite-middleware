@@ -191,7 +191,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.push.PushEventConstants;
@@ -317,8 +317,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private MailAccount getMailAccount() throws OXException {
         if (mailAccount == null) {
             try {
-                MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
-                mailAccount = mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (RuntimeException e) {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
@@ -3702,8 +3702,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int acc = argument.getAccountId();
         try {
-            MailAccountFacade maf = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
-            MailAccount ma = maf.getMailAccount(acc, session.getUserId(), session.getContextId());
+            MailAccountStorageService ss = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            MailAccount ma = ss.getMailAccount(acc, session.getUserId(), session.getContextId());
             if (ma.isDefaultAccount()) {
                 /*
                  * Check for valid from address
@@ -4478,9 +4478,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     String checkArchiveFullNameFor(final ServerSession session, int[] separatorRef, boolean useDefaultName, boolean createIfAbsent) throws OXException {
         final int accountId = mailAccess.getAccountId();
 
-        MailAccountFacade service = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
+        MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
         if (null == service) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountFacade.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountStorageService.class.getName());
         }
         MailAccount mailAccount = service.getMailAccount(accountId, session.getUserId(), session.getContextId());
 
@@ -4514,8 +4514,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             // Update mail account
             if (updateAccount) {
-                final MailAccountFacade maf = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
-                if (null != maf) {
+                final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null != mass) {
                     final String af = archiveFullName;
                     ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
@@ -4524,7 +4524,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             final MailAccountDescription mad = new MailAccountDescription();
                             mad.setId(accountId);
                             mad.setArchiveFullname(af);
-                            maf.updateMailAccount(mad, EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL), session.getUserId(), session.getContextId(), session);
+                            mass.updateMailAccount(mad, EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL), session.getUserId(), session.getContextId(), session);
                             return null;
                         }
                     });

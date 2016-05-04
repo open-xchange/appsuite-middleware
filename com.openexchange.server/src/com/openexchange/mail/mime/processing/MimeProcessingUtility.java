@@ -89,7 +89,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -157,13 +157,13 @@ public final class MimeProcessingUtility {
             return MailAccount.DEFAULT_ID;
         }
 
-        MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService( MailAccountStorageService.class);
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        int accountId = mailAccountFacade.getByPrimaryAddress(addr.getAddress(), userId, contextId);
+        int accountId = storageService.getByPrimaryAddress(addr.getAddress(), userId, contextId);
         if (accountId != -1) {
             // Retry with IDN representation
-            accountId = mailAccountFacade.getByPrimaryAddress(IDNA.toIDN(addr.getAddress()), userId, contextId);
+            accountId = storageService.getByPrimaryAddress(IDNA.toIDN(addr.getAddress()), userId, contextId);
         }
         return accountId;
     }
@@ -199,13 +199,13 @@ public final class MimeProcessingUtility {
         if (null == from) {
             accountId = MailAccount.DEFAULT_ID;
         } else {
-            MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
+            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             int user = session.getUserId();
             int cid = session.getContextId();
-            accountId = mailAccountFacade.getByPrimaryAddress(from.getAddress(), user, cid);
+            accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
             if (accountId != -1) {
                 // Retry with IDN representation
-                accountId = mailAccountFacade.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
+                accountId = storageService.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
             }
         }
         if (accountId == -1) {
@@ -261,8 +261,8 @@ public final class MimeProcessingUtility {
                     likely.setAddress(getUserSettingMail(session).getSendAddr());
                     addUserAliases(fromCandidates, session, ctx);
                 } else {
-                    MailAccountFacade maf = registry.getService(MailAccountFacade.class);
-                    if (null == maf) {
+                    MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                    if (null == mass) {
                         if (isForward) {
                             // Fall-back to primary address
                             return null;
@@ -273,7 +273,7 @@ public final class MimeProcessingUtility {
                         addUserAliases(fromCandidates, session, ctx);
                     } else {
                         QuotedInternetAddress a = new QuotedInternetAddress();
-                        a.setAddress(maf.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress());
+                        a.setAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress());
                         if (isForward) {
                             return a;
                         }
@@ -283,8 +283,8 @@ public final class MimeProcessingUtility {
                     }
                 }
             } else {
-                MailAccountFacade maf = registry.getService(MailAccountFacade.class);
-                if (null == maf) {
+                MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                if (null == mass) {
                     if (isForward) {
                         // Fall-back to primary address
                         return null;
@@ -295,7 +295,7 @@ public final class MimeProcessingUtility {
                     addUserAliases(fromCandidates, session, ctx);
                 } else {
                     QuotedInternetAddress a = new QuotedInternetAddress();
-                    a.setAddress(maf.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress());
+                    a.setAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress());
                     if (isForward) {
                         return a;
                     }

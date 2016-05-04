@@ -85,7 +85,7 @@ import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.converters.UnifiedInboxFolderConverter;
@@ -128,8 +128,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     }
 
     private List<MailAccount> getAccounts() throws OXException {
-        final MailAccountFacade maf = Services.getService(MailAccountFacade.class);
-        final MailAccount[] tmp = maf.getUserMailAccounts(session.getUserId(), session.getContextId());
+        final MailAccountStorageService srv = Services.getService(MailAccountStorageService.class);
+        final MailAccount[] tmp = srv.getUserMailAccounts(session.getUserId(), session.getContextId());
         final List<MailAccount> accounts = new ArrayList<MailAccount>(tmp.length);
         final int thisAccountId = unifiedInboxId;
         for (final MailAccount mailAccount : tmp) {
@@ -698,8 +698,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         final int unifiedINBOXAccountId = unifiedInboxId;
         final MailAccount[] accounts;
         {
-            final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
-            final MailAccount[] arr = mailAccountFacade.getUserMailAccounts(session.getUserId(), session.getContextId());
+            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+            final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(arr.length);
             for (final MailAccount mailAccount : arr) {
                 if (unifiedINBOXAccountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
@@ -803,8 +803,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     private MailFolder[] getKnownFolderSubfolders(final String parentFullName) throws OXException {
         final MailAccount[] accounts;
         {
-            final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
-            final MailAccount[] tmp = mailAccountFacade.getUserMailAccounts(session.getUserId(), session.getContextId());
+            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+            final MailAccount[] tmp = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
             for (final MailAccount mailAccount : tmp) {
                 if (unifiedInboxId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
@@ -1091,13 +1091,13 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     }
 
     private String getMailAccountName(final int accountId) throws OXException {
-        final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
-        return mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
+        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+        return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
     }
 
     private boolean isMailAccountEnabled(final int accountId) throws OXException {
-        final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
-        return mailAccountFacade.getMailAccount(accountId, session.getUserId(), session.getContextId()).isUnifiedINBOXEnabled();
+        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+        return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()).isUnifiedINBOXEnabled();
     }
 
     private static class MailFolderNameComparator implements Comparator<MailFolder> {

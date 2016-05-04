@@ -61,7 +61,7 @@ import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.config.MailAccountUnifiedINBOXProperties;
@@ -303,8 +303,8 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         try {
-            final MailAccountFacade mailAccountFacade = Services.getService(MailAccountFacade.class);
-            return new MailAccountUnifiedINBOXProperties(mailAccountFacade.getMailAccount(
+            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+            return new MailAccountUnifiedINBOXProperties(storageService.getMailAccount(
                 accountId,
                 session.getUserId(),
                 session.getContextId()));

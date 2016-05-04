@@ -80,7 +80,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -292,7 +292,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
                     final MailAccount mailAccount;
                     try {
                         mailAccount =
-                            POP3ServiceRegistry.getServiceRegistry().getService(MailAccountFacade.class, true).getMailAccount(
+                            POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true).getMailAccount(
                                 accountId,
                                 session.getUserId(),
                                 session.getContextId());

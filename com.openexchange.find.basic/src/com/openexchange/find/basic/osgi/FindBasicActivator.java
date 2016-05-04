@@ -71,6 +71,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
@@ -87,7 +88,7 @@ public class FindBasicActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
-            IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
+            MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
             AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class,
             IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class, InfostoreSearchEngine.class,
             FileStorageServiceRegistry.class };

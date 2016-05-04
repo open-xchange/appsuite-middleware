@@ -79,7 +79,7 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
@@ -159,9 +159,10 @@ public final class MailAccountRequest {
 
     private JSONObject actionGet(final JSONObject jsonObject) throws JSONException, OXException {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
-        final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-        final MailAccount mailAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
+        final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
         if (isUnifiedINBOXAccount(mailAccount)) {
             // Treat as no hit
@@ -184,9 +185,10 @@ public final class MailAccountRequest {
     private JSONObject actionGetTree(final JSONObject jsonObject) throws JSONException, OXException {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
 
-        final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-        final MailAccount mailAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
+        final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
         if (isUnifiedINBOXAccount(mailAccount)) {
             // Treat as no hit
@@ -221,13 +223,14 @@ public final class MailAccountRequest {
             }
         }
 
-        final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
         for (final int id : ids) {
-            final MailAccount mailAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
+            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
             if (!isUnifiedINBOXAccount(mailAccount)) {
-                mailAccountFacade.deleteMailAccount(id, Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
+                storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
             }
 
             jsonArray.put(id);
@@ -255,13 +258,14 @@ public final class MailAccountRequest {
             throw MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_CREATION_FAILED.create(accountDescription.getId());
         }
 
-        final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
         final int id =
-            mailAccountFacade.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session);
+            storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session);
 
         final JSONObject jsonAccount =
-            MailAccountWriter.write(mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId()));
+            MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
         return jsonAccount;
     }
@@ -287,10 +291,11 @@ public final class MailAccountRequest {
             /*
              * ID is delivered, but password not set. Thus load from storage version.
              */
-            final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
             final String password =
-                mailAccountFacade.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
+                storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
             accountDescription.setPassword(MailPasswordUtil.decrypt(
                 password,
                 session,
@@ -526,14 +531,15 @@ public final class MailAccountRequest {
                 Integer.valueOf(session.getContextId()));
         }
 
-        final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
         final int id = accountDescription.getId();
         if (-1 == id) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.ID);
         }
 
-        final MailAccount toUpdate = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
+        final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
         if (isUnifiedINBOXAccount(toUpdate)) {
             // Treat as no hit
             throw MailAccountExceptionCodes.NOT_FOUND.create(
@@ -542,7 +548,7 @@ public final class MailAccountRequest {
                 Integer.valueOf(session.getContextId()));
         }
 
-        mailAccountFacade.updateMailAccount(
+        storageService.updateMailAccount(
             accountDescription,
             fieldsToUpdate,
             session.getUserId(),
@@ -579,7 +585,7 @@ public final class MailAccountRequest {
         }
 
         final JSONObject jsonAccount =
-            MailAccountWriter.write(mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId()));
+            MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
         return jsonAccount;
     }
@@ -588,9 +594,10 @@ public final class MailAccountRequest {
         final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
 
         final List<Attribute> attributes = getColumns(colString);
-        final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-        MailAccount[] userMailAccounts = mailAccountFacade.getUserMailAccounts(session.getUserId(), session.getContextId());
+        MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
 
         final boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
         final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
@@ -626,7 +633,8 @@ public final class MailAccountRequest {
         final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
 
         final List<Attribute> attributes = getColumns(colString);
-        final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
         final JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
 
@@ -635,7 +643,7 @@ public final class MailAccountRequest {
 
         for (int i = 0, size = ids.length(); i < size; i++) {
             final int id = ids.getInt(i);
-            final MailAccount account = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
+            final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
             if (!isUnifiedINBOXAccount(account) && (multipleEnabled || isDefaultMailAccount(account))) {
                 accounts.add(account);
             }

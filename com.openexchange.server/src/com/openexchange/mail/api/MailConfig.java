@@ -80,7 +80,7 @@ import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
@@ -281,7 +281,7 @@ public abstract class MailConfig {
          */
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountFacade.class, true).getMailAccount(accountId, userId, contextId);
+        MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountStorageService.class, true).getMailAccount(accountId, userId, contextId);
         mailConfig.accountId = accountId;
         mailConfig.session = session;
         mailConfig.applyStandardNames(mailAccount);
@@ -387,8 +387,8 @@ public abstract class MailConfig {
         if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
             return new UrlInfo(IDNA.toASCII(MailProperties.getInstance().getMailServer()), MailProperties.getInstance().isMailStartTls());
         }
-        final MailAccountFacade maf = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
-        return new UrlInfo(maf.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL(), maf.getMailAccount(accountId, session.getUserId(), session.getContextId()).isMailStartTls());
+        final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        return new UrlInfo(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).generateMailServerURL(), storage.getMailAccount(accountId, session.getUserId(), session.getContextId()).isMailStartTls());
     }
 
     /**
@@ -463,8 +463,8 @@ public abstract class MailConfig {
 
         @Override
         public int[] load(UserID userID) throws Exception {
-            MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
-            return forDefaultAccount(userID.pattern, userID.serverUrl, userID.context, mailAccountFacade);
+            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            return forDefaultAccount(userID.pattern, userID.serverUrl, userID.context, storageService);
         }
     });
 
@@ -495,8 +495,8 @@ public abstract class MailConfig {
         }
 
         // Find user name by user's IMAP login
-        MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
-        final MailAccount[] accounts = mailAccountFacade.resolveLogin(pattern, serverUrl, ctx.getContextId());
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccount[] accounts = storageService.resolveLogin(pattern, serverUrl, ctx.getContextId());
         final int[] retval = new int[accounts.length];
         for (int i = 0; i < retval.length; i++) {
             retval[i] = accounts[i].getUserId();
@@ -507,17 +507,17 @@ public abstract class MailConfig {
     /**
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source for default account
      */
-    protected static int[] forDefaultAccount(final String pattern, final String serverUrl, final Context ctx, final MailAccountFacade mailAccountFacade) throws OXException {
+    protected static int[] forDefaultAccount(final String pattern, final String serverUrl, final Context ctx, final MailAccountStorageService storageService) throws OXException {
         switch (MailProperties.getInstance().getLoginSource()) {
         case USER_IMAPLOGIN:
         case PRIMARY_EMAIL:
             final MailAccount[] accounts;
             switch (MailProperties.getInstance().getLoginSource()) {
             case USER_IMAPLOGIN:
-                        accounts = mailAccountFacade.resolveLogin(pattern, ctx.getContextId());
+                accounts = storageService.resolveLogin(pattern, ctx.getContextId());
                 break;
             case PRIMARY_EMAIL:
-                        accounts = mailAccountFacade.resolvePrimaryAddr(pattern, ctx.getContextId());
+                accounts = storageService.resolvePrimaryAddr(pattern, ctx.getContextId());
                 break;
             default:
                 throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail login source.");

@@ -64,7 +64,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCode;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -84,7 +84,8 @@ public class MailAccountDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-            final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             final int user = deleteEvent.getId();
             final int cid = deleteEvent.getContext().getContextId();
             final OXException[] cup = new OXException[1];
@@ -94,7 +95,7 @@ public class MailAccountDeleteListener implements DeleteListener {
                 @Override
                 public boolean execute(final int accountId) {
                     try {
-                        mailAccountFacade.deleteMailAccount(accountId, Collections.<String, Object> emptyMap(), user, cid, true, writeCon);
+                        storageService.deleteMailAccount(accountId, Collections.<String, Object> emptyMap(), user, cid, true, writeCon);
                         return true;
                     } catch (final OXException e) {
                         cup[0] = e;

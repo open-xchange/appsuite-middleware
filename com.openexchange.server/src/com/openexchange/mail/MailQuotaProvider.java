@@ -58,7 +58,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -73,11 +73,11 @@ import com.openexchange.session.Session;
  */
 public class MailQuotaProvider implements QuotaProvider {
 
-    private final MailAccountFacade mailAccountService;
+    private final MailAccountStorageService mailAccountService;
 
     private final MailService mailService;
 
-    public MailQuotaProvider(MailAccountFacade mailAccountService, MailService mailService) {
+    public MailQuotaProvider(MailAccountStorageService mailAccountService, MailService mailService) {
         super();
         this.mailAccountService = mailAccountService;
         this.mailService = mailService;

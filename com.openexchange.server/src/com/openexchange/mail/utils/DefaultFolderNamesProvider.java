@@ -61,7 +61,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -95,8 +95,8 @@ public final class DefaultFolderNamesProvider {
         if (MailAccount.DEFAULT_ID == accountId) {
             fallbackProvider = DEFAULT_PROVIDER;
         } else {
-            final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getServize(MailAccountFacade.class, true);
-            fallbackProvider = new DefaultAccountFallbackProvider(mailAccountFacade.getDefaultMailAccount(user, cid));
+            final MailAccountStorageService storageService = ServerServiceRegistry.getServize(MailAccountStorageService.class, true);
+            fallbackProvider = new DefaultAccountFallbackProvider(storageService.getDefaultMailAccount(user, cid));
         }
     }
 

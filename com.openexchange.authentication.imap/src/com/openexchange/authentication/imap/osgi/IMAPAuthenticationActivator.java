@@ -53,7 +53,7 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.imap.impl.IMAPAuthentication;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -71,7 +71,7 @@ public class IMAPAuthenticationActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ContextService.class, UserService.class, MailAccountFacade.class };
+        return new Class<?>[] { ConfigurationService.class, ContextService.class, UserService.class, MailAccountStorageService.class };
     }
 
     @Override

@@ -83,7 +83,7 @@ import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
@@ -201,7 +201,7 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 
         MailAccount[] userMailAccounts;
         {
-            final MailAccountFacade mailAccountService = services.getService(MailAccountFacade.class);
+            final MailAccountStorageService mailAccountService = services.getService(MailAccountStorageService.class);
             if (searchingExternalMailboxesIsFast()) {
                 userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
             } else {

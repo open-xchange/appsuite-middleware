@@ -56,7 +56,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -102,9 +102,9 @@ public final class SessionMailCache {
      */
     public static void clearAll(final Session session) {
         try {
-            final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
-            if (null != mailAccountFacade) {
-                final MailAccount[] accounts = mailAccountFacade.getUserMailAccounts(session.getUserId(), session.getContextId());
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            if (null != storageService) {
+                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
                 for (final MailAccount mailAccount : accounts) {
                     SessionMailCache.getInstance(session, mailAccount.getId()).clear();
                 }

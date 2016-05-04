@@ -66,9 +66,10 @@ import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -99,9 +100,10 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
         final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
         try {
-            final MailAccountFacade mailAccountFacade = getAccountFacade();
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            final MailAccount mailAccount = mailAccountFacade.getMailAccount(id, session.getUserId(), session.getContextId());
+            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
             if (isUnifiedINBOXAccount(mailAccount)) {
                 // Treat as no hit

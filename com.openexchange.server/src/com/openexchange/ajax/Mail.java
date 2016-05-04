@@ -187,7 +187,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -5169,8 +5169,10 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private static String getDefaultSendAddress(final ServerSession session) throws OXException {
-        final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
-        return mailAccountFacade.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
+        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+            MailAccountStorageService.class,
+            true);
+        return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
     }
 
     private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException, OXException {
@@ -5179,16 +5181,18 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         int accountId;
         {
-            final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
             final int user = session.getUserId();
             final int cid = session.getContextId();
             if (null == from) {
                 accountId = MailAccount.DEFAULT_ID;
             } else {
-                accountId = mailAccountFacade.getByPrimaryAddress(from.getAddress(), user, cid);
+                accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
                 if (accountId == -1) {
                     // Retry with IDN representation
-                    accountId = mailAccountFacade.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
+                    accountId = storageService.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
                 }
             }
             if (accountId != -1) {
@@ -5196,7 +5200,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
                 }
                 if (checkTransportSupport) {
-                    final MailAccount account = mailAccountFacade.getMailAccount(accountId, user, cid);
+                    final MailAccount account = storageService.getMailAccount(accountId, user, cid);
                     // Check if determined account supports mail transport
                     if (null == account.getTransportServer()) {
                         // Account does not support mail transport

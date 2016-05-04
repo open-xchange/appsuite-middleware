@@ -69,7 +69,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -127,14 +127,14 @@ public class Separators implements PreferencesItemService {
                             retval.put(Integer.toString(MailAccount.DEFAULT_ID), sep.toString());
                         }
                     } else {
-                        final MailAccountFacade maf = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
-                        if (null == maf) {
+                        final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                        if (null == mass) {
                             final Character sep = getSeparator(MailAccount.DEFAULT_ID, session);
                             if (null != sep) {
                                 retval.put(Integer.toString(MailAccount.DEFAULT_ID), sep.toString());
                             }
                         } else {
-                            final List<MailAccount> accounts = Arrays.asList(maf.getUserMailAccounts(user.getId(), ctx.getContextId()));
+                            final List<MailAccount> accounts = Arrays.asList(mass.getUserMailAccounts(user.getId(), ctx.getContextId()));
                             for (final MailAccount mailAccount : accounts) {
                                 if (!PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                                     final Character sep = getSeparator(mailAccount.getId(), session);

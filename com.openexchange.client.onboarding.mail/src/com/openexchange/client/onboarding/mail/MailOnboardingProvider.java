@@ -78,7 +78,7 @@ import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -127,9 +127,9 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             return new AvailabilityResult(false, Permission.WEBMAIL.getCapabilityName());
         }
 
-        MailAccountFacade service = services.getService(MailAccountFacade.class);
+        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
         if (service==null){
-            throw ServiceExceptionCode.absentService(MailAccountFacade.class);
+            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
         }
         MailAccount mailAccount = service.getDefaultMailAccount(session.getUserId(), session.getContextId());
         boolean available = (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));
@@ -142,9 +142,9 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             return new AvailabilityResult(false, Permission.WEBMAIL.getCapabilityName());
         }
 
-        MailAccountFacade service = services.getService(MailAccountFacade.class);
+        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
         if (service==null){
-            throw ServiceExceptionCode.absentService(MailAccountFacade.class);
+            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
         }
         MailAccount mailAccount = service.getDefaultMailAccount(userId, contextId);
         boolean available = (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));

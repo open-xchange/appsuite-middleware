@@ -52,7 +52,7 @@ package com.openexchange.mail.usersetting;
 import java.io.Serializable;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 
@@ -743,9 +743,9 @@ public final class UserSettingMail implements Cloneable, Serializable {
     public boolean isSpamEnabled() {
         if (null == spamHandlerFound) {
             try {
-                final MailAccountFacade mailAccountFacade = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class, true);
+                final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                 // TODO: Use account ID later on!!! Currently default mail account is passed.
-                spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(mailAccountFacade.getDefaultMailAccount(userId, cid)));
+                spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(storage.getDefaultMailAccount(userId, cid)));
             } catch (final OXException e) {
                 LOG.error("", e);
             }

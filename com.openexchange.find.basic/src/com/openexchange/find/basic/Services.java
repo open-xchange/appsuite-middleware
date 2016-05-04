@@ -58,6 +58,7 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -91,6 +92,10 @@ public class Services {
 
     public static MailService getMailService() throws OXException {
         return requireService(MailService.class);
+    }
+
+    public static MailAccountStorageService getMailAccountStorageService() throws OXException {
+        return requireService(MailAccountStorageService.class);
     }
 
     public static ThreadPoolService getThreadPoolService() throws OXException {

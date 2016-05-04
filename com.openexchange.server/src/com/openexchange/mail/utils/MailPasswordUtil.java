@@ -68,7 +68,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountFacade;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.internal.GenericProperty;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -128,7 +128,7 @@ public final class MailPasswordUtil {
         private void update0(final String recrypted, final GenericProperty customizationNote, final Connection con) throws SQLException {
             PreparedStatement stmt = null;
             final Session session = customizationNote.session;
-            final MailAccountFacade service = ServerServiceRegistry.getInstance().getService(MailAccountFacade.class);
+            final MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             if (null != service) {
                 MailAccount mailAccount = null;
                 try {
