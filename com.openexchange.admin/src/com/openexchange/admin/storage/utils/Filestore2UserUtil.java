@@ -513,6 +513,10 @@ public class Filestore2UserUtil {
                 Databases.autocommit(con);
                 inTransaction = false;
                 unmarkOnError = false;
+            } else {
+                // Apparently we did nothing...
+                databaseService.backForUpdateTaskAfterReading(con);
+                con = null;
             }
         } catch (OXException e) {
             throw new StorageException(e);
