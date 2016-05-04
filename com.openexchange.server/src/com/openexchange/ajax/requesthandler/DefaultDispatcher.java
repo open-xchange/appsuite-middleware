@@ -288,28 +288,32 @@ public class DefaultDispatcher implements Dispatcher {
     private void before(AJAXRequestData requestData) throws OXException {
         String module = requestData.getModule();
         String action = requestData.getAction();
-        
+
         int userId = requestData.getSession().getUserId();
         int contextId = requestData.getSession().getContextId();
-        
+
         List<ActionLimiter> actionLimiter = ActionLimiterServices.getActionLimiter();
         for (ActionLimiter limiter : actionLimiter) {
+            List<ActionLimiter> usedLimiters = new ArrayList<>();
             if (limiter.handles(module, action) && limiter.handles(contextId, userId)) {
+                usedLimiters.add(limiter);
                 limiter.check(requestData);
             }
+            requestData.setProperty("limiter", usedLimiters);
         }
     }
 
     private void after(AJAXRequestData requestData, AJAXRequestResult result) throws OXException {
-        String module = requestData.getModule();
-        String action = requestData.getAction();
-        
-        int userId = requestData.getSession().getUserId();
-        int contextId = requestData.getSession().getContextId();
-        
-        List<ActionLimiter> actionLimiter = ActionLimiterServices.getActionLimiter();
-        for (ActionLimiter limiter : actionLimiter) {
-            if (limiter.handles(module, action) && limiter.handles(contextId, userId)) {
+        Object property = requestData.getProperty("limiter");
+        if (property == null) {
+            return;
+        }
+        if (property instanceof List<?>) {
+            List<ActionLimiter> usedLimiter = (List<ActionLimiter>) property;
+            if (usedLimiter.isEmpty()) {
+                return;
+            }
+            for (ActionLimiter limiter : usedLimiter) {
                 limiter.after(requestData, result);
             }
         }
