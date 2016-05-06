@@ -496,8 +496,17 @@ public class Filestore2UserUtil {
                 Databases.startTransaction(con);
                 inTransaction = true;
 
+                // Determine server id
+                int serverID;
+                try {
+                    serverID = databaseService.getServerId();
+                } catch (OXException e) {
+                    //No server configured. Assume initial start.
+                    LOG.warn("Unable to initialize the filestore2user table, because no server is configured.");
+                    return;
+                }
                 // Determine all pools/schemas
-                Set<PoolAndSchema> pools = PoolAndSchema.determinePoolsAndSchemas(databaseService.getServerId(), con);
+                Set<PoolAndSchema> pools = PoolAndSchema.determinePoolsAndSchemas(serverID, con);
 
                 // Determine all users having an individual file store set
                 Set<FilestoreEntry> allEntries = determineAllEntries(pools, databaseService);
