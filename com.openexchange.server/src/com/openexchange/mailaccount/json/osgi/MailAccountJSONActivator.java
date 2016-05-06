@@ -82,8 +82,7 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(MailAccountActionProvider.class, new MailAccountActionProviderImpl());
-        registerModule(MailAccountActionFactory.getInstance(), Constants.getModule());
+        registerModule(MailAccountActionFactory.getInstance(new MailAccountActionProviderImpl()), Constants.getModule());
         final BundleContext context = this.context;
         track(JSlobStorageRegistry.class, new ServiceTrackerCustomizer<JSlobStorageRegistry, JSlobStorageRegistry>() {
 
