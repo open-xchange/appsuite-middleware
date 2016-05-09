@@ -78,6 +78,7 @@ import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -316,7 +317,7 @@ public abstract class MailConfig {
      * @return The mail login of specified user
      * @throws OXException If login cannot be determined
      */
-    public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) throws OXException {
+    public static final String getMailLogin(final Account mailAccount, final String userLoginInfo) throws OXException {
         return saneLogin(getMailLogin0(mailAccount, userLoginInfo));
     }
 
@@ -328,7 +329,7 @@ public abstract class MailConfig {
      * @return The mail login of specified user
      * @throws OXException If login cannot be determined
      */
-    private static final String getMailLogin0(final MailAccount mailAccount, final String userLoginInfo) throws OXException {
+    private static final String getMailLogin0(final Account mailAccount, final String userLoginInfo) throws OXException {
         if (!mailAccount.isDefaultAccount()) {
             return mailAccount.getLogin();
         }
@@ -674,20 +675,20 @@ public abstract class MailConfig {
      *
      * @param mailConfig The mail config whose login and password shall be set
      * @param sessionPassword The session password
-     * @param mailAccount The mail account
+     * @param account The mail account
      * @throws OXException If a configuration error occurs
      */
-    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount mailAccount) throws OXException {
-        final String proxyDelimiter = mailAccount.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
+    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final Account account) throws OXException {
+        final String proxyDelimiter = account.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
         // Assign login
         final String slogin = session.getLoginName();
         if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
             mailConfig.login = saneLogin(slogin);
         } else {
-            mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
+            mailConfig.login = getMailLogin(account, userLoginInfo);
         }
         // Assign password
-        if (mailAccount.isDefaultAccount()) {
+        if (account.isDefaultAccount()) {
             final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
@@ -703,16 +704,20 @@ public abstract class MailConfig {
                 mailConfig.password = sessionPassword;
             }
         } else {
-            final String mailAccountPassword = mailAccount.getPassword();
+            final String mailAccountPassword = account.getPassword();
             if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
                 // Set to empty string
                 mailConfig.password = "";
             } else {
                 // Mail account's password
-                mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, mailAccount.getId(), mailAccount.getLogin(), mailAccount.getMailServer());
+                if (account instanceof MailAccount) {
+                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), ((MailAccount)account).getMailServer());
+                } else {
+                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getTransportServer());
+                }
             }
         }
-        mailConfig.doCustomParsing(mailAccount, session);
+        mailConfig.doCustomParsing(account, session);
     }
 
     private static final int LENGTH = 6;
@@ -1011,7 +1016,7 @@ public abstract class MailConfig {
      * @return <code>true</code> if custom parsing has been performed; otherwise <code>false</code>
      * @throws OXException If custom parsing fails
      */
-    protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
+    protected boolean doCustomParsing(final Account account, final Session session) throws OXException {
         return false;
     }
 

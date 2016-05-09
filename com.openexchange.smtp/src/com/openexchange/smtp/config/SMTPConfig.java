@@ -60,7 +60,7 @@ import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportAuthSupportAware;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
-import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPExceptionCode;
@@ -181,7 +181,7 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
      * {@inheritDoc}
      */
     @Override
-    protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
+    protected boolean doCustomParsing(final Account account, final Session session) throws OXException {
         if (!account.isDefaultAccount()) {
             TransportAuth transportAuth = account.getTransportAuth();
             switch (transportAuth) {

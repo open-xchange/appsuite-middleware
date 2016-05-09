@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount;
 
-import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -57,19 +56,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MailAccount extends Serializable {
-
-    /**
-     * The ID to identify a default mail account.
-     */
-    public static final int DEFAULT_ID = 0;
-
-    /**
-     * Gets the unique ID of this mail account.
-     *
-     * @return The unique ID of this mail account
-     */
-    public int getId();
+public interface MailAccount extends Account {
 
     /**
      * Gets the ID of the user belonging to this mail account.
@@ -79,25 +66,11 @@ public interface MailAccount extends Serializable {
     public int getUserId();
 
     /**
-     * Gets the (display) name of this mail account; e.g. <code>&quot;My mail account&quot;</code>.
-     *
-     * @return The (display) name
-     */
-    public String getName();
-
-    /**
      * Generates the mail server URL; e.g. <code>&quot;imap://imap.somewhere.com:4143&quot;</code>.
      *
      * @return The generated mail server URL
      */
     public String generateMailServerURL();
-
-    /**
-     * Generates the transport server URL; e.g. <code>&quot;smtp://smtp.somewhere.com:225&quot;</code>.
-     *
-     * @return The generated transport server URL
-     */
-    public String generateTransportServerURL();
 
     /**
      * Gets the mail server name.
@@ -135,31 +108,8 @@ public interface MailAccount extends Serializable {
      *
      * @return The transport authentication information
      */
+    @Override
     public TransportAuth getTransportAuth();
-
-    /**
-     * Gets the transport server name.
-     * <p>
-     * The transport server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
-     * address.
-     *
-     * @return The transport server name
-     */
-    public String getTransportServer();
-
-    /**
-     * Gets the transport server port.
-     *
-     * @return The transport server port
-     */
-    public int getTransportPort();
-
-    /**
-     * Gets the transport server protocol.
-     *
-     * @return The transport server protocol
-     */
-    public String getTransportProtocol();
 
     /**
      * Checks if a secure connection to transport server shall be established.
@@ -169,29 +119,13 @@ public interface MailAccount extends Serializable {
     public boolean isTransportSecure();
 
     /**
-     * Gets the login.
-     *
-     * @return The login
-     */
-    public String getLogin();
-
-    /**
-     * Gets the password.
-     * <p>
-     * Beware that password might be encoded when fetching from storage. Use one of the <code>decrypt()</code> methods of
-     * {@link com.openexchange.mail.utils.MailPasswordUtil MailPasswordUtil} plus session password to obtain plain-text password.
-     *
-     * @return The encoded password
-     */
-    public String getPassword();
-
-    /**
      * Gets the optional transport login.
      * <p>
      * <b>NOTE</b>:&nbsp;{@link #getLogin()} is returned if no separate transport login is available.
      *
      * @return The optional transport login
      */
+    @Override
     public String getTransportLogin();
 
     /**
@@ -201,14 +135,8 @@ public interface MailAccount extends Serializable {
      *
      * @return The optional transport password
      */
+    @Override
     public String getTransportPassword();
-
-    /**
-     * Gets the primary email address.
-     *
-     * @return The primary email address
-     */
-    public String getPrimaryAddress();
 
     /**
      * Gets the personal part of primary email address; e.g.<br>
@@ -224,13 +152,6 @@ public interface MailAccount extends Serializable {
      * @return The reply-to address
      */
     public String getReplyTo();
-
-    /**
-     * Checks if this mail account is a default account.
-     *
-     * @return <code>true</code> if this mail account is a default account; otherwise <code>false</code>
-     */
-    public boolean isDefaultAccount();
 
     /**
      * Gets the spam handler name for this mail account.
@@ -395,10 +316,4 @@ public interface MailAccount extends Serializable {
      */
     public boolean isMailStartTls();
 
-    /**
-     * Checks if STARTTLS should be used to connect to transport server
-     * 
-     * @return
-     */
-    public boolean isTransportStartTls();
 }

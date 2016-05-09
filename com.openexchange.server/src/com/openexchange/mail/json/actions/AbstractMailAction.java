@@ -91,6 +91,7 @@ import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -406,13 +407,13 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 // The special ACE notation always starts with "xn--" prefix
                 if (address.indexOf("xn--") >= 0) {
                     // Seems to be in ACE notation; therefore try with its IDN representation
-                    accountId = storageService.getByPrimaryAddress(IDNA.toIDN(address), user, cid);
+                    accountId = storageService.getTransportByPrimaryAddress(IDNA.toIDN(address), user, cid);
                     if (accountId < 0) {
                         // Retry with ACE representation
-                        accountId = storageService.getByPrimaryAddress(address, user, cid);
+                        accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
                     }
                 } else {
-                    accountId = storageService.getByPrimaryAddress(address, user, cid);
+                    accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
                 }
             }
             if (accountId >= 0) {
@@ -421,7 +422,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                     throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
                 }
                 if (checkTransportSupport) {
-                    final MailAccount account = storageService.getMailAccount(accountId, user, cid);
+                    final TransportAccount account = storageService.getTransportAccount(accountId, user, cid);
                     // Check if determined account supports mail transport
                     if (null == account.getTransportServer()) {
                         // Account does not support mail transport

@@ -167,6 +167,29 @@ public interface MailAccountStorageService {
     MailAccount getMailAccount(int id, int userId, int cid, Connection con) throws OXException;
 
     /**
+     * Gets the transport account identified by specified identifier.
+     *
+     * @param accountId The transport account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @return The transport account
+     * @throws OXException If the transport account cannot be returned
+     */
+    TransportAccount getTransportAccount(int accountId, int userId, int contextId, Connection con) throws OXException;
+
+    /**
+     * Gets the transport account identified by specified identifier.
+     *
+     * @param accountId The transport account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The transport account
+     * @throws OXException If the transport account cannot be returned
+     */
+    TransportAccount getTransportAccount(int accountId, int userId, int contextId) throws OXException;
+
+    /**
      * Gets the mail accounts belonging to specified user in given context.
      *
      * @param userId The user identifier
@@ -247,6 +270,17 @@ public interface MailAccountStorageService {
     void updateMailAccount(MailAccountDescription mailAccount, int userId, int cid, Session session) throws OXException;
 
     /**
+     * Updates transport account's value taken from specified transport account.
+     *
+     * @param transportAccount The transport account containing the values to update.
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param session The session
+     * @throws OXException If the mail account cannot be updated
+     */
+    void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int cid, Session session) throws OXException;
+
+    /**
      * Inserts mail account's value taken from specified mail account.
      *
      * @param mailAccount The mail account containing the values to update.
@@ -257,6 +291,18 @@ public interface MailAccountStorageService {
      * @throws OXException If the mail account cannot be updated
      */
     int insertMailAccount(MailAccountDescription mailAccount, int userId, Context ctx, Session session) throws OXException;
+
+    /**
+     * Inserts transport only account's value taken from specified transport account.
+     *
+     * @param transportAccount The transport account containing the values to update.
+     * @param userId The user identifier
+     * @param ctx The context
+     * @param session The session; set to <code>null</code> to insert transport account with an empty password
+     * @return The identifier of the newly created transport account
+     * @throws OXException If the transport account cannot be updated
+     */
+    int insertTransportAccount(TransportAccountDescription transportAccount, int userId, Context ctx, Session session) throws OXException;
 
     /**
      * Inserts mail account's value taken from specified mail account.
@@ -281,6 +327,16 @@ public interface MailAccountStorageService {
      * @throws OXException If the mail account cannot be deleted
      */
     void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId) throws OXException;
+
+    /**
+     * Deletes the transport account identified by specified identifier.
+     *
+     * @param id The transport account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If the mail account cannot be deleted
+     */
+    void deleteTransportAccount(int id, int userId, int contextId) throws OXException;
 
     /**
      * Deletes the mail account identified by specified identifier.
@@ -348,6 +404,17 @@ public interface MailAccountStorageService {
      * @throws OXException If look-up by primary address caused a conflict
      */
     int getByPrimaryAddress(String primaryAddress, int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the transport account matching specified primary email address of given user in given context.
+     *
+     * @param primaryAddress The primary address to look for
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The identifier of the transport account matching specified primary email address or <code>-1</code> if none found
+     * @throws OXException If look-up by primary address caused a conflict
+     */
+    int getTransportByPrimaryAddress(String primaryAddress, int userId, int contextId) throws OXException;
 
     /**
      * Gets those mail accounts of given user in given context whose host name occurs in specified collection of host names.
