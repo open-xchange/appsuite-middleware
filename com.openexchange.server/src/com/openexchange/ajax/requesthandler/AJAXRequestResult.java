@@ -384,20 +384,25 @@ public class AJAXRequestResult {
      * @param e The exception that caused termination, or <code>null</code> if execution completed normally
      */
     public void signalDone(Exception e) {
+        // Get associated request data (if any)
+        AJAXRequestData requestData = this.requestData;
+
+        // Assign a suitable exception
+        Exception exc = e;
+        if (null == exc && null != requestData) {
+            HttpServletResponse servletResponse = requestData.optHttpServletResponse();
+            if (servletResponse instanceof StatusKnowing) {
+                int status = ((StatusKnowing) servletResponse).getStatus();
+                if ((status >= 400 && status <= 499) || (status >= 500 && status <= 599)) {
+                    // Assume error was returned
+                    exc = new HttpErrorCodeException(status);
+                }
+            }
+        }
+
+        // Trigger post-processing
         for (AJAXRequestResultPostProcessor postProcessor; (postProcessor = this.postProcessors.poll()) != null;) {
             try {
-                Exception exc = e;
-                AJAXRequestData requestData = this.requestData;
-                if (null == exc && null != requestData) {
-                    HttpServletResponse servletResponse = requestData.optHttpServletResponse();
-                    if (servletResponse instanceof StatusKnowing) {
-                        int status = ((StatusKnowing) servletResponse).getStatus();
-                        if ((status >= 400 && status <= 499) || (status >= 500 && status <= 599)) {
-                            // Assume error was returned
-                            exc = new HttpErrorCodeException(status);
-                        }
-                    }
-                }
                 postProcessor.doPostProcessing(requestData, this, exc);
             } catch (Exception x) {
                 org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);

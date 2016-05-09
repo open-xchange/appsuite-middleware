@@ -254,22 +254,22 @@ public class DefaultDispatcher implements Dispatcher {
      * Finally calls the requested action with the given request data and returns the result.
      *
      * @param action The action to call
-     * @param modifiedRequestData The request data
+     * @param requestData The request data
      * @param session The session
      * @return The actions result
      * @throws OXException
      */
-    private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData modifiedRequestData, ServerSession session) throws OXException {
+    private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
         AJAXRequestResult result;
         try {
-            before(modifiedRequestData);
-            result = action.perform(modifiedRequestData, session);
+            before(requestData);
+            result = action.perform(requestData, session);
             if (null == result) {
                 // Huh...?!
-                addLogProperties(modifiedRequestData, true);
+                addLogProperties(requestData, true);
                 throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(AJAXRequestResult.class.getSimpleName(), "null");
             }
-            after(modifiedRequestData, result);
+            after(requestData, result);
         } catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -279,10 +279,10 @@ public class DefaultDispatcher implements Dispatcher {
         } catch (final ContinuationException e) {
             result = handleContinuationException(e, session);
         } finally {
-            modifiedRequestData.cleanUploads();
+            requestData.cleanUploads();
         }
 
-        return result.setRequestData(modifiedRequestData);
+        return result.setRequestData(requestData);
     }
 
     private void before(AJAXRequestData requestData) throws OXException {
@@ -665,8 +665,9 @@ public class DefaultDispatcher implements Dispatcher {
      * @param listener The listener
      */
     public synchronized void addDispatcherListener(DispatcherListener listener) {
-        dispatcherListeners.add(listener);
-        hasAnyListener.set(true);
+        if (dispatcherListeners.add(listener)) {
+            hasAnyListener.set(true);
+        }
     }
 
     /**
@@ -676,8 +677,9 @@ public class DefaultDispatcher implements Dispatcher {
      */
     public synchronized void removeDispatcherListener(DispatcherListener listener) {
         Queue<DispatcherListener> dispatcherListeners = this.dispatcherListeners;
-        dispatcherListeners.remove(listener);
-        hasAnyListener.set(!dispatcherListeners.isEmpty());
+        if (dispatcherListeners.remove(listener)) {
+            hasAnyListener.set(!dispatcherListeners.isEmpty());
+        }
     }
 
     /**
