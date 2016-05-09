@@ -803,7 +803,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     public void delete(final Delete parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            userInterface.delete(soap2Context(parameters.ctx), soap2User(parameters.user), null, soap2Credentials(parameters.auth));
+            userInterface.delete(soap2Context(parameters.ctx), soap2User(parameters.user), parameters.getReassign(), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
@@ -844,6 +844,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
     }
 
+
     @Override
     public void deleteMultiple(final DeleteMultiple parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
@@ -853,7 +854,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             for (int i = 0; i < users.length; i++) {
                 users[i] = soap2User(list.get(i));
             }
-            userInterface.delete(soap2Context(parameters.ctx), users, null, soap2Credentials(parameters.auth));
+            userInterface.delete(soap2Context(parameters.ctx), users, parameters.getReassign(), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
