@@ -201,7 +201,7 @@ public class DefaultDispatcher implements Dispatcher {
             }
 
             // Grab dispatcher listeners
-            List<DispatcherListener> dispatcherListeners = hasAnyListener.get() ? null : new ArrayList<DispatcherListener>(this.dispatcherListeners);
+            List<DispatcherListener> dispatcherListeners = hasAnyListener.get() ? new ArrayList<DispatcherListener>(this.dispatcherListeners) : null;
 
             // Perform request
             AJAXRequestResult result = callAction(action, modifiedRequestData, dispatcherListeners, session);
