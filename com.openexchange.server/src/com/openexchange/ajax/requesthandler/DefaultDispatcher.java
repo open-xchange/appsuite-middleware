@@ -104,7 +104,6 @@ public class DefaultDispatcher implements Dispatcher {
 
     private final AtomicBoolean hasAnyListener;
     private final Queue<DispatcherListener> dispatcherListeners;
-    private final DispatcherListenerPostProcessor listenerPostProcessor;
 
     /**
      * Initializes a new {@link DefaultDispatcher}.
@@ -123,7 +122,6 @@ public class DefaultDispatcher implements Dispatcher {
         hasAnyListener = new AtomicBoolean(false);
         ConcurrentLinkedQueue<DispatcherListener> dispatcherListeners = new ConcurrentLinkedQueue<DispatcherListener>();
         this.dispatcherListeners = dispatcherListeners;
-        listenerPostProcessor = new DispatcherListenerPostProcessor(dispatcherListeners);
     }
 
     @Override
@@ -202,15 +200,18 @@ public class DefaultDispatcher implements Dispatcher {
                 requestData.setFormat("apiResponse");
             }
 
+            // Grab dispatcher listeners
+            List<DispatcherListener> dispatcherListeners = hasAnyListener.get() ? null : new ArrayList<DispatcherListener>(this.dispatcherListeners);
+
             // Perform request
-            AJAXRequestResult result = callAction(action, modifiedRequestData, session);
+            AJAXRequestResult result = callAction(action, modifiedRequestData, dispatcherListeners, session);
             if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
                 // No further processing
-                return contributeDispatcherListeners(result);
+                return contributeDispatcherListeners(result, dispatcherListeners);
             }
 
             result = customizeResult(modifiedRequestData, result, customizers, session);
-            return contributeDispatcherListeners(result);
+            return contributeDispatcherListeners(result, dispatcherListeners);
         } catch (OXException e) {
             for (AJAXActionCustomizer customizer : customizers) {
                 if (customizer instanceof AJAXExceptionHandler) {
@@ -255,12 +256,36 @@ public class DefaultDispatcher implements Dispatcher {
      *
      * @param action The action to call
      * @param requestData The request data
+     * @param dispatcherListeners The optional dispatcher listeners to call-back or <code>null</code>
      * @param session The session
      * @return The actions result
-     * @throws OXException
+     * @throws OXException If action fails to handle the request data
      */
-    private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
-        AJAXRequestResult result;
+    private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData requestData, List<DispatcherListener> dispatcherListeners, ServerSession session) throws OXException {
+        if (null == dispatcherListeners) {
+            return doCallAction(action, requestData, session);
+        }
+
+        AJAXRequestResult result = null;
+        Exception exc = null;
+        try {
+            triggerOnRequestInitialized(requestData, dispatcherListeners);
+            result = doCallAction(action, requestData, session);
+            return result;
+        } catch (OXException e) {
+            exc = e;
+            throw e;
+        } catch (RuntimeException e) {
+            exc = e;
+            throw e;
+        } finally {
+            triggerOnRequestPerformed(requestData, result, exc, dispatcherListeners);
+        }
+    }
+
+    private AJAXRequestResult doCallAction(AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
+        AJAXRequestResult result = null;
+
         try {
             before(requestData);
             result = action.perform(requestData, session);
@@ -421,9 +446,9 @@ public class DefaultDispatcher implements Dispatcher {
         return modifiedRequestData;
     }
 
-    private AJAXRequestResult contributeDispatcherListeners(AJAXRequestResult requestResult) {
-        if (null != requestResult && hasAnyListener.get()) {
-            requestResult.addPostProcessor(listenerPostProcessor);
+    private AJAXRequestResult contributeDispatcherListeners(AJAXRequestResult requestResult, List<DispatcherListener> dispatcherListeners) {
+        if (null != requestResult && null != dispatcherListeners) {
+            requestResult.addPostProcessor(new DispatcherListenerPostProcessor(dispatcherListeners));
         }
         return requestResult;
     }
@@ -679,6 +704,26 @@ public class DefaultDispatcher implements Dispatcher {
         Queue<DispatcherListener> dispatcherListeners = this.dispatcherListeners;
         if (dispatcherListeners.remove(listener)) {
             hasAnyListener.set(!dispatcherListeners.isEmpty());
+        }
+    }
+
+    private void triggerOnRequestInitialized(AJAXRequestData requestData, List<DispatcherListener> dispatcherListeners) {
+        for (DispatcherListener dispatcherListener : dispatcherListeners) {
+            try {
+                dispatcherListener.onRequestInitialized(requestData);
+            } catch (Exception x) {
+                LOG.error("Failed to execute dispatcher listener {}", dispatcherListener.getClass().getSimpleName(), x);
+            }
+        }
+    }
+
+    private void triggerOnRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e, List<DispatcherListener> dispatcherListeners) {
+        for (DispatcherListener dispatcherListener : dispatcherListeners) {
+            try {
+                dispatcherListener.onRequestPerformed(requestData, requestResult, e);
+            } catch (Exception x) {
+                LOG.error("Failed to execute dispatcher listener {}", dispatcherListener.getClass().getSimpleName(), x);
+            }
         }
     }
 

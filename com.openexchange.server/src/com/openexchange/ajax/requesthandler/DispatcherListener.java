@@ -59,11 +59,27 @@ package com.openexchange.ajax.requesthandler;
 public interface DispatcherListener {
 
     /**
+     * Called when a request is about being performed.
+     *
+     * @param requestData The associated request data
+     */
+    void onRequestInitialized(AJAXRequestData requestData);
+
+    /**
+     * Called when a result was supposed to be created, but not yet returned to requesting client (by responsible {@link ResponseRenderer renderer}).
+     *
+     * @param requestData The associated request data
+     * @param requestResult The request result that has been created or <code>null</code> if creation failed (in that case an exception is passed)
+     * @param e The exception that caused termination, or <code>null</code> if execution completed normally
+     */
+    void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
+
+    /**
      * Called when a result has been successfully created and an attempt was made returning it to requesting client (by responsible {@link ResponseRenderer renderer}).
      *
      * @param requestData The associated request data
      * @param requestResult The request result that has been returned
      * @param e The exception that caused termination, or <code>null</code> if execution completed normally
      */
-    void onResultRendered(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
+    void onResultReturned(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
 }

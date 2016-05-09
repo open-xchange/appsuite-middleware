@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.Queue;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * {@link DispatcherListenerPostProcessor} - The special post-processor triggering dispatcher listeners for final call-back.
@@ -61,21 +62,21 @@ public class DispatcherListenerPostProcessor implements AJAXRequestResultPostPro
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DispatcherListenerPostProcessor.class);
 
-    private final Queue<DispatcherListener> dispatcherListeners;
+    private final Collection<DispatcherListener> dispatcherListeners;
 
     /**
      * Initializes a new {@link DispatcherListenerPostProcessor}.
      */
-    public DispatcherListenerPostProcessor(Queue<DispatcherListener> dispatcherListeners) {
+    public DispatcherListenerPostProcessor(Collection<DispatcherListener> dispatcherListeners) {
         super();
-        this.dispatcherListeners = dispatcherListeners;
+        this.dispatcherListeners = null == dispatcherListeners ? Collections.<DispatcherListener> emptyList() : dispatcherListeners;
     }
 
     @Override
     public void doPostProcessing(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
         for (DispatcherListener dispatcherListener : dispatcherListeners) {
             try {
-                dispatcherListener.onResultRendered(requestData, requestResult, e);
+                dispatcherListener.onResultReturned(requestData, requestResult, e);
             } catch (Exception x) {
                 LOG.error("Failed to execute dispatcher listener {}", dispatcherListener.getClass().getSimpleName(), x);
             }
