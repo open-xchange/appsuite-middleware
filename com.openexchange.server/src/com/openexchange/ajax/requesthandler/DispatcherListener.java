@@ -52,6 +52,13 @@ package com.openexchange.ajax.requesthandler;
 
 /**
  * {@link DispatcherListener} - A listener which receives various call-backs during a {@link Dispatcher} processing.
+ * <p>
+ * The call-backs happen in the following order:
+ * <ol>
+ * <li>{@link #onRequestInitialized(AJAXRequestData)}<br>Request has been completely parsed. but not yet performed<br>&nbsp;</li>
+ * <li>{@link #onRequestPerformed(AJAXRequestData, AJAXRequestResult, Exception)}<br>Either result has been successfully created or an exception is given<br>&nbsp;</li>
+ * <li>{@link #onResultReturned(AJAXRequestData, AJAXRequestResult, Exception)}<br>The result is ensured to be successfully created and is about being returned to client. If output to client failed the exception argument in non-<code>null</code></li>
+ * </ol>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
@@ -70,7 +77,7 @@ public interface DispatcherListener {
      *
      * @param requestData The associated request data
      * @param requestResult The request result that has been created or <code>null</code> if creation failed (in that case an exception is passed)
-     * @param e The exception that caused termination, or <code>null</code> if execution completed normally
+     * @param e The exception that caused termination, or <code>null</code> if execution completed normally (and a viable <code>requestResult</code> is given)
      */
     void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
 
