@@ -66,6 +66,14 @@ package com.openexchange.ajax.requesthandler;
 public interface DispatcherListener {
 
     /**
+     * Checks whether this dispatcher listener wants to receive call-backs for given request data.
+     *
+     * @param requestData
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     */
+    boolean applicable(AJAXRequestData requestData);
+
+    /**
      * Called when a request is about being performed.
      *
      * @param requestData The associated request data

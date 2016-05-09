@@ -200,8 +200,18 @@ public class DefaultDispatcher implements Dispatcher {
                 requestData.setFormat("apiResponse");
             }
 
-            // Grab dispatcher listeners
-            List<DispatcherListener> dispatcherListeners = hasAnyListener.get() ? new ArrayList<DispatcherListener>(this.dispatcherListeners) : null;
+            // Grab applicable dispatcher listeners
+            List<DispatcherListener> dispatcherListeners = null;
+            if (hasAnyListener.get()) {
+                for (DispatcherListener dispatcherListener : this.dispatcherListeners) {
+                    if (dispatcherListener.applicable(modifiedRequestData)) {
+                        if (null == dispatcherListeners) {
+                            dispatcherListeners = new LinkedList<DispatcherListener>();
+                        }
+                        dispatcherListeners.add(dispatcherListener);
+                    }
+                }
+            }
 
             // Perform request
             AJAXRequestResult result = callAction(action, modifiedRequestData, dispatcherListeners, session);
@@ -256,20 +266,20 @@ public class DefaultDispatcher implements Dispatcher {
      *
      * @param action The action to call
      * @param requestData The request data
-     * @param dispatcherListeners The optional dispatcher listeners to call-back or <code>null</code>
+     * @param optListeners The optional dispatcher listeners that receive call-backs or <code>null</code>
      * @param session The session
      * @return The actions result
      * @throws OXException If action fails to handle the request data
      */
-    private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData requestData, List<DispatcherListener> dispatcherListeners, ServerSession session) throws OXException {
-        if (null == dispatcherListeners) {
+    private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData requestData, List<DispatcherListener> optListeners, ServerSession session) throws OXException {
+        if (null == optListeners) {
             return doCallAction(action, requestData, session);
         }
 
         AJAXRequestResult result = null;
         Exception exc = null;
         try {
-            triggerOnRequestInitialized(requestData, dispatcherListeners);
+            triggerOnRequestInitialized(requestData, optListeners);
             result = doCallAction(action, requestData, session);
             return result;
         } catch (OXException e) {
@@ -279,7 +289,7 @@ public class DefaultDispatcher implements Dispatcher {
             exc = e;
             throw e;
         } finally {
-            triggerOnRequestPerformed(requestData, result, exc, dispatcherListeners);
+            triggerOnRequestPerformed(requestData, result, exc, optListeners);
         }
     }
 
