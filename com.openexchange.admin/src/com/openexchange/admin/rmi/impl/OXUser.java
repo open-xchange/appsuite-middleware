@@ -1099,7 +1099,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             usrdata.testMandatoryCreateFieldsNull();
             userid = usrdata.getId();
 
-            if (!ClientAdminThread.cache.contextAuthenticationDisabled()) {
+            if (!cache.contextAuthenticationDisabled()) {
                 if( basicauth.isMasterOfContext(credentials, ctx) ) {
                     basicauth.doAuthentication(auth, ctx);
                 } else {
@@ -1249,8 +1249,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         // change cached admin credentials if necessary
         if (isContextAdmin && usrdata.getPassword() != null) {
-            final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
-            final String mech = ClientAdminThread.cache.getAdminAuthMech(ctx);
+            final Credentials cauth = cache.getAdminCredentials(ctx);
+            final String mech = cache.getAdminAuthMech(ctx);
             if ("{CRYPT}".equalsIgnoreCase(mech)) {
                 try {
                     cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
@@ -1276,7 +1276,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new StorageException(e);
                 }
             }
-            ClientAdminThread.cache.setAdminCredentials(ctx,mech,cauth);
+            cache.setAdminCredentials(ctx,mech,cauth);
         }
     }
 
@@ -2534,7 +2534,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 permissionBits = Integer.parseInt(filter);
             } catch (final NumberFormatException nfe) {
-                final UserModuleAccess namedAccessCombination = ClientAdminThread.cache.getNamedAccessCombination(filter);
+                final UserModuleAccess namedAccessCombination = cache.getNamedAccessCombination(filter);
                 if (namedAccessCombination == null) {
                     throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"");
                 }

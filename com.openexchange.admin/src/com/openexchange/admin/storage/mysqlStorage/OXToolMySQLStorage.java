@@ -67,7 +67,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import org.osgi.framework.BundleContext;
-import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -330,7 +329,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsGroup(final Context ctx, final Group[] grps) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -396,7 +394,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Deprecated
     public boolean existsGroup(final Context ctx, final int[] gids) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -452,7 +449,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsGroupMember(final Context ctx, final int group_ID, final int[] user_ids) throws StorageException {
         final int contextId = ctx.getId().intValue();
-        final AdminCache cache = ClientAdminThread.cache;
 
         boolean ret = false;
         Connection con = null;
@@ -527,7 +523,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsResource(final Context ctx, final int resource_id) throws StorageException {
         final int contextId = ctx.getId().intValue();
-        final AdminCache cache = ClientAdminThread.cache;
 
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -568,7 +563,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsResourceAddress(final Context ctx, final String address) throws StorageException {
         final int context_id = ctx.getId().intValue();
-        final AdminCache cache = ClientAdminThread.cache;
 
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -605,7 +599,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsResourceAddress(final Context ctx, final String address, final Integer resource_id) throws StorageException {
         final int context_id = ctx.getId().intValue();
-        final AdminCache cache = ClientAdminThread.cache;
 
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -678,7 +671,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsUser(final Context ctx, final int uid) throws StorageException {
-        final AdminCache cache = ClientAdminThread.cache;
         final int contextId = ctx.getId().intValue();
 
         Connection con = null;
@@ -718,7 +710,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException {
-        AdminCache cache = ClientAdminThread.cache;
         int contextId = ctx.getId().intValue();
 
         boolean ret = false;
@@ -775,7 +766,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsUser(final Context ctx, final User[] users) throws StorageException {
         int intValue = ctx.getId().intValue();
-        AdminCache cache = ClientAdminThread.cache;
 
         boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
 
@@ -851,7 +841,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public boolean isGuestUser(Context ctx, int userId) throws StorageException {
-        AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         ResultSet rs = null;
         PreparedStatement prep = null;
@@ -1496,7 +1485,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         final int contextId = ctx.getId().intValue();
 
         boolean isadmin = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
 
         try {
@@ -1522,7 +1510,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public boolean isContextAdmin(final Context ctx, final User user) throws StorageException {
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1577,7 +1564,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean isContextEnabled(final Context ctx) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -2053,7 +2039,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     private boolean selectwithint(final int context_id, final String sql_select_string, final int... ins_numbers) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -2142,7 +2127,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     private boolean selectwithstring(final int context_id, final String sql_select_string, final String... ins_strings) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -2195,7 +2179,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
 
         try {
-            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             prep_check = con.prepareStatement("SELECT cid FROM context WHERE name = ? and cid !=?");
             prep_check.setString(1, ctx.getName());
             prep_check.setInt(2, ctx.getId().intValue());
@@ -2236,7 +2220,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
 
         try {
-            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             prep_check = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE name = ? AND db_pool_id !=?");
             prep_check.setString(1, db.getName());
@@ -2280,7 +2264,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+            con = cache.getConnectionForContext(contextId);
             prep_check = con.prepareStatement("SELECT id FROM groups WHERE cid = ? AND identifier = ? AND id !=?");
             prep_check.setInt(1, contextId);
             prep_check.setString(2, grp.getName());
@@ -2323,7 +2307,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+            con = cache.getConnectionForContext(contextId);
             prep_check = con.prepareStatement("SELECT id FROM resource WHERE cid = ? AND identifier = ? AND id != ?");
             prep_check.setInt(1, contextId);
             prep_check.setString(2, res.getName());
@@ -2366,7 +2350,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
 
         try {
-            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             prep_check = con.prepareStatement("SELECT server_id FROM server WHERE name = ? AND server_id != ?");
             prep_check.setString(1, srv.getName());
             prep_check.setInt(2, srv.getId().intValue());
@@ -2694,7 +2678,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public Database loadDatabaseById(int id) throws StorageException {
         final Connection con;
         try {
-            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }

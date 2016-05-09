@@ -84,7 +84,6 @@ import java.util.concurrent.Future;
 import javax.mail.internet.idn.IDNA;
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.ServiceException;
-import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -1535,7 +1534,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     private SchemaCacheFinalize inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
         // Get cache instance
         SchemaCache schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
-        ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, ClientAdminThread.cache.getPool());
+        ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, cache.getPool());
 
         // Get next known suitable schema
         int poolId = db.getId().intValue();
@@ -1599,9 +1598,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private static void updateContextServer2DbPool(final Database db, Connection con, final int contextId) throws PoolException {
-        final int serverId = ClientAdminThread.cache.getServerId();
-        ClientAdminThread.cache.getPool().deleteAssignment(con, contextId);
-        ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
+        final int serverId = cache.getServerId();
+        cache.getPool().deleteAssignment(con, contextId);
+        cache.getPool().writeAssignment(con, new Assignment() {
 
             @Override
             public int getWritePoolId() {
@@ -1639,7 +1638,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (null == poolId) {
             throw new StorageException("pool_id in getNextUnfilledSchemaFromDB must be != null");
         }
-        OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
+        OXAdminPoolInterface pool = cache.getPool();
         final String[] unfilledSchemas;
         try {
             pool.lock(con, i(poolId));

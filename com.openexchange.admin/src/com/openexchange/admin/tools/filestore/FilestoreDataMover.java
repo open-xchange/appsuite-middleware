@@ -83,6 +83,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -670,10 +671,11 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @throws StorageException If a database error occurs
      */
     protected static void changeUsage(DecrementUsage decUsage, IncrementUsage incUsage, int contextId) throws StorageException {
+        AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         boolean rollback = false;
         try {
-            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+            con = cache.getConnectionForContext(contextId);
             Databases.startTransaction(con);
             rollback = true;
 
@@ -694,7 +696,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
 
             if (null != con) {
                 try {
-                    ClientAdminThread.cache.pushConnectionForContext(contextId, con);
+                    cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
                     throw new StorageException(e);
                 }

@@ -113,6 +113,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     /** The logger */
     static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXContext.class);
 
+    private final AdminCache cache;
     private final OXAdminPoolDBPoolExtension pool;
 
     /**
@@ -122,6 +123,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
      */
     public OXContext(final BundleContext context) {
         super(context);
+        cache = ClientAdminThread.cache;
         this.pool = new OXAdminPoolDBPoolExtension();
         LOGGER.debug("Class loaded: {}", this.getClass().getName());
     }
@@ -415,7 +417,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         LOGGER.debug("{} - {} - {} - {}", ctx, admin_user, access_combination_name, auth);
 
-        UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim(), true);
+        UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim(), true);
         if (access == null) {
             // no such access combination name defined in configuration
             // throw error!
@@ -1182,10 +1184,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         // If not defined or access combination name does NOT exist, use hardcoded fallback!
         UserModuleAccess createaccess;
         if (access == null) {
-            if (DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true) == null) {
+            if (DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true) == null) {
                 createaccess = AdminCache.getDefaultUserModuleAccess().clone();
             } else {
-                createaccess = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true).clone();
+                createaccess = cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true).clone();
             }
         } else {
             createaccess = access.clone();
@@ -1335,8 +1337,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            UserModuleAccess accessAdmin = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim(), true);
-            UserModuleAccess accessUser = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim(), false);
+            UserModuleAccess accessAdmin = cache.getNamedAccessCombination(access_combination_name.trim(), true);
+            UserModuleAccess accessUser = cache.getNamedAccessCombination(access_combination_name.trim(), false);
             if (null == accessAdmin || null == accessUser) {
                 // no such access combination name defined in configuration
                 // throw error!
@@ -1477,7 +1479,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             // Get admin id and fetch current access object and query cache for its name!
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
-            return ClientAdminThread.cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx)));
+            return cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx)));
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;

@@ -155,7 +155,7 @@ public class BasicAuthenticator extends OXCommonImpl {
             authdata.setLogin(authdata.getLogin().toLowerCase());
         }
 
-        final Credentials master = ClientAdminThread.cache.getMasterCredentials();
+        final Credentials master = cache.getMasterCredentials();
         if (autoLowerCase && null != master.getLogin()) {
             master.setLogin(master.getLogin().toLowerCase());
         }
@@ -198,14 +198,14 @@ public class BasicAuthenticator extends OXCommonImpl {
      * @param ctx
      */
     public void removeFromAuthCache(final Context ctx) {
-       ClientAdminThread.cache.removeAdminCredentials(ctx);
+       cache.removeAdminCredentials(ctx);
     }
 
     public boolean isMasterOfContext(final Credentials creds, final Context ctx) throws InvalidCredentialsException {
-        if( ! ClientAdminThread.cache.isAllowMasterOverride() ) {
+        if (!cache.isAllowMasterOverride() ) {
             return false;
         }
-        if( ClientAdminThread.cache.isMasterAdmin(creds) ) {
+        if (cache.isMasterAdmin(creds) ) {
             return true;
         }
         if( plugInAware ) {
@@ -242,7 +242,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         // only do context check, if we have not already admin creds in our cache for given context
         // ATTENTION: It is correct that we don't throw a now such context exception here because we won't
         // give an opportunity to indirectly check for contexts here
-        if( ClientAdminThread.cache.getAdminCredentials(ctx) == null ) {
+        if (cache.getAdminCredentials(ctx) == null ) {
             if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
