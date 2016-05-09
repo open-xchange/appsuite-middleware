@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.utils;
 
+import static com.openexchange.database.DBPoolingExceptionCodes.NOT_RESOLVED_SERVER;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -492,19 +493,26 @@ public class Filestore2UserUtil {
             if (marked) {
                 unmarkOnError = true;
 
-                // Start database transaction
-                Databases.startTransaction(con);
-                inTransaction = true;
-
                 // Determine server id
                 int serverID;
                 try {
                     serverID = databaseService.getServerId();
                 } catch (OXException e) {
-                    //No server configured. Assume initial start.
-                    LOG.warn("Unable to initialize the filestore2user table, because no server is configured.");
-                    return;
+                    if (NOT_RESOLVED_SERVER.equals(e)) {
+                        // Assume initial start and thus mark as processed as there are no entries to insert
+                        processed(con);
+                        unmarkOnError = false;
+                        return;
+                    }
+                    
+                    // Re-throw...
+                    throw e;
                 }
+
+                // Start database transaction
+                Databases.startTransaction(con);
+                inTransaction = true;
+
                 // Determine all pools/schemas
                 Set<PoolAndSchema> pools = PoolAndSchema.determinePoolsAndSchemas(serverID, con);
 
