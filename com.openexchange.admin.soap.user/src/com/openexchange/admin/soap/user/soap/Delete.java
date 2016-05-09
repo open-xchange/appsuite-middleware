@@ -18,15 +18,16 @@ import com.openexchange.admin.soap.user.dataobjects.User;
  *
  * <pre>
  * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="ctx" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Context" minOccurs="0"/>
- *         &lt;element name="user" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
- *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
+ * &lt;complexContent>
+ * &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ * &lt;sequence>
+ * &lt;element name="ctx" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Context" minOccurs="0"/>
+ * &lt;element name="user" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
+ * &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ * &lt;element name="reassign" type="Integer" minOccurs="0"/>
+ * &lt;/sequence>
+ * &lt;/restriction>
+ * &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
  *
@@ -36,7 +37,8 @@ import com.openexchange.admin.soap.user.dataobjects.User;
 @XmlType(name = "", propOrder = {
     "ctx",
     "user",
-    "auth"
+    "auth", 
+    "reassign"
 })
 @XmlRootElement(name = "delete")
 public class Delete {
@@ -47,6 +49,8 @@ public class Delete {
     protected User user;
     @XmlElement(nillable = true)
     protected Credentials auth;
+    @XmlElement(nillable = true)
+    protected Integer reassign;
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
@@ -118,6 +122,14 @@ public class Delete {
      */
     public void setAuth(Credentials value) {
         this.auth = value;
+    }
+
+    public Integer getReassign() {
+        return reassign;
+    }
+
+    public void setReassign(Integer reassign) {
+        this.reassign = reassign;
     }
 
 }

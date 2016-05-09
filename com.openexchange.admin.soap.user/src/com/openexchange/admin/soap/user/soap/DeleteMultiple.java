@@ -26,6 +26,7 @@ import com.openexchange.admin.soap.user.dataobjects.User;
  *         &lt;element name="ctx" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Context" minOccurs="0"/>
  *         &lt;element name="users" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ *         &lt;element name="reassign" type="Integer" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -38,7 +39,8 @@ import com.openexchange.admin.soap.user.dataobjects.User;
 @XmlType(name = "", propOrder = {
     "ctx",
     "users",
-    "auth"
+    "auth",
+    "reassign"
 })
 @XmlRootElement(name = "deleteMultiple")
 public class DeleteMultiple {
@@ -49,6 +51,8 @@ public class DeleteMultiple {
     protected List<User> users;
     @XmlElement(nillable = true)
     protected Credentials auth;
+    @XmlElement(nillable = true)
+    protected Integer reassign;
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
@@ -125,6 +129,14 @@ public class DeleteMultiple {
      */
     public void setAuth(Credentials value) {
         this.auth = value;
+    }
+
+    public Integer getReassign() {
+        return reassign;
+    }
+
+    public void setReassign(Integer reassign) {
+        this.reassign = reassign;
     }
 
 }
