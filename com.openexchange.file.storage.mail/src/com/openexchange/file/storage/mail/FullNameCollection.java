@@ -111,9 +111,9 @@ public class FullNameCollection implements Iterable<FullName> {
 
         switch (type) {
             case ALL:
-                return null == fullNameSent ? null : new FullName(fullNameAll, Type.ALL);
+                return null == fullNameAll ? null : new FullName(fullNameAll, Type.ALL);
             case RECEIVED:
-                return null == fullNameSent ? null : new FullName(fullNameReceived, Type.RECEIVED);
+                return null == fullNameReceived ? null : new FullName(fullNameReceived, Type.RECEIVED);
             case SENT:
                 return null == fullNameSent ? null : new FullName(fullNameSent, Type.SENT);
             case DEFAULT:
