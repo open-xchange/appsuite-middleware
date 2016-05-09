@@ -98,6 +98,22 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class MailDriveFileAccess extends AbstractMailDriveResourceAccess implements FileStorageFileAccess, FileStorageSequenceNumberProvider, FileStorageReadOnly, FileStorageMailAttachments {
 
+    /** The fetch profile for a virtual folder */
+    public static final FetchProfile FETCH_PROFILE_VIRTUAL = new FetchProfile() {
+        // Unnamed block
+        {
+            add(IMAPFolder.FetchProfileItem.INTERNALDATE);
+            add(FetchProfile.Item.SIZE);
+            add(FetchProfile.Item.CONTENT_INFO);
+            add(IMAPFolder.FetchProfileItem.HEADERS);
+            add(UIDFolder.FetchProfileItem.UID);
+            add(MimeStorageUtility.ORIGINAL_MAILBOX);
+            add(MimeStorageUtility.ORIGINAL_UID);
+        }
+    };
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
     private final MailDriveAccountAccess accountAccess;
     final int userId;
 
@@ -297,19 +313,6 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
         exists(folderId, id, CURRENT_VERSION);
     }
 
-    /** The fetch profile for a virtual folder */
-    public static final FetchProfile FETCH_PROFILE_GET_FOR_VIRTUAL = new FetchProfile() {
-        // Unnamed block
-        {
-            add(FetchProfile.Item.ENVELOPE);
-            add(FetchProfile.Item.CONTENT_INFO);
-            add(IMAPFolder.FetchProfileItem.HEADERS);
-            add(UIDFolder.FetchProfileItem.UID);
-            add(MimeStorageUtility.ORIGINAL_MAILBOX);
-            add(MimeStorageUtility.ORIGINAL_UID);
-        }
-    };
-
     @Override
     public TimedResult<File> getDocuments(final String folderId) throws OXException {
         final FullName fullName = checkFolderId(folderId);
@@ -342,7 +345,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
 
                         // Get & fetch messages
                         Message[] messages = folder.getMessages(offset, end);
-                        folder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+                        folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
                         // Iterate messages
                         int i = 0;
@@ -408,7 +411,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
 
                         // Get & fetch messages
                         Message[] messages = folder.getMessages(offset, end);
-                        folder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+                        folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
                         // Iterate messages
                         int i = 0;
@@ -522,7 +525,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                                         indexes.put(Long.valueOf(uidi.uid), Integer.valueOf(uidi.index));
                                     }
                                     messages = folder.getMessagesByUID(grabMe);
-                                    folder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+                                    folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
                                 }
 
                                 // Iterate messages
@@ -599,7 +602,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                         try {
                             if (folder.getMessageCount() > 0) {
                                 Message[] messages = folder.search(new SubjectTerm(pattern));
-                                folder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+                                folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
                                 int i = 0;
                                 for (int k = messages.length; k-- > 0;) {

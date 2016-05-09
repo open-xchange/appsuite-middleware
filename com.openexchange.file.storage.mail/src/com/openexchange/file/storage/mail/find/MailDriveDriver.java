@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.mail.find;
 
-import static com.openexchange.file.storage.mail.MailDriveFileAccess.FETCH_PROFILE_GET_FOR_VIRTUAL;
+import static com.openexchange.file.storage.mail.MailDriveFileAccess.FETCH_PROFILE_VIRTUAL;
 import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import static com.openexchange.find.common.CommonConstants.FIELD_DATE;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
@@ -403,7 +403,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             }
 
                             // Fetch messages
-                            imapFolder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+                            imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
                             int i = 0;
                             for (int k = messages.length; k-- > 0;) {
@@ -443,7 +443,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                         }
 
                         // Fetch messages
-                        imapFolder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+                        imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
                         int i = 0;
                         for (int k = messages.length; k-- > 0;) {

@@ -141,6 +141,15 @@ public class FullName {
     }
 
     /**
+     * Checks if this full name denotes the virtual "all attachments" folder.
+     *
+     * @return <code>true</code> if this full name denotes the virtual "all attachments" folder; otherwise <code>false</code>
+     */
+    public boolean isAllFolder() {
+        return Type.ALL == type;
+    }
+
+    /**
      * Gets the full name
      *
      * @return The full name
