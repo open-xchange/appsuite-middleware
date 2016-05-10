@@ -109,6 +109,7 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
@@ -984,19 +985,18 @@ public class MimeMessageFiller {
                     if (text == null || text.length() == 0) {
                         mailText = "";
                     } else if (isHtml) {
-                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(
-                            htmlService.html2text(text, true),
-                            compositionParameters.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(htmlService.html2text(text, true), compositionParameters.getAutoLinebreak());
                     } else {
                         mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(text, compositionParameters.getAutoLinebreak());
                     }
                     mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
+                    if (Streams.isAscii(mailText.getBytes(contentType.getCharsetParameter()))) {
+                        mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "7bit");
+                    }
                 } else {
                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, contentType.getCharsetParameter());
                     if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
-                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(
-                            HTML_SPACE,
-                            ""), contentType)));
+                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType)));
                     } else {
                         mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
                     }
@@ -1006,10 +1006,14 @@ public class MimeMessageFiller {
                 mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
             } else {
                 final MimeBodyPart msgBodyPart = new MimeBodyPart();
-                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mail.getContent().toString(), contentType)));
+                String mailText = mail.getContent().toString();
+                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
                 // msgBodyPart.setContent(mail.getContent(), contentType.toString());
                 msgBodyPart.setHeader(HDR_MIME_VERSION, VERSION_1_0);
                 msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
+                if (isPlainText && Streams.isAscii(mailText.getBytes(contentType.getCharsetParameter()))) {
+                    mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "7bit");
+                }
                 primaryMultipart.addBodyPart(msgBodyPart);
             }
         } else {
@@ -1568,6 +1572,13 @@ public class MimeMessageFiller {
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(HDR_MIME_VERSION, VERSION_1_0);
         text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/plain; charset=").append(charset).toString());
+        try {
+            if (Streams.isAscii(textContent.getBytes(charset))) {
+                text.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "7bit");
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new MessagingException("Unsupported character encoding: " + charset, e);
+        }
         return text;
     }
 
