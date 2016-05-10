@@ -143,7 +143,7 @@ public final class ShareServletUtils {
              */
             String alternativeID = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
             if (null != alternativeID) {
-                String publicCookieName = getPublicSessionCookieName(request);
+                String publicCookieName = getPublicSessionCookieName(request, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) });
                 Cookie cookie = Cookies.cookieMapFor(request).get(publicCookieName);
                 if (null == cookie || false == alternativeID.equals(cookie.getValue())) {
                     response.addCookie(configureCookie(new Cookie(publicCookieName, alternativeID), request, loginConfig));

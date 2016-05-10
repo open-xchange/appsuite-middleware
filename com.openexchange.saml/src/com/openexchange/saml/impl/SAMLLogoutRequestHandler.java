@@ -103,7 +103,7 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
                 SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfigurationLookup.getLoginConfiguration());
                 LOG.debug("Performing logout for session {}", sessionId);
                 LoginPerformer.getInstance().doLogout(sessionId);
-                SessionUtility.removeOXCookies(httpRequest, httpResponse, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, LoginServlet.SECRET_PREFIX + hash, getPublicSessionCookieName(httpRequest), SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + hash));
+                SessionUtility.removeOXCookies(httpRequest, httpResponse, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, LoginServlet.SECRET_PREFIX + hash, getPublicSessionCookieName(httpRequest, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }), SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + hash));
                 SessionUtility.removeJSESSIONID(httpRequest, httpResponse);
             }
         } catch (OXException e) {

@@ -615,7 +615,15 @@ public class DispatcherServlet extends SessionServlet {
         AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
         String module = requestDataTools.getModule(prefix, httpRequest);
         String action = requestDataTools.getAction(httpRequest);
-        ServerSession session = getSession(httpRequest, DISPATCHER.get(), module, action);
+        String user = requestDataTools.getUser(httpRequest);
+        String context = requestDataTools.getContext(httpRequest);
+        String sequence = requestDataTools.getSequence(httpRequest);
+        ServerSession session = null;
+        if (Strings.isEmpty(user) || Strings.isEmpty(context) || Strings.isEmpty(sequence)) {
+            session = getSession(httpRequest, DISPATCHER.get(), module, action);
+        } else {
+            session = getSession(httpRequest, DISPATCHER.get(), module, action, user, context, sequence);
+        }
         /*
          * Parse AJAXRequestData
          */
@@ -697,7 +705,7 @@ public class DispatcherServlet extends SessionServlet {
             if (!dispatcher.mayOmitSession(module, action)) {
                 if (dispatcher.mayUseFallbackSession(module, action)) {
                     // "open-xchange-public-session" allowed, but missing for associated action
-                    String name = LoginServlet.getPublicSessionCookieName(httpRequest);
+                    String name = LoginServlet.getPublicSessionCookieName(httpRequest, null);
                     throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(name) : AjaxExceptionCodes.MISSING_COOKIE.create(name);
                 }
                 // "open-xchange-public-session" NOT allowed for associated action, therefore complain about missing "session" parameter
@@ -706,6 +714,10 @@ public class DispatcherServlet extends SessionServlet {
             session = fakeSession();
         }
         return session;
+    }
+
+    private ServerSession getSession(HttpServletRequest httpRequest, Dispatcher dispatcher, String module, String action, String user, String context, String sequence) throws OXException {
+        return SessionUtility.getSessionObjectByAlternativeId(httpRequest, context, user);
     }
 
     private ServerSession fakeSession() {

@@ -451,6 +451,18 @@ public class AJAXRequestDataTools {
 
     }
 
+    public String getUser(HttpServletRequest req) {
+        return req.getParameter("user");
+    }
+
+    public String getContext(HttpServletRequest req) {
+        return req.getParameter("context");
+    }
+
+    public String getSequence(HttpServletRequest req) {
+        return req.getParameter("sequence");
+    }
+
     /**
      * Gets the value for the <code>"User-Agent"</code> header from passed AJAX request data<br>
      * (while preferring the one from {@link HttpServletRequest}).

@@ -265,8 +265,8 @@ public class LoginServlet extends AJAXServlet {
      * @param req The HTTP request
      * @return The name of the public session cookie
      */
-    public static String getPublicSessionCookieName(final HttpServletRequest req) {
-        return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(req)).toString();
+    public static String getPublicSessionCookieName(final HttpServletRequest req, String[] additionals) {
+        return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getHash(req, HashCalculator.getUserAgent(req), HashCalculator.getClient(req), additionals)).toString();
     }
 
     /**
@@ -951,7 +951,7 @@ public class LoginServlet extends AJAXServlet {
     private static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req), altId), secure, serverName, conf));
+            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }), altId), secure, serverName, conf));
             return true;
         }
         return false;

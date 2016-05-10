@@ -273,7 +273,11 @@ public final class SessionUtility {
      */
     public static boolean findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-        Cookie cookie = cookies.get(getPublicSessionCookieName(req));
+        if (null == session) {
+            return false;
+        }
+
+        Cookie cookie = cookies.get(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }));
         if (null != cookie) {
             return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
         }
@@ -628,7 +632,7 @@ public final class SessionUtility {
         // Check for public session cookie
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
-            final String cookieName = getPublicSessionCookieName(req);
+            final String cookieName = getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) });
             if (null == cookies.get(cookieName)) {
                 final boolean restored = LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName());
                 if (restored) {
@@ -871,7 +875,7 @@ public final class SessionUtility {
      * @param resp The HTTP response
      */
     public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeOXCookies(req, resp, Arrays.asList(SESSION_PREFIX + hash, SECRET_PREFIX + hash, LoginServlet.getShareCookieName(req), getPublicSessionCookieName(req)));
+        removeOXCookies(req, resp, Arrays.asList(SESSION_PREFIX + hash, SECRET_PREFIX + hash, LoginServlet.getShareCookieName(req), PUBLIC_SESSION_PREFIX + hash));
     }
 
     /**
@@ -892,7 +896,7 @@ public final class SessionUtility {
         String sessionHash = session.getHash();
         removeCookie(cookies, response, SESSION_PREFIX + sessionHash);
         removeCookie(cookies, response, SECRET_PREFIX + sessionHash);
-        removeCookie(cookies, response, getPublicSessionCookieName(request), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID));
+        removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID));
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
             removeCookie(cookies, response, LoginServlet.getShareCookieName(request));
         }
@@ -983,7 +987,15 @@ public final class SessionUtility {
             return (ServerSession) attribute;
         }
         if (mayUseFallbackSession) {
-            return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
+            ServerSession session = (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
+//            if (null == session) {
+//                try {
+//                    session = getGuestSessionObjectByAnyAlternativeId(req);
+//                } catch (OXException e) {
+//                    // nothing to do
+//                }
+//            }
+            return session;
         }
         // No session found
         {
@@ -996,6 +1008,36 @@ public final class SessionUtility {
             final String queryString = httpRequest.getQueryString();
             if (null != queryString) {
                 LogProperties.put(LogProperties.Name.SERVLET_QUERY_STRING, LogProperties.getSanitizedQueryString(queryString));
+            }
+        }
+        return null;
+    }
+
+    public static ServerSession getSessionObjectByAlternativeId(ServletRequest req, String context, String user) throws OXException {
+        HttpServletRequest httpReq = (HttpServletRequest) req;
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(httpReq);
+        String hash = HashCalculator.getInstance().getHash(httpReq, HashCalculator.getUserAgent(httpReq), HashCalculator.getClient(httpReq), new String[] { context, user });
+        Cookie publicSession = cookies.get(PUBLIC_SESSION_PREFIX + hash);
+        if (null != publicSession) {
+            Session session = ServerServiceRegistry.getInstance().getService(SessiondService.class).getSessionByAlternativeId(publicSession.getValue());
+            return ServerSessionAdapter.valueOf(session);
+        }
+        return null;
+    }
+
+    public static ServerSession getGuestSessionObjectByAnyAlternativeId(ServletRequest req) throws OXException {
+        HttpServletRequest httpReq = (HttpServletRequest) req;
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(httpReq);
+        for (String name : cookies.keySet()) {
+            if (name.startsWith(PUBLIC_SESSION_PREFIX)) {
+                Cookie publicSession = cookies.get(name);
+                if (null != publicSession) {
+                    Session session = ServerServiceRegistry.getInstance().getService(SessiondService.class).getSessionByAlternativeId(publicSession.getValue());
+                    ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                    if (null != serverSession && "guest".equals(serverSession.getLogin())) {
+                        return serverSession;
+                    }
+                }
             }
         }
         return null;
