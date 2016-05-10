@@ -123,17 +123,17 @@ public class AdminActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
     }
 
     @Override
     public void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
+        AdminServiceRegistry.getInstance().addService(ThreadPoolService.class, getService(ThreadPoolService.class));
 
         track(PasswordMechFactory.class, new RegistryServiceTrackerCustomizer<PasswordMechFactory>(context, AdminServiceRegistry.getInstance(), PasswordMechFactory.class));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
-        track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
 
         track(TimerService.class, new RegistryServiceTrackerCustomizer<TimerService>(context, AdminServiceRegistry.getInstance(), TimerService.class) {
             @Override
@@ -292,6 +292,8 @@ public class AdminActivator extends HousekeepingActivator {
             daemon.unregisterRMI(context);
             this.daemon = null;
         }
+
+        AdminServiceRegistry.getInstance().removeService(ThreadPoolService.class);
 
         cleanUp();
     }
