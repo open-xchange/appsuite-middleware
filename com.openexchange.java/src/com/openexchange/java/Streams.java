@@ -535,15 +535,19 @@ public class Streams {
             return true;
         }
 
-        boolean isAscci = true;
-        int buflen = 2048;
-        byte[] buf = new byte[buflen];
-        for (int read; isAscci && (read = in.read(buf, 0, buflen)) > 0;) {
-            for (int i = read; isAscci && i-- > 0;) {
-                isAscci = (buf[i] >= 0);
+        try {
+            boolean isAscci = true;
+            int buflen = 2048;
+            byte[] buf = new byte[buflen];
+            for (int read; isAscci && (read = in.read(buf, 0, buflen)) > 0;) {
+                for (int i = read; isAscci && i-- > 0;) {
+                    isAscci = (buf[i] >= 0);
+                }
             }
+            return isAscci;
+        } finally {
+            close(in);
         }
-        return isAscci;
     }
 
     /**
