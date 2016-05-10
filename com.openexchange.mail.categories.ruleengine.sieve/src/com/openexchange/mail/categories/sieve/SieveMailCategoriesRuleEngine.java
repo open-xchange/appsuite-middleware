@@ -68,6 +68,7 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExceptionCodes;
@@ -111,12 +112,13 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         }
 
         Rule oldRule = null;
+        String rulename = rule.getFlag() == null ? MailCategoriesConstants.GENERAL_CATEGORY_ID : rule.getFlag();
         Credentials creds = getCredentials(session);
         try {
 
             List<Rule> rules = mailFilterService.listRules(creds, type.getName());
             for (Rule tmpRule : rules) {
-                if (tmpRule.getRuleComment().getRulename().equals(rule.getFlag())) {
+                if (tmpRule.getRuleComment().getRulename().equals(rulename)) {
                     oldRule = tmpRule;
                     break;
                 }
@@ -167,11 +169,13 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
     }
 
     private Rule mailCategoryRule2SieveRule(MailCategoryRule rule, RuleType type) throws SieveException {
-        ArrayList<Object> argList = new ArrayList<>(1);
-        argList.add(Collections.singletonList(rule.getFlag()));
         List<ActionCommand> actionCommands = new ArrayList<>(4);
-        ActionCommand addFlagAction = new ActionCommand(ActionCommand.Commands.ADDFLAG, argList);
-        actionCommands.add(addFlagAction);
+        if (rule.getFlag() != null) {
+            ArrayList<Object> argList = new ArrayList<>(1);
+            argList.add(Collections.singletonList(rule.getFlag()));
+            ActionCommand addFlagAction = new ActionCommand(ActionCommand.Commands.ADDFLAG, argList);
+            actionCommands.add(addFlagAction);
+        }
 
         String[] flagsToRemove = rule.getFlagsToRemove();
         if (flagsToRemove != null && flagsToRemove.length > 0) {
@@ -193,7 +197,8 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         ArrayList<Command> commands = new ArrayList<Command>(Collections.singleton(ifCommand));
         int linenumber = 0;
         boolean commented = false;
-        RuleComment comment = new RuleComment(rule.getFlag());
+        String ruleName = rule.getFlag() == null ? MailCategoriesConstants.GENERAL_CATEGORY_ID : rule.getFlag();
+        RuleComment comment = new RuleComment(ruleName);
         comment.setFlags(Collections.singletonList(type.getName()));
         Rule result = new Rule(comment, commands, linenumber, commented);
         return result;
@@ -204,11 +209,14 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
 
             List<TestCommand> commands = new ArrayList<>(2);
 
-            List<Object> flagArgList = new ArrayList<Object>(4);
-            flagArgList.add(createTagArgument("is"));
-            flagArgList.add(Collections.singletonList(rule.getFlag()));
-            commands.add(new TestCommand(Commands.NOT, new ArrayList<>(), Collections.singletonList(new TestCommand(Commands.HASFLAG, flagArgList, new ArrayList<TestCommand>()))));
-
+            if (rule.getFlag() == null) {
+                commands.add(new TestCommand(Commands.TRUE, Collections.emptyList(), new ArrayList<TestCommand>(0)));
+            } else {
+                List<Object> flagArgList = new ArrayList<Object>(4);
+                flagArgList.add(createTagArgument("is"));
+                flagArgList.add(Collections.singletonList(rule.getFlag()));
+                commands.add(new TestCommand(Commands.NOT, new ArrayList<>(), Collections.singletonList(new TestCommand(Commands.HASFLAG, flagArgList, new ArrayList<TestCommand>()))));
+            }
             List<Object> argList = new ArrayList<Object>(4);
             argList.add(createTagArgument("contains"));
             argList.add(rule.getHeaders());
@@ -246,8 +254,12 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         Credentials creds = getCredentials(session);
 
         List<Rule> rules = mailFilterService.listRules(creds, "category");
+        String name = flag;
+        if (flag == null) {
+            name = MailCategoriesConstants.GENERAL_CATEGORY_ID;
+        }
         for (Rule tmpRule : rules) {
-            if (tmpRule.getRuleComment().getRulename().equals(flag)) {
+            if (tmpRule.getRuleComment().getRulename().equals(name)) {
                 return parseRootRule(tmpRule.getTestCommand(), flag);
             }
         }
@@ -341,12 +353,18 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
                         mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
                         continue;
                     } else {
+                        // test whether it contains only the hasflag check
                         if (testCom.getTestCommands().size() == 1 && testCom.getTestCommands().get(0).getCommand().equals(Commands.NOT)) {
                             TestCommand com = testCom.getTestCommands().get(0);
                             if (com.getTestCommands().size() == 1 && com.getTestCommands().get(0).getCommand().equals(Commands.HASFLAG)) {
                                 mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
                                 continue;
                             }
+                        }
+                        // test whether it is a empty rule of the 'general' category
+                        if (testCom.getTestCommands().size() == 1 && testCom.getTestCommands().get(0).getCommand().equals(Commands.TRUE)) {
+                            mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
+                            continue;
                         }
                     }
                 }

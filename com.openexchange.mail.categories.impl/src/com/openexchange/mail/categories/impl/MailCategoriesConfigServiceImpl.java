@@ -124,8 +124,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         List<MailCategoryConfig> result = new ArrayList<>(categories.length);
 
         if (includeGeneral) {
-            String name = getLocalizedName(session, locale, "general");
-            MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category("general").isSystemCategory(true).enabled(true).force(true).name(name).build();
+            String name = getLocalizedName(session, locale, MailCategoriesConstants.GENERAL_CATEGORY_ID);
+            MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category(MailCategoriesConstants.GENERAL_CATEGORY_ID).isSystemCategory(true).enabled(true).force(true).name(name).build();
             result.add(generalConfig);
         }
 
@@ -310,11 +310,14 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     private void setRule(Session session, String category, MailCategoryRule rule) throws OXException {
-        String flag = getFlagByCategory(session, category);
-        if (Strings.isEmpty(flag)) {
-            flag = generateFlag(category);
+        String flag = null;
+        if (!category.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
+            flag = getFlagByCategory(session, category);
+            if (Strings.isEmpty(flag)) {
+                flag = generateFlag(category);
+            }
         }
-        if (!flag.equals(rule.getFlag())) {
+        if ((flag == null && rule.getFlag() != null) || (flag != null && !flag.equals(rule.getFlag()))) {
             throw MailCategoriesRuleEngineExceptionCodes.INVALID_RULE.create();
         }
         MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
@@ -329,11 +332,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         if (ruleEngine == null) {
             throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
         }
-
-        String flag = getFlagByCategory(session, category);
-        if (Strings.isEmpty(flag)) {
-            flag = generateFlag(category);
-            MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, flag, session);
+        String flag = null;
+        if (!category.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
+            flag = getFlagByCategory(session, category);
+            if (Strings.isEmpty(flag)) {
+                flag = generateFlag(category);
+                MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, flag, session);
+            }
         }
         return ruleEngine.getRule(session, flag);
     }
@@ -385,9 +390,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             // nothing to do
             return;
         }
-        String flag = getFlagByCategory(session, category);
-        if (Strings.isEmpty(flag)) {
-            flag = generateFlag(category);
+
+        String flag = null;
+        if (!category.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
+            flag = getFlagByCategory(session, category);
+            if (Strings.isEmpty(flag)) {
+                flag = generateFlag(category);
+            }
         }
 
         MailCategoryRule newRule = null;

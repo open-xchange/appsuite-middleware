@@ -118,4 +118,9 @@ public class MailCategoriesConstants {
      */
     public static final String APPLY_OX_RULES_PROPERTY = "com.openexchange.mail.categories.apply.ox.rules";
 
+    /**
+     * The general category id
+     */
+    public static final String GENERAL_CATEGORY_ID = "general";
+
 }

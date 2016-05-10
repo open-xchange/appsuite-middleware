@@ -102,7 +102,10 @@ public class MailCategoriesOrganizer {
             if (flagsToRemove != null && flagsToRemove.length != 0) {
                 messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, flagsToRemove, false);
             }
-            messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, true);
+
+            if (flag != null) {
+                messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, true);
+            }
         } finally {
             if (mailAccess != null) {
                 mailAccess.close();
