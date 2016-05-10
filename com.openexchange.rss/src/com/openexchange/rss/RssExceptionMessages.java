@@ -68,6 +68,18 @@ public final class RssExceptionMessages implements LocalizableStrings {
     // Timeout while reading the RSS feed from URL: %1$s
     public static final String TIMEOUT_ERROR_MSG = "Timeout while reading the RSS feed from URL: %1$s";
 
+    // Failed to read RSS feed from URL: %1$s
+    public static final String GENERIC_ERROR_WITH_ARG1_MSG = "Failed to read RSS feed from URL: %1$s";
+
+    // Failed to read RSS feed from URL: %2$s
+    public static final String GENERIC_ERROR_WITH_ARG2_MSG = "Failed to read RSS feed from URL: %2$s";
+    
+    // The RSS feed is exceeding the maximum allowed size of '%1$s'
+    public static final String RSS_SIZE_EXCEEDED = "The RSS feed is exceeding the maximum allowed size of '%1$s'";
+
+    // Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+    public static final String RSS_CONNECTION_ERROR_MSG = "Cannot connect to RSS with URL: %1$s. Please change URL and try again.";
+
     /**
      * Initializes a new {@link RssExceptionMessages}.
      */

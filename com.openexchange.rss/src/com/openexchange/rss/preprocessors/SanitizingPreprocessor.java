@@ -46,11 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.rss.preprocessors;
 
 import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssResult;
-import com.openexchange.rss.RssServices;
+import com.openexchange.rss.osgi.Services;
 
 /**
  * {@link SanitizingPreprocessor} - Sanitizes HTML content.
@@ -69,9 +70,9 @@ public class SanitizingPreprocessor extends AbstractPreprocessor {
         this.dropExternalImages = dropExternalImages;
     }
 
-	@Override
-	protected String innerProcess(String payload, RssResult rssResult) {
-	    final HtmlService htmlService = RssServices.getHtmlService();
+    @Override
+    protected String innerProcess(String payload, RssResult rssResult) {
+        final HtmlService htmlService = Services.getService(HtmlService.class);
         if (null == htmlService) {
             return payload;
         }
@@ -85,6 +86,6 @@ public class SanitizingPreprocessor extends AbstractPreprocessor {
         }
 
         return sanitized;
-	}
+    }
 
 }
