@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 29
+%define         ox_release 30
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -62,6 +62,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %doc com.openexchange.blackwhitelist/ChangeLog
 
 %changelog
+* Tue May 03 2016 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2016-05-09 (3271)
 * Fri Apr 15 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-04-25 (3238)
 * Tue Apr 05 2016 Carsten Hoeger <choeger@open-xchange.com>

@@ -52,13 +52,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * {@link Tree}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Tree<T> {
+public class Tree<T extends Comparable<T>> {
 
     private Node<T> root;
 
@@ -91,7 +92,7 @@ public class Tree<T> {
     }
 
     public Set<T> getChildren(final T parent) {
-        final Set<T> set = new HashSet<T>();
+        final Set<T> set = new TreeSet<T>();
         final Node<T> n1 = nodes.get(parent);
         if (n1 != null) {
             final Set<Node<T>> children = root.getChildren(n1);

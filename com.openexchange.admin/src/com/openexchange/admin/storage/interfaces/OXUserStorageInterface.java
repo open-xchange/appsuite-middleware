@@ -332,17 +332,17 @@ public abstract class OXUserStorageInterface {
     /**
      * Delete an user or multiple from given context in given connection
      */
-    public abstract void delete(final Context ctx, final User[] user_ids, final Connection write_ox_con ) throws StorageException;
+    public abstract void delete(final Context ctx, final User[] user_ids, Integer destUID, final Connection write_ox_con) throws StorageException;
 
     /**
      * Delete users in given context
      */
-    public abstract void delete( final Context ctx, final User[] users) throws StorageException;
+    public abstract void delete(final Context ctx, final User[] users, Integer destUser) throws StorageException;
 
     /**
      * Delete one user in given context
      */
-    public abstract void delete( final Context ctx, final User user) throws StorageException;
+    public abstract void delete(final Context ctx, final User user, Integer destUser) throws StorageException;
 
     /**
      * Fetch all data from current user  and add it to "del_user"

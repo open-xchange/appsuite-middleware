@@ -56,12 +56,12 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssJsonConverter;
-import com.openexchange.rss.RssServices;
 import com.openexchange.rss.actions.RssActionFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -72,19 +72,20 @@ public class RssActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class, CapabilityService.class, ConfigViewFactory.class };
+        return new Class<?>[] { HtmlService.class, CapabilityService.class, ConfigViewFactory.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() {
         HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
-        RssServices.LOOKUP.set(this);
+        Services.setServiceLookup(this);
         registerModule(new RssActionFactory(), "rss");
         registerService(ResultConverter.class, new RssJsonConverter());
 
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "rss");
         registerService(CapabilityChecker.class, new CapabilityChecker() {
+
             @Override
             public boolean isEnabled(String capability, Session ses) throws OXException {
                 if ("rss".equals(capability)) {
@@ -108,7 +109,7 @@ public class RssActivator extends AJAXModuleActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        RssServices.LOOKUP.set(null);
+        Services.setServiceLookup(null);
         super.stopBundle();
     }
 }

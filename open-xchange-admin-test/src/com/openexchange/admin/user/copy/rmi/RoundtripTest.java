@@ -381,7 +381,7 @@ public class RoundtripTest extends AbstractRMITest {
     @Override
     public void tearDown() throws Exception {
         try {
-            ui.delete(srcCtx, srcUser, getCredentials());
+            ui.delete(srcCtx, srcUser, null, getCredentials());
         } catch (Exception e) {
             e.printStackTrace();
         }

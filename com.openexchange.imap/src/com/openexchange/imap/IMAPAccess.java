@@ -620,6 +620,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 warnings.add(MailExceptionCode.PING_FAILED_AUTH.create(e, config.getServer(), config.getLogin()));
                 throw MimeMailException.handleMessagingException(e, config, session);
             } catch (final MessagingException e) {
+                Exception cause = e.getNextException();
+                if (com.sun.mail.iap.ConnectionException.class.isInstance(cause)) {
+                    OXException oxe = MimeMailException.handleMessagingException(e, config, session);
+                    warnings.add(oxe);
+                    throw oxe;
+                } else if (java.net.SocketException.class.isInstance(cause)) {
+                    OXException oxe = MimeMailException.handleMessagingException(e, config, session);
+                    warnings.add(oxe);
+                    throw oxe;
+                }
                 warnings.add(MailExceptionCode.PING_FAILED.create(e, config.getServer(), config.getLogin(), e.getMessage()));
                 throw MimeMailException.handleMessagingException(e, config, session);
             } finally {

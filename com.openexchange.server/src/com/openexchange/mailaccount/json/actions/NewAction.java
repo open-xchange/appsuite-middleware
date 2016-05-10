@@ -156,10 +156,13 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
         // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
         boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
+
+        boolean valid = true;
         if (!pop3) {
             session.setParameter("mail-account.validate.type", "create");
             try {
-                if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings).booleanValue()) {
+                if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings, true).booleanValue()) {
+                    valid = false;
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
                     warning.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(0, warning);
@@ -170,7 +173,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         // Check standard folder names against full names
-        if (!pop3) {
+        if (!pop3 && valid) {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
                 mailAccess = getMailAccess(accountDescription, session, warnings);

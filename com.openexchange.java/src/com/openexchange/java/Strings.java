@@ -525,17 +525,17 @@ public class Strings {
     /**
      * Checks for an empty string.
      *
-     * @param string The string
-     * @return <code>true</code> if input is null or empty; else <code>false</code>
+     * @param str The string
+     * @return <code>true</code> if input is <code>null</code>, empty or only consists of white-space characters; else <code>false</code>
      */
-    public static boolean isEmpty(final String string) {
-        if (null == string) {
+    public static boolean isEmpty(final String str) {
+        if (null == str) {
             return true;
         }
-        final int len = string.length();
+        final int len = str.length();
         boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = isWhitespace(string.charAt(i));
+        for (int i = len; isWhitespace && i-- > 0;) {
+            isWhitespace = isWhitespace(str.charAt(i));
         }
         return isWhitespace;
     }
@@ -548,6 +548,34 @@ public class Strings {
      */
     public static boolean isNotEmpty(final String string) {
         return !isEmpty(string);
+    }
+
+    /**
+     * Checks for an empty character sequence.
+     *
+     * @param charSeq The character sequence
+     * @return <code>true</code> if input is <code>null</code>, empty or only consists of white-space characters; else <code>false</code>
+     */
+    public static boolean isEmptyCharSequence(final CharSequence charSeq) {
+        if (null == charSeq) {
+            return true;
+        }
+        final int len = charSeq.length();
+        boolean isWhitespace = true;
+        for (int i = len; isWhitespace && i-- > 0;) {
+            isWhitespace = isWhitespace(charSeq.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /**
+     * Checks for a non-empty character sequence.
+     *
+     * @param charSeq The character sequence
+     * @return <code>true</code> if input is a non-empty string; else <code>false</code>
+     */
+    public static boolean isNotEmptyCharSequence(final CharSequence charSeq) {
+        return !isEmptyCharSequence(charSeq);
     }
 
     /**

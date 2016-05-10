@@ -779,7 +779,7 @@ public class DatabaseImpl extends DBService {
 
     /**
      * Get the document file store locations for the specified user in the specified context
-     * 
+     *
      * @param ctx The context
      * @param usr The user
      * @return A sorted set of all document file store locations for the specified user in the specified context
@@ -796,7 +796,7 @@ public class DatabaseImpl extends DBService {
 
     /**
      * Get the document file store locations for the specified user in the specified context
-     * 
+     *
      * @param ctx The context
      * @param usr The user
      * @param connection A read-only database connection for the specified context
@@ -1111,16 +1111,22 @@ public class DatabaseImpl extends DBService {
 
     private static final List<String> tables = Arrays.asList("infostore", "infostore_document");
 
-    public void removeUser(final int id, final Context ctx, final ServerSession session, final EntityLockManager locks) throws OXException {
+    public void removeUser(final int id, final Context ctx, Integer destUser, final ServerSession session, final EntityLockManager locks) throws OXException {
+        if (destUser == null) {
+            destUser = ctx.getMailadmin();
+        }
         if (id != ctx.getMailadmin()) {
-            removePrivate(id, ctx, session);
-            assignToAdmin(id, ctx);
+            if (destUser <= 0) {
+                removeAllForUser(id, ctx, session, true);
+            } else {
+                removePrivate(id, ctx, session);
+                assignToUser(id, ctx, destUser);
+            }
         } else {
             removeAll(ctx, session);
         }
-
         removeFromDel(id, ctx);
-        locks.transferLocks(ctx, id, ctx.getMailadmin());
+        locks.transferLocks(ctx, id, destUser.intValue());
     }
 
     private void removeFromDel(final int id, final Context ctx) throws OXException {
@@ -1241,10 +1247,14 @@ public class DatabaseImpl extends DBService {
     }
 
     private void removePrivate(final int id, final Context ctx, final ServerSession session) throws OXException {
+        removeAllForUser(id, ctx, session, false);
+    }
+
+    private void removeAllForUser(final int id, final Context ctx, final ServerSession session, boolean includeShared) throws OXException {
         PreparedStatementHolder holder = null;
 
         try {
-            final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(this).discoverFolders(id, ctx);
+            final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(this).discoverFolders(id, ctx, includeShared);
             if (foldersWithPrivateItems.size() == 0) {
                 return;
             }
@@ -1340,7 +1350,7 @@ public class DatabaseImpl extends DBService {
         }
     }
 
-    private void assignToAdmin(final int id, final Context ctx) throws OXException {
+    private void assignToUser(final int id, final Context ctx, int destUser) throws OXException {
         Connection writeCon = null;
         Statement stmt = null;
         StringBuilder query = null;
@@ -1350,7 +1360,7 @@ public class DatabaseImpl extends DBService {
             for (final String table : tables) {
                 for (final String userField : userFields) {
                     query = new StringBuilder("UPDATE ").append(table).append(" SET ").append(userField).append(" = ").append(
-                        ctx.getMailadmin()).append(" WHERE cid = ").append(ctx.getContextId()).append(" AND ").append(userField).append(
+                        destUser).append(" WHERE cid = ").append(ctx.getContextId()).append(" AND ").append(userField).append(
                         " = ").append(id);
                     stmt.executeUpdate(query.toString());
                 }

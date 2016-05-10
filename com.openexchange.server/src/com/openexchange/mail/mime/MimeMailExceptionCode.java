@@ -219,9 +219,9 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      */
     BROKEN_CONNECTION("Connection is broken due to a socket exception on remote server: %1$s", CATEGORY_SERVICE_DOWN, 1020),
     /**
-     * A socket error occurred: %1$s
+     * A socket error occurred
      */
-    SOCKET_ERROR("A socket error occurred: %1$s", CATEGORY_ERROR, 1021),
+    SOCKET_ERROR("A socket error occurred", CATEGORY_ERROR, 1021),
     /**
      * The IP address of host "%1$s" could not be determined
      */

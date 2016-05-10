@@ -65,7 +65,9 @@ import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.share.servlet.utils.LoginLocationBuilder;
+import com.openexchange.share.servlet.utils.LoginLocation;
+import com.openexchange.share.servlet.utils.LoginLocationRegistry;
+import com.openexchange.share.servlet.utils.LoginType;
 import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.user.UserService;
@@ -130,18 +132,16 @@ public class WebUIShareHandler extends AbstractShareHandler {
 
             ShareTargetPath targetPath = shareRequest.getTargetPath();
             if (shareRequest.isInvalidTarget()) {
-                LoginLocationBuilder location;
+                LoginLocation location;
                 if (guestInfo.getAuthentication() == AuthenticationMode.GUEST) {
-                    location = new LoginLocationBuilder()
-                        .status("not_found_continue")
+                    location = new LoginLocation()
+                        .loginType(LoginType.MESSAGE_CONTINUE)
                         .share(guestInfo.getBaseToken())
-                        .loginType(guestInfo.getAuthentication())
                         .target(targetPath)
                         .message(MessageType.INFO, translator.translate(ShareServletStrings.NO_ACCESS_TO_SHARE_CONTACT_OWNER_CONTINUE))
                         .loginName(guestInfo.getEmailAddress());
                 } else {
-                    location = new LoginLocationBuilder()
-                        .status("not_found_continue")
+                    location = new LoginLocation()
                         .share(guestInfo.getBaseToken())
                         .loginType(guestInfo.getAuthentication())
                         .target(targetPath)
@@ -151,7 +151,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                     }
                 }
 
-                response.sendRedirect(location.build());
+                LoginLocationRegistry.getInstance().putAndRedirect(location, response);
                 return ShareHandlerReply.ACCEPT;
             }
 
@@ -160,7 +160,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             String type = targetPath.isFolder() ? translator.translate(ShareServletStrings.FOLDER) : translator.translate(ShareServletStrings.FILE);
             String message = String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle());
 
-            LoginLocationBuilder location = new LoginLocationBuilder()
+            LoginLocation location = new LoginLocation()
                 .share(guestInfo.getBaseToken())
                 .loginType(guestInfo.getAuthentication())
                 .message(MessageType.INFO, message);
@@ -170,8 +170,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             if (targetPath != null) {
                 location.target(targetPath);
             }
-
-            response.sendRedirect(location.build());
+            LoginLocationRegistry.getInstance().putAndRedirect(location, response);
             return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());

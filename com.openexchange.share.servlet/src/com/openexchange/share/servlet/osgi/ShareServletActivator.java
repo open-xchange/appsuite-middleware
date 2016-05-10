@@ -111,6 +111,11 @@ public class ShareServletActivator extends HousekeepingActivator {
             PasswordResetServletRegisterer registerer = new PasswordResetServletRegisterer(context, hashSalt);
             track(filter, registerer);
         }
+        {
+            Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
+            RedeemLoginLocationTokenServletRegisterer registerer = new RedeemLoginLocationTokenServletRegisterer(context);
+            track(filter, registerer);
+        }
 
         // Open trackers
         openTrackers();

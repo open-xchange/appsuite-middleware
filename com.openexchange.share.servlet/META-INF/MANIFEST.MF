@@ -5,7 +5,16 @@ Bundle-SymbolicName: com.openexchange.share.servlet
 Bundle-Version: 7.8.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.io;version="18.0.0",
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.google.common.cache,
+ com.google.common.io,
  com.openexchange.ajax,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.login,

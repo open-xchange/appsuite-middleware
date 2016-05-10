@@ -124,7 +124,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     public final void tearDownContexts() throws Exception {
         try {
             if (ui != null && context != null) {
-                ui.delete(context, user, getCredentials());
+                ui.delete(context, user, null, getCredentials());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -286,7 +286,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             assertUserWasCreatedProperly(myNewUser, context, adminCredentials);
         } finally {
             if (userCreated) {
-                userInterface.delete(context, myNewUser, adminCredentials);
+                userInterface.delete(context, myNewUser, null, adminCredentials);
             }
         }
     }
@@ -542,7 +542,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User missingUser = new User();
         missingUser.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            ui.delete(context, missingUser, adminCredentials);
+            ui.delete(context, missingUser, null, adminCredentials);
             fail("Expected NoSuchUserException");
         } catch (NoSuchUserException e) {
             assertTrue("Caught exception", true);

@@ -218,7 +218,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void removeUser(final int userId, final Context context, final ServerSession session) {
+    public void removeUser(final int userId, final Context context, final Integer destUser, final ServerSession session) {
         // Nothing to do.
     }
 

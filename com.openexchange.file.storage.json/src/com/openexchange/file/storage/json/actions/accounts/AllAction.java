@@ -116,7 +116,10 @@ public class AllAction extends AbstractFileStorageAccountAction {
                 try {
                     access = fsService.getAccountAccess(account.getId(), session);
                     FileStorageFolder rootFolder = access.getRootFolder();
-                    result.put(writer.write(account, rootFolder));
+
+                    if (null != rootFolder) {
+                        result.put(writer.write(account, rootFolder));
+                    }
                 } catch (OXException e) {
                     LOG.debug(e.getMessage());
                     if (e.equalsCode(6, "OAUTH")) {

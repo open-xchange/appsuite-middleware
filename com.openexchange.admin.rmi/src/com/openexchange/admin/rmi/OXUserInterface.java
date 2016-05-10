@@ -113,7 +113,7 @@ public interface OXUserInterface extends Remote {
     /**
      * Creates a new user within the given context.
      *
-     * @param context
+     * @param ctx
      *            Context in which the new user will exist.
      * @param usrdata
      *            User containing user data.
@@ -141,7 +141,7 @@ public interface OXUserInterface extends Remote {
     /**
      * Creates a new user within the given context.
      *
-     * @param context
+     * @param ctx
      *            Context in which the new user will exist.
      * @param usrdata
      *            User containing user data.
@@ -171,7 +171,7 @@ public interface OXUserInterface extends Remote {
      * Creates a new user within the given context.<br>
      * Default context access rights are used!
      *
-     * @param context
+     * @param ctx
      *            Context in which the new user will exist.
      * @param usrdata
      *            User containing user data.
@@ -198,7 +198,7 @@ public interface OXUserInterface extends Remote {
     /**
      * Returns the module access rights of the context-admin
      *
-     * @param context
+     * @param ctx
      *            The context
      * @param auth
      *            Credentials for authenticating against server.
@@ -395,7 +395,7 @@ public interface OXUserInterface extends Remote {
     /**
      * Manipulate user data within the given context.
      *
-     * @param context
+     * @param ctx
      *            Context in which the new user will be modified.
      * @param usrdata
      *            User containing user data.
@@ -420,12 +420,14 @@ public interface OXUserInterface extends Remote {
     /**
      * Delete user from given context.
      *
-     * @param context
+     * @param ctx
      *            Context in which the new user will be deleted.
      * @param users
      *            user array containing user object.
      * @param auth
      *            Credentials for authenticating against server.
+     * @param destUser
+     *            The user id of the the user shared data is assigned to. If set to null the context admin and the context filestore will be used instead. If set to 0 or below the data will be removed instead.
      *
      * @throws RemoteException
      *             General RMI Exception
@@ -440,15 +442,17 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void delete(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public void delete(final Context ctx, final User[] users, Integer destUser, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Delete user from given context.
      *
-     * @param context
+     * @param ctx
      *            Context in which the new user will be deleted.
      * @param user
      *            user object.
+     * @param destUser
+     *            The user id of the the user shared data is assigned to. If set to null the context admin and the context filestore will be used instead. If set to 0 or below the data will be removed instead.
      * @param auth
      *            Credentials for authenticating against server.
      *
@@ -465,6 +469,62 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
+    public void delete(final Context ctx, final User user, final Integer destUser, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Use {@link #delete(Context, User[], Integer, Credentials)} instead.
+     *
+     * @param ctx
+     *            Context in which the new user will be deleted.
+     * @param users
+     *            user array containing user object.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @param destUser
+     *            The user id of the the user shared data is assigned to.
+     *
+     * @throws RemoteException
+     *             General RMI Exception
+     * @throws StorageException
+     *             When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException
+     *             If the context does not exist in the system.
+     * @throws InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
+    @Deprecated
+    public void delete(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Use {@link #delete(Context, User, Integer, Credentials)} instead.
+     *
+     * @param ctx
+     *            Context in which the new user will be deleted.
+     * @param user
+     *            user object.
+     * @param destUser
+     *            The user id of the the user shared data is assigned to.
+     * @param auth
+     *            Credentials for authenticating against server.
+     *
+     * @throws RemoteException
+     *             General RMI Exception
+     * @throws StorageException
+     *             When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException
+     *             If the context does not exist in the system.
+     * @throws InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
+    @Deprecated
     public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
@@ -483,7 +543,7 @@ public interface OXUserInterface extends Remote {
     /**
      * Retrieve the ModuleAccess for an user.
      *
-     * @param context
+     * @param ctx
      *            Context
      * @param user_id
      *            int containing the user id.
@@ -598,7 +658,7 @@ public interface OXUserInterface extends Remote {
      *
      * @see User.getUsername().
      *
-     * @param context
+     * @param ctx
      *            Context object.
      * @param users
      *            User[] with users to get data for.
@@ -626,7 +686,7 @@ public interface OXUserInterface extends Remote {
      *
      * @see User.getUsername().
      *
-     * @param context
+     * @param ctx
      *            Context object.
      * @param user
      *            user object with user to get data for.
