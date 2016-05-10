@@ -63,10 +63,19 @@ import ch.qos.logback.core.encoder.EncoderBase;
  */
 public class LogstashEncoder extends EncoderBase<ILoggingEvent> {
 
-    private final LogstashFormatter formatter = new LogstashFormatter();
+    private final LogstashFormatter formatter;
+
+    /**
+     * Initialises a new {@link LogstashEncoder}.
+     */
+    public LogstashEncoder() {
+        super();
+        formatter = new LogstashFormatter();
+    }
 
     /*
      * (non-Javadoc)
+     * 
      * @see ch.qos.logback.core.encoder.Encoder#doEncode(java.lang.Object)
      */
     @Override
@@ -77,10 +86,20 @@ public class LogstashEncoder extends EncoderBase<ILoggingEvent> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see ch.qos.logback.core.encoder.Encoder#close()
      */
     @Override
     public void close() throws IOException {
         IOUtils.write(CoreConstants.LINE_SEPARATOR, outputStream);
+    }
+
+    /**
+     * Adds the specified {@link CustomField} to the {@link LogstashFormatter}
+     *
+     * @param customField the {@link CustomField} to add
+     */
+    public void addCustomField(CustomField customField) {
+        formatter.addCustomField(customField);
     }
 }

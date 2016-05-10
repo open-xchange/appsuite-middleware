@@ -59,7 +59,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.oauth.CallbackRegistry;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.twitter.OAuthServiceMetaDataTwitterImpl;
 import com.openexchange.oauth.twitter.TwitterOAuthServiceRegistry;
@@ -85,7 +84,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CapabilityService.class, ConfigViewFactory.class, DeferringURLService.class, CallbackRegistry.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigurationService.class, CapabilityService.class, ConfigViewFactory.class, DeferringURLService.class, DispatcherPrefixService.class };
     }
 
     @Override

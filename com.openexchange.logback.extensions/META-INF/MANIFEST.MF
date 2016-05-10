@@ -72,6 +72,8 @@ Import-Package: ch.qos.logback.classic,
  javax.net.ssl,
  org.apache.commons.io,
  org.apache.commons.lang.time,
- org.slf4j
+ org.json,
+ org.slf4j,
+ org.xml.sax
 Export-Package: com.openexchange.logback.extensions,
  com.openexchange.logback.extensions.logstash

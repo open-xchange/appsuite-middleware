@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1220,6 +1220,13 @@ fi
 # SoftwareChange_Request-3034
 ox_add_property com.openexchange.mail.bodyDisplaySizeLimit 10485760 /opt/open-xchange/etc/mail.properties
 
+# SoftwareChange_Request-3254
+VALUE=$(ox_read_property com.openexchange.mail.account.blacklist /opt/open-xchange/etc/mail.properties)
+if [ "" = "$VALUE" ]; then
+    ox_set_property com.openexchange.mail.account.blacklist "127.0.0.1-127.255.255.255,localhost" /opt/open-xchange/etc/mail.properties
+fi
+ox_add_property com.openexchange.mail.account.whitelist.ports "143,993, 25,465,587, 110,995" /opt/open-xchange/etc/mail.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1260,6 +1267,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue May 03 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-05-09 (3270)
 * Tue Apr 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-04-25 (3237)
 * Mon Mar 21 2016 Marcus Klein <marcus.klein@open-xchange.com>
