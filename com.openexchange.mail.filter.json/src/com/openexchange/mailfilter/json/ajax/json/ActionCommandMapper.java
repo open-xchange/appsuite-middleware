@@ -49,15 +49,18 @@
 
 package com.openexchange.mailfilter.json.ajax.json;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.base.CharMatcher;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.exception.OXException;
@@ -159,7 +162,8 @@ final class ActionCommandMapper implements Mapper<Rule> {
             final String subjectFieldname = VacationActionFields.SUBJECT.getFieldname();
             if (object.has(subjectFieldname)) {
                 String subject = object.getString(subjectFieldname);
-                subject = MimeMessageUtility.quotePhrase(subject, true);
+                //subject = MimeMessageUtility.quotePhrase(subject, true);
+                subject = encode(subject, "subject");
                 arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.SUBJECT));
                 arrayList.add(stringToList(subject));
             }
@@ -188,7 +192,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
                         throw OXJSONExceptionCodes.INVALID_VALUE.create(from, VacationActionFields.FROM.getFieldname());
                     }
                 }
-                
+
                 if (!Strings.isEmpty(from)) {
                     arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.FROM));
                     arrayList.add(stringToList(from));
@@ -210,8 +214,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
             }
             final String method = object.getString(EnotifyActionFields.METHOD.getFieldname());
             if (null == method) {
-                throw new JSONException(
-                    "Parameter " + EnotifyActionFields.METHOD.getFieldname() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonname() + " is missing in JSON-Object. This is a required field");
+                throw new JSONException("Parameter " + EnotifyActionFields.METHOD.getFieldname() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonname() + " is missing in JSON-Object. This is a required field");
             }
             arrayList.add(stringToList(method.replaceAll("(\r)?\n", "\r\n")));
             return new ActionCommand(ActionCommand.Commands.ENOTIFY, arrayList);
@@ -335,7 +338,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 }
                 final List<String> subject = tagarguments.get(VacationActionFields.SUBJECT.getTagname());
                 if (null != subject) {
-                    String decodedSubject = MimeMessageUtility.decodeEnvelopeSubject(subject.get(0));
+                    String decodedSubject = decode(subject.get(0), "subject");
                     tmp.put(VacationActionFields.SUBJECT.getFieldname(), decodedSubject);
                 }
                 final List<String> from = tagarguments.get(VacationActionFields.FROM.getTagname());
@@ -395,6 +398,47 @@ final class ActionCommandMapper implements Mapper<Rule> {
             return jobj.getString(value);
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading ActionCommand " + component + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Encodes the specified UTF-8 string if necessary and returns the encoded string
+     * 
+     * @param string The string to encode
+     * @param field The field
+     * @return The encoded string
+     * @throws OXException if the string cannot be decoded
+     */
+    private String encode(String string, String field) throws OXException {
+        if (CharMatcher.ASCII.matchesAllOf(string)) {
+            return string;
+        }
+        try {
+            return MimeUtility.encodeText(string);
+        } catch (UnsupportedEncodingException e) {
+            throw MailFilterExceptionCode.PROBLEM.create(e, "Unable to encode the field '" + field + "'");
+        }
+    }
+
+    /**
+     * Decodes the specified UTF-8 string if necessary and returns the decoded string
+     * 
+     * @param utf8 The UTF-8 encoded string
+     * @param field The field
+     * @return The decoded string
+     * @throws JSONException if the string cannot be decoded
+     */
+    private String decode(String utf8, String field) throws JSONException {
+        if (Strings.isEmpty(utf8)) {
+            return utf8;
+        }
+        if (!utf8.startsWith("=?UTF")) {
+            return utf8;
+        }
+        try {
+            return MimeUtility.decodeText(utf8);
+        } catch (UnsupportedEncodingException e) {
+            throw new JSONException("Unable to decode the field '" + field + "'", e);
         }
     }
 }
