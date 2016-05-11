@@ -751,14 +751,6 @@ ox_set_property com.openexchange.server.considerXForwards "true" /opt/open-xchan
 
 # SoftwareChange_Request-1607
 pfile=/opt/open-xchange/etc/preview.properties
-VALUE=$(ox_read_property com.openexchange.preview.cache.quota $pfile)
-if [ "$VALUE" == "0" ]; then
-    ox_set_property com.openexchange.preview.cache.quota 10485760 $pfile
-fi
-VALUE=$(ox_read_property com.openexchange.preview.cache.quotaPerDocument $pfile)
-if [ "$VALUE" == "0" ]; then
-    ox_set_property com.openexchange.preview.cache.quotaPerDocument 524288 $pfile
-fi
 if ! ox_exists_property com.openexchange.preview.cache.type $pfile; then
     ox_set_property com.openexchange.preview.cache.type "FS" $pfile
 fi
