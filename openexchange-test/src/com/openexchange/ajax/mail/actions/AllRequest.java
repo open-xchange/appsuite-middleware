@@ -74,6 +74,11 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
         super(servletPath, folderId, columns, sort, order, failOnError);
     }
 
+    public AllRequest(final String servletPath, final int folderId, final int[] columns, final int sort, final Order order, final boolean failOnError, String categoryId) {
+        super(servletPath, folderId, columns, sort, order, failOnError);
+        this.categoryId = categoryId;
+    }
+
     public AllRequest(final String servletPath, final int folderId, final String alias, final int sort, final Order order, final boolean failOnError) {
         super(servletPath, folderId, alias, sort, order, failOnError);
     }
@@ -85,9 +90,15 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
         super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, failOnError);
     }
 
+    public AllRequest(final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError, String categoryId) {
+        super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order, failOnError);
+        this.categoryId = categoryId;
+    }
+
     public AllRequest(final String folderPath, final String alias, final int sort, final Order order, final boolean failOnError) {
         super(AbstractMailRequest.MAIL_URL, folderPath, alias, sort, order, failOnError);
     }
+
 
     @Override
     public Parameter[] getParameters() {

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import com.openexchange.ajax.mail.categories.MailCategoriesTestSuite;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -117,6 +118,8 @@ public final class MailTestSuite extends TestSuite {
 
         mailSuite.addTestSuite(MaxMailSizeTest.class);
         mailSuite.addTestSuite(MSISDNAddressTest.class);
+
+        mailSuite.addTest(MailCategoriesTestSuite.suite());
         return mailSuite;
     }
 }

@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -77,6 +78,8 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
     protected int leftHandLimit = -1;
 
     protected int rightHandLimit = -1;
+
+    protected String categoryId;
 
     public AbstractAllRequest(final String servletPath, final int folderId, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super();
@@ -160,6 +163,9 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         if (validateLimit()) {
             params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
             params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
+        }
+        if (!Strings.isEmpty(categoryId)) {
+            params.add(new Parameter("categoryid", categoryId));
         }
         return params.toArray(new Parameter[params.size()]);
     }

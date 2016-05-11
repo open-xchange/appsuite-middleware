@@ -64,6 +64,8 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.mail.actions.AllRequest;
+import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.ArchiveRequest;
 import com.openexchange.ajax.mail.actions.CopyRequest;
 import com.openexchange.ajax.mail.actions.CopyResponse;
@@ -75,15 +77,23 @@ import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
 import com.openexchange.ajax.mail.actions.MailSearchResponse;
 import com.openexchange.ajax.mail.actions.MoveMailRequest;
+import com.openexchange.ajax.mail.actions.MoveMailToCategoryRequest;
+import com.openexchange.ajax.mail.actions.MoveMailToCategoryResponse;
 import com.openexchange.ajax.mail.actions.ReplyAllRequest;
 import com.openexchange.ajax.mail.actions.ReplyRequest;
 import com.openexchange.ajax.mail.actions.ReplyResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
+import com.openexchange.ajax.mail.actions.TrainRequest;
+import com.openexchange.ajax.mail.actions.TrainResponse;
+import com.openexchange.ajax.mail.actions.UnreadRequest;
+import com.openexchange.ajax.mail.actions.UnreadResponse;
 import com.openexchange.ajax.mail.actions.UpdateMailRequest;
 import com.openexchange.ajax.mail.actions.UpdateMailResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link MailTestManager}
@@ -247,6 +257,78 @@ public class MailTestManager {
         TestMail modifiedMail = get(destination, response.getID());
         updateForCleanup(mail, modifiedMail);
         return modifiedMail;
+    }
+
+    /**
+     * Moves a mail from the current category to another. This method sets the lastResponse field.
+     */
+    public void moveToCategory(TestMail mail, String categoryId) throws OXException, IOException, SAXException, JSONException {
+
+        MoveMailToCategoryRequest request = new MoveMailToCategoryRequest(categoryId);
+        request.addMail(mail.getId(), mail.getFolder());
+        MoveMailToCategoryResponse response = client.execute(request);
+        lastResponse = response;
+    }
+
+    /**
+     * Retrieves the unread count for the given mail category
+     * 
+     * @param categoryId The category identifier
+     * @return The unread count
+     * @throws Exception
+     * 
+     */
+    public int getUnreadCount(String categoryId) throws Exception {
+
+        UnreadRequest request = new UnreadRequest();
+
+        UnreadResponse response = client.execute(request);
+        lastResponse = response;
+        if (lastResponse.hasError()) {
+            return -1;
+        }
+
+        return response.getUnreadCount(categoryId);
+    }
+    
+    /**
+     * Trains the given category
+     * 
+     * @param categoryId The category identifier
+     * @param applyToExistingOnes Reorganizes the existing mails
+     * @param applyToFutureOnes Defines whether a rule is created or not
+     * @param mails One or more mail addresses
+     * @throws Exception
+     * 
+     */
+    public void trainCategory(String categoryId, boolean applyToExistingOnes, boolean applyToFutureOnes, String... mails) throws Exception {
+
+        TrainRequest request = new TrainRequest(categoryId, applyToFutureOnes, applyToExistingOnes);
+        for(String mail: mails){
+            request.addAddress(mail);
+        }
+
+        TrainResponse response = client.execute(request);
+        lastResponse = response;
+    }
+
+    /**
+     * Retrieves an array of {@link MailMessage}
+     * 
+     * @param folderPath The folder path
+     * @param columns The columns
+     * @param sort The sort field
+     * @param order The sort order
+     * @param failOnError Whether the request should fail on error
+     * @param filter The filter parameter
+     * @return An array of {@link MailMessage}
+     * @throws Exception
+     */
+    public MailMessage[] listMails(String folderPath, int[] columns, int sort, Order order, boolean failOnError, String categoryId) throws Exception {
+        AllRequest request = new AllRequest(folderPath, columns, sort, order, failOnError, categoryId);
+        AllResponse response = client.execute(request);
+        lastResponse = response;
+        return response.getMailMessages(columns);
     }
 
     /**
