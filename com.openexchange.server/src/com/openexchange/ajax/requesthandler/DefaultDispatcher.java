@@ -62,7 +62,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
@@ -102,13 +101,19 @@ public class DefaultDispatcher implements Dispatcher {
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
     private final Queue<AJAXActionAnnotationProcessor> annotationProcessors;
 
-    private final AtomicBoolean hasAnyListener;
-    private final Queue<DispatcherListener> dispatcherListeners;
+    private final DispatcherListenerRegistry listenerRegistry;
 
     /**
      * Initializes a new {@link DefaultDispatcher}.
      */
     public DefaultDispatcher() {
+        this(null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultDispatcher}.
+     */
+    public DefaultDispatcher(DispatcherListenerRegistry listenerRegistry) {
         super();
         fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
         publicSessionAuthCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
@@ -119,9 +124,7 @@ public class DefaultDispatcher implements Dispatcher {
         customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
         annotationProcessors = new ConcurrentLinkedQueue<AJAXActionAnnotationProcessor>();
 
-        hasAnyListener = new AtomicBoolean(false);
-        ConcurrentLinkedQueue<DispatcherListener> dispatcherListeners = new ConcurrentLinkedQueue<DispatcherListener>();
-        this.dispatcherListeners = dispatcherListeners;
+        this.listenerRegistry = null == listenerRegistry ? DispatcherListenerRegistry.NOOP_REGISTRY : listenerRegistry;
     }
 
     @Override
@@ -201,17 +204,7 @@ public class DefaultDispatcher implements Dispatcher {
             }
 
             // Grab applicable dispatcher listeners
-            List<DispatcherListener> dispatcherListeners = null;
-            if (hasAnyListener.get()) {
-                for (DispatcherListener dispatcherListener : this.dispatcherListeners) {
-                    if (dispatcherListener.applicable(modifiedRequestData)) {
-                        if (null == dispatcherListeners) {
-                            dispatcherListeners = new LinkedList<DispatcherListener>();
-                        }
-                        dispatcherListeners.add(dispatcherListener);
-                    }
-                }
-            }
+            List<DispatcherListener> dispatcherListeners = listenerRegistry.getDispatcherListenersFor(modifiedRequestData);
 
             // Perform request
             AJAXRequestResult result = callAction(action, modifiedRequestData, dispatcherListeners, session);
@@ -633,10 +626,7 @@ public class DefaultDispatcher implements Dispatcher {
     }
 
     private DispatcherNotes getActionMetadata(final AJAXActionService action) {
-        if (null == action) {
-            return null;
-        }
-        return action.getClass().getAnnotation(DispatcherNotes.class);
+        return null == action ? null : action.getClass().getAnnotation(DispatcherNotes.class);
     }
 
     /**
@@ -692,29 +682,6 @@ public class DefaultDispatcher implements Dispatcher {
      */
     public void removeCustomizer(AJAXActionCustomizerFactory factory) {
         this.customizerFactories.remove(factory);
-    }
-
-    /**
-     * Adds specified dispatcher listener.
-     *
-     * @param listener The listener
-     */
-    public synchronized void addDispatcherListener(DispatcherListener listener) {
-        if (dispatcherListeners.add(listener)) {
-            hasAnyListener.set(true);
-        }
-    }
-
-    /**
-     * Removes the specified dispatcher listener.
-     *
-     * @param listener The listener
-     */
-    public synchronized void removeDispatcherListener(DispatcherListener listener) {
-        Queue<DispatcherListener> dispatcherListeners = this.dispatcherListeners;
-        if (dispatcherListeners.remove(listener)) {
-            hasAnyListener.set(!dispatcherListeners.isEmpty());
-        }
     }
 
     private void triggerOnRequestInitialized(AJAXRequestData requestData, List<DispatcherListener> dispatcherListeners) {
