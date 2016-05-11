@@ -94,6 +94,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -2393,24 +2394,38 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         stmt = null;
         result = null;
-        try {
-            if (transportAccount.getTransportAuth() != null && transportAccount.getTransportAuth().equals(TransportAuth.MAIL)) {
-                // load login and secret from mail_account
-                stmt = con.prepareStatement("SELECT login, password FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
-                stmt.setLong(1, contextId);
-                stmt.setLong(2, accountId);
-                stmt.setLong(3, userId);
-                result = stmt.executeQuery();
-                if (result.next()) {
-                    final String login = result.getString(1);
-                    if (!result.wasNull()) {
-                        transportAccount.setTransportLogin(login);
-                    }
+        if (transportAccount.getTransportAuth() == null) {
+            if (Strings.isEmpty(transportAccount.getTransportLogin()) || Strings.isEmpty(transportAccount.getTransportPassword())) {
+                loadLoginAndPasswordFromMailAccount(con, contextId, accountId, userId, transportAccount);
+            }
+        } else {
+            if (transportAccount.getTransportAuth().equals(TransportAuth.MAIL)) {
+                loadLoginAndPasswordFromMailAccount(con, contextId, accountId, userId, transportAccount);
+            }
+        }
 
-                    final String password = result.getString(2);
-                    if (!result.wasNull()) {
-                        transportAccount.setTransportPassword(password);
-                    }
+        return transportAccount;
+    }
+
+    private void loadLoginAndPasswordFromMailAccount(Connection con, int contextId, int accountId, int userId, TransportAccountImpl transportAccount) throws OXException {
+        // load login and secret from mail_account
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT login, password FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, accountId);
+            stmt.setLong(3, userId);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                final String login = result.getString(1);
+                if (!result.wasNull()) {
+                    transportAccount.setTransportLogin(login);
+                }
+
+                final String password = result.getString(2);
+                if (!result.wasNull()) {
+                    transportAccount.setTransportPassword(password);
                 }
             }
         } catch (final SQLException e) {
@@ -2428,8 +2443,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         } finally {
             closeSQLStuff(result, stmt);
         }
-
-        return transportAccount;
     }
 
     @Override
