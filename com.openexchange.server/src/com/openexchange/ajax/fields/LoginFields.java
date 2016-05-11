@@ -94,6 +94,8 @@ public class LoginFields {
 
     public static final String STORE_LANGUAGE = "storeLanguage";
 
+    public static final String TRANSIENT = "transient";
+
     private LoginFields() {
         super();
     }
