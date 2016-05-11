@@ -133,7 +133,7 @@ public class Recipient {
     /**
      * Gets the user
      *
-     * @return The user ot <code>null</code>
+     * @return The user or <code>null</code> if this recipient denotes an external contact
      */
     public User getUser() {
         return user;
