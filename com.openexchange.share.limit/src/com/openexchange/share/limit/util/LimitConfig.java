@@ -118,9 +118,9 @@ public class LimitConfig {
                     final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
                         // Service not yet available
-                        return 300000;
+                        return 0;
                     }
-                    tmp = Integer.valueOf(service.getProperty(TIME_FRAME, "300000"));
+                    tmp = Integer.valueOf(service.getProperty(TIME_FRAME, "0"));
                     timeFrame = tmp;
                 }
             }

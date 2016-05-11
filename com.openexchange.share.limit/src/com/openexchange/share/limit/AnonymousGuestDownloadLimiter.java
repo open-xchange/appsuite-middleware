@@ -56,16 +56,19 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.share.limit.exceptions.custom.DownloadLimitedException;
+import com.openexchange.share.limit.exceptions.custom.DownloadLimitedExceptionMessages;
 import com.openexchange.share.limit.impl.ConnectionHelper;
 import com.openexchange.share.limit.internal.Services;
 import com.openexchange.share.limit.storage.RdbFileAccessStorage;
 import com.openexchange.share.limit.util.LimitConfig;
+import com.openexchange.tools.servlet.limit.AbstractActionLimitedException;
 import com.openexchange.tools.servlet.limit.ActionLimiter;
-import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
+import com.openexchange.tools.servlet.limit.UserAction;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -95,33 +98,42 @@ public class AnonymousGuestDownloadLimiter implements ActionLimiter {
     }
 
     @Override
-    public void check(AJAXRequestData request) throws OXException {
+    public void onBefore(AJAXRequestData request) throws AbstractActionLimitedException {
         ServerSession session = request.getSession();
         int contextId = session.getContextId();
         int userId = session.getUserId();
 
-        dropObsoleteAccesses(contextId, userId);
-
         FileAccess limit = getLimit(contextId, userId);
+        if (limit == null) {
+            return;
+        }
         boolean enabled = isEnabled(limit);
         if (!enabled) {
             return;
         }
 
+        try {
+            dropObsoleteAccesses(contextId, userId);
+        } catch (OXException e) {
+            LOG.info("Unable to delete obsolete entries for user {} in context {}. As this is just for cleanup reasons these entries won't be considered within further processings.", userId, contextId);
+        }
+
         FileAccess used = getUsed(limit);
+        if (used == null) {
+            return;
+        }
 
         throwIfExceeded(limit, used);
     }
 
-    protected void throwIfExceeded(FileAccess limit, FileAccess used) {
-        Long timeFrameAsLong = limit.getTimeOfEndInMillis() - limit.getTimeOfStartInMillis();
-        int timeFrame = timeFrameAsLong.intValue();
-
+    protected void throwIfExceeded(FileAccess limit, FileAccess used) throws AbstractActionLimitedException {
         if (FileAccess.isCountExceeded(limit, used)) {
-            throw new RateLimitedException("429 Too Many Requests", timeFrame / 1000);
+            String message = "User " + limit.getUserId() + " in context " + limit.getContextId() + " exceeded the defined count limit of " + limit.getCount() + ". The download will be denied.";
+            throw new DownloadLimitedException(message, DownloadLimitedExceptionMessages.DOWNLOAD_DENIED_EXCEPTION_MESSAGE, Category.CATEGORY_ERROR, 1);
         }
         if (FileAccess.isSizeExceeded(limit, used)) {
-            throw new RateLimitedException("429 Too Large Content Requested", timeFrame / 1000);
+            String message = "User " + limit.getUserId() + " in context " + limit.getContextId() + " exceeded the defined size limit of " + limit.getSize() + " with " + used.getSize() + " bytes. The download will be denied.";
+            throw new DownloadLimitedException(message, DownloadLimitedExceptionMessages.DOWNLOAD_DENIED_EXCEPTION_MESSAGE, Category.CATEGORY_ERROR, 1);
         }
     }
 
@@ -148,33 +160,42 @@ public class AnonymousGuestDownloadLimiter implements ActionLimiter {
     }
 
     /**
-     * Returns the defined limits (by configuration) for the given user
+     * Returns the defined limits (by configuration) for the given user or <code>null</code> if no limit can be found
      * 
      * @param contextId The context id the user is assigned to
      * @param userId The id of the user in the context
      * @return {@link FileAccess} with desired information
-     * @throws OXException
      */
-    protected FileAccess getLimit(int contextId, int userId) throws OXException {
-        ConfigView view = configView.getView(0, contextId);
-        Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT, Long.class, this.sizeLimit);
-        Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT, Integer.class, this.countLimit);
-        Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME, Integer.class, this.limitTimeFrame);
-        long now = new Date().getTime();
-        long start = now - userLimitTimeFrame;
+    protected FileAccess getLimit(int contextId, int userId) {
+        try {
+            ConfigView view = configView.getView(0, contextId);
+            Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT, Long.class, this.sizeLimit);
+            Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT, Integer.class, this.countLimit);
+            Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME, Integer.class, this.limitTimeFrame);
+            long now = new Date().getTime();
+            long start = now - userLimitTimeFrame;
 
-        return new FileAccess(contextId, userId, start, now, userCountLimit, userSizeLimit);
+            return new FileAccess(contextId, userId, start, now, userCountLimit, userSizeLimit);
+        } catch (OXException e) {
+            LOG.warn("Unable to retrieve configured limits for user {} in context {}: {}", userId, contextId, e.getMessage());
+        }
+        return null;
     }
 
     /**
      * Returns if the feature is enabled by checking the configuration retrieved by calling com.openexchange.share.limit.DocumentLimiter.getLimits(int, int).
      * <p>
-     * If both, size and count are smaller or equal zero, the feature is disabled.
+     * The feature will be disabled when:
+     * - The time frame is set to 0 or
+     * - If both, size and count are smaller or equal zero
      * 
      * @param allowedLimits {@link FileAccess} to check if enabled
-     * @return
+     * @return <code>true</code> if limiting anonymous guests is enabled, otherwise <code>false</code> 
      */
     protected boolean isEnabled(FileAccess allowedLimits) {
+        if (allowedLimits == null) {
+            return false;
+        }
         if (allowedLimits.getTimeOfStartInMillis() == allowedLimits.getTimeOfEndInMillis()) {
             return false;
         }
@@ -187,27 +208,33 @@ public class AnonymousGuestDownloadLimiter implements ActionLimiter {
     /**
      * Sets the given {@link FileAccess}es as default and checks the persisted one against it.
      * 
-     * @param limits The {@link FileAccess}es to check against
+     * @param limit The {@link FileAccess}es to check against
      * @return <code>true</code>, if one of the limits (size or count) is exceeded; otherwise <code>false</code>
-     * @throws OXException
      */
-    protected FileAccess getUsed(FileAccess limits) throws OXException {
-        ConnectionHelper connectionHelper = new ConnectionHelper(limits.getContextId());
-
-        long start = limits.getTimeOfStartInMillis();
+    protected FileAccess getUsed(FileAccess limit) {
+        int contextId = limit.getContextId();
+        int userId = limit.getUserId();
         try {
-            return RdbFileAccessStorage.getInstance().getUsage(limits.getContextId(), limits.getUserId(), start, connectionHelper.getReadOnly());
-        } finally {
-            connectionHelper.backReadOnly();
+            ConnectionHelper connectionHelper = new ConnectionHelper(contextId);
+
+            long start = limit.getTimeOfStartInMillis();
+            try {
+                return RdbFileAccessStorage.getInstance().getUsage(contextId, userId, start, connectionHelper.getReadOnly());
+            } finally {
+                connectionHelper.backReadOnly();
+            }
+        } catch (OXException e) {
+            LOG.warn("Unable to retrieve usage for user {} in context {}: {}", userId, contextId, e.getMessage());
         }
+        return null;
     }
 
     @Override
-    public boolean handles(String module, String action) throws OXException {
+    public boolean handles(String module, String action) {
         if (Strings.isEmpty(module) || Strings.isEmpty(action)) {
             return false;
         }
-        
+
         if (!module.toLowerCase().startsWith("files") && !module.toLowerCase().startsWith("infostore")) {
             return false;
         }
@@ -218,24 +245,35 @@ public class AnonymousGuestDownloadLimiter implements ActionLimiter {
     }
 
     @Override
-    public boolean handles(int contextId, int userId) throws OXException {
-        UserService userService = Services.getService(UserService.class);
-
-        User user = userService.getUser(userId, contextId);
-        if (user != null) {
-            return (user.isGuest() && Strings.isEmpty(user.getMail()));
+    public boolean handles(int contextId, int userId) {
+        try {
+            UserService userService = Services.getService(UserService.class);
+            User user = userService.getUser(userId, contextId);
+            if (user != null) {
+                return (user.isGuest() && Strings.isEmpty(user.getMail()));
+            }
+        } catch (OXException e) {
+            LOG.warn("Unable to retrieve user {} in context {}: {}", userId, contextId, e.getMessage());
         }
         return false;
     }
 
     @Override
-    public void after(AJAXRequestData request, AJAXRequestResult result) throws OXException {
+    public boolean handles(UserAction userAction) {
+        return (handles(userAction.getContextId(), userAction.getUserId()) && handles(userAction.getModule(), userAction.getAction()));
+    }
+
+    @Override
+    public void onSuccess(AJAXRequestData request, AJAXRequestResult result) throws AbstractActionLimitedException {
         ServerSession session = request.getSession();
         int contextId = session.getContextId();
         int userId = session.getUserId();
 
-        FileAccess limits = getLimit(contextId, userId);
-        boolean enabled = isEnabled(limits);
+        FileAccess limit = getLimit(contextId, userId);
+        if (limit == null) {
+            return;
+        }
+        boolean enabled = isEnabled(limit);
         if (!enabled) {
             return;
         }
@@ -250,46 +288,31 @@ public class AnonymousGuestDownloadLimiter implements ActionLimiter {
             }
             result.setResponseProperty("X-Content-Size", null);
         } else if (resultObject instanceof IFileHolder) {
-            IFileHolder file = null;
-            try {
-                file = (IFileHolder) resultObject;
-                length = file.getLength();
-            } finally {
-                Streams.close(file);
-            }
+            IFileHolder file = (IFileHolder) resultObject;
+            length = file.getLength();
         }
         if (length != -1) {
-            ConnectionHelper connectionHelper = new ConnectionHelper(contextId);
+            ConnectionHelper connectionHelper = null;
             try {
-                postCheck(limits, length, connectionHelper.getReadOnly());
+                connectionHelper = new ConnectionHelper(contextId);
 
                 Connection writable = connectionHelper.getWritable();
                 RdbFileAccessStorage.getInstance().addAccess(contextId, userId, length, writable);
                 connectionHelper.commit();
+            } catch (OXException e) {
+                LOG.error("Unable to execute post execution check and add access for user {} in context {}: {}", userId, contextId, e.getMessage());
             } finally {
-                connectionHelper.back();
+                if (connectionHelper != null) {
+                    connectionHelper.back();
+                }
             }
         } else {
             LOG.warn("Unable to retrieve size for request. Cannot add file access!");
         }
     }
 
-    /**
-     * Checks if the processed file access will exceed the defined limits and prevents download if so.
-     * 
-     * @param limit The limit to check against
-     * @param length The consumed size
-     * @param readOnly The read only connection
-     * @throws OXException
-     */
-    protected void postCheck(FileAccess limit, long length, Connection readOnly) throws OXException {
-        FileAccess used = RdbFileAccessStorage.getInstance().getUsage(limit.getContextId(), limit.getUserId(), limit.getTimeOfStartInMillis(), readOnly);
-
-        long size = used.getSize();
-        used.setSize(size + length);
-        int count = used.getCount();
-        used.setCount(count++);
-
-        throwIfExceeded(limit, used);
+    @Override
+    public void onError(AJAXRequestData requestData) {
+        // nothing to do as com.openexchange.share.limit.AnonymousGuestDownloadLimiter.onSuccess(AJAXRequestData, AJAXRequestResult) shouldn't be invoked
     }
 }

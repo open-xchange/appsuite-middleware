@@ -47,98 +47,74 @@
  *
  */
 
-package com.openexchange.share.limit;
+package com.openexchange.share.limit.exceptions.custom;
+
+import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.tools.servlet.limit.AbstractActionLimitedException;
 
 /**
- * {@link FileAccess} A generic class that contains information about file accesses in a defined time frame. This may contain either used or allowed values.
+ * {@link DownloadLimitedException} Used for custom exceptions that should be (translated) shown to the user. 
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class FileAccess {
+public class DownloadLimitedException extends AbstractActionLimitedException implements DisplayableOXExceptionCode {
 
-    private final int userId;
-    private final int contextId;
-    private long size;
-    private int count;
-    private long timeOfStartInMillis;
-    private long timeOfEndInMillis;
+    private static final long serialVersionUID = -5958709454473135940L;
 
-    public FileAccess(int contextId, int userId, long start, long end, int counts, long size) {
-        this.contextId = contextId;
-        this.userId = userId;
-        this.timeOfStartInMillis = start;
-        this.timeOfEndInMillis = end;
-        this.size = size;
-        this.count = counts;
+    public static final String PREFIX = "AN-GUEST-LIM";
+
+    private final Category category;
+    private final int detailNumber;
+    private final String message;
+    private final String displayMessage;
+
+    public DownloadLimitedException(String message, String displayMessage, Category category, int detailNumber) {
+        this.message = message;
+        this.displayMessage = displayMessage;
+        this.detailNumber = detailNumber;
+        this.category = category;
     }
 
-    public long getSize() {
-        return size;
+    @Override
+    public Category getCategory() {
+        return category;
     }
 
-    public int getCount() {
-        return count;
+    @Override
+    public String getMessage() {
+        return message;
     }
 
-    public int getUserId() {
-        return userId;
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
-    public int getContextId() {
-        return contextId;
+    @Override
+    public int getNumber() {
+        return detailNumber;
     }
 
-    public long getTimeOfStartInMillis() {
-        return timeOfStartInMillis;
+    @Override
+    public String getPrefix() {
+        return PREFIX;
     }
 
-    public long getTimeOfEndInMillis() {
-        return timeOfEndInMillis;
+    @Override
+    public boolean equals(OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public void setTimeOfStartInMillis(long timeOfStartInMillis) {
-        this.timeOfStartInMillis = timeOfStartInMillis;
-    }
-
-    public void setTimeOfEndInMillis(long timeOfEndInMillis) {
-        this.timeOfEndInMillis = timeOfEndInMillis;
-    }
-
-    public static boolean isExceeded(FileAccess allowed, FileAccess used) {
-        if (isSizeExceeded(allowed, used) || isCountExceeded(allowed, used)) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isCountExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getCount() <= 0) {
-            return false;
-        }
-        
-        if (used.getCount() >= allowed.getCount()) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isSizeExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getSize() <= 0) {
-            return false;
-        }
-
-        if (used.getSize() >= allowed.getSize()) {
-            return true;
-        }
-        return false;
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 }

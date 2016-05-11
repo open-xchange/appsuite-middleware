@@ -47,98 +47,27 @@
  *
  */
 
-package com.openexchange.share.limit;
+package com.openexchange.tools.servlet.limit;
+
+import com.openexchange.exception.OXException;
 
 /**
- * {@link FileAccess} A generic class that contains information about file accesses in a defined time frame. This may contain either used or allowed values.
+ * 
+ * {@link AbstractActionLimitedException} Abstract class to be used for exceptions thrown by the {@link ActionLimiter} implementation.
+ * <p>
+ * This mechanism allows to create custom (translated) exceptions that will be shown to the user.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class FileAccess {
+public abstract class AbstractActionLimitedException extends RuntimeException {
 
-    private final int userId;
-    private final int contextId;
-    private long size;
-    private int count;
-    private long timeOfStartInMillis;
-    private long timeOfEndInMillis;
+    private static final long serialVersionUID = -5570226785757120825L;
 
-    public FileAccess(int contextId, int userId, long start, long end, int counts, long size) {
-        this.contextId = contextId;
-        this.userId = userId;
-        this.timeOfStartInMillis = start;
-        this.timeOfEndInMillis = end;
-        this.size = size;
-        this.count = counts;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public int getContextId() {
-        return contextId;
-    }
-
-    public long getTimeOfStartInMillis() {
-        return timeOfStartInMillis;
-    }
-
-    public long getTimeOfEndInMillis() {
-        return timeOfEndInMillis;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public void setTimeOfStartInMillis(long timeOfStartInMillis) {
-        this.timeOfStartInMillis = timeOfStartInMillis;
-    }
-
-    public void setTimeOfEndInMillis(long timeOfEndInMillis) {
-        this.timeOfEndInMillis = timeOfEndInMillis;
-    }
-
-    public static boolean isExceeded(FileAccess allowed, FileAccess used) {
-        if (isSizeExceeded(allowed, used) || isCountExceeded(allowed, used)) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isCountExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getCount() <= 0) {
-            return false;
-        }
-        
-        if (used.getCount() >= allowed.getCount()) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isSizeExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getSize() <= 0) {
-            return false;
-        }
-
-        if (used.getSize() >= allowed.getSize()) {
-            return true;
-        }
-        return false;
-    }
+    /**
+     * Used to create the thrown (and displayed) {@link OXException} based on the limiting exception
+     * 
+     * @return the {@link OXException}
+     */
+    public abstract OXException create();
 }

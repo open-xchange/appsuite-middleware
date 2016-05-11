@@ -47,38 +47,34 @@
  *
  */
 
-package com.openexchange.share.limit;
+package com.openexchange.tools.servlet.limit;
 
 /**
- * {@link FileAccess} A generic class that contains information about file accesses in a defined time frame. This may contain either used or allowed values.
+ * {@link UserAction} DAO to hold user to action mapping
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class FileAccess {
+public class UserAction {
 
-    private final int userId;
-    private final int contextId;
-    private long size;
-    private int count;
-    private long timeOfStartInMillis;
-    private long timeOfEndInMillis;
+    final private String module;
+    final private String action;
+    final private int userId;
+    final private int contextId;
 
-    public FileAccess(int contextId, int userId, long start, long end, int counts, long size) {
-        this.contextId = contextId;
+    private UserAction(final String module, final String action, final int userId, final int contextId) {
+        this.module = module;
+        this.action = action;
         this.userId = userId;
-        this.timeOfStartInMillis = start;
-        this.timeOfEndInMillis = end;
-        this.size = size;
-        this.count = counts;
+        this.contextId = contextId;
     }
 
-    public long getSize() {
-        return size;
+    public String getModule() {
+        return module;
     }
 
-    public int getCount() {
-        return count;
+    public String getAction() {
+        return action;
     }
 
     public int getUserId() {
@@ -89,56 +85,38 @@ public class FileAccess {
         return contextId;
     }
 
-    public long getTimeOfStartInMillis() {
-        return timeOfStartInMillis;
-    }
+    public static class UserActionBuilder {
 
-    public long getTimeOfEndInMillis() {
-        return timeOfEndInMillis;
-    }
+        private String module;
+        private String action;
+        private int userId;
+        private int contextId;
 
-    public void setSize(long size) {
-        this.size = size;
-    }
+        public UserActionBuilder() {}
 
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public void setTimeOfStartInMillis(long timeOfStartInMillis) {
-        this.timeOfStartInMillis = timeOfStartInMillis;
-    }
-
-    public void setTimeOfEndInMillis(long timeOfEndInMillis) {
-        this.timeOfEndInMillis = timeOfEndInMillis;
-    }
-
-    public static boolean isExceeded(FileAccess allowed, FileAccess used) {
-        if (isSizeExceeded(allowed, used) || isCountExceeded(allowed, used)) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isCountExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getCount() <= 0) {
-            return false;
-        }
-        
-        if (used.getCount() >= allowed.getCount()) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isSizeExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getSize() <= 0) {
-            return false;
+        public UserActionBuilder setModule(String module) {
+            this.module = module;
+            return this;
         }
 
-        if (used.getSize() >= allowed.getSize()) {
-            return true;
+        public UserActionBuilder setAction(String action) {
+            this.action = action;
+            return this;
         }
-        return false;
+
+        public UserActionBuilder setUserId(int userId) {
+            this.userId = userId;
+            return this;
+        }
+
+        public UserActionBuilder setContextId(int contextId) {
+            this.contextId = contextId;
+            return this;
+        }
+
+        public UserAction build() {
+            return new UserAction(module, action, userId, contextId);
+        }
     }
+
 }

@@ -49,96 +49,71 @@
 
 package com.openexchange.share.limit;
 
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
+
 /**
- * {@link FileAccess} A generic class that contains information about file accesses in a defined time frame. This may contain either used or allowed values.
+ * {@link AnonymousGuestDownloadLimiterTest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class FileAccess {
+public class AnonymousGuestDownloadLimiterTest {
 
-    private final int userId;
-    private final int contextId;
-    private long size;
-    private int count;
-    private long timeOfStartInMillis;
-    private long timeOfEndInMillis;
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {}
 
-    public FileAccess(int contextId, int userId, long start, long end, int counts, long size) {
-        this.contextId = contextId;
-        this.userId = userId;
-        this.timeOfStartInMillis = start;
-        this.timeOfEndInMillis = end;
-        this.size = size;
-        this.count = counts;
+    /**
+     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#dropObsoleteAccesses(int, int)}.
+     */
+    @Test
+    public void testDropObsoleteAccesses() {
+        fail("Not yet implemented");
     }
 
-    public long getSize() {
-        return size;
+    /**
+     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#getLimit(int, int)}.
+     */
+    @Test
+    public void testGetLimit() {
+        fail("Not yet implemented");
     }
 
-    public int getCount() {
-        return count;
+    /**
+     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#isEnabled(com.openexchange.share.limit.FileAccess)}.
+     */
+    @Test
+    public void testIsEnabled() {
+        fail("Not yet implemented");
     }
 
-    public int getUserId() {
-        return userId;
+    /**
+     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#handles(java.lang.String, java.lang.String)}.
+     */
+    @Test
+    public void testHandlesStringString() {
+        fail("Not yet implemented");
     }
 
-    public int getContextId() {
-        return contextId;
+    /**
+     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#handles(int, int)}.
+     */
+    @Test
+    public void testHandlesIntInt() {
+        fail("Not yet implemented");
     }
 
-    public long getTimeOfStartInMillis() {
-        return timeOfStartInMillis;
+    /**
+     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#onSuccess(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.requesthandler.AJAXRequestResult)}.
+     */
+    @Test
+    public void testAfter() {
+        fail("Not yet implemented");
     }
 
-    public long getTimeOfEndInMillis() {
-        return timeOfEndInMillis;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public void setTimeOfStartInMillis(long timeOfStartInMillis) {
-        this.timeOfStartInMillis = timeOfStartInMillis;
-    }
-
-    public void setTimeOfEndInMillis(long timeOfEndInMillis) {
-        this.timeOfEndInMillis = timeOfEndInMillis;
-    }
-
-    public static boolean isExceeded(FileAccess allowed, FileAccess used) {
-        if (isSizeExceeded(allowed, used) || isCountExceeded(allowed, used)) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isCountExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getCount() <= 0) {
-            return false;
-        }
-        
-        if (used.getCount() >= allowed.getCount()) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isSizeExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getSize() <= 0) {
-            return false;
-        }
-
-        if (used.getSize() >= allowed.getSize()) {
-            return true;
-        }
-        return false;
-    }
 }

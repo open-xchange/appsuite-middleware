@@ -159,6 +159,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.limit"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.notification"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.handler.ical"/>

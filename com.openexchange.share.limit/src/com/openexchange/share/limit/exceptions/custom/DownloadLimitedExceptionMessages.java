@@ -47,98 +47,26 @@
  *
  */
 
-package com.openexchange.share.limit;
+package com.openexchange.share.limit.exceptions.custom;
+
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link FileAccess} A generic class that contains information about file accesses in a defined time frame. This may contain either used or allowed values.
+ * 
+ * {@link DownloadLimitedExceptionMessages}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class FileAccess {
+public final class DownloadLimitedExceptionMessages implements LocalizableStrings {
 
-    private final int userId;
-    private final int contextId;
-    private long size;
-    private int count;
-    private long timeOfStartInMillis;
-    private long timeOfEndInMillis;
+    public static final String DOWNLOAD_DENIED_EXCEPTION_MESSAGE = "Download denied because download limits have been exceeded. Please try again later.";
 
-    public FileAccess(int contextId, int userId, long start, long end, int counts, long size) {
-        this.contextId = contextId;
-        this.userId = userId;
-        this.timeOfStartInMillis = start;
-        this.timeOfEndInMillis = end;
-        this.size = size;
-        this.count = counts;
+    /**
+     * Initializes a new {@link DownloadLimitedExceptionMessages}.
+     */
+    private DownloadLimitedExceptionMessages() {
+        super();
     }
 
-    public long getSize() {
-        return size;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public int getContextId() {
-        return contextId;
-    }
-
-    public long getTimeOfStartInMillis() {
-        return timeOfStartInMillis;
-    }
-
-    public long getTimeOfEndInMillis() {
-        return timeOfEndInMillis;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public void setTimeOfStartInMillis(long timeOfStartInMillis) {
-        this.timeOfStartInMillis = timeOfStartInMillis;
-    }
-
-    public void setTimeOfEndInMillis(long timeOfEndInMillis) {
-        this.timeOfEndInMillis = timeOfEndInMillis;
-    }
-
-    public static boolean isExceeded(FileAccess allowed, FileAccess used) {
-        if (isSizeExceeded(allowed, used) || isCountExceeded(allowed, used)) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isCountExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getCount() <= 0) {
-            return false;
-        }
-        
-        if (used.getCount() >= allowed.getCount()) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isSizeExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getSize() <= 0) {
-            return false;
-        }
-
-        if (used.getSize() >= allowed.getSize()) {
-            return true;
-        }
-        return false;
-    }
 }

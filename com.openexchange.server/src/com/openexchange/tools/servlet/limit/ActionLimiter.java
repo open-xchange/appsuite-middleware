@@ -54,7 +54,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ActionLimiter} Implement if you would like to limit an action.
+ * {@link ActionLimiter} Allows to limit actions based on user/action specifics by providing methods that will be invoked directly before/after action execution.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
@@ -62,13 +62,36 @@ import com.openexchange.exception.OXException;
 public interface ActionLimiter {
 
     /**
-     * Checks the given request and limits the action by throwing exceptions if the defined limit is exceeded
+     * Invoked before the actual action is executed.
+     * <p>
+     * Execute desired checks and/or changes based on the given {@link AJAXRequestData} and prevent action execution (limiting) by throwing an {@link AbstractActionLimitedException}
      * 
      * @param request The request to check
      * @throws OXException
-     * @throws @{@link ActionLimitedException} if the defined ActionLimit is exceeded
+     * @throws @{@link AbstractActionLimitedException} if the defined ActionLimit is exceeded
      */
-    void check(AJAXRequestData request) throws OXException;
+    void onBefore(AJAXRequestData request) throws AbstractActionLimitedException;
+
+    /**
+     * Invoked after an successful execution of the action.
+     * <p>
+     * Execute desired checks and/or changes based on the given {@link AJAXRequestResult}. Prevent sending a successful response by throwing an {@link AbstractActionLimitedException}
+     * 
+     * @param request The initial request
+     * @param result The result of the request
+     * @throws AbstractActionLimitedException
+     */
+    void onSuccess(AJAXRequestData request, AJAXRequestResult result) throws AbstractActionLimitedException;
+
+    /**
+     * Invoked the actual action call fails.
+     * <p>
+     * Please consider that onSuccess(...) hasn't been invoked in that case.
+     * 
+     * @param request The initial request
+     * @throws AbstractActionLimitedException
+     */
+    void onError(AJAXRequestData request) throws AbstractActionLimitedException;
 
     /**
      * Checks if the {@link ActionLimiter} is responsible for given module/action combination
@@ -76,9 +99,8 @@ public interface ActionLimiter {
      * @param module The module currently invoked
      * @param action The action currently invoked
      * @return <code>true</code> if the {@link ActionLimiter} is responsible for given module/action combination; otherwise <code>false</code>
-     * @throws OXException
      */
-    boolean handles(String module, String action) throws OXException;
+    boolean handles(String module, String action);
 
     /**
      * Checks if the {@link ActionLimiter} is responsible for given user
@@ -86,16 +108,14 @@ public interface ActionLimiter {
      * @param contextId The context id the user is associated to
      * @param userId The id of the user in the context
      * @return <code>true</code> if the {@link ActionLimiter} is responsible for given user; otherwise <code>false</code>
-     * @throws OXException
      */
-    boolean handles(int contextId, int userId) throws OXException;
+    boolean handles(int contextId, int userId);
 
     /**
-     * Invoked after execution of the action to do what the {@link ActionLimiter} would like to do
+     * Checks if the {@link ActionLimiter} is responsible for given {@link UserAction}
      * 
-     * @param request The initial request
-     * @param result The result of the request
-     * @throws OXException
+     * @param userAction The {@link UserAction} that contains user/action data
+     * @return <code>true</code> if the {@link ActionLimiter} is responsible for given user; otherwise <code>false</code>
      */
-    void after(AJAXRequestData request, AJAXRequestResult result) throws OXException;
+    boolean handles(UserAction userAction);
 }

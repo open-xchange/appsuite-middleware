@@ -80,7 +80,10 @@ import com.openexchange.server.services.ActionLimiterServices;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.servlet.limit.AbstractActionLimitedException;
 import com.openexchange.tools.servlet.limit.ActionLimiter;
+import com.openexchange.tools.servlet.limit.UserAction;
+import com.openexchange.tools.servlet.limit.UserAction.UserActionBuilder;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -227,6 +230,10 @@ public class DefaultDispatcher implements Dispatcher {
             }
             throw e;
         } catch (RuntimeException e) {
+            if (e instanceof AbstractActionLimitedException) {
+                AbstractActionLimitedException actionLimitedException = (AbstractActionLimitedException) e;
+                throw actionLimitedException.create();
+            }
             if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
                 // Handle special Rhino wrapper error
                 Throwable wrapped = e.getCause();
@@ -276,6 +283,7 @@ public class DefaultDispatcher implements Dispatcher {
             result = doCallAction(action, requestData, session);
             return result;
         } catch (OXException e) {
+            error(requestData);
             exc = e;
             throw e;
         } catch (RuntimeException e) {
@@ -297,7 +305,7 @@ public class DefaultDispatcher implements Dispatcher {
                 addLogProperties(requestData, true);
                 throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(AJAXRequestResult.class.getSimpleName(), "null");
             }
-            after(requestData, result);
+            success(requestData, result);
         } catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -313,25 +321,36 @@ public class DefaultDispatcher implements Dispatcher {
         return result.setRequestData(requestData);
     }
 
-    private void before(AJAXRequestData requestData) throws OXException {
-        String module = requestData.getModule();
-        String action = requestData.getAction();
+    private UserAction getUserAction(AJAXRequestData requestData) {
+        return new UserActionBuilder().setAction(requestData.getAction()).setModule(requestData.getModule()).setUserId(requestData.getSession().getUserId()).setContextId(requestData.getSession().getContextId()).build();
+    }
 
-        int userId = requestData.getSession().getUserId();
-        int contextId = requestData.getSession().getContextId();
-
+    protected void error(AJAXRequestData requestData) {
+        UserAction userAction = getUserAction(requestData);
         List<ActionLimiter> actionLimiter = ActionLimiterServices.getActionLimiter();
+
+        for (ActionLimiter limiter : actionLimiter) {
+            if (limiter.handles(userAction)) {
+                limiter.onError(requestData);
+            }
+        }
+    }
+
+    protected void before(AJAXRequestData requestData) throws OXException {
+        UserAction userAction = getUserAction(requestData);
+        List<ActionLimiter> actionLimiter = ActionLimiterServices.getActionLimiter();
+
         for (ActionLimiter limiter : actionLimiter) {
             List<ActionLimiter> usedLimiters = new ArrayList<>();
-            if (limiter.handles(module, action) && limiter.handles(contextId, userId)) {
+            if (limiter.handles(userAction)) {
                 usedLimiters.add(limiter);
-                limiter.check(requestData);
+                limiter.onBefore(requestData);
             }
             requestData.setProperty("limiter", usedLimiters);
         }
     }
 
-    private void after(AJAXRequestData requestData, AJAXRequestResult result) throws OXException {
+    protected void success(AJAXRequestData requestData, AJAXRequestResult result) {
         Object property = requestData.getProperty("limiter");
         if (property == null) {
             return;
@@ -342,7 +361,7 @@ public class DefaultDispatcher implements Dispatcher {
                 return;
             }
             for (ActionLimiter limiter : usedLimiter) {
-                limiter.after(requestData, result);
+                limiter.onSuccess(requestData, result);
             }
         }
     }
