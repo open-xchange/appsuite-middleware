@@ -77,7 +77,7 @@ import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegis
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistryImpl;
 import com.openexchange.mail.json.compose.share.settings.AbstractShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.EnabledShareComposeSetting;
-import com.openexchange.mail.json.compose.share.settings.FilesAutoExpireShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.ForceAutoDeleteShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.NameShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.RequiredExpirationShareComposeSetting;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
@@ -252,7 +252,7 @@ public class ShareComposeActivator extends HousekeepingActivator {
         registerSetting(new EnabledShareComposeSetting(handler));
         registerSetting(new NameShareComposeSetting(handler));
         registerSetting(new RequiredExpirationShareComposeSetting(handler));
-        registerSetting(new FilesAutoExpireShareComposeSetting(handler));
+        registerSetting(new ForceAutoDeleteShareComposeSetting(handler));
     }
 
     private <V> void registerSetting(AbstractShareComposeSetting<V> setting) {

@@ -63,35 +63,35 @@ import com.openexchange.tx.TransactionAwares;
  */
 public class DefaultStoredAttachmentsControl implements StoredAttachmentsControl {
 
-    private final List<String> attachmentIds;
-    private final String folderId;
+    private final List<Item> attachments;
+    private final Item folder;
     private final ShareTarget folderTarget;
     private final TransactionAware transaction;
 
     /**
      * Initializes a new {@link DefaultStoredAttachmentsControl}.
      *
-     * @param attachmentIds The identifiers of the stored attachments
-     * @param folderId The folder identifier
+     * @param attachments The stored attachments
+     * @param folder The folder
      * @param folderTarget The share target pointing to the folder/directory containing the attachments
      * @param transaction The associated transaction
      */
-    public DefaultStoredAttachmentsControl(List<String> attachmentIds, String folderId, ShareTarget folderTarget, TransactionAware transaction) {
+    public DefaultStoredAttachmentsControl(List<Item> attachments, Item folder, ShareTarget folderTarget, TransactionAware transaction) {
         super();
-        this.attachmentIds = attachmentIds;
-        this.folderId = folderId;
+        this.attachments = attachments;
+        this.folder = folder;
         this.folderTarget = folderTarget;
         this.transaction = transaction;
     }
 
     @Override
-    public String getFolderId() {
-        return folderId;
+    public Item getFolder() {
+        return folder;
     }
 
     @Override
-    public List<String> getAttachmentIds() {
-        return attachmentIds;
+    public List<Item> getAttachments() {
+        return attachments;
     }
 
     @Override

@@ -104,7 +104,7 @@ public abstract class AbstractShareComposeSetting<V> implements PreferencesItemS
 
     @Override
     public String[] getPath() {
-        return new String[] { "modules", "mail", "compose", "share", nameInPath };
+        return new String[] { "modules", "mail", "compose", "shareAttachments", nameInPath };
     }
 
     @Override
@@ -127,11 +127,11 @@ public abstract class AbstractShareComposeSetting<V> implements PreferencesItemS
 
     @Override
     public String getConfigTreePath() {
-        return "modules/mail/compose/share/" + nameInPath;
+        return "modules/mail/compose/shareAttachments/" + nameInPath;
     }
 
     @Override
     public String getJslobPath() {
-        return "io.ox/mail//compose/share/" + nameInPath;
+        return "io.ox/mail//compose/shareAttachments/" + nameInPath;
     }
 }

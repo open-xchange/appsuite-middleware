@@ -49,58 +49,55 @@
 
 package com.openexchange.mail.json.compose.share;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareTarget;
-
 /**
- * {@link StoredAttachmentsControl} - The control for stored attachments.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * Represents an item associated with a share reference.
  */
-public interface StoredAttachmentsControl {
+public class Item {
+
+    private final String id;
+    private final String name;
 
     /**
-     * Gets the folder
+     * Initializes a new {@link Item}.
      *
-     * @return The folder
+     * @param id The item identifier
+     * @param name The name
      */
-    Item getFolder();
+    public Item(String id, String name) {
+        super();
+        this.id = id;
+        this.name = name;
+    }
 
     /**
-     * Gets the attachments
+     * Gets the identifier
      *
-     * @return The attachments
+     * @return The identifier
      */
-    List<Item> getAttachments();
+    public String getId() {
+        return id;
+    }
 
     /**
-     * Gets the share target for the folder
+     * Gets the name
      *
-     * @return The share target for the folder
+     * @return The name
      */
-    ShareTarget getFolderTarget();
+    public String getName() {
+        return name;
+    }
 
-    /**
-     * Commits the attachment store operation.
-     *
-     * @throws OXException If commit fails
-     */
-    void commit() throws OXException;
-
-    /**
-     * Rolls-back the attachment store operation.
-     *
-     * @throws OXException If roll-back fails
-     */
-    void rollback() throws OXException;
-
-    /**
-     * Performs possible clean-up operations after a commit/roll-back.
-     *
-     * @throws OXException If clean-up fails
-     */
-    void finish() throws OXException;
-
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32);
+        builder.append('[');
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        if (name != null) {
+            builder.append("name=").append(name);
+        }
+        builder.append(']');
+        return builder.toString();
+    }
 }

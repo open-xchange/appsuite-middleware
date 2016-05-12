@@ -59,23 +59,23 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link FilesAutoExpireShareComposeSetting}
+ * {@link ForceAutoDeleteShareComposeSetting}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class FilesAutoExpireShareComposeSetting extends AbstractShareComposeSetting<Boolean> {
+public class ForceAutoDeleteShareComposeSetting extends AbstractShareComposeSetting<Boolean> {
 
     /**
-     * Initializes a new {@link FilesAutoExpireShareComposeSetting}.
+     * Initializes a new {@link ForceAutoDeleteShareComposeSetting}.
      */
-    public FilesAutoExpireShareComposeSetting(ShareComposeHandler shareComposeHandler) {
-        super("filesAutoExpire", shareComposeHandler);
+    public ForceAutoDeleteShareComposeSetting(ShareComposeHandler shareComposeHandler) {
+        super("forceAutoDelete", shareComposeHandler);
     }
 
     @Override
     protected Boolean getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        return Boolean.valueOf(Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.filesAutoExpire", false, session));
+        return Boolean.valueOf(Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.forceAutoDelete", false, session));
     }
 
 }

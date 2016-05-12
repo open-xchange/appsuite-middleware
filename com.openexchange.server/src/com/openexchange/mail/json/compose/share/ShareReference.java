@@ -62,6 +62,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -88,20 +89,20 @@ public class ShareReference {
 
         try {
             JSONObject jReference = new JSONObject(decompress(referenceString));
-            List<String> itemIds;
+            List<Item> items;
             {
-                JSONArray jItemIds = jReference.getJSONArray("itemIds");
-                int length = jItemIds.length();
-                itemIds = new ArrayList<String>(length);
+                JSONArray jItems = jReference.getJSONArray("items");
+                int length = jItems.length();
+                items = new ArrayList<Item>(length);
                 for (int i = 0; i < length; i++) {
-                    itemIds.add(jItemIds.getString(i));
+                    items.add(parseItemFrom(jItems.getJSONObject(i)));
                 }
             }
             Date expiration = null;
             if (jReference.hasAndNotNull("expiration")) {
                 expiration = new Date(jReference.getLong("expiration"));
             }
-            return new ShareReference(jReference.getString("shareUrl"), itemIds, jReference.getString("folderId"), expiration, jReference.getInt("userId"), jReference.getInt("contextId"));
+            return new ShareReference(jReference.getString("shareUrl"), items, parseItemFrom(jReference.getJSONObject("folder")), expiration, jReference.getInt("userId"), jReference.getInt("contextId"));
         } catch (java.util.zip.ZipException e) {
             // A GZIP format error has occurred or the compression method used is unsupported
             throw new IllegalArgumentException("Invalid reference string", e);
@@ -113,6 +114,13 @@ public class ShareReference {
         }
     }
 
+    private static Item parseItemFrom(JSONObject jItem) throws JSONException {
+        if (null == jItem) {
+            return null;
+        }
+        return new Item(jItem.getString("id"), jItem.getString("name"));
+    }
+
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -122,8 +130,8 @@ public class ShareReference {
 
         private final int contextId;
         private final int userId;
-        private String folderId;
-        private List<String> itemIds;
+        private Item folder;
+        private List<Item> items;
         private String shareUrl;
         private Date expiration;
 
@@ -142,22 +150,22 @@ public class ShareReference {
         /**
          * Sets the folder identifier
          *
-         * @param folderId The folder identifier
+         * @param folder The folder
          * @return This builder instance
          */
-        public Builder folderId(String folderId) {
-            this.folderId = folderId;
+        public Builder folder(Item folder) {
+            this.folder = folder;
             return this;
         }
 
         /**
-         * Sets the item identifiers
+         * Sets the items
          *
-         * @param itemIds The item identifiers
+         * @param items The items
          * @return This builder instance
          */
-        public Builder itemIds(List<String> itemIds) {
-            this.itemIds = itemIds;
+        public Builder items(List<Item> items) {
+            this.items = items;
             return this;
         }
 
@@ -189,7 +197,7 @@ public class ShareReference {
          * @return The {@code ShareReference} instance
          */
         public ShareReference build() {
-            return new ShareReference(shareUrl, itemIds, folderId, expiration, userId, contextId);
+            return new ShareReference(shareUrl, items, folder, expiration, userId, contextId);
         }
     }
 
@@ -197,8 +205,8 @@ public class ShareReference {
 
     private final int contextId;
     private final int userId;
-    private final String folderId;
-    private final List<String> itemIds;
+    private final Item folder;
+    private final List<Item> items;
     private final String shareUrl;
     private final Date expiration;
 
@@ -206,16 +214,16 @@ public class ShareReference {
      * Initializes a new {@link ShareReference}.
      *
      * @param shareUrl The associated share URL
-     * @param itemIds The identifiers of the shared files
-     * @param folderId The folder containing the files
+     * @param items The shared files
+     * @param folder The folder containing the files
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    private ShareReference(String shareUrl, List<String> itemIds, String folderId, Date expiration, int userId, int contextId) {
+    private ShareReference(String shareUrl, List<Item> items, Item folder, Date expiration, int userId, int contextId) {
         super();
         this.shareUrl = shareUrl;
-        this.itemIds = itemIds;
-        this.folderId = folderId;
+        this.items = items;
+        this.folder = folder;
         this.expiration = expiration;
         this.userId = userId;
         this.contextId = contextId;
@@ -240,21 +248,21 @@ public class ShareReference {
     }
 
     /**
-     * Gets the folder identifier
+     * Gets the folder
      *
-     * @return The folder identifier
+     * @return The folder
      */
-    public String getFolderId() {
-        return folderId;
+    public Item getFolder() {
+        return folder;
     }
 
     /**
-     * Gets the item identifiers
+     * Gets the items
      *
-     * @return The item identifiers
+     * @return The items
      */
-    public List<String> getItemIds() {
-        return itemIds;
+    public List<Item> getItems() {
+        return items;
     }
 
     /**
@@ -286,8 +294,14 @@ public class ShareReference {
             jReference.put("shareUrl", shareUrl);
             jReference.put("contextId", contextId);
             jReference.put("userId", userId);
-            jReference.put("folderId", folderId);
-            jReference.put("itemIds", new JSONArray(itemIds));
+            jReference.put("folder", new JSONObject(2).put("id", folder.getId()).put("name", folder.getName()));
+            {
+                JSONArray jItems = new JSONArray(items.size());
+                for (Item item : items) {
+                    jItems.put(new JSONObject(2).put("id", item.getId()).put("name", item.getName()));
+                }
+                jReference.put("items", jItems);
+            }
             return compress(jReference.toString());
         } catch (RuntimeException e) {
             throw e;
@@ -301,11 +315,11 @@ public class ShareReference {
     public String toString() {
         StringBuilder sb = new StringBuilder(64);
         sb.append("[contextId=").append(contextId).append(", userId=").append(userId).append(", ");
-        if (folderId != null) {
-            sb.append("folderId=").append(folderId).append(", ");
+        if (folder != null) {
+            sb.append("folder=").append(folder).append(", ");
         }
-        if (itemIds != null) {
-            sb.append("itemIds=").append(itemIds).append(", ");
+        if (items != null) {
+            sb.append("items=").append(items).append(", ");
         }
         if (shareUrl != null) {
             sb.append("shareUrl=").append(shareUrl).append(", ");

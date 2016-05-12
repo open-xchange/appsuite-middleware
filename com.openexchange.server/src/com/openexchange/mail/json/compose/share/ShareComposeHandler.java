@@ -63,7 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
@@ -104,8 +104,6 @@ import com.openexchange.user.UserService;
  */
 public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportComposeContext, ShareDraftComposeContext> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareComposeHandler.class);
-
     /**
      * Initializes a new {@link ShareComposeHandler}.
      */
@@ -113,8 +111,78 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         super();
     }
 
+    /**
+     * Gets the optional share options from JSON message representation.
+     *
+     * @param composeRequest The compose request providing JSON message representation
+     * @return The share options or <code>null</code>
+     */
+    private JSONObject optShareAttachmentOptions(ComposeRequest composeRequest) {
+        return composeRequest.getJsonMail().optJSONObject("share_attachments");
+    }
+
+    /**
+     * Checks whether specified compose request signals to compose a share message.
+     *
+     * @param composeRequest The compose request
+     * @return <code>true</code> to create a share message; otherwise <code>false</code>
+     */
     private boolean isCreateShare(ComposeRequest composeRequest) {
-        return AJAXRequestDataTools.parseBoolParameter("share_attachments", composeRequest.getRequest(), false);
+        JSONObject jShareAttachmentOptions = optShareAttachmentOptions(composeRequest);
+        return null != jShareAttachmentOptions && jShareAttachmentOptions.optBoolean("enable", false);
+    }
+
+    /**
+     * Checks whether created files are supposed to expire as well (provided that an expiration date is set)
+     *
+     * @param request The compose request
+     * @return <code>true</code> for auto-expiration; otherwise <code>false</code>
+     */
+    private boolean isAutoDelete(ComposeRequest request) {
+        JSONObject jShareAttachmentOptions = optShareAttachmentOptions(request);
+        return null != jShareAttachmentOptions && jShareAttachmentOptions.optBoolean("autodelete", false);
+    }
+
+    /**
+     * Gets the password from given compose request.
+     *
+     * @param request The compose request
+     * @return The password or <code>null</code>
+     */
+    private String getPassword(ComposeRequest request) {
+        JSONObject jShareAttachmentOptions = optShareAttachmentOptions(request);
+        return null == jShareAttachmentOptions ? null : jShareAttachmentOptions.optString("password");
+    }
+
+    /**
+     * Gets the expiration date from given compose request.
+     *
+     * @param request The compose request
+     * @return The expiration date or <code>null</code>
+     * @throws OXException If value is invalid (NaN)
+     */
+    protected Date getExpirationDate(ComposeRequest request) throws OXException {
+        JSONObject jShareAttachmentOptions = optShareAttachmentOptions(request);
+        if (null == jShareAttachmentOptions) {
+            return null;
+        }
+
+        long millis = jShareAttachmentOptions.optLong("expiry_date");
+        if (millis > 0) {
+            int offset = TimeZoneUtils.getTimeZone(request.getSession().getUser().getTimeZone()).getOffset(millis);
+            return new Date(millis - offset);
+        }
+
+        String sDate = jShareAttachmentOptions.optString("expiry_date");
+        if (Strings.isEmpty(sDate)) {
+            return null;
+        }
+
+        try {
+            return com.openexchange.java.ISO8601Utils.parse(sDate);
+        } catch (IllegalArgumentException iso8601ParsingFailed) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(iso8601ParsingFailed, "expiry_date", sDate);
+        }
     }
 
     /**
@@ -135,7 +203,6 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
     @Override
     public boolean applicableFor(ComposeRequest composeRequest) throws OXException {
-        // Expect "share_attachments=true" parameter
         if (false == isCreateShare(composeRequest)) {
             return false;
         }
@@ -203,11 +270,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
 
         // Optional auto-expiration of folder/files
-        boolean filesAutoExpire;
+        boolean autoDelete;
         if (null == expirationDate) {
-            filesAutoExpire = false;
+            autoDelete = false;
         } else {
-            filesAutoExpire = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.filesAutoExpire", false, session) || isFilesAutoExpire(composeRequest);
+            autoDelete = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.forceAutoDelete", false, session) || isAutoDelete(composeRequest);
         }
 
         // Determine attachment storage to use
@@ -222,7 +289,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         boolean rollback = true;
         try {
             // Store attachments associated with compose context
-            attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, filesAutoExpire, context);
+            attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, autoDelete, context);
 
             // The share target for an anonymous user
             ShareTarget folderTarget = attachmentsControl.getFolderTarget();
@@ -238,8 +305,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 String basicShareUrl = folderLink.getShareURL(composeRequest.getRequest().getHostData());
                 shareReference = new ShareReference.Builder(session.getUserId(), session.getContextId())
                     .expiration(expirationDate)
-                    .folderId(attachmentsControl.getFolderId())
-                    .itemIds(attachmentsControl.getAttachmentIds())
+                    .folder(attachmentsControl.getFolder())
+                    .items(attachmentsControl.getAttachments())
                     .shareUrl(basicShareUrl)
                     .build();
             }
@@ -303,68 +370,6 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 }
                 attachmentsControl.finish();
             }
-        }
-    }
-
-    /**
-     * Checks whether created files are supposed to expire as well (provided that an expiration date is set)
-     *
-     * @param request The compose request
-     * @return <code>true</code> for auto-expiration; otherwise <code>false</code>
-     */
-    protected boolean isFilesAutoExpire(ComposeRequest request) {
-        return AJAXRequestDataTools.parseBoolParameter("files_auto_expire", request.getRequest(), false);
-    }
-
-    /**
-     * Gets the password from given compose request.
-     *
-     * @param request The compose request
-     * @return The password or <code>null</code>
-     */
-    protected String getPassword(ComposeRequest request) {
-        String value = request.getRequest().getParameter("password");
-        return Strings.isEmpty(value) ? null : value;
-    }
-
-    /**
-     * Gets the expiration date from given compose request.
-     *
-     * @param request The compose request
-     * @return The expiration date or <code>null</code>
-     * @throws OXException If value is invalid (NaN)
-     */
-    protected Date getExpirationDate(ComposeRequest request) throws OXException {
-        String value = request.getRequest().getParameter("expires");
-        if (Strings.isEmpty(value)) {
-            return null;
-        }
-
-        try {
-            value = value.trim();
-
-            // Value is required to start with a digit in either way
-            if (!Strings.isDigit(value.charAt(0))) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expires", value);
-            }
-
-            if (value.indexOf('-') > 0) {
-                // Expect a date in ISO8601 format
-                return com.openexchange.java.ISO8601Utils.parse(value);
-            }
-
-            // Expect a date in milliseconds
-            try {
-                long millis = Long.parseLong(value);
-                int offset = TimeZoneUtils.getTimeZone(request.getSession().getUser().getTimeZone()).getOffset(millis);
-                return new Date(millis - offset);
-            } catch (NumberFormatException e) {
-                // Else expect a date in ISO8601 format
-                LOG.trace("NaN: {}", value, e);
-                return com.openexchange.java.ISO8601Utils.parse(value);
-            }
-        } catch (IllegalArgumentException iso8601ParsingFailed) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(iso8601ParsingFailed, "expires", value);
         }
     }
 

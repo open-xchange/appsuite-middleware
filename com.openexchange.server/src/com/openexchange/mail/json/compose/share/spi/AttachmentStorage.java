@@ -70,11 +70,11 @@ public interface AttachmentStorage extends Applicable {
      * @param sourceMessage The source message providing basic information
      * @param password The optional password to protect the attachments
      * @param expiry The optional expiration date
-     * @param filesAutoExpire <code>true</code> to have the files being cleansed provided that <code>expiry</code> is given; otherwise <code>false</code> to leave them
+     * @param autoDelete <code>true</code> to have the files being cleansed provided that <code>expiry</code> is given; otherwise <code>false</code> to leave them
      * @param context The associated compose context; e.g. providing the attachments to store
      * @return The result for stored attachments
      * @throws OXException If attachments cannot be stored for any reason
      */
-    StoredAttachmentsControl storeAttachments(ComposedMailMessage sourceMessage, String password, Date expiry, boolean filesAutoExpire, ComposeContext context) throws OXException;
+    StoredAttachmentsControl storeAttachments(ComposedMailMessage sourceMessage, String password, Date expiry, boolean autoDelete, ComposeContext context) throws OXException;
 
 }
