@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-04-15 13:59+0100\n"
+"PO-Revision-Date: 2016-05-12 09:36+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -4017,6 +4017,16 @@ msgstr "Lesen des RSS-Feed von URL fehlgeschlagen:%1$s"
 msgid "Failed to read RSS feed from URL: %2$s"
 msgstr "Lesen des RSS-Feed von URL fehlgeschlagen:%2$s"
 
+#. The RSS feed is exceeding the maximum allowed size of '%1$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
+msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
+msgstr "Der RSS-Feed überschreitet die maximal zulässige Größe von '%1$s'"
+
+#. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
+msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr "Es kann keine Verbindung zu RSS mit der URL %1$s hergestellt werden. Bitte ändern Sie die URL und versuchen Sie es erneut."
+
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -6288,13 +6298,18 @@ msgstr "Nicht unterstütztes Zeichen. Bitte korrigieren Sie Ihre Eingabe."
 msgid "Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes."
 msgstr "Aufgrund eingeschränkter Nutzungsmöglichkeiten des Benutzers \"%1$s\" können die Berechtigungsänderungen nicht angewendet werden."
 
-#. Concurrent write attempt. Please await the previous save operation to terminate.
+#. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid "Group %1$s can't be used for object permissions."
+msgstr "Gruppe %1$s kann nicht für Objektberechtigungen verwendet werden."
+
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
 msgid "Concurrent write attempt. Please await the previous save operation to terminate."
 msgstr "Gleichzeitiger Schreibversuch. Bitte warten Sie, bis der vorherige Speichervorgang abgeschlossen wurde."
 
 #. Your search took too long in order to be accomplished.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
 msgstr "Ihre Suche dauerte zu lange, um durchgeführt werden zu können."
 
@@ -8440,8 +8455,8 @@ msgstr "Ungültige oder schädliche Bilddaten erkannt"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
-msgid "The maximum allowed size of '%1$s' for an image in the signature is reached."
-msgstr "Die maximal zulässige Größe von '%1$s' für ein Bild in der Signatur ist erreicht."
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
+msgstr "Das Signaturbild überschreitet die maximal zulässige Größe von '%1$s'."
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
@@ -10891,6 +10906,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The maximum allowed size of '%1$s' for an image in the signature is reached."
+#~ msgstr "Die maximal zulässige Größe von '%1$s' für ein Bild in der Signatur ist erreicht."
 
 #~ msgid "Invalid E-Mail address."
 #~ msgstr "Ungültige E-Mail-Adresse."
