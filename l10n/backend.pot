@@ -6,6 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -7477,19 +7488,22 @@ msgstr ""
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
-msgid "The available attachments for this E-Mail can be accessed via the link:"
+msgid ""
+"The available attachments for this E-Mail can be accessed via the link %1$s"
 msgstr ""
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
+#. * The link will expire on 01/01/16 *
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
-msgid "The link will expire on #DATE#"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
+msgid "The link will expire on %1$s"
 msgstr ""
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the password for affected message's attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
-msgid "Please use the following password to access the attachments"
+msgid "Please use the following password to access the attachments %1$s"
 msgstr ""
 
 #. *
@@ -8548,11 +8562,6 @@ msgstr ""
 #. * View items
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:233
 msgid "View items"
-msgstr ""
-
-#. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
-msgid "The link will expire on %1$s"
 msgstr ""
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
