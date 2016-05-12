@@ -75,7 +75,7 @@ public class ThresholdShareComposeSetting extends AbstractShareComposeSetting<Lo
 
     @Override
     protected Long getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        return Utilities.getLongFromProperty("com.openexchange.mail.compose.share.threshold", Long.valueOf(26214400L), session);
+        return Utilities.getLongFromProperty("com.openexchange.mail.compose.share.threshold", Long.valueOf(0L), session);
     }
 
 }
