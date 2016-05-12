@@ -623,6 +623,9 @@ public class DispatcherServlet extends SessionServlet {
             session = getSession(httpRequest, DISPATCHER.get(), module, action);
         } else {
             session = getSession(httpRequest, DISPATCHER.get(), module, action, user, context, sequence);
+            if (null == session) {
+                session = getSession(httpRequest, DISPATCHER.get(), module, action);
+            }
         }
         /*
          * Parse AJAXRequestData

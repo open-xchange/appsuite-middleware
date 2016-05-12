@@ -275,8 +275,10 @@ public final class SessionUtility {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
 
         if (null == session) {
-            // TODO: Fall-back to old look-up
-
+            ServerSession s = getSessionObjectByAnyAlternativeId(req);
+            if (null != s) {
+                return handlePublicSessionIdentifier(String.valueOf(s.getParameter(PARAM_ALTERNATIVE_ID)), req, s, sessiondService, false);
+            }
         } else {
             Cookie cookie = cookies.get(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }));
             if (null != cookie) {
@@ -989,15 +991,7 @@ public final class SessionUtility {
             return (ServerSession) attribute;
         }
         if (mayUseFallbackSession) {
-            ServerSession session = (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
-//            if (null == session) {
-//                try {
-//                    session = getGuestSessionObjectByAnyAlternativeId(req);
-//                } catch (OXException e) {
-//                    // nothing to do
-//                }
-//            }
-            return session;
+            return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
         }
         // No session found
         {
@@ -1015,6 +1009,15 @@ public final class SessionUtility {
         return null;
     }
 
+    /**
+     * Get session by public-session cookie for userId in contextId
+     *
+     * @param req The servlet request
+     * @param context The context id
+     * @param user The user id
+     * @return Session identified by alternative id for userId in contextId
+     * @throws OXException If context cannot be resolved
+     */
     public static ServerSession getSessionObjectByAlternativeId(ServletRequest req, String context, String user) throws OXException {
         HttpServletRequest httpReq = (HttpServletRequest) req;
         Map<String, Cookie> cookies = Cookies.cookieMapFor(httpReq);
@@ -1027,7 +1030,14 @@ public final class SessionUtility {
         return null;
     }
 
-    public static ServerSession getGuestSessionObjectByAnyAlternativeId(ServletRequest req) throws OXException {
+    /**
+     * Search public-session cookies for any active session
+     * 
+     * @param req The servlet request
+     * @return An active session
+     * @throws OXException
+     */
+    public static ServerSession getSessionObjectByAnyAlternativeId(ServletRequest req) throws OXException {
         HttpServletRequest httpReq = (HttpServletRequest) req;
         Map<String, Cookie> cookies = Cookies.cookieMapFor(httpReq);
         for (String name : cookies.keySet()) {
@@ -1035,10 +1045,11 @@ public final class SessionUtility {
                 Cookie publicSession = cookies.get(name);
                 if (null != publicSession) {
                     Session session = ServerServiceRegistry.getInstance().getService(SessiondService.class).getSessionByAlternativeId(publicSession.getValue());
-                    ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-                    if (null != serverSession && "guest".equals(serverSession.getLogin())) {
-                        return serverSession;
+                    if (null == session) {
+                        continue;
                     }
+                    ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                    return serverSession;
                 }
             }
         }
