@@ -266,7 +266,7 @@ public class LoginServlet extends AJAXServlet {
      * @return The name of the public session cookie
      */
     public static String getPublicSessionCookieName(final HttpServletRequest req, String[] additionals) {
-        return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getHash(req, HashCalculator.getUserAgent(req), HashCalculator.getClient(req), additionals)).toString();
+        return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getHash(req, HashCalculator.getUserAgent(req), null, additionals)).toString();
     }
 
     /**

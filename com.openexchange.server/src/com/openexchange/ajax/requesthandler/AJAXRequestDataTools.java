@@ -423,16 +423,23 @@ public class AJAXRequestDataTools {
      * @return The determined module
      */
     public String getModule(final String prefix, final HttpServletRequest req) {
+        String module = (String) req.getAttribute("__module");
+        if (null != module) {
+            return module;
+        }
+
         String pathInfo = req.getRequestURI();
         final int lastIndex = pathInfo.lastIndexOf(';');
         if (lastIndex > 0) {
             pathInfo = pathInfo.substring(0, lastIndex);
         }
-        String module = null != prefix ? pathInfo.substring(prefix.length()) : pathInfo;
+
+        module = null != prefix ? pathInfo.substring(prefix.length()) : pathInfo;
         final int mlen = module.length() - 1;
         if ('/' == module.charAt(mlen)) {
             module = module.substring(0, mlen);
         }
+        req.setAttribute("__module", module);
         return module;
     }
 
@@ -443,24 +450,8 @@ public class AJAXRequestDataTools {
      * @return The determined action
      */
     public String getAction(final HttpServletRequest req) {
-        final String action = req.getParameter(PARAMETER_ACTION);
-        if (null == action) {
-            return Strings.toUpperCase(req.getMethod());
-        }
-        return action;
-
-    }
-
-    public String getUser(HttpServletRequest req) {
-        return req.getParameter("user");
-    }
-
-    public String getContext(HttpServletRequest req) {
-        return req.getParameter("context");
-    }
-
-    public String getSequence(HttpServletRequest req) {
-        return req.getParameter("sequence");
+        String action = req.getParameter(PARAMETER_ACTION);
+        return null == action ? Strings.toUpperCase(req.getMethod()) : action;
     }
 
     /**

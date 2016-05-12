@@ -332,7 +332,6 @@ public class DispatcherServlet extends SessionServlet {
             SessionUtility.verifySession(req, sessiondService, sessionId, session);
             SessionUtility.rememberSession(req, session);
             SessionUtility.checkPublicSessionCookie(req, resp, session, sessiondService);
-            sessionParamFound = true;
         }
 
         // Check if associated request allows no session (if no "session" parameter was found)
@@ -615,18 +614,7 @@ public class DispatcherServlet extends SessionServlet {
         AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
         String module = requestDataTools.getModule(prefix, httpRequest);
         String action = requestDataTools.getAction(httpRequest);
-        String user = requestDataTools.getUser(httpRequest);
-        String context = requestDataTools.getContext(httpRequest);
-        String sequence = requestDataTools.getSequence(httpRequest);
-        ServerSession session = null;
-        if (Strings.isEmpty(user) || Strings.isEmpty(context) || Strings.isEmpty(sequence)) {
-            session = getSession(httpRequest, DISPATCHER.get(), module, action);
-        } else {
-            session = getSession(httpRequest, DISPATCHER.get(), module, action, user, context, sequence);
-            if (null == session) {
-                session = getSession(httpRequest, DISPATCHER.get(), module, action);
-            }
-        }
+        ServerSession session = getSession(httpRequest, DISPATCHER.get(), module, action);
         /*
          * Parse AJAXRequestData
          */
@@ -717,10 +705,6 @@ public class DispatcherServlet extends SessionServlet {
             session = fakeSession();
         }
         return session;
-    }
-
-    private ServerSession getSession(HttpServletRequest httpRequest, Dispatcher dispatcher, String module, String action, String user, String context, String sequence) throws OXException {
-        return SessionUtility.getSessionObjectByAlternativeId(httpRequest, context, user);
     }
 
     private ServerSession fakeSession() {
