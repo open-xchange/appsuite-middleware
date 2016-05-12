@@ -273,13 +273,15 @@ public final class SessionUtility {
      */
     public static boolean findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-        if (null == session) {
-            return false;
-        }
 
-        Cookie cookie = cookies.get(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }));
-        if (null != cookie) {
-            return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
+        if (null == session) {
+            // TODO: Fall-back to old look-up
+
+        } else {
+            Cookie cookie = cookies.get(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }));
+            if (null != cookie) {
+                return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
+            }
         }
 
         // No such cookie
