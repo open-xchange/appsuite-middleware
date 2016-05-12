@@ -64,13 +64,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @Module(name = "mailaccount", description = "The mail account module is used to manage multiple mail accounts held by a user.")
 public final class MailAccountActionFactory implements AJAXActionServiceFactory {
 
-    private static MailAccountActionFactory instance;
-    private final MailAccountActionProvider provider;
-
-    private MailAccountActionFactory(MailAccountActionProvider provider) {
-        super();
-        this.provider = provider;
-    }
+    private static volatile MailAccountActionFactory instance;
 
     /**
      * Gets the {@link MailAccountActionFactory} instance.
@@ -78,10 +72,26 @@ public final class MailAccountActionFactory implements AJAXActionServiceFactory 
      * @return The {@link MailAccountActionFactory} instance
      */
     public static final MailAccountActionFactory getInstance(MailAccountActionProvider provider) {
-        if (instance == null) {
-            instance = new MailAccountActionFactory(provider);
+        MailAccountActionFactory tmp = instance;
+        if (null == tmp) {
+            synchronized (MailAccountActionFactory.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new MailAccountActionFactory(provider);
+                    instance = tmp;
+                }
+            }
         }
-        return instance;
+        return tmp;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    private final MailAccountActionProvider provider;
+
+    private MailAccountActionFactory(MailAccountActionProvider provider) {
+        super();
+        this.provider = provider;
     }
 
     @Override
