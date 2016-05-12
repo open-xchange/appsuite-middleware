@@ -64,7 +64,6 @@ import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.TransportAccountDescription;
 import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.session.Session;
-import com.openexchange.tools.net.URIDefaults;
 
 /**
  * {@link SanitizingStorageService}
@@ -264,19 +263,6 @@ final class SanitizingStorageService implements MailAccountStorageService {
     @Override
     public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws OXException {
         return storageService.getByHostNames(hostNames, user, cid);
-    }
-
-    @Override
-    public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws OXException {
-        try {
-            return storageService.getTransportAccountForID(id, user, cid);
-        } catch (final OXException e) {
-            if (!isURIError(e)) {
-                throw e;
-            }
-            Sanitizer.sanitize(user, cid, storageService, URIDefaults.SMTP, "smtp://localhost:25");
-            return storageService.getTransportAccountForID(id, user, cid);
-        }
     }
 
     @Override

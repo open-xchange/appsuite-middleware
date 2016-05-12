@@ -3083,15 +3083,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public MailAccount getTransportAccountForID(final int id, final int userId, final int contextId) throws OXException {
-        final MailAccount account = getMailAccount(id, userId, contextId);
-        if (null == account.getTransportServer()) {
-            return getDefaultMailAccount(userId, contextId);
-        }
-        return account;
-    }
-
-    @Override
     public boolean hasAccounts(final Session session) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;

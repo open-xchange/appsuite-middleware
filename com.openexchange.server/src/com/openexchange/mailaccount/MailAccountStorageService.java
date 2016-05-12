@@ -428,17 +428,6 @@ public interface MailAccountStorageService {
     int[] getByHostNames(Collection<String> hostNames, int userId, int contextId) throws OXException;
 
     /**
-     * Gets the transport account for specified account identifier.
-     *
-     * @param id The account identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The mail account providing the information for the appropriate transport account.
-     * @throws OXException If transport look-up fails
-     */
-    MailAccount getTransportAccountForID(int id, int userId, int contextId) throws OXException;
-
-    /**
      * Decodes stored encrypted strings using the old secret and encode them again using the new secret.
      *
      * @param oldSecret The secret used for decrypting the stored passwords

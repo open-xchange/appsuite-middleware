@@ -665,15 +665,6 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public MailAccount getTransportAccountForID(int id, int userId, int contextId) throws OXException {
-        MailAccount account = getMailAccount(id, userId, contextId);
-        if (null == account.getTransportServer()) {
-            return getDefaultMailAccount(userId, contextId);
-        }
-        return account;
-    }
-
-    @Override
     public void migratePasswords(String oldSecret, String newSecret, Session session) throws OXException {
         delegate.migratePasswords(oldSecret, newSecret, session);
         invalidateMailAccounts(session.getUserId(), session.getContextId());
