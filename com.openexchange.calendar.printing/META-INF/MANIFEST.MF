@@ -8,6 +8,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.osgi,
+ com.openexchange.ajax.printing,
  com.openexchange.ajax.requesthandler,
  com.openexchange.api2,
  com.openexchange.calendar.itip,

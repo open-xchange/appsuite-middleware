@@ -52,6 +52,7 @@ package com.openexchange.mail.json.compose.share;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.compose.ComposeRequest;
 
 /**
  * {@link ShareComposeMessageInfo}
@@ -67,11 +68,12 @@ public class ShareComposeMessageInfo {
     private final String password;
     private final Date expirationDate;
     private final ComposedMailMessage source;
+    private final ComposeRequest composeRequest;
 
     /**
      * Initializes a new {@link ShareComposeMessageInfo}.
      */
-    public ShareComposeMessageInfo(ShareComposeLink shareLink, List<Recipient> recipients, String password, Date expirationDate, ComposedMailMessage source, ShareTransportComposeContext context) {
+    public ShareComposeMessageInfo(ShareComposeLink shareLink, List<Recipient> recipients, String password, Date expirationDate, ComposedMailMessage source, ShareTransportComposeContext context, ComposeRequest composeRequest) {
         super();
         this.shareLink = shareLink;
         this.recipients = recipients;
@@ -79,6 +81,16 @@ public class ShareComposeMessageInfo {
         this.expirationDate = expirationDate;
         this.source = source;
         this.composeContext = context;
+        this.composeRequest = composeRequest;
+    }
+
+    /**
+     * Gets the compose request
+     *
+     * @return The compose request
+     */
+    public ComposeRequest getComposeRequest() {
+        return composeRequest;
     }
 
     /**

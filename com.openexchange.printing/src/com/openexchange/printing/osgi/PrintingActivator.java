@@ -54,7 +54,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.printing.contacts.ContactTemplateHelperFactory;
 import com.openexchange.printing.email.EmailTemplateHelperFactory;
 import com.openexchange.printing.tasks.TaskTemplateHelperFactory;
-import com.openexchange.templating.TemplateHelperFactory;
+import com.openexchange.ajax.printing.TemplateHelperFactory;
 import com.openexchange.user.UserService;
 
 /**

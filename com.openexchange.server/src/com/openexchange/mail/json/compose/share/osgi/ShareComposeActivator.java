@@ -62,10 +62,12 @@ import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.json.compose.ComposeHandler;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage;
+import com.openexchange.mail.json.compose.share.MessageGenerators;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistryImpl;
@@ -85,6 +87,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -179,6 +182,54 @@ public class ShareComposeActivator extends HousekeepingActivator {
                 context.ungetService(reference);
             }
         });
+
+        {
+            ServiceTrackerCustomizer<TranslatorFactory, TranslatorFactory> tracker = new ServiceTrackerCustomizer<TranslatorFactory, TranslatorFactory>() {
+
+                @Override
+                public void removedService(ServiceReference<TranslatorFactory> reference, TranslatorFactory factory) {
+                    MessageGenerators.setTranslatorFactory(null);
+                    context.ungetService(reference);
+                }
+
+                @Override
+                public void modifiedService(ServiceReference<TranslatorFactory> reference, TranslatorFactory factory) {
+                    // Ignore
+                }
+
+                @Override
+                public TranslatorFactory addingService(ServiceReference<TranslatorFactory> reference) {
+                    TranslatorFactory factory = context.getService(reference);
+                    MessageGenerators.setTranslatorFactory(factory);
+                    return factory;
+                }
+            };
+            track(TranslatorFactory.class, tracker);
+        }
+
+        {
+            ServiceTrackerCustomizer<TemplateService, TemplateService> tracker = new ServiceTrackerCustomizer<TemplateService, TemplateService>() {
+
+                @Override
+                public void removedService(ServiceReference<TemplateService> reference, TemplateService templateService) {
+                    MessageGenerators.setTemplateService(null);
+                    context.ungetService(reference);
+                }
+
+                @Override
+                public void modifiedService(ServiceReference<TemplateService> reference, TemplateService templateService) {
+                    // Ignore
+                }
+
+                @Override
+                public TemplateService addingService(ServiceReference<TemplateService> reference) {
+                    TemplateService templateService = context.getService(reference);
+                    MessageGenerators.setTemplateService(templateService);
+                    return templateService;
+                }
+            };
+            track(TemplateService.class, tracker);
+        }
 
         openTrackers();
 

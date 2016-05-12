@@ -175,6 +175,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.tasks.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.templating"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.templating.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.textxtraction"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.threadpool"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.tokenlogin"/>

@@ -72,7 +72,7 @@ import com.openexchange.subscribe.microformats.objectparser.OXHCardParser;
 import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFactory;
 import com.openexchange.subscribe.microformats.transformers.MapToContactObjectTransformer;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.OXTemplateImpl;
+import com.openexchange.templating.impl.OXTemplateImpl;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;

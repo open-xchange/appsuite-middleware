@@ -53,13 +53,13 @@ package com.openexchange.printing.contacts;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TimeZone;
+import com.openexchange.ajax.printing.TemplateHelperFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.TemplateHelperFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

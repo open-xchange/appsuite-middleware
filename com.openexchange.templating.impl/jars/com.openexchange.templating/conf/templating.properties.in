@@ -1,0 +1,11 @@
+com.openexchange.templating.path = @templatepath@
+com.openexchange.templating.assets.path = @templatepath@/assets/
+
+# Define which kind of templates should be trusted.
+# Possible values are server, user, true and false.
+com.openexchange.templating.trusted = server
+
+# Define whether users can use templating. This would involve 
+# applying templates located in the user's OXMF Templates folder.
+# If set to false, only server templates will be used.
+com.openexchange.templating.usertemplating = false

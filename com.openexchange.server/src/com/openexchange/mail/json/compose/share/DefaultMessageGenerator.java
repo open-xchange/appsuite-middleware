@@ -59,11 +59,11 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
@@ -72,8 +72,10 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
+import com.openexchange.java.UnsynchronizedStringWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -82,7 +84,10 @@ import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -93,8 +98,6 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.8.2
  */
 public class DefaultMessageGenerator implements MessageGenerator {
-
-    private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
 
     private static final DefaultMessageGenerator INSTANCE = new DefaultMessageGenerator();
 
@@ -188,6 +191,24 @@ public class DefaultMessageGenerator implements MessageGenerator {
      */
     protected boolean equalMessagesByLocale() {
         return true;
+    }
+
+    /**
+     * Checks whether the prefix is supposed to be loaded from template.
+     *
+     * @return <code>true</code> to load from template; otherwise <code>false</code> to generate the prefix manually
+     */
+    protected boolean loadPrefixFromTemplate() {
+        return true;
+    }
+
+    /**
+     * Gets the name of the template to use (provided that {@link #loadPrefixFromTemplate()} returned <code>true</code>).
+     *
+     * @return The template name
+     */
+    protected String getTemplateName() {
+        return "notify.share.compose.prefix.html.tmpl";
     }
 
     @Override
@@ -344,21 +365,18 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Alter text content to include share reference
         TextBodyMailPart textPart = composeContext.getTextPart().copy();
         textPart.setPlainText(null);
-        StringHelper stringHelper = StringHelper.valueOf(locale);
 
         {
             String text = (String) textPart.getContent();
             StringBuilder textBuilder = new StringBuilder(text.length() + 512);
-            textBuilder.append(htmlFormat(stringHelper.getString(ShareComposeStrings.SHARED_ATTACHMENTS_PREFIX))).append("<br>");
-            appendLink(link, textBuilder);
-            if (password != null) {
-                textBuilder.append(htmlFormat(stringHelper.getString(ShareComposeStrings.SHARED_ATTACHMENTS_PASSWORD))).append(": ").append(htmlFormat(password)).append("<br>");
-            }
-            if (elapsedDate != null) {
-                textBuilder.append(htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION)).replaceFirst(DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br>");
-            }
-            textBuilder.append("<br>");
+
+            // Append the prefix that notifies about to access the message's attachment via provided share link
+            textBuilder.append(generatePrefix(locale, link, password, elapsedDate, loadPrefixFromTemplate()));
+
+            // Append actual text
             textBuilder.append(text);
+
+            // Replace text with composed one
             textPart.setText(textBuilder.toString());
             composedMessage.setBodyPart(textPart);
         }
@@ -378,28 +396,12 @@ public class DefaultMessageGenerator implements MessageGenerator {
     }
 
     /**
-     * Appends specified link to given <code>StringBuilder</code> instance.
+     * Gets the {@link InternetAddress} instance for specified recipient.
      *
-     * @param composeLink The link to append
-     * @param textBuilder The <code>StringBuilder</code> to append to
+     * @param recipient The recipient
+     * @return The recipient's address
+     * @throws OXException If address cannot be generated
      */
-    protected void appendLink(ShareComposeLink composeLink, StringBuilder textBuilder) {
-        String link = composeLink.getLink();
-        final char quot;
-        if (link.indexOf('"') < 0) {
-            quot = '"';
-        } else {
-            quot = '\'';
-        }
-        textBuilder.append("<a href=").append(quot).append(link).append(quot).append('>');
-        final String name = composeLink.getName();
-        if (null != name && name.length() > 0) {
-            textBuilder.append(name).append("</a><br>");
-        } else {
-            textBuilder.append(link).append("</a><br>");
-        }
-    } // End of appendLinks()
-
     private InternetAddress addressFor(Recipient recipient) throws OXException {
         try {
             String personal = recipient.getPersonal();
@@ -409,6 +411,151 @@ public class DefaultMessageGenerator implements MessageGenerator {
         } catch (UnsupportedEncodingException e) {
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Generates the prefix to insert.
+     *
+     * @param locale The locale to use for translation
+     * @param link The link
+     * @param password The optional password or <code>null</code>
+     * @param elapsedDate The optional expiration date or <code>null</code>
+     * @param fromTemplate <code>true</code> to generate the prefix by loading from template; otherwise <code>false</code>
+     * @return The generated prefix
+     * @throws OXException If generating prefix from template fails
+     */
+    protected String generatePrefix(Locale locale, ShareComposeLink link, String password, Date elapsedDate, boolean fromTemplate) throws OXException {
+        return fromTemplate ? loadPrefixFromTemplate(locale, link, password, elapsedDate) : generatePrefixPlain(locale, link, password, elapsedDate);
+    }
+
+    /**
+     * Generates the prefix to insert.
+     *
+     * @param locale The locale to use for translation
+     * @param link The link
+     * @param password The optional password or <code>null</code>
+     * @param elapsedDate The optional expiration date or <code>null</code>
+     * @return The generated prefix
+     * @throws OXException If generating prefix from template fails
+     */
+    protected String generatePrefixPlain(Locale locale, ShareComposeLink link, String password, Date elapsedDate) throws OXException {
+        TranslatorFactory translatorFactory = MessageGenerators.getTranslatorFactory();
+        if (null == translatorFactory) {
+            throw ServiceExceptionCode.absentService(TranslatorFactory.class);
+        }
+
+        Translator translator = translatorFactory.translatorFor(locale);
+        StringBuilder textBuilder = new StringBuilder(512);
+
+        {
+            String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PREFIX);
+            translated = String.format(translated, buildLink(link));
+            textBuilder.append(htmlFormat(translated)).append("<br>");
+        }
+
+        if (password != null) {
+            String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PASSWORD);
+            translated = String.format(translated, password);
+            textBuilder.append(htmlFormat(translated)).append("<br>");
+        }
+
+        if (elapsedDate != null) {
+            String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION);
+            translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate));
+            textBuilder.append(htmlFormat(translated)).append("<br>");
+        }
+
+        // Extra line-break
+        textBuilder.append("<br>");
+
+        return textBuilder.toString();
+    }
+
+    /** The template place-holder for the share link */
+    protected static final String VARIABLE_LINK = "link";
+
+    /** The template place-holder for the password */
+    protected static final String VARIABLE_PASSWORD = "password";
+
+    /** The template place-holder for the expiration date */
+    protected static final String VARIABLE_EXPIRATION = "expiration";
+
+    /**
+     * Loads the prefix to insert from a template.
+     *
+     * @param locale The locale to use for translation
+     * @param link The link
+     * @param password The optional password or <code>null</code>
+     * @param elapsedDate The optional expiration date or <code>null</code>
+     * @return The loaded prefix
+     * @throws OXException If loading prefix from template fails
+     */
+    protected String loadPrefixFromTemplate(Locale locale, ShareComposeLink link, String password, Date elapsedDate) throws OXException {
+        TemplateService templateService = MessageGenerators.getTemplateService();
+        if (null == templateService) {
+            throw ServiceExceptionCode.absentService(TemplateService.class);
+        }
+
+        TranslatorFactory translatorFactory = MessageGenerators.getTranslatorFactory();
+        if (null == translatorFactory) {
+            throw ServiceExceptionCode.absentService(TranslatorFactory.class);
+        }
+
+        Translator translator = translatorFactory.translatorFor(locale);
+        Map<String, Object> vars = new HashMap<String, Object>(4);
+
+        // link
+        {
+            String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PREFIX);
+            translated = String.format(translated, buildLink(link));
+            vars.put(VARIABLE_LINK, translated);
+        }
+
+        // password
+        if (null != password) {
+            String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PASSWORD);
+            translated = String.format(translated, password);
+            vars.put(VARIABLE_PASSWORD, translated);
+        }
+
+        // expiration
+        if (null != elapsedDate) {
+            String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION);
+            translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate));
+            vars.put(VARIABLE_EXPIRATION, translated);
+        }
+
+        return compileTemplate(getTemplateName(), vars, templateService);
+    }
+
+    /**
+     * Helper method to compile a given template file into conform HTML.
+     *
+     * @param templateFile Name of the template file
+     * @param vars The template root object as map, containing all necessary variables
+     * @param templateService The template service
+     */
+    protected String compileTemplate(String templateFile, Map<String, Object> vars, TemplateService templateService) throws OXException {
+        OXTemplate template = templateService.loadTemplate(templateFile);
+        UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(2048);
+        template.process(vars, writer);
+        return writer.toString();
+    }
+
+    /**
+     * Builds specified link.
+     *
+     * @param composeLink The link to build from
+     */
+    protected String buildLink(ShareComposeLink composeLink) {
+        String link = composeLink.getLink();
+        char quot = link.indexOf('"') < 0 ? '"' : '\'';
+        StringBuilder linkBuilder = new StringBuilder(128);
+        linkBuilder.append("<a href=").append(quot).append(link).append(quot).append('>');
+        String name = composeLink.getName();
+        linkBuilder.append((null != name && name.length() > 0) ? name : link);
+        linkBuilder.append("</a>");
+        return linkBuilder.toString();
     }
 
     /**

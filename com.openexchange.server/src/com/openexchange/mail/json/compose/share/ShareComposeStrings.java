@@ -79,14 +79,14 @@ public class ShareComposeStrings implements LocalizableStrings {
 
     // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
     // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link:";
+    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link %1$s";
 
     // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
     // Indicates the elapsed date for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on #DATE#";
+    public static final String SHARED_ATTACHMENTS_EXPIRATION = "The link will expire on %1$s";
 
     // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
     // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments";
+    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments %1$s";
 
 }
