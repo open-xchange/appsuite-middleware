@@ -7,18 +7,18 @@ Bundle-Activator: com.openexchange.serverconfig.osgi.ServerConfigActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.capabilities,
+ com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.conversion.simple,
+ com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
- org.ho.yaml,
- org.osgi.framework;version="1.3.0",
- org.osgi.util.tracker;version="1.5.1",
- org.slf4j;version="1.7.5"
-Bundle-ActivationPolicy: lazy
-Require-Bundle: org.json,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.version,
- com.openexchange.global,
- com.openexchange.configread
+ org.ho.yaml,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.serverconfig

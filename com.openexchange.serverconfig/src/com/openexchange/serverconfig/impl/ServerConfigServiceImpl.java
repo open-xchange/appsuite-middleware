@@ -59,7 +59,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -72,7 +71,6 @@ import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -221,10 +219,10 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
     /**
      * Every configuration object from the as-config.yml should have a host or hostRegex entry that specifies if a configuration object
-     * should be used for an incoming request. If either of these matches the host given in the {@link AJAXRequestData} the configuration
+     * should be used for an incoming request. If either of these matches the host given in the {@code AJAXRequestData} the configuration
      * objects looks applicable to us.
      * This check can additionally be expanded by your own {@link ServerConfigMatcherServices} that might apply other criteria to decide if
-     * a configuration object is applicable for the combination of {@link AJAXRequestData} and {@link ServerSession}.
+     * a configuration object is applicable for the combination of {@code AJAXRequestData} and {@code ServerSession}.
      *
      * @param possibleConfiguration A possible configuration Object that should be checked
      * @param requestData The current request data
