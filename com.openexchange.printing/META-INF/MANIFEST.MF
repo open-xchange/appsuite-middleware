@@ -7,25 +7,31 @@ Bundle-Activator: com.openexchange.printing.osgi.PrintingActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax.osgi,
+ com.openexchange.ajax.printing,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.calendar.itip,
  com.openexchange.exception,
+ com.openexchange.groupware.contact.helpers,
+ com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.settings,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.html,
  com.openexchange.i18n,
+ com.openexchange.i18n.tools,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.resource,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.templating,
+ com.openexchange.tools.servlet,
  com.openexchange.tools.session,
+ com.openexchange.user,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.openexchange.server
