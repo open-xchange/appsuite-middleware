@@ -82,7 +82,6 @@ public class TransportAccountImpl implements TransportAccount {
     private int id = -1;
     private String name;
     private String personal;
-    private Map<String, String> properties;
     private String replyTo;
     private String sentAddress;
     private TransportAuth transportAuth;
@@ -235,11 +234,6 @@ public class TransportAccountImpl implements TransportAccount {
      */
     public void setReplyTo(final String replyTo) {
         this.replyTo = replyTo;
-        if (com.openexchange.java.Strings.isEmpty(replyTo)) {
-            properties.remove("replyto");
-        } else {
-            properties.put("replyto", replyTo);
-        }
     }
 
     /**
