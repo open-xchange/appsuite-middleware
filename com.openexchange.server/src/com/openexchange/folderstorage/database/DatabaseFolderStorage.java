@@ -1891,7 +1891,10 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         FolderCacheManager cacheManager = FolderCacheManager.getInstance();
         if (Boolean.TRUE.equals(ignoreCache)) {
             FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
-            cacheManager.putFolderObject(fo, ctx, true, null);
+            Boolean do_not_cache = storageParameters.getParameter(FolderType.GLOBAL, "DO_NOT_CACHE");
+            if (null == do_not_cache || !do_not_cache) {
+                cacheManager.putFolderObject(fo, ctx, true, null);
+            }
             return fo;
         }
 
