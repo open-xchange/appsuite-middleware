@@ -1,6 +1,6 @@
 ---
 title: Column identifiers
-icon: fa-linux
+classes: no-affix
 ---
 Below you find the identifiers for object fields of certain data objects (models) that can be used in the `columns` parameter of a request to return
 specific field data of single or multiple objects.

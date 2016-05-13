@@ -1,6 +1,6 @@
 ---
 title: HTTP API
-icon: fa-linux
+classes: no-affix
 ---
 # OX HTTP API
 

@@ -1,6 +1,6 @@
 ---
 title: Mail filter
-icon: fa-linux
+classes: no-affix
 ---
 # Possible tests
 | Name | Description |

@@ -1,6 +1,6 @@
 ---
 title: Advanced Search
-icon: fa-linux
+classes: no-affix
 ---
 This section describes the syntax of the JSON object representing the search term. The search term is embedded
 in a JSON object with the field `filter`, like `{"filter":[search term]}`. In general the structure of a search

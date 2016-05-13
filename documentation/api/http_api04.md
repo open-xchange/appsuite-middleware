@@ -1,6 +1,6 @@
 ---
 title: Flags and bitmasks
-icon: fa-linux
+classes: no-affix
 ---
 # Permission flags
 | Bits | Value | Bits | Value |

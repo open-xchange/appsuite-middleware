@@ -1,6 +1,6 @@
 ---
 title: API Definitions
-icon: fa-linux
+classes: no-affix
 ---
 # AcquireTokenResponse
 |Name|Description|Required|Schema|Default|

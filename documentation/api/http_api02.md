@@ -1,6 +1,6 @@
 ---
 title: Introduction
-icon: fa-linux
+classes: no-affix
 ---
 # Low level protocol
 The client accesses the server through HTTP GET, POST and PUT requests. HTTP cookies are used for authentication and must therefore be processed and sent back by the client as specified by [RFC 6265](http://tools.ietf.org/html/rfc6265). The HTTP API is accessible at URIs starting with `/ajax`. Each server module has a unique name and its own sub-namespace with that name below `/ajax`, e. g. all access to the module "tasks" is via URIs starting with `/ajax/tasks`.

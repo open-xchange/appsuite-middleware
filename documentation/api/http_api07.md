@@ -1,6 +1,6 @@
 ---
 title: API Paths
-icon: fa-linux
+classes: no-affix
 ---
 # Gets all mail accounts (**available since v6.12**).
 ```
