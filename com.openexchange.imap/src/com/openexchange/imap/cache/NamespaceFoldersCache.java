@@ -51,7 +51,6 @@ package com.openexchange.imap.cache;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.Arrays;
-import java.util.concurrent.locks.Lock;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
@@ -60,7 +59,6 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
-import com.openexchange.session.Sessions;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -98,28 +96,19 @@ public final class NamespaceFoldersCache {
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
-            Lock lock = Sessions.optLock(session);
-            lock.lock();
-            try {
-                mailCache.get(entry);
-                if (load && (null == entry.getValue())) {
-                    Folder[] pns = imapStore.getPersonalNamespaces();
-                    if ((pns == null) || (pns.length == 0)) {
-                        entry.setValue(EMPTY_ARR);
-                    } else {
-                        final String[] fullnames = new String[pns.length];
-                        for (int i = 0; i < pns.length; i++) {
-                            final Folder namespaceFolder = pns[i];
-                            fullnames[i] = namespaceFolder.getFullName();
-                        }
-                        Arrays.sort(fullnames);
-                        entry.setValue(fullnames);
-                    }
-                    mailCache.put(entry);
+            Folder[] pns = imapStore.getPersonalNamespaces();
+            if ((pns == null) || (pns.length == 0)) {
+                entry.setValue(EMPTY_ARR);
+            } else {
+                final String[] fullnames = new String[pns.length];
+                for (int i = 0; i < pns.length; i++) {
+                    final Folder namespaceFolder = pns[i];
+                    fullnames[i] = namespaceFolder.getFullName();
                 }
-            } finally {
-                lock.unlock();
+                Arrays.sort(fullnames);
+                entry.setValue(fullnames);
             }
+            mailCache.put(entry);
         }
         return entry.getValue();
     }
@@ -154,27 +143,18 @@ public final class NamespaceFoldersCache {
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
-            Lock lock = Sessions.optLock(session);
-            lock.lock();
-            try {
-                mailCache.get(entry);
-                if (load && (null == entry.getValue())) {
-                    Folder[] uns = imapStore.getUserNamespaces(null);
-                    if ((uns == null) || (uns.length == 0)) {
-                        entry.setValue(EMPTY_ARR);
-                    } else {
-                        final String[] fullnames = new String[uns.length];
-                        for (int i = 0; i < uns.length; i++) {
-                            fullnames[i] = uns[i].getFullName();
-                        }
-                        Arrays.sort(fullnames);
-                        entry.setValue(fullnames);
-                    }
-                    mailCache.put(entry);
+            Folder[] uns = imapStore.getUserNamespaces(null);
+            if ((uns == null) || (uns.length == 0)) {
+                entry.setValue(EMPTY_ARR);
+            } else {
+                final String[] fullnames = new String[uns.length];
+                for (int i = 0; i < uns.length; i++) {
+                    fullnames[i] = uns[i].getFullName();
                 }
-            } finally {
-                lock.unlock();
+                Arrays.sort(fullnames);
+                entry.setValue(fullnames);
             }
+            mailCache.put(entry);
         }
         return entry.getValue();
     }
@@ -229,27 +209,18 @@ public final class NamespaceFoldersCache {
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
-            Lock lock = Sessions.optLock(session);
-            lock.lock();
-            try {
-                mailCache.get(entry);
-                if (load && (null == entry.getValue())) {
-                    Folder[] sns = imapStore.getSharedNamespaces();
-                    if ((sns == null) || (sns.length == 0)) {
-                        entry.setValue(EMPTY_ARR);
-                    } else {
-                        final String[] fullnames = new String[sns.length];
-                        for (int i = 0; i < sns.length; i++) {
-                            fullnames[i] = sns[i].getFullName();
-                        }
-                        Arrays.sort(fullnames);
-                        entry.setValue(fullnames);
-                    }
-                    mailCache.put(entry);
+            Folder[] sns = imapStore.getSharedNamespaces();
+            if ((sns == null) || (sns.length == 0)) {
+                entry.setValue(EMPTY_ARR);
+            } else {
+                final String[] fullnames = new String[sns.length];
+                for (int i = 0; i < sns.length; i++) {
+                    fullnames[i] = sns[i].getFullName();
                 }
-            } finally {
-                lock.unlock();
+                Arrays.sort(fullnames);
+                entry.setValue(fullnames);
             }
+            mailCache.put(entry);
         }
         return entry.getValue();
     }
