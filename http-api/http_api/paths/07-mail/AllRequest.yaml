@@ -35,7 +35,7 @@
         required: false
       - in: query
         name: filter
-        type: String
+        type: string
         description: The category id to filter for. If set to "general" all mails which does not belong to any other category are retrieved.
         required: false
     responses:

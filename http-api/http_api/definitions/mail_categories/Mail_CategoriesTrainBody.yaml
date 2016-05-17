@@ -4,4 +4,4 @@ properties:
     type: array
     description: An array of email addresses
     items:
-      type: String
+      type: string
