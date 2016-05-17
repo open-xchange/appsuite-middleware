@@ -49,7 +49,6 @@
 
 package com.openexchange.imap.cache;
 
-import java.util.concurrent.locks.Lock;
 import javax.mail.MessagingException;
 
 import com.openexchange.caching.CacheKey;
@@ -58,11 +57,8 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
-import com.openexchange.session.Sessions;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
-import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * {@link RightsCache}
@@ -84,31 +80,22 @@ public final class RightsCache {
      * @param f The IMAP folder
      * @param load Whether <code>MYRIGHTS</code> command should be invoked if no cache entry present or not
      * @param session The session providing the session-bound cache
-     * @param accontId The account ID
+     * @param accountId The account ID
      * @return The cached rights or <code>null</code>
      * @throws MessagingException If <code>MYRIGHTS</code> command fails
      */
-    public static Rights getCachedRights(final IMAPFolder f, final boolean load, final Session session, final int accontId) throws MessagingException {
+    public static Rights getCachedRights(final IMAPFolder f, final boolean load, final Session session, final int accountId) throws MessagingException {
         final RightsCacheEntry entry = new RightsCacheEntry(f.getFullName());
-        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accontId);
+        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
-            Lock lock = Sessions.optLock(session);
-            lock.lock();
             try {
-                mailCache.get(entry);
-                if (load && (null == entry.getValue())) {
-                    try {
-                        entry.setValue(f.myRights());
-                    } catch (final MessagingException e) {
-                        // Hmm...
-                        throw e;
-                    }
-                    mailCache.put(entry);
-                }
-            } finally {
-                lock.unlock();
+                entry.setValue(f.myRights());
+            } catch (final MessagingException e) {
+                // Hmm...
+                throw e;
             }
+            mailCache.put(entry);
         }
         return entry.getValue();
     }
