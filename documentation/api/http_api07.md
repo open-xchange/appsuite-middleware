@@ -904,6 +904,37 @@ filled (see [Error handling](#error-handling)).
 
 * capabilities
 
+# Gets data of a configuration node.
+```
+GET /config/{path}
+```
+
+## Description
+
+The configuration is stored in a tree. Each node of the tree has a name and a value.
+The values of leaf nodes are strings which store the actual configuration data. The
+values of inner nodes are defined recursively as objects with one field for each child node.
+The name and the value of each field is the name and the value of the corresponding child
+node, respectively.
+
+
+## Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|PathParameter|path|The path to the node.|true|enum (gui, fastgui, context_id, cookielifetime, identifier, contact_id, language, timezone, availableTimeZones, calendarnotification, tasknotification, reloadTimes, serverVersion, currentTime, maxUploadIdleTimeout, search, folder, folder/tasks, folder/calendar, folder/contacts, folder/infostore, folder/eas, mail, mail/addresses, mail/defaultaddress, mail/sendaddress, mail/folder, mail/folder/inbox, mail/folder/drafts, mail/folder/trash, mail/folder/spam, mail/folder/sent, mail/htmlinline, mail/colorquote, mail/emoticons, mail/harddelete, mail/inlineforward, mail/vcard, mail/notifyonreadack, mail/msgpreview, mail/ignorereplytext, mail/nocopytosent, mail/spambutton, participants, participants/autoSearch, participants/maximumNumberParticipants, participants/showWithoutEmail, participants/showDialog, availableModules, minimumSearchCharacters, modules, modules/portal, modules/portal/gui, modules/portal/module, modules/mail, modules/mail/addresses, modules/mail/appendmailtext, modules/mail/allowhtmlimages, modules/mailcolorquoted, modules/mail/contactCollectFolder, modules/mail/contactCollectEnabled, modules/mail/contactCollectOnMailAccess, modules/mail/contactCollectOnMailTransport, modules/mail/defaultaddress, modules/mail/deletemail, modules/mail/emoticons, modules/mail/defaultFolder, modules/mail/defaultFolder/drafts, modules/mail/defaultFolder/inbox, modules/mail/defaultFolder/sent, modules/mail/defaultFolder/spam, modules/mail/defaultFolder/trash, modules/mail/forwardmessage, modules/mail/gui, modules/mail/inlineattachments, modules/mail/linewrap, modules/mail/module, modules/mail/phishingheaders, modules/mail/replyallcc, modules/mail/sendaddress, modules/mail/spambutton, modules/mail/vcard, modules/calendar, modules/calendar/calendar_conflict, modules/calendar/calendar_freebusy, modules/calendar/calendar_teamview, modules/calendar/gui, modules/calendar/module, modules/calendar/notifyNewModifiedDeleted, modules/calendar/notifyAcceptedDeclinedAsCreator, modules/calendar/notifyAcceptedDeclinedAsParticipant, modules/calendar/defaultStatusPrivate, modules/calendar/defaultStatusPublic, modules/contacts, modules/contacts/gui, modules/contacts/mailAddressAutoSearch, modules/contacts/module, modules/contacts/singleFolderSearch, modules/contacts/characterSearch, modules/contacts/allFoldersForAutoComplete, modules/tasks, modules/tasks/gui, modules/tasks/module, modules/tasks/delegate_tasks, modules/tasks/notifyNewModifiedDeleted, modules/tasks/notifyAcceptedDeclinedAsCreator, modules/tasks/notifyAcceptedDeclinedAsParticipant, modules/infostore, modules/infostore/gui, modules/infostore/folder, modules/infostore/folder/trash, modules/infostore/folder/pictures, modules/infostore/folder/documents, modules/infostore/folder/music, modules/infostore/folder/videos, modules/infostore/folder/templates, modules/infostore/module, modules/interfaces, modules/interfaces/ical, modules/interfaces/vcard, modules/interfaces/syncml, modules/folder, modules/folder/gui, modules/folder/public_folders, modules/folder/read_create_shared_folders, modules/folder/tree, modules/com.openexchange.extras, modules/com.openexchange.extras/module, modules/com.openexchange.user.passwordchange, modules/com.openexchange.user.passwordchange/module, modules/com.openexchange.user.personaldata, modules/com.openexchange.user.personaldata/module, modules/com.openexchange.group, modules/com.openexchange.group/enabled, modules/com.openexchange.resource, modules/com.openexchange.resource/enabled, modules/com.openexchange.publish, modules/com.openexchange.publish/enabled, modules/com.openexchange.subscribe, modules/com.openexchange.subscribe/enabled, modules/olox20, modules/olox20/active, modules/olox20/module, modules/com.openexchange.oxupdater, modules/com.openexchange.oxupdater/module, modules/com.openexchange.oxupdater/active, modules/com.openexchange.passwordchange, modules/com.openexchange.passwordchange/showStrength, modules/com.openexchange.passwordchange/minLength, modules/com.openexchange.passwordchange/maxLength, modules/com.openexchange.passwordchange/regexp, modules/com.openexchange.passwordchange/special)||
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+
+
+## Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|Value of the node specified by path. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).|ConfigResponse|
+
+
+## Tags
+
+* config
+
 # Sets the value of a configuration node.
 ```
 PUT /config/{path}
@@ -935,37 +966,6 @@ node, respectively.
 ## Consumes
 
 * application/json
-
-## Tags
-
-* config
-
-# Gets data of a configuration node.
-```
-GET /config/{path}
-```
-
-## Description
-
-The configuration is stored in a tree. Each node of the tree has a name and a value.
-The values of leaf nodes are strings which store the actual configuration data. The
-values of inner nodes are defined recursively as objects with one field for each child node.
-The name and the value of each field is the name and the value of the corresponding child
-node, respectively.
-
-
-## Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|PathParameter|path|The path to the node.|true|enum (gui, fastgui, context_id, cookielifetime, identifier, contact_id, language, timezone, availableTimeZones, calendarnotification, tasknotification, reloadTimes, serverVersion, currentTime, maxUploadIdleTimeout, search, folder, folder/tasks, folder/calendar, folder/contacts, folder/infostore, folder/eas, mail, mail/addresses, mail/defaultaddress, mail/sendaddress, mail/folder, mail/folder/inbox, mail/folder/drafts, mail/folder/trash, mail/folder/spam, mail/folder/sent, mail/htmlinline, mail/colorquote, mail/emoticons, mail/harddelete, mail/inlineforward, mail/vcard, mail/notifyonreadack, mail/msgpreview, mail/ignorereplytext, mail/nocopytosent, mail/spambutton, participants, participants/autoSearch, participants/maximumNumberParticipants, participants/showWithoutEmail, participants/showDialog, availableModules, minimumSearchCharacters, modules, modules/portal, modules/portal/gui, modules/portal/module, modules/mail, modules/mail/addresses, modules/mail/appendmailtext, modules/mail/allowhtmlimages, modules/mailcolorquoted, modules/mail/contactCollectFolder, modules/mail/contactCollectEnabled, modules/mail/contactCollectOnMailAccess, modules/mail/contactCollectOnMailTransport, modules/mail/defaultaddress, modules/mail/deletemail, modules/mail/emoticons, modules/mail/defaultFolder, modules/mail/defaultFolder/drafts, modules/mail/defaultFolder/inbox, modules/mail/defaultFolder/sent, modules/mail/defaultFolder/spam, modules/mail/defaultFolder/trash, modules/mail/forwardmessage, modules/mail/gui, modules/mail/inlineattachments, modules/mail/linewrap, modules/mail/module, modules/mail/phishingheaders, modules/mail/replyallcc, modules/mail/sendaddress, modules/mail/spambutton, modules/mail/vcard, modules/calendar, modules/calendar/calendar_conflict, modules/calendar/calendar_freebusy, modules/calendar/calendar_teamview, modules/calendar/gui, modules/calendar/module, modules/calendar/notifyNewModifiedDeleted, modules/calendar/notifyAcceptedDeclinedAsCreator, modules/calendar/notifyAcceptedDeclinedAsParticipant, modules/calendar/defaultStatusPrivate, modules/calendar/defaultStatusPublic, modules/contacts, modules/contacts/gui, modules/contacts/mailAddressAutoSearch, modules/contacts/module, modules/contacts/singleFolderSearch, modules/contacts/characterSearch, modules/contacts/allFoldersForAutoComplete, modules/tasks, modules/tasks/gui, modules/tasks/module, modules/tasks/delegate_tasks, modules/tasks/notifyNewModifiedDeleted, modules/tasks/notifyAcceptedDeclinedAsCreator, modules/tasks/notifyAcceptedDeclinedAsParticipant, modules/infostore, modules/infostore/gui, modules/infostore/folder, modules/infostore/folder/trash, modules/infostore/folder/pictures, modules/infostore/folder/documents, modules/infostore/folder/music, modules/infostore/folder/videos, modules/infostore/folder/templates, modules/infostore/module, modules/interfaces, modules/interfaces/ical, modules/interfaces/vcard, modules/interfaces/syncml, modules/folder, modules/folder/gui, modules/folder/public_folders, modules/folder/read_create_shared_folders, modules/folder/tree, modules/com.openexchange.extras, modules/com.openexchange.extras/module, modules/com.openexchange.user.passwordchange, modules/com.openexchange.user.passwordchange/module, modules/com.openexchange.user.personaldata, modules/com.openexchange.user.personaldata/module, modules/com.openexchange.group, modules/com.openexchange.group/enabled, modules/com.openexchange.resource, modules/com.openexchange.resource/enabled, modules/com.openexchange.publish, modules/com.openexchange.publish/enabled, modules/com.openexchange.subscribe, modules/com.openexchange.subscribe/enabled, modules/olox20, modules/olox20/active, modules/olox20/module, modules/com.openexchange.oxupdater, modules/com.openexchange.oxupdater/module, modules/com.openexchange.oxupdater/active, modules/com.openexchange.passwordchange, modules/com.openexchange.passwordchange/showStrength, modules/com.openexchange.passwordchange/minLength, modules/com.openexchange.passwordchange/maxLength, modules/com.openexchange.passwordchange/regexp, modules/com.openexchange.passwordchange/special)||
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-
-
-## Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|Value of the node specified by path. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).|ConfigResponse|
-
 
 ## Tags
 
@@ -4613,7 +4613,7 @@ GET /mail?action=all
 |QueryParameter|left_hand_limit|A positive integer number to specify the "left-hand" limit of the range to return.|false|integer||
 |QueryParameter|right_hand_limit|A positive integer number to specify the "right-hand" limit of the range to return.|false|integer||
 |QueryParameter|limit|A positive integer number to specify how many items shall be returned according to given sorting; overrides `left_hand_limit`/`right_hand_limit` parameters and is equal to `left_hand_limit=0` and `right_hand_limit=<limit>`.|false|integer||
-|QueryParameter|filter|The category id to filter for. If set to "general" all mails which does not belong to any other category are retrieved.|false|||
+|QueryParameter|filter|The category id to filter for. If set to "general" all mails which does not belong to any other category are retrieved.|false|string||
 
 
 ## Responses
