@@ -54,6 +54,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,6 +65,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -78,6 +80,7 @@ import javax.mail.Quota;
 import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.event.FolderEvent;
+import org.apache.commons.lang.RandomStringUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
@@ -235,6 +238,17 @@ public final class IMAPCommandsCollection {
             }
         }));
     }
+    
+    private static final Random RANDOM = new SecureRandom();
+
+    /**
+     * Gets a random string to use for a mailbox probe.
+     * 
+     * @return The random string
+     */
+    static String getRandomProbe() {
+        return RandomStringUtils.random(32, 97, 122, false, false, null, RANDOM);
+    }
 
     /**
      * Checks if IMAP root folder allows subfolder creation.
@@ -250,23 +264,7 @@ public final class IMAPCommandsCollection {
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 // Ensure a unique name is used to probe with
-                StringBuilder sb = new StringBuilder(48);
-                String fname;
-                {
-                    sb.append("probe").append(UUIDs.getUnformattedString(UUID.randomUUID()));
-                    int olen = sb.length();
-                    int count = 0;
-                    boolean exists = true;
-                    while (exists) {
-                        ListInfo[] li = p.list("", sb.toString());
-                        exists = null != li && li.length > 0;
-                        if (exists) {
-                            sb.setLength(olen);
-                            sb.append(++count);
-                        }
-                    }
-                    fname = sb.toString();
-                }
+                String fname = getRandomProbe();
 
                 // Encode the mailbox name as per RFC2060
                 String mboxName = prepareStringArgument(fname);
@@ -277,10 +275,10 @@ public final class IMAPCommandsCollection {
                     LOG.debug("Trying to probe IMAP server {} for root subfolder capability with mbox name: {}", p.getHost(), mboxName);
                 }
 
+                StringBuilder sb = new StringBuilder(48);
                 boolean created = false;
                 try {
                     // Perform CREATE command
-                    sb.setLength(0);
                     Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
                     Response response = r[r.length - 1];
                     if (response.isOK()) {

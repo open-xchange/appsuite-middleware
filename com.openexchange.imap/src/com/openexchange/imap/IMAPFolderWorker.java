@@ -457,7 +457,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 // Check for equal folder
                 boolean isEqualFolder = isDefaultFolder ? ( 0 == imapFolderFullname.length()) : fullName.equals(imapFolderFullname);
 
-                IMAPCommandsCollection.forceNoopCommand(imapFolder);
+                // IMAPCommandsCollection.forceNoopCommand(imapFolder);
                 clearCache(imapFolder);
 
                 int mode = getMode(imapFolder);

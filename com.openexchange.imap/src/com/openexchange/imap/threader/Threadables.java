@@ -53,9 +53,7 @@ import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.getFetch
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.handleFetchRespone;
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import gnu.trove.TLongCollection;
 import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TLongHashSet;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +70,6 @@ import javax.mail.internet.InternetHeaders;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPMessageStorage;
 import com.openexchange.imap.IMAPServerInfo;
@@ -86,7 +83,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPools;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -302,13 +298,12 @@ public final class Threadables {
                     try {
                         final List<MailMessage> mails = new ArrayList<MailMessage>(messageCount);
                         final String fullName = imapFolder.getFullName();
-                        final char sep = imapFolder.getSeparator();
                         final String sFetch = "FETCH";
                         final String sInReplyTo = "In-Reply-To";
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName);
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);

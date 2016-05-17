@@ -316,7 +316,15 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private char getSeparator() throws MessagingException {
         if (null == separator) {
-            separator = Character.valueOf(imapStore.getDefaultFolder().getSeparator());
+            try {
+                separator = Character.valueOf(ListLsubCache.getSeparator(accountId, (DefaultFolder) imapStore.getDefaultFolder(), session, this.ignoreSubscriptions));
+            } catch (OXException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof MessagingException) {
+                    throw (MessagingException) cause;
+                }
+                throw (cause instanceof Exception) ? new MessagingException(cause.getMessage(), (Exception) cause) : new MessagingException(e.getMessage(), e);
+            }
         }
         return separator.charValue();
     }
@@ -2475,6 +2483,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
 
+            // Determine separator character
+            char separator = ListLsubCache.getSeparator(accountId, (DefaultFolder) imapStore.getDefaultFolder(), session, this.ignoreSubscriptions);
+            getSeparator(separator);
+            
             // Try NAMESPACE command
             boolean detectedByNamespace = false;
             String prefix = null;
@@ -2482,19 +2494,20 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 final String[] namespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
                 if (null == namespaces || 0 == namespaces.length) {
                     // No namespaces available
-                    String prefixByInferiors = prefixByInferiors();
+                    String prefixByInferiors = prefixByInferiors(separator);
                     LOG.info("IMAP server {} does not provide a personal namespace for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                     return prefixByInferiors;
                 }
                 prefix = namespaces[0];
                 detectedByNamespace = true;
             } catch (final MessagingException e) {
-                String prefixByInferiors = prefixByInferiors();
+                String prefixByInferiors = prefixByInferiors(separator);
                 LOG.info("NAMESPACE command failed for any reason on IMAP server {} for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 return prefixByInferiors;
             }
+            
             if (prefix.length() != 0) {
-                return new StringBuilder(prefix).append(((DefaultFolder) imapStore.getDefaultFolder()).getSeparator()).toString();
+                return new StringBuilder(prefix).append(separator).toString();
             }
 
             // The empty prefix so far; verify against root-folder capability
@@ -2505,7 +2518,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     // Strange... Since NAMESPACE tells to use root level, but IMAP server denies to create such folders.
                     LOG.warn("\n\n\tNAMESPACE from IMAP server {} indicates to use root level for login {}, but IMAP server denies to create such folders!\n", imapConfig.getServer(), imapConfig.getLogin());
                 }
-                return new StringBuilder(STR_INBOX).append(defaultFolder.getSeparator()).toString();
+                return new StringBuilder(STR_INBOX).append(separator).toString();
             }
 
             // Grant empty prefix as standard folder prefix
@@ -2517,11 +2530,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private String prefixByInferiors() throws OXException {
+    private String prefixByInferiors(char separator) throws OXException {
         try {
             final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
             if (!RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, defaultFolder) || MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
-                return new StringBuilder(STR_INBOX).append(defaultFolder.getSeparator()).toString();
+                return new StringBuilder(STR_INBOX).append(separator).toString();
             }
             return "";
         } catch (final MessagingException e) {

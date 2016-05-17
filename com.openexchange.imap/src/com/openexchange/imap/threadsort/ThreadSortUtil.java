@@ -227,7 +227,7 @@ public final class ThreadSortUtil {
      *
      * @return An array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
      */
-    public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator, final String threadResponse) {
+    public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final String threadResponse) {
         final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
         final StringBuilder sb = new StringBuilder(8);
         final int length = threadResponse.length();
@@ -239,7 +239,7 @@ public final class ThreadSortUtil {
                 c = threadResponse.charAt(i++);
             }
             if (sb.length() > 0) {
-                tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(sb.toString())));
+                tmp.add(new ExtendedMimeMessage(folderFullname, Integer.parseInt(sb.toString())));
                 sb.setLength(0);
             }
         }

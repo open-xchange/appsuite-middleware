@@ -864,7 +864,7 @@ public final class IMAPConversationWorker {
             if (!body) {
                 final Map<MessageInfo, MailMessage> mapping;
                 {
-                    TLongObjectMap<MailMessage> messages = new SimpleFetchIMAPCommand(imapMessageStorage.getImapFolder(), imapMessageStorage.getSeparator(imapMessageStorage.getImapFolder()), imapMessageStorage.getImapConfig().getImapCapabilities().hasIMAP4rev1(), MessageInfo.toSeqNums(messageIds).toArray(), fetchProfile, imapMessageStorage.getImapServerInfo()).doCommand();
+                    TLongObjectMap<MailMessage> messages = new SimpleFetchIMAPCommand(imapMessageStorage.getImapFolder(), imapMessageStorage.getImapConfig().getImapCapabilities().hasIMAP4rev1(), MessageInfo.toSeqNums(messageIds).toArray(), fetchProfile, imapMessageStorage.getImapServerInfo()).doCommand();
                     mapping = new HashMap<MessageInfo, MailMessage>(messages.size());
                     messages.forEachEntry(new TLongObjectProcedure<MailMessage>() {
 

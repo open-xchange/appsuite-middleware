@@ -182,8 +182,8 @@ public final class ListLsubCache {
         return new KeyedCache(new Key(userId, contextId));
     }
 
-    /** The default timeout for LIST/LSUB cache (5 minutes) */
-    private static final long DEFAULT_TIMEOUT = 300000;
+    /** The default timeout for LIST/LSUB cache (6 minutes) */
+    private static final long DEFAULT_TIMEOUT = 360000;
 
     private static final String INBOX = "INBOX";
 

@@ -260,26 +260,28 @@ public class IMAPProtocol extends Protocol {
      * If the response contains a CAPABILITY response code, extract
      * it and save the capabilities.
      */
-    protected void setCapabilities(final Response r) {
-        setCapabilities(r, true);
+    protected boolean setCapabilities(final Response r) {
+        return setCapabilities(r, true);
     }
 
     /**
      * If the response contains a CAPABILITY response code, extract
      * it and save the capabilities.
+     *
+     * @return <code>true</code> if response contained <code>"[CAPABILITY"</code>; otherwise <code>false</code>
      */
-    protected void setCapabilities(final Response r, final boolean reparse) {
+    protected boolean setCapabilities(final Response r, final boolean reparse) {
 	byte b;
 	while ((b = r.readByte()) > 0 && b != (byte)'[') {
         ;
     }
 	if (b == 0) {
-        return;
+        return false;
     }
 	String s;
 	s = r.readAtom();
 	if (!s.equalsIgnoreCase("CAPABILITY")) {
-        return;
+        return false;
     }
 	if (reparse) {
 	    capabilities = new HashMap<String, String>(10);
@@ -293,6 +295,7 @@ public class IMAPProtocol extends Protocol {
         }
 	}
 	parseCapabilities(r);
+	return true;
     }
 
     /**
@@ -576,7 +579,10 @@ public class IMAPProtocol extends Protocol {
             logger.fine("LOGIN command result: " + r[r.length - 1]);
         handleLoginResult(r[r.length-1]);
         // If the response includes a CAPABILITY response code, process it
-        setCapabilities(r[r.length - 1]);
+        boolean hasCaps = setCapabilities(r[r.length - 1]);
+        if (hasCaps) {
+            capabilities.remove("__PRELOGIN__");
+        }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
     } finally {
@@ -693,7 +699,10 @@ public class IMAPProtocol extends Protocol {
             logger.fine("AUTHENTICATE LOGIN command result: " + r);
         handleLoginResult(r);
         // If the response includes a CAPABILITY response code, process it
-        setCapabilities(r, false);
+        boolean hasCaps = setCapabilities(r, false);
+        if (hasCaps) {
+            capabilities.remove("__PRELOGIN__");
+        }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
     } finally {
@@ -807,7 +816,10 @@ public class IMAPProtocol extends Protocol {
             logger.fine("AUTHENTICATE PLAIN command result: " + r);
         handleLoginResult(r);
         // If the response includes a CAPABILITY response code, process it
-        setCapabilities(r, false);
+        boolean hasCaps = setCapabilities(r, false);
+        if (hasCaps) {
+            capabilities.remove("__PRELOGIN__");
+        }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
     } finally {
@@ -907,7 +919,10 @@ public class IMAPProtocol extends Protocol {
             logger.fine("AUTHENTICATE NTLM command result: " + r);
         handleLoginResult(r);
         // If the response includes a CAPABILITY response code, process it
-        setCapabilities(r, false);
+        boolean hasCaps = setCapabilities(r, false);
+        if (hasCaps) {
+            capabilities.remove("__PRELOGIN__");
+        }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
     } finally {
@@ -1007,7 +1022,10 @@ public class IMAPProtocol extends Protocol {
 	    logger.fine("AUTHENTICATE XOAUTH2 command result: " + r);
 	handleLoginResult(r);
 	// If the response includes a CAPABILITY response code, process it
-	setCapabilities(r);
+	boolean hasCaps = setCapabilities(r);
+    if (hasCaps) {
+        capabilities.remove("__PRELOGIN__");
+    }
 	// if we get this far without an exception, we're authenticated
 	authenticated = true;
     } finally {
@@ -2368,6 +2386,11 @@ public class IMAPProtocol extends Protocol {
     public Response[] fetch(MessageSet[] msgsets, String what)
 			throws ProtocolException {
 	return fetch(MessageSet.toString(msgsets), what, false);
+    }
+
+    public Response[] fetch(UIDSet[] uidsets, String what)
+        throws ProtocolException {
+    return fetch(UIDSet.toString(uidsets), what, true);
     }
 
     public Response[] fetch(int start, int end, String what)

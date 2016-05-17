@@ -1182,6 +1182,14 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * Prefetch attributes, based on the given FetchProfile.
      */
     public synchronized void fetch(Message[] msgs, FetchProfile fp, Collection<String> extensions)
+            throws MessagingException {
+        fetch(msgs, null, fp, extensions);
+    }
+
+    /**
+     * Prefetch attributes, based on the given FetchProfile.
+     */
+    public synchronized void fetch(Message[] msgs, long[] uids, FetchProfile fp, Collection<String> extensions)
 			throws MessagingException {
     // cache this information in case connection is closed and
 	// protocol is set to null
@@ -1297,40 +1305,54 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
         }
 	}
 
-	Utility.Condition condition =
-	    new IMAPMessage.FetchProfileCondition(fp, fitems);
-
         // Acquire the Folder's MessageCacheLock.
         synchronized(messageCacheLock) {
 
 	    // check again to make sure folder is still open
 	    checkOpened();
 
-	    // Apply the test, and get the sequence-number set for
-	    // the messages that need to be prefetched.
-	    MessageSet[] msgsets = Utility.toMessageSetSorted(msgs, condition);
-
-	    if (msgsets == null)
-		// We already have what we need.
-		return;
-
+	    // fetch either by Message[] or by long[]
 	    Response[] r = null;
-	    // to collect non-FETCH responses & unsolicited FETCH FLAG responses 
-	    List<Response> v = new ArrayList<Response>();
-	    try {
-		r = getProtocol().fetch(msgsets, command.toString());
-	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(this, cex.getMessage(), cex);
-	    } catch (CommandFailedException cfx) {
-		// Ignore these, as per RFC 2180
-	    } catch (ProtocolException pex) {
-		throw new MessagingException(pex.getMessage(), pex);
+	    if (null != msgs) {
+	        Utility.Condition condition =
+	            new IMAPMessage.FetchProfileCondition(fp, fitems);
+
+	        // Apply the test, and get the sequence-number set for
+	        // the messages that need to be prefetched.
+	        MessageSet[] msgsets = Utility.toMessageSetSorted(msgs, condition);
+
+	        if (msgsets == null)
+            // We already have what we need.
+            return;
+
+	        try {
+            r = getProtocol().fetch(msgsets, command.toString());
+            } catch (ConnectionException cex) {
+            throw new FolderClosedException(this, cex.getMessage(), cex);
+            } catch (CommandFailedException cfx) {
+            // Ignore these, as per RFC 2180
+            } catch (ProtocolException pex) {
+            throw new MessagingException(pex.getMessage(), pex);
+            }
+	    } else {
+	        try {
+            r = getProtocol().fetch(UIDSet.createUIDSets(uids), command.toString());
+            } catch (ConnectionException cex) {
+            throw new FolderClosedException(this, cex.getMessage(), cex);
+            } catch (CommandFailedException cfx) {
+            // Ignore these, as per RFC 2180
+            } catch (ProtocolException pex) {
+            throw new MessagingException(pex.getMessage(), pex);
+            }
 	    }
 
 	    if (r == null)
 		return;
 
-	    for (int i = 0; i < r.length; i++) {
+	    // to collect non-FETCH responses & unsolicited FETCH FLAG responses 
+	    List<Response> v = new ArrayList<Response>(r.length);
+
+	    for (int k = r.length, i = 0; k-- > 0; i++) {
 		if (r[i] == null)
 		    continue;
 		if (!(r[i] instanceof FetchResponse)) {
