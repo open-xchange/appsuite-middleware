@@ -47,62 +47,57 @@
  *
  */
 
-package com.openexchange.oauth.yahoo.internal;
+package com.openexchange.groupware.update.tasks;
 
-import java.util.Collection;
-import java.util.Collections;
-import org.scribe.builder.api.Api;
-import org.scribe.builder.api.YahooApi;
-import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link OAuthServiceMetaDataYahooImpl}
+ * {@link AddOAuthColumnToMailTransportTableTask} adds a oauth column to the user_transport_account table.
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
  */
-public class OAuthServiceMetaDataYahooImpl extends AbstractScribeAwareOAuthServiceMetaData {
+public class AddOAuthColumnToMailTransportTableTask extends UpdateTaskAdapter {
 
-    public OAuthServiceMetaDataYahooImpl(ServiceLookup services) {
-        super(services, "com.openexchange.oauth.yahoo", "Yahoo");
-    }
+    private static final String TABLE = "user_transport_account";
 
     @Override
-    public String modifyCallbackURL(String callbackUrl, String currentHost, Session session) {
-        DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        if (deferrer == null) {
-            return callbackUrl;
+    public void perform(PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection con = null;
+        try {
+            con = dbService.getForUpdateTask(contextId);
+            con.setAutoCommit(false);
+            Column column = new Column("oauth", "INT UNSIGNED");
+            Tools.addColumns(con, TABLE, new Column[] { column });
+            con.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            DBUtils.rollback(con);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            dbService.backForUpdateTask(contextId, con);
         }
-        return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
+
     }
 
     @Override
-    public API getAPI() {
-        return API.YAHOO;
+    public String[] getDependencies() {
+        return new String[] { com.openexchange.groupware.update.tasks.AddStartTLSColumnForMailAccountTablesTask.class.getName() };
     }
 
-    @Override
-    public Class<? extends Api> getScribeService() {
-        return YahooApi.class;
-    }
-
-    @Override
-    protected String getPropertyId() {
-        return "yahoo";
-    }
-
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public String getScope() {
-        return "mail-x";
-    }
 }

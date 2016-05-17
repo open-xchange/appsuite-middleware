@@ -93,7 +93,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
         // https://www.googleapis.com/auth/plus.me -> Know who you are on Google
         // https://www.googleapis.com/auth/userinfo.email -> View your email address
         // https://www.googleapis.com/auth/userinfo.profile -> View basic information about your account"
-        return "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/drive";
+        return "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/drive https://mail.google.com/";
     }
 
     @Override

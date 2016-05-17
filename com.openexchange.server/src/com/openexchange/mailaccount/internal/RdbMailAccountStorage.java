@@ -2282,7 +2282,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final String transportURL = transportAccount.generateTransportServerURL();
             if (null != transportURL) {
                 final String encryptedTransportPassword = encrypt(transportAccount.getTransportPassword(), session);
-                stmt = con.prepareStatement("UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ? WHERE cid = ? AND id = ? AND user = ?");
+                stmt = con.prepareStatement("UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ?, oauth = ? WHERE cid = ? AND id = ? AND user = ?");
                 int pos = 1;
                 stmt.setString(pos++, name);
                 stmt.setString(pos++, transportURL);
@@ -2300,6 +2300,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     stmt.setString(pos++, replyTo);
+                }
+                final Long oAuth = transportAccount.getOAuth();
+                if (null == oAuth) {
+                    stmt.setNull(pos++, Types.INTEGER);
+                } else {
+                    stmt.setLong(pos++, oAuth);
                 }
                 stmt.setLong(pos++, contextId);
                 stmt.setLong(pos++, accountId);
@@ -2334,7 +2340,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT name, id, url, login, password, personal, replyTo, starttls FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT name, id, url, login, password, personal, replyTo, starttls, oauth FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, accountId);
             stmt.setLong(3, userId);
@@ -2368,6 +2374,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     transportAccount.setReplyTo(replyTo);
                 }
                 transportAccount.setTransportStartTls(result.getBoolean(8));
+                Long oAuth = (Long) result.getObject(9);
+                transportAccount.setOAuth(oAuth);
                 /*
                  * Fill properties
                  */
@@ -2781,7 +2789,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             // Transport data
             String transportURL = transportAccount.generateTransportServerURL();
             if (null != transportURL) {
-                stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo, starttls) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo, starttls, oauth) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
                 // Encrypt password
                 String encryptedTransportPassword;
@@ -2820,6 +2828,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setString(pos++, replyTo);
                 }
                 stmt.setInt(pos++, transportAccount.isTransportStartTls() ? 1 : 0);
+
+                final Long oAuth = transportAccount.getOAuth();
+                if (null == oAuth) {
+                    stmt.setNull(pos++, Types.INTEGER);
+                } else {
+                    stmt.setLong(pos++, oAuth);
+                }
 
                 // Execute update
                 stmt.executeUpdate();

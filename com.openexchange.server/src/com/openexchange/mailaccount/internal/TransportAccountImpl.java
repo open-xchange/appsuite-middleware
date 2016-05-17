@@ -94,6 +94,7 @@ public class TransportAccountImpl implements TransportAccount {
     private String transportServer;
     private String transportServerUrl;
     private boolean transportStartTls;
+    private Long oAuth;
 
     @Override
     public String generateTransportServerURL() {
@@ -348,6 +349,20 @@ public class TransportAccountImpl implements TransportAccount {
      */
     public void setTransportStartTls(boolean startTLS) {
         this.transportStartTls = startTLS;
+    }
+
+    @Override
+    public Long getOAuthID() {
+        return oAuth;
+    }
+
+    public void setOAuth(Long oAuth) {
+        this.oAuth = oAuth;
+    }
+
+    @Override
+    public boolean isOAuthAble() {
+        return oAuth != null && oAuth >= 0;
     }
 
 }

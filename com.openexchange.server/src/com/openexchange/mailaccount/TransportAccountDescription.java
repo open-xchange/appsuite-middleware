@@ -69,6 +69,7 @@ public class TransportAccountDescription {
     private String personal;
     private String primaryAddress;
     private String replyTo;
+    private Long oAuth;
     private TransportAuth transportAuth;
     private int transportPort;
     private String transportProtocol;
@@ -76,6 +77,45 @@ public class TransportAccountDescription {
     private String transportServer;
     private boolean transportStartTls;
     private String transportUrl;
+
+
+    /**
+     * Initializes a new {@link TransportAccountDescription}.
+     * 
+     * @param id
+     * @param login
+     * @param name
+     * @param password
+     * @param personal
+     * @param primaryAddress
+     * @param replyTo
+     * @param oAuth
+     * @param transportAuth
+     * @param transportPort
+     * @param transportProtocol
+     * @param transportSecure
+     * @param transportServer
+     * @param transportStartTls
+     * @param transportUrl
+     */
+    public TransportAccountDescription(int id, String login, String name, String password, String personal, String primaryAddress, String replyTo, Long oAuth, TransportAuth transportAuth, int transportPort, String transportProtocol, boolean transportSecure, String transportServer, boolean transportStartTls, String transportUrl) {
+        super();
+        this.id = id;
+        this.login = login;
+        this.name = name;
+        this.password = password;
+        this.personal = personal;
+        this.primaryAddress = primaryAddress;
+        this.replyTo = replyTo;
+        this.oAuth = oAuth;
+        this.transportAuth = transportAuth;
+        this.transportPort = transportPort;
+        this.transportProtocol = transportProtocol;
+        this.transportSecure = transportSecure;
+        this.transportServer = transportServer;
+        this.transportStartTls = transportStartTls;
+        this.transportUrl = transportUrl;
+    }
 
     /**
      * Generates transport server URL
@@ -212,5 +252,9 @@ public class TransportAccountDescription {
      */
     public boolean isTransportStartTls() {
         return transportStartTls;
+    }
+
+    public Long getOAuth() {
+        return oAuth;
     }
 }

@@ -54,6 +54,7 @@ import java.util.List;
 
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.tasks.AddOAuthColumnToMailTransportTableTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
 import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
@@ -614,6 +615,9 @@ public final class InternalList {
 
         // Applies MEDIUM TEXT to "user_setting" table.
         list.add(new com.openexchange.groupware.update.tasks.UserSettingMediumTextTask());
+
+        // Adds "oauth" column to "user_transport_account" table
+        list.add(new AddOAuthColumnToMailTransportTableTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
