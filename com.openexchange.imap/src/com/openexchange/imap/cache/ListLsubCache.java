@@ -182,8 +182,8 @@ public final class ListLsubCache {
         return new KeyedCache(new Key(userId, contextId));
     }
 
-    /** The default timeout for LIST/LSUB cache (5 minutes) */
-    private static final long DEFAULT_TIMEOUT = 300000;
+    /** The default timeout for LIST/LSUB cache (6 minutes) */
+    private static final long DEFAULT_TIMEOUT = 360000;
 
     private static final String INBOX = "INBOX";
 
@@ -328,6 +328,30 @@ public final class ListLsubCache {
                 return;
             }
             collection.addSingle(fullName, imapFolder, DO_STATUS, DO_GETACL);
+
+            fireInvalidateCacheEvent(session);
+        }
+    }
+    
+    /**
+     * Adds single entry to cache. Replaces any existing entry.
+     *
+     * @param imapFolder The IMAP folder to add
+     * @param subscribed Whether IMAP folder is subscribed
+     * @param fullName The entry's full name
+     * @param accountId The account ID
+     * @param session The session
+     * @param ignoreSubscriptions Whether to ignore subscriptions
+     * @throws OXException If entry could not be added
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static void addSingle(IMAPFolder imapFolder, boolean subscribed, int accountId, Session session, boolean ignoreSubscriptions) throws OXException, MessagingException {
+        ListLsubCollection collection = getCollection(accountId, imapFolder, session, ignoreSubscriptions);
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection, ignoreSubscriptions)) {
+                return;
+            }
+            collection.addSingle(imapFolder, subscribed, DO_STATUS, DO_GETACL);
 
             fireInvalidateCacheEvent(session);
         }
@@ -630,6 +654,31 @@ public final class ListLsubCache {
             collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
             fireInvalidateCacheEvent(session);
             entry = collection.getList(fullName);
+            return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
+        }
+    }
+
+    /**
+     * Gets cached LIST entry for specified full name.
+     *
+     * @param fullName The full name
+     * @param accountId The account ID
+     * @param imapFolder The IMAP
+     * @param session The session
+     * @param ignoreSubscriptions Whether to ignore subscriptions
+     * @return The cached LIST entry or an empty entry
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static ListLsubEntry optCachedLISTEntry(String fullName, int accountId, IMAPFolder imapFolder, Session session, boolean ignoreSubscriptions) throws OXException, MessagingException {
+        ListLsubCollection collection = getCollection(accountId, imapFolder, session, ignoreSubscriptions);
+        if (isAccessible(collection)) {
+            ListLsubEntry entry = collection.getListIgnoreDeprecated(fullName);
+            return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
+        }
+        synchronized (collection) {
+            checkTimeStamp(imapFolder, collection, ignoreSubscriptions);
+            ListLsubEntry entry = collection.getList(fullName);
             return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
         }
     }

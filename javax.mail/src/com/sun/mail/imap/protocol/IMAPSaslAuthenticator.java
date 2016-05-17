@@ -270,7 +270,10 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 
 	// Handle the final OK, NO, BAD or BYE response
 	pr.handleLoginResult(r);
-	pr.setCapabilities(r);
+	boolean hasCaps = pr.setCapabilities(r);
+    if (hasCaps) {
+        pr.getCapabilities().remove("__PRELOGIN__");
+    }
 
 	/*
 	 * If we're using the Novell Groupwise XGWTRUSTEDAPP mechanism

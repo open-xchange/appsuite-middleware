@@ -320,7 +320,19 @@ public class IMAPDefaultFolderChecker {
                         IMAPFolder inboxFolder;
                         {
                             IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(INBOX);
-                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session, ignoreSubscription, true);
+
+                            /*
+                             * Bug #41825: Changed the handling of special-use folders.
+                             *
+                             * Now special-use folder used only when creating a new mail account to
+                             * initial fill the default folder fields. 
+                             *
+                             * After that the values within the database are used instead. Therefore
+                             * changes to the database now influence the default folders.
+                             */
+                            boolean reinitSpecialUseIfLoaded = false;                            
+                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session, ignoreSubscription, reinitSpecialUseIfLoaded);
+
                             if (entry.exists()) {
                                 inboxFolder = tmp;
                             } else {
@@ -347,7 +359,7 @@ public class IMAPDefaultFolderChecker {
                             ListLsubCache.addSingle(INBOX, accountId, inboxFolder, session, ignoreSubscription);
                             inboxListEntry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session, ignoreSubscription);
                         }
-                        char sep = inboxFolder.getSeparator();
+                        char sep = inboxListEntry.getSeparator();
                         /*
                          * Get prefix for default folder names, NOT full names!
                          */

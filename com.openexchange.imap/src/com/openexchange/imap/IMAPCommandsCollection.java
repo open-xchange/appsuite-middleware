@@ -65,6 +65,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -75,9 +76,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -89,6 +90,7 @@ import javax.mail.Quota;
 import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.event.FolderEvent;
+import org.apache.commons.lang.RandomStringUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
@@ -99,7 +101,6 @@ import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -236,6 +237,17 @@ public final class IMAPCommandsCollection {
         }));
     }
 
+    private static final Random RANDOM = new SecureRandom();
+
+    /**
+     * Gets a random string to use for a mailbox probe.
+     *
+     * @return The random string
+     */
+    static String getRandomProbe() {
+        return RandomStringUtils.random(32, 97, 122, false, false, null, RANDOM);
+    }
+
     /**
      * Checks if IMAP root folder allows subfolder creation.
      *
@@ -249,70 +261,86 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                /*
-                 * Encode the mbox as per RFC2060
-                 */
-                final String fname = new StringBuilder("probe").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
-                final String mboxName = prepareStringArgument(fname);
+                // Ensure a unique name is used to probe with
+                String fname = getRandomProbe();
+
+                // Encode the mailbox name as per RFC2060
+                String mboxName = prepareStringArgument(fname);
                 final String login = ((IMAPStore) rootFolder.getStore()).getUser();
                 if (namespacePerUser) {
                     LOG.debug("Trying to probe IMAP server {} on behalf of {} for root subfolder capability with mbox name: {}", p.getHost(), login, mboxName);
                 } else {
                     LOG.debug("Trying to probe IMAP server {} for root subfolder capability with mbox name: {}", p.getHost(), mboxName);
                 }
-                /*
-                 * Perform command: CREATE
-                 */
-                final StringBuilder sb = new StringBuilder(7 + mboxName.length());
-                final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
-                final Response response = r[r.length - 1];
-                if (response.isOK()) {
-                    // Well, CREATE command succeeded. Is folder really on root level...?
-                    sb.setLength(0);
-                    boolean retval = true;
-                    // Query the folder
-                    final ListInfo[] li = p.list("", sb.append("*").append(mboxName).append("*").toString());
-                    if (li != null) {
-                        boolean found = false;
-                        for (int i = 0; !found && i < li.length; i++) {
-                            if (fname.equals(li[i].name)) {
-                                found = true;
+
+                StringBuilder sb = new StringBuilder(48);
+                boolean created = false;
+                try {
+                    // Perform CREATE command
+                    Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
+                    Response response = r[r.length - 1];
+                    if (response.isOK()) {
+                        // Well, CREATE command succeeded. Is folder really on root level...?
+                        created = true;
+                        boolean retval = true;
+
+                        // Query the folder
+                        ListInfo[] li = p.list("", fname);
+                        if (li != null) {
+                            boolean found = false;
+                            for (int i = li.length; !found && i-- > 0;) {
+                                found = fname.equals(li[i].name);
                             }
+                            if (!found) {
+                                if (namespacePerUser) {
+                                    LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), login, mboxName);
+                                } else {
+                                    LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), mboxName);
+                                }
+                            }
+                            retval = found;
                         }
-                        if (!found) {
+
+                        // Return result
+                        if (retval) {
                             if (namespacePerUser) {
-                                LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), login, mboxName);
+                                LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), login, mboxName);
                             } else {
-                                LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), mboxName);
+                                LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), mboxName);
                             }
                         }
-                        retval = found;
+                        return Boolean.valueOf(retval);
                     }
-                    // Delete probe folder and return
-                    sb.setLength(0);
-                    performCommand(p, sb.append("DELETE ").append(mboxName).toString());
-                    if (retval) {
+
+                    // No "OK" response from IMAP server
+                    if (response.isNO()) {
+                        // Examine "NO" response for possible "over quota" or "already exists" nature
+                        String rest = response.getRest();
+                        if (MimeMailException.isOverQuotaException(rest) || MimeMailException.isAlreadyExistsException(rest)) {
+                            // Creating folder failed due to exceeded quota or because such a folder already exists. Thus assume "true".
+                            if (namespacePerUser) {
+                                LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), login, mboxName);
+                            } else {
+                                LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), mboxName);
+                            }
+                            return Boolean.TRUE;
+                        }
+
+                        // Failed...
                         if (namespacePerUser) {
-                            LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), login, mboxName);
+                            LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} failed (\"NO {}\"). Thus assuming no root subfolder capability", p.getHost(), login, mboxName, rest);
                         } else {
-                            LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), mboxName);
+                            LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed (\"NO {}\"). Thus assuming no root subfolder capability", p.getHost(), mboxName, rest);
                         }
                     }
-                    return Boolean.valueOf(retval);
-                }
-                if (response.isNO()) {
-                    final String rest = response.getRest();
-                    if (MimeMailException.isOverQuotaException(rest)) {
-                        // Creating folder failed due to a exceeded quota exception. Thus assume "true".
-                        return Boolean.TRUE;
-                    }
-                    if (namespacePerUser) {
-                        LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} failed (\"NO {}\"). Thus assuming no root subfolder capability", p.getHost(), login, mboxName, rest);
-                    } else {
-                        LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed (\"NO {}\"). Thus assuming no root subfolder capability", p.getHost(), mboxName, rest);
+                    return Boolean.FALSE;
+                } finally {
+                    if (created) {
+                        // Delete probe folder
+                        sb.setLength(0);
+                        performCommand(p, sb.append("DELETE ").append(mboxName).toString());
                     }
                 }
-                return Boolean.FALSE;
             }
         }));
     }

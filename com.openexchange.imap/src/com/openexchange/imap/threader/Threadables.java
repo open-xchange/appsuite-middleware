@@ -362,13 +362,12 @@ public final class Threadables {
                     try {
                         final List<MailMessage> mails = new ArrayList<MailMessage>(messageCount);
                         final String fullName = imapFolder.getFullName();
-                        final char sep = imapFolder.getSeparator();
                         final String sFetch = "FETCH";
                         final String sInReplyTo = "In-Reply-To";
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName);
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);

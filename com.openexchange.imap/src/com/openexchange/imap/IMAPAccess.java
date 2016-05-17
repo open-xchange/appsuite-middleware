@@ -62,6 +62,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.Provider;
@@ -113,6 +114,7 @@ import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
@@ -191,6 +193,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         return b.booleanValue();
     }
+    
 
     /*-
      * Member section
@@ -443,7 +446,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     final IMAPStoreCache imapStoreCache = IMAPStoreCache.getInstance();
                     if (null == imapStoreCache) {
                         closeSafely(imapStore);
-                    } else if (imapStore.isConnected()) {
+                    } else if (imapStore.isConnectedUnsafe()) {
                         imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login, session);
                     } else {
                         // Not null AND not connected...?
@@ -799,21 +802,31 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Special check for ACLs
              */
             if (config.isSupportsACLs()) {
-                final String key = new StringBuilder(server).append('@').append(port).toString();
+                String key = new StringBuilder(server).append('@').append(port).toString();
+                ConcurrentMap<String, Boolean> aclCapableServers = IMAPAccess.aclCapableServers;
                 Boolean b = aclCapableServers.get(key);
                 if (null == b) {
-                    Boolean nb;
-                    final IMAPFolder dummy = (IMAPFolder) imapStore.getFolder("INBOX");
+                    Lock lock = Sessions.optLock(session);
+                    lock.lock();
                     try {
-                        dummy.myRights();
-                        nb = Boolean.TRUE;
-                    } catch (MessagingException e) {
-                        // MessagingException - If the server doesn't support the ACL extension
-                        nb = Boolean.FALSE;
-                    }
-                    b = aclCapableServers.putIfAbsent(key, nb);
-                    if (null == b) {
-                        b = nb;
+                        b = aclCapableServers.get(key);
+                        if (null == b) {
+                            Boolean nb;
+                            IMAPFolder dummy = (IMAPFolder) imapStore.getFolder("INBOX");
+                            try {
+                                dummy.myRights();
+                                nb = Boolean.TRUE;
+                            } catch (MessagingException e) {
+                                // MessagingException - If the server doesn't support the ACL extension
+                                nb = Boolean.FALSE;
+                            }
+                            b = aclCapableServers.putIfAbsent(key, nb);
+                            if (null == b) {
+                                b = nb;
+                            }
+                        }
+                    } finally {
+                        lock.unlock();
                     }
                 }
                 if (!b.booleanValue()) {
@@ -1281,6 +1294,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (connectionTimeout > 0) {
             imapProps.put("mail.imap.connectiontimeout", String.valueOf(connectionTimeout));
         }
+        /*
+         * Specify CLOSE behavior
+         */
+        imapProps.put("mail.imap.explicitCloseForReusedProtocol", "false");
+        /*
+         * Specify NOOP behavior
+         */
+        imapProps.put("mail.imap.issueNoopToKeepConnectionAlive", "false");
         /*
          * Check if a secure IMAP connection should be established
          */

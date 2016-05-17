@@ -158,7 +158,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         }
     }
 
-    private final char separator;
     private String[] args;
     private final String command;
     private SeqNumFetcher seqNumFetcher;
@@ -206,7 +205,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
-        separator = imapFolder.getSeparator();
         command = getFetchCommand(isRev1, fp, loadBody, serverInfo);
         set(arr, isSequential, keepOrder);
     }
@@ -350,7 +348,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
-        separator = imapFolder.getSeparator();
         if (0 == fetchLen) {
             returnDefaultValue = true;
         }
@@ -462,7 +459,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             }
         }
         index++;
-        final ExtendedMimeMessage msg = new ExtendedMimeMessage(imapFolder.getFullName(), separator, seqnum);
+        final ExtendedMimeMessage msg = new ExtendedMimeMessage(imapFolder.getFullName(), seqnum);
         boolean error = false;
         try {
             final int itemCount = fetchResponse.getItemCount();
