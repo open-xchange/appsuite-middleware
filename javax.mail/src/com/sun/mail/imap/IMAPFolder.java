@@ -287,6 +287,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     protected MailLogger logger;
     private MailLogger connectionPoolLogger;
 
+    private final boolean explicitCloseForReusedProtocol;   // Whether explicit closing (be it CLOSE or UNSELECT/re-EXAMINE) is supposed to
+                                                            // happen for an IMAP folder in case IMAPProtocol instance is reused
+
     /**
      * A fetch profile item for fetching headers.
      * This inner class extends the <code>FetchProfile.Item</code>
@@ -396,6 +399,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	logger = new MailLogger(this.getClass(),
 				"DEBUG IMAP", store.getSession());
 	connectionPoolLogger = ((IMAPStore)store).getConnectionPoolLogger();
+	explicitCloseForReusedProtocol = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".explicitCloseForReusedProtocol", true);
 
 	/*
 	 * Work around apparent bug in Exchange.  Exchange
@@ -1569,6 +1573,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    if (protocol != null)
 			protocol.logout();
                 } else {
+            if (explicitCloseForReusedProtocol) {
 		    // If the expunge flag is set or we're open read-only we
 		    // can just close the folder, otherwise open it read-only
 		    // before closing, or unselect it if supported.
@@ -1607,6 +1612,17 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			if (protocol != null)
 			    protocol.close();
 		    }
+            } else {
+                if (expunge && mode == READ_WRITE) {
+                    if (protocol != null) {
+                        try {
+                        protocol.expunge();
+                        } catch (ProtocolException pex2) {
+                            reuseProtocol = false;  // something went wrong
+                        }
+                    }
+                }
+            }
                 }
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
