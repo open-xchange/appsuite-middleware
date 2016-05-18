@@ -360,7 +360,11 @@ public class FileMetadata implements DocumentMetadata {
             /*
              * check for numerical identifiers if set
              */
-            final String id = file.getId();
+            String id = file.getId();
+            if (id.contains("/")) {
+                id = id.substring(id.lastIndexOf("/") + 1, id.length());
+                file.setId(id);
+            }
             if (FileStorageFileAccess.NEW != id) {
                 try {
                     Integer.valueOf(id);
