@@ -57,10 +57,8 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.ConcurrentPriorityQueue;
+import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.mailaccount.json.DefaultMailAccountActionProvider;
 import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.osgi.util.RankedService;
@@ -78,8 +76,7 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
 
     private final BundleContext context;
     private final DefaultMailAccountActionProvider defaultProvider;
-    private final ConcurrentPriorityQueue<RankedService<MailAccountActionProvider>> trackedProviders;
-    private static final String USE_DEFAULT_PROPERTY = "com.openexchange.mail.account.provider.default";
+    private final SortableConcurrentList<RankedService<MailAccountActionProvider>> trackedProviders;
 
     /**
      * Initializes a new {@link TrackingMailAccountActionFactory}.
@@ -88,32 +85,48 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
         super();
         this.context = context;
         this.defaultProvider = defaultProvider;
-        ConcurrentPriorityQueue<RankedService<MailAccountActionProvider>> trackedProviders = new ConcurrentPriorityQueue<RankedService<MailAccountActionProvider>>();
-        trackedProviders.offer(new RankedService<MailAccountActionProvider>(defaultProvider, 0));
+        SortableConcurrentList<RankedService<MailAccountActionProvider>> trackedProviders = new SortableConcurrentList<RankedService<MailAccountActionProvider>>();
+        trackedProviders.add(new RankedService<MailAccountActionProvider>(defaultProvider, 0));
         this.trackedProviders = trackedProviders;
     }
 
     @Override
     public Collection<?> getSupportedServices() {
-        return getActiveProvider().getActions().values();
+        // Assume the default provider dictates available actions
+        return defaultProvider.getActions().values();
     }
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
+        // This instance as delegating AJAXActionService instance 
+        return this;
+    }
+
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        String action = requestData.getAction();
         if (null == action) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create("null");
         }
 
-        AJAXActionService actionService = getActiveProvider().getActions().get(action);
+        // Determine suitable provider & grab the associated action-serving service
+        AJAXActionService actionService = getActiveProvider(session).getActions().get(action);
         if (null == actionService) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
-        return this;
+        
+        return actionService.perform(requestData, session);
     }
-
-    private MailAccountActionProvider getActiveProvider() {
-        RankedService<MailAccountActionProvider> activeProvider = trackedProviders.peek();
-        return null == activeProvider ? defaultProvider : activeProvider.service;
+    
+    private MailAccountActionProvider getActiveProvider(ServerSession session) throws OXException {
+        for (RankedService<MailAccountActionProvider> rankedService : trackedProviders) {
+            MailAccountActionProvider provider = rankedService.service;
+            if (provider.isApplicableFor(session)) {
+                return provider;
+            }
+        }
+        
+        return defaultProvider;
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------
@@ -121,7 +134,7 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
     @Override
     public synchronized MailAccountActionProvider addingService(ServiceReference<MailAccountActionProvider> reference) {
         MailAccountActionProvider provider = context.getService(reference);
-        trackedProviders.offer(new RankedService<MailAccountActionProvider>(provider, RankedService.getRanking(reference)));
+        trackedProviders.addAndSort(new RankedService<MailAccountActionProvider>(provider, RankedService.getRanking(reference)));
         return provider;
     }
 
@@ -134,25 +147,6 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
     public synchronized void removedService(ServiceReference<MailAccountActionProvider> reference, MailAccountActionProvider provider) {
         trackedProviders.remove(new RankedService<MailAccountActionProvider>(provider, RankedService.getRanking(reference)));
         context.ungetService(reference);
-    }
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String action = requestData.getAction();
-        ServiceReference<ConfigViewFactory> reference = context.getServiceReference(ConfigViewFactory.class);
-        if (reference != null) {
-            try {
-                ConfigViewFactory factory = context.getService(reference);
-                ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                String value = view.get(USE_DEFAULT_PROPERTY, String.class);
-                if (Boolean.valueOf(value)) {
-                    return defaultProvider.getActions().get(action).perform(requestData, session);
-                }
-            } catch (OXException e) {
-                //do nothing
-            }
-        }
-        return getActiveProvider().getActions().get(action).perform(requestData, session);
     }
 
 }

@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.json.actions.AllAction;
 import com.openexchange.mailaccount.json.actions.DeleteAction;
 import com.openexchange.mailaccount.json.actions.GetAction;
@@ -61,11 +62,13 @@ import com.openexchange.mailaccount.json.actions.ListAction;
 import com.openexchange.mailaccount.json.actions.NewAction;
 import com.openexchange.mailaccount.json.actions.UpdateAction;
 import com.openexchange.mailaccount.json.actions.ValidateAction;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultMailAccountActionProvider}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
 public class DefaultMailAccountActionProvider implements MailAccountActionProvider {
@@ -78,6 +81,11 @@ public class DefaultMailAccountActionProvider implements MailAccountActionProvid
     public DefaultMailAccountActionProvider() {
         super();
         actions = initActions();
+    }
+    
+    @Override
+    public boolean isApplicableFor(ServerSession session) throws OXException {
+        return true;
     }
 
     @Override
