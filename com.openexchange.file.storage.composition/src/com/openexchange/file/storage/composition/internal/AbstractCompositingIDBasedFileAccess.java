@@ -849,27 +849,35 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                         final File metadata = fileAccess.getFileMetadata(existing.getFolderId(), existing.getId(), FileStorageFileAccess.CURRENT_VERSION);
                         metadata.setFolderId(sourceFolderId);
                         modifiedColumns.add(Field.ID);
-                        //
-                        //                        DigestInputStream digestStream = null;
-                        //                        CountingInputStream countingStream = null;
                         //                        String checksum = null;
+                        //                        byte[] bytes = null;
                         //                        try {
-                        //                            countingStream = new CountingInputStream(data, -1);
+                        //                            ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        //                            IOUtils.copy(data, out);
+                        //                            bytes = out.toByteArray();
+                        //
+                        //                            DigestInputStream digestStream = null;
+                        //                            ByteArrayInputStream input = null;
                         //                            try {
-                        //                                digestStream = new DigestInputStream(countingStream, MessageDigest.getInstance("MD5"));
+                        //                                input = new ByteArrayInputStream(bytes);
+                        //                                digestStream = new DigestInputStream(input, MessageDigest.getInstance("MD5"));
+                        //                                if (null != digestStream) {
+                        //                                    while (digestStream.read() != -1)
+                        //                                        ;
+                        //                                    byte[] digest = digestStream.getMessageDigest().digest();
+                        //                                    checksum = DatatypeConverter.printHexBinary(digest);
+                        //                                }
                         //                            } catch (NoSuchAlgorithmException e) {
                         //                                // okay, save without checksum instead
+                        //                            } finally {
+                        //                                Streams.close(input, digestStream);
                         //                            }
-                        //                            if (null != digestStream) {
-                        //                                //                                checksum = Service.format(digestStream.getMessageDigest().digest());
-                        //                                byte[] digest = digestStream.getMessageDigest().digest();
-                        //                                checksum = DatatypeConverter.printHexBinary(digest);
-                        //                            }
-                        //                        } finally {
-                        //                            //                            Streams.close(countingStream, digestStream);
+                        //                        } catch (IOException e) {
+                        //                            throw FileStorageExceptionCodes.IO_ERROR.create(e);
                         //                        }
+                        //
                         //                        if (null != checksum && checksum.equalsIgnoreCase(metadata.getFileMD5Sum())) {
-                        //                            Streams.close(countingStream, digestStream);
+                        //                            addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("no_op"));
                         //                            return metadata.getId();
                         //                        }
 
@@ -887,7 +895,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                                 metadata.setId(result.getId());
                                 IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, metadata, comparedPermissions);
                                 SaveResult saveResult = new SaveResult();
-                                addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("new version"));
+                                //                                addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("new version"));
                                 saveResult.setIDTuple(idTuple);
                                 saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
                                 return saveResult;
@@ -988,7 +996,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         document.setFolderId(targetFolderID.getFolderId());
         document.setId(sourceFileID.getFileId());
         SaveResult result = saveDelegation.call(getFileAccess(serviceID, accountID));
-        addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("rename"));
+        //        addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("rename"));
         IDTuple idTuple = result.getIDTuple();
         FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
