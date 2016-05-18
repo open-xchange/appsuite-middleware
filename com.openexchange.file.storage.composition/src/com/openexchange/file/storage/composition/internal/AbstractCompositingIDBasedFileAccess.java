@@ -887,7 +887,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                                 metadata.setId(result.getId());
                                 IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, metadata, comparedPermissions);
                                 SaveResult saveResult = new SaveResult();
-                                warnings.add(FileStorageExceptionCodes.CHANGED_ACTION.create("new version"));
+                                addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("new version"));
                                 saveResult.setIDTuple(idTuple);
                                 saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
                                 return saveResult;
@@ -988,7 +988,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         document.setFolderId(targetFolderID.getFolderId());
         document.setId(sourceFileID.getFileId());
         SaveResult result = saveDelegation.call(getFileAccess(serviceID, accountID));
-        warnings.add(FileStorageExceptionCodes.CHANGED_ACTION.create("rename"));
+        addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("rename"));
         IDTuple idTuple = result.getIDTuple();
         FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
