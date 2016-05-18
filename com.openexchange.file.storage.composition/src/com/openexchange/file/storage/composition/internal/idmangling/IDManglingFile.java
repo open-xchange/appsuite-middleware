@@ -84,6 +84,16 @@ public class IDManglingFile implements File {
     }
 
     @Override
+    public boolean isSizePreciselyKnown() {
+        return file.isSizePreciselyKnown();
+    }
+
+    @Override
+    public void setSizeIsPreciselyKnown(boolean preciselyKnownSize) {
+        file.setSizeIsPreciselyKnown(preciselyKnownSize);
+    }
+
+    @Override
     public boolean matches(final String pattern, final Field... fields) {
         return file.matches(pattern, fields);
     }

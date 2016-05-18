@@ -67,11 +67,24 @@ import com.openexchange.file.storage.meta.FileFieldHandling;
  */
 public abstract class AbstractFile implements File {
 
+    protected boolean preciselyKnownSize;
+
     /**
      * Initializes a new {@link AbstractFile}.
      */
     protected AbstractFile() {
         super();
+        preciselyKnownSize = true;
+    }
+
+    @Override
+    public boolean isSizePreciselyKnown() {
+        return preciselyKnownSize;
+    }
+
+    @Override
+    public void setSizeIsPreciselyKnown(boolean preciselyKnownSize) {
+        this.preciselyKnownSize = preciselyKnownSize;
     }
 
     @Override
