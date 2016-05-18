@@ -415,7 +415,7 @@ In addition the io.ox/mail tree is extended with an entry 'categories':
          ]
        }
 
-The categories entry contains the fields: 'enabled', 'forced', 'initialized' and 'list'. The 'enabled' field is a boolean flag indicating whether the categories should be shown or not. It is writeable and can be overwritten by the forced field, which itself is read only. The 'initialized' field is a string field and can contain one of the following values: 'notyetstarted', 'running' or 'finished'. It is indicating whether the init process hasn't started, is still running or has already finished for the current user.
+The categories entry contains the fields: 'enabled', 'forced', 'initialized' and 'list'. The 'enabled' field is a boolean flag indicating whether the categories should be shown or not. It is writeable and can be overwritten by the forced field, which itself is read only. The 'initialized' field is a string field and can contain one of the following values: 'notyetstarted', 'running', 'finished' or 'error'. It is indicating whether the init process hasn't started, is still running or has already finished for the current user. In case the init process failed, initialized is set to 'error' and the init process will be restarted with the next login.
 The 'list' field contains an array of single category configurations and always contains the 'general' category. Each category config has four fields: 'id', 'name', 'active' and 'permissions'.
 
 | Fieldname   |                                                                 Description |

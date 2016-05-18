@@ -533,7 +533,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     @Override
     public String getInitStatus(Session session) throws OXException {
-        return MailCategoriesConfigUtil.getValueFromProperty(INIT_TASK_STATUS_PROPERTY, "notyetstarted", session);
+        return MailCategoriesConfigUtil.getValueFromProperty(INIT_TASK_STATUS_PROPERTY, STATUS_NOT_YET_STARTED, session);
     }
 
     void initMailCategories(Session session) throws OXException {
