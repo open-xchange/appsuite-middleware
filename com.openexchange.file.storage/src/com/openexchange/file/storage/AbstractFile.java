@@ -65,13 +65,18 @@ import com.openexchange.file.storage.meta.FileFieldHandling;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractFile implements File {
+public abstract class AbstractFile implements PreciseSize {
 
     /**
      * Initializes a new {@link AbstractFile}.
      */
     protected AbstractFile() {
         super();
+    }
+
+    @Override
+    public boolean isExact() {
+        return true;
     }
 
     @Override

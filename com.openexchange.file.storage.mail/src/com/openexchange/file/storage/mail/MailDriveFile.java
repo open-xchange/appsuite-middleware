@@ -98,6 +98,11 @@ public final class MailDriveFile extends DefaultFile {
         setIsCurrentVersion(true);
     }
 
+    @Override
+    public boolean isExact() {
+        return false;
+    }
+
     private static boolean isRootFolder(String id, String rootFolderId) {
         return "".equals(id) || rootFolderId.equals(id);
     }
