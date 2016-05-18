@@ -816,21 +816,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    else {
 			p.create(fullName);
 
-			// Certain IMAP servers do not allow creation of folders
-			// that can contain messages *and* subfolders. So, if we
-			// were asked to create such a folder, we should verify
-			// that we could indeed do so.
-			if ((type & HOLDS_FOLDERS) != 0) {
-			    // we want to hold subfolders and messages. Check
-			    // whether we could create such a folder.
-			    ListInfo[] li = p.list("", fullName);
-			    if (li != null && !li[0].hasInferiors) {
-				// Hmm ..the new folder
-				// doesn't support Inferiors ? Fail
-				p.delete(fullName);
-				throw new ProtocolException("Unsupported type");
-			    }
-			}
 		    }
 		    return Boolean.TRUE;
 		}
@@ -843,8 +828,25 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// exists = true;
 	// this.type = type;
 	boolean retb = exists();	// set exists, type, and attributes
-	if (retb)		// Notify listeners on self and our Store
+	if (retb) {		// Notify listeners on self and our Store
+        // Certain IMAP servers do not allow creation of folders
+        // that can contain messages *and* subfolders. So, if we
+        // were asked to create such a folder, we should verify
+        // that we could indeed do so.
+	    if (((type & HOLDS_FOLDERS) != 0) && ((this.type & HOLDS_FOLDERS) == 0)) {
+            // Hmm ..the new folder
+            // doesn't support Inferiors ? Fail
+	        doCommandIgnoreFailure(new ProtocolCommand() {
+	            @Override
+	            public Object doCommand(IMAPProtocol p) throws ProtocolException {
+	                p.delete(fullName);
+	                return null;
+	            }
+	        });
+	        throw new MessagingException("Unsupported type");
+	    }
 	    notifyFolderListeners(FolderEvent.CREATED);
+	}
 	return retb;
     }
 

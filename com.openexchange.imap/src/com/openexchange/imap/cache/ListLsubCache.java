@@ -332,6 +332,30 @@ public final class ListLsubCache {
             fireInvalidateCacheEvent(session);
         }
     }
+    
+    /**
+     * Adds single entry to cache. Replaces any existing entry.
+     *
+     * @param imapFolder The IMAP folder to add
+     * @param subscribed Whether IMAP folder is subscribed
+     * @param fullName The entry's full name
+     * @param accountId The account ID
+     * @param session The session
+     * @param ignoreSubscriptions Whether to ignore subscriptions
+     * @throws OXException If entry could not be added
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static void addSingle(IMAPFolder imapFolder, boolean subscribed, int accountId, Session session, boolean ignoreSubscriptions) throws OXException, MessagingException {
+        ListLsubCollection collection = getCollection(accountId, imapFolder, session, ignoreSubscriptions);
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection, ignoreSubscriptions)) {
+                return;
+            }
+            collection.addSingle(imapFolder, subscribed, DO_STATUS, DO_GETACL);
+
+            fireInvalidateCacheEvent(session);
+        }
+    }
 
     /**
      * Adds single entry to cache. Replaces any existing entry.
