@@ -100,6 +100,10 @@ public class AnonymousGuestDownloadLimiter implements ActionLimiter {
     @Override
     public void onBefore(AJAXRequestData request) throws AbstractActionLimitedException {
         ServerSession session = request.getSession();
+        if (session.isAnonymous()) {
+            return;
+        }
+        
         int contextId = session.getContextId();
         int userId = session.getUserId();
 
@@ -266,6 +270,10 @@ public class AnonymousGuestDownloadLimiter implements ActionLimiter {
     @Override
     public void onSuccess(AJAXRequestData request, AJAXRequestResult result) throws AbstractActionLimitedException {
         ServerSession session = request.getSession();
+        if (session.isAnonymous()) {
+            return;
+        }
+
         int contextId = session.getContextId();
         int userId = session.getUserId();
 
