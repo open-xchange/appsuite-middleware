@@ -101,6 +101,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     private static final String RULE_DEFINITION_PROPERTY_PREFIX = "com.openexchange.mail.categories.rules.";
     private static final String STATUS_NOT_YET_STARTED = "notyetstarted";
+    private static final String STATUS_ERROR = "error";
     private static final String STATUS_RUNNING = "running";
     private static final String STATUS_FINISHED = "finished";
 
@@ -557,7 +558,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
 
         final ConfigProperty<String> hasRun = view.property("user", MailCategoriesConfigServiceImpl.INIT_TASK_STATUS_PROPERTY, String.class);
-        if (hasRun.isDefined() && !hasRun.get().equals(STATUS_NOT_YET_STARTED)) {
+        String currentStatus = hasRun.get();
+        if (hasRun.isDefined() && (currentStatus.equals(STATUS_RUNNING) || currentStatus.equals(STATUS_FINISHED))) {
             return;
         }
         ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
@@ -622,7 +624,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 hasRun.set(STATUS_FINISHED);
             } catch (Exception e) {
                 try {
-                    hasRun.set(STATUS_NOT_YET_STARTED);
+                    hasRun.set(STATUS_ERROR);
                 } catch (OXException ox) {
                 }
                 return false;
