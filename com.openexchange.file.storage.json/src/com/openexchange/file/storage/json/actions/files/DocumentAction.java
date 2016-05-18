@@ -74,7 +74,6 @@ import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageUtility;
-import com.openexchange.file.storage.PreciseSize;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
@@ -145,14 +144,9 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                     fileHolder.write(document.getData());
                     result = new AJAXRequestResult(fileHolder, "file");
                 } else {
-                    long size = document.getSize();
-                    if ((document.getFile() instanceof PreciseSize) && (false == ((PreciseSize) document.getFile()).isExact())) {
-                        // Not precisely known
-                        size = -1L;
-                    }
-                    FileHolder fileHolder = new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName());
+                    FileHolder fileHolder = new FileHolder(getDocumentStream(document), document.getSize(), document.getMimeType(), document.getName());
                     if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                        fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
+                        fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), document.getSize(), request.getSession()));
                     }
                     result = new AJAXRequestResult(fileHolder, "file");
                 }
@@ -177,14 +171,9 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             result = new AJAXRequestResult(fileHolder, "file");
         } else {
             InputStreamClosure isClosure = getDocumentStream(request.getSession(), request.getId(), request.getVersion());
-            long size = metadata.getFileSize();
-            if ((metadata instanceof PreciseSize) && (false == ((PreciseSize) metadata).isExact())) {
-                // Not precisely known
-                size = -1L;
-            }
-            FileHolder fileHolder = new FileHolder(isClosure, size, metadata.getFileMIMEType(), metadata.getFileName());
+            FileHolder fileHolder = new FileHolder(isClosure, metadata.getFileSize(), metadata.getFileMIMEType(), metadata.getFileName());
             if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
+                fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), metadata.getFileSize(), request.getSession()));
             }
             result = new AJAXRequestResult(fileHolder, "file");
         }
