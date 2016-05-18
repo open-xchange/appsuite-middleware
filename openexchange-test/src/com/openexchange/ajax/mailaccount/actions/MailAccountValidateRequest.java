@@ -354,6 +354,16 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public boolean isTransportStartTls() {
                 return acc.isTransportStartTls();
             }
+
+            @Override
+            public boolean isOAuthAble() {
+                return acc.isOAuthAble();
+            }
+
+            @Override
+            public Long getOAuthID() {
+                return acc.getOAuthID();
+            }
         };
     }
 }

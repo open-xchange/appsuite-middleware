@@ -260,7 +260,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname, starttls FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname, starttls, oauth FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, id);
             stmt.setLong(3, userId);
@@ -338,6 +338,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             } else {
                 mailAccount.setReplyTo(replyTo);
             }
+
+            mailAccount.setOAuthID((Long) result.getObject(26));
+
             mailAccount.setUserId(userId);
             /*
              * Fill properties

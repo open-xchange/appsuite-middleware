@@ -117,6 +117,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected Map<String, String> transportProperties;
     protected boolean mailStartTls;
     protected boolean transportStartTls;
+    private Long oauth;
 
     /**
      * Initializes a new {@link AbstractMailAccount}.
@@ -874,5 +875,19 @@ public abstract class AbstractMailAccount implements MailAccount {
         sb.append("\nname=").append(getName()).append(" primary-address=").append(getPrimaryAddress());
         sb.append("\nmail-server=").append(generateMailServerURL()).append(" transport-server=").append(generateTransportServerURL());
         return sb.toString();
+    }
+
+    @Override
+    public boolean isOAuthAble() {
+        return oauth != null && oauth >= 0;
+    };
+
+    @Override
+    public Long getOAuthID() {
+        return oauth;
+    }
+
+    public void setOAuthID(Long id) {
+        this.oauth = id;
     }
 }

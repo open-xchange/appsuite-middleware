@@ -162,4 +162,18 @@ public interface Account extends Serializable {
      */
     boolean isTransportStartTls();
 
+    /**
+     * Checks if this transport account is able to authenticate via oauth or not.
+     * 
+     * @return true if the account is able to authenticate via oauth, otherwise false.
+     */
+    boolean isOAuthAble();
+
+    /**
+     * Retrieves the oauthAccount identifier.
+     * 
+     * @return The oauthAccount id or null;
+     */
+    Long getOAuthID();
+
 }

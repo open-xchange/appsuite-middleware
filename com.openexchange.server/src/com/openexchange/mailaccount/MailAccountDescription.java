@@ -113,6 +113,7 @@ public final class MailAccountDescription implements Serializable {
     private String confirmedHamFullname;
     private Map<String, String> properties;
     private Map<String, String> transportProperties;
+    private Long oauth;
 
     /**
      * Initializes a new {@link MailAccountDescription}.
@@ -1087,5 +1088,17 @@ public final class MailAccountDescription implements Serializable {
             port = defaultPort;
         }
         return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
+    }
+
+    public boolean isOAuthAble() {
+        return oauth != null && oauth >= 0;
+    }
+
+    public Long getOAuthID() {
+        return oauth;
+    }
+
+    public void setOAuthID(Long oauthId) {
+        this.oauth = oauthId;
     }
 }

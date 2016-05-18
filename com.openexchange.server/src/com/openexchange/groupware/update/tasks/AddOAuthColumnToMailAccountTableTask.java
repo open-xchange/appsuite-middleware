@@ -62,14 +62,14 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AddOAuthColumnToMailTransportTableTask} adds a oauth column to the user_transport_account table.
+ * {@link AddOAuthColumnToMailAccountTableTask} adds a oauth column to the user_transport_account table.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class AddOAuthColumnToMailTransportTableTask extends UpdateTaskAdapter {
+public class AddOAuthColumnToMailAccountTableTask extends UpdateTaskAdapter {
 
-    private static final String TABLE = "user_transport_account";
+    private static final String[] TABLES = new String[] { "user_transport_account", "user_mail_account" };
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -80,7 +80,9 @@ public class AddOAuthColumnToMailTransportTableTask extends UpdateTaskAdapter {
             con = dbService.getForUpdateTask(contextId);
             con.setAutoCommit(false);
             Column column = new Column("oauth", "INT UNSIGNED");
-            Tools.addColumns(con, TABLE, new Column[] { column });
+            for (String table : TABLES) {
+                Tools.addColumns(con, table, new Column[] { column });
+            }
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
