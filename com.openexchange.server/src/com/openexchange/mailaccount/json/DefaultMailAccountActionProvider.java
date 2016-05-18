@@ -47,65 +47,55 @@
  *
  */
 
-package com.openexchange.mailaccount.json.actions;
+package com.openexchange.mailaccount.json;
 
-import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.mailaccount.json.actions.AllAction;
+import com.openexchange.mailaccount.json.actions.DeleteAction;
+import com.openexchange.mailaccount.json.actions.GetAction;
+import com.openexchange.mailaccount.json.actions.GetTreeAction;
+import com.openexchange.mailaccount.json.actions.ListAction;
+import com.openexchange.mailaccount.json.actions.NewAction;
+import com.openexchange.mailaccount.json.actions.UpdateAction;
+import com.openexchange.mailaccount.json.actions.ValidateAction;
 
 /**
- * {@link MailAccountActionFactory}
+ * {@link DefaultMailAccountActionProvider}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
  */
-@Module(name = "mailaccount", description = "The mail account module is used to manage multiple mail accounts held by a user.")
-public final class MailAccountActionFactory implements AJAXActionServiceFactory {
+public class DefaultMailAccountActionProvider implements MailAccountActionProvider {
 
-    private static volatile MailAccountActionFactory instance;
+    private final Map<String, AJAXActionService> actions;
 
     /**
-     * Gets the {@link MailAccountActionFactory} instance.
-     *
-     * @return The {@link MailAccountActionFactory} instance
+     * Initializes a new {@link DefaultMailAccountActionProvider}.
      */
-    public static final MailAccountActionFactory getInstance(MailAccountActionProvider provider) {
-        MailAccountActionFactory tmp = instance;
-        if (null == tmp) {
-            synchronized (MailAccountActionFactory.class) {
-                tmp = instance;
-                if (null == tmp) {
-                    tmp = new MailAccountActionFactory(provider);
-                    instance = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------------------------
-
-    private final MailAccountActionProvider provider;
-
-    private MailAccountActionFactory(MailAccountActionProvider provider) {
+    public DefaultMailAccountActionProvider() {
         super();
-        this.provider = provider;
+        actions = initActions();
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        final AJAXActionService retval = provider.getActions().get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
-        }
-        return retval;
+    public Map<String, AJAXActionService> getActions() {
+        return actions;
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return provider.getActions().values();
+    private Map<String, AJAXActionService> initActions() {
+        Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
+        tmp.put(AllAction.ACTION, new AllAction());
+        tmp.put(ListAction.ACTION, new ListAction());
+        tmp.put(GetAction.ACTION, new GetAction());
+        tmp.put(ValidateAction.ACTION, new ValidateAction());
+        tmp.put(DeleteAction.ACTION, new DeleteAction());
+        tmp.put(UpdateAction.ACTION, new UpdateAction());
+        tmp.put(GetTreeAction.ACTION, new GetTreeAction());
+        tmp.put(NewAction.ACTION, new NewAction());
+        return Collections.unmodifiableMap(tmp);
     }
 
 }

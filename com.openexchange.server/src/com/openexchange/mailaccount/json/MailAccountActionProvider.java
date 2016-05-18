@@ -47,47 +47,25 @@
  *
  */
 
-package com.openexchange.mailaccount.json.actions;
+package com.openexchange.mailaccount.json;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 
 /**
- * {@link MailAccountActionProviderImpl}
+ * {@link MailAccountActionProvider} - A provider for actions of the mail account JSON interface.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class MailAccountActionProviderImpl implements MailAccountActionProvider {
-
-    private final Map<String, AJAXActionService> actions;
+public interface MailAccountActionProvider {
 
     /**
-     * Initializes a new {@link MailAccountActionProviderImpl}.
+     * Retrieves a mapping of actions strings to <code>AJAXActionService</code>'s.
+     * 
+     * @return The mapping of available action
      */
-    public MailAccountActionProviderImpl() {
-        super();
-        actions = initActions();
-    }
-
-    @Override
-    public Map<String, AJAXActionService> getActions() {
-        return actions;
-    }
-
-    private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
-        tmp.put(AllAction.ACTION, new AllAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(GetAction.ACTION, new GetAction());
-        tmp.put(ValidateAction.ACTION, new ValidateAction());
-        tmp.put(DeleteAction.ACTION, new DeleteAction());
-        tmp.put(UpdateAction.ACTION, new UpdateAction());
-        tmp.put(GetTreeAction.ACTION, new GetTreeAction());
-        tmp.put(NewAction.ACTION, new NewAction());
-        return Collections.unmodifiableMap(tmp);
-    }
+    public Map<String, AJAXActionService> getActions();
 
 }
