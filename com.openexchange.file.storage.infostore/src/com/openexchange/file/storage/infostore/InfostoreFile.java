@@ -256,7 +256,11 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
         if (id == FileStorageFileAccess.NEW) {
             document.setId(InfostoreFacade.NEW);
         } else {
-            document.setId(Integer.parseInt(id));
+            if (id.contains("/")) {
+                document.setId(Integer.parseInt(id.substring(id.lastIndexOf("/") + 1, id.length())));
+            } else {
+                document.setId(Integer.parseInt(id));
+            }
         }
     }
 

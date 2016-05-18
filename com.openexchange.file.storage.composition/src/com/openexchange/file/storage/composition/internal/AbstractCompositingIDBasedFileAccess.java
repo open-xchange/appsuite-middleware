@@ -58,6 +58,7 @@ import static com.openexchange.file.storage.composition.internal.FileStorageTool
 import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer.fixIDs;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -88,6 +89,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageETagProvider;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -779,7 +781,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
-        return save(document, data, sequenceNumber, modifiedColumns, false, saveDelegation);
+        return save(document, data, sequenceNumber, modifiedColumns, false, false, saveDelegation);
     }
 
     private static final class SaveResult {
@@ -809,7 +811,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     }
 
-    protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
+    protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, boolean tryAddVersion, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
 
         if (Strings.isNotEmpty(document.getFileName())) {
             FilenameValidationUtils.checkCharacters(document.getFileName());
@@ -826,18 +828,77 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             FolderID targetFolderID = new FolderID(document.getFolderId());
             String serviceID = targetFolderID.getService();
             String accountID = targetFolderID.getAccountId();
+            String sourceFolderId = document.getFolderId();
             document.setFolderId(targetFolderID.getFolderId());
             FileStorageFileAccess fileAccess = getFileAccess(serviceID, accountID);
             /*
              * collect warnings prior saving & abort the operation if not ignored
              */
-            List<OXException> warnings = collectWarningsBeforeSave(document, fileAccess, modifiedColumns);
+            final List<OXException> warnings = collectWarningsBeforeSave(document, fileAccess, modifiedColumns);
             if (0 < warnings.size()) {
                 addWarnings(warnings);
                 if (false == ignoreWarnings) {
                     return null;
                 }
             }
+            if (tryAddVersion) {
+                if (FileStorageCapabilityTools.supports(fileAccess, FileStorageCapability.FILE_VERSIONS)) {
+                    SearchIterator<File> it = fileAccess.search(document.getFileName(), Arrays.asList(Field.FOLDER_ID, Field.ID, Field.FILE_MD5SUM), document.getFolderId(), null, null, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                    if (it.hasNext()) {
+                        File existing = it.next();
+                        final File metadata = fileAccess.getFileMetadata(existing.getFolderId(), existing.getId(), FileStorageFileAccess.CURRENT_VERSION);
+                        metadata.setFolderId(sourceFolderId);
+                        modifiedColumns.add(Field.ID);
+                        //
+                        //                        DigestInputStream digestStream = null;
+                        //                        CountingInputStream countingStream = null;
+                        //                        String checksum = null;
+                        //                        try {
+                        //                            countingStream = new CountingInputStream(data, -1);
+                        //                            try {
+                        //                                digestStream = new DigestInputStream(countingStream, MessageDigest.getInstance("MD5"));
+                        //                            } catch (NoSuchAlgorithmException e) {
+                        //                                // okay, save without checksum instead
+                        //                            }
+                        //                            if (null != digestStream) {
+                        //                                //                                checksum = Service.format(digestStream.getMessageDigest().digest());
+                        //                                byte[] digest = digestStream.getMessageDigest().digest();
+                        //                                checksum = DatatypeConverter.printHexBinary(digest);
+                        //                            }
+                        //                        } finally {
+                        //                            //                            Streams.close(countingStream, digestStream);
+                        //                        }
+                        //                        if (null != checksum && checksum.equalsIgnoreCase(metadata.getFileMD5Sum())) {
+                        //                            Streams.close(countingStream, digestStream);
+                        //                            return metadata.getId();
+                        //                        }
+
+                        return save(metadata, data, 2116800000000L, modifiedColumns, ignoreWarnings, tryAddVersion, new TransactionAwareFileAccessDelegation<SaveResult>() {
+
+                            @Override
+                            protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
+                                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, metadata, modifiedColumns);
+                                IDTuple result;
+                                /*
+                                 * perform normal save operation
+                                 */
+                                result = access.saveDocument(metadata, data, 2116800000000L, modifiedColumns);
+                                metadata.setFolderId(result.getFolder());
+                                metadata.setId(result.getId());
+                                IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, metadata, comparedPermissions);
+                                SaveResult saveResult = new SaveResult();
+                                warnings.add(FileStorageExceptionCodes.CHANGED_ACTION.create("new version"));
+                                saveResult.setIDTuple(idTuple);
+                                saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
+                                return saveResult;
+                            }
+                        });
+                    }
+                } else {
+                    warnings.add(FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create());
+                }
+            }
+
             /*
              * perform save operation & return resulting file identifier
              */
@@ -854,7 +915,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         /*
          * Update existing file
          */
-        FileID sourceFileID = new FileID(document.getId());
+        FileID sourceFileID = new FileID(document);
         if (null == sourceFileID.getFolderId()) {
             // preserve folder information also for infostore items
             sourceFileID.setFolderId(document.getFolderId());
@@ -927,13 +988,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         document.setFolderId(targetFolderID.getFolderId());
         document.setId(sourceFileID.getFileId());
         SaveResult result = saveDelegation.call(getFileAccess(serviceID, accountID));
+        warnings.add(FileStorageExceptionCodes.CHANGED_ACTION.create("rename"));
         IDTuple idTuple = result.getIDTuple();
         FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
-        document.setId(newFileID.toUniqueID());
-        document.setFolderId(newFolderID.toUniqueID());
+        DefaultFile file = new DefaultFile(document);
+        file.setId(newFileID.toUniqueID());
+        file.setFolderId(newFolderID.toUniqueID());
         postEvent(FileStorageEventHelper.buildUpdateEvent(
-            session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
+            session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), file.getFileName()));
         return newFileID.toUniqueID();
     }
 
@@ -1069,12 +1132,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreVersion) throws OXException {
-        return saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, false);
+        return saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, false, false);
     }
 
     @Override
-    public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion, boolean ignoreWarnings) throws OXException {
-        return save(document, data, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<SaveResult>() {
+    public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion, boolean ignoreWarnings, boolean tryAddVersion) throws OXException {
+        return save(document, data, sequenceNumber, modifiedColumns, ignoreWarnings, tryAddVersion, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
             protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
@@ -1147,12 +1210,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
-        return saveFileMetadata(document, sequenceNumber, modifiedColumns, false);
+        return saveFileMetadata(document, sequenceNumber, modifiedColumns, false, false);
     }
 
     @Override
-    public String saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings) throws OXException {
-        return save(document, null, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<SaveResult>() {
+    public String saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, boolean tryAddVersion) throws OXException {
+        return save(document, null, sequenceNumber, modifiedColumns, ignoreWarnings, tryAddVersion, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
             protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {

@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -98,22 +97,23 @@ public class NewAction extends AbstractWriteAction {
 
         file.setId(FileStorageFileAccess.NEW);
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
+        boolean tryAddVersion = AJAXRequestDataTools.parseBoolParameter("try_add_version", request.getRequestData(), false);
 
         String newId;
         if (request.hasUploads()) {
             // Save file metadata with binary payload
-            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), false, ignoreWarnings);
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), false, ignoreWarnings, tryAddVersion);
         } else {
             // Save file metadata without binary payload
-            newId = fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), ignoreWarnings);
+            newId = fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), ignoreWarnings, tryAddVersion);
         }
-        
+
         List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());
         if (request.notifyPermissionEntities() && file.getObjectPermissions() != null && file.getObjectPermissions().size() > 0) {
             File modified = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
             warnings.addAll(sendNotifications(request.getNotificationTransport(), request.getNotifiactionMessage(), null, modified, request.getSession(), request.getRequestData().getHostData()));
         }
-        
+
         // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
         AJAXRequestResult result;
         if (null != newId && request.extendedResponse()) {
@@ -121,7 +121,7 @@ public class NewAction extends AbstractWriteAction {
         } else {
             result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
         }
-       
+
         result.addWarnings(warnings);
         if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
             String name = getFilenameSave(file, null, fileAccess);
