@@ -55,12 +55,17 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentPriorityQueue;
 import com.openexchange.mailaccount.json.DefaultMailAccountActionProvider;
 import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.osgi.util.RankedService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -69,17 +74,18 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class TrackingMailAccountActionFactory implements ServiceTrackerCustomizer<MailAccountActionProvider, MailAccountActionProvider>, AJAXActionServiceFactory {
+public class TrackingMailAccountActionFactory implements ServiceTrackerCustomizer<MailAccountActionProvider, MailAccountActionProvider>, AJAXActionServiceFactory, AJAXActionService {
 
     private final BundleContext context;
     private final DefaultMailAccountActionProvider defaultProvider;
     private final ConcurrentPriorityQueue<RankedService<MailAccountActionProvider>> trackedProviders;
+    private static final String USE_DEFAULT_PROPERTY = "com.openexchange.mail.account.provider.default";
 
     /**
      * Initializes a new {@link TrackingMailAccountActionFactory}.
      */
     public TrackingMailAccountActionFactory(DefaultMailAccountActionProvider defaultProvider, BundleContext context) {
-        super();;
+        super();
         this.context = context;
         this.defaultProvider = defaultProvider;
         ConcurrentPriorityQueue<RankedService<MailAccountActionProvider>> trackedProviders = new ConcurrentPriorityQueue<RankedService<MailAccountActionProvider>>();
@@ -102,7 +108,7 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
         if (null == actionService) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
-        return actionService;
+        return this;
     }
 
     private MailAccountActionProvider getActiveProvider() {
@@ -128,6 +134,25 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
     public synchronized void removedService(ServiceReference<MailAccountActionProvider> reference, MailAccountActionProvider provider) {
         trackedProviders.remove(new RankedService<MailAccountActionProvider>(provider, RankedService.getRanking(reference)));
         context.ungetService(reference);
+    }
+
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        String action = requestData.getAction();
+        ServiceReference<ConfigViewFactory> reference = context.getServiceReference(ConfigViewFactory.class);
+        if (reference != null) {
+            try {
+                ConfigViewFactory factory = context.getService(reference);
+                ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                String value = view.get(USE_DEFAULT_PROPERTY, String.class);
+                if (Boolean.valueOf(value)) {
+                    return defaultProvider.getActions().get(action).perform(requestData, session);
+                }
+            } catch (OXException e) {
+                //do nothing
+            }
+        }
+        return getActiveProvider().getActions().get(action).perform(requestData, session);
     }
 
 }
