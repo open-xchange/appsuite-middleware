@@ -1,20 +1,21 @@
 # Antje Faber <antje.faber@open-xchange.com>, 2010, 2012.
-# Ivar Snaaijer <ivar@bureau-cornavin.com>, 2010, 2011, 2012, 2013, 2016.
 # Reinout van Schouwen <reinout@bureau-cornavin.com>, 2012, 2013, 2014, 2015.
+# Ivar Snaaijer <ivar@bureau-cornavin.com>, 2010, 2011, 2012, 2013, 2016.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-04-15 14:04+0100\n"
+"PO-Revision-Date: 2016-05-13 19:35+0200\n"
 "Last-Translator: Ivar Snaaijer <ivar@bureau-cornavin.com>\n"
-"Language-Team: Dutch <kde-i18n-nl@kde.org>\n"
+"Language-Team: Nederlands <ox@bureau-cornavin.com>\n"
 "Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.7.7\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Gtranslator 2.91.7\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -4713,6 +4714,18 @@ msgstr "Het is mislukt om een RSS feed te laden van de URL: %1$s"
 msgid "Failed to read RSS feed from URL: %2$s"
 msgstr "Het is mislukt om een RSS feed te laden van de URL: %2$s"
 
+#. The RSS feed is exceeding the maximum allowed size of '%1$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
+msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
+msgstr "De RSS-feed is groter dan de maximaal toestaande grootte van '%1$s'"
+
+#. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
+msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr ""
+"Het is niet mogelijk om de RSS te verbinden met URL: %1$s. Verander "
+"alstublieft de URL en probeer het opnieuw."
+
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -7229,8 +7242,13 @@ msgstr ""
 "Door de beperkte mogelijkheden van gebruiker \"%1$s\" is het niet mogelijk "
 "om de rechten te wijzigen."
 
-#. Concurrent write attempt. Please await the previous save operation to terminate.
+#. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid "Group %1$s can't be used for object permissions."
+msgstr "Groep %1$s kan niet gebruikt worden voor object rechten."
+
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
 msgid ""
 "Concurrent write attempt. Please await the previous save operation to "
 "terminate."
@@ -7238,7 +7256,7 @@ msgstr ""
 "Gelijktijdige schrijfpoging. Wacht tot de vorige opslagactie voltooid is."
 
 #. Your search took too long in order to be accomplished.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
 msgstr "Uw zoekvraag duurde te lang om uitgevoerd te worden."
 
@@ -9995,11 +10013,10 @@ msgstr "Ongeldige of schadelijke afbeeldinginformatie gevonden"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
-msgid ""
-"The maximum allowed size of '%1$s' for an image in the signature is reached."
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr ""
-"De maximaal toelaatbare bestandsgrootte van '%1$s' voor een "
-"ondertekeningsafbeelding is bereikt."
+"De handtekeningsafbeelding is groter dan de maximaal toegestane grootte van "
+"'%1$s'."
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
@@ -12489,6 +12506,13 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zoeloe"
+
+#~ msgid ""
+#~ "The maximum allowed size of '%1$s' for an image in the signature is "
+#~ "reached."
+#~ msgstr ""
+#~ "De maximaal toelaatbare bestandsgrootte van '%1$s' voor een "
+#~ "ondertekeningsafbeelding is bereikt."
 
 #~ msgid "Invalid E-Mail address."
 #~ msgstr "Ongeldig e-mailadres."

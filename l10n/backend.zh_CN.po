@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-04-15 14:07+0100\n"
+"PO-Revision-Date: 2016-05-15 01:01+1000\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.7.7\n"
+"X-Generator: Poedit 1.8.7\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -4431,6 +4431,16 @@ msgstr "从 URL 读取 RSS 失败：%1$s"
 msgid "Failed to read RSS feed from URL: %2$s"
 msgstr "从 URL 读取 RSS 失败：%2$s"
 
+#. The RSS feed is exceeding the maximum allowed size of '%1$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
+msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
+msgstr "RSS feed 超过允许体积 '%1$s'"
+
+#. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
+msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr "不能连接 URL 之 RSS：%1$s。请更改 URL 后再试。"
+
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -6777,15 +6787,20 @@ msgid ""
 "the permission changes."
 msgstr "由于用户 \"%1$s\" 的有限能力，不能套用权限更改。"
 
-#. Concurrent write attempt. Please await the previous save operation to terminate.
+#. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid "Group %1$s can't be used for object permissions."
+msgstr "群组 %1$s 不能用作对象权限。"
+
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
 msgid ""
 "Concurrent write attempt. Please await the previous save operation to "
 "terminate."
 msgstr "并存写入尝试，请等候之前的保存操作终结。"
 
 #. Your search took too long in order to be accomplished.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
 msgstr "您的搜寻耗时太长未能达成。"
 
@@ -9264,9 +9279,8 @@ msgstr "侦测到无效或有害的图像数据"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
-msgid ""
-"The maximum allowed size of '%1$s' for an image in the signature is reached."
-msgstr "达到签名里一个图像的允许最大体积 '%1$s'。"
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
+msgstr "签名图像超过最大允许体积 '%1$s'。"
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
@@ -11737,6 +11751,11 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "祖鲁"
+
+#~ msgid ""
+#~ "The maximum allowed size of '%1$s' for an image in the signature is "
+#~ "reached."
+#~ msgstr "达到签名里一个图像的允许最大体积 '%1$s'。"
 
 #~ msgid "Invalid E-Mail address."
 #~ msgstr "无效邮件地址。"

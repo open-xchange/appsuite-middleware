@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-04-15 14:07+0100\n"
+"PO-Revision-Date: 2016-05-12 21:40+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.7.7\n"
+"X-Generator: Poedit 1.8.7\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -4431,6 +4431,16 @@ msgstr "自下列網址讀取 RSS 資訊來源失敗: %1$s"
 msgid "Failed to read RSS feed from URL: %2$s"
 msgstr "自下列網址讀取 RSS 資訊來源失敗: %2$s"
 
+#. The RSS feed is exceeding the maximum allowed size of '%1$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
+msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
+msgstr "RSS 資訊來源超過最大允許大小「%1$s」"
+
+#. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
+msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr "無法連線至下列網址的 RSS 資訊來源: %1$s。請修改網址後再試一次。"
+
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -6802,15 +6812,20 @@ msgid ""
 "the permission changes."
 msgstr "由於使用者「%1$s」的能力受限，無法套用權限變更。"
 
-#. Concurrent write attempt. Please await the previous save operation to terminate.
+#. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid "Group %1$s can't be used for object permissions."
+msgstr "群組 %1$s 無法用於物件權限。"
+
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
 msgid ""
 "Concurrent write attempt. Please await the previous save operation to "
 "terminate."
 msgstr "發生同時寫入。請稍候先前的儲存操作完成。"
 
 #. Your search took too long in order to be accomplished.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
 msgstr "您的搜尋花了太久才完成。"
 
@@ -9301,9 +9316,8 @@ msgstr "偵測到無效或有問題的圖片資料"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
-msgid ""
-"The maximum allowed size of '%1$s' for an image in the signature is reached."
-msgstr "已達簽名檔中能包含的圖片大小「%1$s」。"
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
+msgstr "簽名圖片超過最大允許的大小「%1$s」。"
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
@@ -11774,6 +11788,11 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid ""
+#~ "The maximum allowed size of '%1$s' for an image in the signature is "
+#~ "reached."
+#~ msgstr "已達簽名檔中能包含的圖片大小「%1$s」。"
 
 #~ msgid "Invalid E-Mail address."
 #~ msgstr "郵件地址無效。"

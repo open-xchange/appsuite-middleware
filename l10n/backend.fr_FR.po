@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-04-15 14:02+0100\n"
+"PO-Revision-Date: 2016-05-13 22:45+0200\n"
 "Last-Translator: Nicolas Ternisien <nicolas@bureau-cornavin.com>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.7\n"
+"X-Generator: Lokalize 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -710,7 +710,7 @@ msgstr "Le rendez-vous a un nouveau sujet : %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
 msgid "The appointment will now be shown as: \"%1$s\"."
-msgstr "Le rendez-vous sera à présent affiché comme  : « %1$s »."
+msgstr "Le rendez-vous sera à présent affiché comme : « %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:204
 msgid "The appointment timezone was changed to: %1$s"
@@ -719,7 +719,7 @@ msgstr "Le fuseau horaire du rendez-vous a été modifié en : %1$s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:206
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:208
 msgid "Change the location to %1$s."
-msgstr "Changer l'emplacement en %1$s"
+msgstr "Changer l'emplacement en %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:210
 msgid "The appointment takes place in a new location: %1$s."
@@ -4811,6 +4811,19 @@ msgstr "Impossible de lire le flux RSS de l'URL : %1$s"
 msgid "Failed to read RSS feed from URL: %2$s"
 msgstr "Impossible de lire le flux RSS de l'URL : %2$s"
 
+#. The RSS feed is exceeding the maximum allowed size of '%1$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
+msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
+msgstr ""
+"La taille maximale autorisée de « %1$s » pour le flux RSS a été atteinte"
+
+#. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
+msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr ""
+"Impossible de se connecter au RSS avec l'URL : %1$s. Veuillez modifier l'URL "
+"et réessayer."
+
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -7279,8 +7292,13 @@ msgstr ""
 "Comme les droits de l'utilisateur « %1$s » sont limités, il n'est pas "
 "possible d'appliquer les changements de permissions."
 
-#. Concurrent write attempt. Please await the previous save operation to terminate.
+#. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid "Group %1$s can't be used for object permissions."
+msgstr "Le groupe %1$s ne peut pas être utilisé pour des droits d'objet."
+
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
 msgid ""
 "Concurrent write attempt. Please await the previous save operation to "
 "terminate."
@@ -7289,7 +7307,7 @@ msgstr ""
 "d'enregistrement précédente se termine."
 
 #. Your search took too long in order to be accomplished.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
 msgstr "Votre recherche a pris trop de temps pour être menée à bien."
 
@@ -10129,11 +10147,10 @@ msgstr "Détection de données d'image non valables ou dangereuses"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
-msgid ""
-"The maximum allowed size of '%1$s' for an image in the signature is reached."
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr ""
-"La taille maximale autorisée de « %1$s » pour une image dans la signature a "
-"été atteinte."
+"La taille maximale autorisée de « %1$s » a été atteinte pour l'image de "
+"signature."
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
@@ -12645,6 +12662,13 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zoulou"
+
+#~ msgid ""
+#~ "The maximum allowed size of '%1$s' for an image in the signature is "
+#~ "reached."
+#~ msgstr ""
+#~ "La taille maximale autorisée de « %1$s » pour une image dans la signature "
+#~ "a été atteinte."
 
 #~ msgid "Invalid E-Mail address."
 #~ msgstr "Adresse de courrier électronique invalide."
