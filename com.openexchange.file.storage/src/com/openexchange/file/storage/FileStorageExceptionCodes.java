@@ -345,11 +345,6 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     WHITESPACE_END("File name must not end with a dot or whitespace.", Category.CATEGORY_USER_INPUT, 68, FileStorageExceptionMessages.WHITESPACE_END_MSG),
 
-    /**
-     * Changed action: \"%1$s\"
-     */
-    CHANGED_ACTION("Changed action: \"%1$s\"", Category.CATEGORY_WARNING, 69, FileStorageExceptionMessages.CHANGED_ACTION_MSG)
-
     ;
 
     /**
