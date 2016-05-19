@@ -540,7 +540,17 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         if (autoDelete && null != expiry) {
             folder.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
         }
+        setAdditionalInfos(folder);
         return folder;
+    }
+
+    /**
+     * Sets additional information in specified folder.
+     *
+     * @param folder The folder to enhance
+     */
+    protected void setAdditionalInfos(DefaultFileStorageFolder folder) {
+        // Nothing by default;
     }
 
     private static ShareRecipient prepareRecipient(String password, Date expiryDate) {

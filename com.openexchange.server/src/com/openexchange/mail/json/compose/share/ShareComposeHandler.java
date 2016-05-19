@@ -193,6 +193,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
      * @throws OXException If check fails
      */
     public boolean isEnabled(Session session) throws OXException {
+        // TODO: Add hook to specify more conditions
         return Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session) && Utilities.hasCapabilities(session, "drive", "share_links");
     }
 
