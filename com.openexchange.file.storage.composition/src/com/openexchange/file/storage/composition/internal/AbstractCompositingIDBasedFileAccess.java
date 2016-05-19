@@ -890,6 +890,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                                 /*
                                  * perform normal save operation
                                  */
+                                Map<String, Object> meta = metadata.getMeta();
+                                meta.put("save_action", "new_version");
+                                metadata.setMeta(meta);
                                 result = access.saveDocument(metadata, data, 2116800000000L, modifiedColumns);
                                 metadata.setFolderId(result.getFolder());
                                 metadata.setId(result.getId());
