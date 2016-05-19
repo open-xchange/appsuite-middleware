@@ -740,15 +740,18 @@ public class IMAPProtocol extends Protocol {
                 suspendTracing();
             }
 
-            try {
-                tag = writeCommand("AUTHENTICATE PLAIN", null);
-            } catch (final Exception ex) {
-                // Convert this into a BYE response
-                r = Response.byeResponse(ex);
-                done = true;
+            boolean useInitialClientResponse = false;
+            if (null != capabilities && capabilities.containsKey("SASL-IR")) {
+                /* It is allowed to use initial client response according to RFC 4959 (https://tools.ietf.org/html/rfc4959)
+                 *
+                 *    C: C01 CAPABILITY
+                 *    S: * CAPABILITY IMAP4rev1 SASL-IR AUTH=PLAIN
+                 *    S: C01 OK Completed
+                 *    C: A01 AUTHENTICATE PLAIN dGVzdAB0ZXN0AHRlc3Q=
+                 *    S: A01 OK Success (tls protection)
+                 */
+                useInitialClientResponse = true;
             }
-
-            final OutputStream os = getOutputStream(); // stream to IMAP server
 
             /* Wrap a BASE64Encoder around a ByteArrayOutputstream
              * to craft b64 encoded username and password strings
@@ -765,17 +768,46 @@ public class IMAPProtocol extends Protocol {
              * a single packet, to avoid triggering a bug in SUN's SIMS 2.0
              * server caused by patch 105346.
              */
+            
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
 
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            final OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
+            if (useInitialClientResponse) {
+                // Initially pass b64 encoded username and password string
+                try {
+                    String nullByte = "\0";
+                    String s = (authzid == null ? "" : authzid) + nullByte + u + nullByte + p;
+        
+                    // obtain b64 encoded bytes
+                    b64os.write(ASCIIUtility.getBytes(s));
+                    b64os.flush(); // complete the encoding
+                    
+                    tag = writeCommand("AUTHENTICATE PLAIN " + ASCIIUtility.toString(bos.toByteArray()), null);
+                    bos.reset(); // reset buffer
+                } catch (final Exception ex) {
+                    // Convert this into a BYE response
+                    r = Response.byeResponse(ex);
+                    done = true;
+                }
+            } else {
+                try {
+                    tag = writeCommand("AUTHENTICATE PLAIN", null);
+                } catch (final Exception ex) {
+                    // Convert this into a BYE response
+                    r = Response.byeResponse(ex);
+                    done = true;
+                }
+            }
+
+            OutputStream os = getOutputStream(); // stream to IMAP server
 
             while (!done) { // loop till we are done
                 try {
                     r = readResponse();
                     if (r.isContinuation()) {
                         // Server challenge ..
-                        final String nullByte = "\0";
-                        final String s = (authzid == null ? "" : authzid) + nullByte + u + nullByte + p;
+                        String nullByte = "\0";
+                        String s = (authzid == null ? "" : authzid) + nullByte + u + nullByte + p;
 
                         // obtain b64 encoded bytes
                         b64os.write(ASCIIUtility.getBytes(s));
