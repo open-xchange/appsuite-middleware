@@ -1,3 +1,9 @@
+open-xchange-push-malpoll (7.8.1-13) stable; urgency=medium
+
+  * Build for patch 2016-05-19 (3305)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 19 May 2016 16:23:57 +0200
+
 open-xchange-push-malpoll (7.8.1-12) stable; urgency=medium
 
   * Build for patch 2016-05-23 (3294)
