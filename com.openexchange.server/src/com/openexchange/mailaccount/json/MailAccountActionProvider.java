@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount.json;
 
-import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
@@ -71,12 +70,12 @@ public interface MailAccountActionProvider {
      * @throws OXException If check for applicability fails unexpectedly
      */
     boolean isApplicableFor(ServerSession session) throws OXException;
-    
+
     /**
-     * Retrieves a mapping of actions strings to <code>AJAXActionService</code>'s.
-     * 
-     * @return The mapping of available action
+     * Retrieves the appropriate <code>AJAXActionService</code> instance associated with given action identifier.
+     *
+     * @return The associated action or <code>null</code>
      */
-    Map<String, AJAXActionService> getActions();
+    AJAXActionService getAction(String action);
 
 }

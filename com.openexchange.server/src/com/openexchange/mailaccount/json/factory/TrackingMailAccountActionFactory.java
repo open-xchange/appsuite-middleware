@@ -98,7 +98,7 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
-        // This instance as delegating AJAXActionService instance 
+        // This instance as delegating AJAXActionService instance
         return this;
     }
 
@@ -110,14 +110,22 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
         }
 
         // Determine suitable provider & grab the associated action-serving service
-        AJAXActionService actionService = getActiveProvider(session).getActions().get(action);
+        MailAccountActionProvider provider = getActiveProvider(session);
+        AJAXActionService actionService = provider.getAction(action);
         if (null == actionService) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
+            // Grab the one from default provider
+            if (defaultProvider != provider) {
+                actionService = defaultProvider.getAction(action);
+            }
+
+            if (null == actionService) {
+                throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
+            }
         }
-        
+
         return actionService.perform(requestData, session);
     }
-    
+
     private MailAccountActionProvider getActiveProvider(ServerSession session) throws OXException {
         for (RankedService<MailAccountActionProvider> rankedService : trackedProviders) {
             MailAccountActionProvider provider = rankedService.service;
@@ -125,7 +133,7 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
                 return provider;
             }
         }
-        
+
         return defaultProvider;
     }
 
