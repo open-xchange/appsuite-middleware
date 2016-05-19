@@ -56,6 +56,7 @@ import static com.openexchange.file.storage.composition.internal.FileStorageTool
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getAccountName;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPathString;
 import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer.fixIDs;
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -849,37 +850,34 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                         final File metadata = fileAccess.getFileMetadata(existing.getFolderId(), existing.getId(), FileStorageFileAccess.CURRENT_VERSION);
                         metadata.setFolderId(sourceFolderId);
                         modifiedColumns.add(Field.ID);
-                        //                        String checksum = null;
-                        //                        byte[] bytes = null;
+                        String checksum = null;
+                        BufferedInputStream buffer = null;
                         //                        try {
-                        //                            ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        //                            IOUtils.copy(data, out);
-                        //                            bytes = out.toByteArray();
-                        //
-                        //                            DigestInputStream digestStream = null;
-                        //                            ByteArrayInputStream input = null;
-                        //                            try {
-                        //                                input = new ByteArrayInputStream(bytes);
-                        //                                digestStream = new DigestInputStream(input, MessageDigest.getInstance("MD5"));
-                        //                                if (null != digestStream) {
-                        //                                    while (digestStream.read() != -1)
-                        //                                        ;
-                        //                                    byte[] digest = digestStream.getMessageDigest().digest();
-                        //                                    checksum = DatatypeConverter.printHexBinary(digest);
+                        //                            buffer = new BufferedInputStream(data);
+                        //                            MessageDigest digest = MessageDigest.getInstance("MD5");
+                        //                            if (null != buffer) {
+                        //                                buffer.mark(0);
+                        //                                int in;
+                        //                                while ((in = buffer.read()) != -1) {
+                        //                                    digest.update((byte) in);
                         //                                }
-                        //                            } catch (NoSuchAlgorithmException e) {
-                        //                                // okay, save without checksum instead
-                        //                            } finally {
-                        //                                Streams.close(input, digestStream);
+                        //                                byte[] binaryChecksum = digest.digest();
+                        //                                checksum = DatatypeConverter.printHexBinary(binaryChecksum);
+                        //                                buffer.reset();
                         //                            }
+                        //                        } catch (NoSuchAlgorithmException e) {
+                        //                            // okay, save without checksum instead
                         //                        } catch (IOException e) {
                         //                            throw FileStorageExceptionCodes.IO_ERROR.create(e);
                         //                        }
-                        //
-                        //                        if (null != checksum && checksum.equalsIgnoreCase(metadata.getFileMD5Sum())) {
-                        //                            addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("no_op"));
-                        //                            return metadata.getId();
-                        //                        }
+
+                        if (null != checksum && checksum.equalsIgnoreCase(metadata.getFileMD5Sum())) {
+                            Map<String, Object> meta = metadata.getMeta();
+                            meta.put("save_action", "no_op");
+                            metadata.setMeta(meta);
+                            saveFileMetadata(metadata, sequenceNumber, Collections.singletonList(Field.META));
+                            return metadata.getId();
+                        }
 
                         return save(metadata, data, 2116800000000L, modifiedColumns, ignoreWarnings, tryAddVersion, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
