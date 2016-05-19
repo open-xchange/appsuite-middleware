@@ -951,7 +951,7 @@ public class MimeMessageFiller {
                              *
                              * Well-formed HTML
                              */
-                            if (HTMLDetector.containsHTMLTags(content, true)) {
+                            if (HTMLDetector.containsHTMLTags(content, "<br", "<p>", "<div")) {
                                 isHtml = true;
                                 if (BODY_START.matcher(content).find()) {
                                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
