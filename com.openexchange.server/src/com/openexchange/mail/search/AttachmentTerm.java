@@ -47,69 +47,69 @@
  *
  */
 
-package com.openexchange.search;
+package com.openexchange.mail.search;
+
+import java.util.Collection;
+import javax.mail.FetchProfile;
+import javax.mail.Message;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link Operand} - Represents a operand within a search term.
+ * {@link AttachmentTerm}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
  */
-public interface Operand<V> {
+public class AttachmentTerm extends SearchTerm<String> {
 
-    /**
-     * The operand type.
-     */
-    public static enum Type {
-        /**
-         * A constant operand.
-         */
-        CONSTANT("constant"),
-        /**
-         * A column/field within a data object.
-         */
-        COLUMN("column"),
-        /**
-         * A attachment operand.
-         */
-        ATTACHMENT("attachment");
-
-        private final String str;
-
-        private Type(final String str) {
-            this.str = str;
-        }
-
-        /**
-         * Gets this type's string representation.
-         *
-         * @return The type's string representation.
-         */
-        public String getType() {
-            return str;
-        }
-
-        /**
-         * Checks if specified string equals this type's string representation.
-         *
-         * @param other The other string to check
-         * @return <code>true</code> if specified string equals this type's string representation; otherwise <code>false</code>.
-         */
-        public boolean isType(final String other) {
-            return str.equalsIgnoreCase(other);
-        }
+    @Override
+    public String getPattern() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    /**
-     * Gets this operand's type.
-     *
-     * @return The operand's type.
-     */
-    public Type getType();
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
 
-    /**
-     * Gets this operand's value.
-     *
-     * @return The operand's value.
-     */
-    public V getValue();
+    }
+
+    @Override
+    public void addMailField(Collection<MailField> col) {
+        col.add(MailField.ATTACHMENT_NAME);
+
+    }
+
+    @Override
+    public boolean matches(Message msg) throws OXException {
+        //unable to determine
+        return false;
+    }
+
+    @Override
+    public boolean matches(MailMessage mailMessage) throws OXException {
+        //unable to determine
+        return false;
+    }
+
+    @Override
+    public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void contributeTo(FetchProfile fetchProfile) {
+        // TODO Auto-generated method stub
+
+    }
+
 }

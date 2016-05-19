@@ -169,4 +169,11 @@ public interface SearchTermVisitor {
      */
     public void visit(UserFlagTerm term);
 
+    /**
+     * Calls this visitor with specified attachment term.
+     *
+     * @param term The attachment term
+     */
+    public void visit(AttachmentTerm term);
+
 }

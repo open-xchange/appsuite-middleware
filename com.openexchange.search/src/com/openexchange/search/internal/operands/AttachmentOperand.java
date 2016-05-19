@@ -47,69 +47,47 @@
  *
  */
 
-package com.openexchange.search;
+package com.openexchange.search.internal.operands;
+
+import com.openexchange.search.Operand;
 
 /**
- * {@link Operand} - Represents a operand within a search term.
+ * {@link AttachmentOperand}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
  */
-public interface Operand<V> {
+public class AttachmentOperand implements Operand<String> {
 
-    /**
-     * The operand type.
-     */
-    public static enum Type {
-        /**
-         * A constant operand.
-         */
-        CONSTANT("constant"),
-        /**
-         * A column/field within a data object.
-         */
-        COLUMN("column"),
-        /**
-         * A attachment operand.
-         */
-        ATTACHMENT("attachment");
-
-        private final String str;
-
-        private Type(final String str) {
-            this.str = str;
-        }
-
-        /**
-         * Gets this type's string representation.
-         *
-         * @return The type's string representation.
-         */
-        public String getType() {
-            return str;
-        }
-
-        /**
-         * Checks if specified string equals this type's string representation.
-         *
-         * @param other The other string to check
-         * @return <code>true</code> if specified string equals this type's string representation; otherwise <code>false</code>.
-         */
-        public boolean isType(final String other) {
-            return str.equalsIgnoreCase(other);
-        }
+    public enum AttachmentOperandType {
+        NAME
     }
 
-    /**
-     * Gets this operand's type.
-     *
-     * @return The operand's type.
-     */
-    public Type getType();
+    private final AttachmentOperandType type;
 
     /**
-     * Gets this operand's value.
+     * Initializes a new {@link ColumnOperand}.
      *
-     * @return The operand's value.
+     * @param name The attachment
      */
-    public V getValue();
+    public AttachmentOperand(final AttachmentOperandType type) {
+        super();
+        this.type = type;
+    }
+
+    @Override
+    public com.openexchange.search.Operand.Type getType() {
+        return Type.ATTACHMENT;
+    }
+
+    @Override
+    public String getValue() {
+        return type.toString();
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder(Type.ATTACHMENT.getType()).append(':').append(type).toString();
+    }
+
 }
