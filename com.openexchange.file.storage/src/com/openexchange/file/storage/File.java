@@ -162,18 +162,18 @@ public interface File {
     void setMeta(Map<String, Object> properties);
 
     /**
-     * Checks whether the {@link #getFileSize()} returns the exact size w/o any encodings (e.g. base64) applied.
+     * Checks whether {@link #getFileSize()} returns the exact size w/o any encodings (e.g. base64) applied.
      *
      * @return <code>true</code> for exact size; otherwise <code>false</code>
      */
-    boolean isSizePreciselyKnown();
+    boolean isAccurateSize();
 
     /**
      * Sets whether the {@link #getFileSize()} returns the exact size w/o any encodings (e.g. base64) applied
      *
-     * @param preciselyKnownSize <code>true</code> for exact size; otherwise <code>false</code>
+     * @param accurateSize <code>true</code> for exact size; otherwise <code>false</code>
      */
-    void setSizeIsPreciselyKnown(boolean preciselyKnownSize);
+    void setAccurateSize(boolean accurateSize);
 
     /**
      * Gets the object permissions in case they are defined.

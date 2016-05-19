@@ -84,13 +84,13 @@ public class IDManglingFile implements File {
     }
 
     @Override
-    public boolean isSizePreciselyKnown() {
-        return file.isSizePreciselyKnown();
+    public boolean isAccurateSize() {
+        return file.isAccurateSize();
     }
 
     @Override
-    public void setSizeIsPreciselyKnown(boolean preciselyKnownSize) {
-        file.setSizeIsPreciselyKnown(preciselyKnownSize);
+    public void setAccurateSize(boolean accurateSize) {
+        file.setAccurateSize(accurateSize);
     }
 
     @Override

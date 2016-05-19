@@ -168,7 +168,7 @@ public final class MailDriveFile extends DefaultFile {
                     long size = message.getSize();
                     if (size >= 0) {
                         setFileSize(size);
-                        setSizeIsPreciselyKnown(false);
+                        setAccurateSize(false);
                     }
                 }
                 if (set.contains(Field.URL)) {

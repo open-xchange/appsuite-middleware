@@ -145,7 +145,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                     result = new AJAXRequestResult(fileHolder, "file");
                 } else {
                     long size = document.getSize();
-                    if (false == document.getFile().isSizePreciselyKnown()) {
+                    if (false == document.getFile().isAccurateSize()) {
                         size = -1;
                     }
                     FileHolder fileHolder = new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName());
@@ -176,7 +176,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         } else {
             InputStreamClosure isClosure = getDocumentStream(request.getSession(), request.getId(), request.getVersion());
             long size = metadata.getFileSize();
-            if (false == metadata.isSizePreciselyKnown()) {
+            if (false == metadata.isAccurateSize()) {
                 size = -1;
             }
             FileHolder fileHolder = new FileHolder(isClosure, size, metadata.getFileMIMEType(), metadata.getFileName());
