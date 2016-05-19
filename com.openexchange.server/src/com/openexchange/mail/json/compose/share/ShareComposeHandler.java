@@ -79,9 +79,11 @@ import com.openexchange.mail.json.compose.DefaultComposeDraftResult;
 import com.openexchange.mail.json.compose.DefaultComposeTransportResult;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
+import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareComposeLinkGenerator;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
+import com.openexchange.mail.json.compose.share.spi.EnabledChecker;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -193,8 +195,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
      * @throws OXException If check fails
      */
     public boolean isEnabled(Session session) throws OXException {
-        // TODO: Add hook to specify more conditions
-        return Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session) && Utilities.hasCapabilities(session, "drive", "share_links");
+        if (false == Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session)) {
+            // Not enabled as per configuration
+            return false;
+        }
+
+        // Check capabilities, too
+        EnabledCheckerRegistry checkerRegistry = ServerServiceRegistry.getServize(EnabledCheckerRegistry.class);
+        EnabledChecker checker = checkerRegistry.getEnabledCheckerFor(session);
+        return checker.isEnabled(session);
     }
 
     @Override

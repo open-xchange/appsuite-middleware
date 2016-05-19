@@ -71,6 +71,8 @@ import com.openexchange.mail.json.compose.share.MessageGenerators;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistryImpl;
+import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
+import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistryImpl;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistryImpl;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
@@ -82,6 +84,7 @@ import com.openexchange.mail.json.compose.share.settings.NameShareComposeSetting
 import com.openexchange.mail.json.compose.share.settings.RequiredExpirationShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.ThresholdShareComposeSetting;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
+import com.openexchange.mail.json.compose.share.spi.EnabledChecker;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -124,6 +127,9 @@ public class ShareComposeActivator extends HousekeepingActivator {
 
         RankingAwareNearRegistryServiceTracker<AttachmentStorage> attachmentStorageTracker = new RankingAwareNearRegistryServiceTracker<>(context, AttachmentStorage.class);
         rememberTracker(attachmentStorageTracker);
+
+        RankingAwareNearRegistryServiceTracker<EnabledChecker> enabledCheckerTracker = new RankingAwareNearRegistryServiceTracker<>(context, EnabledChecker.class);
+        rememberTracker(enabledCheckerTracker);
 
         // Tracker for CapabilityService that declares "publish_mail_attachments" capability
         final BundleContext context = this.context;
@@ -245,6 +251,9 @@ public class ShareComposeActivator extends HousekeepingActivator {
 
         AttachmentStorageRegistryImpl attachmentStorageRegistry = new AttachmentStorageRegistryImpl(attachmentStorageTracker);
         registerService(AttachmentStorageRegistry.class, attachmentStorageRegistry);
+
+        EnabledCheckerRegistryImpl enabledCheckerRegistry = new EnabledCheckerRegistryImpl(enabledCheckerTracker);
+        registerService(EnabledCheckerRegistry.class, enabledCheckerRegistry);
 
         ShareComposeHandler handler = new ShareComposeHandler();
         registerService(ComposeHandler.class, handler);
