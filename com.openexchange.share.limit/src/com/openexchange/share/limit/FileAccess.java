@@ -112,6 +112,10 @@ public class FileAccess {
     public void setTimeOfEndInMillis(long timeOfEndInMillis) {
         this.timeOfEndInMillis = timeOfEndInMillis;
     }
+    
+    public static boolean isDisabled(FileAccess allowed) {
+        return allowed.getTimeOfEndInMillis() == allowed.getTimeOfStartInMillis();
+    }
 
     public static boolean isExceeded(FileAccess allowed, FileAccess used) {
         if (isSizeExceeded(allowed, used) || isCountExceeded(allowed, used)) {

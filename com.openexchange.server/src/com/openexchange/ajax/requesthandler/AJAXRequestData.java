@@ -326,7 +326,6 @@ public class AJAXRequestData {
         return userAgent;
     }
 
-
     /**
      * Gets the port number to which the request was sent
      *
@@ -609,10 +608,10 @@ public class AJAXRequestData {
      * <pre>
      * long ifModifiedSince = request.getDateHeader(&quot;If-Modified-Since&quot;);
      * if (ifNoneMatch == null &amp;&amp; ifModifiedSince != -1 &amp;&amp; ifModifiedSince + 1000 &gt; lastModified) {
-     *     response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-     *     response.setHeader(&quot;ETag&quot;, eTag); // Required in 304.
-     *     response.setDateHeader(&quot;Expires&quot;, expires); // Postpone cache with 1 week.
-     *     return;
+     * response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+     * response.setHeader(&quot;ETag&quot;, eTag); // Required in 304.
+     * response.setDateHeader(&quot;Expires&quot;, expires); // Postpone cache with 1 week.
+     * return;
      * }
      * </pre>
      *
@@ -934,7 +933,7 @@ public class AJAXRequestData {
      * @return the coerced value
      * @throws OXException if coercion fails
      */
-    public @Nullable<T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo, final boolean optional) throws OXException {
+    public @Nullable <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo, final boolean optional) throws OXException {
         final String value = getParameter(name);
         if (null == value) {
             if (!optional) {
@@ -1353,7 +1352,7 @@ public class AJAXRequestData {
      * Constructs a URL to this server, injecting the host name and optionally the JVM route.
      *
      * <pre>
-     *  "http(s)://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt;
+     * "http(s)://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt;
      * </pre>
      *
      * @param path The path on the server. If <code>null</code> no path is inserted
@@ -1368,7 +1367,7 @@ public class AJAXRequestData {
      * Constructs a URL to this server, injecting the host name and optionally the JVM route.
      *
      * <pre>
-     *  &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
      * </pre>
      *
      * @param protocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
@@ -1418,7 +1417,7 @@ public class AJAXRequestData {
      * Constructs a URL to this server, injecting the host name and optionally the JVM route.
      *
      * <pre>
-     *  &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
      * </pre>
      *
      * @param protocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
@@ -1573,6 +1572,22 @@ public class AJAXRequestData {
      */
     public String getModule() {
         return module;
+    }
+
+    /**
+     * Gets the normalized module, e.g. <code>"files/myFile.txt"</code> will return <code>"files"</code>.
+     * <p>
+     * With '/' concatenated module identifiers will still be returned as they are, e. g. <code>"oauth/account"</code> will stay as it is.
+     * 
+     * @return The normalized module
+     */
+    public String getNormalizedModule() {
+        String lModule = module;
+        int pos = lModule.lastIndexOf('/');
+        if ((pos > 0) && (pathInfo != null) && (lModule.endsWith(pathInfo))) {
+            lModule = lModule.substring(0, pos);
+        }
+        return lModule;
     }
 
     /**
