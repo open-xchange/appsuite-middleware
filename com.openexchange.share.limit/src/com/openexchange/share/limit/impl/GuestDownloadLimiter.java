@@ -220,16 +220,11 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
         if (session.isAnonymous()) {
             return;
         }
-        User user = session.getUser();
         int contextId = session.getContextId();
+        
+        removeOldAccesses(session, contextId);
 
-        try {
-            dropObsoleteAccesses(user, contextId);
-        } catch (OXException e) {
-            int userId = session.getUserId();
-            LOG.info("Unable to delete obsolete entries for user {} in context {}. As this is just for cleanup reasons these entries won't be considered within further processings.", userId, contextId);
-        }
-
+        User user = session.getUser();
         FileAccess limit = getLimit(user, contextId);
         if ((limit == null) || (FileAccess.isDisabled(limit))) {
             return;
@@ -243,6 +238,15 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
         throwIfExceeded(limit, used);
     }
 
+    protected void removeOldAccesses(ServerSession session, int contextId) {
+        try {
+            dropObsoleteAccesses(session.getUser(), contextId);
+        } catch (OXException e) {
+            int userId = session.getUserId();
+            LOG.info("Unable to delete obsolete entries for user {} in context {}. As this is just for cleanup reasons these entries won't be considered within further processings.", userId, contextId);
+        }        
+    }
+
     @Override
     public void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
         if (e != null) { // aborted request due to limit exception
@@ -254,7 +258,6 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
         }
 
         int contextId = session.getContextId();
-        int userId = session.getUserId();
 
         FileAccess limit = getLimit(session.getUser(), contextId);
         if ((limit == null) || (FileAccess.isDisabled(limit))) {
@@ -276,6 +279,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
         }
         if (length != -1) {
             ConnectionHelper connectionHelper = null;
+            int userId = session.getUserId();
             try {
                 connectionHelper = new ConnectionHelper(contextId);
 
