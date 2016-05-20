@@ -114,13 +114,12 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
             return;
         }
         Long start = null;
+        ConfigView view = this.configViewFactory.getView(0, contextId);
         if (Strings.isEmpty(user.getMail())) { // anonymous guest
-            ConfigView view = this.configViewFactory.getView(0, contextId);
             Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, LimitConfig.timeFrameLinks());
             long now = new Date().getTime();
             start = now - timeWindow;
         } else {
-            ConfigView view = this.configViewFactory.getView(0, contextId);
             Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, LimitConfig.timeFrameGuests());
             long now = new Date().getTime();
             start = now - timeWindow;

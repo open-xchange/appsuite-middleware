@@ -210,33 +210,8 @@ public class LimitConfig {
                         // Service not yet available
                         return false;
                     }
-                    if ((!isEnabledViaConfiguration()) || ((timeFrameGuests() <= 0) && (timeFrameLinks() <= 0))) {
-                        tmp = false;
-                    } else {
-                        tmp = true;
-                    }
-                    enabled = tmp.booleanValue();
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
-    private static volatile Boolean enabledViaConfiguration;
-
-    private static boolean isEnabledViaConfiguration() {
-        Boolean tmp = enabledViaConfiguration;
-        if (null == tmp) {
-            synchronized (LimitConfig.class) {
-                tmp = enabledViaConfiguration;
-                if (null == tmp) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    if (null == service) {
-                        // Service not yet available
-                        return false;
-                    }
                     tmp = Boolean.valueOf(service.getBoolProperty(LIMIT_ENABLED, false));
-                    enabledViaConfiguration = tmp.booleanValue();
+                    enabled = tmp.booleanValue();
                 }
             }
         }
