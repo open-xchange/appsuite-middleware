@@ -71,6 +71,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
     private final InputStream input;
     private Transport notificationTransport;
     private String notificationMessage;
+    private boolean tryAddVersion;
 
     /**
      * Initializes a new {@link NewInfostoreRequest}.
@@ -86,6 +87,17 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
      */
     public NewInfostoreRequest(com.openexchange.file.storage.File data) {
         this(data, (InputStream) null);
+    }
+
+    /**
+     * Initializes a new {@link NewInfostoreRequest}.
+     *
+     * @param data The document
+     * @param tryAddVersion <code>true</code> to add a new file version
+     */
+    public NewInfostoreRequest(com.openexchange.file.storage.File data, boolean tryAddVersion) {
+        this(data, (InputStream) null);
+        this.tryAddVersion = tryAddVersion;
     }
 
     /**
@@ -147,6 +159,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
             jNotification.put("transport", notificationTransport.getID());
             jNotification.put("message", notificationMessage);
             data.put("notification", jNotification);
+            data.put("try_add_version", tryAddVersion);
             return data.toString();
         }
         return jFile.toString();
