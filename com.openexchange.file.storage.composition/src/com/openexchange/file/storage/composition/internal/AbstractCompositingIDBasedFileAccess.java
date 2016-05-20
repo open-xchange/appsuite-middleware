@@ -56,7 +56,6 @@ import static com.openexchange.file.storage.composition.internal.FileStorageTool
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getAccountName;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPathString;
 import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer.fixIDs;
-import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -844,40 +843,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             }
             if (tryAddVersion) {
                 if (FileStorageCapabilityTools.supports(fileAccess, FileStorageCapability.FILE_VERSIONS)) {
-                    SearchIterator<File> it = fileAccess.search(document.getFileName(), Arrays.asList(Field.FOLDER_ID, Field.ID, Field.FILE_MD5SUM), document.getFolderId(), null, null, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                    SearchIterator<File> it = fileAccess.search(document.getFileName(), Arrays.asList(Field.FOLDER_ID, Field.ID), document.getFolderId(), null, null, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
                     if (it.hasNext()) {
                         File existing = it.next();
                         final File metadata = fileAccess.getFileMetadata(existing.getFolderId(), existing.getId(), FileStorageFileAccess.CURRENT_VERSION);
                         metadata.setFolderId(sourceFolderId);
                         modifiedColumns.add(Field.ID);
-                        String checksum = null;
-                        BufferedInputStream buffer = null;
-                        //                        try {
-                        //                            buffer = new BufferedInputStream(data);
-                        //                            MessageDigest digest = MessageDigest.getInstance("MD5");
-                        //                            if (null != buffer) {
-                        //                                buffer.mark(0);
-                        //                                int in;
-                        //                                while ((in = buffer.read()) != -1) {
-                        //                                    digest.update((byte) in);
-                        //                                }
-                        //                                byte[] binaryChecksum = digest.digest();
-                        //                                checksum = DatatypeConverter.printHexBinary(binaryChecksum);
-                        //                                buffer.reset();
-                        //                            }
-                        //                        } catch (NoSuchAlgorithmException e) {
-                        //                            // okay, save without checksum instead
-                        //                        } catch (IOException e) {
-                        //                            throw FileStorageExceptionCodes.IO_ERROR.create(e);
-                        //                        }
-
-                        if (null != checksum && checksum.equalsIgnoreCase(metadata.getFileMD5Sum())) {
-                            Map<String, Object> meta = metadata.getMeta();
-                            meta.put("save_action", "no_op");
-                            metadata.setMeta(meta);
-                            saveFileMetadata(metadata, sequenceNumber, Collections.singletonList(Field.META));
-                            return metadata.getId();
-                        }
 
                         return save(metadata, data, 2116800000000L, modifiedColumns, ignoreWarnings, tryAddVersion, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
@@ -896,7 +867,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                                 metadata.setId(result.getId());
                                 IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, metadata, comparedPermissions);
                                 SaveResult saveResult = new SaveResult();
-                                //                                addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("new version"));
                                 saveResult.setIDTuple(idTuple);
                                 saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
                                 return saveResult;
@@ -997,7 +967,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         document.setFolderId(targetFolderID.getFolderId());
         document.setId(sourceFileID.getFileId());
         SaveResult result = saveDelegation.call(getFileAccess(serviceID, accountID));
-        //        addWarning(FileStorageExceptionCodes.CHANGED_ACTION.create("rename"));
         IDTuple idTuple = result.getIDTuple();
         FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
@@ -1418,33 +1387,33 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             ThreadPoolService threadPool = ThreadPools.getThreadPool();
             CompletionService<SearchIterator<File>> completionService = null != threadPool ?
                 new ThreadPoolCompletionService<SearchIterator<File>>(threadPool) : new CallerRunsCompletionService<SearchIterator<File>>();
-            int count = 0;
-            for (Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
-                if (FileStorageTools.supports(entry.getKey(), FileStorageCapability.SEARCH_BY_TERM)) {
-                    FileStorageAdvancedSearchFileAccess fileAccess = (FileStorageAdvancedSearchFileAccess) entry.getKey();
-                    completionService.submit(getSearchCallable(fileAccess, entry.getValue(), searchTerm, fields, sort, order));
-                    count++;
-                }
-            }
-            /*
-             * collect & filter results
-             */
-            return new FilteringSearchIterator<File>(collectSearchResults(completionService, count, sort, order)) {
-
-                int index = 0;
-
-                @Override
-                public boolean accept(File thing) throws OXException {
-                    try {
-                        if (0 < start && index < start || 0 < end && index >= end) {
-                            return false;
-                        }
-                        return true;
-                    } finally {
-                        index++;
+                int count = 0;
+                for (Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
+                    if (FileStorageTools.supports(entry.getKey(), FileStorageCapability.SEARCH_BY_TERM)) {
+                        FileStorageAdvancedSearchFileAccess fileAccess = (FileStorageAdvancedSearchFileAccess) entry.getKey();
+                        completionService.submit(getSearchCallable(fileAccess, entry.getValue(), searchTerm, fields, sort, order));
+                        count++;
                     }
                 }
-            };
+                /*
+                 * collect & filter results
+                 */
+                return new FilteringSearchIterator<File>(collectSearchResults(completionService, count, sort, order)) {
+
+                    int index = 0;
+
+                    @Override
+                    public boolean accept(File thing) throws OXException {
+                        try {
+                            if (0 < start && index < start || 0 < end && index >= end) {
+                                return false;
+                            }
+                            return true;
+                        } finally {
+                            index++;
+                        }
+                    }
+                };
         }
     }
 
