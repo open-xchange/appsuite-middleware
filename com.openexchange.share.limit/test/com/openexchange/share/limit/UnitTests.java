@@ -52,6 +52,7 @@ package com.openexchange.share.limit;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.share.limit.impl.FilesDownloadLimiterTest;
 
 /**
  * 
@@ -62,7 +63,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    AnonymousGuestDownloadLimiterTest.class,
+    FilesDownloadLimiterTest.class,
 })
 public class UnitTests {
 

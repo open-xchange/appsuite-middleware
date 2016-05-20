@@ -61,71 +61,186 @@ import com.openexchange.share.limit.internal.Services;
  */
 public class LimitConfig {
 
-    public static final String SIZE_LIMIT = "com.openexchange.share.servlet.limit.size";
-    public static final String COUNT_LIMIT = "com.openexchange.share.servlet.limit.count";
-    public static final String TIME_FRAME = "com.openexchange.share.servlet.limit.timeFrame";
+    public static final String LIMIT_ENABLED = "com.openexchange.share.servlet.limit.enabled";
 
-    private static volatile Integer countLimit;
+    public static final String SIZE_LIMIT_GUESTS = "com.openexchange.share.servlet.limit.size.guests";
+    public static final String COUNT_LIMIT_GUESTS = "com.openexchange.share.servlet.limit.count.guests";
+    public static final String TIME_FRAME_GUESTS = "com.openexchange.share.servlet.limit.timeFrame.guests";
 
-    public static int countLimit() {
-        Integer tmp = countLimit;
+    public static final String SIZE_LIMIT_LINKS = "com.openexchange.share.servlet.limit.size.links";
+    public static final String COUNT_LIMIT_LINKS = "com.openexchange.share.servlet.limit.count.links";
+    public static final String TIME_FRAME_LINKS = "com.openexchange.share.servlet.limit.timeFrame.links";
+
+    private static volatile Integer countLimitGuests;
+
+    public static int countLimitGuests() {
+        Integer tmp = countLimitGuests;
         if (null == tmp) {
             synchronized (LimitConfig.class) {
-                tmp = countLimit;
+                tmp = countLimitGuests;
                 if (null == tmp) {
                     final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
                         // Service not yet available
                         return 100;
                     }
-                    tmp = Integer.valueOf(service.getProperty(COUNT_LIMIT, "100"));
-                    countLimit = tmp;
+                    tmp = Integer.valueOf(service.getProperty(COUNT_LIMIT_GUESTS, "100"));
+                    countLimitGuests = tmp;
                 }
             }
         }
         return tmp.intValue();
     }
 
-    private static volatile Long sizeLimit;
+    private static volatile Integer countLimitLinks;
 
-    public static long sizeLimit() {
-        Long tmp = sizeLimit;
+    public static int countLimitLinks() {
+        Integer tmp = countLimitLinks;
         if (null == tmp) {
             synchronized (LimitConfig.class) {
-                tmp = sizeLimit;
+                tmp = countLimitLinks;
                 if (null == tmp) {
                     final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
                         // Service not yet available
-                        return 1073741824; // 1GB
+                        return 100;
                     }
-                    tmp = Long.valueOf(service.getProperty(SIZE_LIMIT, "1073741824"));
-                    sizeLimit = tmp;
+                    tmp = Integer.valueOf(service.getProperty(COUNT_LIMIT_LINKS, "100"));
+                    countLimitLinks = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Long sizeLimitGuests;
+
+    public static long sizeLimitGuests() {
+        Long tmp = sizeLimitGuests;
+        if (null == tmp) {
+            synchronized (LimitConfig.class) {
+                tmp = sizeLimitGuests;
+                if (null == tmp) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return 1073741824L; // 1GB
+                    }
+                    tmp = Long.valueOf(service.getProperty(SIZE_LIMIT_GUESTS, "1073741824"));
+                    sizeLimitGuests = tmp;
                 }
             }
         }
         return tmp.longValue();
     }
 
-    private static volatile Integer timeFrame;
+    private static volatile Long sizeLimitLinks;
 
-    public static int timeFrame() {
-        Integer tmp = timeFrame;
+    public static long sizeLimitLinks() {
+        Long tmp = sizeLimitLinks;
         if (null == tmp) {
             synchronized (LimitConfig.class) {
-                tmp = timeFrame;
+                tmp = sizeLimitLinks;
+                if (null == tmp) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return 1073741824L; // 1GB
+                    }
+                    tmp = Long.valueOf(service.getProperty(SIZE_LIMIT_LINKS, "1073741824"));
+                    sizeLimitLinks = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    private static volatile Integer timeFrameGuests;
+
+    public static int timeFrameGuests() {
+        Integer tmp = timeFrameGuests;
+        if (null == tmp) {
+            synchronized (LimitConfig.class) {
+                tmp = timeFrameGuests;
                 if (null == tmp) {
                     final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
                         // Service not yet available
                         return 0;
                     }
-                    tmp = Integer.valueOf(service.getProperty(TIME_FRAME, "0"));
-                    timeFrame = tmp;
+                    tmp = Integer.valueOf(service.getProperty(TIME_FRAME_GUESTS, "0"));
+                    timeFrameGuests = tmp;
                 }
             }
         }
         return tmp.intValue();
+    }
+
+    private static volatile Integer timeFrameLinks;
+
+    public static int timeFrameLinks() {
+        Integer tmp = timeFrameLinks;
+        if (null == tmp) {
+            synchronized (LimitConfig.class) {
+                tmp = timeFrameLinks;
+                if (null == tmp) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return 0;
+                    }
+                    tmp = Integer.valueOf(service.getProperty(TIME_FRAME_LINKS, "0"));
+                    timeFrameLinks = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Boolean enabled;
+
+    public static boolean isEnabled() {
+        Boolean tmp = enabled;
+        if (null == tmp) {
+            synchronized (LimitConfig.class) {
+                tmp = enabled;
+                if (null == tmp) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return false;
+                    }
+                    if ((!isEnabledViaConfiguration()) || ((timeFrameGuests() <= 0) && (timeFrameLinks() <= 0))) {
+                        tmp = false;
+                    } else {
+                        tmp = true;
+                    }
+                    enabled = tmp.booleanValue();
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    private static volatile Boolean enabledViaConfiguration;
+
+    private static boolean isEnabledViaConfiguration() {
+        Boolean tmp = enabledViaConfiguration;
+        if (null == tmp) {
+            synchronized (LimitConfig.class) {
+                tmp = enabledViaConfiguration;
+                if (null == tmp) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Service not yet available
+                        return false;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty(LIMIT_ENABLED, false));
+                    enabledViaConfiguration = tmp.booleanValue();
+                }
+            }
+        }
+        return tmp.booleanValue();
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------ //

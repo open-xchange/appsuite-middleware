@@ -47,73 +47,26 @@
  *
  */
 
-package com.openexchange.share.limit;
+package com.openexchange.share.limit.impl;
 
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-
+import com.openexchange.ajax.requesthandler.DispatcherListener;
+import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
- * {@link AnonymousGuestDownloadLimiterTest}
+ * {@link InfostoreDownloadLimiter} A {@link DispatcherListener} that is responsible for actions defined in {@link GuestDownloadLimiter} and the "infostore" module
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class AnonymousGuestDownloadLimiterTest {
+public class InfostoreDownloadLimiter extends GuestDownloadLimiter {
 
-    /**
-     * @throws java.lang.Exception
-     */
-    @Before
-    public void setUp() throws Exception {}
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#dropObsoleteAccesses(int, int)}.
-     */
-    @Test
-    public void testDropObsoleteAccesses() {
-        fail("Not yet implemented");
+    public InfostoreDownloadLimiter(ConfigViewFactory configView) {
+        super(configView);
     }
 
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#getLimit(int, int)}.
-     */
-    @Test
-    public void testGetLimit() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#isEnabled(com.openexchange.share.limit.FileAccess)}.
-     */
-    @Test
-    public void testIsEnabled() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#handles(java.lang.String, java.lang.String)}.
-     */
-    @Test
-    public void testHandlesStringString() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#handles(int, int)}.
-     */
-    @Test
-    public void testHandlesIntInt() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#onSuccess(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.requesthandler.AJAXRequestResult)}.
-     */
-    @Test
-    public void testAfter() {
-        fail("Not yet implemented");
+    @Override
+    public String getModule() {
+        return "infostore";
     }
 
 }

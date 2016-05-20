@@ -66,10 +66,10 @@ public abstract class ActionBoundDispatcherListener implements DispatcherListene
     protected ActionBoundDispatcherListener() {
         super();
     }
-
+    
     @Override
-    public final boolean applicable(AJAXRequestData requestData) {
-        String module = getModule();
+    public boolean applicable(AJAXRequestData requestData) {
+        String module = requestData.getNormalizedModule();
         if (false == DispatcherListeners.equalsModule(module, requestData)) {
             return false;
         }

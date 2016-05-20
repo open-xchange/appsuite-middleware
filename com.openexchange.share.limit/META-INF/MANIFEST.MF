@@ -24,7 +24,6 @@ Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.tools.servlet.ratelimit,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
- com.openexchange.user,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.share.limit.osgi.ShareLimitActivator
