@@ -406,7 +406,7 @@ public final class CSSMatcher {
 
         // Check for internal invocation and thread pool availability
         ThreadPoolService threadPool = ThreadPools.getThreadPool();
-        if (internallyInvoked || (threadPool == null)) {
+        if (internallyInvoked || (threadPool == null) || (Thread.currentThread().getName().startsWith("JerichoParser"))) {
             boolean retval = doCheckCss(cssBld, styleMap, cssPrefix, removeIfAbsent);
             cssBuilder.append(cssBld);
             return retval;

@@ -49,17 +49,31 @@
 
 package com.openexchange.html.internal.jericho;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlServices;
+import com.openexchange.html.internal.css.CSSMatcher;
 import com.openexchange.html.internal.parser.HtmlHandler;
+import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadRenamer;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.EndTagType;
@@ -77,6 +91,28 @@ import net.htmlparser.jericho.TagType;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JerichoParser {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
+
+    private static volatile Integer htmlParseTimeoutSec;
+    private static int htmlParseTimeoutSec() {
+        Integer tmp = htmlParseTimeoutSec;
+        if (null == tmp) {
+            synchronized (CSSMatcher.class) {
+                tmp = htmlParseTimeoutSec;
+                if (null == tmp) {
+                    final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final int defaultValue = 10;
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.html.parse.timeout", defaultValue));
+                    htmlParseTimeoutSec = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
 
     /**
      * {@link ParsingDeniedException} - Thrown if HTML content cannot be parsed by {@link JerichoParser#parse(String, JerichoHandler)}
@@ -182,7 +218,60 @@ public final class JerichoParser {
      * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    public void parse(String html, JerichoHandler handler, boolean checkSize) {
+    public void parse(final String html, final JerichoHandler handler, final boolean checkSize) {
+        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        if (threadPool == null) {
+            doParse(html, handler, checkSize);
+            return;
+        }
+
+        // Run as a separate task
+        Task<Void> task = new AbstractTask<Void>() {
+
+            @Override
+            public void setThreadName(ThreadRenamer threadRenamer) {
+                threadRenamer.renamePrefix("JerichoParser");
+            }
+
+            @Override
+            public Void call() {
+                doParse(html, handler, checkSize);
+                return null;
+            }
+        };
+
+        // Submit to thread pool ...
+        Future<Void> f = threadPool.submit(task);
+        // ... and await response
+        int timeout = htmlParseTimeoutSec();
+        TimeUnit timeUnit = TimeUnit.SECONDS;
+        try {
+            f.get(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            f.cancel(true);
+        } catch (ExecutionException e) {
+            final Throwable cause = e.getCause();
+            LOG.error("", cause);
+            f.cancel(true);
+            throw new ParsingDeniedException(cause);
+        } catch (TimeoutException e) {
+            // Wait time exceeded
+            LOG.warn("{}Parsing of HTML content exceeded max. response time of {}{}{}", Strings.getLineSeparator(), Integer.valueOf(timeout), toLowerCase(timeUnit.name()), Strings.getLineSeparator());
+            f.cancel(true);
+            throw new ParsingDeniedException("Parsing of HTML content exceeded max. response time of " + Integer.toString(timeout) + " seconds");
+        }
+    }
+
+    /**
+     * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
+     *
+     * @param html The real-life HTML document
+     * @param handler The HTML handler
+     * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
+     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
+     */
+    protected void doParse(String html, JerichoHandler handler, boolean checkSize) {
         StreamedSource streamedSource = null;
         try {
             if (false == checkBody(html, checkSize)) {
