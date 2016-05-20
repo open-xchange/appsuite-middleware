@@ -1,3 +1,9 @@
+open-xchange-dav (7.8.1-12) stable; urgency=medium
+
+  * Build for patch 2016-05-23 (3294)
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 20 May 2016 11:55:22 +0200
+
 open-xchange-dav (7.8.1-11) stable; urgency=medium
 
   * Build for patch 2016-05-09 (3272)
