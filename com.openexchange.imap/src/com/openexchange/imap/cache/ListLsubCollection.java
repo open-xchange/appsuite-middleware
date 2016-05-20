@@ -1202,47 +1202,55 @@ final class ListLsubCollection implements Serializable {
      * @throws ProtocolException If a protocol error occurs
      */
     protected void doRootListCommand(final IMAPProtocol protocol) throws ProtocolException {
-        doDummyLsub(protocol);
         /*
          * Perform command: LIST "" ""
          */
         String command = "LIST \"\" \"\"";
         Response[] r = performCommand(protocol, command);
+
+        if (r.length == 1) {
+            // No LIST response for root folder. Do dummy LSUB and retry...
+            doDummyLsub(protocol);
+            r = performCommand(protocol, command);
+        }
+
         Response response = r[r.length - 1];
-        if (response.isOK()) {
-            String cmd = "LIST";
-            for (int i = 0, len = r.length; i < len; i++) {
-                if (!(r[i] instanceof IMAPResponse)) {
-                    continue;
-                }
-                final IMAPResponse ir = (IMAPResponse) r[i];
-                if (ir.keyEquals(cmd)) {
-                    final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null);
-                    {
-                        final ListLsubEntryImpl oldEntry = listMap.get(ROOT_FULL_NAME);
-                        if (null == oldEntry) {
-                            listMap.put(ROOT_FULL_NAME, listLsubEntry);
-                            lsubMap.put(ROOT_FULL_NAME, listLsubEntry);
-                        } else {
-                            oldEntry.clearChildren();
-                            oldEntry.copyFrom(listLsubEntry);
-                        }
-                    }
-                    r[i] = null;
-                }
-            }
-            /*
-             * Dispatch remaining untagged responses
-             */
-            protocol.notifyResponseHandlers(r);
-        } else {
+        if (false == response.isOK()) {
             /*
              * Dispatch remaining untagged responses
              */
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
+            return;
         }
+
+        String cmd = "LIST";
+        for (int i = 0, k = r.length; k-- > 0; i++) {
+            if (!(r[i] instanceof IMAPResponse)) {
+                continue;
+            }
+
+            IMAPResponse ir = (IMAPResponse) r[i];
+            if (ir.keyEquals(cmd)) {
+                final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null);
+                {
+                    final ListLsubEntryImpl oldEntry = listMap.get(ROOT_FULL_NAME);
+                    if (null == oldEntry) {
+                        listMap.put(ROOT_FULL_NAME, listLsubEntry);
+                        lsubMap.put(ROOT_FULL_NAME, listLsubEntry);
+                    } else {
+                        oldEntry.clearChildren();
+                        oldEntry.copyFrom(listLsubEntry);
+                    }
+                }
+                r[i] = null;
+            }
+        }
+        /*
+         * Dispatch remaining untagged responses
+         */
+        protocol.notifyResponseHandlers(r);
     }
 
     /**
