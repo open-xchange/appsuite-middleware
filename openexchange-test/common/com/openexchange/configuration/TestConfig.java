@@ -90,6 +90,8 @@ public class TestConfig extends AbstractConfig {
          */
         GOOGLE_PROPS("googlePropertiesFile"),
 
+        TEST_DATA_DIR("testDataDir"),
+
         FILESTORE("filestoreId");
 
         /**
