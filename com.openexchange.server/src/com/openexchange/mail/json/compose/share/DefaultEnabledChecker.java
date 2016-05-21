@@ -100,9 +100,15 @@ public class DefaultEnabledChecker implements EnabledChecker {
         return Utilities.hasCapabilities(session, caps);
     }
 
-    protected List<String> modifyCapabilitiesToCheck(List<String> capsToCheck) {
+    /**
+     * Modifies the specified capabilities (remove existing, add new ones) that are supposed to checked.
+     *
+     * @param capabilities The capabilities to modify
+     * @return The possible modified capabilities
+     */
+    protected List<String> modifyCapabilitiesToCheck(List<String> capabilities) {
         // Return unchanged for default checker
-        return capsToCheck;
+        return capabilities;
     }
 
 }
