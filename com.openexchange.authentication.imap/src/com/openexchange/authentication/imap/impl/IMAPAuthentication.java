@@ -263,6 +263,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 }
             }
 
+            ConfigurationService configuration = services.getService(ConfigurationService.class);
             final String socketFactoryClass = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
             final String sPort = port.toString();
             if (USE_IMAPS) {
@@ -284,7 +285,6 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Specify SSL protocols
                  */
                 {
-                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
                     imapprops.put("mail.imap.ssl.protocols", sslProtocols);
                 }
@@ -292,7 +292,6 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Specify SSL cipher suites
                  */
                 {
-                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
                     final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
                     if (false == Strings.isEmpty(cipherSuites)) {
                         imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);
@@ -302,7 +301,12 @@ public class IMAPAuthentication implements AuthenticationService {
                 /*
                  * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
                  */
-                imapprops.put("mail.imap.starttls.enable", "true");
+                {
+                    boolean enableTls = configuration.getBoolProperty("com.openexchange.imap.enableTls", true);
+                    if (enableTls) {
+                        imapprops.put("mail.imap.starttls.enable", "true");
+                    }
+                }
                 /*
                  * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create IMAP SSL sockets if TLS handshake says
                  * so.
@@ -315,7 +319,6 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Specify SSL protocols
                  */
                 {
-                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
                     imapprops.put("mail.imap.ssl.protocols", sslProtocols);
                 }
@@ -323,7 +326,6 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Specify SSL cipher suites
                  */
                 {
-                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
                     final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
                     if (false == Strings.isEmpty(cipherSuites)) {
                         imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);
