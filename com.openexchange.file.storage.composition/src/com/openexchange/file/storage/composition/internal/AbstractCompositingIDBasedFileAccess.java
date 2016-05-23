@@ -874,7 +874,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                         });
                     }
                 } else {
-                    warnings.add(FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create());
+                    warnings.add(FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(serviceID));
                 }
             }
 
