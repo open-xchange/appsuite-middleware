@@ -69,6 +69,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mime.MimeTypeMap;
 import com.sun.mail.imap.IMAPMessage;
 
@@ -206,11 +207,11 @@ public final class MailDriveFile extends DefaultFile {
         }
         {
             Long origUid = (Long) message.getItem("X-REAL-UID");
-            map.put("id",null == origUid ? JSONObject.NULL : origUid.toString());
+            map.put("id", null == origUid ? JSONObject.NULL : origUid.toString());
         }
         {
             String origFolder = (String) message.getItem("X-MAILBOX");
-            map.put("folder",null == origFolder ? JSONObject.NULL : origFolder);
+            map.put("folder", null == origFolder ? JSONObject.NULL : MailFolderUtility.prepareFullname(0, origFolder));
         }
         {
             InternetAddress[] fromHeaders = getAddressHeader("From", message);
