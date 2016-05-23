@@ -137,7 +137,8 @@ public class Guess extends AbstractConfigSource {
             String host = (String) guessedHost[0];
             boolean secure = (Boolean) guessedHost[1];
             Integer port = (Integer) guessedHost[2];
-            String login = guessLogin(protocol, host, port.intValue(), secure, emailLocalPart, emailDomain, password, properties);
+            boolean startTls = (Boolean) guessedHost[3];
+            String login = guessLogin(protocol, host, port.intValue(), secure, startTls, emailLocalPart, emailDomain, password, properties);
             if (login == null) {
                 return false;
             }
@@ -161,20 +162,20 @@ public class Guess extends AbstractConfigSource {
         return false;
     }
 
-    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, String emailLocalPart, String emailDomain, String password, Map<String, Object> properties) {
+    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, boolean startTls, String emailLocalPart, String emailDomain, String password, Map<String, Object> properties) {
         List<String> logins = Arrays.asList(emailLocalPart, emailLocalPart+"@"+emailDomain);
 
         for (String login : logins) {
             if (protocol == URIDefaults.IMAP) {
-                if (MailValidator.validateImap(host, port, secure, login, password)) {
+                if (MailValidator.validateImap(host, port, secure, startTls, login, password)) {
                     return login;
                 }
             } else if (protocol == URIDefaults.POP3) {
-                if (MailValidator.validatePop3(host, port, secure, login, password)) {
+                if (MailValidator.validatePop3(host, port, secure, startTls, login, password)) {
                     return login;
                 }
             } else if (protocol == URIDefaults.SMTP) {
-                if (MailValidator.validateSmtp(host, port, secure, login, password, properties)) {
+                if (MailValidator.validateSmtp(host, port, secure, startTls, login, password, properties)) {
                     return login;
                 }
             }
@@ -201,7 +202,9 @@ public class Guess extends AbstractConfigSource {
         for (String prefix : prefixes) {
             String host = prefix + emailDomain;
             if (checkSave(protocol, host, protocol.getSSLPort(), true)) {
-                return new Object[] { host, true, protocol.getSSLPort() };
+                return new Object[] { host, true, protocol.getSSLPort(), true };
+            } else if (checkSave(protocol, host, protocol.getPort(), true)) {
+                return new Object[] { host, false, protocol.getPort(), true };
             } else if (!forceSecure && altPort > 0 && checkSave(protocol, host, altPort, false)) {
                 return new Object[] { host, false, altPort };
             } else if (!forceSecure && checkSave(protocol, host, protocol.getPort(), false)) {
