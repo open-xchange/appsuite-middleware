@@ -64,6 +64,6 @@ public class SentAttachmentsFolder extends AbstractMailDriveSetting {
      * Initializes a new {@link SentAttachmentsFolder}.
      */
     public SentAttachmentsFolder(MailDriveFileStorageService mailDriveService) {
-        super("sentattachments", Type.SENT, mailDriveService);
+        super("sent", Type.SENT, mailDriveService);
     }
 }
