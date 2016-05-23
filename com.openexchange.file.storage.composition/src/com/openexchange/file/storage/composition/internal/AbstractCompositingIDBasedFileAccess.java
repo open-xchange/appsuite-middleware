@@ -894,7 +894,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         /*
          * Update existing file
          */
-        FileID sourceFileID = new FileID(document);
+        FileID sourceFileID = new FileID(document.getId());
         if (null == sourceFileID.getFolderId()) {
             // preserve folder information also for infostore items
             sourceFileID.setFolderId(document.getFolderId());
