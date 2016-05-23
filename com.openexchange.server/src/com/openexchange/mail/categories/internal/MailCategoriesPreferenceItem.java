@@ -101,6 +101,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
     private static final String FIELD_FEATURE_INITIALIZED = "initialized";
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
+    private static final String FIELD_DESCRIPTION = "description";
     private static final String FIELD_ACTIVE = "active";
     private static final String FIELD_PERMISSIONS = "permissions";
 
@@ -138,6 +139,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                             JSONObject categoryJSON = new JSONObject(3);
                             categoryJSON.put(FIELD_ID, config.getCategory());
                             categoryJSON.put(FIELD_NAME, config.getName());
+                            categoryJSON.put(FIELD_DESCRIPTION, config.getDescription());
                             categoryJSON.put(FIELD_ACTIVE, config.isActive());
 
                             List<String> mailCategoryPermissions = new ArrayList<>();

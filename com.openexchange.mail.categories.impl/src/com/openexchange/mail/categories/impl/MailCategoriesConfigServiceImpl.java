@@ -126,7 +126,9 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
         if (includeGeneral) {
             String name = getLocalizedName(session, locale, MailCategoriesConstants.GENERAL_CATEGORY_ID);
-            MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category(MailCategoriesConstants.GENERAL_CATEGORY_ID).isSystemCategory(true).enabled(true).force(true).name(name).build();
+            String description = getLocalizedDescription(session, locale, MailCategoriesConstants.GENERAL_CATEGORY_ID);
+
+            MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category(MailCategoriesConstants.GENERAL_CATEGORY_ID).isSystemCategory(true).enabled(true).force(true).name(name).description(description).build();
             result.add(generalConfig);
         }
 
@@ -213,6 +215,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             name = getLocalizedName(session, locale, category);
         }
         builder.name(name);
+        String description = getLocalizedDescription(session, locale, category);
+        builder.description(description);
         builder.enabled(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
         builder.force(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session));
         builder.flag(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
@@ -247,11 +251,20 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     private String getLocalizedName(Session session, Locale locale, String category) throws OXException {
 
-        String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_LANGUAGE_PREFIX + locale.toString(), null, session);
+        String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME_LANGUAGE_PREFIX + locale.toString(), null, session);
         if (translation != null && !translation.isEmpty()) {
             return translation;
         }
         return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FALLBACK, category, session);
+    }
+
+    private String getLocalizedDescription(Session session, Locale locale, String category) throws OXException {
+
+        String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_DESCRIPTION_LANGUAGE_PREFIX + locale.toString(), null, session);
+        if (translation != null && !translation.isEmpty()) {
+            return translation;
+        }
+        return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_DESCRIPTION, null, session);
     }
 
     String[] getSystemCategoryNames(Session session) throws OXException {
