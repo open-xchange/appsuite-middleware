@@ -199,7 +199,8 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                         String catID = getType(newConfJSON.remove(FIELD_ID), String.class, setting.getSingleValue(), setting.getName());
                         String name = getType(newConfJSON.remove(FIELD_NAME), String.class, setting.getSingleValue(), setting.getName());
                         Boolean enable = getType(newConfJSON.remove(FIELD_ACTIVE), Boolean.class, setting.getSingleValue(), setting.getName());
-                        newConfJSON.remove("permissions");
+                        newConfJSON.remove(FIELD_PERMISSIONS);
+                        newConfJSON.remove(FIELD_DESCRIPTION);
                         if (!newConfJSON.isEmpty()) {
                             throw SettingExceptionCodes.INVALID_VALUE.create(setting.getSingleValue(), setting.getName());
                         }
