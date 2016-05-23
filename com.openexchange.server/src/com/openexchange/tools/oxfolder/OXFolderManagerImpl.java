@@ -60,7 +60,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -70,10 +69,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -1635,7 +1636,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @throws OXException If deletion fails for any folder
      */
     void deleteValidatedFolders(final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final long lastModified, final int type) throws OXException {
-        final TIntSet validatedFolders = new TIntHashSet();
+        final Set<Integer> validatedFolders = new LinkedHashSet<Integer>();
         TIntObjectProcedure<TIntObjectMap<?>> procedure = new TIntObjectProcedure<TIntObjectMap<?>>() {
 
             @Override
@@ -1644,12 +1645,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     final @SuppressWarnings("unchecked") TIntObjectMap<TIntObjectMap<?>> tmp = (TIntObjectMap<TIntObjectMap<?>>) hashMap;
                     tmp.forEachEntry(this);
                 }
-                validatedFolders.add(folderId);
+                validatedFolders.add(I(folderId));
                 return true;
             }
         };
         deleteableIDs.forEachEntry(procedure);
-        for (int validatedFolder : validatedFolders.toArray()) {
+        for (Integer validatedFolder : validatedFolders) {
             deleteValidatedFolder(validatedFolder, lastModified, type, false);
         }
     }
