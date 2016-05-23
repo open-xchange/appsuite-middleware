@@ -466,8 +466,10 @@ public class DispatcherServlet extends SessionServlet {
             }
         } catch (UploadException e) {
             exc = e;
-            if (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e)) {
+            boolean forceJSON = httpRequest.getParameterMap().containsKey("force_json_response");
+            if (!forceJSON && (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e))) {
                 // An upload failed
+
                 if (null == session || !Client.OX6_UI.getClientId().equals(session.getClient())) {
                     httpResp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(getLocaleFrom(session, Locale.US)));
                     logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
