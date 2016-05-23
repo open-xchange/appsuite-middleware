@@ -1651,7 +1651,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         };
         deleteableIDs.forEachEntry(procedure);
         for (Integer validatedFolder : validatedFolders) {
-            deleteValidatedFolder(validatedFolder, lastModified, type, false);
+            deleteValidatedFolder(validatedFolder.intValue(), lastModified, type, false);
         }
     }
 
