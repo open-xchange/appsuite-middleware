@@ -275,6 +275,41 @@ public final class IMAPCommandsCollection {
         return null == listInfos ? new ListInfo[0] : listInfos;
     }
 
+    /**
+     * Gets the LIST info for specified full name.
+     *
+     * @param fullName The full name
+     * @param imapFolder The IMAP folder providing the protocol to use
+     * @return The LIST info or <code>null</code> (if no such mailbox exists)
+     * @throws MessagingException If LIST info cannot be returned
+     */
+    public static ListInfo getListInfo(final String fullName, IMAPFolder imapFolder) throws MessagingException {
+        ListInfo[] listInfos = ((ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                return protocol.list("", fullName);
+            }
+        }));
+        if (null == listInfos || listInfos.length == 0) {
+            return null;
+        }
+        return listInfos[0];
+    }
+
+    /**
+     * Checks existence for specified full name.
+     *
+     * @param fullName The full name
+     * @param imapFolder The IMAP folder providing the protocol to use
+     * @return <code>true</code> if existing; otherwise <code>false</code>
+     * @throws MessagingException If exists status cannot be returned
+     */
+    public static boolean exists(final String fullName, IMAPFolder imapFolder) throws MessagingException {
+        ListInfo listInfo = getListInfo(fullName, imapFolder);
+        return listInfo != null && fullName.equals(listInfo.name);
+    }
+
     private static final Random RANDOM = new SecureRandom();
 
     /**
