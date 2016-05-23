@@ -449,4 +449,33 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             mailFilterService.reorderRules(creds, new int[] {});
         }
     }
+
+    @Override
+    public void cleanUp(List<String> flags, Session session) throws OXException {
+        MailFilterService mailFilterService = services.getService(MailFilterService.class);
+        if (mailFilterService == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
+        }
+
+        Credentials creds = getCredentials(session);
+        List<Integer> uidList = new ArrayList<>();
+        List<Rule> rules = mailFilterService.listRules(creds, RuleType.CATEGORY.getName());
+        for (Rule rule : rules) {
+            String name = rule.getRuleComment().getRulename();
+            if (!flags.contains(name) && !name.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
+                uidList.add(rule.getRuleComment().getUniqueid());
+            }
+        }
+        if (uidList.isEmpty()) {
+            return;
+        }
+        int[] uids = new int[uidList.size()];
+        int x = 0;
+        for (Integer i : uidList) {
+            uids[x++] = i;
+        }
+
+        mailFilterService.deleteFilterRules(creds, uids);
+
+    }
 }

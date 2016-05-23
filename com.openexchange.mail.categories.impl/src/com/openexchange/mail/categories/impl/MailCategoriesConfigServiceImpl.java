@@ -556,15 +556,17 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         if (!capability) {
             return;
         }
+
+        MailCategoriesRuleEngine engine = Services.getService(MailCategoriesRuleEngine.class);
+        String flags[] = MailCategoriesConfigServiceImpl.getInstance().getAllFlags(session, false, false);
+        engine.cleanUp(Arrays.asList(flags), session);
+
         ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
         if (configViewFactory == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class);
         }
         ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
-
-
         Boolean apply = view.get(MailCategoriesConstants.APPLY_OX_RULES_PROPERTY, Boolean.class);
-
 
         if (apply == null || !apply) {
             return;
