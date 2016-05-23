@@ -193,7 +193,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
     /**
      * The languages config item in the as-config.yml can be:
-     *  - A String "all" which then gets replaced with an ArrayList containing all installed langauges
+     *  - A String "all" which then gets replaced with an ArrayList containing all installed languages
      *  - A Hash as shown in Bug 24171, 41992 specifying a set of languages
      *  - Missing which gets replaced with an ArrayList containing all installed languages
      *

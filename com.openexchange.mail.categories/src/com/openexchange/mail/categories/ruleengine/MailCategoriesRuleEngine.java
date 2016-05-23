@@ -62,9 +62,18 @@ import com.openexchange.session.Session;
 public interface MailCategoriesRuleEngine {
 
     /**
+     * Checks if this rule engine is applicable for session-associated user.
+     *
+     * @param session The session providing user data
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException If applicability cannot be checked
+     */
+    public boolean isApplicable(Session session) throws OXException;
+
+    /**
      * Initialize the rule engine for the given user. For example creates first rules etc.
      * This method should only be called once for every user when the feature is started for the first time.
-     * 
+     *
      * @param session The user session
      * @param rules A list of system rules to create
      * @throws OXException
@@ -102,7 +111,7 @@ public interface MailCategoriesRuleEngine {
 
     /**
      * Removes the value from all condition headers
-     * 
+     *
      * @param session The user session
      * @param value The value to remove
      * @param header The mail header name

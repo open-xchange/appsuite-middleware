@@ -47,38 +47,65 @@
  *
  */
 
-package com.openexchange.mail.categories.impl;
+package com.openexchange.capabilities;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.login.LoginResult;
+import com.openexchange.session.Session;
 
 /**
- * {@link MailCategoriesLoginHandler} initializes the MailCategoriesRuleEngine if it is the first login after activation.
+ * A {@link FailureAwareCapabilityChecker} that extends common <code>CapabilityChecker</code> to deal with possible errors while checking.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.2
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailCategoriesLoginHandler implements LoginHandlerService {
-
-    private final MailCategoriesConfigServiceImpl mailCategoriesService;
+public abstract class FailureAwareCapabilityChecker implements CapabilityChecker {
 
     /**
-     * Initializes a new {@link MailCategoriesLoginHandler}.
+     * The possible results for a capability check.
      */
-    public MailCategoriesLoginHandler(MailCategoriesConfigServiceImpl mailCategoriesService) {
+    public static enum Result {
+        /**
+         * Capability check passed successfully.
+         */
+        ENABLED,
+        /**
+         * Signals that the capability must not be granted.
+         */
+        DISABLED,
+        /**
+         * Signals that capability check could not be performed due to an error.
+         */
+        FAILURE,
+        ;
+    }
+
+    /**
+     * Initializes a new {@link FailureAwareCapabilityChecker}.
+     */
+    protected FailureAwareCapabilityChecker() {
         super();
-        this.mailCategoriesService = mailCategoriesService;
     }
 
+    /**
+     * Check whether the capability should be awarded for a certain user
+     *
+     * @param capability The capability to check
+     * @param session Provides the users session for which to check
+     * @return The result
+     * @throws OXException If check fails
+     */
+    public abstract Result checkEnabled(String capability, Session session) throws OXException;
+
+    /**
+     * Check whether the capability should be awarded for a certain user
+     *
+     * @param capability The capability to check
+     * @param session Provides the users session for which to check
+     * @return Whether to award this capability or not
+     * @throws OXException If check fails
+     */
     @Override
-    public void handleLogin(LoginResult login) throws OXException {
-        mailCategoriesService.initMailCategories(login.getSession());
+    public final boolean isEnabled(String capability, Session session) throws OXException {
+        Result result = checkEnabled(capability, session);
+        return Result.ENABLED == result ? true : false;
     }
-
-    @Override
-    public void handleLogout(LoginResult logout) throws OXException {
-        // nothing to do
-    }
-
 }

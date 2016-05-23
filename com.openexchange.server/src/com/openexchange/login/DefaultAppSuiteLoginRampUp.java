@@ -178,7 +178,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
-                if (false == session.getUserConfiguration().hasWebMail()) {
+                if (false == session.getUserPermissionBits().hasWebMail()) {
                     return null;
                 }
                 JSONObject folder = new JSONObject(3);

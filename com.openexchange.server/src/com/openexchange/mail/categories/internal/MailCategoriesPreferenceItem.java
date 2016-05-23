@@ -78,7 +78,8 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
-    private final ServiceLookup lookupService;
+    /** The service listing */
+    final ServiceLookup lookupService;
 
     /**
      * Initializes a new {@link MailCategoriesPreferenceItem}.
@@ -185,12 +186,12 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                     if (service == null) {
                         return;
                     }
-                    
+
                     boolean featureEnabled = config.getBoolean(FIELD_FEATURE_ENABLED);
                     if (!service.isForced(session)) {
                         service.enable(session, featureEnabled);
                     }
-                    
+
                     JSONArray mailCategories = getType(config.get(FIELD_LIST), JSONArray.class, setting.getSingleValue(), setting.getName());
                     List<MailCategoryConfig> newConfigs = new ArrayList<>();
                     for (Object o : mailCategories.asList()) {
@@ -218,7 +219,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                 } catch (JSONException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(setting.getSingleValue(), setting.getName());
                 }
-                
+
             }
 
             private <T> T getType(Object o, Class<T> clazz, Object exceptionObject, String name) throws OXException {
