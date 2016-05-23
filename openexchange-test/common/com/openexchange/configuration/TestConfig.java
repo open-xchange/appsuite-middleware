@@ -12,6 +12,8 @@ import com.openexchange.tools.conf.AbstractConfig;
  */
 public class TestConfig extends AbstractConfig {
 
+    private static volatile boolean initialized = false;
+
     /**
      * Singleton.
      */
@@ -52,12 +54,20 @@ public class TestConfig extends AbstractConfig {
                 if (null == singleton) {
                     singleton = new TestConfig();
                     singleton.loadPropertiesInternal();
+                    initialized = true;
                 }
             }
         }
     }
 
     public static String getProperty(final Property key) {
+        if (!initialized) {
+            try {
+                init();
+            } catch (final OXException e) {
+                return null;
+            }
+        }
         return singleton.getPropertyInternal(key.getPropertyName());
     }
 
