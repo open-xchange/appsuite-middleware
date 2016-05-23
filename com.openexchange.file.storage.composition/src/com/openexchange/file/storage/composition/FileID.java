@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.composition;
 
 import java.util.List;
-import com.openexchange.file.storage.File;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -123,15 +122,6 @@ public class FileID {
                 fileId = unmangled.get(3);
                 break;
         }
-    }
-
-    /**
-     * Initializes a new {@link FileID}.
-     *
-     * @param document The file
-     */
-    public FileID(File document) {
-        this(document.getFolderId() + IDMangler.SECONDARY_DELIM + document.getId());
     }
 
     /**
