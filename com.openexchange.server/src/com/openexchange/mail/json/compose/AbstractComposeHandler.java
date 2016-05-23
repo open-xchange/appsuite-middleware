@@ -814,6 +814,8 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                 Date date = new Date(jMail.getLong(MailJSONField.SENT_DATE.getKey()));
                 int offset = timeZone.getOffset(date.getTime());
                 composedMail.setSentDate(new Date(jMail.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
+            } else {
+                composedMail.setSentDate(new Date());
             }
             if (jMail.hasAndNotNull(MailJSONField.RECEIVED_DATE.getKey())) {
                 Date date = new Date(jMail.getLong(MailJSONField.RECEIVED_DATE.getKey()));
