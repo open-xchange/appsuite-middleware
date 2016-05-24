@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.IValueHandlerExtended;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
@@ -67,6 +68,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -112,11 +114,21 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
     @Override
     public IValueHandler getSharedValue() {
-        return new IValueHandler() {
+        return new IValueHandlerExtended() {
 
             @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return userConfig.hasWebMail() && userConfig.getExtendedPermissions().contains(MAIL_CATEGORIES_CAPABILTY);
+            }
+
+            @Override
+            public boolean isAvailable(Session session, UserConfiguration userConfig) throws OXException {
+                if (false == userConfig.hasWebMail()) {
+                    return false;
+                }
+
+                CapabilityService service = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+                return service.getCapabilities(session).contains(MAIL_CATEGORIES_CAPABILTY);
             }
 
             @Override

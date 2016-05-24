@@ -50,57 +50,26 @@
 package com.openexchange.groupware.settings;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- * Interface for settings that are shared between GUI and server.
+ * {@link IValueHandlerExtended} - Extends {@link IValueHandler} by {@link #isAvailable(Session, UserConfiguration)} to allow session-based
+ * availability checks.
  *
- * @see IValueHandlerExtended
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public interface IValueHandler {
-
-    int NO_ID = -1;
-    Object UNDEFINED = new Object();
+public interface IValueHandlerExtended extends IValueHandler {
 
     /**
-     * @param session Session.
-     * @param userConfig user configuration.
-     * @param setting the value should be set in this setting object.
+     * Checks if the associated setting is available to session-associated user.
+     *
+     * @param session The session providing user data
+     * @param userConfig The user configuration
+     * @return <code>true</code> if this setting is available; otherwise <code>false</code>
      * @throws OXException if an error occurs.
      */
-    void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException;
+    boolean isAvailable(Session session, UserConfiguration userConfig) throws OXException;
 
-    /**
-     * @param session Session.
-     * @return <code>true</code> if this setting is available due to {@link UserConfiguration}.
-     * @see IValueHandlerExtended
-     */
-    boolean isAvailable(final UserConfiguration userConfig);
-
-    /**
-     * @return <code>true</code> if the setting can be written by the GUI.
-     */
-    boolean isWritable();
-
-    /**
-     * Write a new value to the setting.
-     * @param session Session.
-     * @param ctx Context.
-     * @param user user object.
-     * @param setting contains the value for the setting.
-     * @throws OXException if the setting can't be written or an error occurs while writing the value.
-     */
-    void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException;
-
-    /**
-     * If the value should be written simply to the database and read from there a unique identifier must be returned instead of
-     * implementing methods {@link #getValue(Session, Context, User, UserConfiguration, Setting)} and
-     * {@link #writeValue(Context, User, Setting)}.
-     *
-     * @return the unique identifier of the value in the database.
-     */
-    int getId();
 }
