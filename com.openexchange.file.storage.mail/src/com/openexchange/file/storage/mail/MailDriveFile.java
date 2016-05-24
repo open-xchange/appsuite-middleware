@@ -68,6 +68,9 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mime.MimeTypeMap;
@@ -133,7 +136,7 @@ public final class MailDriveFile extends DefaultFile {
     public MailDriveFile parseMessage(IMAPMessage message, List<Field> fields) throws MessagingException, OXException {
         if (null != message) {
             try {
-                final String name = message.getSubject();
+                String name = MimeMessageConverter.getSubject(message);
                 setTitle(name);
                 setFileName(name);
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
@@ -151,7 +154,15 @@ public final class MailDriveFile extends DefaultFile {
                     }
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
-                    String contentType = message.getContentType();
+                    String contentType;
+                    {
+                        String[] tmp = message.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+                        if ((tmp != null) && (tmp.length > 0)) {
+                            contentType = MimeMessageUtility.decodeMultiEncodedHeader(tmp[0]);
+                        } else {
+                            contentType = MimeTypes.MIME_DEFAULT;
+                        }
+                    }
                     if (Strings.isEmpty(contentType)) {
                         MimeTypeMap map = Services.getService(MimeTypeMap.class);
                         contentType = map.getContentType(name);
