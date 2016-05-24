@@ -279,6 +279,9 @@ public class SearchDriverManager implements ServiceTrackerCustomizer<ModuleSearc
                 return false;
             }
             ComparableDriver other = (ComparableDriver) obj;
+            if (serviceRanking != other.serviceRanking) {
+                return false;
+            }
             if (driver == null) {
                 if (other.driver != null) {
                     return false;
@@ -286,9 +289,6 @@ public class SearchDriverManager implements ServiceTrackerCustomizer<ModuleSearc
             } else if (driver.getModule() != other.driver.getModule()) {
                 return false;
             } else if (!driver.getClass().equals(other.driver.getClass())) {
-                return false;
-            }
-            if (serviceRanking != other.serviceRanking) {
                 return false;
             }
             return true;
