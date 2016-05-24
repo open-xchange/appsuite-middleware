@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.configuration.TestConfig;
 
 /**
  * {@link FileResponseRendererTools}
@@ -72,7 +71,7 @@ public class FileResponseRendererTools {
         attachment, inline
     };
 
-    private static final String TEST_DATA_DIR = TestConfig.getProperty(TestConfig.Property.TEST_DATA_DIR) + "responserenderer/";
+    private static final String TEST_DATA_DIR = "testconf/";
 
     /**
      * @param filename
