@@ -47,50 +47,44 @@
  *
  */
 
-package com.openexchange.find.basic.mail;
+package com.openexchange.imap.sort;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import javax.mail.search.SearchException;
+import javax.mail.search.SearchTerm;
+import com.openexchange.mail.search.AttachmentTerm.AttachmentSearchTerm;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.imap.protocol.SearchSequence;
+
 
 /**
- * {@link Constants}
+ * {@link ExtendedSearchSequence}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
  */
-public class Constants {
+public class ExtendedSearchSequence extends SearchSequence {
 
-    final static String FIELD_FROM = "from";
+    @Override
+    public Argument generateSequence(SearchTerm term, String charset) throws SearchException, IOException {
+        if (term instanceof AttachmentSearchTerm) {
+            return attachmentTerm((AttachmentSearchTerm) term, charset);
+        }
 
-    final static String FIELD_TO = "to";
+        return super.generateSequence(term, charset);
+    }
 
-    final static String FIELD_CC = "cc";
-
-    final static String FIELD_BCC = "bcc";
-
-    final static String FIELD_SUBJECT = "subject";
-
-    final static String FIELD_BODY = "body";
-
-    final static String FIELD_FOLDER = "folder";
-
-    final static String FIELD_ATTACHMENT_NAME = "attachment_name";
-
-    static final List<String> FROM_FIELDS = asList(FIELD_FROM);
-
-    static final List<String> TO_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC, FIELD_BCC });
-
-    static final List<String> FROM_AND_TO_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BCC });
-
-    static final List<String> FOLDERS_FIELDS = Arrays.asList(new String[] { FIELD_FOLDER });
-
-    static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BCC });
-
-    static final List<String> QUERY_FIELDS_BODY = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BCC, FIELD_BODY });
-
-    static List<String> asList(String str) {
-        return Collections.singletonList(str);
+    /**
+     * @param term
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    private Argument attachmentTerm(AttachmentSearchTerm term, String charset) throws UnsupportedEncodingException {
+        Argument result = new Argument();
+        result.writeAtom("BODYSTRUCTURE DISPOSITION PARAM \"filename\"");
+        result.writeString(term.getPattern(), charset);
+        return result;
     }
 
 }

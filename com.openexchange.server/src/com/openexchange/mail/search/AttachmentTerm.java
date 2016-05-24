@@ -64,10 +64,23 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public class AttachmentTerm extends SearchTerm<String> {
 
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 2515235086017062070L;
+    private String pattern;
+
+    /**
+     * Initializes a new {@link AttachmentTerm}.
+     */
+    public AttachmentTerm(String pattern) {
+        super();
+        this.pattern = pattern;
+    }
+
     @Override
     public String getPattern() {
-        // TODO Auto-generated method stub
-        return null;
+        return pattern;
     }
 
     @Override
@@ -96,8 +109,7 @@ public class AttachmentTerm extends SearchTerm<String> {
 
     @Override
     public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-        // TODO Auto-generated method stub
-        return null;
+        return new AttachmentSearchTerm(this.pattern);
     }
 
     @Override
@@ -109,6 +121,33 @@ public class AttachmentTerm extends SearchTerm<String> {
     @Override
     public void contributeTo(FetchProfile fetchProfile) {
         // TODO Auto-generated method stub
+
+    }
+
+    public class AttachmentSearchTerm extends javax.mail.search.SearchTerm {
+
+        /**
+         * serialVersionUID
+         */
+        private static final long serialVersionUID = 686347717555105068L;
+        private String pattern;
+
+        /**
+         * Initializes a new {@link AttachmentTerm.AttachmentSearchTerm}.
+         */
+        public AttachmentSearchTerm(String pattern) {
+            super();
+            this.pattern = pattern;
+        }
+
+        @Override
+        public boolean match(Message msg) {
+            return false;
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
 
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.mail;
 
+import static com.openexchange.find.basic.mail.Constants.FIELD_ATTACHMENT_NAME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BCC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
@@ -71,11 +72,13 @@ import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.find.mail.MailFacetType.CONTACTS;
 import static com.openexchange.find.mail.MailFacetType.MAIL_TEXT;
 import static com.openexchange.find.mail.MailFacetType.SUBJECT;
+import static com.openexchange.find.mail.MailFacetType.ATTACHMENT;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM_AND_TO;
 import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
+import static com.openexchange.find.mail.MailStrings.FACET_ATTACHMENT_NAME;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -138,6 +141,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.AttachmentTerm;
 import com.openexchange.mail.search.BccTerm;
 import com.openexchange.mail.search.BodyTerm;
 import com.openexchange.mail.search.CatenatingTerm;
@@ -229,12 +233,21 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 prefixTokens = Collections.singletonList(prefix);
             }
 
-            addSimpleFacets(facets, prefix, prefixTokens);
+            boolean addAttachmentSearch = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<Boolean>() {
+
+                @Override
+                public Boolean call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
+                    return mailAccess.getMailConfig().getCapabilities().hasAttachmentSearch();
+                }
+            });
+
+            addSimpleFacets(facets, prefix, prefixTokens, addAttachmentSearch);
         } else {
             prefixTokens = Collections.emptyList();
         }
 
         MailFolder folder = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<MailFolder>() {
+
             @Override
             public MailFolder call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
                 return folder;
@@ -326,7 +339,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return MailFolderUtility.prepareMailFolderParam(folderName);
     }
 
-    private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens) {
+    private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens, boolean addAttachmentSearch) {
         if (!prefixTokens.isEmpty()) {
 
             facets.add(newSimpleBuilder(GLOBAL)
@@ -347,6 +360,10 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 prefix,
                 FIELD_BODY,
                 prefixTokens));
+            
+            if (addAttachmentSearch) {
+                facets.add(buildSimpleFacet(ATTACHMENT, FACET_ATTACHMENT_NAME, prefix, FIELD_ATTACHMENT_NAME, prefixTokens));
+            }
         }
     }
 
@@ -504,6 +521,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         SearchTerm<?> bodyTerm = prepareTermForFacet(searchRequest, MailFacetType.MAIL_TEXT, folder, OP.AND, OP.AND, OP.AND);
         if (bodyTerm != null) {
             facetTerms.add(bodyTerm);
+        }
+
+        SearchTerm<?> attachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.ATTACHMENT, folder, OP.AND, OP.AND, OP.AND);
+        if (attachmentTerm != null) {
+            facetTerms.add(attachmentTerm);
         }
 
         SearchTerm<?> contactsTerm = prepareTermForFacet(searchRequest, MailFacetType.CONTACTS, folder, OP.AND, OP.OR, OP.OR);
@@ -698,6 +720,8 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             Comparison comparison = parsed.getFirst();
             Long timestamp = parsed.getSecond();
             return buildDateTerm(comparison, timestamp, isOutgoingFolder);
+        } else if (FIELD_ATTACHMENT_NAME.equals(field)) {
+            return new AttachmentTerm(query);
         }
 
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);

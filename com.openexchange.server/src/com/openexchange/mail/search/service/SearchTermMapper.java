@@ -142,7 +142,7 @@ public final class SearchTermMapper {
                 return null == term ? BooleanTerm.TRUE : term;
             case ATTACHMENT:
                 if (values[0].equals("NAME")) {
-                    return new AttachmentTerm();
+                    return new AttachmentTerm((String) values[1]);
                 }
             default:
                 return BooleanTerm.TRUE;

@@ -503,7 +503,7 @@ public final class IMAPSort {
                     args.writeAtom("UTF-8");    // charset specification
                     if (jmsSearchTerm != null) {
                         try {
-                            args.append(new SearchSequence().generateSequence(jmsSearchTerm, "UTF-8"));
+                            args.append(new ExtendedSearchSequence().generateSequence(jmsSearchTerm, "UTF-8"));
                         } catch (final IOException ioex) {
                             // should never happen
                             throw new WrappingProtocolException("", new SearchException(ioex.toString()));
