@@ -94,6 +94,11 @@ public abstract class MailCapabilities {
         @Override
         public String toString() {
             return "Empty mail capabilities";
+        }
+
+        @Override
+        public boolean hasAttachmentSearch() {
+            return false;
         };
 
     };
@@ -230,5 +235,12 @@ public abstract class MailCapabilities {
             ", hasQuota=").append(hasQuota()).append(", hasSort=").append(hasSort()).append(", hasSubscription=").append(hasSubscription()).append(
             ", hasThreadReferences=").append(hasThreadReferences()).toString();
     }
+
+    /**
+     * Indicates if mail system supports search of mail attachment names
+     * 
+     * @return <code>true</code> if mail system supports search of mail attachment names; otherwise <code>false</code>
+     */
+    public abstract boolean hasAttachmentSearch();
 
 }

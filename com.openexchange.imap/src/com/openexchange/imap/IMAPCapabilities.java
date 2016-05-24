@@ -119,6 +119,11 @@ public class IMAPCapabilities extends MailCapabilities {
      */
     public static final String CAP_SORT_DISPLAY = "SORT=DISPLAY";
 
+    /**
+     * SEARCH BY ATTACHMENT NAME
+     */
+    public static final String CAP_SEARCH_ATTACHMENT = "SEARCH_ATTACHMENT"; //TODO replace with correct cap name
+
     /*-
      * IMAP bit constants
      */
@@ -156,6 +161,7 @@ public class IMAPCapabilities extends MailCapabilities {
     private boolean hasIdle;
     private boolean hasChildren;
     private boolean hasSortDisplay;
+    private boolean hasAttachmentSearch;
 
     /**
      * Initializes a new {@link IMAPCapabilities}
@@ -300,6 +306,15 @@ public class IMAPCapabilities extends MailCapabilities {
             hasIMAP4()).append(", hasIMAP4rev1=").append(hasIMAP4rev1()).append(", hasNamespace=").append(hasNamespace()).append(
             ", hasThreadOrderedSubject=").append(hasThreadOrderedSubject()).append(", hasUIDPlus=").append(hasUIDPlus()).append(
             ", hasSortDisplay=").append(hasSortDisplay()).toString();
+    }
+
+    public void setAttachmentSearch(boolean hasAttachmentSearch) {
+        this.hasAttachmentSearch = hasAttachmentSearch;
+    }
+
+    @Override
+    public boolean hasAttachmentSearch() {
+        return hasAttachmentSearch;
     }
 
 }

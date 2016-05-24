@@ -205,6 +205,7 @@ public final class CapabilitiesCache {
             imapCaps.setIdle(map.containsKey(IMAPCapabilities.CAP_IDLE));
             imapCaps.setChildren(map.containsKey(IMAPCapabilities.CAP_CHILDREN));
             imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
+            imapCaps.setAttachmentSearch(map.containsKey(IMAPCapabilities.CAP_SEARCH_ATTACHMENT));
             if (hasSort && imapConfig.getIMAPProperties().isImapSort()) {
                 // IMAP sort supported & enabled
                 try {
