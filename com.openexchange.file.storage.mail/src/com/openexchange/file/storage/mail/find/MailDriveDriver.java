@@ -89,6 +89,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.mail.AbstractMailDriveResourceAccess;
 import com.openexchange.file.storage.mail.FullName;
 import com.openexchange.file.storage.mail.MailDriveAccountAccess;
@@ -255,6 +256,19 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
         return (MailDriveConstants.ID.equals(idParts.get(0)) && MailDriveConstants.ACCOUNT_ID.equals(idParts.get(1)));
     }
 
+    private String getMailDriveFolderId(String folderId) throws OXException {
+        if (Strings.isEmpty(folderId)) {
+            return null;
+        }
+
+        FolderID compositeFolderId = new FolderID(folderId);
+        if ((!MailDriveConstants.ID.equals(compositeFolderId.getService()) || !MailDriveConstants.ACCOUNT_ID.equals(compositeFolderId.getAccountId()))) {
+            throw FindExceptionCode.INVALID_FOLDER_ID.create(folderId, Module.DRIVE.getIdentifier());
+        }
+
+        return compositeFolderId.getFolderId();
+    }
+
     @Override
     public Module getModule() {
         return Module.DRIVE;
@@ -338,8 +352,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                 fullNames = mailDriveService.getFullNameCollectionFor(session).asList();
             } else {
                 // E.g. "maildrive://0/all"
-                List<String> unmangled = IDMangler.unmangle(folderId);
-                folderId = unmangled.get(unmangled.size() - 1);
+                folderId = getMailDriveFolderId(folderId);
                 FullName fullName = MailDriveAccountAccess.optFolderId(folderId, mailDriveService.getFullNameCollectionFor(session));
                 if (null == fullName) {
                     throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, MailDriveConstants.ACCOUNT_ID, MailDriveConstants.ID, session.getUserId(), session.getContextId());
