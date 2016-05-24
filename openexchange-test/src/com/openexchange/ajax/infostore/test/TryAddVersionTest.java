@@ -57,6 +57,7 @@ import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
+import com.openexchange.configuration.MailConfig;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 
@@ -70,6 +71,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
 
     private List<String> ids;
     private final String[] COLUMNS = new String[] { "700", "702", "710", "711" };
+    private final String filename = "bug.eml";
 
     public TryAddVersionTest(String name) {
         super(name);
@@ -82,7 +84,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        java.io.File f = new java.io.File("testData/responserenderer/sql.properties");
+        java.io.File f = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f);
         NewInfostoreResponse resp = client.execute(req);
         ids.add(resp.getID());
@@ -105,7 +107,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        java.io.File f = new java.io.File("testData/responserenderer/sql.properties");
+        java.io.File f = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f, true);
         NewInfostoreResponse resp = client.execute(req);
         assertFalse(resp.hasError());
@@ -121,7 +123,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        java.io.File f = new java.io.File("testData/responserenderer/sql.properties");
+        java.io.File f = new java.io.File(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f, false);
         NewInfostoreResponse resp = client.execute(req);
         assertFalse(resp.hasError());
