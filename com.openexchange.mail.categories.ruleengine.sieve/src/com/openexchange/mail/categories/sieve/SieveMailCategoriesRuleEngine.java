@@ -108,8 +108,7 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         }
 
         Credentials creds = getCredentials(session);
-        // MAIL_FILTER-0002 Categories=PERMISSION_DENIED Message='Invalid sieve credentials' exceptionID=1049209094-10
-        Set<String> capabilities = mailFilterService.getCapabilities(creds);
+        Set<String> capabilities = mailFilterService.getStaticCapabilities(creds);
         boolean applicable = capabilities.contains("imap4flags");
         if (!applicable) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SieveMailCategoriesRuleEngine.class);

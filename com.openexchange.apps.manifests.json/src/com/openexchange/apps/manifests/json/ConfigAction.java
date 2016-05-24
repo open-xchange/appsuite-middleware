@@ -115,7 +115,7 @@ public class ConfigAction implements AJAXActionService {
             hostname = requestData.getHostname();
         }
 
-        ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, userId, contextId);
+        ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, session);
         Map<String, Object> filteredConfig = serverConfig.forClient();
 
         try {

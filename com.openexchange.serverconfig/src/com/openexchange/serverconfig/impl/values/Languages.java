@@ -60,6 +60,7 @@ import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
+import com.openexchange.session.Session;
 
 /**
  * {@link Languages}
@@ -119,7 +120,7 @@ public class Languages implements ComputedServerConfigValueService {
     }
 
     @Override
-    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userId, int contextId, Session optSession) {
 
         Object existingLanguages = serverConfig.get("languages");
         if (existingLanguages == null || existingLanguages.equals("all")) {

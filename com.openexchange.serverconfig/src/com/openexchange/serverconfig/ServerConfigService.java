@@ -51,6 +51,7 @@ package com.openexchange.serverconfig;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
  * {@link ServerConfigService}
@@ -70,7 +71,17 @@ public interface ServerConfigService {
      * @return the computed server config
      * @throws OXException if computing the server config fails
      */
-    public ServerConfig getServerConfig(String hostname, int userID, int contextID) throws OXException;
+    ServerConfig getServerConfig(String hostname, int userID, int contextID) throws OXException;
+
+    /**
+     * Get the computed server config
+     *
+     * @param hostname The hostname to use when building the {@link ServerConfig}
+     * @param session The session to use when building the {@link ServerConfig}
+     * @return the computed server config
+     * @throws OXException if computing the server config fails
+     */
+    ServerConfig getServerConfig(String hostname, Session session) throws OXException;
 
     /**
      * Get the {@link ServerConfigServicesLookup} that is used when computing the server config.

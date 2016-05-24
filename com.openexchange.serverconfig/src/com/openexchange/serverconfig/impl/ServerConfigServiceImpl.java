@@ -71,6 +71,7 @@ import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
+import com.openexchange.session.Session;
 
 
 /**
@@ -98,9 +99,18 @@ public class ServerConfigServiceImpl implements ServerConfigService {
         this.serverConfigServicesLookup = serverConfigServicesLookup;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ServerConfig getServerConfig(String hostName, int userID, int contextID) throws OXException {
+        return getServerConfig0(hostName, userID, contextID, null);
+    }
+
+    @Override
+    public ServerConfig getServerConfig(String hostName, Session session) throws OXException {
+        return getServerConfig0(hostName, session.getUserId(), session.getContextId(), session);
+    }
+
+    @SuppressWarnings("unchecked")
+    private ServerConfig getServerConfig0(String hostName, int userID, int contextID, Session session) throws OXException {
         ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
 
         // The resulting brand/server configuration
@@ -178,7 +188,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
          */
         for (ComputedServerConfigValueService computed : serverConfigServicesLookup.getComputed()) {
             try {
-                computed.addValue(serverConfiguration, hostName, userID, contextID);
+                computed.addValue(serverConfiguration, hostName, userID, contextID, session);
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
                 LOG.error("Failed to add value from '{}' to server configuration", computed.getClass().getName(), t);

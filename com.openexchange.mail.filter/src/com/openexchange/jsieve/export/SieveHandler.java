@@ -146,31 +146,19 @@ public class SieveHandler {
     protected boolean AUTH = false;
 
     private final String sieve_user;
-
     private final String sieve_auth;
-
     private final String sieve_auth_enc;
-
     private final String sieve_auth_passwd;
-
+    private final boolean onlyWelcome;
     protected final String sieve_host;
-
     protected final int sieve_host_port;
-
     private Capabilities capa = null;
-
     private boolean punycode = false;
-
     private Socket s_sieve = null;
-
     protected BufferedReader bis_sieve = null;
-
     protected BufferedOutputStream bos_sieve = null;
-
     private long mStart;
-
     private long mEnd;
-
     private boolean useSIEVEResponseCodes = false;
 
     /**
@@ -190,6 +178,7 @@ public class SieveHandler {
         sieve_auth_passwd = passwd;
         sieve_host = host; // "127.0.0.1"
         sieve_host_port = port; // 2000
+        onlyWelcome = false;
     }
 
     public SieveHandler(final String userName, final String authUserName, final String authUserPasswd, final String host, final int port, final String authEnc) {
@@ -199,13 +188,22 @@ public class SieveHandler {
         sieve_auth_passwd = authUserPasswd;
         sieve_host = host; // "127.0.0.1"
         sieve_host_port = port; // 2000
+        onlyWelcome = false;
+    }
 
+    public SieveHandler(String host, int port) {
+        sieve_user = null;
+        sieve_auth = null;
+        sieve_auth_enc = null;
+        sieve_auth_passwd = null;
+        sieve_host = host; // "127.0.0.1"
+        sieve_host_port = port; // 2000
+        onlyWelcome = true;
     }
 
     public String getSieveHost() {
         return sieve_host;
     }
-
 
     public int getSievePort() {
         return sieve_host_port;
@@ -259,109 +257,114 @@ public class SieveHandler {
         log.debug("Got welcome from sieve");
         measureEnd("getServerWelcome");
         /*
-         * Capabilities read; further communication dependent on capabilities
+         * Capabilities read
          */
-        measureStart();
-        List<String> sasl = capa.getSasl();
-        measureEnd("capa.getSasl");
-
-        final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
-
-        final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
-
-        punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
-
-        final StringBuilder commandBuilder = new StringBuilder(64);
-
-        if (issueTLS) {
-            /*-
-             * Switch to TLS and re-fetch capabilities
-             *
-             *
-             * Send STARTTLS
-             *
-             * C: STARTTLS
-             * S: OK
-             * <TLS negotiation, further commands are under TLS layer>
-             * S: "IMPLEMENTATION" "Example1 ManageSieved v001"
-             * S: "SASL" "PLAIN"
-             * S: "SIEVE" "fileinto vacation"
-             * S: OK
+        if (false == onlyWelcome) {
+            /*
+             * Further communication dependent on capabilities
              */
             measureStart();
-            bos_sieve.write(commandBuilder.append("STARTTLS").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
-            bos_sieve.flush();
-            measureEnd("startTLS");
-            commandBuilder.setLength(0);
-            /*
-             * Expect OK
-             */
-            while (true) {
-                final String temp = bis_sieve.readLine();
-                if (null == temp) {
-                    throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
-                } else if (temp.startsWith(SIEVE_OK)) {
-                    break;
-                } else if (temp.startsWith(SIEVE_AUTH_FAILED)) {
-                    throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+            List<String> sasl = capa.getSasl();
+            measureEnd("capa.getSasl");
+
+            final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
+
+            final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
+
+            punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
+
+            final StringBuilder commandBuilder = new StringBuilder(64);
+
+            if (issueTLS) {
+                /*-
+                 * Switch to TLS and re-fetch capabilities
+                 *
+                 *
+                 * Send STARTTLS
+                 *
+                 * C: STARTTLS
+                 * S: OK
+                 * <TLS negotiation, further commands are under TLS layer>
+                 * S: "IMPLEMENTATION" "Example1 ManageSieved v001"
+                 * S: "SASL" "PLAIN"
+                 * S: "SIEVE" "fileinto vacation"
+                 * S: OK
+                 */
+                measureStart();
+                bos_sieve.write(commandBuilder.append("STARTTLS").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
+                bos_sieve.flush();
+                measureEnd("startTLS");
+                commandBuilder.setLength(0);
+                /*
+                 * Expect OK
+                 */
+                while (true) {
+                    final String temp = bis_sieve.readLine();
+                    if (null == temp) {
+                        throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                    } else if (temp.startsWith(SIEVE_OK)) {
+                        break;
+                    } else if (temp.startsWith(SIEVE_AUTH_FAILED)) {
+                        throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                    }
                 }
-            }
-            /*
-             * Switch to TLS
-             */
-            s_sieve = SocketFetcher.startTLS(s_sieve, sieve_host);
-            bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
-            bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
-            /*
-             * Fire CAPABILITY command but only for cyrus that is not sieve draft conform to sent CAPABILITY response again
-             * directly as response for the STARTTLS command.
-             */
-            final String implementation = capa.getImplementation();
+                /*
+                 * Switch to TLS
+                 */
+                s_sieve = SocketFetcher.startTLS(s_sieve, sieve_host);
+                bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
+                bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
+                /*
+                 * Fire CAPABILITY command but only for cyrus that is not sieve draft conform to sent CAPABILITY response again
+                 * directly as response for the STARTTLS command.
+                 */
+                final String implementation = capa.getImplementation();
 
-            if (implementation.matches(config.getProperty(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property))) {
-	            measureStart();
-	            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
-	            bos_sieve.flush();
-	            measureEnd("capability");
-	            commandBuilder.setLength(0);
+                if (implementation.matches(config.getProperty(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property))) {
+    	            measureStart();
+    	            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
+    	            bos_sieve.flush();
+    	            measureEnd("capability");
+    	            commandBuilder.setLength(0);
+                }
+                /*
+                 * Read capabilities
+                 */
+                measureStart();
+                if (!getServerWelcome()) {
+                    throw new OXSieveHandlerException("No TLS negotiation from server", sieve_host, sieve_host_port, null);
+                }
+                measureEnd("tlsNegotiation");
+                sasl = capa.getSasl();
             }
+
             /*
-             * Read capabilities
+             * Check for supported authentication support
              */
+            if (null == sasl || (!sasl.contains("PLAIN") && !sasl.contains("GSSAPI")) ) {
+                throw new OXSieveHandlerException(
+                    new StringBuilder(64).append("The server doesn't support PLAIN, nor GSSAPI authentication over a ").append(
+                        issueTLS ? "TLS" : "plain-text").append(" connection.").toString(),
+                    sieve_host,
+                    sieve_host_port,
+                    null);
+            }
             measureStart();
-            if (!getServerWelcome()) {
-                throw new OXSieveHandlerException("No TLS negotiation from server", sieve_host, sieve_host_port, null);
+            String useAuth = "PLAIN";
+            final boolean preferGSSAPI;
+            {
+                final ConfigurationService service = Services.getService(ConfigurationService.class);
+                preferGSSAPI = null != service && service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
             }
-            measureEnd("tlsNegotiation");
-            sasl = capa.getSasl();
+            if (preferGSSAPI && sasl.contains("GSSAPI")) {
+                useAuth = "GSSAPI";
+            }
+            if (!selectAuth(useAuth, commandBuilder)) {
+                throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
+            }
+            log.debug("Authentication to sieve successful");
+            measureEnd("selectAuth");
         }
-
-        /*
-         * Check for supported authentication support
-         */
-        if (null == sasl || (!sasl.contains("PLAIN") && !sasl.contains("GSSAPI")) ) {
-            throw new OXSieveHandlerException(
-                new StringBuilder(64).append("The server doesn't support PLAIN, nor GSSAPI authentication over a ").append(
-                    issueTLS ? "TLS" : "plain-text").append(" connection.").toString(),
-                sieve_host,
-                sieve_host_port,
-                null);
-        }
-        measureStart();
-        String useAuth = "PLAIN";
-        final boolean preferGSSAPI;
-        {
-            final ConfigurationService service = Services.getService(ConfigurationService.class);
-            preferGSSAPI = null != service && service.getBoolProperty("com.openexchange.mail.filter.preferGSSAPI", false);
-        }
-        if (preferGSSAPI && sasl.contains("GSSAPI")) {
-            useAuth = "GSSAPI";
-        }
-        if (!selectAuth(useAuth, commandBuilder)) {
-            throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
-        }
-        log.debug("Authentication to sieve successful");
-        measureEnd("selectAuth");
     }
 
     /**
