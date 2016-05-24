@@ -13,7 +13,7 @@
 - [Requirements](#requirements)
 - [Configuration](#configuration)
 	- [Server](#server)
-		- [com.openexchange.capability.mail_categories](#comopenexchangecapabilitymailcategories)
+		- [com.openexchange.mail.categories](#comopenexchangemailcategories)
 		- [com.openexchange.mail.categories.enabled](#comopenexchangemailcategoriesenabled)
 		- [com.openexchange.mail.categories.forced](#comopenexchangemailcategoriesforced)
 		- [com.openexchange.mail.categories.general.name.fallback](#comopenexchangemailcategoriesgeneralnamefallback)
@@ -284,7 +284,7 @@ All configurations are config cascade aware and can therefore be overwritten on 
 
 | Property                                                                                                        | Type / Values                   | Default   |
 |:----------------------------------------------------------------------------------------------------------------|:--------------------------------|:----------|
-| [com.openexchange.capability.mail_categories](#comopenexchangecapabilitymailcategories)                         | 'true', 'false'                 | 'false'   |
+| [com.openexchange.mail.categories](#comopenexchangemailcategories)                         | 'true', 'false'                 | 'false'   |
 | [com.openexchange.mail.categories.enabled](#comopenexchangemailcategoriesenabled)                               | 'true', 'false'                 | 'true'    |
 | [com.openexchange.mail.categories.forced](#comopenexchangemailcategoriesforced)                                 | 'true', 'false'                 | 'false'   |
 | [com.openexchange.mail.categories.general.name.fallback](#comopenexchangemailcategoriesgeneralnamefallback)     | String                          | 'General' |
@@ -300,9 +300,16 @@ All configurations are config cascade aware and can therefore be overwritten on 
 | [com.openexchange.mail.categories.rules.[category]](#comopenexchangemailcategoriesrulescategory)                | Comma separated list of strings | |         |
 
 
-#### com.openexchange.capability.mail_categories
+#### com.openexchange.mail.categories
 
-This property defines the user capability to use the mail categories feature.
+This property defines whether the user capability is granted to use the mail categories feature. This is the main switch for an administrator to enable/disable that feature.
+
+**Note** The current mail categories implementatiuon also requires that the associated Sieve service advertises the `"imap4flags"` capability. Only if both conditions are met
+
+1.  `com.openexchange.mail.categories` is set to `true`
+2.  `"imap4flags"` capability announced by Sieve service
+
+the mail categories feature becomes effectively available for a user.
 
 #### com.openexchange.mail.categories.enabled
 
