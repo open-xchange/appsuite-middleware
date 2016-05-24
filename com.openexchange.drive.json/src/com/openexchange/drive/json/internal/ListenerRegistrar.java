@@ -63,10 +63,10 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
-import com.openexchange.drive.events.DriveEvent;
-import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.LongPollingListenerFactory;
 import com.openexchange.exception.OXException;
@@ -92,10 +92,10 @@ public class ListenerRegistrar implements DriveEventPublisher  {
     private static final int EXPIRY_TIME = 300;
     private static final ListenerRegistrar INSTANCE = new ListenerRegistrar();
 
-    /** Maps contextID:rootFolderID to sessionID[]  */
+    /** Maps contextID:rootFolderID to listenerID[]  */
     private final ListMultimap<String, String> listenersPerFolder;
 
-    /** Maps sessionID to listener */
+    /** Maps listenerID to listener */
     private final Cache<String, LongPollingListener> listeners;
 
     private final SortedSet<LongPollingListenerFactory> listenerFactories;
@@ -110,7 +110,7 @@ public class ListenerRegistrar implements DriveEventPublisher  {
                 @Override
                 public void onRemoval(RemovalNotification<String, LongPollingListener> notification) {
                     /*
-                     * remove from session id <=> root folder mapping, too
+                     * remove from root folder <=> listener id mapping, too
                      */
                     LongPollingListener listener = notification.getValue();
                     listenersPerFolder.remove(getFolderKey(listener.getSession()), notification.getKey());
@@ -125,18 +125,16 @@ public class ListenerRegistrar implements DriveEventPublisher  {
      * Gets the long polling listener for the supplied session, creating one if not yet present.
      *
      * @param session The session
-     * @param rootFolderID The root folder ID that should be monitored
      * @return The listener
-     * @throws ExecutionException
      */
     public LongPollingListener getOrCreate(final DriveSession session) throws ExecutionException {
-        final String sessionID = session.getServerSession().getSessionID();
-        return listeners.get(sessionID, new Callable<LongPollingListener>() {
+        final String listenerID = getListenerID(session);
+        return listeners.get(listenerID, new Callable<LongPollingListener>() {
 
             @Override
             public LongPollingListener call() throws Exception {
                 LongPollingListener listener = createListener(session);
-                listenersPerFolder.put(getFolderKey(session), sessionID);
+                listenersPerFolder.put(getFolderKey(session), listenerID);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Registered new listener: {}", listener);
                 }
@@ -172,12 +170,12 @@ public class ListenerRegistrar implements DriveEventPublisher  {
 
     @Override
     public void publish(DriveEvent event) {
-        Set<String> listenerSessionIDs = new HashSet<String>();
+        Set<String> listenerIDs = new HashSet<String>();
         for (String folderID : event.getFolderIDs()) {
-            listenerSessionIDs.addAll(listenersPerFolder.get(getFolderKey(folderID, event.getContextID())));
+            listenerIDs.addAll(listenersPerFolder.get(getFolderKey(folderID, event.getContextID())));
         }
         String pushTokenReference = event.getPushTokenReference();
-        for (LongPollingListener listener : listeners.getAllPresent(listenerSessionIDs).values()) {
+        for (LongPollingListener listener : listeners.getAllPresent(listenerIDs).values()) {
             if (null != pushTokenReference && listener.matches(pushTokenReference)) {
                 // don't send back to originator
                 LOG.trace("Skipping push notification for listener: {}", listener);
@@ -204,6 +202,10 @@ public class ListenerRegistrar implements DriveEventPublisher  {
 
     private static String getFolderKey(DriveSession session) {
         return getFolderKey(session.getRootFolderID(), session.getServerSession().getContextId());
+    }
+
+    private static String getListenerID(DriveSession session) {
+        return getFolderKey(session) + ':' + session.getServerSession().getSessionID();
     }
 
 }
