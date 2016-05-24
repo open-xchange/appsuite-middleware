@@ -78,6 +78,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
      */
     public NewInfostoreRequest() {
         this(null, (InputStream) null);
+        this.tryAddVersion = false;
     }
 
     /**
@@ -87,6 +88,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
      */
     public NewInfostoreRequest(com.openexchange.file.storage.File data) {
         this(data, (InputStream) null);
+        this.tryAddVersion = false;
     }
 
     /**
@@ -108,6 +110,19 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
      */
     public NewInfostoreRequest(com.openexchange.file.storage.File data, File upload) throws FileNotFoundException {
         this(data, new FileInputStream(upload));
+    }
+
+    /**
+     * Initializes a new {@link NewInfostoreRequest}.
+     *
+     * @param data The document
+     * @param upload The file data
+     * @param tryAddVersion <code>true</code> to add a new file version
+     * @throws FileNotFoundException
+     */
+    public NewInfostoreRequest(com.openexchange.file.storage.File data, File upload, boolean tryAddVersion) throws FileNotFoundException {
+        this(data, new FileInputStream(upload));
+        this.tryAddVersion = tryAddVersion;
     }
 
     /**
@@ -159,7 +174,6 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
             jNotification.put("transport", notificationTransport.getID());
             jNotification.put("message", notificationMessage);
             data.put("notification", jNotification);
-            data.put("try_add_version", tryAddVersion);
             return data.toString();
         }
         return jFile.toString();
@@ -195,6 +209,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
     public Parameter[] getParameters() throws JSONException {
         List<Parameter> tmp = new ArrayList<Parameter>(3);
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
+        tmp.add(new Parameter("try_add_version", tryAddVersion));
         if (null != input) {
             tmp.add(new FieldParameter("json", getBody()));
             tmp.add(new FileParameter("file", metadata.getFileName(), input, metadata.getFileMIMEType()));

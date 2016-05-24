@@ -50,7 +50,6 @@
 package com.openexchange.ajax.infostore.test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
@@ -69,7 +68,8 @@ import com.openexchange.file.storage.File;
  */
 public class TryAddVersionTest extends AbstractInfostoreTest {
 
-    private List<String> ids = new ArrayList<>(2);
+    private List<String> ids;
+    private final String[] COLUMNS = new String[] { "700", "702", "710", "711" };
 
     public TryAddVersionTest(String name) {
         super(name);
@@ -78,18 +78,26 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        ids = new ArrayList<>(2);
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        NewInfostoreRequest req = new NewInfostoreRequest(file);
+        java.io.File f = new java.io.File("testData/responserenderer/sql.properties");
+        NewInfostoreRequest req = new NewInfostoreRequest(file, f);
         NewInfostoreResponse resp = client.execute(req);
         ids.add(resp.getID());
     }
 
     @Override
     public void tearDown() throws Exception {
-        DeleteInfostoreRequest req = new DeleteInfostoreRequest(ids, Collections.singletonList(String.valueOf(client.getValues().getPrivateInfostoreFolder())), new Date());
-        client.execute(req);
+        if (ids != null) {
+            for (String id : ids) {
+                DeleteInfostoreRequest req = new DeleteInfostoreRequest(id, String.valueOf(client.getValues().getPrivateInfostoreFolder()), new Date());
+                req.setHardDelete(true);
+                client.execute(req);
+            }
+        }
+        ids = null;
         super.tearDown();
     }
 
@@ -97,11 +105,12 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        NewInfostoreRequest req = new NewInfostoreRequest(file, true);
+        java.io.File f = new java.io.File("testData/responserenderer/sql.properties");
+        NewInfostoreRequest req = new NewInfostoreRequest(file, f, true);
         NewInfostoreResponse resp = client.execute(req);
         assertFalse(resp.hasError());
         ids.add(resp.getID());
-        GetInfostoreRequest getReq = new GetInfostoreRequest(resp.getID());
+        GetInfostoreRequest getReq = new GetInfostoreRequest(resp.getID(), COLUMNS);
         GetInfostoreResponse getResp = client.execute(getReq);
         assertNotNull(getResp);
         File uploaded = getResp.getDocumentMetadata();
@@ -112,11 +121,12 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        NewInfostoreRequest req = new NewInfostoreRequest(file, false);
+        java.io.File f = new java.io.File("testData/responserenderer/sql.properties");
+        NewInfostoreRequest req = new NewInfostoreRequest(file, f, false);
         NewInfostoreResponse resp = client.execute(req);
         assertFalse(resp.hasError());
         ids.add(resp.getID());
-        GetInfostoreRequest getReq = new GetInfostoreRequest(resp.getID());
+        GetInfostoreRequest getReq = new GetInfostoreRequest(resp.getID(), COLUMNS);
         GetInfostoreResponse getResp = client.execute(getReq);
         assertNotNull(getResp);
         File uploaded = getResp.getDocumentMetadata();
