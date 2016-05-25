@@ -475,7 +475,6 @@ public class DriveServiceImpl implements DriveService {
         if (capabilitySet.contains("share_links")) {
             capabilities.add("share_links");
         }
-        capabilities.add("invite_guests");
         /*
          * indicate ability to listen for changes in multiple root folders via long polling (bug #45919)
          */
