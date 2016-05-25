@@ -210,7 +210,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
             return false;
         }
 
-        // Check for download explicitly
+        // TODO: Check for download explicitly for "document" action
         return "download".equals(requestData.getParameter("view"));
     }
 
