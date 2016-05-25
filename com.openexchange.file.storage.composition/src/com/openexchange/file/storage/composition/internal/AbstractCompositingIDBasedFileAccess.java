@@ -843,7 +843,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             }
             if (tryAddVersion) {
                 if (FileStorageCapabilityTools.supports(fileAccess, FileStorageCapability.FILE_VERSIONS)) {
-                    SearchIterator<File> it = fileAccess.search(document.getFileName(), Arrays.asList(Field.FOLDER_ID, Field.ID), document.getFolderId(), null, null, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                    String name = document.getFileName() != null ? document.getFileName() : document.getTitle();
+                    SearchIterator<File> it = fileAccess.search(name, Arrays.asList(Field.FOLDER_ID, Field.ID), document.getFolderId(), null, null, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
                     if (it.hasNext()) {
                         File existing = it.next();
                         final File metadata = fileAccess.getFileMetadata(existing.getFolderId(), existing.getId(), FileStorageFileAccess.CURRENT_VERSION);
