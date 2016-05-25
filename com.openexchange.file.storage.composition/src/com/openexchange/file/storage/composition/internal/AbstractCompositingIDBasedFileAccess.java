@@ -970,11 +970,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         IDTuple idTuple = result.getIDTuple();
         FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
-        DefaultFile file = new DefaultFile(document);
-        file.setId(newFileID.toUniqueID());
-        file.setFolderId(newFolderID.toUniqueID());
         postEvent(FileStorageEventHelper.buildUpdateEvent(
-            session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), file.getFileName()));
+            session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
         return newFileID.toUniqueID();
     }
 
