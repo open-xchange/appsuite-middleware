@@ -49,9 +49,18 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.java.Strings.isEmpty;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.ObfuscatorService;
@@ -72,16 +81,104 @@ public class Obfuscator implements ObfuscatorService {
 
     private static final String[] WRAPPED_PARMETERS = { Session.PARAM_ALTERNATIVE_ID };
 
+    private static boolean useDirectByteBuffer() {
+        return false;
+    }
+
+    static ByteBuffer obtainDirectByteBuffer(int size) {
+        return ByteBuffer.allocateDirect(size);
+    }
+
+    static void releaseDirectByteBuffer(ByteBuffer directByteBuffer) {
+        directByteBuffer.clear();
+        destroyBuffer(directByteBuffer);
+    }
+
+    static void destroyBuffer(Buffer buffer) {
+        if (buffer.isDirect()) {
+            try {
+                if (!buffer.getClass().getName().equals("java.nio.DirectByteBuffer")) {
+                    Field attField = buffer.getClass().getDeclaredField("att");
+                    attField.setAccessible(true);
+                    buffer = (Buffer) attField.get(buffer);
+                }
+
+                Method cleanerMethod = buffer.getClass().getMethod("cleaner");
+                cleanerMethod.setAccessible(true);
+                Object cleaner = cleanerMethod.invoke(buffer);
+                Method cleanMethod = cleaner.getClass().getMethod("clean");
+                cleanMethod.setAccessible(true);
+                cleanMethod.invoke(cleaner);
+            } catch (Exception e) {
+                LOG.error("Could not destroy direct buffer {}", buffer, e);
+            }
+        }
+    }
+
+    private static byte[] toBytes(char[] chars) {
+        CharBuffer charBuffer = CharBuffer.wrap(chars);
+        ByteBuffer byteBuffer = Charset.forName("UTF-8").encode(charBuffer);
+        byte[] bytes = Arrays.copyOfRange(byteBuffer.array(), byteBuffer.position(), byteBuffer.limit());
+        Arrays.fill(charBuffer.array(), '\u0000');// clear sensitive data
+        Arrays.fill(byteBuffer.array(), (byte) 0);// clear sensitive data
+        return bytes;
+    }
+
+    private static char[] toChars(byte[] bytes) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        CharBuffer charBuffer = Charset.forName("UTF-8").decode(byteBuffer);
+        char[] chars = Arrays.copyOfRange(charBuffer.array(), charBuffer.position(), charBuffer.limit());
+        Arrays.fill(byteBuffer.array(), (byte) 0);// clear sensitive data
+        Arrays.fill(charBuffer.array(), '\u0000');// clear sensitive data
+        return chars;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
     private final String obfuscationKey;
+    private final AtomicReference<ByteBuffer> obfuscationKeyRef;
+    private final int size;
 
     /**
      * Initializes a new {@link Obfuscator}.
      *
      * @param obfuscationKey The key used to (un)obfuscate session passwords
      */
-    public Obfuscator(String obfuscationKey) {
+    public Obfuscator(char[] obfuscationKey) {
         super();
-        this.obfuscationKey = obfuscationKey;
+        if (useDirectByteBuffer()) {
+            byte[] bytes = toBytes(obfuscationKey);
+            ByteBuffer byteBuffer = obtainDirectByteBuffer(bytes.length);
+            byteBuffer.mark();
+            byteBuffer.put(bytes, 0, bytes.length);
+            byteBuffer.reset();
+            this.obfuscationKeyRef = new AtomicReference<ByteBuffer>(byteBuffer);
+            this.size = bytes.length;
+            this.obfuscationKey = null;
+        } else {
+            this.obfuscationKeyRef = null;
+            this.size = 0;
+            this.obfuscationKey = new String(obfuscationKey);
+        }
+    }
+
+    private char[] getCharsFromBuffer() {
+        ByteBuffer byteBuffer = obfuscationKeyRef.get();
+        byte[] bytes = new byte[size];
+        byteBuffer.get(bytes, 0, size);
+        byteBuffer.reset();
+        char[] key = toChars(bytes);
+        return key;
+    }
+
+    /**
+     * Destroys this obfuscator.
+     */
+    public void destroy() {
+        ByteBuffer directByteBuffer = obfuscationKeyRef.getAndSet(null);
+        if (null != directByteBuffer) {
+            releaseDirectByteBuffer(directByteBuffer);
+        }
     }
 
     /**
@@ -113,9 +210,7 @@ public class Obfuscator implements ObfuscatorService {
         }
 
         // Instantiate & return appropriate stored session
-        return new StoredSession(session.getSessionID(), session.getLoginName(), obfuscate(session.getPassword()), session.getContextId(),
-            session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(),
-            session.getAuthId(), session.getHash(), session.getClient(), parameters);
+        return new StoredSession(session.getSessionID(), session.getLoginName(), obfuscate(session.getPassword()), session.getContextId(), session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(), session.getAuthId(), session.getHash(), session.getClient(), parameters);
     }
 
     /**
@@ -131,9 +226,7 @@ public class Obfuscator implements ObfuscatorService {
         }
 
         // Instantiate session
-        SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(),
-            session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(),
-            session.getAuthId(), session.getHash(), session.getClient(), false);
+        SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(), session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(), session.getAuthId(), session.getHash(), session.getClient(), false);
         for (String name : session.getParameterNames()) {
             sessionImpl.setParameter(name, session.getParameter(name));
         }
@@ -147,11 +240,27 @@ public class Obfuscator implements ObfuscatorService {
         if (isEmpty(string)) {
             return string;
         }
+
+        String obfuscationKey = this.obfuscationKey;
+        if (null != obfuscationKey) {
+            try {
+                return Services.getService(CryptoService.class).encrypt(string, obfuscationKey);
+            } catch (final OXException e) {
+                LOG.error("Could not obfuscate string", e);
+                return string;
+            }
+        }
+
+        char[] key = getCharsFromBuffer();
         try {
-            return Services.getService(CryptoService.class).encrypt(string, obfuscationKey);
+            return Services.getService(CryptoService.class).encrypt(string, new String(key));
         } catch (final OXException e) {
             LOG.error("Could not obfuscate string", e);
             return string;
+        } finally {
+            for (int i = key.length; i-- > 0;) {
+                key[i] = '\u0000';
+            }
         }
     }
 
@@ -160,49 +269,27 @@ public class Obfuscator implements ObfuscatorService {
         if (isEmpty(string)) {
             return string;
         }
+
+        String obfuscationKey = this.obfuscationKey;
+        if (null != obfuscationKey) {
+            try {
+                return Services.getService(CryptoService.class).decrypt(string, obfuscationKey);
+            } catch (final OXException e) {
+                LOG.error("Could not obfuscate string", e);
+                return string;
+            }
+        }
+
+        char[] key = getCharsFromBuffer();
         try {
-            return Services.getService(CryptoService.class).decrypt(string, obfuscationKey);
+            return Services.getService(CryptoService.class).decrypt(string, new String(key));
         } catch (final OXException e) {
             LOG.error("Could not unobfuscate string", e);
             return string;
-        }
-    }
-
-    private static boolean isEmpty(final String str) {
-        if (null == str) {
-            return true;
-        }
-        final int length = str.length();
-        boolean empty = true;
-        for (int i = 0; empty && i < length; i++) {
-            empty = isWhitespace(str.charAt(i));
-        }
-        return empty;
-    }
-
-    /**
-     * High speed test for whitespace!  Faster than the java one (from some testing).
-     *
-     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
-     */
-    private static boolean isWhitespace(final char c) {
-        switch (c) {
-            case 9:  //'unicode: 0009
-            case 10: //'unicode: 000A'
-            case 11: //'unicode: 000B'
-            case 12: //'unicode: 000C'
-            case 13: //'unicode: 000D'
-            case 28: //'unicode: 001C'
-            case 29: //'unicode: 001D'
-            case 30: //'unicode: 001E'
-            case 31: //'unicode: 001F'
-            case ' ': // Space
-                //case Character.SPACE_SEPARATOR:
-                //case Character.LINE_SEPARATOR:
-            case Character.PARAGRAPH_SEPARATOR:
-                return true;
-            default:
-                return false;
+        } finally {
+            for (int i = key.length; i-- > 0;) {
+                key[i] = '\u0000';
+            }
         }
     }
 
