@@ -81,6 +81,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.httpclient.HttpStatus;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
@@ -811,6 +812,11 @@ public final class Tools {
     public static boolean isJsonResponseExpected(HttpServletRequest request, boolean interpretMissingAsTrue) {
         if (null == request) {
             return false;
+        }
+
+        // Explicitly requested by client
+        if (AJAXRequestDataTools.parseBoolParameter(request.getParameter("force_json_response"))) {
+            return true;
         }
 
         // E.g. "Accept: application/json, text/javascript, ..."
