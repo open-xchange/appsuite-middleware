@@ -1326,15 +1326,35 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             int[] inheritingTypes = { FolderObject.TRASH, FolderObject.DOCUMENTS, FolderObject.PICTURES, FolderObject.MUSIC, FolderObject.VIDEOS, FolderObject.TEMPLATES };
             if (contains(inheritingTypes, destinationFolder.getType()) || contains(inheritingTypes, sourceFolder.getType())) {
                 List<Integer> folderIDs;
+                List<Integer> children = null;
                 if (false == recursive || false == sourceFolder.hasSubfolders()) {
                     folderIDs = Collections.singletonList(Integer.valueOf(sourceFolder.getObjectID()));
                 } else {
                     folderIDs = new ArrayList<Integer>();
                     folderIDs.add(Integer.valueOf(sourceFolder.getObjectID()));
-                    folderIDs.addAll(OXFolderSQL.getSubfolderIDs(sourceFolder.getObjectID(), readCon, ctx, true));
+                    children = OXFolderSQL.getSubfolderIDs(sourceFolder.getObjectID(), readCon, ctx, true);
+                    folderIDs.addAll(children);
                 }
                 int type = FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == destinationFolder.getObjectID() ? FolderObject.PUBLIC : destinationFolder.getType();
-                return 0 < OXFolderSQL.updateFolderType(writeCon, ctx, type, optNewOwner, folderIDs);
+                boolean result = 0 < OXFolderSQL.updateFolderType(writeCon, ctx, type, optNewOwner, folderIDs);
+                if (recursive && children != null && !children.isEmpty() && FolderCacheManager.isEnabled()) {
+                    Connection wc = writeCon;
+                    final boolean create = (wc == null);
+                    if (create) {
+                        wc = DBPool.pickupWriteable(ctx);
+                    }
+                    try {
+                        final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+                        for (int i : children) {
+                            cacheManager.loadFolderObject(i, ctx, wc);
+                        }
+                    } finally {
+                        if (create && wc != null) {
+                            DBPool.closeWriterSilent(ctx, wc);
+                        }
+                    }
+                }
+                return result;
             }
         }
         return false;
@@ -1350,16 +1370,36 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
             if (isPublicInfoStoreFolder != wasPublicInfoStoreFolder) {
                 List<Integer> folderIDs;
+                List<Integer> children = null;
                 if (false == recursive || false == fo.hasSubfolders()) {
                     folderIDs = Collections.singletonList(Integer.valueOf(fo.getObjectID()));
                 } else {
                     folderIDs = new ArrayList<Integer>();
                     folderIDs.add(Integer.valueOf(fo.getObjectID()));
-                    folderIDs.addAll(OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx, true));
+                    children = OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx, true);
+                    folderIDs.addAll(children);
+
                 }
 
                 int newOwner = isPublicInfoStoreFolder ? ctx.getMailadmin() : newParent.getCreatedBy();
-                return 0 < OXFolderSQL.updateFolderOwner(writeCon, ctx, newOwner, folderIDs);
+                boolean result = 0 < OXFolderSQL.updateFolderOwner(writeCon, ctx, newOwner, folderIDs);
+                if (recursive && children != null && !children.isEmpty() && FolderCacheManager.isEnabled()) {
+                    Connection wc = writeCon;
+                    final boolean create = (wc == null);
+                    if (create) {
+                        wc = DBPool.pickupWriteable(ctx);
+                    }
+                    try {
+                        for (int i : children) {
+                            FolderCacheManager.getInstance().loadFolderObject(i, ctx, wc);
+                        }
+                    } finally {
+                        if (create && wc != null) {
+                            DBPool.closeWriterSilent(ctx, wc);
+                        }
+                    }
+                }
+                return result;
             }
         }
         return false;
