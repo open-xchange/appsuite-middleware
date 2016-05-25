@@ -11,7 +11,6 @@
 # This script requires the an optional companion script to create users, groups
 # and ressources after finishing the installation process.
 
-
 # Let's get the party started
 show_usage() {
 echo "
@@ -40,7 +39,7 @@ while getopts "f::l::" opts; do
   esac
 done
 
-SWAGGERJSON="../${APIFOLDER}/swagger.json"
+SWAGGERJSON="../${APIFOLDER}/http_api-openapi.json"
 OUTPUT="${APIFOLDER}/clients/${LANG}"
 TEMPLATE="templates/${LANG}"
 CONFIG="${APIFOLDER}/configs/${LANG}.json"
