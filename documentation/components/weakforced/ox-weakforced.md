@@ -25,7 +25,7 @@ The OXWF login listener executes the `allow` call before authentication takes pl
  - <code>-1</code> (BLOCKED)
  - A positive integer
 
- For an OK response, the login attempt is allowed to proceed as usual. The BLOCKED integer value leads to aborting the login attempt through throwing a LGI-0026 (LOGIN DENIED) error code. A positive integer indicates the number of seconds the client is supposed to wait until login attempt is allowed to procee. Hence, the executing thread gets halted for that amount of seconds.
+ For an OK response, the login attempt is allowed to proceed as usual. The BLOCKED integer value leads to aborting the login attempt through throwing a LGI-0026 (LOGIN DENIED) error code. A positive integer indicates the number of seconds the client is supposed to wait until login attempt is allowed to proceed. Hence, the executing thread gets halted for that amount of seconds.
 
 ## After successful authentication
 A successful authentication attempt is `report`ed back to Weakforced service by OXWF login listener while providing login, password-hash, remote address (either host name or IP address) and client identifier. That call-back may also be used to pass more attributes to Weakforced service in order to be validated; e.g. the login result may now contain certain information from LDAP (or any other authentication authority). If so a `allow` call is executed prior to the `report` request, while the status result gets examined as explained above (OK, BLOCKED, or positive integer).
