@@ -157,7 +157,7 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
     @Override
     protected Map<String, String> getNeededConfigurations() {
         Map<String, String> configs = new HashMap<>();
-        configs.put("com.openexchange.capability.mail_categories", Boolean.TRUE.toString());
+        configs.put("com.openexchange.mail.categories", Boolean.TRUE.toString());
         configs.put(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, Boolean.TRUE.toString());
         configs.put("com.openexchange.mail.categories.general.name.fallback", "General");
         configs.put(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, "promotion, social");
