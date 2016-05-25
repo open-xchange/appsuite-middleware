@@ -53,17 +53,14 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
-import com.openexchange.tools.servlet.limit.AbstractActionLimitedException;
 
 /**
- * {@link DownloadLimitedException} Used for custom exceptions that should be (translated) shown to the user. 
+ * {@link DownloadLimitedExceptionCode} Used for custom exceptions that should be (translated) shown to the user.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class DownloadLimitedException extends AbstractActionLimitedException implements DisplayableOXExceptionCode {
-
-    private static final long serialVersionUID = -5958709454473135940L;
+public class DownloadLimitedExceptionCode implements DisplayableOXExceptionCode {
 
     public static final String PREFIX = "AN-GUEST-LIM";
 
@@ -72,7 +69,7 @@ public class DownloadLimitedException extends AbstractActionLimitedException imp
     private final String message;
     private final String displayMessage;
 
-    public DownloadLimitedException(String message, String displayMessage, Category category, int detailNumber) {
+    public DownloadLimitedExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage;
         this.detailNumber = detailNumber;

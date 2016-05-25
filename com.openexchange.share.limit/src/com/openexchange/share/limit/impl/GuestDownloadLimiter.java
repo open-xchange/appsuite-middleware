@@ -66,11 +66,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.share.limit.FileAccess;
-import com.openexchange.share.limit.exceptions.custom.DownloadLimitedException;
+import com.openexchange.share.limit.exceptions.custom.DownloadLimitedExceptionCode;
 import com.openexchange.share.limit.exceptions.custom.DownloadLimitedExceptionMessages;
 import com.openexchange.share.limit.storage.RdbFileAccessStorage;
 import com.openexchange.share.limit.util.LimitConfig;
-import com.openexchange.tools.servlet.limit.AbstractActionLimitedException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -91,14 +90,14 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
         this.configViewFactory = configView;
     }
 
-    protected void throwIfExceeded(FileAccess limit, FileAccess used) throws AbstractActionLimitedException {
+    protected void throwIfExceeded(FileAccess limit, FileAccess used) throws OXException {
         if (FileAccess.isCountExceeded(limit, used)) {
             String message = "User " + limit.getUserId() + " in context " + limit.getContextId() + " exceeded the defined count limit of " + limit.getCount() + ". The download will be denied.";
-            throw new DownloadLimitedException(message, DownloadLimitedExceptionMessages.DOWNLOAD_DENIED_EXCEPTION_MESSAGE, Category.CATEGORY_ERROR, 1);
+            throw new DownloadLimitedExceptionCode(message, DownloadLimitedExceptionMessages.DOWNLOAD_DENIED_EXCEPTION_MESSAGE, Category.CATEGORY_ERROR, 1).create();
         }
         if (FileAccess.isSizeExceeded(limit, used)) {
             String message = "User " + limit.getUserId() + " in context " + limit.getContextId() + " exceeded the defined size limit of " + limit.getSize() + " with " + used.getSize() + " bytes. The download will be denied.";
-            throw new DownloadLimitedException(message, DownloadLimitedExceptionMessages.DOWNLOAD_DENIED_EXCEPTION_MESSAGE, Category.CATEGORY_ERROR, 1);
+            throw new DownloadLimitedExceptionCode(message, DownloadLimitedExceptionMessages.DOWNLOAD_DENIED_EXCEPTION_MESSAGE, Category.CATEGORY_ERROR, 1).create();
         }
     }
 
@@ -211,7 +210,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
     }
 
     @Override
-    public void onRequestInitialized(AJAXRequestData requestData) {
+    public void onRequestInitialized(AJAXRequestData requestData) throws OXException {
         ServerSession session = requestData.getSession();
         if (null == session || session.isAnonymous()) {
             return;

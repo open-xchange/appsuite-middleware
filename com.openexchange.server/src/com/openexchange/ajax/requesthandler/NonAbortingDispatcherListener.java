@@ -52,61 +52,21 @@ package com.openexchange.ajax.requesthandler;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link DispatcherListener} - A listener which receives various call-backs during a {@link Dispatcher} processing.
- * <p>
- * The call-backs happen in the following order:
- * <ol>
- * <li>{@link #onRequestInitialized(AJAXRequestData)}<br>Request has been completely parsed. but not yet performed<br>&nbsp;</li>
- * <li>{@link #onRequestPerformed(AJAXRequestData, AJAXRequestResult, Exception)}<br>Either result has been successfully created or an exception is given<br>&nbsp;</li>
- * <li>{@link #onResultReturned(AJAXRequestData, AJAXRequestResult, Exception)}<br>The result is ensured to be successfully created and is about being returned to client. If output to client failed the exception argument in non-<code>null</code></li>
- * </ol>
- * <p>
- * Example:
- * <pre>
- *  DispatcherListener listener = new ActionBoundDispatcherListener() {
- *
- *      public void onResultReturned(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
- *          if (null == e) {
- *              System.out.println("User " + requestData.getSession().getUserId() + " successfully loaded " + requestData.getParameter("id"));
- *          } else {
- *              System.out.println("User " + requestData.getSession().getUserId() + " failed to download " + requestData.getParameter("id") + " with HTTP error code " + DispatcherListeners.getHttpError(e));
- *          }
- *      }
- *
- *      public void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
- *          // Don't care
- *      }
- *
- *      public void onRequestInitialized(AJAXRequestData requestData) {
- *          System.out.println("User " + requestData.getSession().getUserId() + " wants to download " + requestData.getParameter("id"));
- *      }
- *
- *      public String getModule() {
- *          return "files";
- *      }
- *
- *      public Set<String> getActions() {
- *          return Collections.singleton("document");
- *      }
- *  };
- *
- *  // Register the dispatcher listener
- *  registerService(DispatcherListener.class, listener);
- * </pre>
+ * {@link NonAbortingDispatcherListener} - A dispatcher listener that is not supposed to abort disptacher processing.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
- * @see DispatcherListeners
  */
-public interface DispatcherListener {
+public abstract class NonAbortingDispatcherListener implements DispatcherListener {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NonAbortingDispatcherListener.class);
 
     /**
-     * Checks whether this dispatcher listener wants to receive call-backs for given request data.
-     *
-     * @param requestData
-     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * Initializes a new {@link NonAbortingDispatcherListener}.
      */
-    boolean applicable(AJAXRequestData requestData);
+    protected NonAbortingDispatcherListener() {
+        super();
+    }
 
     /**
      * Called when a request is about being performed.
@@ -114,7 +74,14 @@ public interface DispatcherListener {
      * @param requestData The associated request data
      * @throws OXException If this listener signals to abort further processing
      */
-    void onRequestInitialized(AJAXRequestData requestData) throws OXException;
+    @Override
+    public void onRequestInitialized(AJAXRequestData requestData) {
+        try {
+            doOnRequestInitialized(requestData);
+        } catch (Exception x) {
+            LOG.error("Failed to execute dispatcher listener {}", this.getClass().getSimpleName(), x);
+        }
+    }
 
     /**
      * Called when a result was supposed to be created, but not yet returned to requesting client (by responsible {@link ResponseRenderer renderer}).
@@ -124,14 +91,31 @@ public interface DispatcherListener {
      * @param e The exception that caused termination, or <code>null</code> if execution completed normally (and a viable <code>requestResult</code> is given)
      * @throws OXException If this listener signals to abort further processing
      */
-    void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) throws OXException;
+    @Override
+    public void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
+        try {
+            doOnRequestPerformed(requestData, requestResult, e);
+        } catch (Exception x) {
+            LOG.error("Failed to execute dispatcher listener {}", this.getClass().getSimpleName(), x);
+        }
+    }
 
     /**
-     * Called when a result has been successfully created and an attempt was made returning it to requesting client (by responsible {@link ResponseRenderer renderer}).
+     * Called when a request is about being performed.
      *
      * @param requestData The associated request data
-     * @param requestResult The request result that has been returned
-     * @param e The exception (or <code>HttpErrorCodeException</code>) that caused termination, or <code>null</code> if execution completed normally
+     * @throws Exception If the "request initialized" call-back cannot be successfully handled
      */
-    void onResultReturned(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
+    protected abstract void doOnRequestInitialized(AJAXRequestData requestData) throws Exception;
+
+    /**
+     * Called when a result was supposed to be created, but not yet returned to requesting client (by responsible {@link ResponseRenderer renderer}).
+     *
+     * @param requestData The associated request data
+     * @param requestResult The request result that has been created or <code>null</code> if creation failed (in that case an exception is passed)
+     * @param e The exception that caused termination, or <code>null</code> if execution completed normally (and a viable <code>requestResult</code> is given)
+     * @throws Exception If the "request performed" call-back cannot be successfully handled
+     */
+    protected abstract void doOnRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) throws Exception;
+
 }
