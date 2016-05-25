@@ -66,6 +66,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 
 /**
  * Utilities for database resource handling.
@@ -212,7 +213,7 @@ public final class DBUtils {
     /**
      * Starts a transaction on the given connection. This implementation sets autocommit to false and even executes a START TRANSACTION
      * statement to ensure isolation levels for the current connection.
-     * 
+     *
      * @param con connection to start the transaction on.
      * @throws SQLException if starting the transaction fails.
      */
@@ -350,7 +351,7 @@ public final class DBUtils {
 
     /**
      * Filters a given list of table names. Returns only those that also exist
-     * 
+     *
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -368,7 +369,7 @@ public final class DBUtils {
 
     /**
      * Finds out whether all tables listed exist in the given database
-     * 
+     *
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -385,7 +386,7 @@ public final class DBUtils {
 
     /**
      * Finds out whether a table listed exist in the given database
-     * 
+     *
      * @param con The connection to the database in which to check for the tables
      * @param table The table name to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -406,7 +407,7 @@ public final class DBUtils {
 
     /**
      * Finds out whether a table listed exist in the given database
-     * 
+     *
      * @param con The connection to the database in which to check for the tables
      * @param table The table name to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -506,7 +507,7 @@ public final class DBUtils {
         if (null == sqlException) {
             return false;
         }
-        if (sqlException.getClass().getName().endsWith("TransactionRollbackException")) {
+        if (suggestsRestartingTransaction(sqlException) || sqlException.getClass().getName().endsWith("TransactionRollbackException")) {
             return true;
         }
         if (isTransactionRollbackException(sqlException.getNextException())) {
@@ -541,6 +542,18 @@ public final class DBUtils {
             return false;
         }
         return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Checks if specified SQL exception's detail message contains a suggestion to restart the transaction;<br>
+     * e.g. <code>"Lock wait timeout exceeded; try restarting transaction"</code>
+     *
+     * @param sqlException The SQL exception to check
+     * @return <code>true</code> if SQL exception suggests restarting transaction; otherwise <code>false</code>
+     */
+    public static boolean suggestsRestartingTransaction(SQLException sqlException) {
+        String message = null == sqlException ? null : sqlException.getMessage();
+        return null != message && Strings.asciiLowerCase(message).indexOf("try restarting transaction") >= 0;
     }
 
     /**
