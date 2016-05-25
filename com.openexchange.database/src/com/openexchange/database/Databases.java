@@ -435,6 +435,9 @@ public final class Databases {
         return false;
     }
 
+    /**
+     * Code is correct and will not leave a connection in CLOSED_WAIT state. See CloseWaitTest.java.
+     */
     public static void close(Connection con) {
         if (null == con) {
             return;

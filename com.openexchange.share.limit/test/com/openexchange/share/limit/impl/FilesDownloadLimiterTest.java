@@ -83,7 +83,6 @@ import com.openexchange.share.limit.FileAccess;
 import com.openexchange.share.limit.internal.Services;
 import com.openexchange.share.limit.storage.RdbFileAccessStorage;
 import com.openexchange.share.limit.util.LimitConfig;
-import com.openexchange.tools.servlet.limit.AbstractActionLimitedException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -111,13 +110,13 @@ public class FilesDownloadLimiterTest {
     @Mock
     private ConfigView configView;
 
-    private UserImpl linkUser = new UserImpl();
+    private final UserImpl linkUser = new UserImpl();
 
-    private UserImpl guest = new UserImpl();
+    private final UserImpl guest = new UserImpl();
 
-    private UserImpl internal = new UserImpl();
+    private final UserImpl internal = new UserImpl();
 
-    private AJAXRequestData requestData = new AJAXRequestData();
+    private final AJAXRequestData requestData = new AJAXRequestData();
 
     @Mock
     private DatabaseService databaseService;
@@ -329,15 +328,6 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicable_wrongAction_sessionNotChecked() throws OXException {
-        requestData.setAction("all");
-
-        limiter.applicable(requestData);
-
-        Mockito.verify(session, Mockito.never()).isAnonymous();
-    }
-
-    @Test
     public void testApplicable_isAnonymousSession_notApplicable() throws OXException {
         Mockito.when(session.isAnonymous()).thenReturn(Boolean.TRUE);
 
@@ -461,7 +451,7 @@ public class FilesDownloadLimiterTest {
             }
 
             @Override
-            protected void throwIfExceeded(FileAccess limit, FileAccess used) throws AbstractActionLimitedException {
+            protected void throwIfExceeded(FileAccess limit, FileAccess used) throws OXException {
                 fail();
             }
         };
@@ -496,7 +486,7 @@ public class FilesDownloadLimiterTest {
         limiter.onRequestInitialized(requestData);
     }
 
-    @Test(expected = AbstractActionLimitedException.class)
+    @Test(expected = OXException.class)
     public void testOnRequestInitialized_sizeExceeded_throwException() throws OXException {
         Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
 
@@ -523,7 +513,7 @@ public class FilesDownloadLimiterTest {
         limiter.onRequestInitialized(requestData);
     }
 
-    @Test(expected = AbstractActionLimitedException.class)
+    @Test(expected = OXException.class)
     public void testOnRequestInitialized_countExceeded_throwException() throws OXException {
         Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
 

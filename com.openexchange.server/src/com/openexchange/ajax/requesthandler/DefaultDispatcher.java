@@ -79,7 +79,6 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.servlet.limit.AbstractActionLimitedException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -163,7 +162,7 @@ public class DefaultDispatcher implements Dispatcher {
             if (factory == null) {
                 throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
             }
-            
+
             AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
             if (action == null) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
@@ -227,10 +226,6 @@ public class DefaultDispatcher implements Dispatcher {
             }
             throw e;
         } catch (RuntimeException e) {
-            if (e instanceof AbstractActionLimitedException) {
-                AbstractActionLimitedException actionLimitedException = (AbstractActionLimitedException) e;
-                throw actionLimitedException.create();
-            }
             if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
                 // Handle special Rhino wrapper error
                 Throwable wrapped = e.getCause();
@@ -652,27 +647,15 @@ public class DefaultDispatcher implements Dispatcher {
         this.customizerFactories.remove(factory);
     }
 
-    private void triggerOnRequestInitialized(AJAXRequestData requestData, List<DispatcherListener> dispatcherListeners) {
+    private void triggerOnRequestInitialized(AJAXRequestData requestData, List<DispatcherListener> dispatcherListeners) throws OXException {
         for (DispatcherListener dispatcherListener : dispatcherListeners) {
-            try {
-                dispatcherListener.onRequestInitialized(requestData);
-            } catch (AbstractActionLimitedException x) {
-                throw x;
-            } catch (Exception x) {
-                LOG.error("Failed to execute dispatcher listener {}", dispatcherListener.getClass().getSimpleName(), x);
-            }
+            dispatcherListener.onRequestInitialized(requestData);
         }
     }
 
-    private void triggerOnRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e, List<DispatcherListener> dispatcherListeners) {
+    private void triggerOnRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e, List<DispatcherListener> dispatcherListeners) throws OXException {
         for (DispatcherListener dispatcherListener : dispatcherListeners) {
-            try {
-                dispatcherListener.onRequestPerformed(requestData, requestResult, e);
-            } catch (AbstractActionLimitedException x) {
-                throw x;
-            } catch (Exception x) {
-                LOG.error("Failed to execute dispatcher listener {}", dispatcherListener.getClass().getSimpleName(), x);
-            }
+            dispatcherListener.onRequestPerformed(requestData, requestResult, e);
         }
     }
 

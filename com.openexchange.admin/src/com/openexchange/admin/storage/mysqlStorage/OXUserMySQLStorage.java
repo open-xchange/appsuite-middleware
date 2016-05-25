@@ -73,6 +73,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -3093,10 +3094,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         log.error("Pool Error pushing ox write connection to pool!", e);
                     }
                 }
-            } while (condition.checkRetry());
+            } while (retry(condition, users, ctx));
         } catch (final SQLException sql) {
             throw new StorageException(sql.toString(), sql);
         }
+    }
+
+    private boolean retry(DBUtils.TransactionRollbackCondition condition, final User[] users, Context ctx) throws SQLException {
+        SQLException sqle = condition.getTransactionRollbackException();
+        boolean retry = condition.checkRetry();
+        if (retry) {
+            log.info("Retrying to delete users {} from context {} as suggested by: {}", Arrays.toString(users), ctx.getId(), sqle.getMessage());
+        }
+        return retry;
     }
 
     @Override
