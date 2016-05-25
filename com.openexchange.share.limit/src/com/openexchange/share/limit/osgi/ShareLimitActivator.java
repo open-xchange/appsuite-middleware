@@ -65,7 +65,7 @@ import com.openexchange.share.limit.rdb.FileAccessCreateTableTask;
 import com.openexchange.share.limit.util.LimitConfig;
 
 /**
- * 
+ *
  * {@link ShareLimitActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -85,6 +85,11 @@ public class ShareLimitActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, DatabaseService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override

@@ -104,7 +104,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     /**
      * Drops all database entries for the given user (based on the provided {@link ServerSession}) that have become obsolete based on the server/context defined time frame
-     * 
+     *
      * @param contextId The context id the user is assigned to
      * @param userId The id of the user in the context
      * @throws OXException
@@ -135,7 +135,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     /**
      * Returns the defined limits (by configuration) for the given user or <code>null</code> if no limit can be found
-     * 
+     *
      * @param user The user
      * @param contextId The context id the user is assigned to
      * @return {@link FileAccess} with desired information
@@ -175,7 +175,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     /**
      * Sets the given {@link FileAccess}es as default and checks the persisted one against it.
-     * 
+     *
      * @param limit The {@link FileAccess}es to check against
      * @return <code>true</code>, if one of the limits (size or count) is exceeded; otherwise <code>false</code>
      */
@@ -199,29 +199,25 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     @Override
     public boolean applicable(AJAXRequestData requestData) {
-        boolean applicable = super.applicable(requestData);
-        if (!applicable) {
-            return false;
-        }
-
         ServerSession session = requestData.getSession();
-        if (session.isAnonymous()) {
+        if (null == session || session.isAnonymous()) {
             return false;
         }
         if (!session.getUser().isGuest()) { // if not a guest, skip
             return false;
         }
-        return true;
+
+        return super.applicable(requestData);
     }
 
     @Override
     public void onRequestInitialized(AJAXRequestData requestData) {
         ServerSession session = requestData.getSession();
-        if (session.isAnonymous()) {
+        if (null == session || session.isAnonymous()) {
             return;
         }
         int contextId = session.getContextId();
-        
+
         removeOldAccesses(session, contextId);
 
         User user = session.getUser();
@@ -243,8 +239,8 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
             dropObsoleteAccesses(session.getUser(), contextId);
         } catch (OXException e) {
             int userId = session.getUserId();
-            LOG.info("Unable to delete obsolete entries for user {} in context {}. As this is just for cleanup reasons these entries won't be considered within further processings.", userId, contextId);
-        }        
+            LOG.info("Unable to delete obsolete entries for user {} in context {}. As this is just for cleanup reasons these entries won't be considered within further processings.", userId, contextId, e);
+        }
     }
 
     @Override
@@ -253,7 +249,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
             return;
         }
         ServerSession session = requestData.getSession();
-        if (session.isAnonymous()) {
+        if (null == session || session.isAnonymous()) {
             return;
         }
 
