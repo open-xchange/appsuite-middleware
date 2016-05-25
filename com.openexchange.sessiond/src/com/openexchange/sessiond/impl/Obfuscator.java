@@ -55,7 +55,6 @@ import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +62,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.osgi.Services;
@@ -117,7 +117,7 @@ public class Obfuscator implements ObfuscatorService {
 
     private static byte[] toBytes(char[] chars) {
         CharBuffer charBuffer = CharBuffer.wrap(chars);
-        ByteBuffer byteBuffer = Charset.forName("UTF-8").encode(charBuffer);
+        ByteBuffer byteBuffer = Charsets.UTF_8.encode(charBuffer);
         byte[] bytes = Arrays.copyOfRange(byteBuffer.array(), byteBuffer.position(), byteBuffer.limit());
         Arrays.fill(charBuffer.array(), '\u0000');// clear sensitive data
         Arrays.fill(byteBuffer.array(), (byte) 0);// clear sensitive data
@@ -126,7 +126,7 @@ public class Obfuscator implements ObfuscatorService {
 
     private static char[] toChars(byte[] bytes) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-        CharBuffer charBuffer = Charset.forName("UTF-8").decode(byteBuffer);
+        CharBuffer charBuffer = Charsets.UTF_8.decode(byteBuffer);
         char[] chars = Arrays.copyOfRange(charBuffer.array(), charBuffer.position(), charBuffer.limit());
         Arrays.fill(byteBuffer.array(), (byte) 0);// clear sensitive data
         Arrays.fill(charBuffer.array(), '\u0000');// clear sensitive data
