@@ -206,7 +206,12 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
             return false;
         }
 
-        return super.applicable(requestData);
+        if (!super.applicable(requestData)) {
+            return false;
+        }
+
+        // Check for download explicitly
+        return "download".equals(requestData.getParameter("view"));
     }
 
     @Override
