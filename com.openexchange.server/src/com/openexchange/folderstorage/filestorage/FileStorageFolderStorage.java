@@ -446,10 +446,14 @@ public final class FileStorageFolderStorage implements FolderStorage {
              * 2. Strip Unified-FileStorage account from obtained list
              */
             Locale userLocale = null;
-            if (storageParameters.getSession() == null) {
+            if (storageParameters.getSession() != null) {
+                User user = ServerSessionAdapter.valueOf(storageParameters.getSession()).getUser();
+                if (user != null) {
+                    userLocale = user.getLocale();
+                }
+            }
+            if (null == userLocale) {
                 userLocale = storageParameters.getUser().getLocale();
-            } else {
-                userLocale = ServerSessionAdapter.valueOf(storageParameters.getSession()).getUser().getLocale();
             }
 
             FileStorageFolder[] rootFolders = folderAccess.getRootFolders(userLocale);
