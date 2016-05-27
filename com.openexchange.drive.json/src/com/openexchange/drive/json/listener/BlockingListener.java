@@ -58,9 +58,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.json.DefaultLongPollingListener;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
@@ -123,7 +123,7 @@ public class BlockingListener extends DefaultLongPollingListener {
         /*
          * create and return resulting actions if available
          */
-        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions() :
+        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions(getSession()) :
             new ArrayList<DriveAction<? extends DriveVersion>>(0);
         try {
             return new AJAXRequestResult(JsonDriveAction.serialize(actions, Locale.US), "json");
