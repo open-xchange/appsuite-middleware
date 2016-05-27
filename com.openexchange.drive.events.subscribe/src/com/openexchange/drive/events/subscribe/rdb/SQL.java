@@ -67,6 +67,7 @@ public class SQL {
 
     public static String getCreateDriveEventSubscriptionsTableStmt() {
         return "CREATE TABLE driveEventSubscriptions (" +
+            "uuid BINARY(16) DEFAULT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
             "service VARCHAR(64) NOT NULL," +
             "token VARCHAR(255) NOT NULL," +
@@ -76,15 +77,32 @@ public class SQL {
             "PRIMARY KEY (cid,service,token)," +
             "INDEX (cid,service,folder)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
+        //TODO: change to the following for next release
+//        return "CREATE TABLE driveEventSubscriptions (" +
+//            "uuid BINARY(16) NOT NULL," +
+//            "cid INT4 UNSIGNED NOT NULL," +
+//            "service VARCHAR(64) NOT NULL," +
+//            "token VARCHAR(255) NOT NULL," +
+//            "user INT4 UNSIGNED NOT NULL," +
+//            "folder VARCHAR(512)," +
+//            "timestamp BIGINT(20) NOT NULL," +
+//            "PRIMARY KEY (cid,uuid)," +
+//            "INDEX (cid,service,folder)," +
+//            "INDEX (cid,service,token)" +
+//        ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
     }
 
     public static final String REPLACE_SUBSCRIPTION_STMT =
-        "REPLACE INTO driveEventSubscriptions (cid,service,token,user,folder,timestamp) " +
-        "VALUES (?,?,?,?,REVERSE(?),?);";
+        "REPLACE INTO driveEventSubscriptions (uuid,cid,service,token,user,folder,timestamp) " +
+        "VALUES (UNHEX(?),?,?,?,?,REVERSE(?),?);";
 
     public static final String DELETE_SUBSCRIPTION_STMT =
         "DELETE FROM driveEventSubscriptions " +
         "WHERE cid=? AND service=? AND token=?;";
+
+    public static final String DELETE_SUBSCRIPTION_FOR_FOLDER_STMT =
+        "DELETE FROM driveEventSubscriptions " +
+        "WHERE cid=? AND service=? AND token=? AND folder=REVERSE(?);";
 
     public static final String EXISTS_TOKEN_STMT =
         "SELECT 1 FROM driveEventSubscriptions " +
@@ -103,12 +121,12 @@ public class SQL {
         "WHERE cid=? AND token=?;";
 
     /**
-     * SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
+     * SELECT LOWER(HEX(uuid)),service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
      * WHERE cid=? AND service IN (?,?,...) AND folder IN (?,?,...);"
      */
     public static final String SELECT_SUBSCRIPTIONS_STMT(int serviceCount, int folderCount) throws OXException {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
+        stringBuilder.append("SELECT LOWER(HEX(uuid)),service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
         stringBuilder.append("WHERE cid=? AND service");
         appendPlaceholders(stringBuilder, serviceCount);
         stringBuilder.append(" AND folder");
@@ -117,12 +135,12 @@ public class SQL {
     }
 
     /**
-     * SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
+     * SELECT LOWER(HEX(uuid)),service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
      * WHERE service IN (?,?,...);"
      */
     public static final String SELECT_SUBSCRIPTIONS_STMT(int serviceCount) throws OXException {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT cid,service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
+        stringBuilder.append("SELECT LOWER(HEX(uuid)),cid,service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
         stringBuilder.append("WHERE service");
         appendPlaceholders(stringBuilder, serviceCount);
         return stringBuilder.append(';').toString();
