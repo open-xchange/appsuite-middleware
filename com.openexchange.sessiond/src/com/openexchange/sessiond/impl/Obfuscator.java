@@ -175,9 +175,11 @@ public class Obfuscator implements ObfuscatorService {
      * Destroys this obfuscator.
      */
     public void destroy() {
-        ByteBuffer directByteBuffer = obfuscationKeyRef.getAndSet(null);
-        if (null != directByteBuffer) {
-            releaseDirectByteBuffer(directByteBuffer);
+        if (null != obfuscationKeyRef) {
+            ByteBuffer directByteBuffer = obfuscationKeyRef.getAndSet(null);
+            if (null != directByteBuffer) {
+                releaseDirectByteBuffer(directByteBuffer);
+            }
         }
     }
 
