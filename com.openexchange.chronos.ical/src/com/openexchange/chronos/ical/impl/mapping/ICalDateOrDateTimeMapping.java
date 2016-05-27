@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import biweekly.component.ICalComponent;
+import biweekly.io.TimezoneInfo;
 import biweekly.property.DateOrDateTimeProperty;
 import biweekly.util.DateTimeComponents;
 import biweekly.util.ICalDate;
@@ -173,6 +174,11 @@ public abstract class ICalDateOrDateTimeMapping<T extends ICalComponent, U> exte
 				timezone = "UTC";				
 			} else {
 				timezone = property.getParameter("TZID");
+				if (null == timezone && null != parameters) {
+					TimezoneInfo timezoneInfo = parameters.get(ICalParameters.TIMEZONE_INFO, TimezoneInfo.class);
+					TimeZone timeZone = timezoneInfo.getTimeZone(property);
+					timezone = timeZone.getID();
+				}
 			}
 			setValue(object, new Date(property.getValue().getTime()), timezone, false);
 		}

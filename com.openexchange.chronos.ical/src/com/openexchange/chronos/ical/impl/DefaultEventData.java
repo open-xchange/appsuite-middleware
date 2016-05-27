@@ -50,60 +50,51 @@
 package com.openexchange.chronos.ical.impl;
 
 import java.util.List;
-import com.openexchange.chronos.ical.VCalendarImport;
-import com.openexchange.chronos.ical.VEventImport;
-import com.openexchange.exception.OXException;
+
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.AlarmData;
+import com.openexchange.chronos.ical.EventData;
 import com.openexchange.java.Streams;
 
 /**
- * {@link DefaultVCalendarImport}
+ * {@link DefaultEventData}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultVCalendarImport implements VCalendarImport {
+public class DefaultEventData extends AbstractComponentData implements EventData {
 
-    private final List<OXException> warnings;
-    private final List<VEventImport> vEventImports;
-    private String method;
+    private final Event event;
+    private final List<AlarmData> alarms;
 
     /**
-     * Initializes a new {@link DefaultVCalendarImport}.
+     * Initializes a new {@link DefaultEventData}.
      *
-     * @param method The method
-     * @param event The imported event
-     * @param warnings A list of parser- and conversion warnings
-     * @param iCalHolder A file holder storing the original iCal file, or <code>null</code> if not available
+     * @param event The event
+     * @param alarms The subsidiary alarm data of the event
+     * @param iCalHolder A file holder storing the associated iCal file, or <code>null</code> if not available
      */
-    public DefaultVCalendarImport(String method, List<VEventImport> vEventImports, List<OXException> warnings) {
-        super();
-        this.method = method;
-        this.warnings = warnings;
-        this.vEventImports = vEventImports;
+    public DefaultEventData(Event event, List<AlarmData> alarms, ThresholdFileHolder iCalHolder) {
+        super(iCalHolder);
+        this.event = event;
+        this.alarms = alarms;
     }
+
+    @Override
+    public Event getEvent() {
+        return event;
+    }
+
+	@Override
+	public List<AlarmData> getAlarms() {
+		return alarms;
+	}
 
     @Override
     public void close() {
-    	if (null != vEventImports) {
-    		for (VEventImport vAlarmImport : vEventImports) {
-    			Streams.close(vAlarmImport);
-			}
-		}
-    }
-
-	@Override
-	public List<VEventImport> getVEventImports() {
-		return vEventImports;
-	}
-
-	@Override
-	public List<OXException> getWarnings() {
-		return warnings;
-	}
-
-    @Override
-    public String getMethod() {
-        return method;
+		Streams.close(alarms);
+    	super.close();
     }
 
 }

@@ -47,40 +47,41 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.impl;
 
-import java.io.Closeable;
-import java.util.List;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ComponentData;
+import com.openexchange.java.Streams;
 
 /**
- * {@link VEventImport}
+ * {@link AbstractComponentData}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface VEventImport extends Closeable {
+public class AbstractComponentData implements ComponentData {
+
+    private final ThresholdFileHolder iCalHolder;
 
     /**
-     * Gets the imported event.
+     * Initializes a new {@link AbstractComponentData}.
      *
-     * @return The imported event
+     * @param iCalHolder A file holder storing the original iCal component, or <code>null</code> if not available
      */
-    Event getEventData();
+    protected AbstractComponentData(ThresholdFileHolder iCalHolder) {
+        super();
+        this.iCalHolder = iCalHolder;
+    }
 
-    /**
-     * Gets a file holder storing the original VEVENT component in a file, or <code>null</code> if not available
-     *
-     * @return The original VEVENT component, or <code>null</code> if not available
-     */
-    IFileHolder getVEventComponent();
+    @Override
+    public IFileHolder getComponent() {
+        return iCalHolder;
+    }
 
-    /**
-     * Gets the alarms imported from the contained VALARM components.
-     *
-     * @return The alarm imports, or <code>null</code> if there are none
-     */
-    List<VAlarmImport> getVAlarmImports();
+    @Override
+    public void close() {
+        Streams.close(iCalHolder);
+    }
 
 }

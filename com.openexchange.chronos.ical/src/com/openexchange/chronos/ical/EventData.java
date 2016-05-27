@@ -47,51 +47,32 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.ical;
 
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.ical.VAlarmImport;
-import com.openexchange.java.Streams;
+import java.util.List;
+
+import com.openexchange.chronos.Event;
 
 /**
- * {@link DefaultVAlarmImport}
+ * {@link EventData}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultVAlarmImport implements VAlarmImport {
-
-    private final Alarm alarm;
-    private final ThresholdFileHolder iCalHolder;
+public interface EventData extends ComponentData {
 
     /**
-     * Initializes a new {@link DefaultVAlarmImport}.
+     * Gets the event object.
      *
-     * @param alarm The imported event
-     * @param warnings A list of parser- and conversion warnings
-     * @param iCalHolder A file holder storing the original iCal file, or <code>null</code> if not available
+     * @return The event
      */
-    public DefaultVAlarmImport(Alarm alarm, ThresholdFileHolder iCalHolder) {
-        super();
-        this.alarm = alarm;
-        this.iCalHolder = iCalHolder;
-    }
-
-    @Override
-    public Alarm getAlarmData() {
-        return alarm;
-    }
-
-    @Override
-    public IFileHolder getVAlarmComponent() {
-        return iCalHolder;
-    }
-
-    @Override
-    public void close() {
-        Streams.close(iCalHolder);
-    }
+    Event getEvent();
+    
+    /**
+     * Gets the subsidiary alarm data of the event.
+     *
+     * @return The alarm data, or <code>null</code> if there are none
+     */
+    List<AlarmData> getAlarms();
 
 }

@@ -47,41 +47,74 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl.mapping;
+package com.openexchange.chronos.ical.impl;
 
 import java.util.List;
 
-import biweekly.component.ICalComponent;
-
-import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.CalendarImport;
+import com.openexchange.chronos.ical.EventData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 
 /**
- * {@link ICalMapping}
+ * {@link DefaultCalendarImport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface ICalMapping<T extends ICalComponent, U> {
-	
-    /**
-     * Exports the mapped contact attributes into the supplied vCard.
-     *
-     * @param object The object to export
-     * @param component The target iCal component
-     * @param parameters Further options to use
-     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
-     */
-    void export(U object, T component, ICalParameters parameters, List<OXException> warnings);
+public class DefaultCalendarImport implements CalendarImport {
+
+    private final List<OXException> warnings;
+    private final List<EventData> events;
+    private String method;
+    private String name;
 
     /**
-     * Imports the mapped vCard properties into the supplied contact
+     * Initializes a new {@link DefaultCalendarImport}.
      *
-     * @param component The iCal component to import
-     * @param object The target object
-     * @param parameters Further options to use
-     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
+     * @param method The method
+     * @param event The imported event
+     * @param warnings A list of parser- and conversion warnings
+     * @param iCalHolder A file holder storing the original iCal file, or <code>null</code> if not available
      */
-    void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings);
+    public DefaultCalendarImport(String method, List<EventData> events, List<OXException> warnings) {
+        super();
+        this.method = method;
+        this.warnings = warnings;
+        this.events = events;
+    }
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setMethod(String method) {
+		this.method = method;
+	}
+
+    @Override
+    public String getMethod() {
+        return method;
+    }
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public List<EventData> getEvents() {
+		return events;
+	}
+
+	@Override
+	public List<OXException> getWarnings() {
+		return warnings;
+	}
+
+    @Override
+    public void close() {
+    	Streams.close(events);
+    }
 
 }

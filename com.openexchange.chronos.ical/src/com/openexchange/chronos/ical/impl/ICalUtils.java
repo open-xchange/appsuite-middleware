@@ -52,98 +52,59 @@ package com.openexchange.chronos.ical.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 import biweekly.Biweekly;
 import biweekly.ICalVersion;
 import biweekly.ICalendar;
 import biweekly.component.ICalComponent;
-import biweekly.component.VAlarm;
-import biweekly.component.VEvent;
 import biweekly.io.TimezoneInfo;
 import biweekly.io.text.ICalWriter;
+
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.Event;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.ical.VAlarmImport;
-import com.openexchange.chronos.ical.VCalendarImport;
-import com.openexchange.chronos.ical.VEventImport;
-import com.openexchange.chronos.ical.impl.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 
 /**
- * {@link DefaultICalService}
+ * {@link ICalUtils}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultICalService implements ICalService {
+public class ICalUtils {
 
-    private final ICalMapper mapper;
-
-    public DefaultICalService() {
-        super();
-        this.mapper = new ICalMapper();
-    }
-
-    @Override
-    public VCalendarImport importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
-        List<OXException> warnings = new ArrayList<OXException>();
-        ICalParameters iCalParameters = getParametersOrDefault(parameters);
-
-        ICalendar iCalendar = null;
-        try {
-            iCalendar = Biweekly.parse(iCalFile).first();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if (null != iCalendar) {
-            String method = null == iCalendar.getMethod() ? null : iCalendar.getMethod().getValue();
-            List<VEvent> vEvents = iCalendar.getEvents();
-            List<VEventImport> vEventImports;
-            if (null == vEvents) {
-                vEventImports = null;
-            } else {
-                vEventImports = new ArrayList<VEventImport>(vEvents.size());
-                for (VEvent vEvent : vEvents) {
-                    /*
-                     * import VALARM subcomponents separately
-                     */
-                    List<VAlarm> vAlarms = vEvent.getAlarms();
-                    List<VAlarmImport> vAlarmImports;
-                    if (null == vAlarms) {
-                        vAlarmImports = null;
-                    } else {
-                        vAlarmImports = new ArrayList<VAlarmImport>(vAlarms.size());
-                        for (VAlarm vAlarm : vAlarms) {
-                            Alarm alarm = mapper.importVAlarm(vAlarm, null, iCalParameters, warnings);
-                            ThresholdFileHolder iCalHolder = exportComponent(vAlarm, null);
-                            vAlarmImports.add(new DefaultVAlarmImport(alarm, iCalHolder));
-                        }
-                    }
-                    /*
-                     * import VEVENT
-                     */
-                    Event event = mapper.importVEvent(vEvent, null, iCalParameters, warnings);
-                    ThresholdFileHolder iCalHolder = exportComponent(vEvent, null);
-                    vEventImports.add(new DefaultVEventImport(event, iCalHolder, vAlarmImports));
-                }
-            }
-            return new DefaultVCalendarImport(method, vEventImports, warnings);
-        }
-        return null;
-    }
-
-    private ThresholdFileHolder exportComponent(ICalComponent component, ICalParameters parameters) throws OXException {
+    static ThresholdFileHolder exportComponent(ICalComponent component, ICalParameters parameters) throws OXException {
         ICalendar iCalendar = new ICalendar();
         iCalendar.addComponent(component);
         return exportICalendar(iCalendar, parameters);
     }
 
-    private ThresholdFileHolder exportICalendar(ICalendar iCalendar, ICalParameters parameters) throws OXException {
+    static <T extends ICalComponent> T parseComponent(Class<T> clazz, IFileHolder fileHolder, List<OXException> warnings) throws OXException {
+    	try (InputStream inputStream = fileHolder.getStream()) {
+    		return parseComponent(clazz, inputStream, warnings);
+    	} catch (IOException e) {
+            throw new OXException(e);
+		}
+    }
+
+    static <T extends ICalComponent> T parseComponent(Class<T> clazz, InputStream inputStream, List<OXException> warnings) throws OXException {
+        ICalendar iCalendar = null;
+        try {
+        	List<List<String>> parserWarnings = new ArrayList<List<String>>();
+            iCalendar = Biweekly.parse(inputStream).warnings(parserWarnings).first();
+            if (0 < parserWarnings.size()) {
+            	warnings.addAll(getParserWarnings(parserWarnings.get(0)));
+            }
+        } catch (IOException e) {
+            throw new OXException(e);
+        }
+        return null != iCalendar ? iCalendar.getComponent(clazz) : null;
+    }
+
+    static ThresholdFileHolder exportICalendar(ICalendar iCalendar, ICalParameters parameters) throws OXException {
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         ICalWriter iCalWriter = null;
         try {
@@ -152,7 +113,7 @@ public class DefaultICalService implements ICalService {
             iCalWriter.write(iCalendar);
             iCalWriter.flush();
         } catch (IOException e) {
-            throw new OXException();
+            throw new OXException(e);
         } finally {
             Streams.close(iCalWriter);
         }
@@ -160,22 +121,33 @@ public class DefaultICalService implements ICalService {
     }
 
     /**
-     * Gets the vCard parameters, or the default parameters if passed instance is <code>null</code>.
+     * Gets the iCal parameters, or the default parameters if passed instance is <code>null</code>.
      *
      * @param parameters The parameters as passed from the client
      * @return The parameters, or the default parameters if passed instance is <code>null</code>
      */
-    private ICalParameters getParametersOrDefault(ICalParameters parameters) {
+    static ICalParameters getParametersOrDefault(ICalParameters parameters) {
         return null != parameters ? parameters : new ICalParametersImpl();
     }
 
-    private void applyParameters(ICalWriter writer, ICalParameters parameters) {
+    static void applyParameters(ICalWriter writer, ICalParameters parameters) {
         if (null != parameters) {
             TimezoneInfo tzInfo = parameters.get(ICalParameters.TIMEZONE_INFO, TimezoneInfo.class);
             if (null != tzInfo) {
                 writer.setTimezoneInfo(tzInfo);
             }
         }
+    }
+    
+    static List<OXException> getParserWarnings(List<String> parserWarnings) {
+    	if (null == parserWarnings || 0 == parserWarnings.size()) {
+    		return Collections.emptyList();
+    	}
+    	List<OXException> warnings = new ArrayList<OXException>();
+    	for (String parserWarning : parserWarnings) {
+    		warnings.add(OXException.general(parserWarning));			
+		}
+    	return warnings;
     }
 
 }

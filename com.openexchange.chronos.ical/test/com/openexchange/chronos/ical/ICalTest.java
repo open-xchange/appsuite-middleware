@@ -56,15 +56,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+
 import biweekly.ICalVersion;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
 import biweekly.io.TimezoneInfo;
 import biweekly.io.text.ICalWriter;
+
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.impl.DefaultICalService;
 import com.openexchange.chronos.ical.impl.ICalParametersImpl;
+import com.openexchange.chronos.ical.impl.ICalServiceImpl;
 import com.openexchange.chronos.ical.impl.mapping.ICalMapper;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.TimeZones;
 
@@ -82,7 +85,7 @@ public abstract class ICalTest {
 
     protected ICalTest() {
         super();
-        this.iCalService = new DefaultICalService();
+        this.iCalService = new ICalServiceImpl();
     }
 
 	protected String serialize(Event event) throws IOException {
@@ -108,14 +111,22 @@ public abstract class ICalTest {
 		}
 	}
 
-    protected VCalendarImport importICal(String iCal) throws Exception {
+    protected CalendarImport importICal(String iCal) throws Exception {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
         return iCalService.importICal(inputStream, null);
     }
 
-    protected VEventImport importEvent(String iCal) throws Exception {
+    protected EventData importEvent(String iCal) throws Exception {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
-        return iCalService.importICal(inputStream, null).getVEventImports().get(0);
+        return iCalService.importICal(inputStream, null).getEvents().get(0);
+    }
+    
+    protected String exportEvent(EventData event) throws Exception {
+		ICalParametersImpl parameters = new ICalParametersImpl();
+    	CalendarExport calendarExport = iCalService.exportICal(parameters);
+    	calendarExport.add(event);
+    	byte[] iCal = calendarExport.toByteArray();
+    	return new String(iCal, Charsets.UTF_8);
     }
 
 	protected ICalendar parse(String iCal) {

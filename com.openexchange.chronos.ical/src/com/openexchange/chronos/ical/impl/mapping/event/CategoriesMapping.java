@@ -81,7 +81,7 @@ public class CategoriesMapping extends AbstractICalMapping<VEvent, Event> {
 	public void importICal(VEvent vEvent, Event event, ICalParameters parameters, List<OXException> warnings) {
 		List<Categories> properties = vEvent.getCategories();
 		if (null == properties || 0 == properties.size()) {
-			event.setAttendees(null);
+			event.setCategories(null);
 		} else {
 			List<String> categories = new ArrayList<String>(properties.size());
 			for (biweekly.property.Categories property : properties) {

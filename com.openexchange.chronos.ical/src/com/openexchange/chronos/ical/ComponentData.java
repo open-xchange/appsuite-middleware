@@ -47,41 +47,25 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl.mapping;
+package com.openexchange.chronos.ical;
 
-import java.util.List;
+import java.io.Closeable;
 
-import biweekly.component.ICalComponent;
-
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.fileholder.IFileHolder;
 
 /**
- * {@link ICalMapping}
+ * {@link ComponentData}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface ICalMapping<T extends ICalComponent, U> {
-	
-    /**
-     * Exports the mapped contact attributes into the supplied vCard.
-     *
-     * @param object The object to export
-     * @param component The target iCal component
-     * @param parameters Further options to use
-     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
-     */
-    void export(U object, T component, ICalParameters parameters, List<OXException> warnings);
+public interface ComponentData extends Closeable {
 
     /**
-     * Imports the mapped vCard properties into the supplied contact
+     * Gets a file holder storing the underlying iCalendar component in a file, or <code>null</code> if not available
      *
-     * @param component The iCal component to import
-     * @param object The target object
-     * @param parameters Further options to use
-     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
+     * @return The original iCalendar component, or <code>null</code> if not available
      */
-    void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings);
+    IFileHolder getComponent();
 
 }

@@ -104,6 +104,22 @@ public class ICalMapper {
         return vEvent;
     }
 
+    public VAlarm exportAlarm(Alarm alarm, VAlarm vAlarm, ICalParameters parameters, List<OXException> warnings) {
+        if (null == vAlarm) {
+            vAlarm = new VAlarm(null, null);
+        }
+        if (null == parameters) {
+        	parameters = getDefaultParameters();
+        }
+        if (null == warnings) {
+        	warnings = new ArrayList<OXException>();
+        }
+        for (ICalMapping<VAlarm, Alarm> mapping : AlarmMappings.ALL) {
+            mapping.export(alarm, vAlarm, parameters, warnings);
+        }
+        return vAlarm;
+    }
+
     /**
      * Imports a vEvent, optionally merging with an existing contact.
      *

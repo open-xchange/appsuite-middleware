@@ -49,10 +49,15 @@
 
 package com.openexchange.chronos.ical;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.junit.Test;
+
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
@@ -88,8 +93,8 @@ public class BasicTest extends ICalTest {
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
         ;
-        VEventImport vEventImport = importEvent(iCal);
-        Event event = vEventImport.getEventData();
+        EventData eventData = importEvent(iCal);
+        Event event = eventData.getEvent();
 //        assertEquals(D("1996-07-04 12:00:00"), event.getCreated());
         assertEquals("uid1@example.com", event.getUid());
         assertEquals("mailto:jsmith@example.com", event.getOrganizer().getUri());
@@ -139,8 +144,8 @@ public class BasicTest extends ICalTest {
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
         ;
-        VEventImport vEventImport = importEvent(iCal);
-        Event event = vEventImport.getEventData();
+        EventData eventData = importEvent(iCal);
+        Event event = eventData.getEvent();
 //        assertEquals(D("1996-07-04 12:00:00"), event.getCreated());
         assertEquals("guid-1.example.com", event.getUid());
         assertEquals("mailto:mrbig@example.com", event.getOrganizer().getUri());
@@ -157,6 +162,8 @@ public class BasicTest extends ICalTest {
         assertEquals("XYZ Project Review", event.getSummary());
         assertEquals(D("1998-03-12 08:30:00", "America/New_York"), event.getStartDate());
         assertEquals(D("1998-03-12 09:30:00", "America/New_York"), event.getEndDate());
+        assertEquals("America/New_York", event.getStartTimezone());
+        assertEquals("America/New_York", event.getEndTimezone());        
         assertEquals("1CP Conference Room 4350", event.getLocation());
     }
 
@@ -186,10 +193,10 @@ public class BasicTest extends ICalTest {
             "END:VEVENT\r\n" +
             "END:VCALENDAR\r\n"
         ;
-        VCalendarImport vCalendarImport = importICal(iCal);
+        CalendarImport vCalendarImport = importICal(iCal);
         assertEquals("xyz", vCalendarImport.getMethod());
-        VEventImport vEventImport = vCalendarImport.getVEventImports().get(0);
-        Event event = vEventImport.getEventData();
+        EventData eventData = importEvent(iCal);
+        Event event = eventData.getEvent();
         assertEquals(Integer.valueOf(0), event.getSequence());
         assertEquals("uid3@example.com", event.getUid());
         assertEquals("mailto:jdoe@example.com", event.getOrganizer().getUri());

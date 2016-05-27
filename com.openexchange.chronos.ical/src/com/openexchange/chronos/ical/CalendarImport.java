@@ -47,64 +47,47 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.ical;
 
+import java.io.Closeable;
 import java.util.List;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.VAlarmImport;
-import com.openexchange.chronos.ical.VEventImport;
-import com.openexchange.java.Streams;
+
+import com.openexchange.exception.OXException;
 
 /**
- * {@link DefaultVEventImport}
+ * {@link CalendarImport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultVEventImport implements VEventImport {
-
-    private final Event event;
-    private final ThresholdFileHolder iCalHolder;
-    private final List<VAlarmImport> vAlarmImports;
+public interface CalendarImport extends Closeable {
 
     /**
-     * Initializes a new {@link DefaultVEventImport}.
+     * Gets the method as declared in the VCALENDAR component.
      *
-     * @param event The imported event
-     * @param iCalHolder A file holder storing the original iCal file, or <code>null</code> if not available
+     * @return The method, or <code>null</code> if there was none
      */
-    public DefaultVEventImport(Event event, ThresholdFileHolder iCalHolder, List<VAlarmImport> vAlarmImports) {
-        super();
-        this.event = event;
-        this.iCalHolder = iCalHolder;
-        this.vAlarmImports = vAlarmImports;
-    }
+    String getMethod();
 
-    @Override
-    public Event getEventData() {
-        return event;
-    }
+    /**
+     * Gets the imported calendar's name based on the <code>X-WR-CALNAME</code> property of the underlying <code>VCALENDAR</code> component.  
+     * 
+     * @return The calendar name, or <code>null</code> if not defined
+     */
+    String getName();
+    
+    /**
+     * Gets the events imported from the contained VEVENT components.
+     *
+     * @return The imported events, or <code>null</code> if there are none
+     */
+	List<EventData> getEvents();
 
-    @Override
-    public IFileHolder getVEventComponent() {
-        return iCalHolder;
-    }
-
-    @Override
-    public void close() {
-    	if (null != vAlarmImports) {
-    		for (VAlarmImport vAlarmImport : vAlarmImports) {
-    			Streams.close(vAlarmImport);
-			}
-		}
-        Streams.close(iCalHolder);
-    }
-
-	@Override
-	public List<VAlarmImport> getVAlarmImports() {
-		return vAlarmImports;
-	}
+	/**
+     * Gets a list of parser- and conversion warnings.
+     *
+     * @return The warnings
+     */
+    List<OXException> getWarnings();
 
 }

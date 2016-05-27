@@ -47,39 +47,36 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.impl;
 
-import java.io.Closeable;
-import java.util.List;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.ical.AlarmData;
 
 /**
- * {@link VCalendarImport}
+ * {@link DefaultAlarmData}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface VCalendarImport extends Closeable {
+public class DefaultAlarmData extends AbstractComponentData implements AlarmData {
+
+    private final Alarm alarm;
 
     /**
-     * Gets the method as declared in the VCALENDAR component.
+     * Initializes a new {@link DefaultAlarmData}.
      *
-     * @return The method, or <code>null</code> if there was none
+     * @param alarm The alarm
+     * @param iCalHolder A file holder storing the associated iCal file, or <code>null</code> if not available
      */
-    String getMethod();
+    public DefaultAlarmData(Alarm alarm, ThresholdFileHolder iCalHolder) {
+        super(iCalHolder);
+        this.alarm = alarm;
+    }
 
-    /**
-     * Gets the events imported from the contained VEVENT components.
-     *
-     * @return The event imports, or <code>null</code> if there are none
-     */
-	List<VEventImport> getVEventImports();
-
-	/**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    @Override
+    public Alarm getAlarm() {
+        return alarm;
+    }
 
 }

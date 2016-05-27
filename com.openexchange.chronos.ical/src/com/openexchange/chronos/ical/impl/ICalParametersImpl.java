@@ -52,6 +52,8 @@ package com.openexchange.chronos.ical.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import biweekly.io.TimezoneInfo;
+
 import com.openexchange.chronos.ical.ICalParameters;
 
 /**
@@ -69,6 +71,13 @@ public class ICalParametersImpl implements ICalParameters {
      */
     public ICalParametersImpl() {
         super();
+        applyDefaults();
+    }
+    
+    private void applyDefaults() {
+		TimezoneInfo tzInfo = new TimezoneInfo();
+		tzInfo.setDefaultTimeZone(null);
+		set(ICalParameters.TIMEZONE_INFO, tzInfo);
     }
 
     @Override
