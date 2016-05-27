@@ -47,62 +47,60 @@
  *
  */
 
-package com.openexchange.drive.events.subscribe.osgi;
+package com.openexchange.drive.events.subscribe.rdb;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.database.CreateTableService;
+import static com.openexchange.tools.sql.DBUtils.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
-import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUuidColumnTask;
-import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsCreateTableService;
-import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsCreateTableTask;
-import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsDeleteListener;
-import com.openexchange.drive.events.subscribe.rdb.RdbSubscriptionStore;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link SubscribeActivator}
+ * {@link DriveEventSubscriptionsAddUuidColumnTask}
+ *
+ * Adds the column <code>uuid BINARY(16) DEFAULT NULL</code> to the <code>driveEventSubscriptions</code>.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public class SubscribeActivator extends HousekeepingActivator {
+public class DriveEventSubscriptionsAddUuidColumnTask extends UpdateTaskAdapter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SubscribeActivator.class);
-
-    /**
-     * Initializes a new {@link SubscribeActivator}.
-     */
-    public SubscribeActivator() {
-        super();
+    @Override
+    public String[] getDependencies() {
+        return new String[] { DriveEventSubscriptionsCreateTableTask.class.getName() };
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
-        SubscribeServiceLookup.set(this);
-        registerService(CreateTableService.class, new DriveEventSubscriptionsCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsCreateTableTask()));
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsAddUuidColumnTask()));
-        // TODO: enable update task for next release
-//        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsMakeUuidPrimaryTask()));
-        registerService(DeleteListener.class, new DriveEventSubscriptionsDeleteListener());
-        registerService(DriveSubscriptionStore.class, new RdbSubscriptionStore());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
-        SubscribeServiceLookup.set(null);
-        super.stopBundle();
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        DatabaseService dbService = SubscribeServiceLookup.getService(DatabaseService.class, true);
+        Connection connection = dbService.getForUpdateTask(contextID);
+        boolean committed = false;
+        try {
+            connection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connection, "driveEventSubscriptions", new Column("uuid", "BINARY(16) DEFAULT NULL"));
+            connection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connection);
+            if (committed) {
+                dbService.backForUpdateTask(contextID, connection);
+            } else {
+                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            }
+        }
     }
 
 }
