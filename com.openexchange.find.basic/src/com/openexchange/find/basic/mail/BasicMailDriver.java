@@ -235,7 +235,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             public Object[] call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
                 Object[] vals = new Object[2];
                 vals[0] = folder;
-                vals[1] = prefixAvailable ? Boolean.FALSE : Boolean.valueOf(mailAccess.getMailConfig().getCapabilities().hasFileNameSearch());
+                vals[1] = prefixAvailable ? Boolean.valueOf(mailAccess.getMailConfig().getCapabilities().hasFileNameSearch()) : Boolean.FALSE;
                 return vals;
             }
         });
