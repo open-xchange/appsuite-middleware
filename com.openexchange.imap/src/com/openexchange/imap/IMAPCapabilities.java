@@ -305,7 +305,7 @@ public class IMAPCapabilities extends MailCapabilities {
             ", hasThreadReferences=").append(hasThreadReferences()).append(", hasChildren=").append(hasChildren()).append(", hasIMAP4=").append(
             hasIMAP4()).append(", hasIMAP4rev1=").append(hasIMAP4rev1()).append(", hasNamespace=").append(hasNamespace()).append(
             ", hasThreadOrderedSubject=").append(hasThreadOrderedSubject()).append(", hasUIDPlus=").append(hasUIDPlus()).append(
-            ", hasSortDisplay=").append(hasSortDisplay()).toString();
+            ", hasSortDisplay=").append(hasSortDisplay()).append(", hasFileNameSearch=").append(hasFileNameSearch()).toString();
     }
 
     /**
