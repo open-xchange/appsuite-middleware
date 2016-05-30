@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.json.listener;
 
+import java.util.List;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.LongPollingListenerFactory;
@@ -61,8 +62,8 @@ import com.openexchange.drive.json.LongPollingListenerFactory;
 public class BlockingListenerFactory implements LongPollingListenerFactory {
 
     @Override
-    public LongPollingListener create(DriveSession session) {
-        return new BlockingListener(session);
+    public LongPollingListener create(DriveSession session, List<String> rootFolderIDs) {
+        return new BlockingListener(session, rootFolderIDs);
     }
 
     @Override

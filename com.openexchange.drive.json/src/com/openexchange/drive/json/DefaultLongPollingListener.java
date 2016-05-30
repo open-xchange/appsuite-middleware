@@ -52,9 +52,20 @@ package com.openexchange.drive.json;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.json.json.JsonDriveAction;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link DefaultLongPollingListener}
@@ -63,16 +74,19 @@ import com.openexchange.java.Strings;
  */
 public abstract class DefaultLongPollingListener implements LongPollingListener {
 
-    protected DriveSession driveSession;
+    protected final DriveSession driveSession;
+    protected final List<String> rootFolderIDs;
 
     /**
      * Initializes a new {@link DefaultLongPollingListener}.
      *
      * @param driveSession The drive session
+     * @param rootFolderIDs The root folder IDs to listen for changes in
      */
-    protected DefaultLongPollingListener(DriveSession driveSession) {
+    protected DefaultLongPollingListener(DriveSession driveSession, List<String> rootFolderIDs) {
         super();
         this.driveSession = driveSession;
+        this.rootFolderIDs = rootFolderIDs;
     }
 
     @Override
@@ -86,9 +100,45 @@ public abstract class DefaultLongPollingListener implements LongPollingListener 
         return null == tokenRef ? null == token : tokenRef.equals(token) || tokenRef.equals(getMD5(token));
     }
 
+    /**
+     * Creates an AJAX request result containing the sync actions for the client based on the supplied drive event.
+     *
+     * @param event The drive event to generate the result for
+     * @return The result
+     */
+    protected AJAXRequestResult createResult(DriveEvent event) throws OXException {
+        /*
+         * create and return resulting actions if available
+         */
+        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions(rootFolderIDs) :
+            Collections.<DriveAction<? extends DriveVersion>>emptyList();
+        try {
+            return new AJAXRequestResult(JsonDriveAction.serialize(actions, Locale.US), "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets a value indicating whether the supplied event is of interest for the underlying listener or not.
+     *
+     * @param event The event
+     * @return <code>true</code> if it's interesting, <code>false</code>, otherwise
+     */
+    protected boolean isInteresting(DriveEvent event) {
+        if (null != event && null != event.getFolderIDs() && null != rootFolderIDs) {
+            for (String rootFolderID : rootFolderIDs) {
+                if (event.getFolderIDs().contains(rootFolderID)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static String extractToken(DriveSession driveSession) {
         if (null != driveSession && null != driveSession.getServerSession()) {
-            return (String)driveSession.getServerSession().getParameter(DriveSession.PARAMETER_PUSH_TOKEN);
+            return (String) driveSession.getServerSession().getParameter(DriveSession.PARAMETER_PUSH_TOKEN);
         }
         return null;
     }

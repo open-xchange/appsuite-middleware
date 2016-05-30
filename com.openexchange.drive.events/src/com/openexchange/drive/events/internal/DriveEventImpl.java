@@ -49,11 +49,10 @@
 
 package com.openexchange.drive.events.internal;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.drive.DriveAction;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
 
@@ -97,8 +96,14 @@ public class DriveEventImpl implements DriveEvent {
     }
 
     @Override
-    public List<DriveAction<? extends DriveVersion>> getActions(DriveSession session) {
-        return Collections.<DriveAction<? extends DriveVersion>>singletonList(new SyncDirectoriesAction(session.getRootFolderID()));
+    public List<DriveAction<? extends DriveVersion>> getActions(List<String> rootFolderIDs) {
+        List<DriveAction<? extends DriveVersion>> actions = new ArrayList<DriveAction<? extends DriveVersion>>(rootFolderIDs.size());
+        for (String rootFolderID : rootFolderIDs) {
+            if (folderIDs.contains(rootFolderID)) {
+                actions.add(new SyncDirectoriesAction(rootFolderID));
+            }
+        }
+        return actions;
     }
 
     @Override

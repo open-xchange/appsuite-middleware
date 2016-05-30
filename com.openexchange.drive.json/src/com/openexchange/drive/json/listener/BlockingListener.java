@@ -49,20 +49,14 @@
 
 package com.openexchange.drive.json.listener;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.json.DefaultLongPollingListener;
-import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -84,10 +78,10 @@ public class BlockingListener extends DefaultLongPollingListener {
      * Initializes a new {@link BlockingListener}.
      *
      * @param session The session
-     * @param rootFolderID The root folder ID
+     * @param rootFolderIDs The root folder IDs to listen for changes in
      */
-    public BlockingListener(DriveSession session) {
-        super(session);
+    public BlockingListener(DriveSession session, List<String> rootFolderIDs) {
+        super(session, rootFolderIDs);
         this.lock = new ReentrantLock();
         this.hasEvent = this.lock.newCondition();
     }
@@ -119,19 +113,6 @@ public class BlockingListener extends DefaultLongPollingListener {
         return createResult(data);
     }
 
-    private AJAXRequestResult createResult(DriveEvent event) throws OXException {
-        /*
-         * create and return resulting actions if available
-         */
-        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions(getSession()) :
-            new ArrayList<DriveAction<? extends DriveVersion>>(0);
-        try {
-            return new AJAXRequestResult(JsonDriveAction.serialize(actions, Locale.US), "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
     @Override
     public void onEvent(DriveEvent event) {
         if (false == isInteresting(event)) {
@@ -147,8 +128,9 @@ public class BlockingListener extends DefaultLongPollingListener {
         }
     }
 
-    private boolean isInteresting(DriveEvent event) {
-        return null != event && null != event.getFolderIDs() && event.getFolderIDs().contains(driveSession.getRootFolderID());
+    @Override
+    public String toString() {
+        return "BlockingListener [driveSession=" + driveSession + ", rootFolderIDs=" + rootFolderIDs + "]";
     }
 
 }

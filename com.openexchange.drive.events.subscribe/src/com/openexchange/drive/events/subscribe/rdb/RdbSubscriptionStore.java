@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -90,33 +91,60 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
     }
 
     @Override
-    public Subscription subscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException {
-        Subscription subscription = new Subscription(UUIDs.getUnformattedStringFromRandom(),
-            session.getContextId(), session.getUserId(), serviceID, token, rootFolderID, System.currentTimeMillis());
+    public List<Subscription> subscribe(Session session, String serviceID, String token, List<String> rootFolderIDs) throws OXException {
+        List<Subscription> subscriptions = new ArrayList<Subscription>(rootFolderIDs.size());
         Connection connection = databaseService.getWritable(session.getContextId());
         try {
-            deleteSubscription(connection, session.getContextId(), serviceID, token, rootFolderID);
-            if (0 == replaceSubscription(connection, subscription)) {
-                throw DriveExceptionCodes.DB_ERROR.create("Subscription not added: " + subscription);
+            for (String rootFolderID : rootFolderIDs) {
+                Subscription subscription = new Subscription(UUIDs.getUnformattedStringFromRandom(),
+                    session.getContextId(), session.getUserId(), serviceID, token, rootFolderID, System.currentTimeMillis());
+                deleteSubscription(connection, session.getContextId(), serviceID, token, rootFolderID);
+                if (0 == replaceSubscription(connection, subscription)) {
+                    throw DriveExceptionCodes.DB_ERROR.create("Subscription not added: " + subscription);
+                }
             }
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             databaseService.backWritable(session.getContextId(), connection);
         }
-        return subscription;
+        return subscriptions;
+    }
+
+    @Override
+    public Subscription subscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException {
+        List<Subscription> subscriptions = subscribe(session, serviceID, token, Collections.singletonList(rootFolderID));
+        return null != subscriptions && 0 < subscriptions.size() ? subscriptions.get(0) : null;
+    }
+
+    @Override
+    public boolean unsubscribe(Session session, String serviceID, String token, List<String> rootFolderIDs) throws OXException {
+        int deleted = 0;
+        int contextID = session.getContextId();
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            if (null == rootFolderIDs) {
+                deleted = deleteSubscription(connection, contextID, serviceID, token);
+            } else {
+                for (String rootFolderID : rootFolderIDs) {
+                    deleted += deleteSubscription(connection, contextID, serviceID, token, rootFolderID);
+                }
+            }
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            if (0 < deleted) {
+                databaseService.backWritable(contextID, connection);
+            } else {
+                databaseService.backWritableAfterReading(contextID, connection);
+            }
+        }
+        return 0 <deleted;
     }
 
     @Override
     public boolean unsubscribe(Session session, String serviceID, String token) throws OXException {
-        Connection connection = databaseService.getWritable(session.getContextId());
-        try {
-            return 0 < deleteSubscription(connection, session.getContextId(), serviceID, token);
-        } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            databaseService.backWritable(session.getContextId(), connection);
-        }
+        return unsubscribe(session, serviceID, token, null);
     }
 
     @Override

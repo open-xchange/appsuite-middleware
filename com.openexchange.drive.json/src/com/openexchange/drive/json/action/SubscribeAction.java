@@ -49,6 +49,11 @@
 
 package com.openexchange.drive.json.action;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -59,13 +64,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
-
 /**
  * {@link SubscribeAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SubscribeAction extends AbstractDriveAction {
+
+    @Override
+    protected boolean requiresRootFolderID() {
+        return false;
+    }
 
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
@@ -81,10 +90,38 @@ public class SubscribeAction extends AbstractDriveAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("service");
         }
         /*
+         * get optional root folder identifiers, falling back to the session's default root folder id
+         */
+        List<String> rootFolderIDs = null;
+        Object data = requestData.getData();
+        if (null != data) {
+            if (false == JSONObject.class.isInstance(data)) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
+            JSONObject dataObject = (JSONObject) data;
+            JSONArray rootArray = dataObject.optJSONArray("root");
+            if (null != rootArray && 0 < rootArray.length()) {
+                rootFolderIDs = new ArrayList<String>(rootArray.length());
+                try {
+                    for (int i = 0; i < rootArray.length(); i++) {
+                        rootFolderIDs.add(rootArray.getString(i));
+                    }
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+        if (null == rootFolderIDs) {
+            if (Strings.isEmpty(session.getRootFolderID())) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
+            }
+            rootFolderIDs = Collections.singletonList(session.getRootFolderID());
+        }
+        /*
          * add subscription
          */
         DriveSubscriptionStore subscriptionStore = Services.getService(DriveSubscriptionStore.class, true);
-        subscriptionStore.subscribe(session.getServerSession(), serviceID, token, session.getRootFolderID());
+        subscriptionStore.subscribe(session.getServerSession(), serviceID, token, rootFolderIDs);
         /*
          * return empty json object to indicate success
          */
