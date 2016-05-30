@@ -2654,6 +2654,10 @@ msgstr ""
 msgid "From/To"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+msgid "in attachment file names"
+msgstr ""
+
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Context: Searching in tasks.
 #. Displayed as: [Search for] 'user input' in title.
