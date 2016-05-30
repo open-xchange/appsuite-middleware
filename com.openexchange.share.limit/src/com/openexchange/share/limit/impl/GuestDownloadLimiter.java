@@ -220,13 +220,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     @Override
     public void onRequestInitialized(AJAXRequestData requestData) throws OXException {
-        if (!LimitConfig.getInstance().isEnabled()) {
-            return;
-        }
         ServerSession session = requestData.getSession();
-        if (null == session || session.isAnonymous()) {
-            return;
-        }
         int contextId = session.getContextId();
 
         removeOldAccesses(session, contextId);
@@ -256,18 +250,10 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     @Override
     public void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
-        if (!LimitConfig.getInstance().isEnabled()) {
-            return;
-        }
-
         if (e != null) { // aborted request due to limit exception
             return;
         }
         ServerSession session = requestData.getSession();
-        if (null == session || session.isAnonymous()) {
-            return;
-        }
-
         int contextId = session.getContextId();
 
         FileAccess limit = getLimit(session.getUser(), contextId);
