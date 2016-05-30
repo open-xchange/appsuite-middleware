@@ -182,7 +182,7 @@ public class LimitConfig implements Reloadable {
                         // Service not yet available
                         return 0;
                     }
-                    tmp = Integer.valueOf(service.getProperty(TIME_FRAME_GUESTS, "0"));
+                    tmp = Integer.valueOf(service.getProperty(TIME_FRAME_GUESTS, "3600000"));
                     this.timeFrameGuests = tmp;
                 }
             }
@@ -203,7 +203,7 @@ public class LimitConfig implements Reloadable {
                         // Service not yet available
                         return 0;
                     }
-                    tmp = Integer.valueOf(service.getProperty(TIME_FRAME_LINKS, "0"));
+                    tmp = Integer.valueOf(service.getProperty(TIME_FRAME_LINKS, "3600000"));
                     this.timeFrameLinks = tmp;
                 }
             }
