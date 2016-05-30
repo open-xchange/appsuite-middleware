@@ -279,8 +279,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         }
 
         this.capabilities = mailConfig.getCapabilities().getCapabilities();
-        if (mailConfig.getCapabilities().hasAttachmentSearch()) {
-            addSupportedCapabilities("ATTACHMENT_SEARCH");
+        if (mailConfig.getCapabilities().hasFileNameSearch()) {
+            addSupportedCapabilities("FILENAME_SEARCH");
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation

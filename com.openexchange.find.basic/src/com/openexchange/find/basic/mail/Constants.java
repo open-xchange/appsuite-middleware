@@ -75,7 +75,7 @@ public class Constants {
 
     final static String FIELD_FOLDER = "folder";
 
-    final static String FIELD_ATTACHMENT_NAME = "attachment_name";
+    final static String FIELD_FILENAME_NAME = "filename";
 
     static final List<String> FROM_FIELDS = asList(FIELD_FROM);
 

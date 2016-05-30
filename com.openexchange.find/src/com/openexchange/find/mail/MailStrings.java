@@ -83,6 +83,6 @@ public class MailStrings implements LocalizableStrings {
     // Search for mails sent to ...
     public static final String FACET_TO = "To";
 
-    public static final String FACET_ATTACHMENT_NAME = "in attachment names";
+    public static final String FACET_FILENAME_NAME = "in attachment file names";
 
 }

@@ -92,7 +92,7 @@ public final class POP3Capabilities extends MailCapabilities {
     }
 
     @Override
-    public boolean hasAttachmentSearch() {
+    public boolean hasFileNameSearch() {
         return false;
     }
 

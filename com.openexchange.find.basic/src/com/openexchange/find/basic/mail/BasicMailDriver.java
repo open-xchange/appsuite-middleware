@@ -49,7 +49,7 @@
 
 package com.openexchange.find.basic.mail;
 
-import static com.openexchange.find.basic.mail.Constants.FIELD_ATTACHMENT_NAME;
+import static com.openexchange.find.basic.mail.Constants.FIELD_FILENAME_NAME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BCC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
@@ -72,13 +72,13 @@ import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.find.mail.MailFacetType.CONTACTS;
 import static com.openexchange.find.mail.MailFacetType.MAIL_TEXT;
 import static com.openexchange.find.mail.MailFacetType.SUBJECT;
-import static com.openexchange.find.mail.MailFacetType.ATTACHMENT;
+import static com.openexchange.find.mail.MailFacetType.FILENAME;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM_AND_TO;
 import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
-import static com.openexchange.find.mail.MailStrings.FACET_ATTACHMENT_NAME;
+import static com.openexchange.find.mail.MailStrings.FACET_FILENAME_NAME;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -227,33 +227,32 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         List<Facet> facets = new ArrayList<Facet>(5);
         List<String> prefixTokens = null;
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+        
+        final boolean prefixAvailable = Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters;
+        Object[] values = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<Object[]>() {
+
+            @Override
+            public Object[] call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
+                Object[] vals = new Object[2];
+                vals[0] = folder;
+                vals[1] = prefixAvailable ? Boolean.FALSE : Boolean.valueOf(mailAccess.getMailConfig().getCapabilities().hasFileNameSearch());
+                return vals;
+            }
+        });
+
+        if (prefixAvailable) {
             prefixTokens = tokenize(prefix, minimumSearchCharacters);
             if (prefixTokens.isEmpty()) {
                 prefixTokens = Collections.singletonList(prefix);
             }
 
-            boolean addAttachmentSearch = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<Boolean>() {
-
-                @Override
-                public Boolean call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
-                    return mailAccess.getMailConfig().getCapabilities().hasAttachmentSearch();
-                }
-            });
-
-            addSimpleFacets(facets, prefix, prefixTokens, addAttachmentSearch);
+            boolean addFileNameSearch = ((Boolean) values[1]).booleanValue();
+            addSimpleFacets(facets, prefix, prefixTokens, addFileNameSearch);
         } else {
             prefixTokens = Collections.emptyList();
         }
 
-        MailFolder folder = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<MailFolder>() {
-
-            @Override
-            public MailFolder call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
-                return folder;
-            }
-        });
-
+        MailFolder folder = (MailFolder) values[0];
         boolean toAsDefaultOption = folder.isSent();
         List<ActiveFacet> activeContactFacets = autocompleteRequest.getActiveFacets(MailFacetType.CONTACTS);
         if (!toAsDefaultOption && activeContactFacets != null && !activeContactFacets.isEmpty()) {
@@ -316,7 +315,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         } finally {
             MailAccess.closeInstance(mailAccess);
             long diff = System.currentTimeMillis() - start;
-            LOG.debug("Transaction for MailAccess lasted {}ms. Request type: {}", diff, request.getClass().getSimpleName());
+            LOG.debug("Transaction for MailAccess lasted {}ms. Request type: {}", Long.valueOf(diff), request.getClass().getSimpleName());
         }
     }
 
@@ -339,7 +338,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return MailFolderUtility.prepareMailFolderParam(folderName);
     }
 
-    private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens, boolean addAttachmentSearch) {
+    private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens, boolean addFileNameSearch) {
         if (!prefixTokens.isEmpty()) {
 
             facets.add(newSimpleBuilder(GLOBAL)
@@ -361,8 +360,8 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 FIELD_BODY,
                 prefixTokens));
             
-            if (addAttachmentSearch) {
-                facets.add(buildSimpleFacet(ATTACHMENT, FACET_ATTACHMENT_NAME, prefix, FIELD_ATTACHMENT_NAME, prefixTokens));
+            if (addFileNameSearch) {
+                facets.add(buildSimpleFacet(FILENAME, FACET_FILENAME_NAME, prefix, FIELD_FILENAME_NAME, prefixTokens));
             }
         }
     }
@@ -433,7 +432,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             .build();
     }
 
-    private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, String headers[], int start, int size) throws OXException {
+    static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, String headers[], int start, int size) throws OXException {
         MailSortField sortField = folder.isSent() ? MailSortField.SENT_DATE : MailSortField.RECEIVED_DATE;
         IndexRange indexRange = new IndexRange(start, start + size);
         OrderDirection orderDirection = OrderDirection.DESC;
@@ -523,7 +522,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             facetTerms.add(bodyTerm);
         }
 
-        SearchTerm<?> attachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.ATTACHMENT, folder, OP.AND, OP.AND, OP.AND);
+        SearchTerm<?> attachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.FILENAME, folder, OP.AND, OP.AND, OP.AND);
         if (attachmentTerm != null) {
             facetTerms.add(attachmentTerm);
         }
@@ -577,38 +576,39 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         if (dateFacets != null && !dateFacets.isEmpty()) {
             ActiveFacet dateFacet = dateFacets.get(0);
             Filter filter = dateFacet.getFilter();
-            if (filter == Filter.NO_FILTER) {
-                String timeFramePattern = dateFacet.getValueId();
-                TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
-                if (timeFrame == null) {
-                    throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_DATE);
-                }
-
-                Comparison fromComparison;
-                Comparison toComparison;
-                if (timeFrame.isInclusive()) {
-                    fromComparison = Comparison.GREATER_EQUALS;
-                    toComparison = Comparison.LOWER_EQUALS;
-                } else {
-                    fromComparison = Comparison.GREATER_THAN;
-                    toComparison = Comparison.LOWER_THAN;
-                }
-
-                long from = timeFrame.getFrom();
-                long to = timeFrame.getTo();
-                if (to < 0L) {
-                    return buildDateTerm(fromComparison, from, folder.isSent());
-                }
-
-                SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from, folder.isSent());
-                SearchTerm<?> toTerm = buildDateTerm(toComparison, to, folder.isSent());
-                return new ANDTerm(fromTerm, toTerm);
-            } else {
+            if (filter != Filter.NO_FILTER) {
                 Pair<Comparison, Long> parsed = parseDateQuery(filter.getQueries().get(0));
                 Comparison comparison = parsed.getFirst();
                 Long timestamp = parsed.getSecond();
-                return buildDateTerm(comparison, timestamp, folder.isSent());
+                return buildDateTerm(comparison, timestamp.longValue(), folder.isSent());
             }
+            
+            // No filter...
+            String timeFramePattern = dateFacet.getValueId();
+            TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
+            if (timeFrame == null) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_DATE);
+            }
+
+            Comparison fromComparison;
+            Comparison toComparison;
+            if (timeFrame.isInclusive()) {
+                fromComparison = Comparison.GREATER_EQUALS;
+                toComparison = Comparison.LOWER_EQUALS;
+            } else {
+                fromComparison = Comparison.GREATER_THAN;
+                toComparison = Comparison.LOWER_THAN;
+            }
+
+            long from = timeFrame.getFrom();
+            long to = timeFrame.getTo();
+            if (to < 0L) {
+                return buildDateTerm(fromComparison, from, folder.isSent());
+            }
+
+            SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from, folder.isSent());
+            SearchTerm<?> toTerm = buildDateTerm(toComparison, to, folder.isSent());
+            return new ANDTerm(fromTerm, toTerm);
         }
 
         return null;
@@ -719,8 +719,8 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             Pair<Comparison, Long> parsed = parseDateQuery(query);
             Comparison comparison = parsed.getFirst();
             Long timestamp = parsed.getSecond();
-            return buildDateTerm(comparison, timestamp, isOutgoingFolder);
-        } else if (FIELD_ATTACHMENT_NAME.equals(field)) {
+            return buildDateTerm(comparison, timestamp.longValue(), isOutgoingFolder);
+        } else if (FIELD_FILENAME_NAME.equals(field)) {
             return new AttachmentTerm(query);
         }
 
@@ -804,6 +804,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return null;
         }
 
-        return new Pair<Comparison, Long>(comparison, timestamp);
+        return new Pair<Comparison, Long>(comparison, Long.valueOf(timestamp));
     }
 }

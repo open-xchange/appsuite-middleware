@@ -120,9 +120,9 @@ public class IMAPCapabilities extends MailCapabilities {
     public static final String CAP_SORT_DISPLAY = "SORT=DISPLAY";
 
     /**
-     * SEARCH BY ATTACHMENT NAME
+     * SEARCH BY ATTACHMENT FILE NAME
      */
-    public static final String CAP_SEARCH_ATTACHMENT = "SEARCH_ATTACHMENT"; //TODO replace with correct cap name
+    public static final String CAP_SEARCH_FILENAME = "SEARCH_FILENAME"; //TODO replace with correct cap name
 
     /*-
      * IMAP bit constants
@@ -161,7 +161,7 @@ public class IMAPCapabilities extends MailCapabilities {
     private boolean hasIdle;
     private boolean hasChildren;
     private boolean hasSortDisplay;
-    private boolean hasAttachmentSearch;
+    private boolean hasFileNameSearch;
 
     /**
      * Initializes a new {@link IMAPCapabilities}
@@ -308,13 +308,18 @@ public class IMAPCapabilities extends MailCapabilities {
             ", hasSortDisplay=").append(hasSortDisplay()).toString();
     }
 
-    public void setAttachmentSearch(boolean hasAttachmentSearch) {
-        this.hasAttachmentSearch = hasAttachmentSearch;
+    /**
+     * Sets whether file name search is supported
+     *
+     * @param hasFileNameSearch <code>true</code> to indicate support for file name search; otherwise <code>false</code>
+     */
+    public void setFileNameSearch(boolean hasFileNameSearch) {
+        this.hasFileNameSearch = hasFileNameSearch;
     }
 
     @Override
-    public boolean hasAttachmentSearch() {
-        return hasAttachmentSearch;
+    public boolean hasFileNameSearch() {
+        return hasFileNameSearch;
     }
 
 }

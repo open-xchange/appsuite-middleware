@@ -97,7 +97,7 @@ public abstract class MailCapabilities {
         }
 
         @Override
-        public boolean hasAttachmentSearch() {
+        public boolean hasFileNameSearch() {
             return false;
         };
 
@@ -237,10 +237,10 @@ public abstract class MailCapabilities {
     }
 
     /**
-     * Indicates if mail system supports search of mail attachment names
+     * Indicates if mail system supports search of attachment file names
      * 
-     * @return <code>true</code> if mail system supports search of mail attachment names; otherwise <code>false</code>
+     * @return <code>true</code> if mail system supports search of attachment file names; otherwise <code>false</code>
      */
-    public abstract boolean hasAttachmentSearch();
+    public abstract boolean hasFileNameSearch();
 
 }
