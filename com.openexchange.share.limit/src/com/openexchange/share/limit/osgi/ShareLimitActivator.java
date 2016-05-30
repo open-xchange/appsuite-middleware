@@ -99,20 +99,18 @@ public class ShareLimitActivator extends AJAXModuleActivator {
 
         Services.set(this);
 
-        if (LimitConfig.getInstance().isEnabled()) {
-            // Register create table services for user schema
-            registerService(CreateTableService.class, new FileAccessCreateTableService());
+        // Register create table services for user schema
+        registerService(CreateTableService.class, new FileAccessCreateTableService());
 
-            // Register update tasks for user schema
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new FileAccessCreateTableTask(getService(DatabaseService.class))));
+        // Register update tasks for user schema
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new FileAccessCreateTableTask(getService(DatabaseService.class))));
 
-            final FilesDownloadLimiter filesDownloadLimiter = new FilesDownloadLimiter(getService(ConfigViewFactory.class));
-            registerService(DispatcherListener.class, filesDownloadLimiter);
-            final InfostoreDownloadLimiter infostoreDownloadLimiter = new InfostoreDownloadLimiter(getService(ConfigViewFactory.class));
-            registerService(DispatcherListener.class, infostoreDownloadLimiter);
-            
-            registerService(Reloadable.class, LimitConfig.getInstance());
-        }
+        final FilesDownloadLimiter filesDownloadLimiter = new FilesDownloadLimiter(getService(ConfigViewFactory.class));
+        registerService(DispatcherListener.class, filesDownloadLimiter);
+        final InfostoreDownloadLimiter infostoreDownloadLimiter = new InfostoreDownloadLimiter(getService(ConfigViewFactory.class));
+        registerService(DispatcherListener.class, infostoreDownloadLimiter);
+
+        registerService(Reloadable.class, LimitConfig.getInstance());
     }
 
     @Override

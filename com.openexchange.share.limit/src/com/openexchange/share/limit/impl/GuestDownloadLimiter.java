@@ -157,15 +157,14 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
                 long start = now - userLimitTimeFrame;
 
                 return new FileAccess(contextId, user.getId(), start, now, userCountLimit, userSizeLimit);
-            } else {
-                Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, LimitConfig.getInstance().sizeLimitGuests());
-                Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, LimitConfig.getInstance().countLimitGuests());
-                Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, LimitConfig.getInstance().timeFrameGuests());
-                long now = new Date().getTime();
-                long start = now - userLimitTimeFrame;
-
-                return new FileAccess(contextId, user.getId(), start, now, userCountLimit, userSizeLimit);
             }
+            Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, LimitConfig.getInstance().sizeLimitGuests());
+            Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, LimitConfig.getInstance().countLimitGuests());
+            Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, LimitConfig.getInstance().timeFrameGuests());
+            long now = new Date().getTime();
+            long start = now - userLimitTimeFrame;
+
+            return new FileAccess(contextId, user.getId(), start, now, userCountLimit, userSizeLimit);
         } catch (OXException e) {
             LOG.warn("Unable to retrieve configured limits for user {} in context {}: {}", user.getId(), contextId, e.getMessage());
         }
@@ -198,6 +197,9 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     @Override
     public boolean applicable(AJAXRequestData requestData) {
+        if (!LimitConfig.getInstance().isEnabled()) {
+            return false;
+        }
         ServerSession session = requestData.getSession();
         if (null == session || session.isAnonymous()) {
             return false;
@@ -210,12 +212,17 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
             return false;
         }
 
-        // TODO: Check for download explicitly for "document" action
-        return "download".equals(requestData.getParameter("view"));
+        if ("document".equalsIgnoreCase(requestData.getAction())) {
+            return "download".equals(requestData.getParameter("view"));
+        }
+        return true;
     }
 
     @Override
     public void onRequestInitialized(AJAXRequestData requestData) throws OXException {
+        if (!LimitConfig.getInstance().isEnabled()) {
+            return;
+        }
         ServerSession session = requestData.getSession();
         if (null == session || session.isAnonymous()) {
             return;
@@ -249,6 +256,10 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     @Override
     public void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
+        if (!LimitConfig.getInstance().isEnabled()) {
+            return;
+        }
+
         if (e != null) { // aborted request due to limit exception
             return;
         }
