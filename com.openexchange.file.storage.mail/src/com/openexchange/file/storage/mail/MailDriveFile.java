@@ -56,6 +56,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.MessagingException;
@@ -67,6 +68,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.mail.osgi.Services;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeTypes;
@@ -116,27 +118,35 @@ public final class MailDriveFile extends DefaultFile {
      * Parses specified Mail Drive file.
      *
      * @param message The backing IMAP message representing the attachment
+     * @param locale The locale
      * @return This Mail Drive file
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If parsing message fails
      */
-    public MailDriveFile parseMessage(IMAPMessage message) throws MessagingException, OXException {
-        return parseMessage(message, null);
+    public MailDriveFile parseMessage(IMAPMessage message, Locale locale) throws MessagingException, OXException {
+        return parseMessage(message, locale, null);
     }
 
     /**
      * Parses specified Mail Drive file.
      *
      * @param message The backing IMAP message representing the attachment
+     * @param locale The locale
      * @param fields The fields to consider
      * @return This Mail Drive file with property set applied
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If parsing Mail Drive file fails
      */
-    public MailDriveFile parseMessage(IMAPMessage message, List<Field> fields) throws MessagingException, OXException {
+    public MailDriveFile parseMessage(IMAPMessage message, Locale locale, List<Field> fields) throws MessagingException, OXException {
         if (null != message) {
             try {
                 String name = MimeMessageConverter.getSubject(message);
+                if (Strings.isEmpty(name)) {
+                    String prefix = StringHelper.valueOf(locale).getString(MailDriveStrings.FALL_BACK_NAME);
+                    MimeTypeMap mimeTypeMap = Services.getOptionalService(MimeTypeMap.class);
+                    String ext = null == mimeTypeMap ? null : mimeTypeMap.getFileExtensions(prefix).get(0);
+                    name = null == ext ? prefix : new StringBuilder(prefix).append('.').append(ext).toString();
+                }
                 setTitle(name);
                 setFileName(name);
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);

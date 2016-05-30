@@ -433,7 +433,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                                 if (uid < 0) {
                                     uid = imapFolder.getUID(message);
                                 }
-                                files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, fields));
+                                files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, session.getUser().getLocale(), fields));
                             }
                         }
                     } finally {
@@ -473,7 +473,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             if (uid < 0) {
                                 uid = imapFolder.getUID(message);
                             }
-                            files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, fields));
+                            files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, session.getUser().getLocale(), fields));
                         }
                     }
                 } finally {

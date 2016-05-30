@@ -212,22 +212,25 @@ public final class MailDriveFileStorageService implements AccountAware {
 
         ConfigView view = viewFactory.getView(userId, contextId);
 
+        boolean requireFullNames = false;
         String fullNameAll;
         {
             String propName = "com.openexchange.file.storage.mail.fullNameAll";
             ComposedConfigProperty<String> propertyAll = view.property(propName, String.class);
             if (!propertyAll.isDefined() || Strings.isEmpty((fullNameAll = propertyAll.get()))) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
+                if (requireFullNames) {
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
+                }
+                fullNameAll = null;
             }
         }
 
-        boolean requireOtherFullNames = false;
         String fullNameReceived;
         {
             String propName = "com.openexchange.file.storage.mail.fullNameReceived";
             ComposedConfigProperty<String> propertyReceived = view.property(propName, String.class);
             if (!propertyReceived.isDefined() || Strings.isEmpty((fullNameReceived = propertyReceived.get()))) {
-                if (requireOtherFullNames) {
+                if (requireFullNames) {
                     throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
                 }
                 fullNameReceived = null;
@@ -239,14 +242,14 @@ public final class MailDriveFileStorageService implements AccountAware {
             String propName = "com.openexchange.file.storage.mail.fullNameSent";
             ComposedConfigProperty<String> propertySent = view.property(propName, String.class);
             if (!propertySent.isDefined() || Strings.isEmpty((fullNameSent = propertySent.get()))) {
-                if (requireOtherFullNames) {
+                if (requireFullNames) {
                     throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
                 }
                 fullNameSent = null;
             }
         }
 
-        return new FullNameCollection(fullNameAll.trim(), null == fullNameReceived ? null : fullNameReceived.trim(), null == fullNameSent ? null : fullNameSent.trim());
+        return new FullNameCollection(null == fullNameAll ? null : fullNameAll.trim(), null == fullNameReceived ? null : fullNameReceived.trim(), null == fullNameSent ? null : fullNameSent.trim());
     }
 
     /**

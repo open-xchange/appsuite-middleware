@@ -74,8 +74,9 @@ public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess
      *
      * @param fullNameCollection The collection of valid full names
      * @param session The associated session
+     * @throws OXException If initialization fails
      */
-    public MailDriveFolderAccess(FullNameCollection fullNameCollection, Session session) {
+    public MailDriveFolderAccess(FullNameCollection fullNameCollection, Session session) throws OXException {
         super(fullNameCollection, session);
         userId = session.getUserId();
     }
