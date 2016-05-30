@@ -205,6 +205,17 @@ public abstract class MailCapabilities {
     public abstract boolean hasSubscription();
 
     /**
+     * Indicates if mail system supports search of attachment file names.
+     * <p>
+     * Defaults to <code>false</code>
+     * 
+     * @return <code>true</code> if mail system supports search of attachment file names; otherwise <code>false</code>
+     */
+    public boolean hasFileNameSearch() {
+        return false;
+    }
+
+    /**
      * Returns the capabilities as a bit mask.
      * <p>
      * Override to support additional capabilities:
@@ -235,12 +246,5 @@ public abstract class MailCapabilities {
             ", hasQuota=").append(hasQuota()).append(", hasSort=").append(hasSort()).append(", hasSubscription=").append(hasSubscription()).append(
             ", hasThreadReferences=").append(hasThreadReferences()).toString();
     }
-
-    /**
-     * Indicates if mail system supports search of attachment file names
-     * 
-     * @return <code>true</code> if mail system supports search of attachment file names; otherwise <code>false</code>
-     */
-    public abstract boolean hasFileNameSearch();
 
 }
