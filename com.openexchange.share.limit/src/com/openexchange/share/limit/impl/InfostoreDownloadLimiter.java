@@ -47,33 +47,26 @@
  *
  */
 
-package com.openexchange.server.services;
+package com.openexchange.share.limit.impl;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import com.openexchange.tools.servlet.limit.ActionLimiter;
+import com.openexchange.ajax.requesthandler.DispatcherListener;
+import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
- * {@link ActionLimiterServices}
+ * {@link InfostoreDownloadLimiter} A {@link DispatcherListener} that is responsible for actions defined in {@link GuestDownloadLimiter} and the "infostore" module
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class ActionLimiterServices {
+public class InfostoreDownloadLimiter extends GuestDownloadLimiter {
 
-    private static final List<ActionLimiter> actionLimiter = new CopyOnWriteArrayList<ActionLimiter>();
-
-    private ActionLimiterServices() {}
-
-    public static void add(ActionLimiter service) {
-        getActionLimiter().add(service);
+    public InfostoreDownloadLimiter(ConfigViewFactory configView) {
+        super(configView);
     }
 
-    public static void remove(ActionLimiter service) {
-        getActionLimiter().remove(service);
+    @Override
+    public String getModule() {
+        return "infostore";
     }
 
-    public static List<ActionLimiter> getActionLimiter() {
-        return actionLimiter;
-    }
 }

@@ -290,6 +290,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     private final boolean explicitCloseForReusedProtocol;   // Whether explicit closing (be it CLOSE or UNSELECT/re-EXAMINE) is supposed to
                                                             // happen for an IMAP folder in case IMAPProtocol instance is reused
 
+    private final boolean issueNoopToKeepConnectionAlive;   // Whether to issue a noop command for the connection to keep it alive
+
     /**
      * A fetch profile item for fetching headers.
      * This inner class extends the <code>FetchProfile.Item</code>
@@ -400,6 +402,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 				"DEBUG IMAP", store.getSession());
 	connectionPoolLogger = ((IMAPStore)store).getConnectionPoolLogger();
 	explicitCloseForReusedProtocol = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".explicitCloseForReusedProtocol", true);
+	issueNoopToKeepConnectionAlive = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".issueNoopToKeepConnectionAlive", true);
 
 	/*
 	 * Work around apparent bug in Exchange.  Exchange
@@ -4061,10 +4064,11 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	assert Thread.holdsLock(messageCacheLock);
 	if (protocol == null)	// in case connection was closed
 	    return;
-        if (System.currentTimeMillis() - protocol.getTimestamp() > 1000) {
+        
+	if (issueNoopToKeepConnectionAlive && (System.currentTimeMillis() - protocol.getTimestamp() > 1000)) {
 	    waitIfIdle();
 	    if (protocol != null)
-		protocol.noop(); 
+		protocol.noop();
 	}
 
         if (keepStoreAlive && ((IMAPStore)store).hasSeparateStoreConnection()) {

@@ -98,6 +98,11 @@ public class SearchServiceImpl implements SearchService {
         }
     }
 
+    @Override
+    public ModuleSearchDriver getDriver(Module module, ServerSession session) throws OXException {
+        return requireDriver(session, module, null);
+    }
+
     private ModuleSearchDriver requireDriver(ServerSession session, Module module, AbstractFindRequest findRequest) throws OXException {
         ModuleSearchDriver determined = driverManager.determineDriver(session, module, findRequest, true);
         if (determined == null) {

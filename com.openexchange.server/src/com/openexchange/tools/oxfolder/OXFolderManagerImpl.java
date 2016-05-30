@@ -60,7 +60,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -70,10 +69,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -1326,15 +1327,35 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             int[] inheritingTypes = { FolderObject.TRASH, FolderObject.DOCUMENTS, FolderObject.PICTURES, FolderObject.MUSIC, FolderObject.VIDEOS, FolderObject.TEMPLATES };
             if (contains(inheritingTypes, destinationFolder.getType()) || contains(inheritingTypes, sourceFolder.getType())) {
                 List<Integer> folderIDs;
+                List<Integer> children = null;
                 if (false == recursive || false == sourceFolder.hasSubfolders()) {
                     folderIDs = Collections.singletonList(Integer.valueOf(sourceFolder.getObjectID()));
                 } else {
                     folderIDs = new ArrayList<Integer>();
                     folderIDs.add(Integer.valueOf(sourceFolder.getObjectID()));
-                    folderIDs.addAll(OXFolderSQL.getSubfolderIDs(sourceFolder.getObjectID(), readCon, ctx, true));
+                    children = OXFolderSQL.getSubfolderIDs(sourceFolder.getObjectID(), readCon, ctx, true);
+                    folderIDs.addAll(children);
                 }
                 int type = FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == destinationFolder.getObjectID() ? FolderObject.PUBLIC : destinationFolder.getType();
-                return 0 < OXFolderSQL.updateFolderType(writeCon, ctx, type, optNewOwner, folderIDs);
+                boolean result = 0 < OXFolderSQL.updateFolderType(writeCon, ctx, type, optNewOwner, folderIDs);
+                if (recursive && children != null && !children.isEmpty() && FolderCacheManager.isEnabled()) {
+                    Connection wc = writeCon;
+                    final boolean create = (wc == null);
+                    if (create) {
+                        wc = DBPool.pickupWriteable(ctx);
+                    }
+                    try {
+                        final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+                        for (int i : children) {
+                            cacheManager.loadFolderObject(i, ctx, wc);
+                        }
+                    } finally {
+                        if (create && wc != null) {
+                            DBPool.closeWriterSilent(ctx, wc);
+                        }
+                    }
+                }
+                return result;
             }
         }
         return false;
@@ -1350,16 +1371,36 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
             if (isPublicInfoStoreFolder != wasPublicInfoStoreFolder) {
                 List<Integer> folderIDs;
+                List<Integer> children = null;
                 if (false == recursive || false == fo.hasSubfolders()) {
                     folderIDs = Collections.singletonList(Integer.valueOf(fo.getObjectID()));
                 } else {
                     folderIDs = new ArrayList<Integer>();
                     folderIDs.add(Integer.valueOf(fo.getObjectID()));
-                    folderIDs.addAll(OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx, true));
+                    children = OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx, true);
+                    folderIDs.addAll(children);
+
                 }
 
                 int newOwner = isPublicInfoStoreFolder ? ctx.getMailadmin() : newParent.getCreatedBy();
-                return 0 < OXFolderSQL.updateFolderOwner(writeCon, ctx, newOwner, folderIDs);
+                boolean result = 0 < OXFolderSQL.updateFolderOwner(writeCon, ctx, newOwner, folderIDs);
+                if (recursive && children != null && !children.isEmpty() && FolderCacheManager.isEnabled()) {
+                    Connection wc = writeCon;
+                    final boolean create = (wc == null);
+                    if (create) {
+                        wc = DBPool.pickupWriteable(ctx);
+                    }
+                    try {
+                        for (int i : children) {
+                            FolderCacheManager.getInstance().loadFolderObject(i, ctx, wc);
+                        }
+                    } finally {
+                        if (create && wc != null) {
+                            DBPool.closeWriterSilent(ctx, wc);
+                        }
+                    }
+                }
+                return result;
             }
         }
         return false;
@@ -1635,7 +1676,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @throws OXException If deletion fails for any folder
      */
     void deleteValidatedFolders(final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final long lastModified, final int type) throws OXException {
-        final TIntSet validatedFolders = new TIntHashSet();
+        final Set<Integer> validatedFolders = new LinkedHashSet<Integer>();
         TIntObjectProcedure<TIntObjectMap<?>> procedure = new TIntObjectProcedure<TIntObjectMap<?>>() {
 
             @Override
@@ -1644,13 +1685,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     final @SuppressWarnings("unchecked") TIntObjectMap<TIntObjectMap<?>> tmp = (TIntObjectMap<TIntObjectMap<?>>) hashMap;
                     tmp.forEachEntry(this);
                 }
-                validatedFolders.add(folderId);
+                validatedFolders.add(I(folderId));
                 return true;
             }
         };
         deleteableIDs.forEachEntry(procedure);
-        for (int validatedFolder : validatedFolders.toArray()) {
-            deleteValidatedFolder(validatedFolder, lastModified, type, false);
+        for (Integer validatedFolder : validatedFolders) {
+            deleteValidatedFolder(validatedFolder.intValue(), lastModified, type, false);
         }
     }
 

@@ -73,12 +73,16 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageMailAttachments;
+import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageReadOnly;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.mail.sort.MailDriveSortUtility;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.imap.IMAPMessageStorage;
+import com.openexchange.java.BoolReference;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -89,6 +93,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.SortTerm;
 
 /**
  * {@link MailDriveFileAccess}
@@ -96,7 +101,7 @@ import com.sun.mail.imap.IMAPStore;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class MailDriveFileAccess extends AbstractMailDriveResourceAccess implements FileStorageFileAccess, FileStorageSequenceNumberProvider, FileStorageReadOnly, FileStorageMailAttachments {
+public class MailDriveFileAccess extends AbstractMailDriveResourceAccess implements FileStorageFileAccess, FileStorageSequenceNumberProvider, FileStorageReadOnly, FileStorageMailAttachments, FileStorageRangeFileAccess {
 
     /** The fetch profile for a virtual folder */
     public static final FetchProfile FETCH_PROFILE_VIRTUAL = new FetchProfile() {
@@ -204,12 +209,14 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                 IMAPFolder folder = getIMAPFolderFor(fullName, imapStore);
                 folder.open(Folder.READ_ONLY);
                 try {
-                    Message message = folder.getMessageByUID(parseUnsignedLong(id));
+                    long uid = parseUnsignedLong(id);
+                    folder.fetch(null, new long[] { uid }, FETCH_PROFILE_VIRTUAL, null);
+                    IMAPMessage message = (IMAPMessage) folder.getMessageByUID(uid);
                     if (null == message) {
                         throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
                     }
 
-                    return new MailDriveFile(folderId, id, userId, getRootFolderId()).parseMessage((IMAPMessage) message);
+                    return new MailDriveFile(folderId, id, userId, getRootFolderId()).parseMessage(message);
                 } finally {
                     folder.close(false);
                 }
@@ -377,6 +384,108 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields) throws OXException {
         return getDocuments(folderId);
+    }
+
+    @Override
+    public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order, final Range range) throws OXException {
+        final FullName fullName = checkFolderId(folderId);
+
+        if (fullName.isDefaultFolder()) {
+            return new FileTimedResult(Collections.<File> emptyList());
+        }
+
+        final BoolReference doSort = new BoolReference(true);
+        List<File> files = perform(new MailDriveClosure<List<File>>() {
+
+            @Override
+            protected List<File> doPerform(IMAPStore imapStore, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, MessagingException, IOException {
+                IMAPFolder folder = getIMAPFolderFor(fullName, imapStore);
+                folder.open(Folder.READ_ONLY);
+                try {
+                    int messageCount = folder.getMessageCount();
+                    if (messageCount <= 0) {
+                        return Collections.<File> emptyList();
+                    }
+
+                    List<File> files = new LinkedList<File>();
+
+                    boolean hasEsort;
+                    {
+                        IMAPMessageStorage messageStorage = AbstractMailDriveResourceAccess.getImapMessageStorageFrom(mailAccess);
+                        Map<String, String> caps = messageStorage.getImapConfig().asMap();
+                        hasEsort = (caps.containsKey("ESORT") && (caps.containsKey("CONTEXT=SEARCH") || caps.containsKey("CONTEXT=SORT")));
+                    }
+
+                    if (hasEsort) {
+                        SortTerm[] sortTerms = MailDriveSortUtility.getSortTerms(sort, order);
+                        Message[] messages = null == sortTerms ? null : MailDriveSortUtility.performEsort(sortTerms, null, range.from, range.to, folder);
+                        if (null != messages) {
+                            folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
+
+                            // Iterate messages
+                            int i = 0;
+                            for (int k = messages.length; k-- > 0;) {
+                                IMAPMessage message = (IMAPMessage) messages[i++];
+                                long uid = message.getUID();
+                                if (uid < 0) {
+                                    uid = folder.getUID(message);
+                                }
+                                files.add(new MailDriveFile(folderId, Long.toString(uid), userId, getRootFolderId()).parseMessage(message, fields));
+                            }
+
+                            // Clear folder's message cache
+                            IMAPMessageStorage.clearCache(folder);
+
+                            // Mark as already sorted & return files
+                            doSort.setValue(false);
+                            return files;
+                        }
+                    }
+
+                    // Manual chunk-wise fetch & sort in-app
+                    int limit = 100;
+                    int offset = 1;
+
+                    do {
+                        int end = offset + limit;
+                        if (end > messageCount) {
+                            end = messageCount;
+                        }
+
+                        // Get & fetch messages
+                        Message[] messages = folder.getMessages(offset, end);
+                        folder.fetch(messages, FETCH_PROFILE_VIRTUAL);
+
+                        // Iterate messages
+                        int i = 0;
+                        for (int k = messages.length; k-- > 0;) {
+                            IMAPMessage message = (IMAPMessage) messages[i++];
+                            long uid = message.getUID();
+                            if (uid < 0) {
+                                uid = folder.getUID(message);
+                            }
+                            files.add(new MailDriveFile(folderId, Long.toString(uid), userId, getRootFolderId()).parseMessage(message, fields));
+                        }
+
+                        // Clear folder's message cache
+                        IMAPMessageStorage.clearCache(folder);
+
+                        offset = end + 1;
+                    } while (offset <= messageCount);
+
+                    return files;
+                } finally {
+                    folder.close(false);
+                }
+            }
+        });
+
+        // Sort collection if needed
+        if (doSort.getValue()) {
+            sort(files, sort, order);
+        }
+
+        return new FileTimedResult(files);
     }
 
     @Override

@@ -22,6 +22,7 @@ Import-Package: com.openexchange.context,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.sql,
+ com.openexchange.tools.update,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j

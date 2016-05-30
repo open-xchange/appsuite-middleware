@@ -10,9 +10,10 @@
 	- [5. Setup the initiale system category rules (optional)](#5-setup-the-initiale-system-category-rules-optional)
 	- [6. Check properties and restart the server](#6-check-properties-and-restart-the-server)
 - [Introduction](#introduction)
+- [Requirements](#requirements)
 - [Configuration](#configuration)
 	- [Server](#server)
-		- [com.openexchange.capability.mail_categories](#comopenexchangecapabilitymailcategories)
+		- [com.openexchange.mail.categories](#comopenexchangemailcategories)
 		- [com.openexchange.mail.categories.enabled](#comopenexchangemailcategoriesenabled)
 		- [com.openexchange.mail.categories.forced](#comopenexchangemailcategoriesforced)
 		- [com.openexchange.mail.categories.general.name.fallback](#comopenexchangemailcategoriesgeneralnamefallback)
@@ -36,6 +37,8 @@
 This guide gives a quick overview on how to get the mail categories feature running. If you instead want to know more about the feature and its configuration details take a look at the other chapters below.
 
 This guide provides the quickest way to get the feature running. It will activate the feature for every user on the system and it will create five categories (3 system and 2 user categories) in total. Therefore it will not scope all configuration details. But it can be used as a guideline to adapt the configuration to ones individual needs. This guide also assumes that mails will not already be flagged by another system (e.g. system wide sieve rules).
+
+This feature requires an imap server with support of the the imap4flags extension.
 
 In order to get the mail categories feature running you have to do the following steps:
 
@@ -267,6 +270,9 @@ If another category is trained with the same address the old rule will be remove
 In addition to option two the user is also able to reorganize all existing mails within the inbox.
 That means that all mails which match the rules of the category will be categorized in this category.
 
+## Requirements
+
+The mail categories feature requires an imap server with support of the the imap4flags extension. See https://tools.ietf.org/html/rfc5232 for further informations.
 
 ## Configuration
 
@@ -278,7 +284,7 @@ All configurations are config cascade aware and can therefore be overwritten on 
 
 | Property                                                                                                        | Type / Values                   | Default   |
 |:----------------------------------------------------------------------------------------------------------------|:--------------------------------|:----------|
-| [com.openexchange.capability.mail_categories](#comopenexchangecapabilitymailcategories)                         | 'true', 'false'                 | 'false'   |
+| [com.openexchange.mail.categories](#comopenexchangemailcategories)                         | 'true', 'false'                 | 'false'   |
 | [com.openexchange.mail.categories.enabled](#comopenexchangemailcategoriesenabled)                               | 'true', 'false'                 | 'true'    |
 | [com.openexchange.mail.categories.forced](#comopenexchangemailcategoriesforced)                                 | 'true', 'false'                 | 'false'   |
 | [com.openexchange.mail.categories.general.name.fallback](#comopenexchangemailcategoriesgeneralnamefallback)     | String                          | 'General' |
@@ -294,9 +300,16 @@ All configurations are config cascade aware and can therefore be overwritten on 
 | [com.openexchange.mail.categories.rules.[category]](#comopenexchangemailcategoriesrulescategory)                | Comma separated list of strings | |         |
 
 
-#### com.openexchange.capability.mail_categories
+#### com.openexchange.mail.categories
 
-This property defines the user capability to use the mail categories feature.
+This property defines whether the user capability is granted to use the mail categories feature. This is the main switch for an administrator to enable/disable that feature.
+
+**Note** The current mail categories implementatiuon also requires that the associated Sieve service advertises the `"imap4flags"` capability. Only if both conditions are met
+
+1.  `com.openexchange.mail.categories` is set to `true`
+2.  `"imap4flags"` capability announced by Sieve service
+
+the mail categories feature becomes effectively available for a user.
 
 #### com.openexchange.mail.categories.enabled
 

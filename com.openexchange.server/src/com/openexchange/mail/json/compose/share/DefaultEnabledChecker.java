@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,76 +47,68 @@
  *
  */
 
-package com.openexchange.tools.servlet.limit;
+package com.openexchange.mail.json.compose.share;
+
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.Utilities;
+import com.openexchange.mail.json.compose.share.spi.EnabledChecker;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link UserAction} DAO to hold user to action mapping
+ * {@link DefaultEnabledChecker} - The default checker testing for <code>"drive"</code> and <code>"share_links"</code> capabilities.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class UserAction {
+public class DefaultEnabledChecker implements EnabledChecker {
 
-    final private String module;
-    final private String action;
-    final private int userId;
-    final private int contextId;
+    private static final DefaultEnabledChecker INSTANCE = new DefaultEnabledChecker();
 
-    private UserAction(final String module, final String action, final int userId, final int contextId) {
-        this.module = module;
-        this.action = action;
-        this.userId = userId;
-        this.contextId = contextId;
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static DefaultEnabledChecker getInstance() {
+        return INSTANCE;
     }
 
-    public String getModule() {
-        return module;
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link DefaultEnabledChecker}.
+     */
+    protected DefaultEnabledChecker() {
+        super();
     }
 
-    public String getAction() {
-        return action;
+    @Override
+    public boolean isEnabled(Session session) throws OXException {
+        List<String> capsToCheck = new ArrayList<String>(4);
+        capsToCheck.add("drive");
+        capsToCheck.add("share_links");
+        capsToCheck = modifyCapabilitiesToCheck(capsToCheck);
+
+        if (null == capsToCheck) {
+            return true;
+        }
+
+        String[] caps = capsToCheck.toArray(new String[capsToCheck.size()]);
+        return Utilities.hasCapabilities(session, caps);
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public int getContextId() {
-        return contextId;
-    }
-
-    public static class UserActionBuilder {
-
-        private String module;
-        private String action;
-        private int userId;
-        private int contextId;
-
-        public UserActionBuilder() {}
-
-        public UserActionBuilder setModule(String module) {
-            this.module = module;
-            return this;
-        }
-
-        public UserActionBuilder setAction(String action) {
-            this.action = action;
-            return this;
-        }
-
-        public UserActionBuilder setUserId(int userId) {
-            this.userId = userId;
-            return this;
-        }
-
-        public UserActionBuilder setContextId(int contextId) {
-            this.contextId = contextId;
-            return this;
-        }
-
-        public UserAction build() {
-            return new UserAction(module, action, userId, contextId);
-        }
+    /**
+     * Modifies the specified capabilities (remove existing, add new ones) that are supposed to checked.
+     *
+     * @param capabilities The capabilities to modify
+     * @return The possible modified capabilities
+     */
+    protected List<String> modifyCapabilitiesToCheck(List<String> capabilities) {
+        // Return unchanged for default checker
+        return capabilities;
     }
 
 }

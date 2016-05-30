@@ -66,7 +66,7 @@ public final class FileAccessCreateTableService extends AbstractCreateTableImpl 
         "  userid int4 unsigned NOT NULL,\n" +
         "  accessed bigint(20) unsigned NOT NULL,\n" +
         "  size bigint(20) unsigned NOT NULL,\n" +
-        "  PRIMARY KEY (`userid`,`cid`,`accessed`)" +
+        "  PRIMARY KEY (`cid`,`userid`,`accessed`)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**

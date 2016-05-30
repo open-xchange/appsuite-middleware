@@ -19,19 +19,19 @@ The OXWF itself registers such a login listener, which triggers the HTTP calls t
  - `report`
 
 ## Before authentication
-The OXWF login listener executes the `allow` call before authentication takes place to let Weakforced service check whether that login attempt is allowed or not, which is determined by providing a hash of login, password, remote address (either host name or IP address) and client identifier. The `allow` call responds with an integer result:
+The OXWF login listener executes the `allow` call before authentication takes place to let Weakforced service check whether that login attempt is allowed or not, which is determined by providing login, password-hash, remote address (either host name or IP address) and client identifier. The `allow` call responds with an integer result:
 
  - <code>0</code> (OK )
  - <code>-1</code> (BLOCKED)
  - A positive integer
 
- For an OK response, the login attempt is allowed to proceed as usual. The BLOCKED integer value leads to aborting the login attempt through throwing a LGI-0026 (LOGIN DENIED) error code. A positive integer indicates the number of seconds the client is supposed to wait until login attempt is allowed to procee. Hence, the executing thread gets halted for that amount of seconds.
+ For an OK response, the login attempt is allowed to proceed as usual. The BLOCKED integer value leads to aborting the login attempt through throwing a LGI-0026 (LOGIN DENIED) error code. A positive integer indicates the number of seconds the client is supposed to wait until login attempt is allowed to proceed. Hence, the executing thread gets halted for that amount of seconds.
 
 ## After successful authentication
-A successful authentication attempt is `report`ed back to Weakforced service by OXWF login listener while providing a hash of login, password, remote address (either host name or IP address) and client identifier. That call-back may also be used to pass more attributes to Weakforced service in order to be validated; e.g. the login result may now contain certain information from LDAP (or any other authentication authority). If so a `allow` call is executed prior to the `report` request, while the status result gets examined as explained above (OK, BLOCKED, or positive integer).
+A successful authentication attempt is `report`ed back to Weakforced service by OXWF login listener while providing login, password-hash, remote address (either host name or IP address) and client identifier. That call-back may also be used to pass more attributes to Weakforced service in order to be validated; e.g. the login result may now contain certain information from LDAP (or any other authentication authority). If so a `allow` call is executed prior to the `report` request, while the status result gets examined as explained above (OK, BLOCKED, or positive integer).
 
 ## After failed authentication
-A failed authentication attempt is `report`ed back to Weakforced service by providing a hash of login, password, remote address (either host name or IP address) and client identifier in order to be tracked for subsequent validations of login attempts from the same client/user.
+A failed authentication attempt is `report`ed back to Weakforced service by providing login, password-hash, remote address (either host name or IP address) and client identifier in order to be tracked for subsequent validations of login attempts from the same client/user.
 
 # Installation
 Deploying the OXWF simply requires to install the `open-xchange-weakforced` package. Once istalled the associated login listener gets registered and receives the mentioned call-backs during login requests.
@@ -66,12 +66,12 @@ Each end-point listing also supports specifying the total number of connections 
 This examples specifies two generic end-points and two end-points to use for `report` calls exclusively. Hence, the OXWF routes all `report` calls to either `http://weakforced1.reporthost.invalid:8081` or `http://weakforced2.reporthost.invalid:8081`. Remaining calls (only `allow` left) will use `http://weakforced1.host.invalid:8081` or`http://weakforced2.host.invalid:8081`.
 
 ## Secret
-The `com.openexchange.weakforced.secret` option specifies the secret to use when calculating the hash of login, password, remote address (either host name or IP address) and client identifier acting as some sort of salt.
+The `com.openexchange.weakforced.secret` option specifies the secret to use when calculating the hash for password acting as some sort of salt.
 
 ## Basic authentication
 The `com.openexchange.weakforced.basic-auth.login` and `com.openexchange.weakforced.basic-auth.password` allow setting the user-name and password to use to perform HTTP basic authentication against Weakforced end-points. All end-points are expected to have the same HTTP basic authentication.
 
-## Basic authentication
+## Attributes
 The `com.openexchange.weakforced.attributes` specifies a comma-separated list of arbitrary attributes that are supposed to read from session on successful authentication. Those attributes are then communicated to Weakforced using post-auth `allow` hook.
 
 If no attributes specified or no single attribute available from session, no post-auth 'allow' takes place.

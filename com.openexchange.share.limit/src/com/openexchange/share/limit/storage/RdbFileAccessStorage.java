@@ -151,7 +151,8 @@ public class RdbFileAccessStorage {
             statement.setInt(2, userId);
             statement.setLong(3, timestamp);
 
-            statement.executeUpdate();
+            int deletedRows = statement.executeUpdate();
+            LOG.debug("Deleted {} rows for user {} in context {}", deletedRows, userId, contextId);
         } catch (final SQLException e) {
             throw LimitExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

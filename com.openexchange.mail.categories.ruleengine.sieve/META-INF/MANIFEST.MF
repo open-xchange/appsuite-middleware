@@ -21,4 +21,5 @@ Import-Package: com.openexchange.config,
  com.openexchange.session,
  org.apache.jsieve,
  org.apache.jsieve.parser.generated,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j

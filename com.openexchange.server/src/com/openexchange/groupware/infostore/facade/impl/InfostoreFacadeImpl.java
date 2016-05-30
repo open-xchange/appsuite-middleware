@@ -640,6 +640,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             FilenameReservation reservation = filenameReserver.reserve(document, true);
             if (reservation.wasAdjusted()) {
                 document.setFileName(reservation.getFilename());
+                Map<String, Object> meta = document.getMeta();
+                meta.put("save_action", "rename");
+                document.setMeta(meta);
                 if (reservation.wasSameTitle()) {
                     document.setTitle(reservation.getFilename());
                 }

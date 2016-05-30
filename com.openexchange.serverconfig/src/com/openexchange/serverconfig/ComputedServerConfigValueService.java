@@ -51,6 +51,7 @@ package com.openexchange.serverconfig;
 
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link ComputedServerConfigValueService} - Services implementing this interface are able to add computed values to the server config object that is being generated.
@@ -60,5 +61,15 @@ import com.openexchange.exception.OXException;
  */
 public interface ComputedServerConfigValueService {
 
-    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) throws OXException;
+    /**
+     * Adds this instance's value to passed map.
+     *
+     * @param serverConfig The server config map
+     * @param hostName The host name
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param optSession The optional session or <code>null</code>
+     * @throws OXException If this instance's value cannot be computed
+     */
+    void addValue(Map<String, Object> serverConfig, String hostName, int userId, int contextId, Session optSession) throws OXException;
 }

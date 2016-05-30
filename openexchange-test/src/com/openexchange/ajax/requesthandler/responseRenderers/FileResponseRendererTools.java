@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.configuration.MailConfig;
 
 /**
  * {@link FileResponseRendererTools}
@@ -70,8 +71,6 @@ public class FileResponseRendererTools {
     public static enum Disposition {
         attachment, inline
     };
-
-    private static final String TEST_DATA_DIR = "testconf/";
 
     /**
      * @param filename
@@ -139,7 +138,8 @@ public class FileResponseRendererTools {
     }
 
     private static byte[] readFile(String filename) throws IOException {
-        final File file = new File(TEST_DATA_DIR, filename);
+        String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        final File file = new File(testDataDir, filename);
         final InputStream is = new FileInputStream(file);
         final byte[] bytes = IOUtils.toByteArray(is);
         return bytes;

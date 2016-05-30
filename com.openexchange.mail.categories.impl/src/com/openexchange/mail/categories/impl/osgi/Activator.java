@@ -49,18 +49,24 @@
 
 package com.openexchange.mail.categories.impl.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.impl.MailCategoriesConfigServiceImpl;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.impl.MailCategoriesConfigUtil;
-import com.openexchange.mail.categories.impl.MailCategoriesLoginHandler;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link Activator}
@@ -72,15 +78,56 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailCategoriesRuleEngine.class, ThreadPoolService.class, CapabilityService.class };
+        return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailCategoriesRuleEngine.class, ThreadPoolService.class,
+            CapabilityService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerService(MailCategoriesConfigService.class, MailCategoriesConfigServiceImpl.getInstance());
+
+        final MailCategoriesConfigServiceRegisterer registerer = new MailCategoriesConfigServiceRegisterer(context);
+        track(MailCategoriesRuleEngine.class, registerer);
+        openTrackers();
+
+        final String sCapability = "mail_categories";
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+        registerService(CapabilityChecker.class, new FailureAwareCapabilityChecker() {
+            @Override
+            public FailureAwareCapabilityChecker.Result checkEnabled(String capability, Session ses) throws OXException {
+                if (sCapability.equals(capability)) {
+                    ServerSession session = ServerSessionAdapter.valueOf(ses);
+                    if (session.isAnonymous() || session.getUser().isGuest()) {
+                        return FailureAwareCapabilityChecker.Result.DISABLED;
+                    }
+
+                    ConfigViewFactory service = Services.getService(ConfigViewFactory.class);
+                    ConfigView view = service.getView(ses.getUserId(), ses.getContextId());
+
+                    ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.categories", Boolean.class);
+                    if (!property.isDefined() || !property.get().booleanValue()) {
+                        // Not enabled as per configuration
+                        return FailureAwareCapabilityChecker.Result.DISABLED;
+                    }
+
+                    // Enabled. Check rule engine, too
+                    try {
+                        if (!registerer.getService().isRuleEngineApplicable(session)) {
+                            return FailureAwareCapabilityChecker.Result.DISABLED;
+                        }
+                    } catch (OXException e) {
+                        // Failed to reliably check rule engine
+                        return FailureAwareCapabilityChecker.Result.FAILURE;
+                    }
+                }
+
+                return FailureAwareCapabilityChecker.Result.ENABLED;
+            }
+        }, properties);
+        getService(CapabilityService.class).declareCapability(sCapability);
+
         registerService(Reloadable.class, MailCategoriesConfigUtil.getInstance());
-        registerService(LoginHandlerService.class, new MailCategoriesLoginHandler());
     }
 
     @Override

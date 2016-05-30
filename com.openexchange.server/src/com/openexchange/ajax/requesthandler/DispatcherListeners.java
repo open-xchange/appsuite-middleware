@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler;
 
-
 /**
  * {@link DispatcherListeners} - Utility class for dispatcher listeners.
  *
@@ -79,7 +78,7 @@ public enum DispatcherListeners {
             return false;
         }
 
-        return module.equals(null == requestData ? null : requestData.getModule());
+        return module.equals(null == requestData ? null : requestData.getNormalizedModule());
     }
 
     /**
@@ -94,7 +93,7 @@ public enum DispatcherListeners {
             return false;
         }
 
-        return module.equals(requestData.getModule()) && action.equals(requestData.getAction());
+        return module.equals(requestData.getNormalizedModule()) && action.equals(requestData.getAction());
     }
 
     /**

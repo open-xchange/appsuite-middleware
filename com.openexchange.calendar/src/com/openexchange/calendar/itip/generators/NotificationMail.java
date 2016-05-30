@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.CalendarField;
@@ -574,6 +575,10 @@ public class NotificationMail {
         if (isAttachmentUpdate()) {
             return false;
         }
+
+        if (isStateChangeExceptionCreate()) {
+            return true;
+        }
         return diff.isAboutStateChangesOnly(FIELDS_TO_REPORT);
     }
 
@@ -604,6 +609,14 @@ public class NotificationMail {
             return false;
         }
         return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
+    }
+    
+    public boolean isStateChangeExceptionCreate() {
+        boolean candidate = diff.exactlyTheseChanged(CalendarFields.CHANGE_EXCEPTIONS, CalendarFields.RECURRENCE_DATE_POSITION, CalendarFields.RECURRENCE_POSITION, CalendarFields.USERS);
+        if (candidate) {
+            return diff.isAboutStateChanges();
+        }
+        return false;
     }
 
     public void setActor(NotificationParticipant actor) {

@@ -824,6 +824,39 @@ public class ContentType extends ParameterizedHeader {
     }
 
     /**
+     * Checks if Content-Type's base type ignore-case contains specified string.
+     *
+     * @param string The string
+     * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
+     * @throws IllegalArgumentException If specified string is <code>null</code>
+     */
+    public boolean contains(final String string) {
+        if (null == string) {
+            throw new IllegalArgumentException("String is null");
+        }
+        return getLowerCaseBaseType().indexOf(Strings.asciiLowerCase(string)) >= 0;
+    }
+
+    /**
+     * Checks if Content-Type's base type ignore-case contains specified strings.
+     *
+     * @param s The strings
+     * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
+     */
+    public boolean containsAny(final String... strings) {
+        if (null == strings) {
+            return false;
+        }
+        final String lowerCase = getLowerCaseBaseType();
+        for (final String string : strings) {
+            if (null != string && lowerCase.indexOf(Strings.asciiLowerCase(string)) >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checks if Content-Type's base type ignore-case starts with specified prefix.
      *
      * @param prefix The prefix

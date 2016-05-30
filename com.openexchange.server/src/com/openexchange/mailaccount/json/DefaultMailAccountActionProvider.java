@@ -82,15 +82,24 @@ public class DefaultMailAccountActionProvider implements MailAccountActionProvid
         super();
         actions = initActions();
     }
-    
+
     @Override
     public boolean isApplicableFor(ServerSession session) throws OXException {
         return true;
     }
 
-    @Override
+    /**
+     * Retrieves a mapping of actions strings to <code>AJAXActionService</code>'s.
+     *
+     * @return The mapping of available action
+     */
     public Map<String, AJAXActionService> getActions() {
         return actions;
+    }
+
+    @Override
+    public AJAXActionService getAction(String action) {
+        return null == action ? null : actions.get(action);
     }
 
     private Map<String, AJAXActionService> initActions() {

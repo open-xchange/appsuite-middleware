@@ -49,10 +49,12 @@
 
 package com.openexchange.drive.events.internal;
 
+import java.util.Collections;
 import java.util.Map;
 import com.openexchange.drive.Action;
-import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
+import com.openexchange.java.Strings;
 
 /**
  * {@link SyncDirectoriesAction}
@@ -61,8 +63,16 @@ import com.openexchange.drive.DirectoryVersion;
  */
 public class SyncDirectoriesAction implements DriveAction<DirectoryVersion> {
 
-    public SyncDirectoriesAction() {
+    private final String rootFolderID;
+
+    /**
+     * Initializes a new {@link SyncDirectoriesAction}.
+     *
+     * @param rootFolderID The corresponding session's root folder identifier
+     */
+    public SyncDirectoriesAction(String rootFolderID) {
         super();
+        this.rootFolderID = rootFolderID;
     }
 
     @Override
@@ -87,7 +97,10 @@ public class SyncDirectoriesAction implements DriveAction<DirectoryVersion> {
 
     @Override
     public Map<String, Object> getParameters() {
-        return null;
+        if (Strings.isNotEmpty(rootFolderID)) {
+            return Collections.<String, Object>singletonMap(DriveAction.PARAMETER_ROOT, rootFolderID);
+        }
+        return Collections.emptyMap();
     }
 
 }

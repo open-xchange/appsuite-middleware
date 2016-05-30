@@ -73,13 +73,13 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(MailCategoriesRuleEngine.class, new SieveMailCategoriesRuleEngine(this));
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { MailFilterService.class, ConfigurationService.class, ConfigViewFactory.class };
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { MailFilterService.class, ConfigurationService.class, ConfigViewFactory.class };
+    protected void startBundle() throws Exception {
+        registerService(MailCategoriesRuleEngine.class, new SieveMailCategoriesRuleEngine(this));
     }
 
 }

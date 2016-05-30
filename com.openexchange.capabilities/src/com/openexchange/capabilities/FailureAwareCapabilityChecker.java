@@ -47,27 +47,65 @@
  *
  */
 
-package com.openexchange.tools.servlet.limit;
+package com.openexchange.capabilities;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * 
- * {@link AbstractActionLimitedException} Abstract class to be used for exceptions thrown by the {@link ActionLimiter} implementation.
- * <p>
- * This mechanism allows to create custom (translated) exceptions that will be shown to the user.
+ * A {@link FailureAwareCapabilityChecker} that extends common <code>CapabilityChecker</code> to deal with possible errors while checking.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.8.2
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractActionLimitedException extends RuntimeException {
-
-    private static final long serialVersionUID = -5570226785757120825L;
+public abstract class FailureAwareCapabilityChecker implements CapabilityChecker {
 
     /**
-     * Used to create the thrown (and displayed) {@link OXException} based on the limiting exception
-     * 
-     * @return the {@link OXException}
+     * The possible results for a capability check.
      */
-    public abstract OXException create();
+    public static enum Result {
+        /**
+         * Capability check passed successfully.
+         */
+        ENABLED,
+        /**
+         * Signals that the capability must not be granted.
+         */
+        DISABLED,
+        /**
+         * Signals that capability check could not be performed due to an error.
+         */
+        FAILURE,
+        ;
+    }
+
+    /**
+     * Initializes a new {@link FailureAwareCapabilityChecker}.
+     */
+    protected FailureAwareCapabilityChecker() {
+        super();
+    }
+
+    /**
+     * Check whether the capability should be awarded for a certain user
+     *
+     * @param capability The capability to check
+     * @param session Provides the users session for which to check
+     * @return The result
+     * @throws OXException If check fails
+     */
+    public abstract Result checkEnabled(String capability, Session session) throws OXException;
+
+    /**
+     * Check whether the capability should be awarded for a certain user
+     *
+     * @param capability The capability to check
+     * @param session Provides the users session for which to check
+     * @return Whether to award this capability or not
+     * @throws OXException If check fails
+     */
+    @Override
+    public final boolean isEnabled(String capability, Session session) throws OXException {
+        Result result = checkEnabled(capability, session);
+        return Result.ENABLED == result ? true : false;
+    }
 }

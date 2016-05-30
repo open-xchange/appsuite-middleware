@@ -57,6 +57,8 @@ import com.openexchange.session.Session;
 
 /**
  * Interface for settings that are shared between GUI and server.
+ *
+ * @see IValueHandlerExtended
  */
 public interface IValueHandler {
 
@@ -74,6 +76,7 @@ public interface IValueHandler {
     /**
      * @param session Session.
      * @return <code>true</code> if this setting is available due to {@link UserConfiguration}.
+     * @see IValueHandlerExtended
      */
     boolean isAvailable(final UserConfiguration userConfig);
 

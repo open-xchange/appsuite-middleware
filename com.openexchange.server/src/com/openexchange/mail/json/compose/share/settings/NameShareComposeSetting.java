@@ -75,7 +75,7 @@ public class NameShareComposeSetting extends AbstractShareComposeSetting<String>
 
     @Override
     protected String getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        return Utilities.getValueFromProperty("com.openexchange.mail.compose.share.name", "Link Mail", session);
+        return Utilities.getValueFromProperty("com.openexchange.mail.compose.share.name", "Drive Mail", session);
     }
 
 }

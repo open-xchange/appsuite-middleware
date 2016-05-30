@@ -57,7 +57,6 @@ import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.Strings;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -771,7 +770,10 @@ public class UserConfiguration implements Serializable, Cloneable {
      * Gets the extended permissions.
      *
      * @return The extended permissions
+     * @deprecated Might return incomplete capabilities as capabilities are loaded by user/context identifier pair not providing further
+     * session attributes
      */
+    @Deprecated
     public Set<String> getExtendedPermissions() {
         return capabilities;
     }

@@ -53,6 +53,7 @@ import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
+import com.openexchange.session.Session;
 
 /**
  * {@link ForcedHttpsValue} - Ensured that value of property <code>"com.openexchange.forceHTTPS"</code> is contained in server configuration
@@ -74,7 +75,7 @@ public class ForcedHttpsValue implements ComputedServerConfigValueService {
     }
 
     @Override
-    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userId, int contextId, Session optSession) {
         if (!serverConfig.containsKey("forceHTTPS")) {
             final ConfigurationService service = services.getService(ConfigurationService.class);
             final boolean forceHttps = service.getBoolProperty("com.openexchange.forceHTTPS", false);

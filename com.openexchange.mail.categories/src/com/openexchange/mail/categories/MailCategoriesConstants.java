@@ -89,9 +89,19 @@ public class MailCategoriesConstants {
     public static final String MAIL_CATEGORIES_NAME = ".name";
 
     /**
-     * The language prefix
+     * The current mail category description
      */
-    public static final String MAIL_CATEGORIES_LANGUAGE_PREFIX = ".name.";
+    public static final String MAIL_CATEGORIES_DESCRIPTION = ".description";
+
+    /**
+     * The name language prefix
+     */
+    public static final String MAIL_CATEGORIES_NAME_LANGUAGE_PREFIX = ".name.";
+
+    /**
+     * The description language prefix
+     */
+    public static final String MAIL_CATEGORIES_DESCRIPTION_LANGUAGE_PREFIX = ".description.";
 
     /**
      * The fall-back name parameter name

@@ -47,74 +47,60 @@
  *
  */
 
-package com.openexchange.share.limit.exceptions.custom;
+package com.openexchange.drive.events.subscribe.rdb;
 
-import com.openexchange.exception.Category;
-import com.openexchange.exception.DisplayableOXExceptionCode;
+import static com.openexchange.tools.sql.DBUtils.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionFactory;
-import com.openexchange.tools.servlet.limit.AbstractActionLimitedException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DownloadLimitedException} Used for custom exceptions that should be (translated) shown to the user. 
+ * {@link DriveEventSubscriptionsAddUuidColumnTask}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * Adds the column <code>uuid BINARY(16) DEFAULT NULL</code> to the <code>driveEventSubscriptions</code>.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.2
  */
-public class DownloadLimitedException extends AbstractActionLimitedException implements DisplayableOXExceptionCode {
+public class DriveEventSubscriptionsAddUuidColumnTask extends UpdateTaskAdapter {
 
-    private static final long serialVersionUID = -5958709454473135940L;
-
-    public static final String PREFIX = "AN-GUEST-LIM";
-
-    private final Category category;
-    private final int detailNumber;
-    private final String message;
-    private final String displayMessage;
-
-    public DownloadLimitedException(String message, String displayMessage, Category category, int detailNumber) {
-        this.message = message;
-        this.displayMessage = displayMessage;
-        this.detailNumber = detailNumber;
-        this.category = category;
+    @Override
+    public String[] getDependencies() {
+        return new String[] { DriveEventSubscriptionsCreateTableTask.class.getName() };
     }
 
     @Override
-    public Category getCategory() {
-        return category;
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        DatabaseService dbService = SubscribeServiceLookup.getService(DatabaseService.class, true);
+        Connection connection = dbService.getForUpdateTask(contextID);
+        boolean committed = false;
+        try {
+            connection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connection, "driveEventSubscriptions", new Column("uuid", "BINARY(16) DEFAULT NULL"));
+            connection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connection);
+            if (committed) {
+                dbService.backForUpdateTask(contextID, connection);
+            } else {
+                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            }
+        }
     }
 
-    @Override
-    public String getMessage() {
-        return message;
-    }
-
-    @Override
-    public String getDisplayMessage() {
-        return displayMessage;
-    }
-
-    @Override
-    public int getNumber() {
-        return detailNumber;
-    }
-
-    @Override
-    public String getPrefix() {
-        return PREFIX;
-    }
-
-    @Override
-    public boolean equals(OXException e) {
-        return OXExceptionFactory.getInstance().equals(this, e);
-    }
-
-    /**
-     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
-     * @return The newly created {@link OXException} instance
-     */
-    public OXException create() {
-        return OXExceptionFactory.getInstance().create(this, new Object[0]);
-    }
 }

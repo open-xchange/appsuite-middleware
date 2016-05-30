@@ -68,7 +68,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -91,7 +90,6 @@ import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -238,12 +236,85 @@ public final class IMAPCommandsCollection {
             }
         }));
     }
-    
+
+    /**
+     * Retrieves the ACL for specified full name.
+     *
+     * @param fullName The full name
+     * @param imapFolder The IMAP folder providing the protocol to use
+     * @return The ACL
+     * @throws MessagingException If ACL cannot be returned
+     */
+    public static ACL[] getACL(final String fullName, IMAPFolder imapFolder) throws MessagingException {
+        return ((ACL[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                return protocol.getACL(fullName);
+            }
+        }));
+    }
+
+    /**
+     * Lists subfolders under specified full name.
+     *
+     * @param fullName The full name
+     * @param separator The separator character
+     * @param imapFolder The IMAP folder providing the protocol to use
+     * @return The available subfolders
+     * @throws MessagingException If subfolders cannot be returned
+     */
+    public static ListInfo[] listSubfolders(final String fullName, final char separator, IMAPFolder imapFolder) throws MessagingException {
+        ListInfo[] listInfos = ((ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                return protocol.list("", new StringBuilder(fullName).append(separator).append("%").toString());
+            }
+        }));
+        return null == listInfos ? new ListInfo[0] : listInfos;
+    }
+
+    /**
+     * Gets the LIST info for specified full name.
+     *
+     * @param fullName The full name
+     * @param imapFolder The IMAP folder providing the protocol to use
+     * @return The LIST info or <code>null</code> (if no such mailbox exists)
+     * @throws MessagingException If LIST info cannot be returned
+     */
+    public static ListInfo getListInfo(final String fullName, IMAPFolder imapFolder) throws MessagingException {
+        ListInfo[] listInfos = ((ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                return protocol.list("", fullName);
+            }
+        }));
+        if (null == listInfos || listInfos.length == 0) {
+            return null;
+        }
+        return listInfos[0];
+    }
+
+    /**
+     * Checks existence for specified full name.
+     *
+     * @param fullName The full name
+     * @param imapFolder The IMAP folder providing the protocol to use
+     * @return <code>true</code> if existing; otherwise <code>false</code>
+     * @throws MessagingException If exists status cannot be returned
+     */
+    public static boolean exists(final String fullName, IMAPFolder imapFolder) throws MessagingException {
+        ListInfo listInfo = getListInfo(fullName, imapFolder);
+        return listInfo != null && fullName.equals(listInfo.name);
+    }
+
     private static final Random RANDOM = new SecureRandom();
 
     /**
      * Gets a random string to use for a mailbox probe.
-     * 
+     *
      * @return The random string
      */
     static String getRandomProbe() {
@@ -1382,7 +1453,7 @@ public final class IMAPCommandsCollection {
         }))).booleanValue();
     }
 
-    public static void renameFolder(final IMAPFolder folder, final IMAPFolder renameTo) throws MessagingException {
+    public static void renameFolder(final IMAPFolder folder, final char separator, final IMAPFolder renameTo) throws MessagingException {
         final String renameFullname = renameTo.getFullName();
         final Boolean ret = (Boolean) folder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -1433,7 +1504,7 @@ public final class IMAPCommandsCollection {
             LOG.error("", e);
         }
 
-        new ExtendedIMAPFolder(folder, folder.getSeparator()).triggerNotifyFolderListeners(FolderEvent.RENAMED);
+        new ExtendedIMAPFolder(folder, separator).triggerNotifyFolderListeners(FolderEvent.RENAMED);
     }
 
     public static void createFolder(final IMAPFolder newFolder, final char separator, final int type) throws MessagingException {

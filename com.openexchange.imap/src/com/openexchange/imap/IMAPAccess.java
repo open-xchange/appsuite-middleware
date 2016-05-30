@@ -1301,6 +1301,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         imapProps.put("mail.imap.explicitCloseForReusedProtocol", "false");
         /*
+         * Specify NOOP behavior
+         */
+        imapProps.put("mail.imap.issueNoopToKeepConnectionAlive", "false");
+        /*
          * Check if a secure IMAP connection should be established
          */
         final String sPort = String.valueOf(config.getPort());

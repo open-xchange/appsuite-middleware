@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,73 +47,37 @@
  *
  */
 
-package com.openexchange.share.limit;
+package com.openexchange.mail.json.compose.share.internal;
 
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.compose.share.DefaultEnabledChecker;
+import com.openexchange.mail.json.compose.share.spi.EnabledChecker;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.session.Session;
 
 /**
- * {@link AnonymousGuestDownloadLimiterTest}
+ * {@link EnabledCheckerRegistryImpl}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AnonymousGuestDownloadLimiterTest {
+public class EnabledCheckerRegistryImpl implements EnabledCheckerRegistry {
+
+    private final ServiceListing<EnabledChecker> storages;
 
     /**
-     * @throws java.lang.Exception
+     * Initializes a new {@link EnabledCheckerRegistryImpl}.
      */
-    @Before
-    public void setUp() throws Exception {}
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#dropObsoleteAccesses(int, int)}.
-     */
-    @Test
-    public void testDropObsoleteAccesses() {
-        fail("Not yet implemented");
+    public EnabledCheckerRegistryImpl(ServiceListing<EnabledChecker> storages) {
+        super();
+        this.storages = storages;
     }
 
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#getLimit(int, int)}.
-     */
-    @Test
-    public void testGetLimit() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#isEnabled(com.openexchange.share.limit.FileAccess)}.
-     */
-    @Test
-    public void testIsEnabled() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#handles(java.lang.String, java.lang.String)}.
-     */
-    @Test
-    public void testHandlesStringString() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#handles(int, int)}.
-     */
-    @Test
-    public void testHandlesIntInt() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for {@link com.openexchange.share.limit.AnonymousGuestDownloadLimiter#onSuccess(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.requesthandler.AJAXRequestResult)}.
-     */
-    @Test
-    public void testAfter() {
-        fail("Not yet implemented");
+    @Override
+    public EnabledChecker getEnabledCheckerFor(Session session) throws OXException {
+        List<EnabledChecker> checkers = storages.getServiceList();
+        return null == checkers || checkers.isEmpty() ? DefaultEnabledChecker.getInstance() : checkers.get(0);
     }
 
 }

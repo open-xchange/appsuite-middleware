@@ -64,6 +64,6 @@ public class AllAttachmentsFolder extends AbstractMailDriveSetting {
      * Initializes a new {@link AllAttachmentsFolder}.
      */
     public AllAttachmentsFolder(MailDriveFileStorageService mailDriveService) {
-        super("allattachments", Type.ALL, mailDriveService);
+        super("all", Type.ALL, mailDriveService);
     }
 }

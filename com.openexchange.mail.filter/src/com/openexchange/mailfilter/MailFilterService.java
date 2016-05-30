@@ -194,4 +194,13 @@ public interface MailFilterService {
      */
     public Set<String> getCapabilities(final Credentials credentials) throws OXException;
 
+    /**
+     * Get a set with static capabilities
+     *
+     * @param credentials the user's credentials (but only used to determine host and port)
+     * @return a Set with static capabilities
+     * @throws OXException
+     */
+    public Set<String> getStaticCapabilities(Credentials credentials) throws OXException;
+
 }

@@ -56,6 +56,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
+import com.openexchange.session.Session;
 
 /**
  * {@link Capabilities}
@@ -73,9 +74,14 @@ public class Capabilities implements ComputedServerConfigValueService {
 
 
     @Override
-    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) throws OXException {
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userId, int contextId, Session optSession) throws OXException {
         CapabilityService capabilityService = services.getService(CapabilityService.class);
-        Set<Capability> capabilities = capabilityService.getCapabilities(userID, contextID, true, true).asSet();
+        Set<Capability> capabilities;
+        if (null == optSession) {
+            capabilities = capabilityService.getCapabilities(userId, contextId, true, true).asSet();
+        } else {
+            capabilities = capabilityService.getCapabilities(optSession, true).asSet();
+        }
         serverConfig.put("capabilities", capabilities);
     }
 

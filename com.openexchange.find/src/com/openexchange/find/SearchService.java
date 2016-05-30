@@ -50,6 +50,7 @@
 package com.openexchange.find;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -82,5 +83,15 @@ public interface SearchService {
      * @return A {@link SearchResult}. Never <code>null</code>.
      */
     SearchResult search(SearchRequest searchRequest, Module module, ServerSession session) throws OXException;
+
+    /**
+     * Gets the appropriate driver for given module.
+     *
+     * @param module The module
+     * @param session The associated session
+     * @return The driver
+     * @throws OXException If no suitable driver exists
+     */
+    ModuleSearchDriver getDriver(Module module, ServerSession session) throws OXException;
 
 }

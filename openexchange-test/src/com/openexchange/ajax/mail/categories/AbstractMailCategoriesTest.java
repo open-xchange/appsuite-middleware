@@ -63,6 +63,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.AbstractMailTest;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConstants;
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -75,7 +76,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
 
-    private static final String RMI_HOSTNAME = "rmi://localhost:1099/";
 
     protected static final String CAT_GENERAL = "general";
     protected static final String CAT_1 = "social";
@@ -106,7 +106,7 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
         super.setUp();
         values = getClient().getValues();
         clearFolder(values.getInboxFolder()); // always start with an empty inbox
-        OXUserInterface oxUserRemote = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
+        OXUserInterface oxUserRemote = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         String login = AJAXConfig.getProperty(User.OXAdmin.getLogin());
         String password = AJAXConfig.getProperty(User.OXAdmin.getPassword());
         Set<String> capsToAdd = new HashSet<String>();
@@ -157,7 +157,7 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
     @Override
     protected Map<String, String> getNeededConfigurations() {
         Map<String, String> configs = new HashMap<>();
-        configs.put("com.openexchange.capability.mail_categories", Boolean.TRUE.toString());
+        configs.put("com.openexchange.mail.categories", Boolean.TRUE.toString());
         configs.put(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, Boolean.TRUE.toString());
         configs.put("com.openexchange.mail.categories.general.name.fallback", "General");
         configs.put(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, "promotion, social");

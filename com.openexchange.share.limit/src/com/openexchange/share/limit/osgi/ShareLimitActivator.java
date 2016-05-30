@@ -49,22 +49,24 @@
 
 package com.openexchange.share.limit.osgi;
 
+import com.openexchange.ajax.requesthandler.DispatcherListener;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.share.limit.AnonymousGuestDownloadLimiter;
+import com.openexchange.share.limit.impl.FilesDownloadLimiter;
+import com.openexchange.share.limit.impl.InfostoreDownloadLimiter;
 import com.openexchange.share.limit.internal.Services;
 import com.openexchange.share.limit.rdb.FileAccessCreateTableService;
 import com.openexchange.share.limit.rdb.FileAccessCreateTableTask;
-import com.openexchange.tools.servlet.limit.ActionLimiter;
-import com.openexchange.user.UserService;
+import com.openexchange.share.limit.util.LimitConfig;
 
 /**
- * 
+ *
  * {@link ShareLimitActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -83,7 +85,12 @@ public class ShareLimitActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, DatabaseService.class, UserService.class };
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, DatabaseService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
@@ -92,14 +99,20 @@ public class ShareLimitActivator extends AJAXModuleActivator {
 
         Services.set(this);
 
-        // Register create table services for user schema
-        registerService(CreateTableService.class, new FileAccessCreateTableService());
+        if (LimitConfig.getInstance().isEnabled()) {
+            // Register create table services for user schema
+            registerService(CreateTableService.class, new FileAccessCreateTableService());
 
-        // Register update tasks for user schema
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new FileAccessCreateTableTask(getService(DatabaseService.class))));
+            // Register update tasks for user schema
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new FileAccessCreateTableTask(getService(DatabaseService.class))));
 
-        final AnonymousGuestDownloadLimiter downloadLimiter = new AnonymousGuestDownloadLimiter(getService(ConfigViewFactory.class));
-        registerService(ActionLimiter.class, downloadLimiter);
+            final FilesDownloadLimiter filesDownloadLimiter = new FilesDownloadLimiter(getService(ConfigViewFactory.class));
+            registerService(DispatcherListener.class, filesDownloadLimiter);
+            final InfostoreDownloadLimiter infostoreDownloadLimiter = new InfostoreDownloadLimiter(getService(ConfigViewFactory.class));
+            registerService(DispatcherListener.class, infostoreDownloadLimiter);
+            
+            registerService(Reloadable.class, LimitConfig.getInstance());
+        }
     }
 
     @Override

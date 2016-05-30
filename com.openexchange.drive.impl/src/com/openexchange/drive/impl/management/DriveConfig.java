@@ -626,10 +626,10 @@ public class DriveConfig implements Initialization {
         /*
          * optimistic save thresholds
          */
-        String optimisticSaveThresholdDesktopValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdDesktop", "1MB");
+        String optimisticSaveThresholdDesktopValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdDesktop", "64kB");
         optimisticSaveThresholdDesktop = Strings.isEmpty(optimisticSaveThresholdDesktopValue) || "-1".equals(optimisticSaveThresholdDesktopValue) ? -1 :
             parseBytes(optimisticSaveThresholdDesktopValue);
-        String optimisticSaveThresholdMobileValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdMobile", "100kB");
+        String optimisticSaveThresholdMobileValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdMobile", "64kB");
         optimisticSaveThresholdMobile = Strings.isEmpty(optimisticSaveThresholdMobileValue) || "-1".equals(optimisticSaveThresholdMobileValue) ? -1 :
             parseBytes(optimisticSaveThresholdMobileValue);
     }

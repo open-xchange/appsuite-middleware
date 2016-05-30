@@ -362,10 +362,6 @@ public class FileMetadata implements DocumentMetadata {
              */
             String id = file.getId();
             if (FileStorageFileAccess.NEW != id) {
-                if (id.contains("/")) {
-                    id = id.substring(id.lastIndexOf("/") + 1, id.length());
-                    file.setId(id);
-                }
                 try {
                     Integer.valueOf(id);
                 } catch (final NumberFormatException e) {

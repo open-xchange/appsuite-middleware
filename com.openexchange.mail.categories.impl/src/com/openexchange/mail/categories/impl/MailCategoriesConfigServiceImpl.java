@@ -82,9 +82,8 @@ import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link MailCategoriesConfigServiceImpl}
@@ -105,17 +104,27 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     private static final String STATUS_RUNNING = "running";
     private static final String STATUS_FINISHED = "finished";
 
-    private static MailCategoriesConfigServiceImpl INSTANCE;
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
-    public static MailCategoriesConfigServiceImpl getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new MailCategoriesConfigServiceImpl();
-        }
-        return INSTANCE;
+    private final MailCategoriesRuleEngine ruleEngine;
+
+    /**
+     * Initializes a new {@link MailCategoriesConfigServiceImpl}.
+     *
+     * @param The rule engine to use
+     */
+    public MailCategoriesConfigServiceImpl(MailCategoriesRuleEngine ruleEngine) {
+        super();
+        this.ruleEngine = ruleEngine;
     }
 
-    private MailCategoriesConfigServiceImpl() {
-        super();
+    /**
+     * Gets the rule engine
+     *
+     * @return The rule engine
+     */
+    public MailCategoriesRuleEngine getRuleEngine() {
+        return ruleEngine;
     }
 
     @Override
@@ -126,7 +135,9 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
         if (includeGeneral) {
             String name = getLocalizedName(session, locale, MailCategoriesConstants.GENERAL_CATEGORY_ID);
-            MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category(MailCategoriesConstants.GENERAL_CATEGORY_ID).isSystemCategory(true).enabled(true).force(true).name(name).build();
+            String description = getLocalizedDescription(session, locale, MailCategoriesConstants.GENERAL_CATEGORY_ID);
+
+            MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category(MailCategoriesConstants.GENERAL_CATEGORY_ID).isSystemCategory(true).enabled(true).force(true).name(name).description(description).build();
             result.add(generalConfig);
         }
 
@@ -213,6 +224,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             name = getLocalizedName(session, locale, category);
         }
         builder.name(name);
+        String description = getLocalizedDescription(session, locale, category);
+        builder.description(description);
         builder.enabled(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
         builder.force(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session));
         builder.flag(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
@@ -247,11 +260,20 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     private String getLocalizedName(Session session, Locale locale, String category) throws OXException {
 
-        String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_LANGUAGE_PREFIX + locale.toString(), null, session);
+        String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME_LANGUAGE_PREFIX + locale.toString(), null, session);
         if (translation != null && !translation.isEmpty()) {
             return translation;
         }
         return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FALLBACK, category, session);
+    }
+
+    private String getLocalizedDescription(Session session, Locale locale, String category) throws OXException {
+
+        String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_DESCRIPTION_LANGUAGE_PREFIX + locale.toString(), null, session);
+        if (translation != null && !translation.isEmpty()) {
+            return translation;
+        }
+        return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_DESCRIPTION, null, session);
     }
 
     String[] getSystemCategoryNames(Session session) throws OXException {
@@ -272,6 +294,17 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
         String result[] = Strings.splitByComma(categoriesString);
         return result == null ? new String[0] : result;
+    }
+
+    /**
+     * Checks if underlying rule engine is applicable for specified session.
+     *
+     * @param session The session to check for
+     * @return <code>true</code> if rule engine is applicable; otherwise <code>false</code>
+     * @throws OXException If check fort applicability fails
+     */
+    public boolean isRuleEngineApplicable(Session session) throws OXException {
+        return ruleEngine.isApplicable(session);
     }
 
     @Override
@@ -321,18 +354,10 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         if ((flag == null && rule.getFlag() != null) || (flag != null && !flag.equals(rule.getFlag()))) {
             throw MailCategoriesRuleEngineExceptionCodes.INVALID_RULE.create();
         }
-        MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
-        if (ruleEngine == null) {
-            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
-        }
         ruleEngine.setRule(session, rule, RuleType.CATEGORY);
     }
 
     private MailCategoryRule getRule(Session session, String category) throws OXException {
-        MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
-        if (ruleEngine == null) {
-            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
-        }
         String flag = null;
         if (!category.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
             flag = getFlagByCategory(session, category);
@@ -345,10 +370,6 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     private void removeMailFromRules(Session session, String mailAddress) throws OXException {
-        MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
-        if (ruleEngine == null) {
-            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
-        }
         ruleEngine.removeValueFromHeader(session, mailAddress, "from");
     }
 
@@ -543,15 +564,17 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         if (!capability) {
             return;
         }
+
+        MailCategoriesRuleEngine engine = Services.getService(MailCategoriesRuleEngine.class);
+        String flags[] = getAllFlags(session, false, false);
+        engine.cleanUp(Arrays.asList(flags), session);
+
         ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
         if (configViewFactory == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class);
         }
         ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
-
-
         Boolean apply = view.get(MailCategoriesConstants.APPLY_OX_RULES_PROPERTY, Boolean.class);
-
 
         if (apply == null || !apply) {
             return;
@@ -563,43 +586,31 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             return;
         }
         ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
-        threadPoolService.submit(new InitTask(session, hasRun));
+        threadPoolService.submit(new InitTask(this, session, hasRun));
 
     }
 
-    private class InitTask implements Task<Boolean> {
+    private static final class InitTask extends AbstractTask<Boolean> {
+
+        private final MailCategoriesConfigServiceImpl mailCategoriesService;
+        private final Session session;
+        private final ConfigProperty<String> hasRun;
 
         /**
          * Initializes a new {@link MailCategoriesConfigServiceImpl.InitTask}.
          */
-        public InitTask(Session session, ConfigProperty<String> hasRun) {
+        InitTask(MailCategoriesConfigServiceImpl mailCategoriesService, Session session, ConfigProperty<String> hasRun) {
             super();
+            this.mailCategoriesService = mailCategoriesService;
             this.session = session;
             this.hasRun = hasRun;
         }
-
-        Session session;
-        ConfigProperty<String> hasRun;
-
-        @Override
-        public void setThreadName(ThreadRenamer threadRenamer) {}
-
-        @Override
-        public void beforeExecute(Thread t) {}
-
-        @Override
-        public void afterExecute(Throwable t) {}
 
         @Override
         public Boolean call() throws Exception {
             try {
                 hasRun.set(STATUS_RUNNING);
-                MailCategoriesRuleEngine engine = Services.getService(MailCategoriesRuleEngine.class);
-                if (engine == null) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class);
-                }
 
-                MailCategoriesConfigServiceImpl mailCategoriesService = MailCategoriesConfigServiceImpl.getInstance();
                 String categoryNames[] = mailCategoriesService.getSystemCategoryNames(session);
                 List<MailCategoryRule> rules = new ArrayList<>();
                 for (String categoryName : categoryNames) {
@@ -615,7 +626,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                     MailCategoryRule rule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), Arrays.asList(addresses), flag);
                     rules.add(rule);
                 }
-                engine.initRuleEngineForUser(session, rules);
+                mailCategoriesService.getRuleEngine().initRuleEngineForUser(session, rules);
                 FullnameArgument fa = new FullnameArgument("INBOX");
                 for (MailCategoryRule rule : rules) {
                     SearchTerm<?> searchTerm = mailCategoriesService.getSearchTerm(rule);

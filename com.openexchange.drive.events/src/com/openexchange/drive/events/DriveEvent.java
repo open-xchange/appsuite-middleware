@@ -52,6 +52,7 @@ package com.openexchange.drive.events;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 
 
@@ -67,7 +68,7 @@ public interface DriveEvent {
      *
      * @return The client actions
      */
-    List<DriveAction<? extends DriveVersion>> getActions();
+    List<DriveAction<? extends DriveVersion>> getActions(DriveSession session);
 
     /**
      * Gets the context ID.

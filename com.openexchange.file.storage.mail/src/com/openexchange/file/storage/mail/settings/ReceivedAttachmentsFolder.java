@@ -64,6 +64,6 @@ public class ReceivedAttachmentsFolder extends AbstractMailDriveSetting {
      * Initializes a new {@link ReceivedAttachmentsFolder}.
      */
     public ReceivedAttachmentsFolder(MailDriveFileStorageService mailDriveService) {
-        super("receivedattachments", Type.RECEIVED, mailDriveService);
+        super("received", Type.RECEIVED, mailDriveService);
     }
 }

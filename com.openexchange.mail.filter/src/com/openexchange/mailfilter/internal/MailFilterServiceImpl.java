@@ -60,8 +60,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
@@ -69,6 +72,8 @@ import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -100,7 +105,7 @@ import com.openexchange.mailfilter.services.Services;
 public final class MailFilterServiceImpl implements MailFilterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailFilterServiceImpl.class);
-    
+
     private static final String CATEGORY_FLAG = "category";
     private static final String SYSTEM_CATEGORY_FLAG = "syscategory";
 
@@ -155,7 +160,8 @@ public final class MailFilterServiceImpl implements MailFilterService {
     // ---------------------------------------------------------------------------------------------------------------- //
 
     private final String scriptname;
-    private final boolean useSIEVEResponseCodes;
+    final boolean useSIEVEResponseCodes;
+    private final Cache<HostAndPort, Capabilities> staticCapabilities;
 
     /**
      * Initializes a new {@link MailFilterServiceImpl}.
@@ -165,6 +171,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
         ConfigurationService config = Services.getService(ConfigurationService.class);
         scriptname = config.getProperty(MailFilterProperties.Values.SCRIPT_NAME.property);
         useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
+        staticCapabilities = CacheBuilder.newBuilder().maximumSize(10).expireAfterWrite(30, TimeUnit.MINUTES).build();
     }
 
     /**
@@ -173,7 +180,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @param sieveHandler The <tt>SieveHandler</tt> instance to close
      * @throws OXException If closing fails
      */
-    private void closeSieveHandler(SieveHandler sieveHandler) throws OXException {
+    protected void closeSieveHandler(SieveHandler sieveHandler) throws OXException {
         if (null != sieveHandler) {
             try {
                 sieveHandler.close();
@@ -433,7 +440,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     private void removeRules(List<Rule> rules, String... flagsToRemove) {
         Iterator<Rule> iterator = rules.iterator();
         while (iterator.hasNext()) {
@@ -502,7 +509,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
 
                     List<Rule> clientrules = clientrulesandrequire.getRules();
-                    
+
                     // Identify rule groups
                     List<MailFilterGroup> groups = getMailFilterGroups(uids);
                     List<Rule> tmpList = new ArrayList<>(clientrules);
@@ -510,7 +517,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     for(MailFilterGroup group: groups){
                         clientrules.addAll(group.getOrderedRules(tmpList));
                     }
-                    
+
                     String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                     writeback = sieveTextFilter.rewriteRequire(writeback, script);
                     writeScript(sieveHandler, activeScript, writeback);
@@ -532,7 +539,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-    
+
     private List<MailFilterGroup> getMailFilterGroups(int[] ids) {
         ArrayList<MailFilterGroup> result = new ArrayList<>(2);
         result.add(new PredefinedSystemCategoriesMailFilterGroup());
@@ -598,6 +605,38 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
             } finally {
                 closeSieveHandler(sieveHandler);
+            }
+        }
+    }
+
+    @Override
+    public Set<String> getStaticCapabilities(final Credentials credentials) throws OXException {
+        Object lock = lockFor(credentials);
+        synchronized (lock) {
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, true);
+            HostAndPort key = new HostAndPort(sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+            try {
+                Capabilities capabilities = staticCapabilities.get(key, new Callable<Capabilities>() {
+
+                    @Override
+                    public Capabilities call() throws Exception {
+                        try {
+                            handlerConnect(sieveHandler, credentials.getSubject());
+                            return sieveHandler.getCapabilities();
+                        } catch (OXSieveHandlerException e) {
+                            throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+                        } finally {
+                            closeSieveHandler(sieveHandler);
+                        }
+                    }
+                });
+                return new HashSet<String>(capabilities.getSieve());
+            } catch (ExecutionException e) {
+                Throwable t = e.getCause();
+                if (t instanceof OXException) {
+                    throw (OXException) t;
+                }
+                throw OXException.general("Failed loading Sieve capabilities", t);
             }
         }
     }
@@ -846,7 +885,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @throws OXSieveHandlerInvalidCredentialsException
      * @throws PrivilegedActionException
      */
-    private void handlerConnect(final SieveHandler sieveHandler, Subject subject) throws OXException, OXSieveHandlerException {
+    protected void handlerConnect(final SieveHandler sieveHandler, Subject subject) throws OXException, OXSieveHandlerException {
         try {
             if (subject != null) {
                 Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
@@ -897,6 +936,8 @@ public final class MailFilterServiceImpl implements MailFilterService {
         return nextuid;
     }
 
+    // ----------------------------------------------------- Helper classes -------------------------------------------------------
+
     private static final class Key {
 
         private final int cid;
@@ -938,5 +979,52 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
 
     } // End of class Key
+
+    private static final class HostAndPort {
+
+        private final String host;
+        private final int port;
+        private final int hashCode;
+
+        HostAndPort(String host, int port) {
+            super();
+            if (port < 0 || port > 0xFFFF) {
+                throw new IllegalArgumentException("port out of range:" + port);
+            }
+            if (host == null) {
+                throw new IllegalArgumentException("hostname can't be null");
+            }
+            this.host = host;
+            this.port = port;
+            hashCode = (Strings.asciiLowerCase(host).hashCode()) ^ port;
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof HostAndPort)) {
+                return false;
+            }
+            HostAndPort other = (HostAndPort) obj;
+            if (port != other.port) {
+                return false;
+            }
+            if (host == null) {
+                if (other.host != null) {
+                    return false;
+                }
+            } else if (!host.equals(other.host)) {
+                return false;
+            }
+            return true;
+        }
+    }
 
 }

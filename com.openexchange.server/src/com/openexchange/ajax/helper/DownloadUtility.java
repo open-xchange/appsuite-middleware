@@ -433,6 +433,8 @@ public final class DownloadUtility {
                     in = sink.getClosingRandomAccess();
                     sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
+            } else if (contentType.containsAny("shockwave", "flash") || fileNameImpliesFlash(fileName)) {
+                sContentDisposition = "attachment";
             } else if (fileNameImpliesHtml(fileName)) {
                 /*
                  * HTML content requested for download...
@@ -511,6 +513,10 @@ public final class DownloadUtility {
 
     private static boolean fileNameImpliesImage(final String fileName) {
         return null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("image/");
+    }
+
+    private static boolean fileNameImpliesFlash(final String fileName) {
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("flash") >= 0;
     }
 
     /**

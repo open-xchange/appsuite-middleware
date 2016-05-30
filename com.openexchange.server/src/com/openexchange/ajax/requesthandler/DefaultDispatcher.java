@@ -76,14 +76,9 @@ import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.log.LogProperties;
-import com.openexchange.server.services.ActionLimiterServices;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.servlet.limit.AbstractActionLimitedException;
-import com.openexchange.tools.servlet.limit.ActionLimiter;
-import com.openexchange.tools.servlet.limit.UserAction;
-import com.openexchange.tools.servlet.limit.UserAction.UserActionBuilder;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -207,6 +202,7 @@ public class DefaultDispatcher implements Dispatcher {
             }
 
             // Grab applicable dispatcher listeners
+
             List<DispatcherListener> dispatcherListeners = listenerRegistry.getDispatcherListenersFor(modifiedRequestData);
 
             // Perform request
@@ -230,10 +226,6 @@ public class DefaultDispatcher implements Dispatcher {
             }
             throw e;
         } catch (RuntimeException e) {
-            if (e instanceof AbstractActionLimitedException) {
-                AbstractActionLimitedException actionLimitedException = (AbstractActionLimitedException) e;
-                throw actionLimitedException.create();
-            }
             if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
                 // Handle special Rhino wrapper error
                 Throwable wrapped = e.getCause();
@@ -272,7 +264,7 @@ public class DefaultDispatcher implements Dispatcher {
      * @throws OXException If action fails to handle the request data
      */
     private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData requestData, List<DispatcherListener> optListeners, ServerSession session) throws OXException {
-        if (null == optListeners) {
+        if ((null == optListeners) || (optListeners.isEmpty())) {
             return doCallAction(action, requestData, session);
         }
 
@@ -283,7 +275,6 @@ public class DefaultDispatcher implements Dispatcher {
             result = doCallAction(action, requestData, session);
             return result;
         } catch (OXException e) {
-            error(requestData);
             exc = e;
             throw e;
         } catch (RuntimeException e) {
@@ -298,14 +289,12 @@ public class DefaultDispatcher implements Dispatcher {
         AJAXRequestResult result = null;
 
         try {
-            before(requestData);
             result = action.perform(requestData, session);
             if (null == result) {
                 // Huh...?!
                 addLogProperties(requestData, true);
                 throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(AJAXRequestResult.class.getSimpleName(), "null");
             }
-            success(requestData, result);
         } catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -319,51 +308,6 @@ public class DefaultDispatcher implements Dispatcher {
         }
 
         return result.setRequestData(requestData);
-    }
-
-    private UserAction getUserAction(AJAXRequestData requestData) {
-        return new UserActionBuilder().setAction(requestData.getAction()).setModule(requestData.getModule()).setUserId(requestData.getSession().getUserId()).setContextId(requestData.getSession().getContextId()).build();
-    }
-
-    protected void error(AJAXRequestData requestData) {
-        UserAction userAction = getUserAction(requestData);
-        List<ActionLimiter> actionLimiter = ActionLimiterServices.getActionLimiter();
-
-        for (ActionLimiter limiter : actionLimiter) {
-            if (limiter.handles(userAction)) {
-                limiter.onError(requestData);
-            }
-        }
-    }
-
-    protected void before(AJAXRequestData requestData) throws OXException {
-        UserAction userAction = getUserAction(requestData);
-        List<ActionLimiter> actionLimiter = ActionLimiterServices.getActionLimiter();
-
-        for (ActionLimiter limiter : actionLimiter) {
-            List<ActionLimiter> usedLimiters = new ArrayList<>();
-            if (limiter.handles(userAction)) {
-                usedLimiters.add(limiter);
-                limiter.onBefore(requestData);
-            }
-            requestData.setProperty("limiter", usedLimiters);
-        }
-    }
-
-    protected void success(AJAXRequestData requestData, AJAXRequestResult result) {
-        Object property = requestData.getProperty("limiter");
-        if (property == null) {
-            return;
-        }
-        if (property instanceof List<?>) {
-            List<ActionLimiter> usedLimiter = (List<ActionLimiter>) property;
-            if (usedLimiter.isEmpty()) {
-                return;
-            }
-            for (ActionLimiter limiter : usedLimiter) {
-                limiter.onSuccess(requestData, result);
-            }
-        }
     }
 
     /**
@@ -703,23 +647,15 @@ public class DefaultDispatcher implements Dispatcher {
         this.customizerFactories.remove(factory);
     }
 
-    private void triggerOnRequestInitialized(AJAXRequestData requestData, List<DispatcherListener> dispatcherListeners) {
+    private void triggerOnRequestInitialized(AJAXRequestData requestData, List<DispatcherListener> dispatcherListeners) throws OXException {
         for (DispatcherListener dispatcherListener : dispatcherListeners) {
-            try {
-                dispatcherListener.onRequestInitialized(requestData);
-            } catch (Exception x) {
-                LOG.error("Failed to execute dispatcher listener {}", dispatcherListener.getClass().getSimpleName(), x);
-            }
+            dispatcherListener.onRequestInitialized(requestData);
         }
     }
 
-    private void triggerOnRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e, List<DispatcherListener> dispatcherListeners) {
+    private void triggerOnRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e, List<DispatcherListener> dispatcherListeners) throws OXException {
         for (DispatcherListener dispatcherListener : dispatcherListeners) {
-            try {
-                dispatcherListener.onRequestPerformed(requestData, requestResult, e);
-            } catch (Exception x) {
-                LOG.error("Failed to execute dispatcher listener {}", dispatcherListener.getClass().getSimpleName(), x);
-            }
+            dispatcherListener.onRequestPerformed(requestData, requestResult, e);
         }
     }
 

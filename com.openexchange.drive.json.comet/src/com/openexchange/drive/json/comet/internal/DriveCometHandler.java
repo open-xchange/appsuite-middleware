@@ -111,7 +111,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
                 DriveEvent driveEvent = driveCometEvent.attachment();
                 if (null != driveEvent && driveEvent.getContextID() == session.getServerSession().getContextId() &&
                     driveEvent.getFolderIDs().contains(session.getRootFolderID())) {
-                    write(driveEvent.getActions());
+                    write(driveEvent.getActions(session));
                 }
             }
         } finally {
