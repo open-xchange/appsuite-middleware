@@ -52,6 +52,7 @@ package com.openexchange.share.limit.osgi;
 import com.openexchange.ajax.requesthandler.DispatcherListener;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -98,7 +99,7 @@ public class ShareLimitActivator extends AJAXModuleActivator {
 
         Services.set(this);
 
-        if (LimitConfig.isEnabled()) {
+        if (LimitConfig.getInstance().isEnabled()) {
             // Register create table services for user schema
             registerService(CreateTableService.class, new FileAccessCreateTableService());
 
@@ -109,6 +110,8 @@ public class ShareLimitActivator extends AJAXModuleActivator {
             registerService(DispatcherListener.class, filesDownloadLimiter);
             final InfostoreDownloadLimiter infostoreDownloadLimiter = new InfostoreDownloadLimiter(getService(ConfigViewFactory.class));
             registerService(DispatcherListener.class, infostoreDownloadLimiter);
+            
+            registerService(Reloadable.class, LimitConfig.getInstance());
         }
     }
 

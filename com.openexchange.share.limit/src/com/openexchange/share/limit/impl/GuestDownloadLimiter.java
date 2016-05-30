@@ -115,11 +115,11 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
         Long start = null;
         ConfigView view = this.configViewFactory.getView(0, contextId);
         if (Strings.isEmpty(user.getMail())) { // anonymous guest
-            Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, LimitConfig.timeFrameLinks());
+            Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, LimitConfig.getInstance().timeFrameLinks());
             long now = new Date().getTime();
             start = now - timeWindow;
         } else {
-            Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, LimitConfig.timeFrameGuests());
+            Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, LimitConfig.getInstance().timeFrameGuests());
             long now = new Date().getTime();
             start = now - timeWindow;
         }
@@ -150,17 +150,17 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
                 return null;
             }
             if (Strings.isEmpty(user.getMail())) { // anonymous guest
-                Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_LINKS, Long.class, LimitConfig.sizeLimitLinks());
-                Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_LINKS, Integer.class, LimitConfig.countLimitLinks());
-                Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, LimitConfig.timeFrameLinks());
+                Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_LINKS, Long.class, LimitConfig.getInstance().sizeLimitLinks());
+                Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_LINKS, Integer.class, LimitConfig.getInstance().countLimitLinks());
+                Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, LimitConfig.getInstance().timeFrameLinks());
                 long now = new Date().getTime();
                 long start = now - userLimitTimeFrame;
 
                 return new FileAccess(contextId, user.getId(), start, now, userCountLimit, userSizeLimit);
             } else {
-                Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, LimitConfig.sizeLimitGuests());
-                Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, LimitConfig.countLimitGuests());
-                Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, LimitConfig.timeFrameGuests());
+                Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, LimitConfig.getInstance().sizeLimitGuests());
+                Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, LimitConfig.getInstance().countLimitGuests());
+                Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, LimitConfig.getInstance().timeFrameGuests());
                 long now = new Date().getTime();
                 long start = now - userLimitTimeFrame;
 

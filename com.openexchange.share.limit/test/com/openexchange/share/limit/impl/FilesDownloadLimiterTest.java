@@ -232,11 +232,11 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testGetLimit_noConfigCascadeValueSet_ReturnDefaults() throws OXException {
-        Long sizeLimit = LimitConfig.sizeLimitLinks();
+        Long sizeLimit = LimitConfig.getInstance().sizeLimitLinks();
         Mockito.when(configView.opt(LimitConfig.SIZE_LIMIT_LINKS, Long.class, sizeLimit)).thenReturn(sizeLimit);
-        Integer countLimit = LimitConfig.countLimitLinks();
+        Integer countLimit = LimitConfig.getInstance().countLimitLinks();
         Mockito.when(configView.opt(LimitConfig.COUNT_LIMIT_LINKS, Integer.class, countLimit)).thenReturn(countLimit);
-        Integer timeFrame = LimitConfig.timeFrameLinks();
+        Integer timeFrame = LimitConfig.getInstance().timeFrameLinks();
         Mockito.when(configView.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, timeFrame)).thenReturn(timeFrame);
         Mockito.when(configView.opt(LimitConfig.LIMIT_ENABLED, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.TRUE);
 
@@ -250,11 +250,11 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testGetLimit_configCascadeValueSet_ReturnConfigCascadeValues() throws OXException {
-        Long sizeLimit = LimitConfig.sizeLimitLinks();
+        Long sizeLimit = LimitConfig.getInstance().sizeLimitLinks();
         Mockito.when(configView.opt(LimitConfig.SIZE_LIMIT_LINKS, Long.class, sizeLimit)).thenReturn(new Long(22222222222L));
-        Integer countLimit = LimitConfig.countLimitLinks();
+        Integer countLimit = LimitConfig.getInstance().countLimitLinks();
         Mockito.when(configView.opt(LimitConfig.COUNT_LIMIT_LINKS, Integer.class, countLimit)).thenReturn(new Integer(111111));
-        Integer timeFrame = LimitConfig.timeFrameLinks();
+        Integer timeFrame = LimitConfig.getInstance().timeFrameLinks();
         Mockito.when(configView.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, timeFrame)).thenReturn(new Integer(7));
 
         FileAccess limit = limiter.getLimit(linkUser, CONTEXT_ID);
@@ -276,11 +276,11 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testGetLimit_noConfigCascadeValueSetForGuest_ReturnDefaults() throws OXException {
-        Long sizeLimit = LimitConfig.sizeLimitGuests();
+        Long sizeLimit = LimitConfig.getInstance().sizeLimitGuests();
         Mockito.when(configView.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, sizeLimit)).thenReturn(sizeLimit);
-        Integer countLimit = LimitConfig.countLimitGuests();
+        Integer countLimit = LimitConfig.getInstance().countLimitGuests();
         Mockito.when(configView.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, countLimit)).thenReturn(countLimit);
-        Integer timeFrame = LimitConfig.timeFrameGuests();
+        Integer timeFrame = LimitConfig.getInstance().timeFrameGuests();
         Mockito.when(configView.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, timeFrame)).thenReturn(timeFrame);
         Mockito.when(configView.opt(LimitConfig.LIMIT_ENABLED, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.TRUE);
 
@@ -294,11 +294,11 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testGetLimit_configCascadeValueSetForGuest_ReturnConfigCascadeValues() throws OXException {
-        Long sizeLimit = LimitConfig.sizeLimitGuests();
+        Long sizeLimit = LimitConfig.getInstance().sizeLimitGuests();
         Mockito.when(configView.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, sizeLimit)).thenReturn(new Long(22222222222L));
-        Integer countLimit = LimitConfig.countLimitGuests();
+        Integer countLimit = LimitConfig.getInstance().countLimitGuests();
         Mockito.when(configView.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, countLimit)).thenReturn(new Integer(111111));
-        Integer timeFrame = LimitConfig.timeFrameGuests();
+        Integer timeFrame = LimitConfig.getInstance().timeFrameGuests();
         Mockito.when(configView.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, timeFrame)).thenReturn(new Integer(7));
 
         FileAccess limit = limiter.getLimit(guest, CONTEXT_ID);
