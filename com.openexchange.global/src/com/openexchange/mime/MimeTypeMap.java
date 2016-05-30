@@ -101,5 +101,5 @@ public interface MimeTypeMap {
      * @param mimeType The MIME type
      * @return The file extension for given MIME type or <code>dat</code> if none found
      */
-    List<String> getFileExtensions(String mime);
+    List<String> getFileExtensions(String mimeType);
 }
