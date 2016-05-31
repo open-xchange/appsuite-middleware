@@ -48,7 +48,7 @@ First of all you have to install the "open-xchange-mail-categories" package.
 
 #### 2. Add 'mail_categories' capability
 
-Open /opt/open-xchange/etc/mail-categories.properties and set com.openexchange.capability.mail_categories to 'true'.
+Open /opt/open-xchange/etc/mail-categories.properties and set ```com.openexchange.mail.categories``` to 'true'.
 
 #### 3. Add category identifiers
 
@@ -128,7 +128,7 @@ The used lists in both variants are not complete and are only applicable for use
 
 #### 6. Check properties and restart the server
 
-Finally your mail-categories.properties file should look similar to this:
+Finally your ```mail-categories.properties``` file should look similar to this:
 
 
     # The config-cascade aware properties for mail categories
@@ -136,10 +136,10 @@ Finally your mail-categories.properties file should look similar to this:
     # General capability to enable/disable mail categories for primary inbox
     #
     # Default is "false"
-    com.openexchange.capability.mail_categories=true
+    com.openexchange.mail.categories=true
 
     # Switch to show or hide mail categories feature during the first start.
-    # Notice that this property only influence the starting value. Changing this value will have no effect on users with mail_categories capability set to true.
+    # Notice that this property only influence the starting value. Changing this value will have no effect on users with "com.openexchange.mail.categories" set to true.
     #
     # Default is "true"
     com.openexchange.mail.categories.enabled=true
