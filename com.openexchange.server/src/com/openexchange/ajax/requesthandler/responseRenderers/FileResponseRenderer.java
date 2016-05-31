@@ -55,6 +55,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -66,6 +67,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherListener;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.CheckParametersAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper;
@@ -103,6 +105,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     private final AtomicReference<File> tmpDirReference;
     private final TransformImageAction imageAction;
     private final List<IFileResponseRendererAction> registeredActions;
+    private final List<DispatcherListener> listenerRegistry;
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
@@ -140,6 +143,15 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         });
         tmpDirReference.set(getTmpDirByPath(path));
+        this.listenerRegistry = Collections.synchronizedList(new ArrayList<DispatcherListener>());
+    }
+
+    public void addDispatcherListener(DispatcherListener listener) {
+        this.listenerRegistry.add(listener);
+    }
+
+    public void removeDispatcherListener(DispatcherListener listener) {
+        this.listenerRegistry.remove(listener);
     }
 
     @Override
@@ -163,6 +175,16 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
+        List<DispatcherListener> registry = this.listenerRegistry;
+        try {
+            if (!registry.isEmpty()) {
+                preProcessListeners(request);
+            }
+        } catch (OXException e1) {
+            LOG.warn("Pre processing of DispatcherListener aborted due to the following exception {}. Skip further processing", e1.getMessage());
+            return;
+        }
+
         IFileHolder file = (IFileHolder) result.getResultObject();
         // Check if file is actually supplied by the request URL.
         if (file == null || hasNoFileItem(file)) {
@@ -179,6 +201,30 @@ public class FileResponseRenderer implements ResponseRenderer {
             writeFileHolder(file, request, result, req, resp);
         } finally {
             postProcessingTasks(file);
+        }
+        try {
+            if (!registry.isEmpty()) {
+                postProcessListeners(request, result);
+            }
+        } catch (OXException e1) {
+            LOG.warn("Post processing of DispatcherListener throws an exception {}.", e1.getMessage());
+            return;
+        }
+    }
+
+    private void postProcessListeners(AJAXRequestData request, AJAXRequestResult result) throws OXException {
+        for (DispatcherListener dispatcherListener : this.listenerRegistry) {
+            if (dispatcherListener.applicable(request)) {
+                dispatcherListener.onRequestPerformed(request, result, null);
+            }
+        }
+    }
+
+    private void preProcessListeners(AJAXRequestData request) throws OXException {
+        for (DispatcherListener dispatcherListener : this.listenerRegistry) {
+            if (dispatcherListener.applicable(request)) {
+                dispatcherListener.onRequestInitialized(request);
+            }
         }
     }
 
@@ -205,17 +251,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         final long length = fileHolder.getLength();
         final List<Closeable> closeables = new LinkedList<Closeable>();
         final String fileContentType = fileHolder.getContentType();
-        IDataWrapper data = new DataWrapper().setContentTypeByParameter(false)
-            .setLength(length)
-            .setFile(fileHolder)
-            .setRequest(req)
-            .setFileContentType(fileContentType)
-            .setFileName(fileName)
-            .setRequestData(requestData)
-            .setResponse(resp)
-            .setCloseAbles(closeables)
-            .setResult(result)
-            .setTmpDirReference(tmpDirReference);
+        IDataWrapper data = new DataWrapper().setContentTypeByParameter(false).setLength(length).setFile(fileHolder).setRequest(req).setFileContentType(fileContentType).setFileName(fileName).setRequestData(requestData).setResponse(resp).setCloseAbles(closeables).setResult(result).setTmpDirReference(tmpDirReference);
 
         try {
             data.setUserAgent(AJAXUtility.sanitizeParam(req.getHeader("user-agent")));
@@ -529,14 +565,14 @@ public class FileResponseRenderer implements ResponseRenderer {
         /** The status code to respond with */
         public final int statusCode;
 
-        /** The optional accompanying  message */
+        /** The optional accompanying message */
         public final String message;
 
         /**
          * Initializes a new {@link FileResponseRendererActionException}.
          *
          * @param statusCode The HTTP status code
-         * @param message The optional accompanying  message
+         * @param message The optional accompanying message
          */
         public FileResponseRendererActionException(int statusCode, String message) {
             super();

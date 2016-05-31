@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.limit.impl;
+package com.openexchange.share.limit.limiter;
 
 import com.openexchange.ajax.requesthandler.DispatcherListener;
 import com.openexchange.config.cascade.ConfigViewFactory;

@@ -1583,7 +1583,7 @@ public class AJAXRequestData {
      */
     public String getNormalizedModule() {
         String lModule = module;
-        int pos = lModule.lastIndexOf('/');
+        int pos = lModule.indexOf('/');
         if ((pos > 0) && (pathInfo != null) && (lModule.endsWith(pathInfo))) {
             lModule = lModule.substring(0, pos);
         }

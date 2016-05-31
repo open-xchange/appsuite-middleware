@@ -47,14 +47,13 @@
  *
  */
 
-package com.openexchange.share.limit.impl;
+package com.openexchange.share.limit.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.limit.exceptions.LimitExceptionCodes;
-import com.openexchange.share.limit.internal.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 /**

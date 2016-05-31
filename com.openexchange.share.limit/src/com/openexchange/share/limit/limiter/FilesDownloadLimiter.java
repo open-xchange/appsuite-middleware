@@ -47,26 +47,25 @@
  *
  */
 
-package com.openexchange.share.limit.exceptions.custom;
+package com.openexchange.share.limit.limiter;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.ajax.requesthandler.DispatcherListener;
+import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
- * 
- * {@link DownloadLimitedExceptionMessages}
+ * {@link FilesDownloadLimiter} A {@link DispatcherListener} that is responsible for actions defined in {@link GuestDownloadLimiter} and the "files" module
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public final class DownloadLimitedExceptionMessages implements LocalizableStrings {
+public class FilesDownloadLimiter extends GuestDownloadLimiter {
 
-    public static final String DOWNLOAD_DENIED_EXCEPTION_MESSAGE = "Download denied because download limits have been exceeded. Please try again later.";
-
-    /**
-     * Initializes a new {@link DownloadLimitedExceptionMessages}.
-     */
-    private DownloadLimitedExceptionMessages() {
-        super();
+    public FilesDownloadLimiter(ConfigViewFactory configView) {
+        super(configView);
     }
 
+    @Override
+    public String getModule() {
+        return "files";
+    }
 }

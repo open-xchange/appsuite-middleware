@@ -52,7 +52,7 @@ package com.openexchange.share.limit;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.share.limit.impl.FilesDownloadLimiterTest;
+import com.openexchange.share.limit.limiter.FilesDownloadLimiterTest;
 
 /**
  * 

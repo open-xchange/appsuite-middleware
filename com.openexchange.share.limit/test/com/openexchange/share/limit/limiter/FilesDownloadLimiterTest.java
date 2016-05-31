@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.limit.impl;
+package com.openexchange.share.limit.limiter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -92,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.8.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class, RdbFileAccessStorage.class })
+@PrepareForTest({ Services.class, RdbFileAccessStorage.class, LimitConfig.class })
 public class FilesDownloadLimiterTest {
 
     private static int CONTEXT_ID = 1;
@@ -106,6 +106,9 @@ public class FilesDownloadLimiterTest {
 
     @Mock
     private RdbFileAccessStorage fileAccessStorage;
+
+    @Mock
+    private LimitConfig config;
 
     @Mock
     private ConfigView configView;
@@ -152,6 +155,10 @@ public class FilesDownloadLimiterTest {
         requestData.setSession(session);
         Mockito.when(session.isAnonymous()).thenReturn(Boolean.FALSE);
         Mockito.when(session.getUser()).thenReturn(linkUser);
+
+        PowerMockito.mockStatic(LimitConfig.class);
+        PowerMockito.when(LimitConfig.getInstance()).thenReturn(config);
+        Mockito.when(config.isEnabled()).thenReturn(Boolean.TRUE);
 
         Mockito.when(configView.opt(LimitConfig.LIMIT_ENABLED, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.TRUE);
 
@@ -347,8 +354,28 @@ public class FilesDownloadLimiterTest {
     }
 
     @Test
-    public void testApplicable_isGuest_applicable() throws OXException {
+    public void testApplicableWithDocumentAction_isGuestButNoDelivery_notApplicable() throws OXException {
         Mockito.when(session.getUser()).thenReturn(guest);
+
+        boolean applicable = limiter.applicable(requestData);
+
+        assertFalse(applicable);
+    }
+
+    @Test
+    public void testApplicableWithDocumentAction_isGuestAndDelivery_applicable() throws OXException {
+        Mockito.when(session.getUser()).thenReturn(guest);
+        requestData.putParameter("delivery", "download");
+
+        boolean applicable = limiter.applicable(requestData);
+
+        assertTrue(applicable);
+    }
+    
+    @Test
+    public void testApplicableWithDocumentAction_isGuestAndDL_applicable() throws OXException {
+        Mockito.when(session.getUser()).thenReturn(guest);
+        requestData.putParameter("dl", "1");
 
         boolean applicable = limiter.applicable(requestData);
 
@@ -357,23 +384,11 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testApplicable_isGuest_isApplicable() throws OXException {
+        requestData.setAction("zipdocuments");
+        
         boolean applicable = limiter.applicable(requestData);
 
         assertTrue(applicable);
-    }
-
-    @Test
-    public void testOnRequestInitialized_isAnonymousSession_return() throws OXException {
-        limiter = new FilesDownloadLimiter(configViewFactory) {
-
-            @Override
-            protected void removeOldAccesses(ServerSession session, int contextId) {
-                fail();
-            }
-        };
-        Mockito.when(session.isAnonymous()).thenReturn(Boolean.TRUE);
-
-        limiter.onRequestInitialized(requestData);
     }
 
     @Test
@@ -545,25 +560,6 @@ public class FilesDownloadLimiterTest {
         limiter.onRequestPerformed(requestData, null, new Exception("buh"));
 
         Mockito.verify(session, Mockito.never()).isAnonymous();
-    }
-
-    @Test
-    public void testOnRequestPerformed_sessionAnonymous_doNothing() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
-        Mockito.when(session.isAnonymous()).thenReturn(Boolean.TRUE);
-
-        limiter = new FilesDownloadLimiter(configViewFactory) {
-
-            @Override
-            protected FileAccess getLimit(User user, int contextId) {
-                fail();
-                return null;
-            }
-        };
-
-        limiter.onRequestPerformed(requestData, null, null);
-
-        Mockito.verify(session, Mockito.times(1)).isAnonymous();
     }
 
     @Test

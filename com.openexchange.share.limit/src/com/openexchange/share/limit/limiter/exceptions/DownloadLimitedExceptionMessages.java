@@ -47,71 +47,26 @@
  *
  */
 
-package com.openexchange.share.limit.exceptions.custom;
+package com.openexchange.share.limit.limiter.exceptions;
 
-import com.openexchange.exception.Category;
-import com.openexchange.exception.DisplayableOXExceptionCode;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link DownloadLimitedExceptionCode} Used for custom exceptions that should be (translated) shown to the user.
+ * 
+ * {@link DownloadLimitedExceptionMessages}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class DownloadLimitedExceptionCode implements DisplayableOXExceptionCode {
+public final class DownloadLimitedExceptionMessages implements LocalizableStrings {
 
-    public static final String PREFIX = "AN-GUEST-LIM";
-
-    private final Category category;
-    private final int detailNumber;
-    private final String message;
-    private final String displayMessage;
-
-    public DownloadLimitedExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
-        this.message = message;
-        this.displayMessage = displayMessage;
-        this.detailNumber = detailNumber;
-        this.category = category;
-    }
-
-    @Override
-    public Category getCategory() {
-        return category;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
-    }
-
-    @Override
-    public String getDisplayMessage() {
-        return displayMessage;
-    }
-
-    @Override
-    public int getNumber() {
-        return detailNumber;
-    }
-
-    @Override
-    public String getPrefix() {
-        return PREFIX;
-    }
-
-    @Override
-    public boolean equals(OXException e) {
-        return OXExceptionFactory.getInstance().equals(this, e);
-    }
+    public static final String DOWNLOAD_DENIED_EXCEPTION_MESSAGE = "Download denied because download limits have been exceeded. Please try again later.";
 
     /**
-     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
-     * @return The newly created {@link OXException} instance
+     * Initializes a new {@link DownloadLimitedExceptionMessages}.
      */
-    public OXException create() {
-        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    private DownloadLimitedExceptionMessages() {
+        super();
     }
+
 }

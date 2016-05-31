@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.limit.impl;
+package com.openexchange.share.limit.limiter;
 
 import java.sql.Connection;
 import java.util.Arrays;
@@ -61,13 +61,12 @@ import com.openexchange.ajax.requesthandler.ActionBoundDispatcherListener;
 import com.openexchange.ajax.requesthandler.DispatcherListener;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.share.limit.FileAccess;
-import com.openexchange.share.limit.exceptions.custom.DownloadLimitedExceptionCode;
-import com.openexchange.share.limit.exceptions.custom.DownloadLimitedExceptionMessages;
+import com.openexchange.share.limit.internal.ConnectionHelper;
+import com.openexchange.share.limit.limiter.exceptions.DownloadLimitedExceptionCode;
 import com.openexchange.share.limit.storage.RdbFileAccessStorage;
 import com.openexchange.share.limit.util.LimitConfig;
 import com.openexchange.tools.session.ServerSession;
@@ -92,12 +91,10 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     protected void throwIfExceeded(FileAccess limit, FileAccess used) throws OXException {
         if (FileAccess.isCountExceeded(limit, used)) {
-            String message = "User " + limit.getUserId() + " in context " + limit.getContextId() + " exceeded the defined count limit of " + limit.getCount() + ". The download will be denied.";
-            throw new DownloadLimitedExceptionCode(message, DownloadLimitedExceptionMessages.DOWNLOAD_DENIED_EXCEPTION_MESSAGE, Category.CATEGORY_ERROR, 1).create();
+            throw DownloadLimitedExceptionCode.COUNT_EXCEEDED.create(limit.getUserId(), limit.getContextId(), limit.getCount());
         }
         if (FileAccess.isSizeExceeded(limit, used)) {
-            String message = "User " + limit.getUserId() + " in context " + limit.getContextId() + " exceeded the defined size limit of " + limit.getSize() + " with " + used.getSize() + " bytes. The download will be denied.";
-            throw new DownloadLimitedExceptionCode(message, DownloadLimitedExceptionMessages.DOWNLOAD_DENIED_EXCEPTION_MESSAGE, Category.CATEGORY_ERROR, 1).create();
+            throw DownloadLimitedExceptionCode.LIMIT_EXCEEDED.create(limit.getUserId(), limit.getContextId(), limit.getSize(), used.getSize());
         }
     }
 
@@ -213,9 +210,13 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
         }
 
         if ("document".equalsIgnoreCase(requestData.getAction())) {
-            return "download".equals(requestData.getParameter("view"));
+            return "download".equalsIgnoreCase(requestData.getParameter("delivery")) || isTrue(requestData.getParameter("dl"));
         }
         return true;
+    }
+
+    protected static boolean isTrue(String value) {
+        return "1".equals(value) || "yes".equalsIgnoreCase(value) || Boolean.valueOf(value).booleanValue();
     }
 
     @Override
