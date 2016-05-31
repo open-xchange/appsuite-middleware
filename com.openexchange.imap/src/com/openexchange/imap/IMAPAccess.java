@@ -119,6 +119,7 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.iap.ConnectQuotaExceededException;
+import com.sun.mail.iap.StarttlsRequiredException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.JavaIMAPStore;
@@ -632,6 +633,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     OXException oxe = MimeMailException.handleMessagingException(e, config, session);
                     warnings.add(oxe);
                     throw oxe;
+                } else if (StarttlsRequiredException.class.isInstance(cause)) {
+                    OXException oxe = MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
+                    warnings.add(oxe);
+                    throw oxe;
                 }
                 warnings.add(MailExceptionCode.PING_FAILED.create(e, config.getServer(), config.getLogin(), e.getMessage()));
                 throw MimeMailException.handleMessagingException(e, config, session);
@@ -776,6 +781,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         if (null != map) {
                             map.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
                         }
+                    }
+                }
+                {
+                    Exception next = e.getNextException();
+                    if (StarttlsRequiredException.class.isInstance(next)) {
+                        throw MailExceptionCode.NON_SECURE_DENIED.create(server);
                     }
                 }
                 throw e;
@@ -1339,31 +1350,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
              */
-            if (forceSecure || config.getIMAPProperties().isEnableTls()) {
-                try {
-                    final String serverUrl = new StringBuilder(36).append(IDNA.toASCII(config.getServer())).append(':').append(config.getPort()).toString();
-                    final Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, false, config.getIMAPProperties());
-                    if (null != capabilities) {
-                        if (capabilities.containsKey("STARTTLS")) {
-                            imapProps.put("mail.imap.starttls.enable", "true");
-                        } else if (forceSecure) {
-                            // No SSL demanded and IMAP server seems not to support TLS
-                            throw MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
-                        }
-                    } else {
-                        if (forceSecure) {
-                            // No SSL demanded and IMAP server seems not to support TLS
-                            throw MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
-                        }
-                        imapProps.put("mail.imap.starttls.enable", "true");
-                    }
-                } catch (final IOException e) {
-                    if (forceSecure) {
-                        // No SSL demanded and IMAP server seems not to support TLS
-                        throw MailExceptionCode.NON_SECURE_DENIED.create(e, config.getServer());
-                    }
-                    imapProps.put("mail.imap.starttls.enable", "true");
-                }
+            if (forceSecure) {
+                imapProps.put("mail.imap.starttls.required", "true");
+            } else if (config.getIMAPProperties().isEnableTls()) {
+                imapProps.put("mail.imap.starttls.enable", "true");
             }
             /*
              * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create IMAP SSL sockets if TLS handshake says
