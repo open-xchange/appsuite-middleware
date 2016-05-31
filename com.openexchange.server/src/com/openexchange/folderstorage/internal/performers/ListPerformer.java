@@ -498,7 +498,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         return trimArray(subfolders);
     }
 
-    private void loadFoldersFromStorage(FolderStorage folderStorage, StorageParametersProvider paramsProvider, String treeId, String[] subfolderIds, boolean all, boolean checkOnly, UserizedFolder[] subfolders, int[] indexes) throws Exception {
+    void loadFoldersFromStorage(FolderStorage folderStorage, StorageParametersProvider paramsProvider, String treeId, String[] subfolderIds, boolean all, boolean checkOnly, UserizedFolder[] subfolders, int[] indexes) throws Exception {
         StorageParameters newParameters = paramsProvider.getStorageParameters();
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
         if (folderStorage.startTransaction(newParameters, false)) {
