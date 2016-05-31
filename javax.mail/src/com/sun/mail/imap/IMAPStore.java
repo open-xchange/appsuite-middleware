@@ -954,7 +954,7 @@ public class IMAPStore extends Store
 		p.capability();
 	    } else if (requireStartTLS) {
 		logger.fine("STARTTLS required but not supported by server");
-		throw new ProtocolException(
+		throw new com.sun.mail.iap.StarttlsRequiredException(
 		    "STARTTLS required but not supported by server");
 	    }
 	}
