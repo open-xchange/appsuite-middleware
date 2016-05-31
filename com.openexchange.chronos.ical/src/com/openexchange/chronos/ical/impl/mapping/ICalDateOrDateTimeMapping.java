@@ -55,13 +55,14 @@ import java.util.List;
 import java.util.TimeZone;
 
 import biweekly.component.ICalComponent;
-import biweekly.io.TimezoneInfo;
 import biweekly.property.DateOrDateTimeProperty;
 import biweekly.util.DateTimeComponents;
 import biweekly.util.ICalDate;
 
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link ICalDateOrDateTimeMapping}
@@ -113,7 +114,7 @@ public abstract class ICalDateOrDateTimeMapping<T extends ICalComponent, U> exte
 				/*
 				 * all-day event
 				 */
-				Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+				Calendar calendar = Calendar.getInstance(TimeZones.UTC);
 				calendar.setTime(value);
 				DateTimeComponents rawComponents = new DateTimeComponents(calendar.get(Calendar.YEAR), 1 + calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE));
 				property.setValue(new ICalDate(rawComponents, false));
@@ -121,29 +122,19 @@ public abstract class ICalDateOrDateTimeMapping<T extends ICalComponent, U> exte
 				/*
 				 * UTC timestamp
 				 */
-				Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-				calendar.setTime(value);
-				DateTimeComponents rawComponents = new DateTimeComponents(
-					calendar.get(Calendar.YEAR), 1 + calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE),
-					calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), true);
-				property.setValue(new ICalDate(rawComponents, true));
+				property.setValue(new ICalDate(getRawComponents(value, true), true));
 			} else if (null == timezone) {
 				/*
 				 * floating / local time
 				 */
-				Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-				calendar.setTime(value);
-				DateTimeComponents rawComponents = new DateTimeComponents(
-					calendar.get(Calendar.YEAR), 1 + calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE),
-					calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), false);
-				property.setValue(new ICalDate(rawComponents, true));
-				trackTimezone(parameters, property, null);
+				property.setValue(new ICalDate(getRawComponents(value, false), false));
+				trackTimeZone(parameters, property, null);
 			} else {
 				/*
 				 * date-time with timezone
 				 */
 				property.setValue(value, true);
-				trackTimezone(parameters, property, TimeZone.getTimeZone(timezone));
+				trackTimeZone(parameters, property, TimeZone.getTimeZone(timezone));
 			}
 		}
 	}
@@ -160,28 +151,67 @@ public abstract class ICalDateOrDateTimeMapping<T extends ICalComponent, U> exte
 			/*
 			 * "VALUE=DATE", assume all day 
 			 */
-			DateTimeComponents rawComponents = property.getValue().getRawComponents();
-			Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-			calendar.clear();
-			calendar.set(rawComponents.getYear(), rawComponents.getMonth() - 1, rawComponents.getDate());
-			setValue(object, calendar.getTime(), null, true);
+			setValue(object, getUTCDate(property.getValue().getRawComponents()), null, true);
 		} else {
 			/*
 			 * "VALUE=DATE-TIME", otherwise
 			 */
-			String timezone;
-			if (property.getValue().getRawComponents().isUtc()) {
-				timezone = "UTC";				
-			} else {
-				timezone = property.getParameter("TZID");
-				if (null == timezone && null != parameters) {
-					TimezoneInfo timezoneInfo = parameters.get(ICalParameters.TIMEZONE_INFO, TimezoneInfo.class);
-					TimeZone timeZone = timezoneInfo.getTimeZone(property);
-					timezone = timeZone.getID();
-				}
-			}
+			TimeZone timeZone = selectTimeZone(property, parameters, warnings);
+			String timezone = null != timeZone ? timeZone.getID() : null;
 			setValue(object, new Date(property.getValue().getTime()), timezone, false);
 		}
 	}
 	
+	/**
+	 * Gets the iCal raw components for a date. 
+	 * 
+	 * @param value The date to get the raw components for
+	 * @param utc <code>true</code> to assume UTC, <code>false</code>, otherwise
+	 * @return The date time components
+	 */
+	private static DateTimeComponents getRawComponents(Date value, boolean utc) {
+		Calendar calendar = Calendar.getInstance(TimeZones.UTC);
+		calendar.setTime(value);
+		return new DateTimeComponents(
+			calendar.get(Calendar.YEAR), 1 + calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE),
+			calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), utc);
+	}
+	
+	/**
+	 * Creates a UTC date instance with all time components set to 0.
+	 * 
+	 * @param rawComponents The raw iCal date components
+	 * @return The UTC date
+	 */
+	private static Date getUTCDate(DateTimeComponents rawComponents) {
+		return getUTCDate(rawComponents.getYear(), rawComponents.getMonth() - 1, rawComponents.getDate());
+	}
+	
+	/**
+	 * Creates a UTC date instance with all time components set to 0.
+	 * 
+	 * @param year The value used to set the YEAR calendar field
+	 * @param month The value used to set the MONTH calendar field (0-based)
+	 * @param date The value used to set the DAY_OF_MONTH calendar field
+	 * @return The UTC date
+	 */
+	private static Date getUTCDate(int year, int month, int date) {
+		Calendar calendar = Calendar.getInstance(TimeZones.UTC);
+		calendar.clear();
+		calendar.set(year, month, date);
+		return calendar.getTime();
+	}
+	
+    private static TimeZone selectTimeZone(biweekly.property.DateOrDateTimeProperty property, ICalParameters parameters, List<OXException> warnings) {
+		if (property.getValue().getRawComponents().isUtc()) {
+			return TimeZones.UTC;			
+		}
+		TimeZone parsedTimeZone = getTimeZone(parameters, property);
+		if (null == parsedTimeZone) {
+			String tzidParameter = property.getParameter("TZID");
+			return Strings.isNotEmpty(tzidParameter) ? TimeZoneUtils.selectTimeZone(tzidParameter, null) : null;
+		}
+		return TimeZoneUtils.selectTimeZone(parsedTimeZone, null);
+    }
+
 }

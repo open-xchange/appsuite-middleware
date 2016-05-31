@@ -59,6 +59,8 @@ public interface ICalParameters {
 	
 	String TIMEZONE_INFO = "TIMEZONE_INFO";
 	
+	String DEFAULT_TIMEZONE = "DEFAULT_TIMEZONE";
+	
 	String METHOD = "METHOD";
 
     /**

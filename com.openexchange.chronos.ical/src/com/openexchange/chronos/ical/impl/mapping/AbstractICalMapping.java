@@ -113,8 +113,16 @@ public abstract class AbstractICalMapping<T extends ICalComponent, U> implements
         }
         return false;
     }
+    
+    protected static TimeZone getTimeZone(ICalParameters parameters, ICalProperty property) {
+		TimezoneInfo timezoneInfo = parameters.get(ICalParameters.TIMEZONE_INFO, TimezoneInfo.class);
+		if (null != timezoneInfo) {
+			return timezoneInfo.getTimeZone(property);
+		}
+		return null;
+    }
 
-	protected void trackTimezone(ICalParameters parameters, ICalProperty property, TimeZone timeZone) {
+	protected static void trackTimeZone(ICalParameters parameters, ICalProperty property, TimeZone timeZone) {
 		TimezoneInfo tzInfo = parameters.get("TIMEZONE_INFO", TimezoneInfo.class);
 		if (null == tzInfo) {
 			tzInfo = new TimezoneInfo();
