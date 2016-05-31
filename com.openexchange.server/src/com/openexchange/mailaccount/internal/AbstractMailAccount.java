@@ -117,6 +117,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected Map<String, String> transportProperties;
     protected boolean mailStartTls;
     protected boolean transportStartTls;
+    protected String rootFolder;
 
     /**
      * Initializes a new {@link AbstractMailAccount}.
@@ -220,6 +221,11 @@ public abstract class AbstractMailAccount implements MailAccount {
     @Override
     public int getUserId() {
         return userId;
+    }
+
+    @Override
+    public String getRootFolder() {
+        return rootFolder;
     }
 
     /**
@@ -498,6 +504,15 @@ public abstract class AbstractMailAccount implements MailAccount {
     public void setTransportSecure(final boolean transportSecure) {
         transportServerUrl = null;
         this.transportSecure = transportSecure;
+    }
+
+    /**
+     * Sets the identifier for the root folder
+     *
+     * @param rootFolder The root folder identifier to set
+     */
+    public void setRootFolder(String rootFolder) {
+        this.rootFolder = rootFolder;
     }
 
     @Override

@@ -1144,7 +1144,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (null == con) {
             return getMailAccount(id, userId, contextId);
         }
-        AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
+        AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount(id);
         fillMailAccount(retval, id, userId, contextId, false, con);
         fillTransportAccount(retval, id, userId, contextId, con);
         return retval;
@@ -1164,7 +1164,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     public MailAccount getRawMailAccount(int id, int userId, int contextId) throws OXException {
         final Connection con = Database.get(contextId, false);
         try {
-            AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
+            AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount(id);
             fillMailAccount(retval, id, userId, contextId, true, con);
             fillTransportAccount(retval, id, userId, contextId, con);
             return retval;
@@ -2871,7 +2871,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (!result.next()) {
                 return new int[0];
             }
-            final CustomMailAccount tmp = new CustomMailAccount();
+            final CustomMailAccount tmp = new CustomMailAccount(-1);
             final TIntList ids = new TIntArrayList(6);
             do {
                 tmp.parseMailServerURL(result.getString(2));
@@ -2990,7 +2990,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             do {
                 final int id = (int) result.getLong(1);
                 if (null == excepts || !excepts.contains(id)) {
-                    final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
+                    final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount(id);
                     final String url = result.getString(2);
                     if (null != url) {
                         current.parseMailServerURL(url);
@@ -3143,7 +3143,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (null == encryptionService) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretEncryptionService.class.getName());
             }
-            final CustomMailAccount parser = new CustomMailAccount();
+            final CustomMailAccount parser = new CustomMailAccount(-1);
             // Iterate mail accounts
             while (rs.next()) {
                 final String password = rs.getString(2);

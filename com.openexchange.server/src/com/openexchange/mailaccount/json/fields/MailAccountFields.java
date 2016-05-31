@@ -151,4 +151,6 @@ public interface MailAccountFields {
     public static final String ADDRESSES = "addresses";
 
     public static final String META = "meta";
+
+    public static final String ROOT_FOLDER = "root_folder";
 }

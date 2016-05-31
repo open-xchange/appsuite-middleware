@@ -354,6 +354,11 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public boolean isTransportStartTls() {
                 return acc.isTransportStartTls();
             }
+
+            @Override
+            public String getRootFolder() {
+                return null;
+            }
         };
     }
 }

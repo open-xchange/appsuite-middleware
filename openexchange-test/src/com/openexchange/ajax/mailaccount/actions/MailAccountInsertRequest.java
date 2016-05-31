@@ -345,6 +345,11 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             public boolean isTransportStartTls() {
                 return acc.isTransportStartTls();
             }
+
+            @Override
+            public String getRootFolder() {
+                return null;
+            }
         };
     }
 }

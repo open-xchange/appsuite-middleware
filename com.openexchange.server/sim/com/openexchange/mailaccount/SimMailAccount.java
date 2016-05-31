@@ -397,14 +397,17 @@ public class SimMailAccount implements MailAccount {
 
     @Override
     public boolean isMailStartTls() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean isTransportStartTls() {
-        // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public String getRootFolder() {
+        return null;
     }
 
 }

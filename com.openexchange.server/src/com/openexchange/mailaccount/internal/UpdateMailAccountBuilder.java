@@ -403,4 +403,9 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object rootFolder() {
+        return null;
+    }
+
 }

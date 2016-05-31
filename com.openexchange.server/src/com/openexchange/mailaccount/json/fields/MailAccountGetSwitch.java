@@ -294,4 +294,10 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     public Object transportStartTls() {
         return Boolean.valueOf(account.isTransportStartTls());
     }
+
+    @Override
+    public Object rootFolder() {
+        return account.getRootFolder();
+    }
+
 }

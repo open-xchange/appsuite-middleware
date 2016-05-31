@@ -311,9 +311,16 @@ public interface MailAccount extends Account {
 
     /**
      * Checks if STARTTLS should be used to connect to mail server
-     * 
-     * @return
+     *
+     * @return <code>true</code> if STARTTLS should be used; otherwise <code>false</code>
      */
     public boolean isMailStartTls();
+
+    /**
+     * Gets the identifier of the account's root folder.
+     *
+     * @return The root folder identifier
+     */
+    public String getRootFolder();
 
 }
