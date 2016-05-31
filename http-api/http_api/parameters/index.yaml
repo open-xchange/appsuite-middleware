@@ -236,7 +236,7 @@ gblQueryParamMailColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "600,601". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).
+  description: A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).
   required: true
 gblQueryParamInfostoreFolder:
   name: folder
