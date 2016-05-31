@@ -117,7 +117,10 @@ import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.search.FileNameTerm;
+import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
+import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
@@ -844,10 +847,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             if (tryAddVersion) {
                 if (FileStorageCapabilityTools.supports(fileAccess, FileStorageCapability.FILE_VERSIONS)) {
                     String name = document.getFileName() != null ? document.getFileName() : document.getTitle();
-                    SearchIterator<File> it = fileAccess.search(name, Arrays.asList(Field.FOLDER_ID, Field.ID), document.getFolderId(), null, null, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                    SearchTerm<?> fileNameTerm = new FileNameTerm(name, true, false);
+                    SearchTerm<?> titleTerm = new TitleTerm(name, true, false);
+                    OrTerm searchTerm = new OrTerm(Arrays.asList(fileNameTerm, titleTerm));
+                    SearchIterator<File> it = search(Collections.singletonList(document.getFolderId()), searchTerm, Arrays.asList(Field.FOLDER_ID, Field.ID), null, null, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
                     if (it.hasNext()) {
                         File existing = it.next();
-                        final File metadata = fileAccess.getFileMetadata(existing.getFolderId(), existing.getId(), FileStorageFileAccess.CURRENT_VERSION);
+                        final DefaultFile metadata = new DefaultFile(getFileMetadata(existing.getId(), FileStorageFileAccess.CURRENT_VERSION));
                         metadata.setFolderId(sourceFolderId);
                         modifiedColumns.add(Field.ID);
 
