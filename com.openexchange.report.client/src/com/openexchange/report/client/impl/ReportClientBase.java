@@ -51,6 +51,7 @@ package com.openexchange.report.client.impl;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mockito.Mockito;
 import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -90,6 +92,8 @@ public class ReportClientBase extends AbstractJMXTools {
     protected static final String NO_OPTION_SELECTED_USING_THE_DEFAULT_DISPLAY_AND_SEND = "No option selected. Using the default (display and send)";
 
     protected static final String NO_REPORT_FOUND_MSG = "No report found. Please generate a report first by using parameter -e or -x or having a look into the CLT help (-h)!";
+
+    protected static final String NO_START_DATE_SET = "You can not run a report with an end date and no start date set!";
 
     private static final char OPT_SEND_ONLY_SHORT = 's';
 
@@ -143,6 +147,30 @@ public class ReportClientBase extends AbstractJMXTools {
 
     private static final String OPT_RUN_AND_DELIVER_OLD_REPORT_LONG = "run-and-deliver-old-report";
 
+    private static final char OPT_APPSUITE_SET_TIMEFRAME_START_SHORT = 'S';
+
+    private static final String OPT_APPSUITE_SET_TIMEFRAME_START_LONG = "timeframe-start";
+
+    private static final char OPT_APPSUITE_SET_TIMEFRAME_END_SHORT = 'E';
+
+    private static final String OPT_APPSUITE_SET_TIMEFRAME_END_LONG = "timeframe-end";
+
+    private static final char OPT_OXCS_SET_SINGLE_BRAND_SHORT = 'R';
+
+    private static final String OPT_OXCS_SET_SINGLE_BRAND_LONG = "single-tenant";
+
+    private static final char OPT_OXCS_SET_IGNORE_ADMINS_SHORT = 'A';
+
+    private static final String OPT_OXCS_SET_IGNORE_ADMINS_LONG = "ignore-admins";
+
+    private static final char OPT_OXCS_SET_DRIVE_METRICS_SHORT = 'D';
+
+    private static final String OPT_OXCS_SET_DRIVE_METRICS_LONG = "drive-metrics";
+
+    private static final char OPT_OXCS_SET_MAIL_METRICS_SHORT = 'M';
+
+    private static final String OPT_OXCS_SET_MAIL_METRICS_LONG = "mail-metrics";
+
     private CLIOption displayonly = null;
 
     private CLIOption sendonly = null;
@@ -165,12 +193,25 @@ public class ReportClientBase extends AbstractJMXTools {
 
     private CLIOption getAsReport = null;
 
+    private CLIOption timeframeStart = null;
+
+    private CLIOption timeframeEnd = null;
+
     // After changing to appsuite report as default -x does nothing. To be backward compatible -x will still be accepted.
     private CLIOption runAndDeliverAsReport = null;
 
     private CLIOption runAndDeliverOldReport = null;
 
     private CLIOption asReportType = null;
+
+    // OXCS options
+    private CLIOption singleTenant = null;
+
+    private CLIOption ignoreAdmins = null;
+
+    private CLIOption driveMetrics = null;
+
+    private CLIOption mailMetrics = null;
 
     public enum ReportMode {
         SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE
@@ -187,6 +228,11 @@ public class ReportClientBase extends AbstractJMXTools {
 
             ReportMode mode = ReportMode.NONE;
             boolean savereport = false;
+
+            SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+            boolean isCustomTimeframe = false;
+            Date timeframeStart = new Date();
+            Date timeframeEnd = new Date();
 
             if (null != parser.getOptionValue(this.savereport)) {
                 mode = ReportMode.SAVEONLY;
@@ -212,6 +258,42 @@ public class ReportClientBase extends AbstractJMXTools {
                 }
             }
 
+            // Does this report have a custom timeframe
+            if (parser.getOptionValue(this.timeframeStart) != null && mode != ReportMode.MULTIPLE) {
+                timeframeStart = formatter.parse((String) parser.getOptionValue(this.timeframeStart));
+                isCustomTimeframe = true;
+                if (parser.getOptionValue(this.timeframeEnd) != null) {
+                    timeframeEnd = formatter.parse((String) parser.getOptionValue(this.timeframeEnd));
+                }
+            }
+            
+            // If report-type is oxcs-extended, look for other report specific options
+            String reportType = (String) parser.getOptionValue(this.asReportType);
+            if (reportType == null) {
+                reportType = "default";
+            }
+            boolean isSingleTenant = false;
+            Long singeTenantId = 0l;
+            boolean isIgnoreAdmin = false;
+            boolean isShowDriveMetrics = false;
+            boolean isShowMailMetrics = false;
+            if (reportType.equals("oxcs-extended")) {
+                if (parser.getOptionValue(singleTenant) != null) {
+                    isSingleTenant = true;
+                    singeTenantId = Long.parseLong(((String) parser.getOptionValue(singleTenant)));
+                }
+                if (parser.getOptionValue(ignoreAdmins) != null) {
+                    isIgnoreAdmin = true;
+                }
+                if (parser.getOptionValue(driveMetrics) != null) {
+                    isShowDriveMetrics = true;
+                }
+                if (parser.getOptionValue(mailMetrics) != null) {
+                    isShowMailMetrics = true;
+                }
+            }
+           
+
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
             final MBeanServerConnection initConnection = initConnection(env);
 
@@ -225,21 +307,21 @@ public class ReportClientBase extends AbstractJMXTools {
                     System.out.println(ADVANCED_NOT_SUPPORTED_MSG);
                 }
                 if (null != parser.getOptionValue(this.runAsReport)) {
-                    runASReport(parser.getOptionValue(this.asReportType), initConnection);
-                    inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                    runASReport(reportType, initConnection, isCustomTimeframe, timeframeStart, timeframeEnd);
+                    inspectASReports(reportType, initConnection);
                     return;
                 } else if (null != parser.getOptionValue(this.inspectAsReports)) {
-                    inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                    inspectASReports(reportType, initConnection);
                     return;
                 } else if (null != parser.getOptionValue(this.cancelAsReports)) {
-                    cancelASReports(parser.getOptionValue(this.asReportType), initConnection);
+                    cancelASReports(reportType, initConnection);
                     return;
                 } else if (null != parser.getOptionValue(this.getAsReport)) {
-                    getASReport(parser.getOptionValue(this.asReportType), mode, savereport, initConnection);
+                    getASReport(reportType, mode, savereport, initConnection);
                     return;
                 } else {
                     // run and deliver AS report is no default
-                    runAndDeliverASReport(parser.getOptionValue(this.asReportType), mode, null != parser.getOptionValue(this.asReportType), savereport, initConnection);
+                    runAndDeliverASReport(reportType, mode, null != parser.getOptionValue(this.asReportType), savereport, initConnection, isCustomTimeframe, timeframeStart, timeframeEnd, isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
                     return;
                 }
             }
@@ -299,16 +381,24 @@ public class ReportClientBase extends AbstractJMXTools {
     }
 
     protected TransportHandler createTransportHandler() {
-        return new TransportHandler();
+        return Mockito.mock(TransportHandler.class);
+        // TODO QS-VS uncomment and remove mock, when done
+        //              return new TransportHandler();
+
     }
 
     @Override
     public void setFurtherOptions(final AdminParser parser) {
         this.sendonly = setShortLongOpt(parser, OPT_SEND_ONLY_SHORT, OPT_SEND_ONLY_LONG, "Send report without displaying it (Disables default)", false, NeededQuadState.notneeded);
+
         this.displayonly = setShortLongOpt(parser, OPT_DISPLAY_ONLY_SHORT, OPT_DISPLAY_ONLY_LONG, "Display report without sending it (Disables default)", false, NeededQuadState.notneeded);
+
         this.csv = setShortLongOpt(parser, OPT_CSV_SHORT, OPT_CSV_LONG, "Show output as CSV", false, NeededQuadState.notneeded);
+
         this.advancedreport = setShortLongOpt(parser, OPT_ADVANCEDREPORT_SHORT, OPT_ADVANCEDREPORT_LONG, "Run an advanced report (could take some time with a lot of contexts)", false, NeededQuadState.notneeded);
+
         this.savereport = setShortLongOpt(parser, OPT_SAVEREPORT_SHORT, OPT_SAVEREPORT_LONG, "Save the report as JSON String instead of sending it", false, NeededQuadState.notneeded);
+
         this.showcombi = setShortLongOpt(parser, OPT_SHOWCOMBINATION_SHORT, OPT_SHOWCOMBINATION_LONG, "Show access combination for bitmask", true, NeededQuadState.notneeded);
 
         this.runAsReport = setShortLongOpt(parser, OPT_APPSUITE_RUN_REPORT_SHORT, OPT_APPSUITE_RUN_REPORT_LONG, "Schedule an appsuite style report. Will print out the reports UUID or, if a report is being generated, the UUID of the pending report", false, NeededQuadState.notneeded);
@@ -324,6 +414,18 @@ public class ReportClientBase extends AbstractJMXTools {
         this.runAndDeliverAsReport = setShortLongOpt(parser, OPT_APPSUITE_RUN_AND_DELIVER_REPORT_SHORT, OPT_APPSUITE_RUN_AND_DELIVER_REPORT_LONG, "Create a new report and send it immediately. Note: This command will run until the report is finished, and that could take a while. Can (and should) be combined with the options for sending, displaying or saving the report ", false, NeededQuadState.notneeded);
 
         this.runAndDeliverOldReport = setShortLongOpt(parser, OPT_RUN_AND_DELIVER_OLD_REPORT_SHORT, OPT_RUN_AND_DELIVER_OLD_REPORT_LONG, "Run old report type. Used to have a backward compatibility.", false, NeededQuadState.notneeded);
+
+        this.timeframeStart = setShortLongOpt(parser, OPT_APPSUITE_SET_TIMEFRAME_START_SHORT, OPT_APPSUITE_SET_TIMEFRAME_START_LONG, "Set the starting date of the timeframe in format: dd.mm.yyyy", true, NeededQuadState.notneeded);
+
+        this.timeframeEnd = setShortLongOpt(parser, OPT_APPSUITE_SET_TIMEFRAME_END_SHORT, OPT_APPSUITE_SET_TIMEFRAME_END_LONG, "Set the ending date of the timeframe in format: dd.mm.yyyy. If start date is set and this parameter not, the current Date is taken as timeframe end.", true, NeededQuadState.notneeded);
+
+        this.singleTenant = setShortLongOpt(parser, OPT_OXCS_SET_SINGLE_BRAND_SHORT, OPT_OXCS_SET_SINGLE_BRAND_LONG, "Run the report for a single brand, identified by the sid of the brands admin. oxcs-extended report-type only", true, NeededQuadState.notneeded);
+
+        this.ignoreAdmins = setShortLongOpt(parser, OPT_OXCS_SET_IGNORE_ADMINS_SHORT, OPT_OXCS_SET_IGNORE_ADMINS_LONG, "Ignore admins and dont show users of that category. oxcs-extended report-type only", false, NeededQuadState.notneeded);
+
+        this.driveMetrics = setShortLongOpt(parser, OPT_OXCS_SET_DRIVE_METRICS_SHORT, OPT_OXCS_SET_DRIVE_METRICS_LONG, "Get drive metrics for each user. oxcs-extended report-type only", false, NeededQuadState.notneeded);
+
+        this.mailMetrics = setShortLongOpt(parser, OPT_OXCS_SET_MAIL_METRICS_SHORT, OPT_OXCS_SET_MAIL_METRICS_LONG, "Get mail metrics for each user. oxcs-extended report-type only", false, NeededQuadState.notneeded);
     }
 
     protected void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, Map<String, String> serverConfiguration, final String[] versions, final AdminParser parser, final ClientLoginCount clc, final ClientLoginCount clcYear) {
@@ -531,12 +633,25 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
-    private void runAndDeliverASReport(Object reportType, ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server) {
+    private void runAndDeliverASReport(Object reportType, ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, boolean isCustomTimerange, Date start, Date end, boolean isShowSingleTenant, Long singleTenantId, boolean isIgnoreAdmin, boolean isShowDriveMetrics, boolean isShowMailMetrics) {
         if (reportType == null) {
             reportType = "default";
         }
         try {
-            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
+            String uuid = "";
+            if (reportType.equals("oxcs-extended")) {
+                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(),  Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName()});
+                if (uuid == null && isShowSingleTenant) {
+                    System.out.println("No contexts for this brand or the sid is invalid. Report generation aborted.");
+                    return;
+                }
+            } else {
+                if (isCustomTimerange) {
+                    uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName() });
+                } else {
+                    uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
+                }
+            }
 
             // Start polling
             boolean done = false;
@@ -561,9 +676,10 @@ public class ReportClientBase extends AbstractJMXTools {
 
                 done = !found;
 
-                if (!done) {
-                    Thread.sleep(silent ? 60000 : 10000);
-                }
+                // TODO QS-VS uncomment when done
+//                if (!done) {
+//                    Thread.sleep(silent ? 60000 : 10000);
+//                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -659,12 +775,18 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
-    private void runASReport(Object reportType, MBeanServerConnection server) {
+    private void runASReport(Object reportType, MBeanServerConnection server, boolean isCustomTimerange, Date start, Date end) {
         if (reportType == null) {
             reportType = "default";
         }
         try {
-            System.out.println("\nRunning report with uuid: " + server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType }, new String[] { String.class.getCanonicalName() }));
+            String uuid = "";
+            if (isCustomTimerange) {
+                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName() });
+            } else {
+                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
+            }
+            System.out.println("\nRunning report with uuid: " + uuid);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);

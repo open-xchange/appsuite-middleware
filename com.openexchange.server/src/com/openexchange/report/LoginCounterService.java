@@ -49,13 +49,14 @@
 
 package com.openexchange.report;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.management.MBeanException;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.internal.LoginCounterMBean;
-
 
 /**
  * {@link LoginCounterMBean}
@@ -65,6 +66,7 @@ import com.openexchange.report.internal.LoginCounterMBean;
  */
 
 public interface LoginCounterService {
+
     /**
      * The key to receive the summed up number of logins.
      */
@@ -78,12 +80,12 @@ public interface LoginCounterService {
      *
      * @param startDate The start time
      * @param endDate The end time
-     * @param aggregate Set to <code>true</code> if you want to aggregate the sum of logins by users. 
-     * That means that the sum value does not contain duplicate logins caused by multiple clients of one user.
-     * This also means that the sum value likely does not match the addition of all single values.
+     * @param aggregate Set to <code>true</code> if you want to aggregate the sum of logins by users.
+     *            That means that the sum value does not contain duplicate logins caused by multiple clients of one user.
+     *            This also means that the sum value likely does not match the addition of all single values.
      * @param regex A regular expression to filter results by client identifiers. May be <code>null</code> to not filter clients at all.
      * @return The number of logins happened in specified range by client identifier.
-     * @throws OXException 
+     * @throws OXException
      * @throws MBeanException If an error occurs while counting
      */
     public Map<String, Integer> getNumberOfLogins(Date startDate, Date endDate, boolean aggregate, String regex) throws OXException;
@@ -98,9 +100,22 @@ public interface LoginCounterService {
      * @param client The client identifier
      * @return The time stamp of last login as UTC <code>long</code><br>
      *         (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
-     * @throws OXException 
+     * @throws OXException
      * @throws MBeanException If retrieval fails
      */
     List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws OXException;
+
+    /**
+     * Gets a list of all client logins in the given timeframe.
+     * 
+     * @param userId, the user ID
+     * @param contextId, the context ID
+     * @param startDate, the start date
+     * @param endDate, the end date
+     * @return, a map with the client as key and the last login date as long value, which is number of
+     *          milliseconds since January 1, 1970, 00:00:00 GMT
+     * @throws OXException
+     */
+    public HashMap<String, Long> getLastClientLogIns(int userId, int contextId, Date startDate, Date endDate) throws OXException;
 
 }

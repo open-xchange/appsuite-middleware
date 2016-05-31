@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite;
 
+import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.serialization.Report;
 
@@ -135,4 +136,36 @@ public interface ReportService {
      * @return {@link Report} that contains the status while abortion and the detailed error description.
      */
     Report getLastErrorReport(String reportType);
+
+    /**
+     * Run a report of the given reportType. Consider the given dates as timerange.
+     * Note that when a report of this type is already running, no new report is
+     * triggered and the uuid of the running report is returned instead.
+     * 
+     * @param reportType
+     * @param startDate, start of the timerange
+     * @param endDate, end of the timerange
+     *            @return, uuid of the report
+     * @throws Exception
+     */
+    String run(String reportType, Date startDate, Date endDate) throws OXException;
+
+    /**
+     * Run a report of the given report-type. The given parameters will be used to set the created
+     * reports parameters. Note that when a report of this type is already running, no new report is
+     * triggered and the uuid of the running report is returned instead.
+     * 
+     * @param reportType, the report-type to be run
+     * @param startDate, start of the timerange
+     * @param endDate, end of the timerange
+     * @param isCustomTimerange, is the timerange relevant
+     * @param isShowSingleTenant, is only one tenant relevant
+     * @param singleTenantId, the tenants id
+     * @param isIgnoreAdmin, should admins be ignored in the calculation
+     * @param isShowDriveMetrics, are drive metrics relevant
+     * @param isShowMailMetrics, are mail metrics relevant
+     *            @return, uuid of the report
+     * @throws Exception
+     */
+    String run(String reportType, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) throws OXException;
 }

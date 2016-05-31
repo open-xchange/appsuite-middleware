@@ -80,7 +80,7 @@ public class JMXReport {
      * Creates a JMX friendly version of the given report
      */
     public JMXReport(Report report) throws Exception {
-
+        //TODO: QS-VS erweitern um die neuen Parameter des Reports? Ja/Nein/Vielleicht
         this.uuid = report.getUUID();
         this.pendingTasks = report.getNumberOfPendingTasks();
         this.tasks = report.getNumberOfTasks();
@@ -98,6 +98,7 @@ public class JMXReport {
                 configs = new HashMap<String, Object>();
             }
             configs.put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled));
+            lData.put("configs", configs);
             
             JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(lData);
             jsonData.put("uuid", uuid);

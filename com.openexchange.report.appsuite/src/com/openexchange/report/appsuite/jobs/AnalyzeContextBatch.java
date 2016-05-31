@@ -66,6 +66,7 @@ import com.openexchange.report.appsuite.ReportUserHandler;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.internal.Services;
+import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.user.UserService;
 
 /**
@@ -83,6 +84,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
     private final String uuid;
     private String reportType;
     private List<Integer> contextIds;
+    private Report report;
 
     /**
      *
@@ -98,6 +100,23 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
         this.reportType = reportType;
         this.contextIds = chunk;
     }
+    
+    /**
+    *
+    * Initializes a new {@link AnalyzeContextBatch} with a report instead of just a report-type.
+    * This means, additional options are selected and stored in the report object.
+    *
+    * @param uuid The uuid of the report we're running
+    * @param reportType The type of report that is being run
+    * @param chunk a list of context IDs to analyze
+    */
+   public AnalyzeContextBatch(String uuid, Report report, List<Integer> chunk) {
+       super();
+       this.uuid = uuid;
+       this.report = report;
+       this.reportType = report.getType();
+       this.contextIds = chunk;
+   }
 
     @Override
     public Void call() throws Exception {
@@ -119,8 +138,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
                     contextReport = new ContextReport(uuid, reportType, ctx);
 
                     handleContext(contextReport);
-                    handleUsers(ctx, contextReport);
-                    handleGuests(ctx, contextReport);
+                    handleUsersGuestsLinks(ctx, contextReport);
 
                     reportService.finishContext(contextReport);
                 } catch (OXException oxException) {
@@ -149,6 +167,8 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
     }
 
     /**
+     * Run the report for the given context, to get/set all relevant data.
+     * 
      * @param contextReport
      * @throws OXException
      */
@@ -168,18 +188,33 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
      * @param contextReport
      * @throws OXException
      */
-    private void handleUsers(Context ctx, ContextReport contextReport) throws OXException {
+    private void handleUsersGuestsLinks(Context ctx, ContextReport contextReport) throws OXException {
         // Next, let's look at all the users in this context
         User[] loadUsers = loadUsers(ctx);
         for (User user : loadUsers) {
             UserReport userReport = new UserReport(uuid, reportType, ctx, user, contextReport);
+            // Are extended options available?
+            if (this.report != null) {
+                if (report.isAdminIgnore() && ctx.getMailadmin() == user.getId()) {
+                    continue;
+                }
+                userReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
+                userReport.setShowMailMetrics(this.report.isShowMailMetrics());
+                userReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
+                userReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+                //Add user to context
+                contextReport.getUserList().add(user.getId());
+                contextReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
+                contextReport.setShowMailMetrics(this.report.isShowMailMetrics());
+                contextReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
+                contextReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+            }
             // Run User Analyzers
             for (ReportUserHandler userHandler : Services.getUserHandlers()) {
                 if (userHandler.appliesTo(reportType)) {
                     userHandler.runUserReport(userReport);
                 }
             }
-
             // Compact User Analysis and add to context report
             for (UserReportCumulator cumulator : Services.getUserReportCumulators()) {
                 if (cumulator.appliesTo(reportType)) {
@@ -189,32 +224,12 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
         }
     }
 
-    /**
-     * Handles guests for the given context
-     *
-     * @param ctx
-     * @param contextReport
-     * @throws OXException
-     */
-    private void handleGuests(Context ctx, ContextReport contextReport) throws OXException {
-        User[] guests = loadGuests(ctx);
-        for (User guest : guests) {
-            UserReport guestReport = new UserReport(uuid, reportType, ctx, guest, contextReport);
-
-            for (UserReportCumulator cumulator : Services.getUserReportCumulators()) {
-                if (cumulator.appliesTo(reportType)) {
-                    cumulator.merge(guestReport, contextReport);
-                }
-            }
-        }
-    }
-
     protected User[] loadUsers(Context ctx) throws OXException {
-        return Services.getService(UserService.class).getUser(ctx);
+        return Services.getService(UserService.class).getUser(ctx, true, false);
     }
 
     protected User[] loadGuests(Context ctx) throws OXException {
-        return Services.getService(UserService.class).getUser(ctx, true, true);
+        return Services.getService(UserService.class).getUser(ctx, true, false);
     }
 
     protected Context loadContext(int contextId) throws OXException {

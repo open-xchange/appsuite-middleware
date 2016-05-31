@@ -49,9 +49,12 @@
 
 package com.openexchange.report.appsuite.internal;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +69,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -77,6 +81,7 @@ import com.openexchange.report.appsuite.ReportFinishingTouches;
 import com.openexchange.report.appsuite.ReportSystemHandler;
 import com.openexchange.report.appsuite.jobs.AnalyzeContextBatch;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.storage.DataloaderMySQL;
 
 /**
  * {@link LocalReportService}
@@ -86,6 +91,7 @@ import com.openexchange.report.appsuite.serialization.Report;
  */
 public class LocalReportService extends AbstractReportService {
 
+    //--------------------Class Attributes--------------------
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalReportService.class);
 
     /**
@@ -101,6 +107,7 @@ public class LocalReportService extends AbstractReportService {
 
     private final AtomicInteger threadNumber = new AtomicInteger();
 
+    //--------------------Public override methods--------------------
     /**
      * {@inheritDoc}
      */
@@ -122,57 +129,15 @@ public class LocalReportService extends AbstractReportService {
         // Load all contextIds
         List<Integer> allContextIds = Services.getService(ContextService.class).getAllContextIds();
 
-        // Set up the report instance
-        Report report = new Report(uuid, reportType, System.currentTimeMillis());
+        // Set up the report instance, default for one year timerange
+        Report report = new Report(uuid, reportType, System.currentTimeMillis(), null, null, false, false, null, false, false, false);
         report.setNumberOfTasks(allContextIds.size());
         pendingReports.put(uuid, report);
         cache.asMap().put(PENDING_REPORTS_PRE_KEY + reportType, pendingReports);
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
-        DatabaseService databaseService = Services.getService(DatabaseService.class);
-
-        ExecutorService newFixedThreadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
-
-            @Override
-            public Thread newThread(Runnable r) {
-                int threadNum;
-                while ((threadNum = threadNumber.incrementAndGet()) <= 0) {
-                    if (threadNumber.compareAndSet(threadNum, 1)) {
-                        threadNum = 1;
-                    } else {
-                        threadNum = threadNumber.incrementAndGet();
-                    }
-                }
-                return new Thread(r, getThreadName(threadNum));
-            }
-        });
-        EXECUTOR_SERVICE_REF.compareAndSet(null, newFixedThreadPool);
-        if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
-            EXECUTOR_SERVICE_REF.set(newFixedThreadPool);
-        }
-
-        List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
-        LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
-        while (!contextsToProcess.isEmpty()) {
-            Integer firstRemainingContext = contextsToProcess.get(0);
-            Integer[] contextsInSameSchema = ArrayUtils.toObject(databaseService.getContextsInSameSchema(firstRemainingContext.intValue()));
-
-            LOG.debug("For {} contexts a new thread will be spawned. Contained contexts: {}", contextsInSameSchema.length, Arrays.toString(contextsInSameSchema));
-            for (int i = 0; i < contextsInSameSchema.length; i++) {
-                contextsToProcess.remove(contextsInSameSchema[i]);
-            }
-            if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
-                break;
-            }
-            EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)));
-            LOG.info("{} assigned. {} contexts still to assign.", contextsInSameSchema.length, contextsToProcess.size());
-        }
-        LOG.info("All {} contexts assigned.", allContextIds.size());
+        setUpContextAnalyzer(uuid, reportType, allContextIds, null);
         return uuid;
-    }
-
-    private static String getThreadName(int threadNumber) {
-        return LocalReportService.class.getSimpleName() + "-" + threadNumber;
     }
 
     /**
@@ -268,36 +233,6 @@ public class LocalReportService extends AbstractReportService {
         }
     }
 
-    private void finishUpReport(String reportType, Map<String, Report> pendingReports, Report report) {
-        for (ReportSystemHandler handler : Services.getSystemHandlers()) {
-            if (handler.appliesTo(reportType)) {
-                handler.runSystemReport(report);
-            }
-        }
-
-        // And perform the finishing touches
-        for (ReportFinishingTouches handler : Services.getFinishingTouches()) {
-            if (handler.appliesTo(reportType)) {
-                handler.finish(report);
-            }
-        }
-
-        // We are done. Dump Report
-        report.setStopTime(System.currentTimeMillis());
-        report.getNamespace("configs").put("com.openexchange.report.appsuite.ReportService", this.getClass().getSimpleName());
-
-        Map<String, Report> finishedReports = cache.asMap().get(REPORTS_KEY);
-        if (finishedReports == null) {
-            finishedReports = new HashMap<>();
-        }
-        finishedReports.put(report.getType(), report);
-        cache.asMap().put(REPORTS_KEY, finishedReports);
-
-        // Clean up resources
-        pendingReports.remove(report.getUUID());
-        cache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType).remove(report.getUUID());
-    }
-
     @Override
     public void abortGeneration(String uuid, String reportType, String reason) {
         Map<String, Report> pendingReports = cache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType);
@@ -329,5 +264,155 @@ public class LocalReportService extends AbstractReportService {
             return null;
         }
         return errorReports.get(reportType);
+    }
+
+    @Override
+    public String run(String reportType, Date startDate, Date endDate) throws OXException {
+        Map<String, Report> pendingReports = cache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType);
+        if (pendingReports == null) {
+            pendingReports = new HashMap<>();
+        }
+
+        if (!pendingReports.isEmpty()) {
+            // Yes, there is a report running, so retrieve its UUID and return it.
+            return pendingReports.keySet().iterator().next();
+        }
+
+        // No, we have to set up a  new report
+        String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+
+        // Load all contextIds
+        List<Integer> allContextIds = Services.getService(ContextService.class).getAllContextIds();
+
+        // Set up the report instance
+        Report report = new Report(uuid, reportType, System.currentTimeMillis(), startDate, endDate, true, false, null, false, false, false);
+        report.setNumberOfTasks(allContextIds.size());
+        pendingReports.put(uuid, report);
+        cache.asMap().put(PENDING_REPORTS_PRE_KEY + reportType, pendingReports);
+
+        // Set up an AnalyzeContextBatch instance for every chunk of contextIds
+        setUpContextAnalyzer(uuid, reportType, allContextIds, null);
+        return uuid;
+    }
+
+    @Override
+    public String run(String reportType, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) throws OXException {
+        Map<String, Report> pendingReports = cache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType);
+        if (pendingReports == null) {
+            pendingReports = new HashMap<>();
+        }
+
+        if (!pendingReports.isEmpty()) {
+            // Yes, there is a report running, so retrieve its UUID and return it.
+            return pendingReports.keySet().iterator().next();
+        }
+
+        // No, we have to set up a  new report
+        String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+
+        // Load all contextIds
+        List<Integer> allContextIds = Services.getService(ContextService.class).getAllContextIds();
+
+        // Set up an AnalyzeContextBatch instance for every chunk of contextIds
+        if (isShowSingleTenant) {
+            DataloaderMySQL dataloaderMySQL = new DataloaderMySQL();
+            try {
+                allContextIds = dataloaderMySQL.getAllContextsForSid(singleTenantId);
+            } catch (SQLException e) {
+                // TODO QS-VS was soll hier ausgesagt werden?
+                e.printStackTrace();
+            }
+            if (allContextIds.isEmpty()) {
+                System.out.println("No contexts for this brand or the sid is invalid.");
+                return null;
+            }
+        }
+
+        // Set up the report instance
+        Report report = new Report(uuid, reportType, System.currentTimeMillis(), startDate, endDate, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
+        report.setNumberOfTasks(allContextIds.size());
+        pendingReports.put(uuid, report);
+        cache.asMap().put(PENDING_REPORTS_PRE_KEY + reportType, pendingReports);
+
+        setUpContextAnalyzer(uuid, reportType, allContextIds, report);
+        return uuid;
+    }
+
+    //--------------------Private helper methods--------------------
+    private void setUpContextAnalyzer(String uuid, String reportType, List<Integer> allContextIds, Report report) throws OXException {
+        DatabaseService databaseService = Services.getService(DatabaseService.class);
+        ExecutorService newFixedThreadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
+
+            @Override
+            public Thread newThread(Runnable r) {
+                int threadNum;
+                while ((threadNum = threadNumber.incrementAndGet()) <= 0) {
+                    if (threadNumber.compareAndSet(threadNum, 1)) {
+                        threadNum = 1;
+                    } else {
+                        threadNum = threadNumber.incrementAndGet();
+                    }
+                }
+                return new Thread(r, getThreadName(threadNum));
+            }
+        });
+        EXECUTOR_SERVICE_REF.compareAndSet(null, newFixedThreadPool);
+        if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
+            EXECUTOR_SERVICE_REF.set(newFixedThreadPool);
+        }
+        List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
+        LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
+        while (!contextsToProcess.isEmpty()) {
+            Integer firstRemainingContext = contextsToProcess.get(0);
+            Integer[] contextsInSameSchema = ArrayUtils.toObject(databaseService.getContextsInSameSchema(firstRemainingContext.intValue()));
+
+            LOG.debug("For {} contexts a new thread will be spawned. Contained contexts: {}", contextsInSameSchema.length, Arrays.toString(contextsInSameSchema));
+            for (int i = 0; i < contextsInSameSchema.length; i++) {
+                contextsToProcess.remove(contextsInSameSchema[i]);
+            }
+            if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
+                break;
+            }
+            if (report != null) {
+                EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, report, Arrays.asList(contextsInSameSchema)));
+            } else
+                EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)));
+            LOG.info("{} assigned. {} contexts still to assign.", contextsInSameSchema.length, contextsToProcess.size());
+        }
+        LOG.info("All {} contexts assigned.", allContextIds.size());
+    }
+
+    private static String getThreadName(int threadNumber) {
+        return LocalReportService.class.getSimpleName() + "-" + threadNumber;
+    }
+
+    private void finishUpReport(String reportType, Map<String, Report> pendingReports, Report report) {
+        for (ReportSystemHandler handler : Services.getSystemHandlers()) {
+            if (handler.appliesTo(reportType)) {
+                handler.runSystemReport(report);
+            }
+        }
+
+        // And perform the finishing touches
+        for (ReportFinishingTouches handler : Services.getFinishingTouches()) {
+            if (handler.appliesTo(reportType)) {
+                handler.finish(report);
+            }
+        }
+
+        // We are done. Dump Report
+        report.setStopTime(System.currentTimeMillis());
+        report.getNamespace("configs").put("com.openexchange.report.appsuite.ReportService", this.getClass().getSimpleName());
+
+        Map<String, Report> finishedReports = cache.asMap().get(REPORTS_KEY);
+        if (finishedReports == null) {
+            finishedReports = new HashMap<>();
+        }
+        finishedReports.put(report.getType(), report);
+        cache.asMap().put(REPORTS_KEY, finishedReports);
+
+        // Clean up resources
+        pendingReports.remove(report.getUUID());
+        cache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType).remove(report.getUUID());
     }
 }

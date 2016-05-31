@@ -59,6 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.ContextReportCumulator;
 import com.openexchange.report.appsuite.ReportContextHandler;
@@ -85,7 +86,7 @@ public class ReportActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContextService.class, UserService.class, CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class, DatabaseService.class };
+        return new Class[] { ContextService.class, UserService.class, CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class, DatabaseService.class, InfostoreInformationService.class };
     }
 
     @Override
