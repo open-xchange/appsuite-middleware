@@ -70,6 +70,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
@@ -123,8 +124,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         try {
             final Object data = requestData.getData();
             if (data instanceof JSONValue) {
-                final JSONValue jBody = (JSONValue) data;
-                return innerPerform(requestData, session, jBody);
+                return innerPerform(requestData, session, (JSONValue) data);
             }
             return innerPerform(requestData, session, null);
         } catch (final JSONException e) {
@@ -294,7 +294,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * Checks if specified {@link MailAccountDescription} is considered as default aka primary account.
      *
      * @param mailAccount The mail account description to examine
-     * @return <code>true</code> if specified {@link MailAccountDescription} is considered as defaul account; otherwise <code>false</code>
+     * @return <code>true</code> if specified {@link MailAccountDescription} is considered as default account; otherwise <code>false</code>
      */
     protected static boolean isDefaultMailAccount(final MailAccountDescription mailAccount) {
         return MailAccount.DEFAULT_ID == mailAccount.getId();
@@ -308,18 +308,31 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      */
     protected static List<Attribute> getColumns(final String colString) {
         List<Attribute> attributes = null;
-        if (colString != null && !"".equals(colString.trim())) {
+        if (Strings.isNotEmpty(colString)) {
+            if ("all".equalsIgnoreCase(colString)) {
+                // All columns
+                return Arrays.asList(Attribute.values());
+            }
+
             attributes = new LinkedList<Attribute>();
-            for (final String col : colString.split("\\s*,\\s*")) {
-                if ("".equals(col)) {
-                    continue;
+            for (String col : Strings.splitByComma(colString)) {
+                if (Strings.isNotEmpty(col)) {
+                    int id = parseInt(col);
+                    Attribute attr = id > 0 ? Attribute.getById(id) : null;
+                    if (null != attr) {
+                        attributes.add(attr);
+                    }
                 }
-                attributes.add(Attribute.getById(Integer.parseInt(col)));
             }
             return attributes;
         }
+
         // All columns
         return Arrays.asList(Attribute.values());
+    }
+
+    private static int parseInt(String col) {
+        return Tools.getUnsignedInteger(col);
     }
 
     /**
