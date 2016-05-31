@@ -315,6 +315,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 String basicShareUrl = folderLink.getShareURL(composeRequest.getRequest().getHostData());
                 shareReference = new ShareReference.Builder(session.getUserId(), session.getContextId())
                     .expiration(expirationDate)
+                    .password(password)
                     .folder(attachmentsControl.getFolder())
                     .items(attachmentsControl.getAttachments())
                     .shareUrl(basicShareUrl)

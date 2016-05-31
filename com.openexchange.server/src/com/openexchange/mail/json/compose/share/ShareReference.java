@@ -102,7 +102,7 @@ public class ShareReference {
             if (jReference.hasAndNotNull("expiration")) {
                 expiration = new Date(jReference.getLong("expiration"));
             }
-            return new ShareReference(jReference.getString("shareUrl"), items, parseItemFrom(jReference.getJSONObject("folder")), expiration, jReference.getInt("userId"), jReference.getInt("contextId"));
+            return new ShareReference(jReference.getString("shareUrl"), items, parseItemFrom(jReference.getJSONObject("folder")), expiration, jReference.optString("password", null), jReference.getInt("userId"), jReference.getInt("contextId"));
         } catch (java.util.zip.ZipException e) {
             // A GZIP format error has occurred or the compression method used is unsupported
             throw new IllegalArgumentException("Invalid reference string", e);
@@ -134,6 +134,7 @@ public class ShareReference {
         private List<Item> items;
         private String shareUrl;
         private Date expiration;
+        private String password;
 
         /**
          * Initializes a new {@link Builder}.
@@ -192,12 +193,23 @@ public class ShareReference {
         }
 
         /**
+         * Sets the password
+         *
+         * @param password The password
+         * @return This builder instance
+         */
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        /**
          * Creates the appropriate {@code ShareReference} instance according to this builder's arguments.
          *
          * @return The {@code ShareReference} instance
          */
         public ShareReference build() {
-            return new ShareReference(shareUrl, items, folder, expiration, userId, contextId);
+            return new ShareReference(shareUrl, items, folder, expiration, password, userId, contextId);
         }
     }
 
@@ -209,6 +221,7 @@ public class ShareReference {
     private final List<Item> items;
     private final String shareUrl;
     private final Date expiration;
+    private final String password;
 
     /**
      * Initializes a new {@link ShareReference}.
@@ -216,15 +229,18 @@ public class ShareReference {
      * @param shareUrl The associated share URL
      * @param items The shared files
      * @param folder The folder containing the files
+     * @param expiration The optional expiration date
+     * @param password The optional password
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    private ShareReference(String shareUrl, List<Item> items, Item folder, Date expiration, int userId, int contextId) {
+    ShareReference(String shareUrl, List<Item> items, Item folder, Date expiration, String password, int userId, int contextId) {
         super();
         this.shareUrl = shareUrl;
         this.items = items;
         this.folder = folder;
         this.expiration = expiration;
+        this.password = password;
         this.userId = userId;
         this.contextId = contextId;
     }
@@ -284,6 +300,15 @@ public class ShareReference {
     }
 
     /**
+     * Gets the optional password
+     *
+     * @return The password or <code>null</code>
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
      * Generates the reference string.
      *
      * @return The reference string
@@ -301,6 +326,12 @@ public class ShareReference {
                     jItems.put(new JSONObject(2).put("id", item.getId()).put("name", item.getName()));
                 }
                 jReference.put("items", jItems);
+            }
+            if (null != expiration) {
+                jReference.put("expiration", expiration.getTime());
+            }
+            if (null != password) {
+                jReference.put("password", password);
             }
             return compress(jReference.toString());
         } catch (RuntimeException e) {
@@ -326,6 +357,9 @@ public class ShareReference {
         }
         if (expiration != null) {
             sb.append("expiration=").append(expiration);
+        }
+        if (password != null) {
+            sb.append("password=").append(password);
         }
         sb.append("]");
         return sb.toString();
