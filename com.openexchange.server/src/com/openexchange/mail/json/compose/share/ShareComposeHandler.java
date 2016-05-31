@@ -312,13 +312,13 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             // Create share compose reference
             ShareReference shareReference;
             {
-                String basicShareUrl = folderLink.getShareURL(composeRequest.getRequest().getHostData());
+                String shareToken = folderLink.getGuest().getBaseToken();
                 shareReference = new ShareReference.Builder(session.getUserId(), session.getContextId())
                     .expiration(expirationDate)
                     .password(password)
                     .folder(attachmentsControl.getFolder())
                     .items(attachmentsControl.getAttachments())
-                    .shareUrl(basicShareUrl)
+                    .shareToken(shareToken)
                     .build();
             }
 

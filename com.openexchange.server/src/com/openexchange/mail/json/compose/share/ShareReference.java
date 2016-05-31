@@ -56,6 +56,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -74,6 +75,14 @@ import com.openexchange.java.Strings;
  * @since v7.8.2
  */
 public class ShareReference {
+
+    public static void main(String[] args) {
+        ShareReference sr = new ShareReference("mytokenyeah", Collections.singletonList(new Item("12", "foo")), new Item("myfolder", "myfolder"), null, null, 17, 1337);
+        String ref = sr.generateReferenceString();
+
+        sr = parseFromReferenceString(ref);
+        System.out.println(sr);
+    }
 
     /**
      * Parses a <code>ShareReference</code> from specified reference string.
@@ -102,7 +111,7 @@ public class ShareReference {
             if (jReference.hasAndNotNull("expiration")) {
                 expiration = new Date(jReference.getLong("expiration"));
             }
-            return new ShareReference(jReference.getString("shareUrl"), items, parseItemFrom(jReference.getJSONObject("folder")), expiration, jReference.optString("password", null), jReference.getInt("userId"), jReference.getInt("contextId"));
+            return new ShareReference(jReference.getString("shareToken"), items, parseItemFrom(jReference.getJSONObject("folder")), expiration, jReference.optString("password", null), jReference.getInt("userId"), jReference.getInt("contextId"));
         } catch (java.util.zip.ZipException e) {
             // A GZIP format error has occurred or the compression method used is unsupported
             throw new IllegalArgumentException("Invalid reference string", e);
@@ -132,7 +141,7 @@ public class ShareReference {
         private final int userId;
         private Item folder;
         private List<Item> items;
-        private String shareUrl;
+        private String shareToken;
         private Date expiration;
         private String password;
 
@@ -171,13 +180,13 @@ public class ShareReference {
         }
 
         /**
-         * Sets the share URL
+         * Sets the share token
          *
-         * @param shareUrl The share URL
+         * @param shareToken The share token
          * @return This builder instance
          */
-        public Builder shareUrl(String shareUrl) {
-            this.shareUrl = shareUrl;
+        public Builder shareToken(String shareToken) {
+            this.shareToken = shareToken;
             return this;
         }
 
@@ -209,7 +218,7 @@ public class ShareReference {
          * @return The {@code ShareReference} instance
          */
         public ShareReference build() {
-            return new ShareReference(shareUrl, items, folder, expiration, password, userId, contextId);
+            return new ShareReference(shareToken, items, folder, expiration, password, userId, contextId);
         }
     }
 
@@ -219,14 +228,14 @@ public class ShareReference {
     private final int userId;
     private final Item folder;
     private final List<Item> items;
-    private final String shareUrl;
+    private final String shareToken;
     private final Date expiration;
     private final String password;
 
     /**
      * Initializes a new {@link ShareReference}.
      *
-     * @param shareUrl The associated share URL
+     * @param shareToken The associated share token
      * @param items The shared files
      * @param folder The folder containing the files
      * @param expiration The optional expiration date
@@ -234,9 +243,9 @@ public class ShareReference {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    ShareReference(String shareUrl, List<Item> items, Item folder, Date expiration, String password, int userId, int contextId) {
+    ShareReference(String shareToken, List<Item> items, Item folder, Date expiration, String password, int userId, int contextId) {
         super();
-        this.shareUrl = shareUrl;
+        this.shareToken = shareToken;
         this.items = items;
         this.folder = folder;
         this.expiration = expiration;
@@ -282,12 +291,12 @@ public class ShareReference {
     }
 
     /**
-     * Gets the share URL
+     * Gets the share token
      *
-     * @return The share URL
+     * @return The share token
      */
-    public String getShareUrl() {
-        return shareUrl;
+    public String getShareToken() {
+        return shareToken;
     }
 
     /**
@@ -316,7 +325,7 @@ public class ShareReference {
     public String generateReferenceString() {
         try {
             JSONObject jReference = new JSONObject(8);
-            jReference.put("shareUrl", shareUrl);
+            jReference.put("shareToken", shareToken);
             jReference.put("contextId", contextId);
             jReference.put("userId", userId);
             jReference.put("folder", new JSONObject(2).put("id", folder.getId()).put("name", folder.getName()));
@@ -352,8 +361,8 @@ public class ShareReference {
         if (items != null) {
             sb.append("items=").append(items).append(", ");
         }
-        if (shareUrl != null) {
-            sb.append("shareUrl=").append(shareUrl).append(", ");
+        if (shareToken != null) {
+            sb.append("shareToken=").append(shareToken).append(", ");
         }
         if (expiration != null) {
             sb.append("expiration=").append(expiration);
