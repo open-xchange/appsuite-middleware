@@ -75,7 +75,7 @@ public final class RightsCache {
     }
 
     /**
-     * Gets cached <code>MYRIGHTS</code> command invoked on given IMAP folder
+     * Gets cached <code>MYRIGHTS</code> command invoked on given IMAP folder.
      *
      * @param f The IMAP folder
      * @param load Whether <code>MYRIGHTS</code> command should be invoked if no cache entry present or not
@@ -84,14 +84,14 @@ public final class RightsCache {
      * @return The cached rights or <code>null</code>
      * @throws MessagingException If <code>MYRIGHTS</code> command fails
      */
-    public static Rights getCachedRights(final IMAPFolder f, final boolean load, final Session session, final int accountId) throws MessagingException {
-        final RightsCacheEntry entry = new RightsCacheEntry(f.getFullName());
-        final SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
+    public static Rights getCachedRights(IMAPFolder f, boolean load, Session session, int accountId) throws MessagingException {
+        RightsCacheEntry entry = new RightsCacheEntry(f.getFullName());
+        SessionMailCache mailCache = SessionMailCache.getInstance(session, accountId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
             try {
                 entry.setValue(f.myRights());
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 // Hmm...
                 throw e;
             }
@@ -101,40 +101,46 @@ public final class RightsCache {
     }
 
     /**
-     * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder
+     * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder.
      *
      * @param f The IMAP folder
      * @param session The session providing the session-bound cache
      * @param accontId The account ID
      */
-    public static void removeCachedRights(final IMAPFolder f, final Session session, final int accontId) {
-        SessionMailCache.getInstance(session, accontId).remove(new RightsCacheEntry(f.getFullName()));
+    public static void removeCachedRights(IMAPFolder f, Session session, int accontId) {
+        SessionMailCache sessionMailCache = SessionMailCache.optInstance(session, accontId);
+        if (null != sessionMailCache) {
+            sessionMailCache.remove(new RightsCacheEntry(f.getFullName()));
+        }
     }
 
     /**
-     * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder
+     * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder.
      *
      * @param fullName The IMAP folder full name
      * @param session The session providing the session-bound cache
      * @param accontId The account ID
      */
-    public static void removeCachedRights(final String fullName, final Session session, final int accontId) {
-        SessionMailCache.getInstance(session, accontId).remove(new RightsCacheEntry(fullName));
+    public static void removeCachedRights(String fullName, Session session, int accontId) {
+        SessionMailCache sessionMailCache = SessionMailCache.optInstance(session, accontId);
+        if (null != sessionMailCache) {
+            sessionMailCache.remove(new RightsCacheEntry(fullName));
+        }
     }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     private static final class RightsCacheEntry implements SessionMailCacheEntry<Rights> {
 
         private final String fullname;
-
         private volatile Rights rights;
-
         private volatile CacheKey key;
 
-        public RightsCacheEntry(final String fullname) {
+        RightsCacheEntry(final String fullname) {
             this(fullname, null);
         }
 
-        public RightsCacheEntry(final String fullname, final Rights rights) {
+        RightsCacheEntry(final String fullname, final Rights rights) {
             super();
             this.fullname = fullname;
             this.rights = rights;
@@ -167,6 +173,6 @@ public final class RightsCache {
         public Class<Rights> getEntryClass() {
             return Rights.class;
         }
-    }
+    } // End of class RightsCacheEntry
 
 }
