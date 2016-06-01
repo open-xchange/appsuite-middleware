@@ -542,8 +542,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // files
         {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_FILES);
-            translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate));
-            vars.put(VARIABLE_EXPIRATION, translated);
+            vars.put(VARIABLE_FILES, translated);
 
             List<Item> items = shareReference.getItems();
             List<String> fileNames = new ArrayList<String>(items.size());
