@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-05-03 10:58+0100\n"
+"PO-Revision-Date: 2016-06-01 13:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1697,6 +1697,13 @@ msgstr "Gesendete Anhänge"
 msgid "Mail Drive"
 msgstr ""
 
+#. The name used for mail attachments that have no file name
+#. Fall-back name if a file has no valid name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
+msgid "Unnamed"
+msgstr "Unbenannt"
+
 #. Search in From sender.
 #. Search for mails sent from ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:67 /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:81
@@ -2462,6 +2469,11 @@ msgstr "Personen"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:78
 msgid "From/To"
 msgstr "Von/An"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+#, fuzzy
+msgid "in attachment file names"
+msgstr "in Anhangsdateinamen"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Context: Searching in tasks.
@@ -7324,6 +7336,11 @@ msgstr "Die Anhänge zu dieser E-Mail haben die Größenbeschränkung für Anhä
 msgid "You are not allowed to compose a message containing share links"
 msgstr "Sie haben keine Berechtigung, eine Nachricht mit Freigabe-Links zu erstellen"
 
+#. User wants to compose a share message but does not specify an expiration date which is required
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
+msgid "Please specify an expiration date in order to compose a message containing share links"
+msgstr "Bitte geben Sie ein Ablaufdatum an, um eine Nachricht mit Freigabe-Links zu erstellen"
+
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
@@ -7338,20 +7355,28 @@ msgstr "Meine freigegebenen E-Mail-Anhänge"
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
-msgid "The available attachments for this E-Mail can be accessed via the link:"
-msgstr "Die zur Verfügung stehenden Anhänge für diese E-Mail können über den Link aufgerufen werden:"
+msgid "The available attachments for this E-Mail can be accessed via the link %1$s"
+msgstr "Die zur Verfügung stehenden Anhänge für diese E-Mail können über den Link %1$s aufgerufen werden"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
+#. * The link will expire on 01/01/16 *
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
-msgid "The link will expire on #DATE#"
-msgstr "Der Link läuft ab am #DATE#"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
+msgid "The link will expire on %1$s"
+msgstr "Der Link läuft ab am %1$s"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the password for affected message's attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
-msgid "Please use the following password to access the attachments"
-msgstr "Bitte verwenden Sie das folgende Passwort zum Zugriff auf die Anhänge"
+msgid "Please use the following password to access the attachments %1$s"
+msgstr "Bitte verwenden Sie das folgende Passwort zum Zugriff auf die Anhänge %1$s"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the file names for affected message's attachments
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:94
+msgid "The following files are shared"
+msgstr "Die folgenden Dateien wurden freigegeben"
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -7997,6 +8022,10 @@ msgstr "Authentifizierung fehlgeschlagen für den Benutzernamen: %1$s"
 msgid "No session found for identifier: %1$s"
 msgstr "Kein Sitzung gefunden für die ID: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.limit/src/com/openexchange/share/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
+msgid "Download denied because download limits have been exceeded. Please try again later."
+msgstr "Herunterladen verweigert, weil Download-Limits überschritten wurden. Bitte versuchen Sie es später noch einmal."
+
 #. subject
 #. * $username has shared file "$filename" with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:65
@@ -8279,11 +8308,6 @@ msgstr "Objekt anzeigen"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:233
 msgid "View items"
 msgstr "Objekte anzeigen"
-
-#. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
-msgid "The link will expire on %1$s"
-msgstr "Der Link läuft ab am %1$s"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:239
@@ -11042,6 +11066,15 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The available attachments for this E-Mail can be accessed via the link:"
+#~ msgstr "Die zur Verfügung stehenden Anhänge für diese E-Mail können über den Link aufgerufen werden:"
+
+#~ msgid "The link will expire on #DATE#"
+#~ msgstr "Der Link läuft ab am #DATE#"
+
+#~ msgid "Please use the following password to access the attachments"
+#~ msgstr "Bitte verwenden Sie das folgende Passwort zum Zugriff auf die Anhänge"
 
 #~ msgid "The maximum allowed size of '%1$s' for an image in the signature is reached."
 #~ msgstr "Die maximal zulässige Größe von '%1$s' für ein Bild in der Signatur ist erreicht."
