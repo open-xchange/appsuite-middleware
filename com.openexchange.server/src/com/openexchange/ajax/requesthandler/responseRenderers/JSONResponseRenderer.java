@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,7 +63,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class JSONResponseRenderer extends AbstractResponseRenderer {
+public class JSONResponseRenderer implements ResponseRenderer {
 
     private static final String FORMAT = "json";
 
@@ -84,7 +85,7 @@ public class JSONResponseRenderer extends AbstractResponseRenderer {
     }
 
     @Override
-    public void actualWrite(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         final Response response = new Response(request.getSession());
         response.setData(result.getResultObject());
         response.setTimestamp(result.getTimestamp());

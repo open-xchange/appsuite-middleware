@@ -64,6 +64,7 @@ import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
@@ -74,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class APIResponseRenderer extends AbstractResponseRenderer {
+public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * The logger constant.
@@ -109,7 +110,7 @@ public class APIResponseRenderer extends AbstractResponseRenderer {
     }
 
     @Override
-    public void actualWrite(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
         final Response response = (Response) result.getResultObject();
         response.setContinuationUUID(result.getContinuationUuid());

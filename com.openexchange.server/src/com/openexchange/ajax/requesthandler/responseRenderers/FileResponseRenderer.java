@@ -91,7 +91,7 @@ import com.openexchange.tools.servlet.http.Tools;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileResponseRenderer extends AbstractResponseRenderer {
+public class FileResponseRenderer extends AbstractListenerCollectingResponseRenderer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
 

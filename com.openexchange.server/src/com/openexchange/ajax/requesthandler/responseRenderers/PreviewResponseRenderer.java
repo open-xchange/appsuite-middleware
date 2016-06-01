@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.preview.PreviewDocument;
 
@@ -67,7 +68,7 @@ import com.openexchange.preview.PreviewDocument;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PreviewResponseRenderer extends AbstractResponseRenderer {
+public class PreviewResponseRenderer implements ResponseRenderer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewResponseRenderer.class);
 
@@ -82,7 +83,7 @@ public class PreviewResponseRenderer extends AbstractResponseRenderer {
     }
 
     @Override
-    public void actualWrite(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
         //httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         try {
             final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();

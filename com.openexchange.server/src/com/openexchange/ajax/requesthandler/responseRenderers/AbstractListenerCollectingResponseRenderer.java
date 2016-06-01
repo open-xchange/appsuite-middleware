@@ -59,19 +59,19 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.HttpErrorCodeException;
-import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.ajax.requesthandler.ListenerCollectingResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.servlet.StatusKnowing;
 
 /**
- * {@link AbstractResponseRenderer}
+ * {@link AbstractListenerCollectingResponseRenderer}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public abstract class AbstractResponseRenderer implements ResponseRenderer {
+public abstract class AbstractListenerCollectingResponseRenderer implements ListenerCollectingResponseRenderer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractResponseRenderer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractListenerCollectingResponseRenderer.class);
 
     /** The queue for added listeners */
     protected final Queue<RenderListener> renderListenerRegistry;
@@ -80,29 +80,21 @@ public abstract class AbstractResponseRenderer implements ResponseRenderer {
     protected volatile boolean hasRenderListeners;
 
     /**
-     * Initializes a new {@link AbstractResponseRenderer}.
+     * Initializes a new {@link AbstractListenerCollectingResponseRenderer}.
      */
-    protected AbstractResponseRenderer() {
+    protected AbstractListenerCollectingResponseRenderer() {
         super();
         this.renderListenerRegistry = new ConcurrentLinkedQueue<RenderListener>();
     }
 
-    /**
-     * Adds specified listener to this response renderer.
-     *
-     * @param listener The listener to add
-     */
+    @Override
     public void addRenderListener(RenderListener listener) {
         if (null != listener && renderListenerRegistry.add(listener)) {
             hasRenderListeners = true;
         }
     }
 
-    /**
-     * Removes specified listener from this response renderer.
-     *
-     * @param listener The listener to remove
-     */
+    @Override
     public void removeRenderListener(RenderListener listener) {
         if (null != listener && renderListenerRegistry.remove(listener)) {
             hasRenderListeners = (false == renderListenerRegistry.isEmpty());

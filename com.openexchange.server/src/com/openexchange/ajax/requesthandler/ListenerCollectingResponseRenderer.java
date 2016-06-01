@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,63 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers;
+package com.openexchange.ajax.requesthandler;
 
-import java.io.IOException;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
 
 /**
- * {@link StringResponseRenderer}
+ * {@link ListenerCollectingResponseRenderer} - Extends {@link ResponseRenderer} by possibily to add/remove {@link RenderListener listeners}.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class StringResponseRenderer implements ResponseRenderer {
-
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(StringResponseRenderer.class);
+public interface ListenerCollectingResponseRenderer extends ResponseRenderer {
 
     /**
-     * Initializes a new {@link StringResponseRenderer}.
+     * Adds specified listener to this response renderer.
+     *
+     * @param listener The listener to add
      */
-    public StringResponseRenderer() {
-        super();
-    }
+    void addRenderListener(RenderListener listener);
 
-    @Override
-    public int getRanking() {
-        return Integer.MIN_VALUE;
-    }
-
-    @Override
-    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        return true;
-    }
-
-    @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
-        /*
-         * Write headers
-         */
-        final Map<String, String> headers = result.getHeaders();
-        for (final Map.Entry<String, String> entry : headers.entrySet()) {
-            resp.setHeader(entry.getKey(), entry.getValue());
-        }
-        /*
-         * Write output to OutputStream
-         */
-        try {
-            final Object resultObject = result.getResultObject();
-            resp.getWriter().write(resultObject == null ? "" : resultObject.toString());
-        } catch (final IOException e) {
-            LOG.error("", e);
-        } catch (final RuntimeException e) {
-            LOG.error("", e);
-        }
-    }
-
+    /**
+     * Removes specified listener from this response renderer.
+     *
+     * @param listener The listener to remove
+     */
+    void removeRenderListener(RenderListener listener);
 }
