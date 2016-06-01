@@ -6,6 +6,8 @@
     summary: Resolves a given share reference
     consumes:
       - application/json
+    produces:
+      - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: body
@@ -13,9 +15,7 @@
         description: A JSON object providing the share reference to resolve
         required: true
         schema:
-          type: object
-          items:
-            $ref: "#/definitions/ResolveShareReferenceElement"
+          $ref: "#/definitions/ResolveShareReferenceElement"
     responses:
       200:
         description: |

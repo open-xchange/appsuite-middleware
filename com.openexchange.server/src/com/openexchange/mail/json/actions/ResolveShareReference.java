@@ -188,7 +188,7 @@ public class ResolveShareReference extends AbstractMailAction {
                     JSONObject jFileObj = ((JSONObject) requestResult.getResultObject());
                     jFileObjs.put(jFileObj);
                 }
-                jReference.put("items", jFileObjs);
+                jReference.put("files", jFileObjs);
 
             } finally {
                 SearchIterators.close(searchIterator);

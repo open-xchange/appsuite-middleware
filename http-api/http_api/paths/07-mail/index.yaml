@@ -22,3 +22,4 @@ requests:
   - DeleteRequest.yaml
   - ClearRequest.yaml
   - ReceiptAckRequest.yaml
+  - ResolveShareReferenceRequest.yaml

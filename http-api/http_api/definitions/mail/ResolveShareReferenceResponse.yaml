@@ -13,9 +13,11 @@ properties:
         userId:
           type: integer
           description: The originator's user identifier.
-        items:
+        files:
           type: array
           description: The file meta data.
+          items:
+            $ref: ../infostore/InfoItemData.yaml
         password:
           type: string
           description: The optional password that protects the share link.
