@@ -90,9 +90,9 @@ public class DownloadHandlerActivator extends HousekeepingActivator {
          */
         final DownloadHandler handler = new DownloadHandler();
 
-        // only a local limiter for the DownloadHandler. Not required for the complete DispatcherListener framework 
+        // only a local limiter for DownloadHandlers FileResponseRenderer 
         final ShareDownloadLimiter shareDownloadLimiter = new ShareDownloadLimiter(getService(ConfigViewFactory.class));
-        handler.addDispatcherListener(shareDownloadLimiter);
+        handler.addRenderListener(shareDownloadLimiter);
 
         registerService(ShareHandler.class, handler, handler.getRanking());
     }

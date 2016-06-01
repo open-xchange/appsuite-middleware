@@ -61,8 +61,8 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.DispatcherListener;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
@@ -94,12 +94,12 @@ public class DownloadHandler extends HttpAuthShareHandler {
         this.renderer = new FileResponseRenderer();
     }
 
-    public void addDispatcherListener(DispatcherListener listener) {
-        this.renderer.addDispatcherListener(listener);
+    public void addRenderListener(RenderListener listener) {
+        this.renderer.addRenderListener(listener);
     }
 
-    public void removeDispatcherListener(DispatcherListener listener) {
-        this.renderer.removeDispatcherListener(listener);
+    public void removeRenderListener(RenderListener listener) {
+        this.renderer.removeRenderListener(listener);
     }
 
     @Override

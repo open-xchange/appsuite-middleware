@@ -49,70 +49,42 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
-import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.preview.PreviewDocument;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
 
 /**
- * {@link PreviewResponseRenderer} - The response renderer for {@link PreviewDocument}s.
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link RenderListener} - A listener which receives various call-backs before/after a {@link ResponseRenderer#write(AJAXRequestData, AJAXRequestResult, HttpServletRequest, HttpServletResponse)} processing.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.2
  */
-public class PreviewResponseRenderer extends AbstractResponseRenderer {
+public interface RenderListener {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewResponseRenderer.class);
+    /**
+     * Checks whether this render listener wants to receive call-backs for given request data.
+     *
+     * @param request The associated request data
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     */
+    boolean handles(AJAXRequestData request);
 
-    @Override
-    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        return (result.getResultObject() instanceof PreviewDocument);
-    }
+    /**
+     * Called before the write operation of the {@link ResponseRenderer} is invoked.
+     *
+     * @param request The associated request data
+     * @see ResponseRenderer#write(AJAXRequestData, AJAXRequestResult, HttpServletRequest, HttpServletResponse)
+     */
+    void onBeforeWrite(AJAXRequestData request);
 
-    @Override
-    public int getRanking() {
-        return 0;
-    }
-
-    @Override
-    public void actualWrite(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
-        //httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-        try {
-            final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
-
-            final JSONArray jsonArray = new JSONArray();
-            for (final String previewPage : previewDocument.getContent()) {
-                jsonArray.put(previewPage);
-            }
-
-            final JSONObject jsonObject = new JSONObject();
-            if (previewDocument.isMoreAvailable() != null) {
-                jsonObject.put("moreAvailable", previewDocument.isMoreAvailable());
-            }
-            jsonObject.put("document", jsonArray);
-
-            final Response response = new Response(request.getSession());
-            response.setTimestamp(result.getTimestamp());
-            response.setData(jsonObject);
-            response.setProperties(result.getResponseProperties());
-
-            final Collection<OXException> warnings = result.getWarnings();
-            if (warnings != null && !warnings.isEmpty()) {
-                for (final OXException warning : warnings) {
-                    response.addWarning(warning);
-                }
-            }
-            APIResponseRenderer.writeResponse(response, request.getAction(), httpReq, httpResp);
-        } catch (final JSONException e) {
-            LOG.error("JSON Error", e);
-        }
-    }
-
+    /**
+     * Called after the write operation of the {@link ResponseRenderer} is invoked.
+     *
+     * @param request The associated request data
+     * @param result The request result that has been created
+     * @see ResponseRenderer#write(AJAXRequestData, AJAXRequestResult, HttpServletRequest, HttpServletResponse)
+     */
+    void onAfterWrite(AJAXRequestData request, AJAXRequestResult result);
 }

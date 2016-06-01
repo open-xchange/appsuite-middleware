@@ -53,23 +53,55 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.DispatcherListener;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.limit.limiter.FilesDownloadLimiter;
 import com.openexchange.share.limit.limiter.GuestDownloadLimiter;
+import com.openexchange.share.limit.limiter.InfostoreDownloadLimiter;
 import com.openexchange.share.limit.limiter.exceptions.DownloadLimitedExceptionCode;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
- * {@link ShareDownloadLimiter} A {@link DispatcherListener} that is responsible for 'GET' actions in the 'share' module which are invoked directly via ShareHandler from the ShareServlet
+ * {@link ShareDownloadLimiter} - A {@link RenderListener} that is responsible for 'GET' actions in the 'share' module which are invoked directly via ShareHandler from the ShareServlet.
+ * <p>
+ * As this {@link RenderListener} is mostly similar to existing limiters it extends the {@link GuestDownloadLimiter} as it provides almost all functionality.
+ * 
+ * @see {@link FilesDownloadLimiter}
+ * @see {@link InfostoreDownloadLimiter}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class ShareDownloadLimiter extends GuestDownloadLimiter {
+public class ShareDownloadLimiter extends GuestDownloadLimiter implements RenderListener {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareDownloadLimiter.class);
 
     public ShareDownloadLimiter(ConfigViewFactory configView) {
         super(configView);
+    }
+
+    @Override
+    public boolean handles(AJAXRequestData request) {
+        return applicable(request);
+    }
+
+    @Override
+    public void onBeforeWrite(AJAXRequestData request) {
+        try {
+            super.onRequestInitialized(request);
+        } catch (OXException oxException) {
+            if (oxException.similarTo(DownloadLimitedExceptionCode.COUNT_EXCEEDED) || oxException.similarTo(DownloadLimitedExceptionCode.LIMIT_EXCEEDED)) {
+                throw new RateLimitedException("429 Download Limits Exceeded", 0);
+            }
+            LOG.warn("An unexpected error occurred while calling onRequestInitialized", oxException);
+        }
+    }
+
+    @Override
+    public void onAfterWrite(AJAXRequestData request, AJAXRequestResult result) {
+        super.onRequestPerformed(request, result, null);
     }
 
     @Override
@@ -80,17 +112,5 @@ public class ShareDownloadLimiter extends GuestDownloadLimiter {
     @Override
     public Set<String> getActions() {
         return new HashSet<>(Arrays.asList("GET"));
-    }
-
-    @Override
-    public void onRequestInitialized(AJAXRequestData requestData) throws OXException {
-        try {
-            super.onRequestInitialized(requestData);
-        } catch (OXException oxException) {
-            if (oxException.similarTo(DownloadLimitedExceptionCode.COUNT_EXCEEDED) || oxException.similarTo(DownloadLimitedExceptionCode.LIMIT_EXCEEDED)) {
-                throw new RateLimitedException("429 Download Limits Exceeded", 0);
-            }
-            throw oxException;
-        }
     }
 }
