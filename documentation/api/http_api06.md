@@ -19,6 +19,7 @@ The logic operator "not" has exactly one operand, the other logic operators can 
 array representing a nested search expression.
 
 Example:
+
 ```json
 {
   "filter":[
@@ -43,6 +44,7 @@ Example:
   ]
 }
 ```
+
 Represents the expression `field_name1 = value1 AND NOT field_name2 > value2`.
 ___
 

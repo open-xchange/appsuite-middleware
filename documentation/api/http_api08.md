@@ -2847,6 +2847,27 @@ or it may be a JSON array of account data objects if the parameter "module" spec
 |timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
 
 
+# ResolveShareReferenceElement
+|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|
+|reference|The reference string.|true|string||
+
+
+# ResolveShareReferenceResponse
+|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|
+|data||false|object||
+|error|The translated error message. Present in case of errors.|false|string||
+|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
+|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
+|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
+|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
+|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
+|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
+|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
+|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+
 # ResourceData
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|

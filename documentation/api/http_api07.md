@@ -1342,40 +1342,6 @@ filled (see [Error handling](#error-handling)).
 
 # Creates a contact.
 ```
-PUT /contacts?action=new
-```
-
-## Description
-
-Creates a new contact. This request cannot add contact images. Therefor it
-is necessary to use the `POST` method.
-
-
-## Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|BodyParameter|body|A JSON object containing the contact's data. The field id is not included.|true|ContactData||
-
-
-## Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object containing the ID of the newly created contact. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|ContactUpdateResponse|
-
-
-## Consumes
-
-* application/json
-
-## Tags
-
-* contacts
-
-# Creates a contact.
-```
 POST /contacts?action=new
 ```
 
@@ -1413,6 +1379,40 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 
 * contacts
 
+# Creates a contact.
+```
+PUT /contacts?action=new
+```
+
+## Description
+
+Creates a new contact. This request cannot add contact images. Therefor it
+is necessary to use the `POST` method.
+
+
+## Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|BodyParameter|body|A JSON object containing the contact's data. The field id is not included.|true|ContactData||
+
+
+## Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object containing the ID of the newly created contact. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|ContactUpdateResponse|
+
+
+## Consumes
+
+* application/json
+
+## Tags
+
+* contacts
+
 # Search for contacts.
 ```
 PUT /contacts?action=search
@@ -1436,43 +1436,6 @@ PUT /contacts?action=search
 information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
 responsible fields in the response are filled (see [Error handling](#error-handling)).
 |ContactsResponse|
-
-
-## Consumes
-
-* application/json
-
-## Tags
-
-* contacts
-
-# Updates a contact.
-```
-PUT /contacts?action=update
-```
-
-## Description
-
-Updates a contact's data. This request cannot change or add contact images. Therefore it
-is necessary to use the `POST` method.
-
-
-## Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|folder|Object ID of the folder who contains the contacts.|true|string||
-|QueryParameter|id|Object ID of the contact that shall be updated.|true|string||
-|QueryParameter|timestamp|Timestamp of the updated contact. If the contact was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
-|BodyParameter|body|A JSON object containing the contact's data. Only modified fields must be specified. To remove some contact image send the image attribute set to null.|true|ContactData||
-
-
-## Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object with a timestamp. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|ContactUpdateResponse|
 
 
 ## Consumes
@@ -1520,6 +1483,43 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 ## Produces
 
 * text/html
+
+## Tags
+
+* contacts
+
+# Updates a contact.
+```
+PUT /contacts?action=update
+```
+
+## Description
+
+Updates a contact's data. This request cannot change or add contact images. Therefore it
+is necessary to use the `POST` method.
+
+
+## Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|folder|Object ID of the folder who contains the contacts.|true|string||
+|QueryParameter|id|Object ID of the contact that shall be updated.|true|string||
+|QueryParameter|timestamp|Timestamp of the updated contact. If the contact was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
+|BodyParameter|body|A JSON object containing the contact's data. Only modified fields must be specified. To remove some contact image send the image attribute set to null.|true|ContactData||
+
+
+## Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object with a timestamp. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|ContactUpdateResponse|
+
+
+## Consumes
+
+* application/json
 
 ## Tags
 
@@ -3268,40 +3268,6 @@ response are filled (see [Error handling](#error-handling)).
 
 # Copies an infoitem.
 ```
-PUT /infostore?action=copy
-```
-
-## Description
-
-This request cannot change or add files. Therefore it is necessary to use the `POST` method.
-
-
-## Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|id|Object ID of the infoitem that shall be copied.|true|string||
-|BodyParameter|body|A JSON object containing the modified fields of the destination infoitem. The field `id` must not be present.|true|InfoItemData||
-
-
-## Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|InfoItemUpdateResponse|
-
-
-## Consumes
-
-* application/json
-
-## Tags
-
-* infostore
-
-# Copies an infoitem.
-```
 POST /infostore?action=copy
 ```
 
@@ -3335,6 +3301,40 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 ## Produces
 
 * text/html
+
+## Tags
+
+* infostore
+
+# Copies an infoitem.
+```
+PUT /infostore?action=copy
+```
+
+## Description
+
+This request cannot change or add files. Therefore it is necessary to use the `POST` method.
+
+
+## Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|id|Object ID of the infoitem that shall be copied.|true|string||
+|BodyParameter|body|A JSON object containing the modified fields of the destination infoitem. The field `id` must not be present.|true|InfoItemData||
+
+
+## Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|InfoItemUpdateResponse|
+
+
+## Consumes
+
+* application/json
 
 ## Tags
 
@@ -3554,42 +3554,6 @@ filled (see [Error handling](#error-handling)).
 
 # Creates an infoitem.
 ```
-PUT /infostore?action=new
-```
-
-## Description
-
-Creates a new contact. This request cannot add a file to the infoitem. Therefor it
-is necessary to use the `POST` method.
-
-
-## Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|id|Object ID of the infoitem that shall be updated.|true|string||
-|QueryParameter|timestamp|Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
-|BodyParameter|body|A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.|true|InfoItemBody array||
-
-
-## Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|InfoItemUpdateResponse|
-
-
-## Consumes
-
-* application/json
-
-## Tags
-
-* infostore
-
-# Creates an infoitem.
-```
 POST /infostore?action=new
 ```
 
@@ -3622,6 +3586,42 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 ## Produces
 
 * text/html
+
+## Tags
+
+* infostore
+
+# Creates an infoitem.
+```
+PUT /infostore?action=new
+```
+
+## Description
+
+Creates a new contact. This request cannot add a file to the infoitem. Therefor it
+is necessary to use the `POST` method.
+
+
+## Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|id|Object ID of the infoitem that shall be updated.|true|string||
+|QueryParameter|timestamp|Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
+|BodyParameter|body|A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.|true|InfoItemBody array||
+
+
+## Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|InfoItemUpdateResponse|
+
+
+## Consumes
+
+* application/json
 
 ## Tags
 
@@ -3809,42 +3809,6 @@ GET /infostore?action=unlock
 
 # Updates an infoitem.
 ```
-PUT /infostore?action=update
-```
-
-## Description
-
-Updates an infoitem's data. This request cannot change or add files. Therefore it
-is necessary to use the `POST` method.
-
-
-## Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|id|Object ID of the infoitem that shall be updated.|true|string||
-|QueryParameter|timestamp|Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
-|BodyParameter|body|A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.|true|InfoItemBody array||
-
-
-## Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object with the object ID of the updated infoitem. In case of errors the responsible fields in the response are
-filled (see [Error handling](#error-handling)).
-|InfoItemUpdateResponse|
-
-
-## Consumes
-
-* application/json
-
-## Tags
-
-* infostore
-
-# Updates an infoitem.
-```
 POST /infostore?action=update
 ```
 
@@ -3880,6 +3844,42 @@ must be placed in a file field named `file` (see also [File uploads](#file-uploa
 ## Produces
 
 * text/html
+
+## Tags
+
+* infostore
+
+# Updates an infoitem.
+```
+PUT /infostore?action=update
+```
+
+## Description
+
+Updates an infoitem's data. This request cannot change or add files. Therefore it
+is necessary to use the `POST` method.
+
+
+## Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|id|Object ID of the infoitem that shall be updated.|true|string||
+|QueryParameter|timestamp|Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.|true|integer (int64)||
+|BodyParameter|body|A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.|true|InfoItemBody array||
+
+
+## Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object with the object ID of the updated infoitem. In case of errors the responsible fields in the response are
+filled (see [Error handling](#error-handling)).
+|InfoItemUpdateResponse|
+
+
+## Consumes
+
+* application/json
 
 ## Tags
 
@@ -4607,7 +4607,7 @@ GET /mail?action=all
 |----|----|----|----|----|----|
 |QueryParameter|session|A session ID previously obtained from the login module.|true|string||
 |QueryParameter|folder|Object ID of the folder who contains the mails.|true|string||
-|QueryParameter|columns|A comma-separated list of columns to return, like "600,601". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
+|QueryParameter|columns|A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
 |QueryParameter|sort|The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified.|false|string||
 |QueryParameter|order|"asc" if the response entities should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.|false|string||
 |QueryParameter|left_hand_limit|A positive integer number to specify the "left-hand" limit of the range to return.|false|integer||
@@ -4981,7 +4981,7 @@ PUT /mail?action=list
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
 |QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|columns|A comma-separated list of columns to return, like "600,601". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
+|QueryParameter|columns|A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
 |QueryParameter|headers|(preliminary) A comma-separated list of header names. Each name requests denoted header from each mail.|false|string||
 |BodyParameter|body|A JSON array of JSON objects with the id and folder of the requested mails.|true|MailListElement array||
 
@@ -4998,41 +4998,6 @@ response are filled (see [Error handling](#error-handling)).'
 ## Consumes
 
 * application/json
-
-## Tags
-
-* mail
-
-# Sends or saves a mail as MIME data block (RFC822) (**available since SP5**).
-```
-PUT /mail?action=new
-```
-
-## Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
-|QueryParameter|folder|In case the mail should not be sent out, but saved in a specific folder, the "folder" parameter
-can be used. If the mail should be sent out to the recipient, the "folder" parameter must not be
-included and the mail is stored in the folder "Sent Items".
-|false|string||
-|QueryParameter|flags|In case the mail should be stored with status "read" (e.g. mail has been read already in the client
-inbox), the parameter "flags" has to be included. If no `folder` parameter is specified, this parameter
-must not be included. For information about mail flags see [Mail data](#/definitions/MailData) model.
-|false|string||
-
-
-## Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|A JSON object containing the folder ID and the object ID of the mail. In case of errors the
-responsible fields in the response are filled (see [Error handling](#error-handling)).
-|MailDestinationResponse|
-
-
-## Consumes
-
-* text/plain
 
 ## Tags
 
@@ -5088,6 +5053,41 @@ message (referenced by `msgref` field) being deleted after successful transport)
 ## Produces
 
 * text/html
+
+## Tags
+
+* mail
+
+# Sends or saves a mail as MIME data block (RFC822) (**available since SP5**).
+```
+PUT /mail?action=new
+```
+
+## Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|QueryParameter|folder|In case the mail should not be sent out, but saved in a specific folder, the "folder" parameter
+can be used. If the mail should be sent out to the recipient, the "folder" parameter must not be
+included and the mail is stored in the folder "Sent Items".
+|false|string||
+|QueryParameter|flags|In case the mail should be stored with status "read" (e.g. mail has been read already in the client
+inbox), the parameter "flags" has to be included. If no `folder` parameter is specified, this parameter
+must not be included. For information about mail flags see [Mail data](#/definitions/MailData) model.
+|false|string||
+
+
+## Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|A JSON object containing the folder ID and the object ID of the mail. In case of errors the
+responsible fields in the response are filled (see [Error handling](#error-handling)).
+|MailDestinationResponse|
+
+
+## Consumes
+
+* text/plain
 
 ## Tags
 
@@ -5189,6 +5189,38 @@ response are filled (see [Error handling](#error-handling)).
 
 * mail
 
+# Resolves a given share reference
+```
+PUT /mail?action=resolve_share_reference
+```
+
+## Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|session|A session ID previously obtained from the login module.|true|string||
+|BodyParameter|body|A JSON object providing the share reference to resolve|true|ResolveShareReferenceElement||
+
+
+## Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|'The JSON representation for the resolved share reference. In case of errors the responsible fields in the
+response are filled (see [Error handling](#error-handling)).'
+|ResolveShareReferenceResponse|
+
+
+## Consumes
+
+* application/json
+
+## Produces
+
+* application/json
+
+## Tags
+
+* mail
+
 # Searches for mails.
 ```
 PUT /mail?action=search
@@ -5199,7 +5231,7 @@ PUT /mail?action=search
 |----|----|----|----|----|----|
 |QueryParameter|session|A session ID previously obtained from the login module.|true|string||
 |QueryParameter|folder|Object ID of the folder who contains the mails.|true|string||
-|QueryParameter|columns|A comma-separated list of columns to return, like "600,601". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
+|QueryParameter|columns|A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
 |QueryParameter|sort|The identifier of a column which determines the sort order of the response or the string “thread” to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified. Note: Applies only to root-level messages.|false|string||
 |QueryParameter|order|"asc" if the response entires should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified. Note: Applies only to root-level messages.|false|string||
 |BodyParameter|body|A JSON object describing the search term as introducted in [Advanced search](#advanced-search). Example:
@@ -5236,7 +5268,7 @@ GET /mail?action=threadedAll
 |----|----|----|----|----|----|
 |QueryParameter|session|A session ID previously obtained from the login module.|true|string||
 |QueryParameter|folder|Object ID of the folder who contains the mails.|true|string||
-|QueryParameter|columns|A comma-separated list of columns to return, like "600,601". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
+|QueryParameter|columns|A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
 |QueryParameter|sort|The identifier of a column which determines the sort order of the response or the string “thread” to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified. Note: Applies only to root-level messages.|false|string||
 |QueryParameter|order|"asc" if the response entires should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified. Note: Applies only to root-level messages.|false|string||
 |QueryParameter|includeSent|A boolean value to signal that conversations also include messages taken from special "sent" aka "sent items" folder.|false|boolean||
@@ -5318,7 +5350,7 @@ GET /mail?action=updates
 |----|----|----|----|----|----|
 |QueryParameter|session|A session ID previously obtained from the login module.|true|string||
 |QueryParameter|folder|Object ID of the folder who contains the mails.|true|string||
-|QueryParameter|columns|A comma-separated list of columns to return, like "600,601". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
+|QueryParameter|columns|A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).|true|string||
 
 
 ## Responses

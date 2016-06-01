@@ -6,6 +6,7 @@ classes: no-affix
 The client accesses the server through HTTP GET, POST and PUT requests. HTTP cookies are used for authentication and must therefore be processed and sent back by the client as specified by [RFC 6265](http://tools.ietf.org/html/rfc6265). The HTTP API is accessible at URIs starting with `/ajax`. Each server module has a unique name and its own sub-namespace with that name below `/ajax`, e. g. all access to the module "tasks" is via URIs starting with `/ajax/tasks`.
 
 Text encoding is always UTF-8. Data is sent from the server to the client as text/javascript and interpreted by the client to obtain an ECMAScript object. The HTTP API uses only a small subset of the ECMAScript syntax. This subset is roughly described by the following BNF:
+
 ```
 Value   ::= "null" | Boolean | Number | String | Array | Object
 Boolean ::= "true" | "false"
@@ -15,6 +16,7 @@ Array   ::= "[]" | "[" Value ("," Value)* "]"
 Object  ::= "{}" | "{" Name ":" Value ("," Name ":" Value)* "}"
 Name    ::= [A-Fa-f][0-9A-Fa-f_]*
 ```
+
 Numbers are the standard signed integer and floating point numbers. Strings can contain any character, except double quotes, newlines and backslashes, which must be escaped by a backslash. Control characters in strings (other than newline) are not supported. Whitespace is allowed between any two tokens. See [JSON](http://json.org/) and [ECMA 262, 3rd edition](http://www.ecma-international.org/publications/standards/Ecma-262.htm) for the formal definition.
 
 The response body consists of an object, which contains up to four fields as described in Response body. The field data contains the actual payload which is described in following chapters. The fields `timestamp`, `error` and `error_params` are present when data objects are returned, if an error occurred and if the error message contains conversion specifiers, respectively. Following sections describe the contents of these fields in more detail.
@@ -104,6 +106,7 @@ Since the upload is performed directly by the browser and is not an Ajax call, t
   </head>
 </html>
 ```
+
 The placeholders `{json}` is replaced by the response with the timestamp that would be expected from the corresponding PUT method. The placeholder `action` is replaced by the value of the parameter `action` of the request (except for the import bundle, which is named "import" instead of the action name for legacy purposes). The content-type of the answer is `text/html`.
 
 **Non-browser clients don't need to interpret HTML or JavaScript.** The JSON data can be recognized by the outermost `({` and `})`, where the inner braces are part of the JSON value. For example, the regular expression `\((\{.*\})\)` captures the entire JSON value in its first capturing group.
