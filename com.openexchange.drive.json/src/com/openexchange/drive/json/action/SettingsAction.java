@@ -110,6 +110,7 @@ public class SettingsAction extends AbstractDriveAction {
                 jsonObject.put("serverVersion", settings.getServerVersion());
                 jsonObject.put("supportedApiVersion", settings.getSupportedApiVersion());
                 jsonObject.put("minApiVersion", settings.getMinApiVersion());
+                jsonObject.putOpt("minUploadChunk", settings.getMinUploadChunk());
                 jsonObject.put("localizedFolderNames", settings.getLocalizedFolders());
                 jsonObject.put("capabilities", settings.getCapabilities());
             } catch (JSONException e) {
