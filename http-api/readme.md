@@ -148,6 +148,7 @@ a response or request body model.
 
 Next to this the information of a documentation can be outsourced in an _index.yaml_ file of an _info_ folder at
 the base level (next to _paths_, ...). This file contains general information or an overview description like:
+
 ```yaml
 title: OX HTTP API
 description: The overview.
