@@ -58,7 +58,6 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -392,7 +391,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] digest = md5.digest(Streams.stream2bytes(getStream()));
-            return new BigInteger(1, digest).toString(16);
+            return jonelo.jacksum.util.Service.format(digest);
         } catch (NoSuchAlgorithmException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
