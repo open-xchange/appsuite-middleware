@@ -16,6 +16,7 @@ has to have an _index.yaml_ file. In easy words: if a folder contains YAML files
 The _index.yaml_ file lists all request files in the corresponding folder. The place where all module folders are stored is the _ paths_ folder.
 
 To sum up, we look at a folder example of the OX HTTP API. The `http_api` folder contains the Swagger definition of the requests:
+
 ```
 http_api
 |-- paths
@@ -33,13 +34,16 @@ http_api
 			|-- ...
 		|-- ...
 ```
+
 The _index.yaml_ of _01-login_ might look as follows:
+
 ```yaml
 requests:
   - LoginRequest.yaml
   - FormLoginRequest.yaml
   - ...
 ```
+
 It describes what requests of the module login are available and where they are found providing a key `requests:`
 that contains a list of the request files. Because all files (_index.yaml_ and the YAML files of the requests)
 are stored in the same folder it simply contains the file names.
@@ -49,6 +53,7 @@ Normally each request returns a response. Responses and request bodies are descr
 The models are stored in a module related folder that is itself located in a base folder named _definitions_. The _definitions_ folder
 contains an _index.yaml_ that collects all available models. Each model (resp. response or request body) has a name and a referenced YAML file that
 contains the final definition of the response. The _index.yaml_ file might look as follows:
+
 ```yaml
 # Common response containing the error fields
 CommonResponse:
@@ -62,10 +67,12 @@ TokenLoginResponse:
   $ref: ./login/TokenLoginResponse.yaml
 #...
 ```
+
 As shown the reponses and request bodies of one module are stored in a folder with the name of the module. In this folder there
 must not be an _index.yaml_ file. The folder structure shall simplify the editing and version control.
 
 Up to now the folder structure is:
+
 ```
 http_api
 |-- definitions
@@ -97,6 +104,7 @@ Furthermore it is possible to outsource globale parameters. These parameters are
 requests but the definition of those parameters must only be written once and can be referenced using the "$ref" tag.
 Such parameters are specified in an _index.yaml_ file in a _parameters_ folder on the same level as the _paths_ and _definitions_
 folder. For instance this YAML file might contain the following:
+
 ```yaml
 # "Global" parameters that can be referenced in operation parameters with
 # - $ref: "#/parameters/TheParamNameFromBelow"
@@ -108,8 +116,10 @@ gblQueryParamSession:
   required: true
 #...
 ```
+
 Global parameters can be referenced in request definitions like models of the _index.yaml_ in the _definitions_ folder.
 Example: shows a request with a `session` paramater, an `id` parameter and a response model (see [Short introduction to the specification](#short-introduction-to-the-specification), too)
+
 ```yaml
 /resource?action=get:
   get:
@@ -132,6 +142,7 @@ Example: shows a request with a `session` paramater, an `id` parameter and a res
         schema:
           $ref: "#/definitions/ResourceResponse"
 ```
+
 All reference pointers that represent a string starting with "#" indicate an internal reference to a global parameter or
 a response or request body model.
 
@@ -148,6 +159,7 @@ version: 7.8.1
 ```
 
 Finally all comes together in a last _index.yaml_ file (the base _index.yaml_) that is stored at the base level of the file structure:
+
 ```yaml
 swagger: '2.0'
 # Document information
@@ -175,6 +187,7 @@ parameters:
 paths:
   source: ./paths/
 ```
+
 As you can see, all model definitions are listed below the `definitions` key. It is sufficient to reference
 the _index.yaml_ that is stored in the _definitions_ folder. In the dereferencing process the external reference pointers
 (those pointing to YAML files) are replaced by the content of the referenced file. Take another look at the `paths` key.
@@ -191,6 +204,7 @@ To get a functioning Swagger definition of the API all YAML files must be put to
 big _swagger.json_ file. This process is done using a simple Node.js application. The magic is done in 
 a resolve.js file. The resolve.js script is stored in a level above the Swagger definition file structure of
 a certain API.
+
 ```
 resolve.js  <=====
 http_api
@@ -231,6 +245,7 @@ to the error location which makes it easier to identify positions that do not ma
 #### Define a new request
 A request is depicted in a YAML file as introducted in [File structure](#file-structure). In general the YAML file consists of
 key-value assignments. Before we go into detail it follows an example of a request:
+
 ```yaml
 /tasks?action=list:
   put:
@@ -261,17 +276,20 @@ key-value assignments. Before we go into detail it follows an example of a reque
         schema:
           $ref: "#/definitions/TasksResponse"
 ```
+
 In the first line stands the request's endpoint. The request endpoint can provide several HTTP methods, like GET, PUT, POST, etc.
 In the case above it is only a PUT. The part after the method key describes the HTTP request in detail, specifying
 the parameters and responses. Beside it is assigned an operation ID and a tag (see [Specify operation identifiers and tags](#specify-operation-identifiers-and-tags), too).
 Additionaly it should be stated a summary of the request and if necessary a description. If a description contains line breaks you should use
 the "|" operator like
+
 ```yaml
 description: |
   This is a description
   
   with line breaks.
 ```
+
 Another important aspect of the definition of a request is the MIME type that the request consumes and the
 one it produces. In the top most _index.yaml_ there are specified the general types. Although it is possible to
 list multiple MIME types it is a recommendation to only use one or at least specify the one that is mostly used at the beginning.
@@ -281,6 +299,7 @@ In the example we have a PUT request that sends data in JSON format, therefore i
 
 Now we want to look at the parameter definition. The parameters key contains a list of parameters. Each parameter has a
 preceded "-". A parameter can be placed in the query, the path, the header, the form-data or the body.
+
 ```yaml
 - in: query|path|header|formData
   name: parameter name
@@ -288,9 +307,11 @@ preceded "-". A parameter can be placed in the query, the path, the header, the 
   description: a parameter description
   required: true|false
 ```
+
 If you specify form-data parameters you have to consider the consumes type of the request which should be `application/x-www-form-urlencoded` or `multipart/form-data`.
 It is also possible to use an extending format for the `type` like `format: int64` (long) or `format: float` (see [Data Types](http://swagger.io/specification/#dataTypeFormat), too).
 In case of a body parameter the definition is as follows:
+
 ```yaml
 - in: body
   name: body name
@@ -299,6 +320,7 @@ In case of a body parameter the definition is as follows:
   schema:
     ...
 ```
+
 The body is described in a schema. That can be of type `object` or `array`. It is recommended to outsource the definition
 of the body in a request body model (if it is of type `object`) and use a `$ref: "#/definitions/ModelName"` to reference this body.
 
@@ -316,13 +338,16 @@ A model must be placed in a `definitions` section. As mentioned in the [File str
 the model definitions are stored in own files (like the requests) in a similar folder structure. All model definitions
 are aggregated in the _index.yaml_ of the _definitions_ folder. In that file the models get a name and its schema is
 referenced by an external reference to the model YAML file (Sample _index.yaml_ file):
+
 ```yaml
 ...
 TasksResponse:
   $ref: ./tasks/TasksResponse.yaml
 ...
 ```
+
 In the _TasksResponse.yaml_ will stand the concrete response schema like:
+
 ```yaml
 type: object
 properties:
@@ -338,6 +363,7 @@ properties:
           Array with elements that contain the information of a task specified by the corresponding
           identifiers in the columns parameter. Therefore, the element types can be distinguished.
 ```
+
 All models should be of type `object`. The `properties` key defines the fields of the object.
 In our case, common response fields (like error fields) are got from the _CommonResponseData.yaml_. More precisely
 they are imported from the specified YAML file.
@@ -351,21 +377,29 @@ case of models and "parameters" in case of global parameters) as shown above (li
 [Bootprint](https://github.com/bootprint/bootprint-openapi) is a tool to convert a _swagger.json_ into a static HTML page.
 
 Prerequisite: `npm` is installed on the system (should be done during installation of Node.js).
+
 1. Install `bootprint` using `npm`:
+
 ```sh
 npm install -g bootprint
 npm install -g bootprint-openapi
 ```
+
 2. Create a HTML and CSS file from command line (files are stored in the folder `PATH/TO/documentation`):
+
 ```sh
 bootprint openapi PATH/TO/swagger.json PATH/TO/documentation
 ```
+
 3. OPTIONAL: Convert to single HTML file using `html-inline`
   * Install `html-inline` using `npm`:
+  
   ```sh
   npm install -g html-inline
   ```
+  
   * Generate self-contained HTML file `OX_HTTP_API.html` in folder `documentation` from command line:
+  
   ```sh
   html-inline PATH/TO/documentation/index.html > PATH/TO/documentation/OX_HTTP_API.html
   ```
@@ -377,6 +411,7 @@ previously created _swagger.json_ file. Swagger Codegen comes with templates for
 and parameterized to generate a concrete client API.
 
 Example: Generation of a Java Client API
+
 ```sh
 java -jar PATH/TO/swagger-codegen-cli.jar generate -i PATH/TO/swagger.json -l java -o PATH/TO/OUTPUTFOLDER -t PATH/TO/TEMPLATES -c PATH/TO/CONFIGFILE
 ```
@@ -392,6 +427,7 @@ cookies in responses. Therefore it is necessary to edit the templates. For Java,
 of `ApiClient` class template is extended by a `private List<Cookie> cookies = new ArrayList<Cookie>();`. This list is used in
 `getAPIResponse` to add the current cookies to the response builder and to save the received cookies from
 the response in the list.
+
 ```java
 private ClientResponse getAPIResponse(String path, String method, List<Pair> queryParams, Object body, Map<String, String> headerParams, Map<String, Object> formParams, String accept, String contentType, String[] authNames) throws ApiException {
 	//...
@@ -413,10 +449,12 @@ private ClientResponse getAPIResponse(String path, String method, List<Pair> que
 ```
 
 In case of C# (see `codegen/templates/csharp`) it is only necessary to add a
+
 ```cs
 // set cookie container for automatic cookie support
 RestClient.CookieContainer = new CookieContainer();
 ```
+
 in the constructor of `ApiClient` class template. _Note: in both cases it is necessary to add some imports resp. using directives._
 
 Beside the changes from above a few other modifications are done (relating to the current master branch of Swagger Codegen, commits up to 2016-03-23).
@@ -430,6 +468,7 @@ As previously mentioned, it is possible to configure the code generation with a 
 stored in a JSON file. Existing configuration files are for example `codegen/http_api/configs/java.json` and
 `codegen/http_api/configs/csharp.json`. These configuration files must be stored individually for each API that
 is described using Swagger. It follows a sample config file for the Java Client API generation of OX HTTP API:
+
 ```json
 {
 	"modelPackage": "com.openexchange.clientapi.http.models",
@@ -441,6 +480,7 @@ is described using Swagger. It follows a sample config file for the Java Client 
 	"serializableModel": false
 }
 ```
+
 The properties are language specific and must not be existing for each Codegen configuration. Here, the primary
 options are the ones for the packages the java files are stored in. The package description uses the common package
 structure. The package for the API classes is `modules` and the one for the `ApiClient` and related classes is `invoker`. Response
@@ -452,6 +492,7 @@ The group ID is relevant for the maven POM file generation.
 For code generation it is important to specify `operationId`s in the definition of a request. The `operationId`
 determines the name of the request's method in the client API. Otherwise the name might be illegible. The following example (from above)
 shows the allocation of an `operationId`:
+
 ```yaml
 /resource?action=get:
   get:
@@ -460,6 +501,7 @@ shows the allocation of an `operationId`:
       - resources
     #...
 ```
+
 Additionally a tag should be specified with the name of the related module. The Swagger Codegen uses the tag
 to name the API class of a certain module. Furthermore the tag is responsible for grouping of requests (e.g. when the _swagger.json_
 is visualized as web documentation).
