@@ -49,15 +49,20 @@
 
 package com.openexchange.drive.impl.metadata;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.LockSupport;
-import jonelo.jacksum.algorithm.MD;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.impl.DriveConstants;
+import com.openexchange.drive.impl.internal.PartialInputStream;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -81,16 +86,16 @@ public class DriveMetadata extends DefaultFile {
     private final SyncSession session;
     private final FileStorageFolder folder;
 
-    private byte[] document;
     private JSONObject jsonData;
     private Long contentsSequenceNumber;
+    private Long fileSize;
+    private String md5sum;
 
     /**
      * Initializes a new {@link DriveMetadata}.
      *
      * @param session The sync session
      * @param folder The folder to create the metadata for.
-     * @throws OXException
      */
     public DriveMetadata(SyncSession session, FileStorageFolder folder) throws OXException {
         this(session, folder, null);
@@ -102,25 +107,12 @@ public class DriveMetadata extends DefaultFile {
      * @param session The sync session
      * @param folder The folder to create the metadata for
      * @param contentsSequenceNumber The sequence number for the folder's contents, or <code>null</code> if not available
-     * @throws OXException
      */
     public DriveMetadata(SyncSession session, FileStorageFolder folder, Long contentsSequenceNumber) throws OXException {
         super();
         this.session = session;
         this.folder = folder;
         this.contentsSequenceNumber = contentsSequenceNumber;
-    }
-
-    /**
-     * Gets the contents of the drive metadata file.
-     *
-     * @return The document data
-     */
-    public byte[] getDocumentData() throws OXException {
-        if (null == document) {
-            document = getJSONData().toString().getBytes(Charsets.UTF_8);
-        }
-        return document;
     }
 
     /**
@@ -141,35 +133,57 @@ public class DriveMetadata extends DefaultFile {
      * @param offset The offset to get the data from
      * @param length The length of the data to get
      * @return The document data
-     * @throws OXException
      */
     public InputStream getDocument(long offset, long length) throws OXException {
         if (0 < offset || 0 < length) {
-            return Streams.newByteArrayInputStream(getDocumentData(), (int) offset, (int) length);
+            try {
+                return new PartialInputStream(getDocumentData().getClosingStream(), offset, length);
+            } catch (IOException e) {
+                throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
         }
-        return Streams.newByteArrayInputStream(getDocumentData());
-    }
-
-    @Override
-    public String getFileMD5Sum() {
-        try {
-            MD md = session.newMD5();
-            md.update(getDocumentData());
-            return md.getFormattedValue();
-        } catch (OXException e) {
-            LOG.error("Error determining md5 sum for metadata file of folder {}: {}", getFolderId(), e.getMessage(), e);
-            return null;
-        }
+        return getDocumentData().getClosingStream();
     }
 
     /**
      * Gets the contents of the drive metadata file.
      *
      * @return The document data
-     * @throws OXException
      */
     public InputStream getDocument() throws OXException {
         return getDocument(0, -1);
+    }
+
+    @Override
+    public String getFileMD5Sum() {
+        if (null == md5sum) {
+            ThresholdFileHolder documentData = null;
+            try {
+                documentData = getDocumentData();
+                md5sum = documentData.getMD5();
+            } catch (OXException e) {
+                LOG.error("Error determining md5 sum for metadata file of folder {}: {}", getFolderId(), e.getMessage(), e);
+            } finally {
+                Streams.close(documentData);
+            }
+        }
+        return md5sum;
+    }
+
+    @Override
+    public long getFileSize() {
+        if (null == fileSize) {
+            ThresholdFileHolder documentData = null;
+            try {
+                documentData = getDocumentData();
+                fileSize = Long.valueOf(documentData.getLength());
+            } catch (OXException e) {
+                LOG.error("Error determining size for metadata file of folder {}: {}", getFolderId(), e.getMessage(), e);
+            } finally {
+                Streams.close(documentData);
+            }
+        }
+        return null != fileSize ? fileSize.longValue() : -1L;
     }
 
     @Override
@@ -203,16 +217,6 @@ public class DriveMetadata extends DefaultFile {
     }
 
     @Override
-    public long getFileSize() {
-        try {
-            return getDocumentData().length;
-        } catch (OXException e) {
-            LOG.error("", e);
-        }
-        return -1;
-    }
-
-    @Override
     public long getSequenceNumber() {
         long sequenceNumber = null != folder.getLastModifiedDate() ? folder.getLastModifiedDate().getTime() : 0;
         try {
@@ -223,14 +227,23 @@ public class DriveMetadata extends DefaultFile {
         return sequenceNumber;
     }
 
-    @Override
-    public String toString() {
+    /**
+     * Serializes the JSON representation into a threshold file holder representing the contents of the drive metadata file.
+     *
+     * @return A fileholder representing the document data
+     */
+    private ThresholdFileHolder getDocumentData() throws OXException {
+        ThresholdFileHolder document = new ThresholdFileHolder();
+        OutputStreamWriter writer = null;
         try {
-            return new String(getDocumentData(), Charsets.UTF_8);
-        } catch (OXException e) {
-            LOG.error("", e);
-            return super.toString();
+            writer = new OutputStreamWriter(document.asOutputStream(), Charsets.UTF_8);
+            getJSONData().write(writer);
+        } catch (JSONException e) {
+            throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(writer);
         }
+        return document;
     }
 
     private JSONObject generateJSONData() throws OXException {
@@ -279,6 +292,22 @@ public class DriveMetadata extends DefaultFile {
             }
         }
         return contentsSequenceNumber.longValue();
+    }
+
+    @Override
+    public String toString() {
+        ThresholdFileHolder documentData = null;
+        try {
+            documentData = getDocumentData();
+            if (null != documentData && documentData.isInMemory()) {
+                return new String(documentData.toByteArray(), Charsets.UTF_8);
+            }
+        } catch (OXException e) {
+            LOG.error("", e);
+        } finally {
+            Streams.close(documentData);
+        }
+        return super.toString();
     }
 
 }
