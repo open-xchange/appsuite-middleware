@@ -55,14 +55,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseRenderer;
 
 /**
  * {@link StringResponseRenderer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StringResponseRenderer implements ResponseRenderer {
+public class StringResponseRenderer extends AbstractResponseRenderer {
 
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(StringResponseRenderer.class);
@@ -85,7 +84,7 @@ public class StringResponseRenderer implements ResponseRenderer {
     }
 
     @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void actualWrite(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         /*
          * Write headers
          */

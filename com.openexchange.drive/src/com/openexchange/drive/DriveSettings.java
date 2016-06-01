@@ -66,6 +66,7 @@ public class DriveSettings {
     private String minApiVersion;
     private Map<String, String> localizedFolders;
     private Set<String> capabilities;
+    private Long minUploadChunk;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -198,6 +199,24 @@ public class DriveSettings {
      */
     public void setCapabilities(Set<String> capabilities) {
         this.capabilities = capabilities;
+    }
+
+    /**
+     * Gets the minUploadChunk
+     *
+     * @return The minUploadChunk
+     */
+    public Long getMinUploadChunk() {
+        return minUploadChunk;
+    }
+
+    /**
+     * Sets the minUploadChunk
+     *
+     * @param minUploadChunk The minUploadChunk to set
+     */
+    public void setMinUploadChunk(Long minUploadChunk) {
+        this.minUploadChunk = minUploadChunk;
     }
 
 }

@@ -55,7 +55,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,8 +66,6 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.DispatcherListener;
-import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.CheckParametersAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.IFileResponseRendererAction;
@@ -94,7 +91,7 @@ import com.openexchange.tools.servlet.http.Tools;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileResponseRenderer implements ResponseRenderer {
+public class FileResponseRenderer extends AbstractResponseRenderer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
 
@@ -105,7 +102,6 @@ public class FileResponseRenderer implements ResponseRenderer {
     private final AtomicReference<File> tmpDirReference;
     private final TransformImageAction imageAction;
     private final List<IFileResponseRendererAction> registeredActions;
-    private final List<DispatcherListener> listenerRegistry;
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
@@ -143,15 +139,6 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         });
         tmpDirReference.set(getTmpDirByPath(path));
-        this.listenerRegistry = Collections.synchronizedList(new ArrayList<DispatcherListener>());
-    }
-
-    public void addDispatcherListener(DispatcherListener listener) {
-        this.listenerRegistry.add(listener);
-    }
-
-    public void removeDispatcherListener(DispatcherListener listener) {
-        this.listenerRegistry.remove(listener);
     }
 
     @Override
@@ -174,17 +161,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     @Override
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
-        List<DispatcherListener> registry = this.listenerRegistry;
-        try {
-            if (!registry.isEmpty()) {
-                preProcessListeners(request);
-            }
-        } catch (OXException e1) {
-            LOG.warn("Pre processing of DispatcherListener aborted due to the following exception {}. Skip further processing", e1.getMessage());
-            return;
-        }
-
+    public void actualWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
         // Check if file is actually supplied by the request URL.
         if (file == null || hasNoFileItem(file)) {
@@ -201,30 +178,6 @@ public class FileResponseRenderer implements ResponseRenderer {
             writeFileHolder(file, request, result, req, resp);
         } finally {
             postProcessingTasks(file);
-        }
-        try {
-            if (!registry.isEmpty()) {
-                postProcessListeners(request, result);
-            }
-        } catch (OXException e1) {
-            LOG.warn("Post processing of DispatcherListener throws an exception {}.", e1.getMessage());
-            return;
-        }
-    }
-
-    private void postProcessListeners(AJAXRequestData request, AJAXRequestResult result) throws OXException {
-        for (DispatcherListener dispatcherListener : this.listenerRegistry) {
-            if (dispatcherListener.applicable(request)) {
-                dispatcherListener.onRequestPerformed(request, result, null);
-            }
-        }
-    }
-
-    private void preProcessListeners(AJAXRequestData request) throws OXException {
-        for (DispatcherListener dispatcherListener : this.listenerRegistry) {
-            if (dispatcherListener.applicable(request)) {
-                dispatcherListener.onRequestInitialized(request);
-            }
         }
     }
 
@@ -580,5 +533,4 @@ public class FileResponseRenderer implements ResponseRenderer {
             this.message = message;
         }
     } // End of class FileResponseRendererActionException
-
 }

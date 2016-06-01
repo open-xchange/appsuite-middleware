@@ -49,70 +49,72 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
-import java.util.Collection;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.preview.PreviewDocument;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
 
 /**
- * {@link PreviewResponseRenderer} - The response renderer for {@link PreviewDocument}s.
+ * {@link AbstractResponseRenderer}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.2
  */
-public class PreviewResponseRenderer extends AbstractResponseRenderer {
+public abstract class AbstractResponseRenderer implements ResponseRenderer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewResponseRenderer.class);
+    protected final Queue<RenderListener> renderListenerRegistry;
 
-    @Override
-    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        return (result.getResultObject() instanceof PreviewDocument);
+    public AbstractResponseRenderer() {
+        this.renderListenerRegistry = new ConcurrentLinkedQueue<RenderListener>();
+    }
+
+    public void addRenderListener(RenderListener listener) {
+        this.renderListenerRegistry.add(listener);
+    }
+
+    public void removeRenderListener(RenderListener listener) {
+        this.renderListenerRegistry.remove(listener);
     }
 
     @Override
-    public int getRanking() {
-        return 0;
+    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
+        beforeWrite(request);
+
+        actualWrite(request, result, req, resp);
+
+        afterWrite(request, result);
     }
 
-    @Override
-    public void actualWrite(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
-        //httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-        try {
-            final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
+    /**
+     * The actual call to the write implementation. It becomes invoked after AbstractResponseRenderer.beforeWrite(AJAXRequestData) and before AbstractResponseRenderer.afterWrite(AJAXRequestData, AJAXRequestResult) is called.
+     * 
+     * @param request The request data
+     * @param result The result
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     */
+    public abstract void actualWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp);
 
-            final JSONArray jsonArray = new JSONArray();
-            for (final String previewPage : previewDocument.getContent()) {
-                jsonArray.put(previewPage);
-            }
-
-            final JSONObject jsonObject = new JSONObject();
-            if (previewDocument.isMoreAvailable() != null) {
-                jsonObject.put("moreAvailable", previewDocument.isMoreAvailable());
-            }
-            jsonObject.put("document", jsonArray);
-
-            final Response response = new Response(request.getSession());
-            response.setTimestamp(result.getTimestamp());
-            response.setData(jsonObject);
-            response.setProperties(result.getResponseProperties());
-
-            final Collection<OXException> warnings = result.getWarnings();
-            if (warnings != null && !warnings.isEmpty()) {
-                for (final OXException warning : warnings) {
-                    response.addWarning(warning);
+    public void beforeWrite(AJAXRequestData request) {
+        if (!this.renderListenerRegistry.isEmpty()) {
+            for (RenderListener renderListener : this.renderListenerRegistry) {
+                if (renderListener.handles(request)) {
+                    renderListener.onBeforeWrite(request);
                 }
             }
-            APIResponseRenderer.writeResponse(response, request.getAction(), httpReq, httpResp);
-        } catch (final JSONException e) {
-            LOG.error("JSON Error", e);
         }
     }
 
+    public void afterWrite(AJAXRequestData request, AJAXRequestResult result) {
+        if (!this.renderListenerRegistry.isEmpty()) {
+            for (RenderListener renderListener : this.renderListenerRegistry) {
+                if (renderListener.handles(request)) {
+                    renderListener.onAfterWrite(request, result);
+                }
+            }
+        }
+    }
 }

@@ -450,6 +450,7 @@ public class DriveServiceImpl implements DriveService {
         settings.setServerVersion(com.openexchange.version.Version.getInstance().getVersionString());
         settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion()));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
+        settings.setMinUploadChunk(Long.valueOf(syncSession.getOptimisticSaveThreshold()));
         /*
          * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
          */
