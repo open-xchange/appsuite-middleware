@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
@@ -388,6 +389,27 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @throws OXException If MD5 sum cannot be returned
      */
     public String getMD5() throws OXException {
+        File tempFile = this.tempFile;
+        if (null != tempFile) {
+            DigestInputStream digestStream = null;
+            try {
+                digestStream = new DigestInputStream(new FileInputStream(tempFile), MessageDigest.getInstance("MD5"));
+                byte[] buf = new byte[8192];
+                for (int read; (read = digestStream.read(buf, 0, 8192)) > 0;) {
+                    ;
+                }
+                byte[] digest = digestStream.getMessageDigest().digest();
+                return jonelo.jacksum.util.Service.format(digest);
+            } catch (NoSuchAlgorithmException e) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(digestStream);
+            }
+        }
+
+        // In memory...
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] digest = md5.digest(Streams.stream2bytes(getStream()));
