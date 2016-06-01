@@ -52,6 +52,8 @@ package com.openexchange.share.handler.download.limiter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
@@ -67,7 +69,7 @@ import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
  * {@link ShareDownloadLimiter} - A {@link RenderListener} that is responsible for 'GET' actions in the 'share' module which are invoked directly via ShareHandler from the ShareServlet.
  * <p>
  * As this {@link RenderListener} is mostly similar to existing limiters it extends the {@link GuestDownloadLimiter} as it provides almost all functionality.
- * 
+ *
  * @see {@link FilesDownloadLimiter}
  * @see {@link InfostoreDownloadLimiter}
  *
@@ -86,7 +88,7 @@ public class ShareDownloadLimiter extends GuestDownloadLimiter implements Render
     }
 
     @Override
-    public void onBeforeWrite(AJAXRequestData request) throws OXException {
+    public void onBeforeWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) throws OXException {
         try {
             super.onRequestInitialized(request);
         } catch (OXException oxException) {
@@ -98,8 +100,8 @@ public class ShareDownloadLimiter extends GuestDownloadLimiter implements Render
     }
 
     @Override
-    public void onAfterWrite(AJAXRequestData request, AJAXRequestResult result) {
-        super.onRequestPerformed(request, result, null);
+    public void onAfterWrite(AJAXRequestData request, AJAXRequestResult result, Exception writeException) {
+        super.onRequestPerformed(request, result, writeException);
     }
 
     @Override

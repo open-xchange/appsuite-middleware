@@ -53,12 +53,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.HttpErrorCodeException;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link RenderListener} - A listener which receives various call-backs before/after a {@link ResponseRenderer#write(AJAXRequestData, AJAXRequestResult, HttpServletRequest, HttpServletResponse)} processing.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
@@ -76,17 +77,22 @@ public interface RenderListener {
      * Called before the write operation of the {@link ResponseRenderer} is invoked.
      *
      * @param request The associated request data
+     * @param result The result
+     * @param req The HTTP request
+     * @param resp The HTTP response
      * @throws OXException If this listener signals to abort further processing
      * @see ResponseRenderer#write(AJAXRequestData, AJAXRequestResult, HttpServletRequest, HttpServletResponse)
      */
-    void onBeforeWrite(AJAXRequestData request) throws OXException;
+    void onBeforeWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) throws OXException;
 
     /**
      * Called after the write operation of the {@link ResponseRenderer} is invoked.
      *
      * @param request The associated request data
      * @param result The request result that has been created
+     * @param writeException The optional exception instance in case actual write yielded an error;
+     *                       in case no <code>"200 - OK"</code> status was set an instance of {@link HttpErrorCodeException} is passed
      * @throws OXException If this listener signals to abort further processing
      */
-    void onAfterWrite(AJAXRequestData request, AJAXRequestResult result) throws OXException;
+    void onAfterWrite(AJAXRequestData request, AJAXRequestResult result, Exception writeException) throws OXException;
 }

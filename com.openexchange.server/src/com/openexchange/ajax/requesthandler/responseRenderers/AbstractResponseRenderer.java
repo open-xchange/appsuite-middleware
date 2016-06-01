@@ -49,14 +49,19 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.HttpErrorCodeException;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.servlet.StatusKnowing;
 
 /**
  * {@link AbstractResponseRenderer}
@@ -68,36 +73,117 @@ public abstract class AbstractResponseRenderer implements ResponseRenderer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractResponseRenderer.class);
 
+    /** The queue for added listeners */
     protected final Queue<RenderListener> renderListenerRegistry;
 
-    public AbstractResponseRenderer() {
+    /** The flag signaling is there is any registered listener */
+    protected volatile boolean hasRenderListeners;
+
+    /**
+     * Initializes a new {@link AbstractResponseRenderer}.
+     */
+    protected AbstractResponseRenderer() {
+        super();
         this.renderListenerRegistry = new ConcurrentLinkedQueue<RenderListener>();
     }
 
+    /**
+     * Adds specified listener to this response renderer.
+     *
+     * @param listener The listener to add
+     */
     public void addRenderListener(RenderListener listener) {
-        this.renderListenerRegistry.add(listener);
-    }
-
-    public void removeRenderListener(RenderListener listener) {
-        this.renderListenerRegistry.remove(listener);
-    }
-
-    @Override
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
-        try {
-            beforeWrite(request);
-
-            actualWrite(request, result, req, resp);
-
-            afterWrite(request, result);
-        } catch (OXException e) {
-            LOG.error("Skipped using renderer " + this.getClass().getName() + " due to the following error: " + e.getMessage(), e);
+        if (null != listener && renderListenerRegistry.add(listener)) {
+            hasRenderListeners = true;
         }
     }
 
     /**
-     * The actual call to the write implementation. It becomes invoked after AbstractResponseRenderer.beforeWrite(AJAXRequestData) and before AbstractResponseRenderer.afterWrite(AJAXRequestData, AJAXRequestResult) is called.
-     * 
+     * Removes specified listener from this response renderer.
+     *
+     * @param listener The listener to remove
+     */
+    public void removeRenderListener(RenderListener listener) {
+        if (null != listener && renderListenerRegistry.remove(listener)) {
+            hasRenderListeners = (false == renderListenerRegistry.isEmpty());
+        }
+    }
+
+    @Override
+    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
+        // Fast check for available listeners
+        if (false == hasRenderListeners) {
+            // No listeners...
+            actualWrite(request, result, req, resp);
+            return;
+        }
+
+        // Collect applicable listeners
+        List<RenderListener> applicableListeners = new LinkedList<RenderListener>();
+        for (RenderListener renderListener : this.renderListenerRegistry) {
+            if (renderListener.handles(request)) {
+                applicableListeners.add(renderListener);
+            }
+        }
+
+        if (applicableListeners.isEmpty()) {
+            // No applicable listeners...
+            actualWrite(request, result, req, resp);
+            return;
+        }
+
+        StatusKnowing statusKnowing = null;
+        if (resp instanceof StatusKnowing) {
+            statusKnowing = (StatusKnowing) resp;
+        }
+
+        // Trigger onBeforeWrite()
+        try {
+            beforeWrite(request, result, req, resp, applicableListeners);
+            if (null != statusKnowing && isError(statusKnowing.getStatus())) {
+                // onBeforeWrite() set a HTTP error
+                return;
+            }
+        } catch (OXException e) {
+            LOG.error("Skipped using renderer '{}' due to an error.", this.getClass().getName(), e);
+            return;
+        }
+
+        // Do the actual write and trigger onAfterWrite() afterwards
+        Exception exceptionCausedByActualWrite = null;
+        try {
+            actualWrite(request, result, req, resp);
+
+            // Assign a suitable exception in case a non-OK status is set
+            if (null != statusKnowing) {
+                int status = ((StatusKnowing) resp).getStatus();
+                if (isError(status)) {
+                    // Assume error was returned
+                    exceptionCausedByActualWrite = new HttpErrorCodeException(status);
+                }
+            }
+        } catch (RuntimeException e) {
+            exceptionCausedByActualWrite = e;
+            LOG.error("Skipped using renderer '{}' due to an error.", this.getClass().getName(), e);
+        } finally {
+            // Trigger onAfterWrite()
+            try {
+                afterWrite(request, result, exceptionCausedByActualWrite, applicableListeners);
+            } catch (Exception e) {
+                LOG.error("Skipped using renderer '{}' due to an error.", this.getClass().getName(), e);
+            }
+        }
+    }
+
+    private boolean isError(int status) {
+        return ((status >= 400 && status <= 499) || (status >= 500 && status <= 599));
+    }
+
+    /**
+     * The actual call to the write implementation.
+     * <p>
+     * Gets invoked after AbstractResponseRenderer.beforeWrite(AJAXRequestData) and before AbstractResponseRenderer.afterWrite(AJAXRequestData, AJAXRequestResult) is called.
+     *
      * @param request The request data
      * @param result The result
      * @param req The HTTP request
@@ -105,23 +191,39 @@ public abstract class AbstractResponseRenderer implements ResponseRenderer {
      */
     public abstract void actualWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp);
 
-    public void beforeWrite(AJAXRequestData request) throws OXException {
-        if (!this.renderListenerRegistry.isEmpty()) {
-            for (RenderListener renderListener : this.renderListenerRegistry) {
-                if (renderListener.handles(request)) {
-                    renderListener.onBeforeWrite(request);
-                }
+    /**
+     * Triggers the {@link RenderListener#onBeforeWrite(AJAXRequestData) onBeforeWrite()} method of registered listeners.
+     *
+     * @param requestData The AJAX request data to pass
+     * @param resp The result
+     * @param req The HTTP request
+     * @param result The HTTP response
+     * @param listeners The render listeners to trigger
+     * @throws OXException If a registered listener signals to abort further processing
+     */
+    protected void beforeWrite(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp, Collection<RenderListener> listeners) throws OXException {
+        for (RenderListener renderListener : listeners) {
+            if (renderListener.handles(requestData)) {
+                renderListener.onBeforeWrite(requestData, result, req, resp);
             }
         }
     }
 
-    public void afterWrite(AJAXRequestData request, AJAXRequestResult result) throws OXException {
-        if (!this.renderListenerRegistry.isEmpty()) {
-            for (RenderListener renderListener : this.renderListenerRegistry) {
-                if (renderListener.handles(request)) {
-                    renderListener.onAfterWrite(request, result);
-                }
+    /**
+     * Triggers the {@link RenderListener#onAfterWrite(AJAXRequestData, AJAXRequestResult, Exception) onAfterWrite()} method of registered listeners.
+     *
+     * @param requestData The AJAX request data to pass
+     * @param result The result data to pass
+     * @param writeException The optional unexpected exception
+     * @param listeners The render listeners to trigger
+     * @throws OXException If a registered listener signals to abort further processing
+     */
+    public void afterWrite(AJAXRequestData requestData, AJAXRequestResult result, Exception writeException, Collection<RenderListener> listeners) throws OXException {
+        for (RenderListener renderListener : listeners) {
+            if (renderListener.handles(requestData)) {
+                renderListener.onAfterWrite(requestData, result, writeException);
             }
         }
     }
+
 }
