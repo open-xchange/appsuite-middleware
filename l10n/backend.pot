@@ -1806,7 +1806,9 @@ msgid "Mail Drive"
 msgstr ""
 
 #. The name used for mail attachments that have no file name
+#. Fall-back name if a file has no valid name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
 msgid "Unnamed"
 msgstr ""
 
@@ -7502,6 +7504,12 @@ msgstr ""
 #. Indicates the password for affected message's attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
 msgid "Please use the following password to access the attachments %1$s"
+msgstr ""
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the file names for affected message's attachments
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:94
+msgid "The following files are shared"
 msgstr ""
 
 #. *
