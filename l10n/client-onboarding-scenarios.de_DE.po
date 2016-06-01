@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-02-17 10:57+0100\n"
+"PO-Revision-Date: 2016-06-01 12:09+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -86,9 +86,8 @@ msgid "Connector for Microsoft Outlook®"
 msgstr "Konnektor für Microsoft Outlook®"
 
 # Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
-#, fuzzy
 msgid "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients."
-msgstr "Synchronisation von E-Mail, Kalender, Kontakte und Aufgaben, zusammen mit öffentlichen, freigegebenen und Systemordnern mit Microsoft Outlook®-Clients."
+msgstr "Synchronisation von E-Mails, Kalendern, Kontakten und Aufgaben, zusammen mit öffentlichen, freigegebenen und Systemordnern mit Microsoft Outlook®-Clients."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
 msgid "Synchronize your Mail, Calendar and Address Book data with your device."
