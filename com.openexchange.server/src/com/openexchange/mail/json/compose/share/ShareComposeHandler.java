@@ -366,8 +366,6 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                     ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<Recipient>(entry.getValue()), password, expirationDate, source, context, composeRequest);
                     List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference);
                     for (ComposedMailMessage generatedTransportMessage : generatedTransportMessages) {
-                        // TODO: Apply header to transport messages, too?
-                        // transportMessage.setHeader(HEADER_SHARE_MAIL, referenceString);
                         generatedTransportMessage.setAppendToSentFolder(false);
                         transportMessages.add(generatedTransportMessage);
                     }
