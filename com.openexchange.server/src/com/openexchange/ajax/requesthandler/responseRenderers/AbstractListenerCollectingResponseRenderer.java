@@ -195,9 +195,7 @@ public abstract class AbstractListenerCollectingResponseRenderer implements List
      */
     protected void beforeWrite(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp, Collection<RenderListener> listeners) throws OXException {
         for (RenderListener renderListener : listeners) {
-            if (renderListener.handles(requestData)) {
-                renderListener.onBeforeWrite(requestData, result, req, resp);
-            }
+            renderListener.onBeforeWrite(requestData, result, req, resp);
         }
     }
 
@@ -212,9 +210,7 @@ public abstract class AbstractListenerCollectingResponseRenderer implements List
      */
     public void afterWrite(AJAXRequestData requestData, AJAXRequestResult result, Exception writeException, Collection<RenderListener> listeners) throws OXException {
         for (RenderListener renderListener : listeners) {
-            if (renderListener.handles(requestData)) {
-                renderListener.onAfterWrite(requestData, result, writeException);
-            }
+            renderListener.onAfterWrite(requestData, result, writeException);
         }
     }
 
