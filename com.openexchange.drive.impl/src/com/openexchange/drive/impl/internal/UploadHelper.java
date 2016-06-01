@@ -63,12 +63,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
-import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.drive.impl.sync.RenameTools;
 import com.openexchange.exception.OXException;
@@ -113,7 +111,7 @@ public class UploadHelper {
         /*
          * Try to save directly if applicable (no upload resume, no replace, total length is known and smaller than threshold)
          */
-        if (null == originalVersion && 0 >= offset && 0 < totalLength && getOptimisticSaveThreshold(session.getDriveSession()) >= totalLength) {
+        if (null == originalVersion && 0 >= offset && 0 < totalLength && session.getOptimisticSaveThreshold() >= totalLength) {
 
             Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
 
@@ -593,21 +591,6 @@ public class UploadHelper {
             Streams.close(outputStream);
         }
         return managedFile;
-    }
-
-    /**
-     * Gets the maximum file length of uploads to be stored directly at the target location - others are going to be written to a
-     * temporary upload file first.
-     *
-     * @param session The drive session
-     * @return The optimistic save threshold in bytes
-     */
-    private static long getOptimisticSaveThreshold(DriveSession session) {
-        if (null != session.getClientType() && session.getClientType().isDesktop()) {
-            return DriveConfig.getInstance().getOptimisticSaveThresholdDesktop();
-        } else {
-            return DriveConfig.getInstance().getOptimisticSaveThresholdMobile();
-        }
     }
 
 }

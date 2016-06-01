@@ -402,6 +402,21 @@ public class SyncSession {
         return null != capabilities && capabilities.contains(capability);
     }
 
+    /**
+     * Gets the maximum file length of uploads to be stored directly at the target location - others are going to be written to a
+     * temporary upload file first.
+     *
+     * @param session The drive session
+     * @return The optimistic save threshold in bytes
+     */
+    public long getOptimisticSaveThreshold() {
+        if (null != session.getClientType() && session.getClientType().isDesktop()) {
+            return DriveConfig.getInstance().getOptimisticSaveThresholdDesktop();
+        } else {
+            return DriveConfig.getInstance().getOptimisticSaveThresholdMobile();
+        }
+    }
+
     @Override
     public String toString() {
         return session.getServerSession().getLoginName() + " [" + session.getServerSession().getContextId() + ':' +
