@@ -76,8 +76,6 @@ import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
  */
 public class ShareDownloadLimiter extends GuestDownloadLimiter implements RenderListener {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareDownloadLimiter.class);
-
     public ShareDownloadLimiter(ConfigViewFactory configView) {
         super(configView);
     }
@@ -88,14 +86,14 @@ public class ShareDownloadLimiter extends GuestDownloadLimiter implements Render
     }
 
     @Override
-    public void onBeforeWrite(AJAXRequestData request) {
+    public void onBeforeWrite(AJAXRequestData request) throws OXException {
         try {
             super.onRequestInitialized(request);
         } catch (OXException oxException) {
             if (oxException.similarTo(DownloadLimitedExceptionCode.COUNT_EXCEEDED) || oxException.similarTo(DownloadLimitedExceptionCode.LIMIT_EXCEEDED)) {
                 throw new RateLimitedException("429 Download Limits Exceeded", 0);
             }
-            LOG.warn("An unexpected error occurred while calling onRequestInitialized", oxException);
+            throw oxException;
         }
     }
 

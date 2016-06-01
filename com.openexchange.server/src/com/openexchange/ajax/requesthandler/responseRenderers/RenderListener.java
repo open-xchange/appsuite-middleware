@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link RenderListener} - A listener which receives various call-backs before/after a {@link ResponseRenderer#write(AJAXRequestData, AJAXRequestResult, HttpServletRequest, HttpServletResponse)} processing.
@@ -75,16 +76,17 @@ public interface RenderListener {
      * Called before the write operation of the {@link ResponseRenderer} is invoked.
      *
      * @param request The associated request data
+     * @throws OXException If this listener signals to abort further processing
      * @see ResponseRenderer#write(AJAXRequestData, AJAXRequestResult, HttpServletRequest, HttpServletResponse)
      */
-    void onBeforeWrite(AJAXRequestData request);
+    void onBeforeWrite(AJAXRequestData request) throws OXException;
 
     /**
      * Called after the write operation of the {@link ResponseRenderer} is invoked.
      *
      * @param request The associated request data
      * @param result The request result that has been created
-     * @see ResponseRenderer#write(AJAXRequestData, AJAXRequestResult, HttpServletRequest, HttpServletResponse)
+     * @throws OXException If this listener signals to abort further processing
      */
-    void onAfterWrite(AJAXRequestData request, AJAXRequestResult result);
+    void onAfterWrite(AJAXRequestData request, AJAXRequestResult result) throws OXException;
 }

@@ -56,6 +56,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractResponseRenderer}
@@ -64,6 +65,8 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
  * @since v7.8.2
  */
 public abstract class AbstractResponseRenderer implements ResponseRenderer {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractResponseRenderer.class);
 
     protected final Queue<RenderListener> renderListenerRegistry;
 
@@ -81,11 +84,15 @@ public abstract class AbstractResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
-        beforeWrite(request);
+        try {
+            beforeWrite(request);
 
-        actualWrite(request, result, req, resp);
+            actualWrite(request, result, req, resp);
 
-        afterWrite(request, result);
+            afterWrite(request, result);
+        } catch (OXException e) {
+            LOG.error("Skipped using renderer " + this.getClass().getName() + " due to the following error: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -98,7 +105,7 @@ public abstract class AbstractResponseRenderer implements ResponseRenderer {
      */
     public abstract void actualWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp);
 
-    public void beforeWrite(AJAXRequestData request) {
+    public void beforeWrite(AJAXRequestData request) throws OXException {
         if (!this.renderListenerRegistry.isEmpty()) {
             for (RenderListener renderListener : this.renderListenerRegistry) {
                 if (renderListener.handles(request)) {
@@ -108,7 +115,7 @@ public abstract class AbstractResponseRenderer implements ResponseRenderer {
         }
     }
 
-    public void afterWrite(AJAXRequestData request, AJAXRequestResult result) {
+    public void afterWrite(AJAXRequestData request, AJAXRequestResult result) throws OXException {
         if (!this.renderListenerRegistry.isEmpty()) {
             for (RenderListener renderListener : this.renderListenerRegistry) {
                 if (renderListener.handles(request)) {
