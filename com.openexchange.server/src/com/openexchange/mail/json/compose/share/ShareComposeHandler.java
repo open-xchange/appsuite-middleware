@@ -71,6 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.DelegatingComposedMailMessage;
 import com.openexchange.mail.json.compose.AbstractComposeHandler;
 import com.openexchange.mail.json.compose.ComposeDraftResult;
 import com.openexchange.mail.json.compose.ComposeRequest;
@@ -243,6 +244,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
     @Override
     protected ComposeTransportResult doCreateTransportResult(ComposeRequest composeRequest, ShareTransportComposeContext context) throws OXException {
+        // Check if context collected any attachment at all
+        if (false == context.hasAnyPart()) {
+            // No attachments
+            ComposedMailMessage composeMessage = createRegularComposeMessage(context);
+            DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
+            transportMessage.setAppendToSentFolder(false);
+            return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage);
+        }
+
         // Get the basic source message
         ServerSession session = composeRequest.getSession();
         ComposedMailMessage source = context.getSourceMessage();
@@ -354,7 +364,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 MessageGenerator messageGenerator = generatorRegistry.getMessageGeneratorFor(composeRequest);
                 for (Map.Entry<ShareComposeLink, Set<Recipient>> entry : links.entrySet()) {
                     ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<Recipient>(entry.getValue()), password, expirationDate, source, context, composeRequest);
-                    List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo);
+                    List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference);
                     for (ComposedMailMessage generatedTransportMessage : generatedTransportMessages) {
                         // TODO: Apply header to transport messages, too?
                         // transportMessage.setHeader(HEADER_SHARE_MAIL, referenceString);

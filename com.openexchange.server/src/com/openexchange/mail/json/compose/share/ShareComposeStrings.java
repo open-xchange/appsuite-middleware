@@ -89,4 +89,11 @@ public class ShareComposeStrings implements LocalizableStrings {
     // Indicates the password for affected message's attachments
     public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments %1$s";
 
+    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+    // Indicates the file names for affected message's attachments
+    public static final String SHARED_ATTACHMENTS_FILES = "The following files are shared";
+
+    // Fall-back name if a file has no valid name
+    public static final String DEFAULT_FILE_NAME = "Unnamed";
+
 }

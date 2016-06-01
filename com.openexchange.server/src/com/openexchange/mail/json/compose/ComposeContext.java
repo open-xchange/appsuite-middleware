@@ -129,6 +129,13 @@ public interface ComposeContext {
     List<MailPart> getAllParts();
 
     /**
+     * Checks if this context has any part
+     *
+     * @return <code>true</code> if there is any part; otherwise <code>false</code>
+     */
+    boolean hasAnyPart();
+
+    /**
      * Adds specified referenced part
      *
      * @param referencedPart The referenced part

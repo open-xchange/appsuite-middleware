@@ -174,6 +174,23 @@ public abstract class AbstractComposeContext implements ComposeContext {
     }
 
     @Override
+    public boolean hasAnyPart() {
+        if (false == getReferencedParts().isEmpty()) {
+            return true;
+        }
+        if (false == getDataParts().isEmpty()) {
+            return true;
+        }
+        if (false == getUploadParts().isEmpty()) {
+            return true;
+        }
+        if (false == getDriveParts().isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void addReferencedPart(ReferencedMailPart referencedPart) throws OXException {
         if (null != referencedPart) {
             List<ReferencedMailPart> referencedParts = this.referencedParts;

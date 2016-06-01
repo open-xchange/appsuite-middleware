@@ -56,7 +56,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -75,14 +74,6 @@ import com.openexchange.java.Strings;
  * @since v7.8.2
  */
 public class ShareReference {
-
-    public static void main(String[] args) {
-        ShareReference sr = new ShareReference("mytokenyeah", Collections.singletonList(new Item("12", "foo")), new Item("myfolder", "myfolder"), null, null, 17, 1337);
-        String ref = sr.generateReferenceString();
-
-        sr = parseFromReferenceString(ref);
-        System.out.println(sr);
-    }
 
     /**
      * Parses a <code>ShareReference</code> from specified reference string.
