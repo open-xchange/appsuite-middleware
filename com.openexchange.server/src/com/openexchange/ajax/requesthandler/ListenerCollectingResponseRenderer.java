@@ -52,7 +52,7 @@ package com.openexchange.ajax.requesthandler;
 import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
 
 /**
- * {@link ListenerCollectingResponseRenderer} - Extends {@link ResponseRenderer} by possibily to add/remove {@link RenderListener listeners}.
+ * {@link ListenerCollectingResponseRenderer} - Extends {@link ResponseRenderer} by possibility to add/remove {@link RenderListener listeners}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
