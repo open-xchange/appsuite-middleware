@@ -229,7 +229,7 @@ public class DefaultShareService implements ShareService {
     @Override
     public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
         ShareTool.validateTarget(target);
-        LOG.info("Adding share target {} for recipients {} in context {}...", target, recipients, I(session.getContextId()));
+        LOG.info("Configuring accounts for {} at {} in context {}...", recipients, target, I(session.getContextId()));
         Map<ShareRecipient, ShareInfo> sharesByRecipient = new HashMap<ShareRecipient, ShareInfo>(recipients.size());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
@@ -256,7 +256,7 @@ public class DefaultShareService implements ShareService {
              */
             checkQuota(session, connectionHelper, sharesInfos);
             connectionHelper.commit();
-            LOG.info("Share target {} for recipients {} in context {} added successfully.", target, recipients, I(session.getContextId()));
+            LOG.info("Accounts at {} in context {} configured: {}", target, I(session.getContextId()), sharesByRecipient.values());
             return new CreatedSharesImpl(sharesByRecipient);
         } finally {
             connectionHelper.finish();
