@@ -174,10 +174,6 @@ public class CapabilityHandlerTest {
             @Override
             public void closeAllDBConnections() {}
 
-            @Override
-            public Long getQuotaForUser(Integer contextId, Integer userId) throws SQLException, OXException {
-                return 1000000l;
-            }
         };
 
         PowerMockito.mockStatic(Services.class);
@@ -261,10 +257,6 @@ public class CapabilityHandlerTest {
             @Override
             public void closeAllDBConnections() {}
 
-            @Override
-            public Long getQuotaForUser(Integer contextId, Integer userId) throws SQLException, OXException {
-                return 0l;
-            }
         };
 
         PowerMockito.mockStatic(Services.class);

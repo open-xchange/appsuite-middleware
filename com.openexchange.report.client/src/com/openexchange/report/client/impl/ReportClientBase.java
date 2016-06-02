@@ -403,7 +403,7 @@ public class ReportClientBase extends AbstractJMXTools {
 
         this.runAsReport = setShortLongOpt(parser, OPT_APPSUITE_RUN_REPORT_SHORT, OPT_APPSUITE_RUN_REPORT_LONG, "Schedule an appsuite style report. Will print out the reports UUID or, if a report is being generated, the UUID of the pending report", false, NeededQuadState.notneeded);
 
-        this.asReportType = setShortLongOpt(parser, OPT_APPSUITE_REPORT_TYPE_SHORT, OPT_APPSUITE_REPORT_TYPE_LONG, "The type of the report to run. Leave this off for the 'default' report.", true, NeededQuadState.notneeded);
+        this.asReportType = setShortLongOpt(parser, OPT_APPSUITE_REPORT_TYPE_SHORT, OPT_APPSUITE_REPORT_TYPE_LONG, "The type of the report to run. Leave this off for the 'default' report. 'Known reports next to 'default': 'extended', 'oscs-extended' Enables additional options, as listed below (provisioning-bundels needed)", true, NeededQuadState.notneeded);
 
         this.inspectAsReports = setLongOpt(parser, OPT_APPSUITE_INSPECT_REPORTS_LONG, "Prints information about currently running reports", false, false);
 
@@ -419,13 +419,13 @@ public class ReportClientBase extends AbstractJMXTools {
 
         this.timeframeEnd = setShortLongOpt(parser, OPT_APPSUITE_SET_TIMEFRAME_END_SHORT, OPT_APPSUITE_SET_TIMEFRAME_END_LONG, "Set the ending date of the timeframe in format: dd.mm.yyyy. If start date is set and this parameter not, the current Date is taken as timeframe end.", true, NeededQuadState.notneeded);
 
-        this.singleTenant = setShortLongOpt(parser, OPT_OXCS_SET_SINGLE_BRAND_SHORT, OPT_OXCS_SET_SINGLE_BRAND_LONG, "Run the report for a single brand, identified by the sid of the brands admin. oxcs-extended report-type only", true, NeededQuadState.notneeded);
+        this.singleTenant = setShortLongOpt(parser, OPT_OXCS_SET_SINGLE_BRAND_SHORT, OPT_OXCS_SET_SINGLE_BRAND_LONG, "OXCS only: Run the report for a single brand, identified by the sid of the brands admin. oxcs-extended report-type only", true, NeededQuadState.notneeded);
 
-        this.ignoreAdmins = setShortLongOpt(parser, OPT_OXCS_SET_IGNORE_ADMINS_SHORT, OPT_OXCS_SET_IGNORE_ADMINS_LONG, "Ignore admins and dont show users of that category. oxcs-extended report-type only", false, NeededQuadState.notneeded);
+        this.ignoreAdmins = setShortLongOpt(parser, OPT_OXCS_SET_IGNORE_ADMINS_SHORT, OPT_OXCS_SET_IGNORE_ADMINS_LONG, "OXCS only: Ignore admins and dont show users of that category. oxcs-extended report-type only", false, NeededQuadState.notneeded);
 
-        this.driveMetrics = setShortLongOpt(parser, OPT_OXCS_SET_DRIVE_METRICS_SHORT, OPT_OXCS_SET_DRIVE_METRICS_LONG, "Get drive metrics for each user. oxcs-extended report-type only", false, NeededQuadState.notneeded);
+        this.driveMetrics = setShortLongOpt(parser, OPT_OXCS_SET_DRIVE_METRICS_SHORT, OPT_OXCS_SET_DRIVE_METRICS_LONG, "OXCS only: Get drive metrics for each user. oxcs-extended report-type only", false, NeededQuadState.notneeded);
 
-        this.mailMetrics = setShortLongOpt(parser, OPT_OXCS_SET_MAIL_METRICS_SHORT, OPT_OXCS_SET_MAIL_METRICS_LONG, "Get mail metrics for each user. oxcs-extended report-type only", false, NeededQuadState.notneeded);
+        this.mailMetrics = setShortLongOpt(parser, OPT_OXCS_SET_MAIL_METRICS_SHORT, OPT_OXCS_SET_MAIL_METRICS_LONG, "OXCS only: Get mail metrics for each user. oxcs-extended report-type only", false, NeededQuadState.notneeded);
     }
 
     protected void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, Map<String, String> serverConfiguration, final String[] versions, final AdminParser parser, final ClientLoginCount clc, final ClientLoginCount clcYear) {
