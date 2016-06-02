@@ -53,7 +53,6 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -83,8 +82,6 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "id", description = "The ID of the account to return.")
 }, responseDescription = "A JSON object representing the desired mail account. See mail account data.")
 public final class GetAction extends AbstractMailAccountAction implements MailAccountFields {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
     public static final String ACTION = AJAXServlet.ACTION_GET;
 

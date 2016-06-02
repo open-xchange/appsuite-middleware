@@ -299,10 +299,11 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
      *
      * @param mailAccounts The mail accounts
      * @param attributes The attributes
+     * @param session The session
      * @return A JSON array of JSON arrays for each account
      * @throws OXException If writing JSON fails
      */
-    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes, final Session session) throws OXException {
+    public static JSONArray writeArray(MailAccount[] mailAccounts, List<Attribute> attributes, Session session) throws OXException {
         return writeArray(mailAccounts, attributes, session, hideDetailsForDefaultAccount());
     }
 
@@ -311,6 +312,8 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
      *
      * @param mailAccounts The mail accounts
      * @param attributes The attributes
+     * @param session The session
+     * @param hideDetailsForDefaultAccount Whether to hide details for primary account
      * @return A JSON array of JSON arrays for each account
      * @throws OXException If writing JSON fails
      */
@@ -329,10 +332,25 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
      *
      * @param account The mail account
      * @param attributes The attributes
+     * @param session The session
      * @return A JSON array row for given account
      * @throws OXException If writing JSON fails
      */
-    public static JSONArray writeArrayRow(final MailAccount account, final List<Attribute> attributes, final Session session, final boolean hideDetailsForDefaultAccount) throws OXException {
+    public static JSONArray writeArrayRow(MailAccount account, List<Attribute> attributes, Session session) throws OXException {
+        return writeArrayRow(account, attributes, session, hideDetailsForDefaultAccount());
+    }
+
+    /**
+     * Writes specified attributes for each mail account contained in given array in an own JSON array surrounded by a super JSON array.
+     *
+     * @param account The mail account
+     * @param attributes The attributes
+     * @param session The session
+     * @param hideDetailsForDefaultAccount Whether to hide details for primary account
+     * @return A JSON array row for given account
+     * @throws OXException If writing JSON fails
+     */
+    public static JSONArray writeArrayRow(MailAccount account, List<Attribute> attributes, Session session, boolean hideDetailsForDefaultAccount) throws OXException {
         final JSlobStorage jSlobStorage = AbstractMailAccountAction.getStorage();
         return writeArrayRow(account, attributes, session, hideDetailsForDefaultAccount, jSlobStorage);
     }

@@ -54,9 +54,7 @@ import static com.openexchange.mailaccount.Tools.getUnsignedInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -70,7 +68,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.java.Strings;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
@@ -90,6 +87,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountJsonUtility;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
@@ -307,32 +305,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The parsed attributes
      */
     protected static List<Attribute> getColumns(final String colString) {
-        List<Attribute> attributes = null;
-        if (Strings.isNotEmpty(colString)) {
-            if ("all".equalsIgnoreCase(colString)) {
-                // All columns
-                return Arrays.asList(Attribute.values());
-            }
-
-            attributes = new LinkedList<Attribute>();
-            for (String col : Strings.splitByComma(colString)) {
-                if (Strings.isNotEmpty(col)) {
-                    int id = parseInt(col);
-                    Attribute attr = id > 0 ? Attribute.getById(id) : null;
-                    if (null != attr) {
-                        attributes.add(attr);
-                    }
-                }
-            }
-            return attributes;
-        }
-
-        // All columns
-        return Arrays.asList(Attribute.values());
-    }
-
-    private static int parseInt(String col) {
-        return Tools.getUnsignedInteger(col);
+        return MailAccountJsonUtility.getColumns(colString);
     }
 
     /**
