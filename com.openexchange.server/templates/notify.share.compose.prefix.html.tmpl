@@ -17,9 +17,11 @@
 
   <div>
   ${files}
-  <#list filenames as filename>
-    ${filename}
-  </#list>
+  <ul>
+    <#list filenames as filename>
+    <li>${filename}</li>
+    </#list>
+  </ul>
   </div>
   
 </div>
