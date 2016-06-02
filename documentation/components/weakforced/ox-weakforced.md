@@ -65,8 +65,12 @@ Each end-point listing also supports specifying the total number of connections 
 
 This examples specifies two generic end-points and two end-points to use for `report` calls exclusively. Hence, the OXWF routes all `report` calls to either `http://weakforced1.reporthost.invalid:8081` or `http://weakforced2.reporthost.invalid:8081`. Remaining calls (only `allow` left) will use `http://weakforced1.host.invalid:8081` or`http://weakforced2.host.invalid:8081`.
 
-## Secret
-The `com.openexchange.weakforced.secret` option specifies the secret to use when calculating the hash for password acting as some sort of salt.
+## Password hash
+This section describes available properties that specify how the hash for login and password tuple is generated.
+
+- The `com.openexchange.weakforced.hash.secret` option specifies the secret to use when calculating the hash for password acting as some sort of salt
+- The `com.openexchange.weakforced.hash.algorithm` option specifies the name of the algorithm, which is used to generate the digest bytes. Supported values are: `MD2`, `MD5`, `SHA-1`, `SHA-256`, `SHA-384`, or `SHA-512`. Default is `SHA-256`
+- The `com.openexchange.weakforced.hash.truncate` option specifies whether the HEX string for the computed digest bytes is generated considering only the first 12 bits padded by 4 0 (zero) bits) or if the whole digest is taken. Default is `true`
 
 ## Basic authentication
 The `com.openexchange.weakforced.basic-auth.login` and `com.openexchange.weakforced.basic-auth.password` allow setting the user-name and password to use to perform HTTP basic authentication against Weakforced end-points. All end-points are expected to have the same HTTP basic authentication.
