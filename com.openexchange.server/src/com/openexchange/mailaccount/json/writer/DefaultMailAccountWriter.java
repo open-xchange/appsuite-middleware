@@ -314,62 +314,78 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
      * @return A JSON array of JSON arrays for each account
      * @throws OXException If writing JSON fails
      */
-    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes, final Session session, final boolean hideDetailsForDefaultAccount) throws OXException {
-        final JSONArray rows = new JSONArray(mailAccounts.length);
-        final JSlobStorage jSlobStorage = AbstractMailAccountAction.getStorage();
-        final int defaultId = MailAccount.DEFAULT_ID;
+    public static JSONArray writeArray(MailAccount[] mailAccounts, List<Attribute> attributes, Session session, boolean hideDetailsForDefaultAccount) throws OXException {
+        JSONArray jRows = new JSONArray(mailAccounts.length);
+        JSlobStorage jSlobStorage = AbstractMailAccountAction.getStorage();
         // Write accounts
-        for (final MailAccount account : mailAccounts) {
-            final boolean hideForDefault = hideDetailsForDefaultAccount && defaultId == account.getId();
-            final MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
-            final JSONArray row = new JSONArray(hideForDefault ? 32 : 64);
-            for (final Attribute attribute : attributes) {
-                if (hideForDefault) {
-                    if (HIDDEN_FOR_DEFAULT.contains(attribute)) {
-                        row.put(JSONObject.NULL);
-                    } else {
-                        writeAttribute(attribute, account, getter, row, session, jSlobStorage);
-                    }
-                } else {
-                    if (Attribute.PASSWORD_LITERAL == attribute || Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
-                        row.put(JSONObject.NULL);
-                    } else if (Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL == attribute || Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL == attribute) {
-                        row.put(Boolean.parseBoolean(String.valueOf(attribute.doSwitch(getter))));
-                    } else {
-                        writeAttribute(attribute, account, getter, row, session, jSlobStorage);
-                    }
-                }
-            }
-            rows.put(row);
+        for (MailAccount account : mailAccounts) {
+            jRows.put(writeArrayRow(account, attributes, session, hideDetailsForDefaultAccount, jSlobStorage));
         }
-        return rows;
+        return jRows;
     }
 
-    private static void writeAttribute(final Attribute attribute, final MailAccount account, final MailAccountGetSwitch getter, final JSONArray row, final Session session, final JSlobStorage jSlobStorage) throws OXException {
+    /**
+     * Writes specified attributes for each mail account contained in given array in an own JSON array surrounded by a super JSON array.
+     *
+     * @param account The mail account
+     * @param attributes The attributes
+     * @return A JSON array row for given account
+     * @throws OXException If writing JSON fails
+     */
+    public static JSONArray writeArrayRow(final MailAccount account, final List<Attribute> attributes, final Session session, final boolean hideDetailsForDefaultAccount) throws OXException {
+        final JSlobStorage jSlobStorage = AbstractMailAccountAction.getStorage();
+        return writeArrayRow(account, attributes, session, hideDetailsForDefaultAccount, jSlobStorage);
+    }
+
+    private static JSONArray writeArrayRow(MailAccount account, List<Attribute> attributes, Session session, boolean hideDetailsForDefaultAccount, JSlobStorage jSlobStorage) throws OXException {
+        final boolean hideForDefault = hideDetailsForDefaultAccount && MailAccount.DEFAULT_ID == account.getId();
+        final MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
+        final JSONArray jRow = new JSONArray(hideForDefault ? 32 : 64);
+        for (final Attribute attribute : attributes) {
+            if (hideForDefault) {
+                if (HIDDEN_FOR_DEFAULT.contains(attribute)) {
+                    jRow.put(JSONObject.NULL);
+                } else {
+                    writeAttribute(attribute, account, getter, jRow, session, jSlobStorage);
+                }
+            } else {
+                if (Attribute.PASSWORD_LITERAL == attribute || Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
+                    jRow.put(JSONObject.NULL);
+                } else if (Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL == attribute || Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL == attribute) {
+                    jRow.put(Boolean.parseBoolean(String.valueOf(attribute.doSwitch(getter))));
+                } else {
+                    writeAttribute(attribute, account, getter, jRow, session, jSlobStorage);
+                }
+            }
+        }
+        return jRow;
+    }
+
+    private static void writeAttribute(Attribute attribute, MailAccount account, MailAccountGetSwitch getter, JSONArray row, Session session, JSlobStorage jSlobStorage) throws OXException {
         if (FULL_NAMES.contains(attribute)) {
-            final Object value = attribute.doSwitch(getter);
+            Object value = attribute.doSwitch(getter);
             if (null == value) {
                 row.put(JSONObject.NULL);
             } else {
                 row.put(prepareFullname(account.getId(), value.toString()));
             }
         } else if (Attribute.META == attribute) {
-            final JSlobId jSlobId = new JSlobId(AbstractMailAccountAction.JSLOB_SERVICE_ID, Integer.toString(account.getId()), session.getUserId(), session.getContextId());
-            final JSlob jSlob = jSlobStorage.opt(jSlobId);
+            JSlobId jSlobId = new JSlobId(AbstractMailAccountAction.JSLOB_SERVICE_ID, Integer.toString(account.getId()), session.getUserId(), session.getContextId());
+            JSlob jSlob = jSlobStorage.opt(jSlobId);
             if (null == jSlob) {
                 row.put(JSONObject.NULL);
             } else {
                 row.put(jSlob.getJsonObject());
             }
         } else if (Attribute.PRIMARY_ADDRESS_LITERAL == attribute) {
-            final Object value  = attribute.doSwitch(getter);
+            Object value  = attribute.doSwitch(getter);
             if (null == value) {
                 row.put(JSONObject.NULL);
             } else {
                 row.put(addr2String(value.toString()));
             }
         } else {
-            final Object value  = attribute.doSwitch(getter);
+            Object value  = attribute.doSwitch(getter);
             row.put(value == null ? JSONObject.NULL : value);
         }
     }
