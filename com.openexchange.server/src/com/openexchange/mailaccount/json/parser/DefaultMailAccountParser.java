@@ -74,11 +74,11 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link MailAccountParser} - Parses a JSON object to a mail account.
+ * {@link DefaultMailAccountParser} - Parses a JSON object to a mail account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailAccountParser extends DataParser {
+public class DefaultMailAccountParser extends DataParser {
 
     private static final class StandardPorts {
 
@@ -119,21 +119,21 @@ public class MailAccountParser extends DataParser {
         PORTS = Collections.unmodifiableMap(m);
     }
 
-    private static final MailAccountParser INSTANCE = new MailAccountParser();
+    private static final DefaultMailAccountParser INSTANCE = new DefaultMailAccountParser();
 
     /**
      * Gets the instance.
      *
      * @return The instance
      */
-    public static MailAccountParser getInstance() {
+    public static DefaultMailAccountParser getInstance() {
         return INSTANCE;
     }
 
     /**
      * Default constructor.
      */
-    private MailAccountParser() {
+    private DefaultMailAccountParser() {
         super();
     }
 

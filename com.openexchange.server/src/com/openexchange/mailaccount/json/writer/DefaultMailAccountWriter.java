@@ -74,11 +74,11 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAccountWriter} - Writes mail account as JSON data.
+ * {@link DefaultMailAccountWriter} - Writes mail account as JSON data.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountWriter implements MailAccountFields {
+public final class DefaultMailAccountWriter implements MailAccountFields {
 
     private static final EnumSet<Attribute> HIDDEN_FOR_DEFAULT = EnumSet.of(
         Attribute.MAIL_PORT_LITERAL,
@@ -109,7 +109,7 @@ public final class MailAccountWriter implements MailAccountFields {
     private static boolean hideDetailsForDefaultAccount() {
         Boolean tmp = hideDetailsForDefaultAccount;
         if (null == tmp) {
-            synchronized (MailAccountWriter.class) {
+            synchronized (DefaultMailAccountWriter.class) {
                 tmp = hideDetailsForDefaultAccount;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -121,7 +121,7 @@ public final class MailAccountWriter implements MailAccountFields {
         return tmp.booleanValue();
     }
 
-    private MailAccountWriter() {
+    private DefaultMailAccountWriter() {
         super();
     }
 

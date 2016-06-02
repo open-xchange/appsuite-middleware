@@ -68,7 +68,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.MailAccountFields;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -119,7 +119,7 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
                     Integer.valueOf(session.getContextId()));
             }
 
-            final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
+            final JSONObject jsonAccount = DefaultMailAccountWriter.write(mailAccount);
             // final JSONObject jsonAccount = MailAccountWriter.write(checkFullNames(mailAccount, storageService, session));
 
             {

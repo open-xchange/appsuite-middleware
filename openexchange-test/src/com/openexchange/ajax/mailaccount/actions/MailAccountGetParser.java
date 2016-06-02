@@ -56,7 +56,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.json.parser.MailAccountParser;
+import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 
 
 /**
@@ -76,7 +76,7 @@ public class MailAccountGetParser extends AbstractAJAXParser<MailAccountGetRespo
         final MailAccountGetResponse resp = new MailAccountGetResponse(response);
         final MailAccountDescription account = new MailAccountDescription();
         try {
-            MailAccountParser.getInstance().parse(account, (JSONObject) response.getData(), new LinkedList<OXException>());
+            DefaultMailAccountParser.getInstance().parse(account, (JSONObject) response.getData(), new LinkedList<OXException>());
         } catch (final OXException e) {
             throw new JSONException(e);
         }

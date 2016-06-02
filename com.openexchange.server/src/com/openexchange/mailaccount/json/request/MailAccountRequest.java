@@ -82,8 +82,8 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.MailAccountFields;
-import com.openexchange.mailaccount.json.parser.MailAccountParser;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -178,7 +178,7 @@ public final class MailAccountRequest {
                 Integer.valueOf(session.getContextId()));
         }
 
-        final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
+        final JSONObject jsonAccount = DefaultMailAccountWriter.write(mailAccount);
         return jsonAccount;
     }
 
@@ -248,7 +248,7 @@ public final class MailAccountRequest {
         }
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
-        MailAccountParser.getInstance().parse(accountDescription, jData, new LinkedList<OXException>());
+        DefaultMailAccountParser.getInstance().parse(accountDescription, jData, new LinkedList<OXException>());
 
         checkNeededFields(accountDescription);
 
@@ -265,7 +265,7 @@ public final class MailAccountRequest {
             storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session);
 
         final JSONObject jsonAccount =
-            MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
+            DefaultMailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
         return jsonAccount;
     }
@@ -285,7 +285,7 @@ public final class MailAccountRequest {
         }
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
-        MailAccountParser.getInstance().parse(accountDescription, jData, new LinkedList<OXException>());
+        DefaultMailAccountParser.getInstance().parse(accountDescription, jData, new LinkedList<OXException>());
 
         if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
             /*
@@ -523,7 +523,7 @@ public final class MailAccountRequest {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
-        final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData, new LinkedList<OXException>());
+        final Set<Attribute> fieldsToUpdate = DefaultMailAccountParser.getInstance().parse(accountDescription, jData, new LinkedList<OXException>());
 
         if (!session.getUserPermissionBits().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
             throw MailAccountExceptionCodes.NOT_ENABLED.create(
@@ -585,7 +585,7 @@ public final class MailAccountRequest {
         }
 
         final JSONObject jsonAccount =
-            MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
+            DefaultMailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
 
         return jsonAccount;
     }
@@ -610,7 +610,7 @@ public final class MailAccountRequest {
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
-        return MailAccountWriter.writeArray(userMailAccounts, attributes, session);
+        return DefaultMailAccountWriter.writeArray(userMailAccounts, attributes, session);
     }
 
     private List<Attribute> getColumns(final String colString) {
@@ -649,7 +649,7 @@ public final class MailAccountRequest {
             }
         }
 
-        return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes, session);
+        return DefaultMailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes, session);
     }
 
     private static boolean isUnifiedINBOXAccount(final MailAccount mailAccount) {

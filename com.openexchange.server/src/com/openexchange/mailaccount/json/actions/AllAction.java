@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -106,7 +106,7 @@ public final class AllAction extends AbstractMailAccountAction {
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
-        JSONArray jsonArray = MailAccountWriter.writeArray(userMailAccounts, attributes, session);
+        JSONArray jsonArray = DefaultMailAccountWriter.writeArray(userMailAccounts, attributes, session);
         return new AJAXRequestResult(jsonArray);
     }
 

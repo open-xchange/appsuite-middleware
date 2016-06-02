@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 
 /**
  * {@link MailAccountInsertRequest}
@@ -83,7 +83,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
 
     @Override
     public Object getBody() throws JSONException {
-        final JSONObject json = MailAccountWriter.write(wrap(account));
+        final JSONObject json = DefaultMailAccountWriter.write(wrap(account));
         json.put("password", account.getPassword());
         return json;
     }
