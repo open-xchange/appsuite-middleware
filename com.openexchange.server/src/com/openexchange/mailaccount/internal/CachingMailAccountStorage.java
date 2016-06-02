@@ -395,6 +395,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public TransportAccount getTransportByReference(String reference, int userId, int contextId) throws OXException {
+        return delegate.getTransportByReference(reference, userId, contextId);
+    }
+
+    @Override
     public int[] getByHostNames(Collection<String> hostNames, int userId, int contextId) throws OXException {
         return delegate.getByHostNames(hostNames, userId, contextId);
     }

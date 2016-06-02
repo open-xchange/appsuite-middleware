@@ -49,247 +49,250 @@
 
 package com.openexchange.mailaccount.json.fields;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.AttributeSwitch;
-import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.TransportAccount;
 
 /**
- * {@link GetSwitch}
+ * {@link TransportAccountGetSwitch}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class GetSwitch implements AttributeSwitch {
+public class TransportAccountGetSwitch implements AttributeSwitch {
 
-    private final MailAccountDescription desc;
+    private final TransportAccount account;
 
     /**
-     * Initializes a new {@link GetSwitch}.
+     * Initializes a new {@link TransportAccountGetSwitch}.
      *
-     * @param desc The account description
+     * @param account The account to read from
+     * @throws IllegalArgumentException If passed account is <code>null</code>
      */
-    public GetSwitch(final MailAccountDescription desc) {
+    public TransportAccountGetSwitch(final TransportAccount account) {
         super();
-        this.desc = desc;
-    }
-
-    @Override
-    public Object confirmedHam() {
-        return desc.getConfirmedHam();
-    }
-
-    @Override
-    public Object confirmedSpam() {
-        return desc.getConfirmedSpam();
-    }
-
-    @Override
-    public Object drafts() {
-        return desc.getDrafts();
-    }
-
-    @Override
-    public Object id() {
-        return desc.getId();
-    }
-
-    @Override
-    public Object login() {
-        return desc.getLogin();
+        if (null == account) {
+            throw new IllegalArgumentException("account is null.");
+        }
+        this.account = account;
     }
 
     @Override
     public Object replyTo() {
-        return desc.getReplyTo();
+        return null;
     }
 
     @Override
-    public Object mailURL() throws OXException {
-        return desc.generateMailServerURL();
+    public Object confirmedHam() {
+        return null;
+    }
+
+    @Override
+    public Object confirmedSpam() {
+        return null;
+    }
+
+    @Override
+    public Object drafts() {
+        return null;
+    }
+
+    @Override
+    public Object id() {
+        return Integer.valueOf(account.getId());
+    }
+
+    @Override
+    public Object login() {
+        return account.getLogin();
+    }
+
+    @Override
+    public Object mailURL() {
+        return null;
     }
 
     @Override
     public Object name() {
-        return desc.getName();
+        return account.getName();
     }
 
     @Override
     public Object password() {
-        return desc.getPassword();
+        return account.getPassword();
     }
 
     @Override
     public Object primaryAddress() {
-        return desc.getPrimaryAddress();
+        return account.getPrimaryAddress();
     }
 
     @Override
     public Object personal() {
-        return desc.getPersonal();
+        return account.getPersonal();
     }
 
     @Override
     public Object sent() {
-        return desc.getSent();
+        return null;
     }
 
     @Override
     public Object spam() {
-        return desc.getSpam();
+        return null;
     }
 
     @Override
     public Object spamHandler() {
-        return desc.getSpamHandler();
+        return null;
     }
 
     @Override
-    public Object transportURL() throws OXException {
-        return desc.generateTransportServerURL();
+    public Object transportURL() {
+        return account.generateTransportServerURL();
     }
 
     @Override
     public Object trash() {
-        return desc.getTrash();
+        return null;
     }
 
     @Override
     public Object archive() {
-        return desc.getArchive();
+        return null;
     }
 
     @Override
     public Object mailPort() {
-        return Integer.valueOf(desc.getMailPort());
+        return null;
     }
 
     @Override
     public Object mailProtocol() {
-        return desc.getMailProtocol();
+        return null;
     }
 
     @Override
     public Object mailSecure() {
-        return Boolean.valueOf(desc.isMailSecure());
+        return null;
     }
 
     @Override
     public Object mailServer() {
-        return desc.getMailServer();
+        return null;
     }
 
     @Override
     public Object transportPort() {
-        return Integer.valueOf(desc.getTransportPort());
+        return Integer.valueOf(account.getTransportPort());
     }
 
     @Override
     public Object transportProtocol() {
-        return desc.getTransportProtocol();
+        return account.getTransportProtocol();
     }
 
     @Override
     public Object transportSecure() {
-        return Boolean.valueOf(desc.isTransportSecure());
+        return Boolean.valueOf(account.isTransportSecure());
     }
 
     @Override
     public Object transportServer() {
-        return desc.getTransportServer();
+        return account.getTransportServer();
     }
 
     @Override
     public Object transportLogin() {
-        return desc.getTransportLogin();
+        return account.getTransportLogin();
     }
 
     @Override
     public Object transportPassword() {
-        return desc.getTransportPassword();
+        return account.getTransportPassword();
     }
 
     @Override
     public Object unifiedINBOXEnabled() {
-        return Boolean.valueOf(desc.isUnifiedINBOXEnabled());
+        return null;
     }
 
     @Override
     public Object confirmedHamFullname() {
-        return desc.getConfirmedHamFullname();
+        return null;
     }
 
     @Override
     public Object confirmedSpamFullname() {
-        return desc.getConfirmedSpamFullname();
+        return null;
     }
 
     @Override
     public Object draftsFullname() {
-        return desc.getDraftsFullname();
+        return null;
     }
 
     @Override
     public Object sentFullname() {
-        return desc.getSentFullname();
+        return null;
     }
 
     @Override
     public Object spamFullname() {
-        return desc.getSpamFullname();
+        return null;
     }
 
     @Override
     public Object trashFullname() {
-        return desc.getTrashFullname();
+        return null;
     }
 
     @Override
     public Object archiveFullname() {
-        return desc.getArchiveFullname();
+        return null;
     }
 
     @Override
     public Object transportAuth() {
-        return desc.getTransportAuth();
+        return account.getTransportAuth();
     }
 
     @Override
     public Object pop3DeleteWriteThrough() {
-        return Boolean.valueOf(desc.getProperties().get("pop3.deletewt"));
+        return null;
     }
 
     @Override
     public Object pop3ExpungeOnQuit() {
-        return Boolean.valueOf(desc.getProperties().get("pop3.expunge"));
+        return null;
     }
 
     @Override
     public Object pop3RefreshRate() {
-        return desc.getProperties().get("pop3.refreshrate");
+        return null;
     }
 
     @Override
     public Object pop3Path() {
-        return desc.getProperties().get("pop3.path");
+        return null;
     }
 
     @Override
     public Object pop3Storage() {
-        return desc.getProperties().get("pop3.storage");
+        return null;
     }
 
     @Override
     public Object addresses() {
-        return desc.getProperties().get("addresses");
+        return null;
     }
 
     @Override
     public Object mailStartTls() {
-        return Boolean.valueOf(desc.isMailStartTls());
+        return null;
     }
 
     @Override
     public Object transportStartTls() {
-        return Boolean.valueOf(desc.isTransportStartTls());
+        return Boolean.valueOf(account.isTransportStartTls());
     }
 
     @Override

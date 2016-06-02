@@ -467,8 +467,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            final String table = "user_transport_account_properties";
-            stmt = con.prepareStatement("SELECT name, value FROM " + table + " WHERE cid = ? AND user = ? AND id = ?");
+            stmt = con.prepareStatement("SELECT name, value FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -485,7 +484,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         }
                     }
                 } while (rs.next());
-                // Add aliases, too
+
                 String sTransAuth = properties.remove("transport.auth");
                 if (null != sTransAuth) {
                     transportAccount.setTransportAuth(TransportAuth.transportAuthFor(sTransAuth));
@@ -2311,6 +2310,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (null != transportAuth) {
                 updateProperty(contextId, userId, transportAccount.getId(), "transport.auth", transportAuth.getId(), true, con);
             }
+            String reference = transportAccount.getTransportProperties().get("reference");
+            if (null != reference) {
+                updateProperty(contextId, userId, transportAccount.getId(), "reference", reference, true, con);
+            }
 
             con.commit();
             rollback = false;
@@ -2662,6 +2665,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (null != transportAuth) {
                     updateProperty(contextId, userId, id, "transport.auth", transportAuth.getId(), true, con);
                 }
+                String reference = mailAccount.getTransportProperties().get("reference");
+                if (null != reference) {
+                    updateProperty(contextId, userId, id, "reference", reference, true, con);
+                }
             }
         } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -2833,6 +2840,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (null != transportAuth) {
                     updateProperty(contextId, userId, id, "transport.auth", transportAuth.getId(), true, con);
                 }
+                String reference = transportAccount.getTransportProperties().get("reference");
+                if (null != reference) {
+                    updateProperty(contextId, userId, id, "reference", reference, true, con);
+                }
             }
         } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -2953,6 +2964,44 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 throw MailAccountExceptionCodes.CONFLICT_ADDR.create(primaryAddress, I(userId), I(contextId));
             }
             return id;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    @Override
+    public TransportAccount getTransportByReference(final String reference, final int userId, final int contextId) throws OXException {
+        final Connection con = Database.get(contextId, false);
+        try {
+            return getTransportByReference(reference, userId, contextId, con);
+        } finally {
+            Database.back(contextId, false, con);
+        }
+    }
+
+    private TransportAccount getTransportByReference(final String reference, final int userId, final int contextId, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT id FROM user_transport_account_properties WHERE cid = ? AND user = ? AND name = ? AND value = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, userId);
+            stmt.setString(3, "reference");
+            stmt.setString(4, reference);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                return null;
+            }
+
+            // Get identifier
+            int id = result.getInt(1);
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            return getTransportAccount(id, userId, contextId, con);
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

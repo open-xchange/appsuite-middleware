@@ -105,8 +105,6 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a mail account", parameters = { @Parameter(name = "session", description = "A session ID previously obtained from the login module.") }, requestBody = "A JSON object identifiying (field ID is present) and describing the account to update. See mail account data.", responseDescription = "A JSON object representing the updated mail account. See mail account data.")
 public final class UpdateAction extends AbstractMailAccountAction implements MailAccountFields {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
-
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
 
     /**

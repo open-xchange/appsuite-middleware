@@ -57,6 +57,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
@@ -66,10 +67,13 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
+import com.openexchange.mailaccount.json.fields.TransportAccountGetSwitch;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -405,6 +409,84 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
         } else {
             Object value  = attribute.doSwitch(getter);
             row.put(value == null ? JSONObject.NULL : value);
+        }
+    }
+
+    /**
+     * Adds transport account's value for specified attribute to given JSON array.
+     *
+     * @param attribute The attribute to add
+     * @param account The transport account
+     * @param jAccount The JSON array
+     * @throws OXException If adding attribute fails
+     */
+    public static void writeAttributeToArray(Attribute attribute, TransportAccount account, JSONArray jAccount) throws OXException {
+        writeAttribute(attribute, account, jAccount, ARRAY_ATTR_PUTTER);
+    }
+
+    /**
+     * Adds transport account's value for specified attribute to given JSON object.
+     *
+     * @param attribute The attribute to add
+     * @param account The transport account
+     * @param jAccount The JSON object
+     * @throws OXException If adding attribute fails
+     */
+    public static void writeAttributeToObject(Attribute attribute, TransportAccount account, JSONObject jAccount) throws OXException {
+        writeAttribute(attribute, account, jAccount, OBJECT_ATTR_PUTTER);
+    }
+
+    private static interface AttributePutter {
+
+        void putAttribute(Attribute attribute, Object value, JSONValue jValue) throws JSONException;
+    }
+
+    private static final AttributePutter OBJECT_ATTR_PUTTER = new AttributePutter() {
+
+        @Override
+        public void putAttribute(Attribute attribute, Object value, JSONValue jValue) throws JSONException {
+            if (null != value) {
+                jValue.toObject().put(attribute.getName(), value);
+            }
+        }
+    };
+
+    private static final AttributePutter ARRAY_ATTR_PUTTER = new AttributePutter() {
+
+        @Override
+        public void putAttribute(Attribute attribute, Object value, JSONValue jValue) {
+            jValue.toArray().put(null == value ? JSONObject.NULL : value);
+        }
+    };
+
+    private static void writeAttribute(Attribute attribute, TransportAccount account, JSONValue jValue, AttributePutter putter) throws OXException {
+        try {
+            boolean hideForDefault = hideDetailsForDefaultAccount() && MailAccount.DEFAULT_ID == account.getId();
+            if (hideForDefault) {
+                if (HIDDEN_FOR_DEFAULT.contains(attribute)) {
+                    putter.putAttribute(attribute, null, jValue);
+                    return;
+                }
+            }
+
+            TransportAccountGetSwitch getter = new TransportAccountGetSwitch(account);
+            if (Attribute.PASSWORD_LITERAL == attribute || Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
+                putter.putAttribute(attribute, null, jValue);
+            } else if (Attribute.META == attribute) {
+                putter.putAttribute(attribute, null, jValue);
+            } else if (Attribute.PRIMARY_ADDRESS_LITERAL == attribute) {
+                Object value  = attribute.doSwitch(getter);
+                if (null == value) {
+                    putter.putAttribute(attribute, null, jValue);
+                } else {
+                    putter.putAttribute(attribute, addr2String(value.toString()), jValue);
+                }
+            } else {
+                Object value  = attribute.doSwitch(getter);
+                putter.putAttribute(attribute, value, jValue);
+            }
+        } catch (JSONException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

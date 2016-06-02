@@ -227,6 +227,11 @@ public class TransportAccountImpl implements TransportAccount {
         this.personal = personal;
     }
 
+    @Override
+    public String getPersonal() {
+        return personal;
+    }
+
     /**
      * Sets the reply-to address
      *
@@ -234,6 +239,11 @@ public class TransportAccountImpl implements TransportAccount {
      */
     public void setReplyTo(final String replyTo) {
         this.replyTo = replyTo;
+    }
+
+    @Override
+    public String getReplyTo() {
+        return replyTo;
     }
 
     /**
@@ -308,6 +318,11 @@ public class TransportAccountImpl implements TransportAccount {
         this.transportSecure = transportSecure;
     }
 
+    @Override
+    public boolean isTransportSecure() {
+        return transportSecure;
+    }
+
     /**
      * Sets the transport server name.
      *
@@ -343,7 +358,7 @@ public class TransportAccountImpl implements TransportAccount {
 
     /**
      * Sets the startTLS flag
-     * 
+     *
      * @param startTLS The startTLS flag
      */
     public void setTransportStartTls(boolean startTLS) {

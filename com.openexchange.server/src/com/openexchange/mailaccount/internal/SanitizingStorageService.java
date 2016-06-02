@@ -261,6 +261,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public TransportAccount getTransportByReference(String reference, int userId, int contextId) throws OXException {
+        return storageService.getTransportByReference(reference, userId, contextId);
+    }
+
+    @Override
     public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws OXException {
         return storageService.getByHostNames(hostNames, user, cid);
     }

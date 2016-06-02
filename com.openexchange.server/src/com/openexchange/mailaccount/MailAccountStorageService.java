@@ -417,6 +417,17 @@ public interface MailAccountStorageService {
     int getTransportByPrimaryAddress(String primaryAddress, int userId, int contextId) throws OXException;
 
     /**
+     * Gets the transport account matching specified reference for given user in given context.
+     *
+     * @param reference The reference to look for
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The identifier of the transport account or <code>null</code> if none found
+     * @throws OXException If look-up by reference caused a conflict
+     */
+    TransportAccount getTransportByReference(String reference, int userId, int contextId) throws OXException;
+
+    /**
      * Gets those mail accounts of given user in given context whose host name occurs in specified collection of host names.
      *
      * @param hostNames The host names

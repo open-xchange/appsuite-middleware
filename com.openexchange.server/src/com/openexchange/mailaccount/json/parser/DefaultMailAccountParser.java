@@ -67,6 +67,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
@@ -157,8 +158,17 @@ public class DefaultMailAccountParser extends DataParser {
     protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings) throws JSONException, OXException {
         final Set<Attribute> attributes = new HashSet<Attribute>();
         if (json.hasAndNotNull(MailAccountFields.ID)) {
-            account.setId(parseInt(json, MailAccountFields.ID));
-            attributes.add(Attribute.ID_LITERAL);
+            Object object = json.get(MailAccountFields.ID);
+            if (object instanceof Integer) {
+                account.setId(((Integer) object).intValue());
+                attributes.add(Attribute.ID_LITERAL);
+            } else {
+                int parsed = Tools.getUnsignedInteger(object.toString());
+                if (parsed >= 0) {
+                    account.setId(parsed);
+                    attributes.add(Attribute.ID_LITERAL);
+                }
+            }
         }
         if (json.hasAndNotNull(MailAccountFields.LOGIN)) {
             account.setLogin(parseString(json, MailAccountFields.LOGIN));

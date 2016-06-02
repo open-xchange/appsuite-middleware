@@ -69,9 +69,9 @@ import com.openexchange.tools.net.URITools;
 public class TransportAccountDescription {
 
     private int id;
-    private String login;
+    private String transportLogin;
     private String name;
-    private String password;
+    private String transportPassword;
     private String personal;
     private String primaryAddress;
     private String replyTo;
@@ -245,7 +245,16 @@ public class TransportAccountDescription {
      * @return The transport login
      */
     public String getTransportLogin() {
-        return login;
+        return transportLogin;
+    }
+
+    /**
+     * Sets the transport login
+     *
+     * @param login The transport login to set
+     */
+    public void setTransportLogin(String login) {
+        this.transportLogin = login;
     }
 
     /**
@@ -254,7 +263,16 @@ public class TransportAccountDescription {
      * @return The transport password
      */
     public String getTransportPassword() {
-        return password;
+        return transportPassword;
+    }
+
+    /**
+     * Sets the password
+     *
+     * @param password The password to set
+     */
+    public void setTransportPassword(String password) {
+        this.transportPassword = password;
     }
 
     /**
