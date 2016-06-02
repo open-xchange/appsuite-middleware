@@ -90,7 +90,7 @@ public class DefaultEnabledChecker implements EnabledChecker {
         List<String> capsToCheck = new ArrayList<String>(4);
         capsToCheck.add("infostore");
         capsToCheck.add("share_links");
-        capsToCheck = modifyCapabilitiesToCheck(capsToCheck);
+        capsToCheck = modifyCapabilitiesToCheck(capsToCheck, session);
 
         if (null == capsToCheck) {
             return true;
@@ -104,9 +104,10 @@ public class DefaultEnabledChecker implements EnabledChecker {
      * Modifies the specified capabilities (remove existing, add new ones) that are supposed to checked.
      *
      * @param capabilities The capabilities to modify
+     * @param session The session providing user data
      * @return The possible modified capabilities
      */
-    protected List<String> modifyCapabilitiesToCheck(List<String> capabilities) {
+    protected List<String> modifyCapabilitiesToCheck(List<String> capabilities, Session session) {
         // Return unchanged for default checker
         return capabilities;
     }
