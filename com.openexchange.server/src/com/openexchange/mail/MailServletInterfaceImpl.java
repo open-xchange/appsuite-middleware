@@ -50,7 +50,6 @@
 package com.openexchange.mail;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.mail.config.IPRange.isWhitelistedFromRateLimit;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import gnu.trove.map.TIntObjectMap;
@@ -205,6 +204,7 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.HostList;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -4568,6 +4568,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
         separatorRef[0] = separator;
         return archiveFullName;
+    }
+
+    /**
+     * Checks if specified IP address is contained in given collection of IP address ranges
+     *
+     * @param actual The IP address to check
+     * @param ranges The collection of IP address ranges
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    private static boolean isWhitelistedFromRateLimit(String actual, HostList ranges) {
+        if (Strings.isEmpty(actual)) {
+            return false;
+        }
+
+        return ranges.contains(actual);
     }
 
 }
