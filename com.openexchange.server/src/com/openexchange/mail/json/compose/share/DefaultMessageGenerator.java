@@ -550,7 +550,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
                 String fileName = item.getName();
                 fileNames.add(Strings.isEmpty(fileName) ? translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME) : fileName);
             }
-            vars.put(VARIABLE_FILE_NAMES, items);
+            vars.put(VARIABLE_FILE_NAMES, fileNames);
         }
 
         return compileTemplate(getTemplateName(), vars, templateService);
