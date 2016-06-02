@@ -76,7 +76,7 @@ public abstract class AbstractListenerCollectingResponseRenderer implements List
     /** The queue for added listeners */
     protected final Queue<RenderListener> renderListenerRegistry;
 
-    /** The flag signaling is there is any registered listener */
+    /** The flag signaling if there is any registered listener */
     protected volatile boolean hasRenderListeners;
 
     /**
