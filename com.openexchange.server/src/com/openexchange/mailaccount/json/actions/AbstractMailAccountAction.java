@@ -86,7 +86,6 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
-import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.MailAccountJsonUtility;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -255,16 +254,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     }
 
     protected static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
-        // Check needed fields
-        if (isEmpty(accountDescription.getMailServer())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.MAIL_URL);
-        }
-        if (isEmpty(accountDescription.getLogin())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.LOGIN);
-        }
-        if (isEmpty(accountDescription.getPassword())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.PASSWORD);
-        }
+        MailAccountJsonUtility.checkNeededFields(accountDescription);
     }
 
     /**

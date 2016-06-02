@@ -49,12 +49,16 @@
 
 package com.openexchange.mailaccount.json;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.Tools;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link MailAccountJsonUtility}
@@ -104,6 +108,25 @@ public class MailAccountJsonUtility {
 
     private static int parseInt(String col) {
         return Tools.getUnsignedInteger(col);
+    }
+
+    /**
+     * Checks validity of values for needed fields.
+     *
+     * @param accountDescription The account description
+     * @throws OXException If a needed field's value is invalid
+     */
+    public static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
+        // Check needed fields
+        if (isEmpty(accountDescription.getMailServer())) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.MAIL_URL);
+        }
+        if (isEmpty(accountDescription.getLogin())) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.LOGIN);
+        }
+        if (isEmpty(accountDescription.getPassword())) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.PASSWORD);
+        }
     }
 
 }

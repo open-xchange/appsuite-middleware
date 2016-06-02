@@ -49,9 +49,15 @@
 
 package com.openexchange.mailaccount;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.net.URITools;
 
 /**
@@ -76,6 +82,37 @@ public class TransportAccountDescription {
     private String transportServer;
     private boolean transportStartTls;
     private String transportUrl;
+    private Map<String, String> transportProperties;
+
+    /**
+     * Initializes a new {@link TransportAccountDescription}.
+     */
+    public TransportAccountDescription() {
+        super();
+        transportProperties = new HashMap<String, String>(4);
+        transportAuth = TransportAuth.MAIL;
+        transportPort = 25;
+        transportProtocol = "smtp";
+        id = -1;
+    }
+
+    /**
+     * Parses specified transport server URL
+     *
+     * @param mailServerURL The transport server URL to parse
+     * @throws OXException If URL cannot be parsed
+     */
+    public void parseTransportServerURL(final String transportServerURL) throws OXException {
+        if (null == transportServerURL) {
+            setTransportServer((String) null);
+            return;
+        }
+        try {
+            setTransportServer(URIParser.parse(IDNA.toASCII(transportServerURL), URIDefaults.SMTP));
+        } catch (final URISyntaxException e) {
+            throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, transportServerURL);
+        }
+    }
 
     /**
      * Generates transport server URL
@@ -113,6 +150,15 @@ public class TransportAccountDescription {
     }
 
     /**
+     * Gets the ID
+     *
+     * @return The ID
+     */
+    public void setId(final int id) {
+        this.id = id;
+    }
+
+    /**
      * Gets the account name.
      *
      * @return The account name
@@ -146,6 +192,42 @@ public class TransportAccountDescription {
      */
     public String getReplyTo() {
         return replyTo;
+    }
+
+    /**
+     * Sets the account name.
+     *
+     * @param name The account name.
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    /**
+     * Sets the primary email address.
+     *
+     * @param primaryAddress The primary email address
+     */
+    public void setPrimaryAddress(final String primaryAddress) {
+        this.primaryAddress = primaryAddress;
+    }
+
+    /**
+     * Sets the personal.
+     *
+     * @param personal The personal
+     */
+    public void setPersonal(final String personal) {
+        this.personal = personal;
+    }
+
+    /**
+     * Sets the reply-to address
+     *
+     * @param replyTo The reply-to address
+     */
+    public void setReplyTo(final String replyTo) {
+        this.replyTo = replyTo;
     }
 
     /**
@@ -206,11 +288,142 @@ public class TransportAccountDescription {
     }
 
     /**
+     * Sets the transport server name
+     *
+     * @param transportServer The transport server name to set
+     */
+    public void setTransportServer(String transportServer) {
+        this.transportServer = transportServer;
+    }
+
+    /**
+     * Sets transport server URI
+     *
+     * @param transportServer The transport server URI
+     */
+    public void setTransportServer(final URI transportServer) {
+        if (null == transportServer) {
+            // Parse like old parser to prevent problems.
+            setTransportServer("");
+        } else {
+            final String protocol = transportServer.getScheme();
+            if (protocol.endsWith("s")) {
+                setTransportSecure(true);
+                setTransportProtocol(protocol.substring(0, protocol.length() - 1));
+            } else {
+                setTransportSecure(false);
+                setTransportProtocol(protocol);
+            }
+            setTransportServer(URITools.getHost(transportServer));
+            setTransportPort(transportServer.getPort());
+        }
+    }
+
+    /**
+     * Sets the transport authentication information
+     *
+     * @param transportAuth The transport authentication information to set
+     */
+    public void setTransportAuth(TransportAuth transportAuth) {
+        this.transportAuth = transportAuth;
+    }
+
+    /**
+     * Sets the transport server port
+     *
+     * @param transportPort The transport server port to set
+     */
+    public void setTransportPort(final int transportPort) {
+        transportUrl = null;
+        this.transportPort = checkTransportPort(transportPort);
+    }
+
+    private static int checkTransportPort(final int port) {
+        if (URIDefaults.IMAP.getPort() == port) {
+            return URIDefaults.SMTP.getPort();
+        }
+        if (URIDefaults.IMAP.getSSLPort() == port) {
+            return URIDefaults.SMTP.getSSLPort();
+        }
+        return port;
+    }
+
+    /**
+     * Sets the transport server protocol
+     *
+     * @param transportProtocol The transport server protocol to set
+     */
+    public void setTransportProtocol(final String transportProtocol) {
+        transportUrl = null;
+        this.transportProtocol = transportProtocol;
+    }
+
+    /**
+     * Sets if a secure connection to transport server shall be established.
+     *
+     * @param mailSecure <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
+     */
+    public void setTransportSecure(final boolean transportSecure) {
+        transportUrl = null;
+        this.transportSecure = transportSecure;
+    }
+
+    /**
+     * Sets if STARTTLS should be used to connect to transport server
+     *
+     * @return
+     */
+    public void setTransportStartTls(boolean transportStartTls) {
+        this.transportStartTls = transportStartTls;
+    }
+
+    /**
      * Checks if STARTTLS should be used to connect to transport server
-     * 
+     *
      * @return
      */
     public boolean isTransportStartTls() {
         return transportStartTls;
     }
+
+    /**
+     * Gets the transport properties
+     *
+     * @return The transport properties
+     */
+    public Map<String, String> getTransportProperties() {
+        if (transportProperties.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return new HashMap<String, String>(transportProperties);
+    }
+
+    /**
+     * Sets the transport properties
+     *
+     * @param properties The transport properties to set
+     */
+    public void setTransportProperties(final Map<String, String> transportProperties) {
+        if (null == transportProperties) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else if (transportProperties.isEmpty()) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else {
+            this.transportProperties = new HashMap<String, String>(transportProperties);
+        }
+    }
+
+    /**
+     * Adds specified name-value-pair to transport properties.
+     *
+     * @param name The transport property name
+     * @param value The transport property value
+     */
+    public void addTransportProperty(final String name, final String value) {
+        if (transportProperties.isEmpty()) {
+            transportProperties = new HashMap<String, String>(4);
+        }
+        transportProperties.put(name, value);
+    }
+
 }
