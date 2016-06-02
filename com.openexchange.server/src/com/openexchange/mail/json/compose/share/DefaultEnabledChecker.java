@@ -88,7 +88,7 @@ public class DefaultEnabledChecker implements EnabledChecker {
     @Override
     public boolean isEnabled(Session session) throws OXException {
         List<String> capsToCheck = new ArrayList<String>(4);
-        capsToCheck.add("drive");
+        capsToCheck.add("infostore");
         capsToCheck.add("share_links");
         capsToCheck = modifyCapabilitiesToCheck(capsToCheck);
 
