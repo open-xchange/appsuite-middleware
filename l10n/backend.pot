@@ -7509,7 +7509,7 @@ msgstr ""
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the file names for affected message's attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:94
-msgid "The following files are shared"
+msgid "The following attachments are accessible:"
 msgstr ""
 
 #. *
