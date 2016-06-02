@@ -89,7 +89,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;

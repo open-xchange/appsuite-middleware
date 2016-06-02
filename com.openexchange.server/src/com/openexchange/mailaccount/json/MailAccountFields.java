@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailaccount.json.fields;
+package com.openexchange.mailaccount.json;
 
 /**
  * {@link MailAccountFields} - Provides constants for mail account JSON fields.

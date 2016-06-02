@@ -55,7 +55,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountFields;
 
 /**
  * {@link Attribute}.

@@ -67,7 +67,7 @@ import com.openexchange.jslob.JSlobId;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;

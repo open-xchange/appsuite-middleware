@@ -86,7 +86,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;

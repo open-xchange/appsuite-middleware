@@ -68,7 +68,7 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
