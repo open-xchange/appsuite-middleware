@@ -184,6 +184,9 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
     protected boolean doCustomParsing(final Account account, final Session session) throws OXException {
         if (!account.isDefaultAccount()) {
             TransportAuth transportAuth = account.getTransportAuth();
+            if (transportAuth == null) {
+                return true;
+            }
             switch (transportAuth) {
             case CUSTOM:
                 login = saneLogin(account.getTransportLogin());
