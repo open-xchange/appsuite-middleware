@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The chronos implementation bundle
+Bundle-SymbolicName: com.openexchange.chronos.imp
+Bundle-Version: 7.10.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.chronos,
+ com.openexchange.exception,
+ com.openexchange.folderstorage,
+ com.openexchange.folderstorage.database.contentType,
+ com.openexchange.folderstorage.type,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.osgi.util,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ javax.mail.internet,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.slf4j
