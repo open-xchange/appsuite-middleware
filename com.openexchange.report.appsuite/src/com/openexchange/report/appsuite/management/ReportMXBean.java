@@ -58,6 +58,7 @@ import com.openexchange.report.appsuite.ReportService;
  * methods are the equivalents of the methods in the {@link ReportService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public interface ReportMXBean {
 

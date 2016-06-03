@@ -60,6 +60,7 @@ import com.openexchange.report.appsuite.serialization.Report;
  * A {@link ContextReport} holds the information discovered about a certain context. See {@link Report}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public @NotThreadSafe class ContextReport extends Report {
 

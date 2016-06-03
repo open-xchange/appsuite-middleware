@@ -67,7 +67,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class DataloaderMySQL {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataloaderMySQL.class);
     DatabaseService dbService;
 
     public DataloaderMySQL() {
@@ -79,7 +78,7 @@ public class DataloaderMySQL {
      * Get all contexts IDs as a list for a given sub-admin id. The sub-admin is a tenant administrator.
      * 
      * @param sid, sub-admins ID
-     * @return , a list with all contextIDs for the sub-admins brand
+     * @return a list with all contextIDs for the sub-admins brand
      * @throws SQLException, if the query is incorrect or can not be executed
      * @throws OXException
      */

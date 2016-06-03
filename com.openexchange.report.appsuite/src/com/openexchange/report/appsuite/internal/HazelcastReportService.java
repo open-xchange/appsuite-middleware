@@ -97,6 +97,7 @@ import com.openexchange.report.appsuite.serialization.Report;
  * A Lock com.openexchange.report.Reports.Merge.[reportType] that protects the merge operations for the global report
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class HazelcastReportService extends AbstractReportService {
 

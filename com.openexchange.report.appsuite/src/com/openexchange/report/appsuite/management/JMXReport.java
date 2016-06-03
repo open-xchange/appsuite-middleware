@@ -66,6 +66,7 @@ import com.openexchange.version.Version;
  * OX versioning information.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class JMXReport {
     private final String uuid;

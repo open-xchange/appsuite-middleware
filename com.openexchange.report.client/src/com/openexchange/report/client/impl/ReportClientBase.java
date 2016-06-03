@@ -81,6 +81,12 @@ import com.openexchange.tools.console.TableWriter;
 import com.openexchange.tools.console.TableWriter.ColumnFormat;
 import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
+/**
+ * {@link ReportClientBase}
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.8.0
+ */
 public class ReportClientBase extends AbstractJMXTools {
 
     protected static final String CSV_NOT_SUPPORTED_MSG = "CSV support for appsuite report style not available. Please execute again with additional parameter '-o'.";
@@ -226,13 +232,9 @@ public class ReportClientBase extends AbstractJMXTools {
                 return;
             }
 
+            //determine the report mode
             ReportMode mode = ReportMode.NONE;
             boolean savereport = false;
-
-            SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-            boolean isCustomTimeframe = false;
-            Date timeframeStart = new Date();
-            Date timeframeEnd = new Date();
 
             if (null != parser.getOptionValue(this.savereport)) {
                 mode = ReportMode.SAVEONLY;
@@ -258,7 +260,11 @@ public class ReportClientBase extends AbstractJMXTools {
                 }
             }
 
-            // Does this report have a custom timeframe
+            // Does this report have a custom timeframe, if not, start- and end-date will be the same
+            SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+            boolean isCustomTimeframe = false;
+            Date timeframeStart = new Date();
+            Date timeframeEnd = new Date();
             if (parser.getOptionValue(this.timeframeStart) != null && mode != ReportMode.MULTIPLE) {
                 timeframeStart = formatter.parse((String) parser.getOptionValue(this.timeframeStart));
                 isCustomTimeframe = true;
@@ -266,7 +272,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     timeframeEnd = formatter.parse((String) parser.getOptionValue(this.timeframeEnd));
                 }
             }
-            
+
             // If report-type is oxcs-extended, look for other report specific options
             String reportType = (String) parser.getOptionValue(this.asReportType);
             if (reportType == null) {
@@ -292,14 +298,14 @@ public class ReportClientBase extends AbstractJMXTools {
                     isShowMailMetrics = true;
                 }
             }
-           
 
+            //Start the report generation
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
             final MBeanServerConnection initConnection = initConnection(env);
 
-            // Is one of the appsuite report options set? In that case do something completely different.
-
+            // Run the new report style
             if (null == parser.getOptionValue(this.runAndDeliverOldReport)) {
+                // the new report style does not support csv or advanced report option
                 if (null != parser.getOptionValue(this.csv)) {
                     System.out.println(CSV_NOT_SUPPORTED_MSG);
                 }
@@ -382,7 +388,7 @@ public class ReportClientBase extends AbstractJMXTools {
 
     protected TransportHandler createTransportHandler() {
         return Mockito.mock(TransportHandler.class);
-        // TODO QS-VS uncomment and remove mock, when done
+        // TODO QS-VS uncomment and remove mock, when done, this will try to send out a report
         //              return new TransportHandler();
 
     }
@@ -570,6 +576,15 @@ public class ReportClientBase extends AbstractJMXTools {
         return null;
     }
 
+    /**
+     * Retrieve a last report of the given type and determine further actions depending on the given {@link ReportMode}
+     * what should be done with the report.
+     * 
+     * @param reportType, the report type to retrieve
+     * @param mode, the report mode
+     * @param savereport, save this report
+     * @param server, server connection used to invoke report getting methods
+     */
     protected void getASReport(Object reportType, ReportMode mode, boolean savereport, MBeanServerConnection server) {
         if (reportType == null) {
             reportType = "default";
@@ -623,7 +638,9 @@ public class ReportClientBase extends AbstractJMXTools {
                 case DISPLAYANDSEND:
                 default:
                     savereport = false;
+                    // send via TransportHandler 
                     createTransportHandler().sendASReport(report, savereport);
+                    // print to console
                     printASReport(report);
                     break;
             }
@@ -633,6 +650,23 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
+    /**
+     * Generate a report with the given parameters and wait until its finished.
+     * 
+     * @param reportType, the report type
+     * @param mode, the mode of report generation
+     * @param silent, should the current status of the report be displayed on the console
+     * @param savereport, save the report to disc or not
+     * @param server, the server connection
+     * @param isCustomTimerange, does this report have a custom timerange
+     * @param start, starting date of the report
+     * @param end, end date of the report
+     * @param isShowSingleTenant, should a report be generated for only one tenant
+     * @param singleTenantId, the id of the tenants admin
+     * @param isIgnoreAdmin, should admin users be ignored
+     * @param isShowDriveMetrics, calculate drive metrics
+     * @param isShowMailMetrics, calculate mail metrics
+     */
     private void runAndDeliverASReport(Object reportType, ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, boolean isCustomTimerange, Date start, Date end, boolean isShowSingleTenant, Long singleTenantId, boolean isIgnoreAdmin, boolean isShowDriveMetrics, boolean isShowMailMetrics) {
         if (reportType == null) {
             reportType = "default";
@@ -640,7 +674,7 @@ public class ReportClientBase extends AbstractJMXTools {
         try {
             String uuid = "";
             if (reportType.equals("oxcs-extended")) {
-                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(),  Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName()});
+                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName() });
                 if (uuid == null && isShowSingleTenant) {
                     System.out.println("No contexts for this brand or the sid is invalid. Report generation aborted.");
                     return;
@@ -677,18 +711,30 @@ public class ReportClientBase extends AbstractJMXTools {
                 done = !found;
 
                 // TODO QS-VS uncomment when done
-//                if (!done) {
-//                    Thread.sleep(silent ? 60000 : 10000);
-//                }
+                // wait until the report is done
+                //                if (!done) {
+                //                    Thread.sleep(silent ? 60000 : 10000);
+                //                }
             }
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
         }
 
+        // retrieve the latest report of this type and do what the mode tells to do
         getASReport(reportType, mode, savereport, server);
     }
 
+    /**
+     * Print the status of the current report:
+     * 
+     * Example:
+     * Time | uuid | context/totalContexts | percent | how long the report has been running
+     * 13:58:43, 058b5dafb1ec4911917c24290b04b97b: 1/1 (100,00 %) ETA: 0 milliseconds
+     * 
+     * @param report
+     * @return
+     */
     private int printStatusLine(CompositeData report) {
         Long start = (Long) report.get("startTime");
         Long now = System.currentTimeMillis();
@@ -734,6 +780,12 @@ public class ReportClientBase extends AbstractJMXTools {
         System.out.print(b);
     }
 
+    /**
+     * Cancel a report of the given type.
+     * 
+     * @param reportType, the type of the report
+     * @param server, the server connection
+     */
     private void cancelASReports(Object reportType, MBeanServerConnection server) {
         if (reportType == null) {
             reportType = "default";
@@ -756,6 +808,12 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
+    /**
+     * Get the status of the current running report of the given type.
+     * 
+     * @param reportType, the type of the report
+     * @param server, the server connection
+     */
     private void inspectASReports(Object reportType, MBeanServerConnection server) {
         if (reportType == null) {
             reportType = "default";
@@ -775,6 +833,15 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
+    /**
+     * Run a report with the given report type and print out the uuid only. Additionally a custom timerange can be set
+     * 
+     * @param reportType, the type of the report
+     * @param server, the server connection
+     * @param isCustomTimerange, should this report have a custom timerange
+     * @param start, starting date of the timerange
+     * @param end, ending time of the timerange
+     */
     private void runASReport(Object reportType, MBeanServerConnection server, boolean isCustomTimerange, Date start, Date end) {
         if (reportType == null) {
             reportType = "default";
@@ -793,6 +860,11 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
+    /**
+     * Print a given reports header with probable time left. 
+     * 
+     * @param compositeData
+     */
     private void printASDiagnostics(CompositeData compositeData) {
         Long start = (Long) compositeData.get("startTime");
         Long now = System.currentTimeMillis();
@@ -820,6 +892,11 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
+    /**
+     * Print the given report to console.
+     * 
+     * @param report
+     */
     private void printASReport(CompositeData report) {
         try {
             Long start = (Long) report.get("startTime");
@@ -848,6 +925,15 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
+    /**
+     * Convert milliseconds to a pretty time output String.
+     * 
+     * Example:
+     * 0 hours, 28 minutes, 3 seconds
+     * 
+     * @param interval, the time in milliseconds
+     * @return, a pretty time String
+     */
     private String prettyPrintTimeInterval(long interval) {
         // FROM: http://stackoverflow.com/questions/635935/how-can-i-calculate-a-time-span-in-java-and-format-the-output
 

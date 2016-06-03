@@ -87,6 +87,7 @@ import com.openexchange.report.appsuite.storage.DataloaderMySQL;
  * {@link LocalReportService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.8.2
  */
 public class LocalReportService extends AbstractReportService {

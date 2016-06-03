@@ -61,6 +61,7 @@ import com.openexchange.report.appsuite.serialization.Report;
  * the {@link HazelcastReportService} singleton and wrapping reports as {@link JMXReport} instances
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class ReportMXBeanImpl implements ReportMXBean {
 

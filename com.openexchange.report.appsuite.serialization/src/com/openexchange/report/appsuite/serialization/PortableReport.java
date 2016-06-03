@@ -69,6 +69,7 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
  * {@link PortableReport} that is distributed within a hazelcast cluster.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since 7.6.1
  */
 public class PortableReport extends AbstractCustomPortable {

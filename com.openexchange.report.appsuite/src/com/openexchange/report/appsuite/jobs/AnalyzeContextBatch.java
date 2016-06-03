@@ -74,6 +74,7 @@ import com.openexchange.user.UserService;
  * context ids and is distributed cluster-wide via hazelcasts executor service.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class AnalyzeContextBatch implements Callable<Void>, Serializable {
 

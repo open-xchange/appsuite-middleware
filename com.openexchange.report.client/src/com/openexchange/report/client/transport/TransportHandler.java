@@ -78,6 +78,12 @@ import com.openexchange.report.client.container.MacDetail;
 import com.openexchange.report.client.container.Total;
 import com.openexchange.tools.encoding.Base64;
 
+/**
+ * {@link TransportHandler}
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.8.0
+ */
 public class TransportHandler {
 
     // TODO QS-VS: replace when done
