@@ -9,5 +9,5 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-file-storage-mail
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@), open-xchange-imap (>= @OXVERSION@)
-Description: The Open Xchange backend Box.com file storage extension
+Description: The Open Xchange backend Virtual Mail Attachment file storage extension
  Adds a file storage service for the Virtual Mail Attachments to the backend installation.

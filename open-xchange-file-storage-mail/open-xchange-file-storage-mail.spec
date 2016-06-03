@@ -23,7 +23,7 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        The Open Xchange backend Box.com file storage extension
+Summary:        The Open Xchange backend Virtual Mail Attachment file storage extension
 Autoreqprov:   no
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-imap >= @OXVERSION@
