@@ -46,6 +46,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-boxcom"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-dropbox"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-googledrive"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-onedrive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-gui-help-plugin"/>
