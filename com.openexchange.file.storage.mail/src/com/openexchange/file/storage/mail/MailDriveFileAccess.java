@@ -217,7 +217,11 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                         throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
                     }
 
-                    return new MailDriveFile(folderId, id, userId, getRootFolderId()).parseMessage(message, locale);
+                    MailDriveFile mailDriveFile = MailDriveFile.parse(message, folderId, id, userId, getRootFolderId());
+                    if (null == mailDriveFile) {
+                        throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+                    }
+                    return mailDriveFile;
                 } finally {
                     folder.close(false);
                 }
@@ -363,7 +367,10 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                             if (uid < 0) {
                                 uid = folder.getUID(message);
                             }
-                            files.add(new MailDriveFile(folderId, Long.toString(uid), userId, getRootFolderId()).parseMessage(message, locale));
+                            MailDriveFile mailDriveFile = MailDriveFile.parse(message, folderId, Long.toString(uid), userId, getRootFolderId());
+                            if (null != mailDriveFile) {
+                                files.add(mailDriveFile);
+                            }
                         }
 
                         // Clear folder's message cache
@@ -431,7 +438,10 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                                 if (uid < 0) {
                                     uid = folder.getUID(message);
                                 }
-                                files.add(new MailDriveFile(folderId, Long.toString(uid), userId, getRootFolderId()).parseMessage(message, locale, fields));
+                                MailDriveFile mailDriveFile = MailDriveFile.parse(message, folderId, Long.toString(uid), userId, getRootFolderId(), fields);
+                                if (null != mailDriveFile) {
+                                    files.add(mailDriveFile);
+                                }
                             }
 
                             // Clear folder's message cache
@@ -465,7 +475,11 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                             if (uid < 0) {
                                 uid = folder.getUID(message);
                             }
-                            files.add(new MailDriveFile(folderId, Long.toString(uid), userId, getRootFolderId()).parseMessage(message, locale, fields));
+
+                            MailDriveFile mailDriveFile = MailDriveFile.parse(message, folderId, Long.toString(uid), userId, getRootFolderId(), fields);
+                            if (null != mailDriveFile) {
+                                files.add(mailDriveFile);
+                            }
                         }
 
                         // Clear folder's message cache
@@ -531,7 +545,10 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                             if (uid < 0) {
                                 uid = folder.getUID(message);
                             }
-                            files.add(new MailDriveFile(folderId, Long.toString(uid), userId, getRootFolderId()).parseMessage(message, locale, fields));
+                            MailDriveFile mailDriveFile = MailDriveFile.parse(message, folderId, Long.toString(uid), userId, getRootFolderId(), fields);
+                            if (null != mailDriveFile) {
+                                files.add(mailDriveFile);
+                            }
                         }
 
                         // Clear folder's message cache
@@ -650,7 +667,10 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
 
                                         Integer index = indexes.get(Long.valueOf(uid));
                                         if (null != index) {
-                                            files[index.intValue()] = new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, getRootFolderId()).parseMessage(message, locale, fields);
+                                            MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, getRootFolderId(), fields);
+                                            if (null != mailDriveFile) {
+                                                files[index.intValue()] = mailDriveFile;
+                                            }
                                         }
                                     }
                                 }
@@ -666,7 +686,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                     }
                 }
 
-                return new FileTimedResult(files);
+                return new FileTimedResult(filterNullElements(files));
             }
         });
     }
@@ -721,7 +741,10 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                                     if (uid < 0) {
                                         uid = folder.getUID(message);
                                     }
-                                    files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, getRootFolderId()).parseMessage(message, locale, fields));
+                                    MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, getRootFolderId(), fields);
+                                    if (null != mailDriveFile) {
+                                        files.add(mailDriveFile);
+                                    }
                                 }
                             }
                         } finally {
@@ -875,6 +898,22 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
             this.uid = uid;
             this.index = index;
         }
+    }
+
+    static <E> List<E> filterNullElements(E[] elements) {
+        if (null == elements) {
+            return Collections.emptyList();
+        }
+
+        int length = elements.length;
+        List<E> list = new ArrayList<E>(length);
+        for (int i = 0, k = length; k-- > 0; i++) {
+            E elem = elements[i];
+            if (null != elem) {
+                list.add(elem);
+            }
+        }
+        return list;
     }
 
 }

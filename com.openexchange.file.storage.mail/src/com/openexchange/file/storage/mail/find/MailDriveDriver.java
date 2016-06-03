@@ -435,7 +435,10 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                                 if (uid < 0) {
                                     uid = imapFolder.getUID(message);
                                 }
-                                files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, locale, fields));
+                                MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
+                                if (null != mailDriveFile) {
+                                    files.add(mailDriveFile);
+                                }
                             }
                         }
                     } finally {
@@ -476,7 +479,10 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             if (uid < 0) {
                                 uid = imapFolder.getUID(message);
                             }
-                            files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, locale, fields));
+                            MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
+                            if (null != mailDriveFile) {
+                                files.add(mailDriveFile);
+                            }
                         }
                     }
                 } finally {
@@ -489,6 +495,11 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             MailAccess.closeInstance(mailAccess);
+        }
+
+        // Empty?
+        if (files.isEmpty()) {
+            return new SearchResult(-1, searchRequest.getStart(), Collections.<Document> emptyList(), searchRequest.getActiveFacets());
         }
 
         // Check whether to sort manually
@@ -510,11 +521,13 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                 }
                 files = files.subList(start, toIndex);
             }
+
+            // Empty after slicing?
+            if (files.isEmpty()) {
+                return new SearchResult(-1, searchRequest.getStart(), Collections.<Document> emptyList(), searchRequest.getActiveFacets());
+            }
         }
 
-        if (files.isEmpty()) {
-            return new SearchResult(-1, searchRequest.getStart(), Collections.<Document> emptyList(), searchRequest.getActiveFacets());
-        }
 
         List<Document> results = new ArrayList<Document>(files.size());
         for (File file : files) {

@@ -75,7 +75,4 @@ public class MailDriveStrings implements LocalizableStrings {
     // The account display name
     public static final String ACCOUNT_DISPLAY_NAME = "Mail Drive";
 
-    // The name used for mail attachments that have no file name
-    public static final String FALL_BACK_NAME = "Unnamed";
-
 }

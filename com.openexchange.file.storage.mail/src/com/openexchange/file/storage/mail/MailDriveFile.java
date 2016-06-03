@@ -56,7 +56,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.MessagingException;
@@ -68,7 +67,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.mail.osgi.Services;
-import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeTypes;
@@ -87,13 +85,49 @@ import com.sun.mail.imap.IMAPMessage;
 public final class MailDriveFile extends DefaultFile {
 
     /**
+     * Parses an instance of <code>MailDriveFile</code> from specified IMAP message.
+     *
+     * @param message The backing IMAP message representing the attachment
+     * @param folderId The folder identifier
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @param rootFolderId The identifier of the root folder
+     * @return This parsed Mail Drive file <b>or <code>null</code> if specified IMAP message represents an invalid attachment</b>
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an Open-Xchange error occurs
+     */
+    public static MailDriveFile parse(IMAPMessage message, String folderId, String id, int userId, String rootFolderId) throws MessagingException, OXException {
+        return parse(message, folderId, id, userId, rootFolderId, null);
+    }
+
+    /**
+     * Parses an instance of <code>MailDriveFile</code> from specified IMAP message.
+     *
+     * @param message The backing IMAP message representing the attachment
+     * @param folderId The folder identifier
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @param rootFolderId The identifier of the root folder
+     * @param fields The fields to consider
+     * @return This parsed Mail Drive file <b>or <code>null</code> if specified IMAP message represents an invalid attachment</b>
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an Open-Xchange error occurs
+     */
+    public static MailDriveFile parse(IMAPMessage message, String folderId, String id, int userId, String rootFolderId, List<Field> fields) throws MessagingException, OXException {
+        return new MailDriveFile(folderId, id, userId, rootFolderId).parseMessage(message, fields);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    /**
      * Initializes a new {@link MailDriveFile}.
      *
      * @param folderId The folder identifier
      * @param id The file identifier
      * @param userId The user identifier
+     * @param rootFolderId The identifier of the root folder
      */
-    public MailDriveFile(String folderId, String id, int userId, String rootFolderId) {
+    private MailDriveFile(String folderId, String id, int userId, String rootFolderId) {
         super();
         setFolderId(isRootFolder(folderId, rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : folderId);
         setCreatedBy(userId);
@@ -118,34 +152,29 @@ public final class MailDriveFile extends DefaultFile {
      * Parses specified Mail Drive file.
      *
      * @param message The backing IMAP message representing the attachment
-     * @param locale The locale
-     * @return This Mail Drive file
+     * @return This Mail Drive file <b>or <code>null</code> if specified IMAP message represents an invalid attachment</b>
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If parsing message fails
      */
-    public MailDriveFile parseMessage(IMAPMessage message, Locale locale) throws MessagingException, OXException {
-        return parseMessage(message, locale, null);
+    private MailDriveFile parseMessage(IMAPMessage message) throws MessagingException, OXException {
+        return parseMessage(message, null);
     }
 
     /**
      * Parses specified Mail Drive file.
      *
      * @param message The backing IMAP message representing the attachment
-     * @param locale The locale
      * @param fields The fields to consider
-     * @return This Mail Drive file with property set applied
+     * @return This Mail Drive file with property set applied <b>or <code>null</code> if specified IMAP message represents an invalid attachment</b>
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If parsing Mail Drive file fails
      */
-    public MailDriveFile parseMessage(IMAPMessage message, Locale locale, List<Field> fields) throws MessagingException, OXException {
+    private MailDriveFile parseMessage(IMAPMessage message, List<Field> fields) throws MessagingException, OXException {
         if (null != message) {
             try {
                 String name = MimeMessageConverter.getSubject(message);
                 if (Strings.isEmpty(name)) {
-                    String prefix = StringHelper.valueOf(locale).getString(MailDriveStrings.FALL_BACK_NAME);
-                    MimeTypeMap mimeTypeMap = Services.getOptionalService(MimeTypeMap.class);
-                    String ext = null == mimeTypeMap ? null : mimeTypeMap.getFileExtensions(prefix).get(0);
-                    name = null == ext ? prefix : new StringBuilder(prefix).append('.').append(ext).toString();
+                    return null;
                 }
                 setTitle(name);
                 setFileName(name);
