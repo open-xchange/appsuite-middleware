@@ -1,8 +1,11 @@
 title: OX HTTP API
 description: |
   Documentation of the Open-Xchange HTTP API which is used by the new AJAX GUI.
+  
   ## Introduction
+  
   ### Low level protocol
+  
   The client accesses the server through HTTP GET, POST and PUT requests. HTTP cookies are used for authentication and must therefore be processed and sent back by the client as specified by [RFC 6265](http://tools.ietf.org/html/rfc6265). The HTTP API is accessible at URIs starting with `/ajax`. Each server module has a unique name and its own sub-namespace with that name below `/ajax`, e. g. all access to the module "tasks" is via URIs starting with `/ajax/tasks`.
   
   Text encoding is always UTF-8. Data is sent from the server to the client as text/javascript and interpreted by the client to obtain an ECMAScript object. The HTTP API uses only a small subset of the ECMAScript syntax. This subset is roughly described by the following BNF:
@@ -55,6 +58,7 @@ description: |
   | NON-0005 | 1, 2 |
   
   ### Date and time
+  
   Dates without time are transmitted as the number of milliseconds between 00:00 UTC on that date and 1970-01-01 00:00 UTC. Leap seconds are ignored, therefore this number is always an integer multiple of 8.64e7.
   
   Because ECMAScript Date objects have no way to explicitly specify a timezone for calculations, timezone correction must be performed on the server. Dates with time are transmitted as the number of milliseconds since 1970-01-01 00:00 UTC (again, ignoring leap seconds) plus the offset between the user's timezone and UTC at the time in question. (See the Java method java.util.TimeZone.getOffset(long)). Unless optional URL parameter `timezone` is present. Then dates with time are transmitted as the number of milliseconds since 1970-01-01 00:00 UTC (again, ignoring leap seconds) plus the offset between the _specified_ timezone and UTC at the time in question.
@@ -70,6 +74,7 @@ description: |
   | Timestamp | Yes | UTC | Timestamp or unique sequence number. |
   
   ### Updates
+  
   To allow efficient synchronization of a client with changes made by other clients and to detect conflicts, the server stores a timestamp of the last modification for each object. Whenever the server transmits data objects to the client, the response object described in Response body includes the field `timestamp`. This field contains a timestamp value which is computed as the maximum of the timestamps of all transmitted objects.
   
   When requesting updates to a previously retrieved set of objects, the client sends the last timestamp which belongs to that set of objects. The response contains all updates with timestamps greater than the one specified by the client. The field timestamp of the response contains the new maximum timestamp value.
@@ -112,152 +117,411 @@ description: |
   **Non-browser clients don't need to interpret HTML or JavaScript.** The JSON data can be recognized by the outermost `({` and `})`, where the inner braces are part of the JSON value. For example, the regular expression `\((\{.*\})\)` captures the entire JSON value in its first capturing group.
   
   ## Column identifiers
+  
   Below you find the identifiers for object fields of certain data objects (models) that can be used in the `columns` parameter of a request to return
   specific field data of single or multiple objects.
+  
   ### Common object data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 1 | id | 2 | created_by | 3 | modified_by | 4 | creation_date |
-  | 5 | last_modified | 20 | folder_id | 100 | categories | 101 | private_flag |
-  | 102 | color_label | 104 | number_of_attachments | 105 | lastModifiedOfNewestAttachmentUTC |
+  
+  | ID | Name |
+  |----|------|
+  | 1 | id |
+  | 2 | created_by |
+  | 3 | modified_by |
+  | 4 | creation_date |
+  | 5 | last_modified |
+  | 20 | folder_id |
+  | 100 | categories |
+  | 101 | private_flag |
+  | 102 | color_label |
+  | 104 | number_of_attachments |
+  | 105 | lastModifiedOfNewestAttachmentUTC |
+  
   ### Common folder data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 1 | id | 2 | created_by | 3 | modified_by | 4 | creation_date |
-  | 5 | last_modified | 6 | last_modified_utc | 20 | folder_id |
+  
+  | ID | Name |
+  |----|------|
+  | 1 | id |
+  | 2 | created_by |
+  | 3 | modified_by |
+  | 4 | creation_date |
+  | 5 | last_modified |
+  | 6 | last_modified_utc |
+  | 20 | folder_id |
+  
   ### Detailed folder data
-  | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|
-  | 300 | title | 301 | module | 302 | type |
-  | 304 | subfolders | 305 | own_rights | 306 | permissions |
-  | 307 | summary | 308 | standard_folder | 309 | total |
-  | 310 | new | 311 | unread | 312 | deleted |
-  | 313 | capabilities | 314 | subscribed | 315 | subscr_subflds |
-  | 316 | standard_folder_type | 317 | supported_capabilities | 318 | account_id |
-  | 3010 | com.openexchange.publish.publicationFlag | 3020 | com.openexchange.subscribe.subscriptionFlag | 3030 | com.openexchange.folderstorage.displayName |
+  
+  | ID | Name |
+  |----|------|
+  | 300 | title |
+  | 301 | module |
+  | 302 | type |
+  | 304 | subfolders |
+  | 305 | own_rights |
+  | 306 | permissions |
+  | 307 | summary |
+  | 308 | standard_folder |
+  | 309 | total |
+  | 310 | new |
+  | 311 | unread |
+  | 312 | deleted |
+  | 313 | capabilities |
+  | 314 | subscribed |
+  | 315 | subscr_subflds |
+  | 316 | standard_folder_type |
+  | 317 | supported_capabilities |
+  | 318 | account_id |
+  | 3010 | com.openexchange.publish.publicationFlag |
+  | 3020 | com.openexchange.subscribe.subscriptionFlag |
+  | 3030 | com.openexchange.folderstorage.displayName |
   | 3060 | com.openexchange.share.extendedPermissions |
+  
   ### Detailed task and appointment data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 200 | title | 201 | start_date | 202 | end_date | 203 | note |
-  | 204 | alarm | 209 | recurrence_type | 212 | days | 213 | day_in_month |
-  | 214 | month | 215 | interval | 216 | until | 217 | notification |
-  | 220 | participants | 221 | users | 222 | occurrences |223 | uid |
-  | 224 | organizer | 225 | sequence | 226 | confirmations | 227 | organizerId |
-  | 228 | principal | 229 | principalId | 401 | full_time |
+  
+  | ID | Name |
+  |----|------|
+  | 200 | title |
+  | 201 | start_date |
+  | 202 | end_date |
+  | 203 | note |
+  | 204 | alarm |
+  | 209 | recurrence_type |
+  | 212 | days |
+  | 213 | day_in_month |
+  | 214 | month |
+  | 215 | interval |
+  | 216 | until |
+  | 217 | notification |
+  | 220 | participants |
+  | 221 | users |
+  | 222 | occurrences |
+  | 223 | uid |
+  | 224 | organizer |
+  | 225 | sequence |
+  | 226 | confirmations |
+  | 227 | organizerId |
+  | 228 | principal |
+  | 229 | principalId |
+  | 401 | full_time |
+  
   ### Detailed task data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 300 | status | 301 | percent_completed | 302 | actual_costs | 303 | actual_duration |
-  | 304 | after_complete | 305 | billing_information | 307 | target_costs | 308 | target_duration |
-  | 309 | priority | 312 | currency | 313 | trip_meter | 314 | companies |
-  | 315 | date_completed | 316 | start_time | 317 | end_time |
+  
+  | ID | Name |
+  |----|------|
+  | 300 | status |
+  | 301 | percent_completed |
+  | 302 | actual_costs |
+  | 303 | actual_duration |
+  | 304 | after_complete |
+  | 305 | billing_information |
+  | 307 | target_costs |
+  | 308 | target_duration |
+  | 309 | priority |
+  | 312 | currency |
+  | 313 | trip_meter |
+  | 314 | companies |
+  | 315 | date_completed |
+  | 316 | start_time |
+  | 317 | end_time |
+  
   ### Detailed contact data
-  | ID | Name | CSV column title | ID | Name | CSV column title | ID | Name | CSV column title |
-  |----|------|------------------|----|------|------------------|----|------|------------------|
-  | 223 | uid |   | 500 | display_name | Display name | 501 | first_name | Given name |
-  | 502 | last_name | Sur name | 503 | second_name | Middle name | 504 | suffix | Suffix |
-  | 505 | title | Title | 506 | street_home | Street home | 507 | postal_code_home | Postal code home |
-  | 508 | city_home | City home | 509 | state_home | State home | 510 | country_home | Country home |
-  | 511 | birthday | Birthday | 512 | martial_status | Martial status | 513 | number_of_children | Number of children |
-  | 514 | profession | Profession | 515 | nickname | Nickname | 516 | spouse_name | Spouse name |
-  | 517 | anniversary | Anniversary | 518 | note | Note | 519 | department | Department |
-  | 520 | position | Position | 521 | employee_type | Employee type | 522 | room_number | Room number |
-  | 523 | street_business | Street business | 524 | user_id | Internal user id | 525 | postal_code_business | Postal code business |
-  | 526 | city_business | City business | 527 | state_business | State business | 528 | country_business | Country business |
-  | 529 | number_of_employees | Number of employee | 530 | sales_volume | Sales volume | 531 | tax_id | Tax id |
-  | 532 | commercial_register | Commercial register | 533 | branches | Branches | 534 | business_category | Business category |
-  | 535 | info | Info | 536 | manager_name | Manager's name | 537 | assistant_name | Assistant's name |
-  | 538 | street_other | Street other | 539 | city_other | City other | 540 | postal_code_other | Postal code other |
-  | 541 | country_other | Country other | 542 | telephone_business1 | Telephone business 1 | 543 | telephone_business2 | Telephone business 2 |
-  | 544 | fax_business | FAX business | 545 | telephone_callback | Telephone callback | 546 | telephone_car | Telephone car |
-  | 547 | telephone_company | Telephone company | 548 | telephone_home1 | Telephone home 1 | 549 | telephone_home2 | Telephone home 2 |
-  | 550 | fax_home | FAX home | 551 | cellular_telephone1 | Cellular telephone 1 | 552 | cellular_telephone2 | Cellular telephone 2 |
-  | 553 | telephone_other | Telephone other | 554 | fax_other | FAX other | 555 | email1 | Email 1 |
-  | 556 | email2 | Email 2 | 557 | email3 | Email 3 | 558 | url | URL |
-  | 559 | telephone_isdn | Telephone ISDN | 560 | telephone_pager | Telephone pager | 561 | telephone_primary | Telephone primary |
-  | 562 | telephone_radio | Telephone radio | 563 | telephone_telex | Telephone telex | 564 | telephone_ttytdd | Telephone TTY/TDD |
-  | 565 | instant_messenger1 | Instantmessenger 1 | 566 | instant_messenger2 | Instantmessenger 2 | 567 | telephone_ip | Telephone IP |
-  | 568 | telephone_assistant | Telephone assistant | 569 | company | Company | 570 | image1 |   |
-  | 571 | userfield01 | Dynamic Field 1 | 572 | userfield02 | Dynamic Field 2 | 573 | userfield03 | Dynamic Field 3 |
-  | 574 | userfield04 | Dynamic Field 4 | 575 | userfield05 | Dynamic Field 5 | 576 | userfield06 | Dynamic Field 6 |
-  | 577 | userfield07 | Dynamic Field 7 | 578 | userfield08 | Dynamic Field 8 | 579 | userfield09 | Dynamic Field 9 |
-  | 580 | userfield10 | Dynamic Field 10 | 581 | userfield11 | Dynamic Field 11 | 582 | userfield12 | Dynamic Field 12 |
-  | 583 | userfield13 | Dynamic Field 13 | 584 | userfield14 | Dynamic Field 14 | 585 | userfield15 | Dynamic Field 15 |
-  | 586 | userfield16 | Dynamic Field 16 | 587 | userfield17 | Dynamic Field 17 | 588 | userfield18 | Dynamic Field 18 |
-  | 589 | userfield19 | Dynamic Field 19 | 590 | userfield20 | Dynamic Field 20 | 592 | distribution_list |   |
-  | 594 | number_of_distribution_list | Number of distributionlists | 596 | number_of_images |   | 597 | image_last_modified |   |
-  | 598 | state_other | State other | 599 | file_as |   | 601 | image1_content_type |   |
-  | 602 | mark_as_distributionlist |   | 605 | default_address | Default address | 606 | image1_url |   |
-  | 608 | useCount |   | 610 | yomiFirstName |   | 611 | yomiLastName |   |
-  | 612 | yomiCompany |   | 613 | addressHome |   | 614 | addressBusiness |   |
+  
+  | ID | Name | CSV column title |
+  |----|------|------------------|
+  | 223 | uid |   |
+  | 500 | display_name | Display name |
+  | 501 | first_name | Given name |
+  | 502 | last_name | Sur name |
+  | 503 | second_name | Middle name |
+  | 504 | suffix | Suffix |
+  | 505 | title | Title |
+  | 506 | street_home | Street home |
+  | 507 | postal_code_home | Postal code home |
+  | 508 | city_home | City home |
+  | 509 | state_home | State home |
+  | 510 | country_home | Country home |
+  | 511 | birthday | Birthday |
+  | 512 | martial_status | Martial status |
+  | 513 | number_of_children | Number of children |
+  | 514 | profession | Profession |
+  | 515 | nickname | Nickname |
+  | 516 | spouse_name | Spouse name |
+  | 517 | anniversary | Anniversary |
+  | 518 | note | Note |
+  | 519 | department | Department |
+  | 520 | position | Position |
+  | 521 | employee_type | Employee type |
+  | 522 | room_number | Room number |
+  | 523 | street_business | Street business |
+  | 524 | user_id | Internal user id |
+  | 525 | postal_code_business | Postal code business |
+  | 526 | city_business | City business |
+  | 527 | state_business | State business |
+  | 528 | country_business | Country business |
+  | 529 | number_of_employees | Number of employee |
+  | 530 | sales_volume | Sales volume |
+  | 531 | tax_id | Tax id |
+  | 532 | commercial_register | Commercial register |
+  | 533 | branches | Branches |
+  | 534 | business_category | Business category |
+  | 535 | info | Info |
+  | 536 | manager_name | Manager's name |
+  | 537 | assistant_name | Assistant's name |
+  | 538 | street_other | Street other |
+  | 539 | city_other | City other |
+  | 540 | postal_code_other | Postal code other |
+  | 541 | country_other | Country other |
+  | 542 | telephone_business1 | Telephone business 1 |
+  | 543 | telephone_business2 | Telephone business 2 |
+  | 544 | fax_business | FAX business |
+  | 545 | telephone_callback | Telephone callback |
+  | 546 | telephone_car | Telephone car |
+  | 547 | telephone_company | Telephone company |
+  | 548 | telephone_home1 | Telephone home 1 |
+  | 549 | telephone_home2 | Telephone home 2 |
+  | 550 | fax_home | FAX home |
+  | 551 | cellular_telephone1 | Cellular telephone 1 |
+  | 552 | cellular_telephone2 | Cellular telephone 2 |
+  | 553 | telephone_other | Telephone other |
+  | 554 | fax_other | FAX other |
+  | 555 | email1 | Email 1 |
+  | 556 | email2 | Email 2 |
+  | 557 | email3 | Email 3 |
+  | 558 | url | URL |
+  | 559 | telephone_isdn | Telephone ISDN |
+  | 560 | telephone_pager | Telephone pager |
+  | 561 | telephone_primary | Telephone primary |
+  | 562 | telephone_radio | Telephone radio |
+  | 563 | telephone_telex | Telephone telex |
+  | 564 | telephone_ttytdd | Telephone TTY/TDD |
+  | 565 | instant_messenger1 | Instantmessenger 1 |
+  | 566 | instant_messenger2 | Instantmessenger 2 |
+  | 567 | telephone_ip | Telephone IP |
+  | 568 | telephone_assistant | Telephone assistant |
+  | 569 | company | Company |
+  | 570 | image1 |   |
+  | 571 | userfield01 | Dynamic Field 1 |
+  | 572 | userfield02 | Dynamic Field 2 |
+  | 573 | userfield03 | Dynamic Field 3 |
+  | 574 | userfield04 | Dynamic Field 4 |
+  | 575 | userfield05 | Dynamic Field 5 |
+  | 576 | userfield06 | Dynamic Field 6 |
+  | 577 | userfield07 | Dynamic Field 7 |
+  | 578 | userfield08 | Dynamic Field 8 |
+  | 579 | userfield09 | Dynamic Field 9 |
+  | 580 | userfield10 | Dynamic Field 10 |
+  | 581 | userfield11 | Dynamic Field 11 |
+  | 582 | userfield12 | Dynamic Field 12 |
+  | 583 | userfield13 | Dynamic Field 13 |
+  | 584 | userfield14 | Dynamic Field 14 |
+  | 585 | userfield15 | Dynamic Field 15 |
+  | 586 | userfield16 | Dynamic Field 16 |
+  | 587 | userfield17 | Dynamic Field 17 |
+  | 588 | userfield18 | Dynamic Field 18 |
+  | 589 | userfield19 | Dynamic Field 19 |
+  | 590 | userfield20 | Dynamic Field 20 |
+  | 592 | distribution_list |   |
+  | 594 | number_of_distribution_list | Number of distributionlists |
+  | 596 | number_of_images |   |
+  | 597 | image_last_modified |   |
+  | 598 | state_other | State other |
+  | 599 | file_as |   |
+  | 601 | image1_content_type |   |
+  | 602 | mark_as_distributionlist |   |
+  | 605 | default_address | Default address |
+  | 606 | image1_url |   |
+  | 608 | useCount |   |
+  | 610 | yomiFirstName |   |
+  | 611 | yomiLastName |   |
+  | 612 | yomiCompany |   |
+  | 613 | addressHome |   |
+  | 614 | addressBusiness |   |
   | 615 | addressOther |   |
+  
   ### Detailed appointment data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 206 | recurrence_id | 207 | recurrence_position | 208 | recurrence_date_position | 210 | change_exceptions |
-  | 211 | delete_exceptions | 400 | location | 402 | shown_as | 408 | timezone |
+  
+  | ID | Name |
+  |----|------|
+  | 206 | recurrence_id |
+  | 207 | recurrence_position |
+  | 208 | recurrence_date_position |
+  | 210 | change_exceptions |
+  | 211 | delete_exceptions |
+  | 400 | location |
+  | 402 | shown_as |
+  | 408 | timezone |
   | 410 | recurrence_start |
+  
   ### Detailed mail data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 102 | color_label | 600 | id | 601 | folder_id | 602 | attachment |
-  | 603 | from | 604 | to | 605 | cc | 606 | bcc |
-  | 607 | subject | 608 | size | 609 | sent_date | 610 | received_date |
-  | 611 | flags | 612 | level | 613 | disp_notification_to | 614 | priority |
-  | 615 | msg_ref | 651 | flag_seen | 652 | account_name | 653 | account_id |
-  | 654 | original_id | 655 | original_folder_id |
+  
+  | ID | Name |
+  |----|------|
+  | 102 | color_label |
+  | 600 | id |
+  | 601 | folder_id |
+  | 602 | attachment |
+  | 603 | from |
+  | 604 | to |
+  | 605 | cc |
+  | 606 | bcc |
+  | 607 | subject |
+  | 608 | size |
+  | 609 | sent_date |
+  | 610 | received_date |
+  | 611 | flags |
+  | 612 | level |
+  | 613 | disp_notification_to |
+  | 614 | priority |
+  | 615 | msg_ref |
+  | 651 | flag_seen |
+  | 652 | account_name |
+  | 653 | account_id |
+  | 654 | original_id |
+  | 655 | original_folder_id |
+  
   ### Detailed infoitem data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 108 | object_permissions | 109 | shareable | 700 | title | 701 | url |
-  | 702 | filename | 703 | file_mimetype | 704 | file_size | 705 | version |
-  | 706 | description | 707 | locked_until | 708 | file_md5sum | 709 | version_comment |
-  | 710 | current_version | 711 | number_of_versions | 7010 | com.openexchange.share.extendedObjectPermissions | 7020 | com.openexchange.realtime.resourceID |
+  
+  | ID | Name |
+  |----|------|
+  | 108 | object_permissions |
+  | 109 | shareable |
+  | 700 | title |
+  | 701 | url |
+  | 702 | filename |
+  | 703 | file_mimetype |
+  | 704 | file_size |
+  | 705 | version |
+  | 706 | description |
+  | 707 | locked_until |
+  | 708 | file_md5sum |
+  | 709 | version_comment |
+  | 710 | current_version |
+  | 711 | number_of_versions |
+  | 7010 | com.openexchange.share.extendedObjectPermissions |
+  | 7020 | com.openexchange.realtime.resourceID |
+  
   ### Attachment data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 800 | folder | 801 | attached | 802 | module | 803 | filename |
-  | 804 | file_size | 805 | file_mimetype | 806 | rft_flag |
+  
+  | ID | Name |
+  |----|------|
+  | 800 | folder |
+  | 801 | attached |
+  | 802 | module |
+  | 803 | filename |
+  | 804 | file_size |
+  | 805 | file_mimetype |
+  | 806 | rft_flag |
+  
   ### Mail account data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 1001 | id | 1002 | login | 1003 | password | 1004 | mail_url |
-  | 1005 | transport_url | 1006 | name | 1007 | primary_address | 1008 | spam_handler |
-  | 1009 | trash | 1010 | sent | 1011 | drafts | 1012 | spam |
-  | 1013 | confirmed_spam | 1014 | confirmed_ham | 1015 | mail_server | 1016 | mail_port |
-  | 1017 | mail_protocol | 1018 | mail_secure | 1019 | transport_server | 1020 | transport_port |
-  | 1021 | transport_protocol | 1022 | transport_secure | 1023 | transport_login | 1024 | transport_password |
-  | 1025 | unified_inbox_enabled | 1026 | trash_fullname | 1027 | sent_fullname | 1028 | drafts_fullname |
-  | 1029 | spam_fullname | 1030 | confirmed_spam_fullname | 1031 | confirmed_ham_fullname | 1032 | pop3_refresh_rate |
-  | 1033 | pop3_expunge_on_quit | 1034 | pop3_delete_write_through | 1035 | pop3_storage | 1036 | pop3_path |
-  | 1037 | personal | 1038 | reply_to | 1039 | addresses | 1040 | meta |
-  | 1041 | archive | 1042 | archive_fullname | 1043 | transport_auth | 1044 | mail_starttls |
+  
+  | ID | Name |
+  |----|------|
+  | 1001 | id |
+  | 1002 | login |
+  | 1003 | password |
+  | 1004 | mail_url |
+  | 1005 | transport_url |
+  | 1006 | name |
+  | 1007 | primary_address |
+  | 1008 | spam_handler |
+  | 1009 | trash |
+  | 1010 | sent |
+  | 1011 | drafts |
+  | 1012 | spam |
+  | 1013 | confirmed_spam |
+  | 1014 | confirmed_ham |
+  | 1015 | mail_server |
+  | 1016 | mail_port |
+  | 1017 | mail_protocol |
+  | 1018 | mail_secure |
+  | 1019 | transport_server |
+  | 1020 | transport_port |
+  | 1021 | transport_protocol |
+  | 1022 | transport_secure |
+  | 1023 | transport_login |
+  | 1024 | transport_password |
+  | 1025 | unified_inbox_enabled |
+  | 1026 | trash_fullname |
+  | 1027 | sent_fullname |
+  | 1028 | drafts_fullname |
+  | 1029 | spam_fullname |
+  | 1030 | confirmed_spam_fullname |
+  | 1031 | confirmed_ham_fullname |
+  | 1032 | pop3_refresh_rate |
+  | 1033 | pop3_expunge_on_quit |
+  | 1034 | pop3_delete_write_through |
+  | 1035 | pop3_storage |
+  | 1036 | pop3_path |
+  | 1037 | personal |
+  | 1038 | reply_to |
+  | 1039 | addresses |
+  | 1040 | meta |
+  | 1041 | archive |
+  | 1042 | archive_fullname |
+  | 1043 | transport_auth |
+  | 1044 | mail_starttls |
   | 1045 | transport_starttls |
+  
   ### Detailed user data
-  | ID | Name | ID | Name | ID | Name | ID | Name |
-  |----|------|----|------|----|------|----|------|
-  | 610 | aliases | 611 | timezone | 612 | locale | 613 | groups |
-  | 614 | contact_id | 615 | login_info | 616 | guest_created_by |
+  
+  | ID | Name |
+  |----|------|
+  | 610 | aliases |
+  | 611 | timezone |
+  | 612 | locale |
+  | 613 | groups |
+  | 614 | contact_id |
+  | 615 | login_info |
+  | 616 | guest_created_by |
+  
   ### Messaging fields
-  | Name | Name | Name | Name | Name | Name | Name | Name | Name | Name |
-  |------|------|------|------|------|------|------|------|------|------|
-  | id | folder | from | to | cc | bcc | headers | subject | body | contentType |
-  | size | sentDate | receivedDate | flags | threadLevel | dispositionNotificationTo | priority | colorLabel | url | picture |
+  
+  | Name |
+  |------|
+  | id |
+  | folder |
+  | from |
+  | to |
+  | cc |
+  | bcc |
+  | headers |
+  | subject |
+  | body |
+  | contentType |
+  | size |
+  | sentDate |
+  | receivedDate |
+  | flags |
+  | threadLevel |
+  | dispositionNotificationTo |
+  | priority |
+  | colorLabel |
+  | url |
+  | picture |
   
   ## Flags / bit masks
+  
   ### Permission flags
-  | Bits | Value | Bits | Value |
-  |------|-------|------|-------|
-  | **0-6** | **Folder permissions:** | **21-27** | **Delete permissions for objects in folder:** |
-  |   | 0 (no permissions) |   | 0 (no permissions) |
-  |   | 1 (see the folder) |   | 1 (delete only own objects) |
-  |   | 2 (create objects in folder) |   | 2 (delete all objects) |
-  |   | 4 (create subfolders) |   | 64 (all permissions) |
+  
+  | Bits | Value |
+  |------|-------|
+  | **0-6** | **Folder permissions:** |
+  | **21-27** | **Delete permissions for objects in folder:** |
+  |   | 0 (no permissions) |
+  |   | 0 (no permissions) |
+  |   | 1 (see the folder) |
+  |   | 1 (delete only own objects) |
+  |   | 2 (create objects in folder) |
+  |   | 2 (delete all objects) |
+  |   | 4 (create subfolders) |
   |   | 64 (all permissions) |
-  | **7-13** | **Read permissions for objects in folder:** | **28** | **Admin flag:** |
-  |   | 0 (no permissions) |   | 0 (no permissions) |
-  |   | 1 (read only own objects) |   | 1 (every operation modifying the folder in some way requires this permission (e.g. changing the folder name) |
+  |   | 64 (all permissions) |
+  | **7-13** | **Read permissions for objects in folder:** |
+  | **28** | **Admin flag:** |
+  |   | 0 (no permissions) |
+  |   | 0 (no permissions) |
+  |   | 1 (read only own objects) |
+  |   | 1 (every operation modifying the folder in some way requires this permission (e.g. changing the folder name) |
   |   | 2 (read all objects) |
   |   | 64 (all permissions) |
   | **14-20** | **Write permissions for objects in folder:** |
@@ -267,7 +531,9 @@ description: |
   |   | 64 (all permissions) |
   
   ## Mail filter
+  
   ### Possible tests
+  
   | Name | Description |
   |------|-------------|
   | address | This test type applies to addresses only. So it may be used for all header fields which contain addresses. This test returns true if any combination of the header-list and values-list arguments match. |
@@ -280,35 +546,57 @@ description: |
   | body | Tests against the content of a mail. |
   | allof | Defines an AND condition between several tests. |
   | anyof | Defines an OR condition between several tests. |
+  
   ### Possible comparisons
-  | Name | Description | Name | Description |
-  |------|-------------|------|-------------|
-  | is | If a field is equal to a given value. | contains | If a field contains a given value at any position. |
-  | matches | Tests if the value matches the value in the specified field ("*" matches zero or more characters, "?" matches a single character, to use these characters themselves they have to be escaped via backslash). | regex | Tests if a given regular expression matches with the value present in the specified field. |
-  | user | Tests if the user part of an e-mail address is the value given here. This means in herbert+mustermann@example.com. The user checks the part herbert (only possible in conjunction with the `address` test). | detail | Tests if the detail part of an e-mail address is the value given here. In the example above this evaluates to mustermann (only possible in conjunction with the `address` test). |
+  
+  | Name | Description |
+  |------|-------------|
+  | is | If a field is equal to a given value. |
+  | contains | If a field contains a given value at any position. |
+  | matches | Tests if the value matches the value in the specified field ("*" matches zero or more characters, "?" matches a single character, to use these characters themselves they have to be escaped via backslash). | 
+  | regex | Tests if a given regular expression matches with the value present in the specified field. |
+  | user | Tests if the user part of an e-mail address is the value given here. This means in herbert+mustermann@example.com. The user checks the part herbert (only possible in conjunction with the `address` test). | 
+  | detail | Tests if the detail part of an e-mail address is the value given here. In the example above this evaluates to mustermann (only possible in conjunction with the `address` test). |
+  
   #### Possible currentdate comparisons
-  | Name | Description | Name | Description |
-  |------|-------------|------|-------------|
-  | is | Used in the date test to check for a value equal to the given one. | ge | Used in the date test to check for a value greater or equal to the given one. |
-  | le | Used in the date test to check for a value less or equal to the given one. |   |   |
+  
+  | Name | Description |
+  |------|-------------|
+  | is | Used in the date test to check for a value equal to the given one. |
+  | ge | Used in the date test to check for a value greater or equal to the given one. |
+  | le | Used in the date test to check for a value less or equal to the given one. |
+  
   #### Possible size comparisons
-  | Name | Description | Name | Description |
-  |------|-------------|------|-------------|
-  | over | Used in the size test to check for a value greater than the given one. | under | Used in the size test to check for a value less than the given one. |
+  
+  | Name | Description |
+  |------|-------------|
+  | over | Used in the size test to check for a value greater than the given one.|
+  | under | Used in the size test to check for a value less than the given one. |
+  
   ### Possible extensions
-  | Name | Description | Name | Description |
-  |------|-------------|------|-------------|
-  | content | An extension used in conjunction with the body test to define the content which should be considered. This extension will need a parameter specifying the mime-type of the part of the message which will be searched. | text | An extension used in conjunction with the body test to define that only the text of the body should be considered in this test. This extension takes no parameter. |
+  
+  | Name | Description |
+  |------|-------------|
+  | content | An extension used in conjunction with the body test to define the content which should be considered. This extension will need a parameter specifying the mime-type of the part of the message which will be searched. |
+  | text | An extension used in conjunction with the body test to define that only the text of the body should be considered in this test. This extension takes no parameter. |
+  
   ### Possible action commands
-  | Name | Description | Name | Description |
-  |------|-------------|------|-------------|
-  | keep | Keeps a mail non-changed. | discard | Discards a mail without any processing. |
-  | redirect | Redirects a mail to a given e-mail address. | move | Moves a mail into a given subfolder (the syntax of the subfolder given here must be the correct syntax of the underlying IMAP-server and is up to the GUI to detect things such as altnamespace or unixhierarchysep). |
-  | reject | Rejects the mail with a given text. | stop | Stops any further progressing of a mail. |
-  | vacation | Creates a vacation mail. | addflags | Adds flags to a mail. |
-  | notify | Adds a notification. | pgp | Encrypts a mail via pgp. |
+  
+  | Name | Description |
+  |------|-------------|
+  | keep | Keeps a mail non-changed. |
+  | discard | Discards a mail without any processing. |
+  | redirect | Redirects a mail to a given e-mail address. |
+  | move | Moves a mail into a given subfolder (the syntax of the subfolder given here must be the correct syntax of the underlying IMAP-server and is up to the GUI to detect things such as altnamespace or unixhierarchysep). |
+  | reject | Rejects the mail with a given text. |
+  | stop | Stops any further progressing of a mail. |
+  | vacation | Creates a vacation mail. |
+  | addflags | Adds flags to a mail. |
+  | notify | Adds a notification. |
+  | pgp | Encrypts a mail via pgp. |
   
   ## Advanced search
+  
   This section describes the syntax of the JSON object representing the search term. The search term is embedded
   in a JSON object with the field `filter`, like `{"filter":[search term]}`. In general the structure of a search
   term is in prefix notation, meaning the operator is written before its operands: `[">", 5, 2]` represents the condition
