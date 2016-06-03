@@ -2,7 +2,9 @@
 title: Introduction
 classes: no-affix
 ---
+
 # Low level protocol
+
 The client accesses the server through HTTP GET, POST and PUT requests. HTTP cookies are used for authentication and must therefore be processed and sent back by the client as specified by [RFC 6265](http://tools.ietf.org/html/rfc6265). The HTTP API is accessible at URIs starting with `/ajax`. Each server module has a unique name and its own sub-namespace with that name below `/ajax`, e. g. all access to the module "tasks" is via URIs starting with `/ajax/tasks`.
 
 Text encoding is always UTF-8. Data is sent from the server to the client as text/javascript and interpreted by the client to obtain an ECMAScript object. The HTTP API uses only a small subset of the ECMAScript syntax. This subset is roughly described by the following BNF:
@@ -55,6 +57,7 @@ Some error message contain data sizes which must be expressed in Bytes or Kiloby
 | NON-0005 | 1, 2 |
 
 # Date and time
+
 Dates without time are transmitted as the number of milliseconds between 00:00 UTC on that date and 1970-01-01 00:00 UTC. Leap seconds are ignored, therefore this number is always an integer multiple of 8.64e7.
 
 Because ECMAScript Date objects have no way to explicitly specify a timezone for calculations, timezone correction must be performed on the server. Dates with time are transmitted as the number of milliseconds since 1970-01-01 00:00 UTC (again, ignoring leap seconds) plus the offset between the user's timezone and UTC at the time in question. (See the Java method java.util.TimeZone.getOffset(long)). Unless optional URL parameter `timezone` is present. Then dates with time are transmitted as the number of milliseconds since 1970-01-01 00:00 UTC (again, ignoring leap seconds) plus the offset between the _specified_ timezone and UTC at the time in question.
@@ -70,6 +73,7 @@ This specification refers to these three interpretations of the type Number as s
 | Timestamp | Yes | UTC | Timestamp or unique sequence number. |
 
 # Updates
+
 To allow efficient synchronization of a client with changes made by other clients and to detect conflicts, the server stores a timestamp of the last modification for each object. Whenever the server transmits data objects to the client, the response object described in Response body includes the field `timestamp`. This field contains a timestamp value which is computed as the maximum of the timestamps of all transmitted objects.
 
 When requesting updates to a previously retrieved set of objects, the client sends the last timestamp which belongs to that set of objects. The response contains all updates with timestamps greater than the one specified by the client. The field timestamp of the response contains the new maximum timestamp value.

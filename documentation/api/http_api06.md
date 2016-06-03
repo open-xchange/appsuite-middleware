@@ -2,6 +2,7 @@
 title: Advanced Search
 classes: no-affix
 ---
+
 This section describes the syntax of the JSON object representing the search term. The search term is embedded
 in a JSON object with the field `filter`, like `{"filter":[search term]}`. In general the structure of a search
 term is in prefix notation, meaning the operator is written before its operands: `[">", 5, 2]` represents the condition
