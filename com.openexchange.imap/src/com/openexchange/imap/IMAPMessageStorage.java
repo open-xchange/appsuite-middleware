@@ -4338,7 +4338,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
         int length = elements.length;
         List<E> list = new ArrayList<E>(length);
-        for (int i = 0; i < length; i++) {
+        for (int i = 0, k = length; k-- > 0; i++) {
             E elem = elements[i];
             if (null != elem) {
                 list.add(elem);
