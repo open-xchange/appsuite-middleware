@@ -1684,8 +1684,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private void setSeenFlag(final String fullName, final MailMessage mail, final IMAPMessage msg) {
         try {
-            // No need to set \Seen fag explicitly when FETCH'ing message content
-            // msg.setFlags(FLAGS_SEEN, true);
+            // Set \Seen fag explicitly although actually fetching content applies \Seen flag automatically,
+            // but we cannot know for sure that content will really be fetched. Therefore accept a possibly
+            // unnecessary "STORE <seqnum> +FLAGS (\Seen)" command
+            msg.setFlags(FLAGS_SEEN, true);
             mail.setFlag(MailMessage.FLAG_SEEN, true);
             final int cur = mail.getUnreadMessages();
             mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
