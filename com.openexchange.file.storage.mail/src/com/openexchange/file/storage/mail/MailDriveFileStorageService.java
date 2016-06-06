@@ -60,9 +60,12 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.RootFolderPermissionsAware;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
@@ -77,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public final class MailDriveFileStorageService implements AccountAware {
+public final class MailDriveFileStorageService implements AccountAware, RootFolderPermissionsAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailDriveFileStorageService.class);
 
@@ -125,6 +128,18 @@ public final class MailDriveFileStorageService implements AccountAware {
     @Override
     public Set<String> getSecretProperties() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public List<FileStoragePermission> getRootFolderPermissions(String accountId, Session session) throws OXException {
+        if (!MailDriveConstants.ACCOUNT_ID.equals(accountId)) {
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, MailDriveConstants.ID);
+        }
+        DefaultFileStoragePermission p = DefaultFileStoragePermission.newInstance();
+        p.setEntity(session.getUserId());
+        p.setAdmin(false);
+        p.setAllPermissions(FileStoragePermission.READ_FOLDER, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS);
+        return Collections.<FileStoragePermission> singletonList(p);
     }
 
     private UserPermissionBits getUserPermissionBits(Session session, int userId, int contextId) throws OXException {

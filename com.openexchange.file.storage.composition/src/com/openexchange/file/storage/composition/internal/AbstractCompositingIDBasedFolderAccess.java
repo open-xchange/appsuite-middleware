@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import org.osgi.service.event.Event;
@@ -76,11 +77,11 @@ import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.RootFolderPermissionsAware;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -356,7 +357,12 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
                 accounts = service.getAccountManager().getAccounts(session);
             }
             for (FileStorageAccount account : accounts) {
-                rootFolders.add(getRootFolder(session.getUserId(), service.getId(), account.getId(), account.getDisplayName()));
+                List<FileStoragePermission> rootFolderPermissions = null;
+                if (service instanceof RootFolderPermissionsAware) {
+                    RootFolderPermissionsAware rootFolderPermissionsAware = (RootFolderPermissionsAware) service;
+                    rootFolderPermissions = rootFolderPermissionsAware.getRootFolderPermissions(account.getId(), session);
+                }
+                rootFolders.add(getRootFolder(session.getUserId(), service.getId(), account.getId(), account.getDisplayName(), rootFolderPermissions));
             }
         }
         /*
@@ -416,9 +422,16 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
      * @return The root folder, already with an unique identifier and the parent set to {@link #INFOSTORE_FOLDER_ID}
      */
     private FileStorageFolder getRootFolder(String serviceID, String accountID) throws OXException {
-        FileStorageServiceRegistry serviceRegistry = Services.getService(FileStorageServiceRegistry.class);
-        FileStorageAccount account = serviceRegistry.getFileStorageService(serviceID).getAccountManager().getAccount(accountID, session);
-        return getRootFolder(session.getUserId(), serviceID, accountID, account.getDisplayName());
+        FileStorageService service = getFileStorageServiceRegistry().getFileStorageService(serviceID);
+
+        List<FileStoragePermission> rootFolderPermissions = null;
+        if (service instanceof RootFolderPermissionsAware) {
+            RootFolderPermissionsAware rootFolderPermissionsAware = (RootFolderPermissionsAware) service;
+            rootFolderPermissions = rootFolderPermissionsAware.getRootFolderPermissions(accountID, session);
+        }
+
+        FileStorageAccount account = service.getAccountManager().getAccount(accountID, session);
+        return getRootFolder(session.getUserId(), serviceID, accountID, account.getDisplayName(), rootFolderPermissions);
     }
 
     /**
@@ -428,9 +441,10 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
      * @param serviceID The account's service identifier
      * @param accountID The account identifier
      * @param displayName The folder name to use, usually the account's display name
+     * @param rootFolderPermissions The optional root folder permissions
      * @return The root folder, already with an unique identifier and the parent set to {@link #INFOSTORE_FOLDER_ID}
      */
-    private static FileStorageFolder getRootFolder(int userID, String serviceID, String accountID, String displayName) {
+    private static FileStorageFolder getRootFolder(int userID, String serviceID, String accountID, String displayName, List<FileStoragePermission> rootFolderPermissions) {
         DefaultTypeAwareFileStorageFolder rootFolder = new DefaultTypeAwareFileStorageFolder();
         rootFolder.setParentId(INFOSTORE_FOLDER_ID);
         rootFolder.setId(new FolderID(serviceID, accountID, FileStorageFolder.ROOT_FULLNAME).toUniqueID());
@@ -443,12 +457,33 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         rootFolder.setHoldsFiles(true);
         rootFolder.setHoldsFolders(true);
         rootFolder.setExists(true);
-        DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
-        permission.setAdmin(false);
-        permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
-        permission.setEntity(userID);
-        rootFolder.setPermissions(Collections.<FileStoragePermission>singletonList(permission));
-        rootFolder.setOwnPermission(permission);
+
+        if (null == rootFolderPermissions || rootFolderPermissions.isEmpty()) {
+            DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
+            permission.setAdmin(false);
+            permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
+            permission.setEntity(userID);
+            rootFolder.setPermissions(Collections.<FileStoragePermission>singletonList(permission));
+            rootFolder.setOwnPermission(permission);
+        } else {
+            rootFolder.setPermissions(rootFolderPermissions);
+
+            FileStoragePermission ownPermission = rootFolderPermissions.get(0);
+            if (ownPermission.getEntity() != userID) {
+                ownPermission = null;
+                for (Iterator<FileStoragePermission> it = rootFolderPermissions.iterator(); null == ownPermission && it.hasNext(); ) {
+                    FileStoragePermission permission = it.next();
+                    if (permission.getEntity() == userID) {
+                        ownPermission = permission;
+                    }
+                }
+            }
+
+            if (null != ownPermission) {
+                rootFolder.setOwnPermission(ownPermission);
+            }
+        }
+
         rootFolder.setCreatedBy(userID);
         rootFolder.setModifiedBy(userID);
         return rootFolder;
