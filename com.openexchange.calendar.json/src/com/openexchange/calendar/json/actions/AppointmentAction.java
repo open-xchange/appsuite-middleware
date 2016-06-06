@@ -149,7 +149,8 @@ public abstract class AppointmentAction implements AJAXActionService {
         }
         try {
             final AppointmentAJAXRequest ar = AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(requestData, session);
-            return perform(ar);
+            boolean performNew = true;
+            return performNew ? performNew(ar) : perform(ar);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
@@ -164,6 +165,10 @@ public abstract class AppointmentAction implements AJAXActionService {
      * @throws JSONException If a JSON error occurs
      */
     protected abstract AJAXRequestResult perform(AppointmentAJAXRequest req) throws OXException, JSONException;
+
+    protected AJAXRequestResult performNew(AppointmentAJAXRequest req) throws OXException, JSONException {
+        return perform(req);
+    }
 
     /**
      * Gets the result filled with JSON <code>NULL</code>.

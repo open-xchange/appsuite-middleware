@@ -76,7 +76,9 @@ public class SeriesPattern {
     public SeriesPattern(String pattern) throws IllegalArgumentException {
         super();
         this.pattern = pattern;
-        deserialize(pattern);
+        if (null != pattern) {
+            deserialize(pattern);
+        }
     }
 
     private void deserialize(String pattern) throws IllegalArgumentException {

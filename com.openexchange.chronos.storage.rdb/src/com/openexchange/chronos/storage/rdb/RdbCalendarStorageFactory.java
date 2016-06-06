@@ -47,64 +47,36 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb.osgi;
+package com.openexchange.chronos.storage.rdb;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarStorageFactory;
-import com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory;
-import com.openexchange.chronos.storage.rdb.tables.AlarmTableUpdateTask;
-import com.openexchange.chronos.storage.rdb.tables.CreateAlarmTable;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RdbCalendarStorageActivator}
+ * {@link CalendarStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorageActivator extends HousekeepingActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RdbCalendarStorageActivator.class);
+public class RdbCalendarStorageFactory implements CalendarStorageFactory {
 
     /**
-     * Initializes a new {@link RdbCalendarStorageActivator}.
+     * Initializes a new {@link RdbCalendarStorageFactory}.
      */
-    public RdbCalendarStorageActivator() {
+    public RdbCalendarStorageFactory() throws OXException {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+    public CalendarStorage create(ServerSession session) throws OXException {
+        return new RdbCalendarStorage(session.getContextId());
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: \"com.openexchange.calendar.storage.rdb\"");
-            Services.set(this);
-            /*
-             * register services
-             */
-            registerService(CreateTableService.class, new CreateAlarmTable());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AlarmTableUpdateTask()));
-            registerService(CalendarStorageFactory.class, new RdbCalendarStorageFactory());
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.calendar.storage.rdb\"", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.calendar.storage.rdb\"");
-        super.stopBundle();
+    public CalendarStorage create(int contextID) throws OXException {
+        return new RdbCalendarStorage(contextID);
     }
 
 }

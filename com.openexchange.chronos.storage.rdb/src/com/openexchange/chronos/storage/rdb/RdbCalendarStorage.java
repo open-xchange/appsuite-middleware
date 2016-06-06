@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -81,7 +82,7 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage extends AbstractRdbStorage {
+public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarStorage {
 
     /**
      * Initializes a new {@link RdbChecksumStore}.
@@ -102,6 +103,8 @@ public class RdbCalendarStorage extends AbstractRdbStorage {
             return loadAlarms(connection, userID, objectID);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            close();
         }
     }
 
@@ -134,6 +137,8 @@ public class RdbCalendarStorage extends AbstractRdbStorage {
             return event;
         } catch (SQLException e) {
             throw new OXException(e);
+        } finally {
+            close();
         }
     }
 
@@ -287,6 +292,18 @@ public class RdbCalendarStorage extends AbstractRdbStorage {
     private static List<String> parseSeparatedStrings(String strings) {
         String[] splittedStrings = Strings.splitByCommaNotInQuotes(strings);
         return null == splittedStrings ? null : Arrays.asList(splittedStrings);
+    }
+
+    @Override
+    public int insertEvent(Event event) throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public void insertAlarms(int userID, int objectID, List<Alarm> alarms) {
+        // TODO Auto-generated method stub
+
     }
 
 }

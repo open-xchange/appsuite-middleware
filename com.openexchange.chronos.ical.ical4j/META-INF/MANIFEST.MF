@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The chronos iCal iCal4j bundle
-Bundle-SymbolicName: com.openexchange.chronos.ical
+Bundle-SymbolicName: com.openexchange.chronos.ical.ical4j
 Bundle-Version: 7.10.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

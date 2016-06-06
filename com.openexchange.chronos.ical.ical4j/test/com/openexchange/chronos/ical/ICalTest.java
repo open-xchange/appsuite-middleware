@@ -54,7 +54,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-
 import com.openexchange.chronos.ical.impl.ICalParametersImpl;
 import com.openexchange.chronos.ical.impl.ICalServiceImpl;
 import com.openexchange.java.Charsets;
@@ -78,28 +77,28 @@ public abstract class ICalTest {
         this.iCalService = new ICalServiceImpl();
     }
 
-//	private String serialize(Event event) throws IOException {
-//		ICalParametersImpl parameters = new ICalParametersImpl();
-//		TimezoneInfo tzInfo = new TimezoneInfo();
-//		tzInfo.setDefaultTimeZone(null);
-//		parameters.set(ICalParameters.TIMEZONE_INFO, tzInfo);
-//
-//		VEvent vEvent = new ICalMapper().exportEvent(event, null, parameters, null);
-//
-//		ICalendar iCalendar = new ICalendar();
-//		iCalendar.addEvent(vEvent);
-//		StringWriter writer = null;
-//		ICalWriter iCalWriter = null;
-//		try {
-//			writer = new StringWriter();
-//			iCalWriter = new ICalWriter(writer, ICalVersion.V2_0);
-//			iCalWriter.setTimezoneInfo(tzInfo);
-//			iCalWriter.write(iCalendar);
-//			return writer.toString();
-//		} finally {
-//			Streams.close(iCalWriter, writer);
-//		}
-//	}
+    //	private String serialize(Event event) throws IOException {
+    //		ICalParametersImpl parameters = new ICalParametersImpl();
+    //		TimezoneInfo tzInfo = new TimezoneInfo();
+    //		tzInfo.setDefaultTimeZone(null);
+    //		parameters.set(ICalParameters.TIMEZONE_INFO, tzInfo);
+    //
+    //		VEvent vEvent = new ICalMapper().exportEvent(event, null, parameters, null);
+    //
+    //		ICalendar iCalendar = new ICalendar();
+    //		iCalendar.addEvent(vEvent);
+    //		StringWriter writer = null;
+    //		ICalWriter iCalWriter = null;
+    //		try {
+    //			writer = new StringWriter();
+    //			iCalWriter = new ICalWriter(writer, ICalVersion.V2_0);
+    //			iCalWriter.setTimezoneInfo(tzInfo);
+    //			iCalWriter.write(iCalendar);
+    //			return writer.toString();
+    //		} finally {
+    //			Streams.close(iCalWriter, writer);
+    //		}
+    //	}
 
     protected CalendarImport importICal(String iCal) throws Exception {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
@@ -110,27 +109,24 @@ public abstract class ICalTest {
         ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(iCal.getBytes("UTF-8"));
         return iCalService.importICal(inputStream, null).getEvents().get(0);
     }
-    
+
     protected String exportEvent(EventData event) throws Exception {
-		ICalParametersImpl parameters = new ICalParametersImpl();
-    	CalendarExport calendarExport = iCalService.exportICal(parameters);
-    	calendarExport.add(event);
-    	byte[] iCal = calendarExport.toByteArray();
-    	return new String(iCal, Charsets.UTF_8);
+        ICalParametersImpl parameters = new ICalParametersImpl();
+        CalendarExport calendarExport = iCalService.exportICal(parameters);
+        calendarExport.add(event);
+        byte[] iCal = calendarExport.toByteArray();
+        return new String(iCal, Charsets.UTF_8);
     }
 
-//	protected ICalendar parse(String iCal) {
-//		return biweekly.Biweekly.parse(iCal).first();
-//	}
+    protected static Date D(String value) throws ParseException {
+        return D(value, TimeZones.UTC);
+    }
 
-	protected static Date D(String value) throws ParseException {
-	    return D(value, TimeZones.UTC);
-	}
     protected static Date D(String value, String timeZoneID) throws ParseException {
         return D(value, TimeZone.getTimeZone(timeZoneID));
     }
 
-	protected static Date D(String value, TimeZone timeZone) throws ParseException {
+    protected static Date D(String value, TimeZone timeZone) throws ParseException {
         for (String pattern : DATE_PATTERNS) {
             try {
                 SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
@@ -143,6 +139,6 @@ public abstract class ICalTest {
             }
         }
         throw new ParseException(value, 0);
-	}
+    }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -61,6 +62,12 @@ public class UserizedEvent extends Event {
 
     int folderId;
     List<Alarm> alarms;
+    Event delegate;
+
+    public UserizedEvent(Event delegate) {
+        super();
+        this.delegate = delegate;
+    }
 
     /**
      * Gets the folderId
@@ -96,6 +103,238 @@ public class UserizedEvent extends Event {
      */
     public void setAlarms(List<Alarm> alarms) {
         this.alarms = alarms;
+    }
+
+    public boolean equals(Object obj) {
+        return delegate.equals(obj);
+    }
+
+    public int getId() {
+        return delegate.getId();
+    }
+
+    public String getUid() {
+        return delegate.getUid();
+    }
+
+    public String getFilename() {
+        return delegate.getFilename();
+    }
+
+    public String getiCalId() {
+        return delegate.getiCalId();
+    }
+
+    public Date getCreated() {
+        return delegate.getCreated();
+    }
+
+    public Date getLastModified() {
+        return delegate.getLastModified();
+    }
+
+    public int getCreatedBy() {
+        return delegate.getCreatedBy();
+    }
+
+    public int getModifiedBy() {
+        return delegate.getModifiedBy();
+    }
+
+    public String getSummary() {
+        return delegate.getSummary();
+    }
+
+    public String getLocation() {
+        return delegate.getLocation();
+    }
+
+    public String getDescription() {
+        return delegate.getDescription();
+    }
+
+    public EventStatus getStatus() {
+        return delegate.getStatus();
+    }
+
+    public Date getStartDate() {
+        return delegate.getStartDate();
+    }
+
+    public String getStartTimezone() {
+        return delegate.getStartTimezone();
+    }
+
+    public Date getEndDate() {
+        return delegate.getEndDate();
+    }
+
+    public String getEndTimezone() {
+        return delegate.getEndTimezone();
+    }
+
+    public boolean isAllDay() {
+        return delegate.isAllDay();
+    }
+
+    public TimeTransparency getTransp() {
+        return delegate.getTransp();
+    }
+
+    public int getRecurrenceId() {
+        return delegate.getRecurrenceId();
+    }
+
+    public String getRecurrenceRule() {
+        return delegate.getRecurrenceRule();
+    }
+
+    public List<Date> getDeleteExceptionDates() {
+        return delegate.getDeleteExceptionDates();
+    }
+
+    public List<Date> getChangeExceptionDates() {
+        return delegate.getChangeExceptionDates();
+    }
+
+    public Organizer getOrganizer() {
+        return delegate.getOrganizer();
+    }
+
+    public List<Attendee> getAttendees() {
+        return delegate.getAttendees();
+    }
+
+    public List<Attachment> getAttachments() {
+        return delegate.getAttachments();
+    }
+
+    public Classification getClassification() {
+        return delegate.getClassification();
+    }
+
+    public Integer getSequence() {
+        return delegate.getSequence();
+    }
+
+    public List<String> getCategories() {
+        return delegate.getCategories();
+    }
+
+    public int hashCode() {
+        return delegate.hashCode();
+    }
+
+    public void setId(int id) {
+        delegate.setId(id);
+    }
+
+    public void setUid(String uid) {
+        delegate.setUid(uid);
+    }
+
+    public void setFilename(String filename) {
+        delegate.setFilename(filename);
+    }
+
+    public void setiCalId(String iCalId) {
+        delegate.setiCalId(iCalId);
+    }
+
+    public void setCreated(Date created) {
+        delegate.setCreated(created);
+    }
+
+    public void setLastModified(Date lastModified) {
+        delegate.setLastModified(lastModified);
+    }
+
+    public void setCreatedBy(int createdBy) {
+        delegate.setCreatedBy(createdBy);
+    }
+
+    public void setModifiedBy(int modifiedBy) {
+        delegate.setModifiedBy(modifiedBy);
+    }
+
+    public void setSummary(String summary) {
+        delegate.setSummary(summary);
+    }
+
+    public void setLocation(String location) {
+        delegate.setLocation(location);
+    }
+
+    public void setDescription(String description) {
+        delegate.setDescription(description);
+    }
+
+    public void setStatus(EventStatus status) {
+        delegate.setStatus(status);
+    }
+
+    public void setStartDate(Date startDate) {
+        delegate.setStartDate(startDate);
+    }
+
+    public void setStartTimezone(String startTimezone) {
+        delegate.setStartTimezone(startTimezone);
+    }
+
+    public void setEndDate(Date endDate) {
+        delegate.setEndDate(endDate);
+    }
+
+    public void setEndTimezone(String endTimezone) {
+        delegate.setEndTimezone(endTimezone);
+    }
+
+    public void setAllDay(boolean allDay) {
+        delegate.setAllDay(allDay);
+    }
+
+    public void setTransp(TimeTransparency transp) {
+        delegate.setTransp(transp);
+    }
+
+    public void setRecurrenceId(int recurrenceId) {
+        delegate.setRecurrenceId(recurrenceId);
+    }
+
+    public void setRecurrenceRule(String recurrenceRule) {
+        delegate.setRecurrenceRule(recurrenceRule);
+    }
+
+    public void setDeleteExceptionDates(List<Date> deleteExceptionDates) {
+        delegate.setDeleteExceptionDates(deleteExceptionDates);
+    }
+
+    public void setChangeExceptionDates(List<Date> changeExceptionDates) {
+        delegate.setChangeExceptionDates(changeExceptionDates);
+    }
+
+    public void setOrganizer(Organizer organizer) {
+        delegate.setOrganizer(organizer);
+    }
+
+    public void setAttendees(List<Attendee> attendees) {
+        delegate.setAttendees(attendees);
+    }
+
+    public void setAttachments(List<Attachment> attachments) {
+        delegate.setAttachments(attachments);
+    }
+
+    public void setClassification(Classification classification) {
+        delegate.setClassification(classification);
+    }
+
+    public void setSequence(Integer sequence) {
+        delegate.setSequence(sequence);
+    }
+
+    public void setCategories(List<String> categories) {
+        delegate.setCategories(categories);
     }
 
 }

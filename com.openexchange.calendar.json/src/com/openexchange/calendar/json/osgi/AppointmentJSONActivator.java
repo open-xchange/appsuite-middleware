@@ -54,7 +54,9 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.converters.AppointmentIcalResultConverter;
 import com.openexchange.calendar.json.converters.AppointmentResultConverter;
+import com.openexchange.calendar.json.converters.EventResultConverter;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.chronos.CalendarService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -70,7 +72,7 @@ import com.openexchange.user.UserService;
  */
 public class AppointmentJSONActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED = new Class[] { UserService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class, ICalEmitter.class };
+    private static final Class<?>[] NEEDED = new Class[] { CalendarService.class, UserService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class, ICalEmitter.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -79,24 +81,27 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-//        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-//        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-//        registerService(TargetService.class, new ModifyThroughDependant(), props);
+        //        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+        //        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
+        //        registerService(TargetService.class, new ModifyThroughDependant(), props);
         registerModule(new AppointmentActionFactory(this), "calendar");
         registerService(ResultConverter.class, new AppointmentResultConverter(this));
         registerService(ResultConverter.class, new AppointmentIcalResultConverter(this));
         registerService(OAuthScopeProvider.class, new AbstractScopeProvider(AppointmentActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
+
             @Override
             public boolean canBeGranted(CapabilitySet capabilities) {
                 return capabilities.contains(Permission.CALENDAR.getCapabilityName());
             }
         });
         registerService(OAuthScopeProvider.class, new AbstractScopeProvider(AppointmentActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+
             @Override
             public boolean canBeGranted(CapabilitySet capabilities) {
                 return capabilities.contains(Permission.CALENDAR.getCapabilityName());
             }
         });
+        registerService(ResultConverter.class, new EventResultConverter(this));
     }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,74 +47,59 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.impl.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-import com.openexchange.server.ServiceLookup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarStorageFactory;
+import com.openexchange.chronos.impl.CalendarServiceImpl;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link Services}
+ * {@link ChronosActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class Services {
+public class ChronosActivator extends HousekeepingActivator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ChronosActivator.class);
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link ChronosActivator}.
      */
-    private Services() {
+    public ChronosActivator() {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, CalendarStorageFactory.class, FolderService.class };
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.chronos.impl\" not started?");
-        }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+    @Override
+    protected void startBundle() throws Exception {
         try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
+            LOG.info("starting bundle: \"com.openexchange.chronos.impl\"");
+            Services.setServiceLookup(this);
+            /*
+             * register services
+             */
+            registerService(CalendarService.class, new CalendarServiceImpl());
+        } catch (Exception e) {
+            LOG.error("error starting \"com.openexchange.chronos.impl\"", e);
+            throw e;
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: \"com.openexchange.chronos.impl\"");
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
 }
