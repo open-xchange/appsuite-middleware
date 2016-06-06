@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.directory"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.dispatch"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.group"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.handle"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.hazelcast"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.hazelcast.serialization"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.realtime"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.realtime.directory"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.realtime.dispatch"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.realtime.group"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.realtime.handle"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.realtime.hazelcast"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.realtime.hazelcast.serialization"/>
 </provider>
 </psf>
