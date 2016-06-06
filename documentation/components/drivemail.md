@@ -49,14 +49,14 @@ If enabled and user holds sufficient capabilities (_"infostore"_ and _"share_lin
 
 ## Display name
 
-It is possible to change the display name of that feature according to customer needs through ``com.openexchange.mail.compose.share.name`` option. Default is ``Drive Mail``.
+It is possible to change the display name of that feature according to customer needs through ``com.openexchange.mail.compose.share.name`` option. Default is _Drive Mail_.
 
 ## Threshold
 
-Since file attachments are not physically attached, but stored in Drive if sending user, a user can be forced to send a share link through specifying property ``com.openexchange.mail.compose.share.threshold``. That option accepts a threshold, which is the total number of bytes of all file attachments that are allowed to be sent physically attached. Once exceeded the file attachments are made accessible via a share link.
+Since file attachments are not physically attached, but stored in Drive of sending user, a user can be forced to send a share link through specifying property ``com.openexchange.mail.compose.share.threshold``. That option accepts a threshold, which is the total number of bytes of all file attachments that are allowed to be sent physically attached. Once exceeded the file attachments are made accessible via a share link.
 
 ## Root folder name
-The ``com.openexchange.mail.compose.share.folderName`` setting allows to specify the name of root folder under which message-specific sub-folders are created. Default value is ``i18n-defined`` which reflects to choose the translated string of the ``"My shared mail attachments"`` string literal.
+The ``com.openexchange.mail.compose.share.folderName`` setting allows to specify the name of root folder under which message-specific sub-folders are created. Default value is ``i18n-defined`` which reflects to choose the translated string of the _"My shared mail attachments"_ string literal.
 
 However, it is possible to hard-code the name of the folder with respect to a user's locale.
 
