@@ -47,70 +47,77 @@
  *
  */
 
-package com.openexchange.share.handler.download.limiter;
+package com.openexchange.download.limit.osgi;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
+import com.openexchange.ajax.requesthandler.DispatcherListener;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.download.limit.internal.Services;
 import com.openexchange.download.limit.limiter.FilesDownloadLimiter;
-import com.openexchange.download.limit.limiter.GuestDownloadLimiter;
 import com.openexchange.download.limit.limiter.InfostoreDownloadLimiter;
-import com.openexchange.download.limit.limiter.exceptions.DownloadLimitedExceptionCode;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
+import com.openexchange.download.limit.rdb.FileAccessCreateTableService;
+import com.openexchange.download.limit.rdb.FileAccessCreateTableTask;
+import com.openexchange.download.limit.util.LimitConfig;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 
 /**
- * {@link ShareDownloadLimiter} - A {@link RenderListener} that is responsible for 'GET' actions in the 'share' module which are invoked directly via ShareHandler from the ShareServlet.
- * <p>
- * As this {@link RenderListener} is mostly similar to existing limiters it extends the {@link GuestDownloadLimiter} as it provides almost all functionality.
  *
- * @see {@link FilesDownloadLimiter}
- * @see {@link InfostoreDownloadLimiter}
+ * {@link ShareLimitActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.2
  */
-public class ShareDownloadLimiter extends GuestDownloadLimiter implements RenderListener {
+public class ShareLimitActivator extends AJAXModuleActivator {
 
-    public ShareDownloadLimiter(ConfigViewFactory configView) {
-        super(configView);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareLimitActivator.class);
+
+    /**
+     * Initializes a new {@link ShareLimitActivator}.
+     */
+    public ShareLimitActivator() {
+        super();
     }
 
     @Override
-    public boolean handles(AJAXRequestData request) {
-        return applicable(request);
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, DatabaseService.class };
     }
 
     @Override
-    public void onBeforeWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) throws OXException {
-        try {
-            super.onRequestInitialized(request);
-        } catch (OXException oxException) {
-            if (oxException.similarTo(DownloadLimitedExceptionCode.COUNT_EXCEEDED) || oxException.similarTo(DownloadLimitedExceptionCode.LIMIT_EXCEEDED)) {
-                throw new RateLimitedException("429 Download Limits Exceeded", 0);
-            }
-            throw oxException;
-        }
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
-    public void onAfterWrite(AJAXRequestData request, AJAXRequestResult result, Exception writeException) {
-        super.onRequestPerformed(request, result, writeException);
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle: \"com.openexchange.share.limit\"");
+
+        Services.set(this);
+
+        // Register create table services for user schema
+        registerService(CreateTableService.class, new FileAccessCreateTableService());
+
+        // Register update tasks for user schema
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new FileAccessCreateTableTask(getService(DatabaseService.class))));
+
+        ConfigViewFactory configView = getService(ConfigViewFactory.class);
+        final FilesDownloadLimiter filesDownloadLimiter = new FilesDownloadLimiter(configView);
+        registerService(DispatcherListener.class, filesDownloadLimiter);
+        final InfostoreDownloadLimiter infostoreDownloadLimiter = new InfostoreDownloadLimiter(configView);
+        registerService(DispatcherListener.class, infostoreDownloadLimiter);
+
+        registerService(Reloadable.class, LimitConfig.getInstance());
     }
 
     @Override
-    public String getModule() {
-        return "share";
-    }
-
-    @Override
-    public Set<String> getActions() {
-        return new HashSet<>(Arrays.asList("GET"));
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: \"com.openexchange.share.limit\"");
+        Services.set(null);
+        super.stopBundle();
     }
 }
