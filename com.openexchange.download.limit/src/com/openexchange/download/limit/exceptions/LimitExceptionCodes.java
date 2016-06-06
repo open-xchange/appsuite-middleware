@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * 
+ *
  * {@link LimitExceptionCodes}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -78,7 +78,7 @@ public enum LimitExceptionCodes implements DisplayableOXExceptionCode {
 
     private final static String NO_CONNECTION_PROVIDED_MSG = "No connection provided to connect to file access storage.";
 
-    private static final String PREFIX = "SHR-LIM";
+    private static final String PREFIX = "DWN-LIM";
 
     private final Category category;
     private final int number;
