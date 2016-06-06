@@ -58,11 +58,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.download.limit.limiter.FilesDownloadLimiter;
+import com.openexchange.download.limit.limiter.GuestDownloadLimiter;
+import com.openexchange.download.limit.limiter.InfostoreDownloadLimiter;
+import com.openexchange.download.limit.limiter.exceptions.DownloadLimitedExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.limit.limiter.FilesDownloadLimiter;
-import com.openexchange.share.limit.limiter.GuestDownloadLimiter;
-import com.openexchange.share.limit.limiter.InfostoreDownloadLimiter;
-import com.openexchange.share.limit.limiter.exceptions.DownloadLimitedExceptionCode;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.group.json.manage"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.resource.json.manage"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.group.json.manage"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.resource.json.manage"/>
 </provider>
 </psf>
