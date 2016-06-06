@@ -53,15 +53,17 @@ package com.openexchange.chronos.ical;
  * {@link ICalParameters}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0 
+ * @since v7.10.0
  */
 public interface ICalParameters {
-	
-	String TIMEZONE_INFO = "TIMEZONE_INFO";
-	
-	String DEFAULT_TIMEZONE = "DEFAULT_TIMEZONE";
-	
-	String METHOD = "METHOD";
+
+    String DEFAULT_TIMEZONE = "DEFAULT_TIMEZONE";
+
+    String TIMEZONE_REGISTRY = "TIMEZONE_REGISTRY";
+
+    String KEEP_COMPONENTS = "KEEP_COMPONENTS";
+
+    String OUTLOOK_TIMEZONES = "OUTLOOK_TIMEZONES";
 
     /**
      * Gets the value of an arbitrary extended parameter.

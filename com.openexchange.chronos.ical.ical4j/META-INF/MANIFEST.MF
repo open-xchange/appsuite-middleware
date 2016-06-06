@@ -1,15 +1,15 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The chronos iCal bundle
+Bundle-Name: The chronos iCal iCal4j bundle
 Bundle-SymbolicName: com.openexchange.chronos.ical
 Bundle-Version: 7.10.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ClassPath: .,
- lib/biweekly-0.4.5.jar
+Bundle-ClassPath: .
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.chronos,
+ com.openexchange.chronos.ical,
  com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.java,
@@ -29,7 +29,7 @@ Import-Package: com.openexchange.ajax.container,
  net.fortuna.ical4j.transform,
  net.fortuna.ical4j.util,
  net.fortuna.ical4j.zoneinfo.outlook,
- org.apache.commons.collections;version="3.2.2",
+ org.apache.commons.collections,
  org.apache.commons.collections.bidimap,
  org.osgi.framework,
  org.osgi.service.event,

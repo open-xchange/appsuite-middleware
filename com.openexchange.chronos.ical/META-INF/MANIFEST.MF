@@ -5,8 +5,7 @@ Bundle-SymbolicName: com.openexchange.chronos.ical
 Bundle-Version: 7.10.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ClassPath: .,
- lib/biweekly-0.4.5.jar
+Bundle-ClassPath: .
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.chronos,
@@ -19,9 +18,6 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.osgi.util,
  com.openexchange.session,
  com.openexchange.tools.arrays,
- javax.mail.internet,
- org.apache.commons.collections;version="3.2.2",
- org.apache.commons.collections.bidimap,
  org.osgi.framework,
- org.osgi.service.event,
  org.slf4j
+Export-Package: com.openexchange.chronos.ical

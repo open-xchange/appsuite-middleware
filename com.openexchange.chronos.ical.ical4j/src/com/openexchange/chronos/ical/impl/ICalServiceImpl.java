@@ -51,22 +51,10 @@ package com.openexchange.chronos.ical.impl;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.ComponentList;
-import net.fortuna.ical4j.model.component.VAlarm;
-import net.fortuna.ical4j.model.component.VEvent;
-
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.AlarmData;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.CalendarImport;
-import com.openexchange.chronos.ical.EventData;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
@@ -86,80 +74,20 @@ public class ICalServiceImpl implements ICalService {
         super();
         this.mapper = new ICalMapper();
     }
-    
+
+    @Override
+    public CalendarExport exportICal(ICalParameters parameters) throws OXException {
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+        List<OXException> warnings = new ArrayList<OXException>();
+        return new CalendarExportImpl(mapper, iCalParameters, warnings);
+    }
+
     @Override
     public CalendarImport importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
-    	ICalParameters iCalParameters = getParametersOrDefault(parameters);
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         List<OXException> warnings = new ArrayList<OXException>();
         Calendar calendar = ICalUtils.importCalendar(iCalFile, iCalParameters);
-        return importCalendar(calendar, iCalParameters, warnings);
-    }
-    
-    private DefaultCalendarImport importCalendar(Calendar calendar, ICalParameters parameters, List<OXException> warnings) throws OXException {
-    	String method = null != calendar.getMethod() ? calendar.getMethod().getValue() : null;
-    	List<EventData> events = importEvents(calendar.getComponents(Component.VEVENT), parameters, warnings);
-    	return new DefaultCalendarImport(method, events, warnings);
-    }
-    
-    @Override
-    public CalendarExport exportICal(ICalParameters parameters) { 
-    	return new DefaultCalendarExport(mapper, parameters);
-    }
-    
-    private List<EventData> importEvents(ComponentList eventComponents, ICalParameters parameters, List<OXException> warnings) throws OXException {
-    	if (null == eventComponents) {
-    		return null;
-    	}
-    	List<EventData> events = new ArrayList<EventData>(eventComponents.size());
-        for (Iterator<?> iterator = eventComponents.iterator(); iterator.hasNext();) {
-            VEvent vEvent = (VEvent) iterator.next();
-            List<AlarmData> alarms = importAlarms(vEvent.getAlarms(), parameters, warnings);
-            Event event = mapper.importVEvent(vEvent, null, parameters, warnings);
-            if (Boolean.TRUE.equals(parameters.get(ICalParameters.KEEP_COMPONENTS, Boolean.class))) {
-            	events.add(new DefaultEventData(event, alarms, ICalUtils.exportComponent(vEvent, parameters)));
-            } else {
-            	events.add(new DefaultEventData(event, alarms, null));
-            }
-        }
-        return events;
-    }
-    
-    private List<AlarmData> importAlarms(ComponentList alarmComponents, ICalParameters parameters, List<OXException> warnings) throws OXException {
-        if (null == alarmComponents) {
-        	return null;
-        }
-    	List<AlarmData> alarms = new ArrayList<AlarmData>(alarmComponents.size());
-        for (Iterator<?> iterator = alarmComponents.iterator(); iterator.hasNext();) {
-            VAlarm vAlarm = (VAlarm) iterator.next();
-            Alarm alarm = mapper.importVAlarm(vAlarm, null, parameters, warnings);
-            if (Boolean.TRUE.equals(parameters.get(ICalParameters.KEEP_COMPONENTS, Boolean.class))) {
-            	alarms.add(new DefaultAlarmData(alarm, ICalUtils.exportComponent(vAlarm, parameters)));
-            } else {
-            	alarms.add(new DefaultAlarmData(alarm, null));
-            }
-        }
-        return alarms;
-    }    
-
-    /**
-     * Gets the iCal parameters, or the default parameters if passed instance is <code>null</code>.
-     *
-     * @param parameters The parameters as passed from the client
-     * @return The parameters, or the default parameters if passed instance is <code>null</code>
-     */
-    private ICalParameters getParametersOrDefault(ICalParameters parameters) {
-        return null != parameters ? parameters : new ICalParametersImpl();
-    }
-
-    private static List<OXException> getParserWarnings(List<String> parserWarnings) {
-    	if (null == parserWarnings || 0 == parserWarnings.size()) {
-    		return Collections.emptyList();
-    	}
-    	List<OXException> warnings = new ArrayList<OXException>();
-    	for (String parserWarning : parserWarnings) {
-    		warnings.add(OXException.general(parserWarning));			
-		}
-    	return warnings;
+        return new CalendarImportImpl(calendar, mapper, iCalParameters, warnings);
     }
 
 }

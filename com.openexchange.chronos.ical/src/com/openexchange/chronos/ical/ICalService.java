@@ -50,7 +50,6 @@
 package com.openexchange.chronos.ical;
 
 import java.io.InputStream;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -75,6 +74,6 @@ public interface ICalService {
      */
     CalendarImport importICal(InputStream iCalFile, ICalParameters parameters) throws OXException;
 
-    CalendarExport exportICal(ICalParameters parameters);
-    
+    CalendarExport exportICal(ICalParameters parameters) throws OXException;
+
 }

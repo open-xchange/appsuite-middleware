@@ -51,11 +51,10 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 
 import java.util.Iterator;
 import java.util.List;
-
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -66,26 +65,34 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public abstract class AbstractICalMapping<T extends CalendarComponent, U> implements ICalMapping<T, U> {
-	
+
     /**
      * Initializes a new {@link AbstractICalMapping}.
      */
-	protected AbstractICalMapping() {
-		super();
-	}
+    protected AbstractICalMapping() {
+        super();
+    }
 
-	protected boolean removeProperties(T component, String name) {
-		int removed = 0;
-		PropertyList properties = component.getProperties(name);
+    protected boolean removeProperties(T component, String name) {
+        int removed = 0;
+        PropertyList properties = component.getProperties(name);
         for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
             Property property = (Property) iterator.next();
             if (property.getName().equalsIgnoreCase(name)) {
-            	iterator.remove();
-            	removed++;
+                iterator.remove();
+                removed++;
             }
         }
         return 0 < removed;
-	}
+    }
+
+    protected static String optParameterValue(Parameter parameter) {
+        return null != parameter ? parameter.getValue() : null;
+    }
+
+    protected static String optParameterValue(Property property, String parameterName) {
+        return optParameterValue(property.getParameter(parameterName));
+    }
 
     /**
      * Initializes and adds a new conversion warning to the warnings collection in the supplied iCal parameters reference.
@@ -125,26 +132,5 @@ public abstract class AbstractICalMapping<T extends CalendarComponent, U> implem
         }
         return false;
     }
-    
-//    protected static TimeZone getTimeZone(ICalParameters parameters, ICalProperty property) {
-//		TimezoneInfo timezoneInfo = parameters.get(ICalParameters.TIMEZONE_INFO, TimezoneInfo.class);
-//		if (null != timezoneInfo) {
-//			return timezoneInfo.getTimeZone(property);
-//		}
-//		return null;
-//    }
-//
-//	protected static void trackTimeZone(ICalParameters parameters, ICalProperty property, TimeZone timeZone) {
-//		TimezoneInfo tzInfo = parameters.get("TIMEZONE_INFO", TimezoneInfo.class);
-//		if (null == tzInfo) {
-//			tzInfo = new TimezoneInfo();
-//			parameters.set("TIMEZONE_INFO", tzInfo);
-//		}
-//		if (null == timeZone) {
-//			tzInfo.setFloating(property, true);
-//		} else {
-//			tzInfo.setTimeZone(property, timeZone);
-//		}
-//	}
-	
+
 }

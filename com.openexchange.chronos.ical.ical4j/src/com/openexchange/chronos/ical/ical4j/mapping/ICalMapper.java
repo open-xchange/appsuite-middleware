@@ -51,18 +51,14 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
-
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.alarm.AlarmMappings;
 import com.openexchange.chronos.ical.ical4j.mapping.event.EventMappings;
-import com.openexchange.chronos.ical.impl.ICalParametersImpl;
+import com.openexchange.chronos.ical.impl.ICalUtils;
 import com.openexchange.exception.OXException;
 
 /**
@@ -72,18 +68,18 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public class ICalMapper {
-	
+
     /**
      * Initializes a new {@link ICalMapper}.
      */
-	public ICalMapper() {
-		super();
-	}
-	
+    public ICalMapper() {
+        super();
+    }
+
     /**
      * Exports an event to a vEvent, optionally merging with an existing vEvent.
      *
-     * @param event The contact to export
+     * @param event The event to export
      * @param vEvent The vEvent to merge the event into, or <code>null</code> to export to a new vEvent
      * @param parameters Further options to use, or <code>null</code> to stick with the defaults
      * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
@@ -93,14 +89,12 @@ public class ICalMapper {
         if (null == vEvent) {
             vEvent = new VEvent();
         }
-        if (null == parameters) {
-        	parameters = getDefaultParameters();
-        }
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         if (null == warnings) {
-        	warnings = new ArrayList<OXException>();
+            warnings = new ArrayList<OXException>();
         }
         for (ICalMapping<VEvent, Event> mapping : EventMappings.ALL) {
-            mapping.export(event, vEvent, parameters, warnings);
+            mapping.export(event, vEvent, iCalParameters, warnings);
         }
         return vEvent;
     }
@@ -109,14 +103,12 @@ public class ICalMapper {
         if (null == vAlarm) {
             vAlarm = new VAlarm();
         }
-        if (null == parameters) {
-        	parameters = getDefaultParameters();
-        }
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         if (null == warnings) {
-        	warnings = new ArrayList<OXException>();
+            warnings = new ArrayList<OXException>();
         }
         for (ICalMapping<VAlarm, Alarm> mapping : AlarmMappings.ALL) {
-            mapping.export(alarm, vAlarm, parameters, warnings);
+            mapping.export(alarm, vAlarm, iCalParameters, warnings);
         }
         return vAlarm;
     }
@@ -134,39 +126,28 @@ public class ICalMapper {
         if (null == event) {
             event = new Event();
         }
-        if (null == parameters) {
-        	parameters = getDefaultParameters();
-        }
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         if (null == warnings) {
-        	warnings = new ArrayList<OXException>();
+            warnings = new ArrayList<OXException>();
         }
         for (ICalMapping<VEvent, Event> mapping : EventMappings.ALL) {
-            mapping.importICal(vEvent, event, parameters, warnings);
+            mapping.importICal(vEvent, event, iCalParameters, warnings);
         }
         return event;
     }
-    
+
     public Alarm importVAlarm(VAlarm vAlarm, Alarm alarm, ICalParameters parameters, List<OXException> warnings) {
         if (null == alarm) {
             alarm = new Alarm();
         }
-        if (null == parameters) {
-        	parameters = getDefaultParameters();
-        }
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         if (null == warnings) {
-        	warnings = new ArrayList<OXException>();
+            warnings = new ArrayList<OXException>();
         }
         for (ICalMapping<VAlarm, Alarm> mapping : AlarmMappings.ALL) {
-            mapping.importICal(vAlarm, alarm, parameters, warnings);
+            mapping.importICal(vAlarm, alarm, iCalParameters, warnings);
         }
         return alarm;
     }
-    
-    private ICalParameters getDefaultParameters() {
-    	ICalParameters parameters = new ICalParametersImpl();
-    	TimeZoneRegistry timeZoneRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
-    	parameters.set(ICalParameters.TIMEZONE_REGISTRY, timeZoneRegistry);
-		return parameters;    	
-    }
-	
+
 }

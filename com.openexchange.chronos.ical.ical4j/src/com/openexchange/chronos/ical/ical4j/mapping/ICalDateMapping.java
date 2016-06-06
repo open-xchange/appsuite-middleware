@@ -52,12 +52,10 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
-
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -69,98 +67,98 @@ import com.openexchange.java.Strings;
  * @since v7.10.0
  */
 public abstract class ICalDateMapping<T extends CalendarComponent, U> extends AbstractICalMapping<T, U> {
-	
-	private final String propertyName;
-	
+
+    private final String propertyName;
+
     /**
      * Initializes a new {@link ICalDateMapping}.
      * 
-     * @param propertyName The name of the mapping's property 
+     * @param propertyName The name of the mapping's property
      */
-	protected ICalDateMapping(String propertyName) {
-		super();
-		this.propertyName = propertyName;
-	}
-	
-	protected abstract Date getValue(U object);
+    protected ICalDateMapping(String propertyName) {
+        super();
+        this.propertyName = propertyName;
+    }
 
-	protected abstract String getTimezone(U object);
-	
-	protected abstract boolean hasTime(U object);
+    protected abstract Date getValue(U object);
 
-	protected abstract void setValue(U object, Date value, String timezone, boolean hasTime);
+    protected abstract String getTimezone(U object);
 
-	protected abstract DateProperty createProperty();
+    protected abstract boolean hasTime(U object);
 
-	@Override
-	public void export(U object, T component, ICalParameters parameters, List<OXException> warnings) {
-		Date value = getValue(object);
-		if (null == value) {
-			removeProperties(component, propertyName);
-		} else {
-			DateProperty property = (DateProperty) component.getProperty(propertyName);
-			if (null == property) {
-				property = createProperty();
-				component.getProperties().add(property);
-			}
-			if (hasTime(object)) {
-				String timezoneID = getTimezone(object);
-				if (Strings.isNotEmpty(timezoneID)) {
-					TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParameters.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
-					net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timezoneID);
-					if (null != timeZone) {
-						DateTime dateTime = new DateTime(false);
-						dateTime.setTimeZone(timeZone);
-						dateTime.setTime(value.getTime());
-						property.setDate(dateTime);
-					} else {
-						addConversionWarning(warnings, propertyName, "No timezone '" + timezoneID + "' registered.");
-				    	DateTime dateTime = new DateTime(true);
-				    	dateTime.setTime(value.getTime());
-						property.setDate(dateTime);
-					}
-				} else {
-			    	DateTime dateTime = new DateTime(true);
-			    	dateTime.setTime(value.getTime());
-					property.setDate(dateTime);
-				}
-			} else {
-				property.setDate(new net.fortuna.ical4j.model.Date(value.getTime()));
-			}
-		}
-	}
+    protected abstract void setValue(U object, Date value, String timezone, boolean hasTime);
 
-	@Override
-	public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
-		DateProperty property = (DateProperty) component.getProperty(propertyName);
-		if (null == property || null == property.getDate()) {
-			setValue(object, null, null, true);
-		} else {
-			TimeZone defaultTimeZone = parameters.get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class);
-			if (ParserTools.isDateTime(property)) {
-				Date value = ParserTools.parseDateConsideringDateType(component, property, defaultTimeZone);
-				TimeZone timeZone = ParserTools.chooseTimeZone(property, defaultTimeZone);
-				setValue(object, value, null != timeZone ? timeZone.getID() : null, true);
-			} else {
-				setValue(object, ParserTools.parseDate(component, property, defaultTimeZone), null, false);
-			}
-//			net.fortuna.ical4j.model.Date date = property.getDate();
-//			Date value;
-//			String timezone;
-//			boolean hasTime;
-//			if (DateTime.class.isInstance(date)) {
-//				hasTime = true;
-//				TimeZone timeZone = ((DateTime) date).getTimeZone();
-//				timezone = null != timeZone ? timeZone.getID() : null;
-//				value = new Date(date.getTime());				
-//			} else {
-//				hasTime = false;
-//				timezone = null;
-//				value = new Date(date.getTime());
-//			}
-//			setValue(object, value, timezone, hasTime);
+    protected abstract DateProperty createProperty();
 
-		}
-	}
-	
+    @Override
+    public void export(U object, T component, ICalParameters parameters, List<OXException> warnings) {
+        Date value = getValue(object);
+        if (null == value) {
+            removeProperties(component, propertyName);
+        } else {
+            DateProperty property = (DateProperty) component.getProperty(propertyName);
+            if (null == property) {
+                property = createProperty();
+                component.getProperties().add(property);
+            }
+            if (hasTime(object)) {
+                String timezoneID = getTimezone(object);
+                if (Strings.isNotEmpty(timezoneID)) {
+                    TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParameters.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
+                    net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timezoneID);
+                    if (null != timeZone) {
+                        DateTime dateTime = new DateTime(false);
+                        dateTime.setTimeZone(timeZone);
+                        dateTime.setTime(value.getTime());
+                        property.setDate(dateTime);
+                    } else {
+                        addConversionWarning(warnings, propertyName, "No timezone '" + timezoneID + "' registered.");
+                        DateTime dateTime = new DateTime(true);
+                        dateTime.setTime(value.getTime());
+                        property.setDate(dateTime);
+                    }
+                } else {
+                    DateTime dateTime = new DateTime(true);
+                    dateTime.setTime(value.getTime());
+                    property.setDate(dateTime);
+                }
+            } else {
+                property.setDate(new net.fortuna.ical4j.model.Date(value.getTime()));
+            }
+        }
+    }
+
+    @Override
+    public void importICal(T component, U object, ICalParameters parameters, List<OXException> warnings) {
+        DateProperty property = (DateProperty) component.getProperty(propertyName);
+        if (null == property || null == property.getDate()) {
+            setValue(object, null, null, true);
+        } else {
+            TimeZone defaultTimeZone = parameters.get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class);
+            if (ParserTools.isDateTime(property)) {
+                Date value = ParserTools.parseDateConsideringDateType(component, property, defaultTimeZone);
+                TimeZone timeZone = TimeZoneUtils.selectTimeZone(property, defaultTimeZone);
+                setValue(object, value, null != timeZone ? timeZone.getID() : null, true);
+            } else {
+                setValue(object, ParserTools.parseDate(component, property, defaultTimeZone), null, false);
+            }
+            //			net.fortuna.ical4j.model.Date date = property.getDate();
+            //			Date value;
+            //			String timezone;
+            //			boolean hasTime;
+            //			if (DateTime.class.isInstance(date)) {
+            //				hasTime = true;
+            //				TimeZone timeZone = ((DateTime) date).getTimeZone();
+            //				timezone = null != timeZone ? timeZone.getID() : null;
+            //				value = new Date(date.getTime());				
+            //			} else {
+            //				hasTime = false;
+            //				timezone = null;
+            //				value = new Date(date.getTime());
+            //			}
+            //			setValue(object, value, timezone, hasTime);
+
+        }
+    }
+
 }

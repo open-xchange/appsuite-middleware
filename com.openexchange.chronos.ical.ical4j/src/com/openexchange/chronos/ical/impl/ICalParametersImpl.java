@@ -52,9 +52,7 @@ package com.openexchange.chronos.ical.impl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
-
 import com.openexchange.chronos.ical.ICalParameters;
 
 /**
@@ -74,11 +72,12 @@ public class ICalParametersImpl implements ICalParameters {
         super();
         applyDefaults();
     }
-    
+
     private void applyDefaults() {
-    	set(TIMEZONE_REGISTRY, TimeZoneRegistryFactory.getInstance().createRegistry());
-    	set(DEFAULT_TIMEZONE, TimeZone.getDefault());
-    	set(KEEP_COMPONENTS, Boolean.TRUE);
+        set(TIMEZONE_REGISTRY, TimeZoneRegistryFactory.getInstance().createRegistry());
+        set(DEFAULT_TIMEZONE, TimeZone.getTimeZone("EST"));
+        //        set(DEFAULT_TIMEZONE, TimeZone.getDefault());
+        set(KEEP_COMPONENTS, Boolean.TRUE);
     }
 
     @Override
