@@ -112,7 +112,7 @@ public class FileAccess {
     public void setTimeOfEndInMillis(long timeOfEndInMillis) {
         this.timeOfEndInMillis = timeOfEndInMillis;
     }
-    
+
     public static boolean isDisabled(FileAccess allowed) {
         return allowed.getTimeOfEndInMillis() == allowed.getTimeOfStartInMillis();
     }
@@ -125,24 +125,12 @@ public class FileAccess {
     }
 
     public static boolean isCountExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getCount() <= 0) {
-            return false;
-        }
-        
-        if (used.getCount() >= allowed.getCount()) {
-            return true;
-        }
-        return false;
+        int allowedCount = allowed.getCount();
+        return (allowedCount > 0) && (used.getCount() >= allowedCount);
     }
 
     public static boolean isSizeExceeded(FileAccess allowed, FileAccess used) {
-        if (allowed.getSize() <= 0) {
-            return false;
-        }
-
-        if (used.getSize() >= allowed.getSize()) {
-            return true;
-        }
-        return false;
+        long allowedSize = allowed.getSize();
+        return (allowedSize > 0) && (used.getSize() >= allowedSize);
     }
 }
