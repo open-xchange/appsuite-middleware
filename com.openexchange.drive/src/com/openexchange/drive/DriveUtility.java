@@ -50,6 +50,8 @@
 package com.openexchange.drive;
 
 import java.util.List;
+import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -207,11 +209,21 @@ public interface DriveUtility {
     /**
      * (Re-)Sends a notification message tom one or more existing entities of a shared file or folder.
      *
-     * @param session The session The target
+     * @param session The session
      * @param target The target
      * @param entityIDs The user- or group identifiers to notify
      * @param parameters The notification parameters
      */
     void notify(DriveSession session, DriveShareTarget target, int[] entityIDs, NotificationParameters parameters) throws OXException;
+
+    /**
+     * Searches for contacts, groups and users, driving the typical "auto-completion" scenario in clients when inviting guests.
+     *
+     * @param session The session
+     * @param query The query
+     * @param parameters Additional auto-complete specific parameters
+     * @return A JSON array holding the results, ready to be consumed by clients
+     */
+    JSONArray autocomplete(DriveSession session, String query, Map<String, Object> parameters) throws OXException;
 
 }
