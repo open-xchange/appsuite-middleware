@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -57,6 +57,8 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
@@ -119,6 +121,8 @@ public class MailFilterActivator extends HousekeepingActivator {
 
             registerService(MailFilterService.class, new MailFilterServiceImpl());
 
+            registerTestCommandRegistry();
+
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
@@ -174,5 +178,21 @@ public class MailFilterActivator extends HousekeepingActivator {
             throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
         }
 
+    }
+
+    /**
+     * Registers the {@link TestCommandParserRegistry} along with all available {@link TestCommandParser}s
+     */
+    private void registerTestCommandRegistry() {
+        TestCommandRegistry registry = new TestCommandRegistry();
+
+        // add own Tests:
+        for (Commands command : Commands.values()) {
+            registry.register(command.getCommandName(), command);
+        }
+
+        registerService(TestCommandRegistry.class, registry);
+        trackService(TestCommandRegistry.class);
+        openTrackers();
     }
 }

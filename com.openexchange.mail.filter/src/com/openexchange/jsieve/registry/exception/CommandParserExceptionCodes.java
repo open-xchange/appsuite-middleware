@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,96 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper;
+package com.openexchange.jsieve.registry.exception;
 
-import org.apache.jsieve.SieveException;
-import org.json.JSONException;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.Rule;
-import com.openexchange.jsieve.commands.RuleComment;
-import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link IDRuleFieldMapper}
+ * {@link CommandParserExceptionCodes}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class IDRuleFieldMapper implements RuleFieldMapper {
+public enum CommandParserExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
-     * Initialises a new {@link IDRuleFieldMapper}.
+     * No parser found under the specified key '%1$s'
      */
-    public IDRuleFieldMapper() {
-        super();
+    UNKNOWN_PARSER("No parser found under the specified key '%1$s'", CATEGORY_ERROR, 1)
+
+    ;
+
+    private static final String PREFIX = "MAIL-FILTER";
+
+    private final String message;
+
+    private final Category category;
+
+    private final int number;
+
+    private final String displayMessage;
+
+    private CommandParserExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttributeName()
-     */
-    @Override
-    public RuleField getAttributeName() {
-        return RuleField.id;
+    private CommandParserExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
+        this.message = message;
+        this.category = category;
+        number = detailNumber;
+        this.displayMessage = displayMessage;
+
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#isNull(com.openexchange.jsieve.commands.Rule)
-     */
     @Override
-    public boolean isNull(Rule rule) {
-        return ((null == rule.getRuleComment()) || (-1 == rule.getRuleComment().getUniqueid()));
+    public int getNumber() {
+        return number;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
-     */
     @Override
-    public Object getAttribute(Rule rule) throws JSONException, OXException {
-        RuleComment ruleComment = rule.getRuleComment();
-        return (ruleComment == null) ? null : Integer.valueOf(ruleComment.getUniqueid());
+    public Category getCategory() {
+        return category;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#setAttribute(com.openexchange.jsieve.commands.Rule, java.lang.Object)
-     */
     @Override
-    public void setAttribute(Rule rule, Object attribute) throws JSONException, SieveException, OXException {
-        RuleComment ruleComment = rule.getRuleComment();
-        if (ruleComment != null) {
-            ruleComment.setUniqueid(((Integer) attribute).intValue());
-        } else {
-            rule.setRuleComments(new RuleComment(((Integer) attribute).intValue()));
-        }
+    public String getPrefix() {
+        return PREFIX;
     }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
+
+    @Override
+    public boolean equals(final OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
 }

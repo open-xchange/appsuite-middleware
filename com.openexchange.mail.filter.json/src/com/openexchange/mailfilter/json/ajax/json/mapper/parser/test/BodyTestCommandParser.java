@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
@@ -82,7 +82,7 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
      */
     @Override
@@ -91,7 +91,7 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
         final List<Object> argList = new ArrayList<Object>();
         argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, BodyTestField.comparison.name(), commandName)));
         final String extensionkey = CommandParserJSONUtil.getString(jsonObject, BodyTestField.extensionskey.name(), commandName);
-        if (null != extensionkey) {
+        if (null != extensionkey && !extensionkey.equals(JSONObject.NULL.toString())) {
             if (extensionkey.equals("text")) {
                 argList.add(ArgumentUtil.createTagArgument("text"));
             } else if (extensionkey.equals("content")) {
@@ -110,7 +110,7 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -118,16 +118,24 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.BODY.getCommandName());
         jsonObject.put(BodyTestField.comparison.name(), command.getMatchType().substring(1));
-        final String extensionkey = command.getTagArguments().get(1).substring(1);
-        jsonObject.put(BodyTestField.extensionskey.name(), extensionkey);
-        if ("content".equals(extensionkey)) {
-            // TODO: This part should be tested for correct operation, our GUI doesn't use this, but this is
-            // allowed according to our specification
-            jsonObject.put(BodyTestField.extensionsvalue.name(), command.getArguments().get(2));
-            jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(3)));
+        List<String> tagArguments = command.getTagArguments();
+        if (tagArguments.size() > 1) {
+            final String extensionkey = tagArguments.get(1).substring(1);
+            jsonObject.put(BodyTestField.extensionskey.name(), extensionkey);
+            if ("content".equals(extensionkey)) {
+                // TODO: This part should be tested for correct operation, our GUI doesn't use this, but this is
+                // allowed according to our specification
+                jsonObject.put(BodyTestField.extensionsvalue.name(), command.getArguments().get(2));
+                jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(3)));
+            } else {
+                jsonObject.put(BodyTestField.extensionsvalue.name(), JSONObject.NULL);
+                jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(2)));
+            }
         } else {
+            // no extensionskey
+            jsonObject.put(BodyTestField.extensionskey.name(), JSONObject.NULL);
             jsonObject.put(BodyTestField.extensionsvalue.name(), JSONObject.NULL);
-            jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(2)));
+            jsonObject.put(BodyTestField.values.name(), new JSONArray((List) command.getArguments().get(1)));
         }
     }
 }

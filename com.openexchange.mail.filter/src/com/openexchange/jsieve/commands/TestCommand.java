@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,6 +55,7 @@ import java.util.Hashtable;
 import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
+import com.openexchange.jsieve.commands.test.ITestCommand;
 
 public class TestCommand extends Command {
     /*
@@ -135,10 +136,10 @@ public class TestCommand extends Command {
     // return false;
     // }
     // }
-    public enum Commands {
+    public enum Commands implements ITestCommand {
         ADDRESS("address", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardAddressMatchTypes(), standardJSONAddressMatchTypes(), null),
         ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope"),
-        EXISTS("exists", 1, 1, null, null, null, null, null),
+//        EXITS("exists", 1, 1, null, null, null, null, null),
         FALSE("false", 0, 0, null, null, null, null, null),
         TRUE("true", 0, 0, null, null, null, null, null),
         NOT("not", 0, 0, null, null, null, null, null),
@@ -299,26 +300,32 @@ public class TestCommand extends Command {
             this.required = required;
         }
 
+        @Override
         public final int getNumberOfArguments() {
             return numberOfArguments;
         }
 
+        @Override
         public final int getMaxNumberOfArguments() {
             return maxNumberOfArguments;
         }
 
+        @Override
         public final String getCommandName() {
             return commandName;
         }
 
+        @Override
         public final Hashtable<String, String> getAddress() {
             return address;
         }
 
+        @Override
         public final Hashtable<String, String> getComparator() {
             return comparator;
         }
 
+        @Override
         public final String getRequired() {
             return required;
         }
@@ -343,6 +350,7 @@ public class TestCommand extends Command {
             this.required = required;
         }
 
+        @Override
         public final Hashtable<String, String> getMatchTypes() {
             return matchTypes;
         }
@@ -351,12 +359,13 @@ public class TestCommand extends Command {
             this.matchTypes = matchtypes;
         }
 
+        @Override
         public List<String[]> getJsonMatchTypes() {
             return jsonMatchTypes;
         }
     }
 
-    private Commands command;
+    private ITestCommand command;
 
     private final List<String> tagArguments;
 
@@ -377,7 +386,7 @@ public class TestCommand extends Command {
         this.tagArguments = new ArrayList<String>();
     }
 
-    public TestCommand(final Commands command, final List<Object> arguments, final List<TestCommand> testcommands) throws SieveException {
+    public TestCommand(final ITestCommand command, final List<Object> arguments, final List<TestCommand> testcommands) throws SieveException {
         this.command = command;
         this.tagArguments = new ArrayList<String>();
         this.arguments = arguments;
@@ -461,7 +470,7 @@ public class TestCommand extends Command {
         throw new SieveException("An error occured while search the comparator tag in the arguments");
     }
 
-    public final Commands getCommand() {
+    public final ITestCommand getCommand() {
         return command;
     }
 
@@ -520,7 +529,7 @@ public class TestCommand extends Command {
     @Override
     public HashSet<String> getRequired() {
         final HashSet<String> retval = new HashSet<String>();
-        final String required = this.command.required;
+        final String required = this.command.getRequired();
         if (null != required) {
             retval.add(required);
         }
@@ -536,7 +545,7 @@ public class TestCommand extends Command {
             retval.addAll(command.getRequired());
         }
         for (final String text : this.tagArguments) {
-            final String string = this.command.matchTypes.get(text);
+            final String string = this.command.getMatchTypes().get(text);
             if (null != string && (0 != string.length())) {
                 retval.add(string);
             }

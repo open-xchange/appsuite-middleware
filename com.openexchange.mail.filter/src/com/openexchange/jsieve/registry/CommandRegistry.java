@@ -47,72 +47,51 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper;
+package com.openexchange.jsieve.registry;
 
-import org.apache.jsieve.SieveException;
-import org.json.JSONException;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.Rule;
-import com.openexchange.jsieve.commands.RuleComment;
-import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
+import com.openexchange.jsieve.commands.Command;
 
 /**
- * {@link IDRuleFieldMapper}
+ * {@link CommandRegistry}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class IDRuleFieldMapper implements RuleFieldMapper {
+public interface CommandRegistry<T> {
 
     /**
-     * Initialises a new {@link IDRuleFieldMapper}.
+     * Registers a {@link Command} under the specified key
+     *
+     * @param key The key
+     * @param command The {@link Command} to register
      */
-    public IDRuleFieldMapper() {
-        super();
-    }
+    void register(String key, T command);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttributeName()
+    /**
+     * Unregisters the {@link Command} with the specified key
+     *
+     * @param key The key
      */
-    @Override
-    public RuleField getAttributeName() {
-        return RuleField.id;
-    }
+    void unregister(String key);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#isNull(com.openexchange.jsieve.commands.Rule)
+    /**
+     * Purges the registry
      */
-    @Override
-    public boolean isNull(Rule rule) {
-        return ((null == rule.getRuleComment()) || (-1 == rule.getRuleComment().getUniqueid()));
-    }
+    void purge();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
+    /**
+     * Get the parser registered under the specified key
+     *
+     * @param key The key
+     * @return The {@link Command}
+     * @throws OXException if the parser is not found
      */
-    @Override
-    public Object getAttribute(Rule rule) throws JSONException, OXException {
-        RuleComment ruleComment = rule.getRuleComment();
-        return (ruleComment == null) ? null : Integer.valueOf(ruleComment.getUniqueid());
-    }
+    T get(String key) throws OXException;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#setAttribute(com.openexchange.jsieve.commands.Rule, java.lang.Object)
+    /**
+     * Gets all registered Commands
+     * @return The Collection of {@link Command}s
      */
-    @Override
-    public void setAttribute(Rule rule, Object attribute) throws JSONException, SieveException, OXException {
-        RuleComment ruleComment = rule.getRuleComment();
-        if (ruleComment != null) {
-            ruleComment.setUniqueid(((Integer) attribute).intValue());
-        } else {
-            rule.setRuleComments(new RuleComment(((Integer) attribute).intValue()));
-        }
-    }
+    Collection<T> getCommands();
 }

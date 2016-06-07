@@ -47,72 +47,78 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper;
+package com.openexchange.jsieve.registry;
 
-import org.apache.jsieve.SieveException;
-import org.json.JSONException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.Rule;
-import com.openexchange.jsieve.commands.RuleComment;
-import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
+import com.openexchange.jsieve.commands.test.ITestCommand;
+import com.openexchange.jsieve.registry.exception.CommandParserExceptionCodes;
 
 /**
- * {@link IDRuleFieldMapper}
+ * {@link TestCommandRegistry}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class IDRuleFieldMapper implements RuleFieldMapper {
+public class TestCommandRegistry implements CommandRegistry<ITestCommand> {
+
+    private final Map<String, ITestCommand> testCommands;
 
     /**
-     * Initialises a new {@link IDRuleFieldMapper}.
+     * Initialises a new {@link TestCommandRegistry}.
      */
-    public IDRuleFieldMapper() {
+    public TestCommandRegistry() {
         super();
+        testCommands = new HashMap<>();
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttributeName()
+     *
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#register(java.lang.String, com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser)
      */
     @Override
-    public RuleField getAttributeName() {
-        return RuleField.id;
+    public void register(String key, ITestCommand command) {
+        testCommands.put(key, command);
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#isNull(com.openexchange.jsieve.commands.Rule)
+     *
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#unregister(java.lang.String)
      */
     @Override
-    public boolean isNull(Rule rule) {
-        return ((null == rule.getRuleComment()) || (-1 == rule.getRuleComment().getUniqueid()));
+    public void unregister(String key) {
+        testCommands.remove(key);
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
+     *
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#get(java.lang.String)
      */
     @Override
-    public Object getAttribute(Rule rule) throws JSONException, OXException {
-        RuleComment ruleComment = rule.getRuleComment();
-        return (ruleComment == null) ? null : Integer.valueOf(ruleComment.getUniqueid());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#setAttribute(com.openexchange.jsieve.commands.Rule, java.lang.Object)
-     */
-    @Override
-    public void setAttribute(Rule rule, Object attribute) throws JSONException, SieveException, OXException {
-        RuleComment ruleComment = rule.getRuleComment();
-        if (ruleComment != null) {
-            ruleComment.setUniqueid(((Integer) attribute).intValue());
-        } else {
-            rule.setRuleComments(new RuleComment(((Integer) attribute).intValue()));
+    public ITestCommand get(String key) throws OXException {
+        ITestCommand testCommand = testCommands.get(key);
+        if (testCommand == null) {
+            throw CommandParserExceptionCodes.UNKNOWN_PARSER.create(key);
         }
+        return testCommand;
+    }
+
+    @Override
+    public Collection<ITestCommand> getCommands() {
+        return testCommands.values();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#purge()
+     */
+    @Override
+    public void purge() {
+        testCommands.clear();
     }
 }

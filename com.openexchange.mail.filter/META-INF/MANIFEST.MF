@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mail Filter
 Bundle-SymbolicName: com.openexchange.mail.filter
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.mailfilter.osgi.MailFilterActivator
@@ -61,8 +61,10 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.http,
  org.slf4j
 Export-Package: com.openexchange.jsieve.commands,
+ com.openexchange.jsieve.commands.test,
  com.openexchange.jsieve.export,
  com.openexchange.jsieve.export.exceptions,
+ com.openexchange.jsieve.registry,
  com.openexchange.mailfilter,
  com.openexchange.mailfilter.exceptions,
  org.apache.jsieve,
