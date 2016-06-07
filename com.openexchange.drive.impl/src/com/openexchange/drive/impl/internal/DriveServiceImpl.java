@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -472,6 +473,10 @@ public class DriveServiceImpl implements DriveService {
         if (capabilitySet.contains("share_links")) {
             capabilities.add("share_links");
         }
+        /*
+         * indicate ability to listen for changes in multiple root folders via long polling (bug #45919)
+         */
+        capabilities.add("multiple_folder_long_polling");
         settings.setCapabilities(capabilities);
         return settings;
     }
