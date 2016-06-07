@@ -50,16 +50,27 @@
 package com.openexchange.chronos.compat;
 
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
 
 /**
- * {@link AppointmentConstants}
+ * {@link Appointment2Event}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AppointmentConstants {
+public class Appointment2Event {
+
+    /**
+     * Gets the event classification appropriate for the supplied "private flag" value.
+     * 
+     * @param privateFlag The legacy "private flag"
+     * @return The classification
+     */
+    public static Classification getClassification(boolean privateFlag) {
+        return privateFlag ? Classification.PRIVATE : Classification.PUBLIC;
+    }
 
     /**
      * Gets the event status appropriate for the supplied "shown as" value.
@@ -73,21 +84,6 @@ public class AppointmentConstants {
                 return EventStatus.TENTATIVE;
             default:
                 return EventStatus.CONFIRMED;
-        }
-    }
-
-    /**
-     * Gets the "shown as" value based on the supplied event status.
-     *
-     * @param eventStatus The event status
-     * @return The legacy "shown as" constant
-     */
-    public static int getShownAs(EventStatus eventStatus) {
-        switch (eventStatus) {
-            case TENTATIVE:
-                return 3; // com.openexchange.groupware.container.Appointment.TEMPORARY
-            default:
-                return 1; // com.openexchange.groupware.container.Appointment.RESERVED
         }
     }
 
@@ -133,11 +129,10 @@ public class AppointmentConstants {
     }
 
     /**
-     * Initializes a new {@link AppointmentConstants}.
+     * Initializes a new {@link Appointment2Event}.
      */
-    private AppointmentConstants() {
+    private Appointment2Event() {
         super();
     }
 
 }
-

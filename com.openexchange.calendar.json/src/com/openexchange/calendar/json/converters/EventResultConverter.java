@@ -49,18 +49,26 @@
 
 package com.openexchange.calendar.json.converters;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.UserizedEvent;
+import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarField;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -75,7 +83,6 @@ import com.openexchange.tools.session.ServerSession;
 public class EventResultConverter implements ResultConverter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventResultConverter.class);
-    private static final String INPUT_FORMAT = "event";
 
     private final ServiceLookup services;
 
@@ -107,24 +114,29 @@ public class EventResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();
-        TimeZone clientTimeZone = getClientTimeZone(requestData, session);
         if (UserizedEvent.class.isInstance(resultObject)) {
             try {
-                result.setResultObject(convertEvent((UserizedEvent) resultObject, clientTimeZone), getOutputFormat());
+                result.setResultObject(convertEvent((UserizedEvent) resultObject, getClientTimeZone(requestData, session)), getOutputFormat());
             } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
+        } else if (Collection.class.isInstance(resultObject)) {
+            Collection<UserizedEvent> events = (Collection<UserizedEvent>) resultObject;
+
         }
     }
 
-    private static TimeZone getClientTimeZone(AJAXRequestData requestData, ServerSession session) {
-        String timeZoneID = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        if (Strings.isEmpty(timeZoneID)) {
-            timeZoneID = session.getUser().getTimeZone();
-        }
-        return TimeZone.getTimeZone(timeZoneID);
-    }
+    private JSONArray convertEvents(Collection<UserizedEvent> events, TimeZone clientTimeZone, int[] columns) throws JSONException {
+        JSONArray jsonArray = new JSONArray(events.size());
+        for (UserizedEvent userizedEvent : events) {
+            JSONObject convertedEvent = convertEvent(userizedEvent, clientTimeZone);
 
+            
+
+        }
+        return jsonArray;
+    }
+    
     private JSONObject convertEvent(UserizedEvent event, TimeZone clientTimeZone) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.putOpt(AppointmentFields.TITLE, event.getSummary());
@@ -139,7 +151,6 @@ public class EventResultConverter implements ResultConverter {
             jsonObject.putOpt(AppointmentFields.END_DATE, toJsonTime(event.getEndDate(), clientTimeZone));
         }
         jsonObject.putOpt(AppointmentFields.TIMEZONE, event.getStartTimezone());
-
         jsonObject.put(AppointmentFields.ID, event.getId());
         jsonObject.put(AppointmentFields.FOLDER_ID, event.getFolderId());
         jsonObject.putOpt(AppointmentFields.UID, event.getUid());
@@ -148,8 +159,78 @@ public class EventResultConverter implements ResultConverter {
         jsonObject.putOpt(AppointmentFields.LAST_MODIFIED, toJsonTime(event.getLastModified(), clientTimeZone));
         jsonObject.put(AppointmentFields.MODIFIED_BY, event.getModifiedBy());
         jsonObject.putOpt(AppointmentFields.LAST_MODIFIED_UTC, toJsonTime(event.getLastModified(), TimeZone.getTimeZone("UTC")));
+        jsonObject.putOpt(AppointmentFields.SEQUENCE, event.getSequence());
+        jsonObject.put(AppointmentFields.PRIVATE_FLAG, Event2Appointment.getPrivateFlag(event.getClassification()));
+        jsonObject.putOpt(AppointmentFields.SHOW_AS, Event2Appointment.getShownAs(event.getStatus()));
+        jsonObject.putOpt(AppointmentFields.ORGANIZER, Event2Appointment.getEMailAddress(event.getOrganizer().getUri()));
+        if (null != event.getOrganizer() && 0 < event.getOrganizer().getEntity()) {
+            jsonObject.putOpt(AppointmentFields.ORGANIZER_ID, event.getOrganizer().getEntity());
+        }
+        List<Attendee> attendees = event.getAttendees();
+        if (null != attendees && 0 < attendees.size()) {
+            JSONArray participantsArray = new JSONArray(attendees.size());
+            JSONArray usersArray = new JSONArray();
+            JSONArray confirmationsArray = new JSONArray();
+            for (Attendee attendee : attendees) {
+                convertAttendee(attendee, participantsArray, usersArray, confirmationsArray);
+            }
+            if (0 < participantsArray.length()) {
+                jsonObject.put(AppointmentFields.PARTICIPANTS, participantsArray);
+            }
+            if (0 < usersArray.length()) {
+                jsonObject.put(AppointmentFields.USERS, usersArray);
+            }
+            if (0 < confirmationsArray.length()) {
+                jsonObject.put(AppointmentFields.CONFIRMATIONS, confirmationsArray);
+            }
+        }
 
         return jsonObject;
+    }
+
+    private void convertAttendee(Attendee attendee, JSONArray participantsArray, JSONArray usersArray, JSONArray confirmationsArray) throws JSONException {
+        if (null == attendee.getCuType()) {
+            return;
+        }
+        switch (attendee.getCuType()) {
+            case GROUP:
+                participantsArray.put(new JSONObject()
+                    .put(ParticipantsFields.ID, attendee.getEntity())
+                    .put(ParticipantsFields.TYPE, Participant.GROUP));
+                //TODO: confirm status of group members into "users" array?
+                break;
+            case INDIVIDUAL:
+                if (0 < attendee.getEntity()) {
+                    participantsArray.put(new JSONObject()
+                        .put(ParticipantsFields.ID, attendee.getEntity())
+                        .put(ParticipantsFields.TYPE, Participant.USER));
+                    usersArray.put(new JSONObject()
+                        .put(ParticipantsFields.ID, attendee.getEntity())
+                        .put(ParticipantsFields.CONFIRMATION, Event2Appointment.getConfirm(attendee.getPartStat())));
+                } else {
+                    participantsArray.put(new JSONObject()
+                        .put(ParticipantsFields.ID, attendee.getEntity())
+                        .putOpt(ParticipantsFields.DISPLAY_NAME, attendee.getCommonName())
+                        .putOpt(ParticipantsFields.MAIL, Event2Appointment.getEMailAddress(attendee.getUri()))
+                        .put(ParticipantsFields.TYPE, Participant.EXTERNAL_USER));
+                    confirmationsArray.put(new JSONObject()
+                        .put(ParticipantsFields.TYPE, Participant.EXTERNAL_USER)
+                        .putOpt(ParticipantsFields.MAIL, Event2Appointment.getEMailAddress(attendee.getUri()))
+                        .putOpt(ParticipantsFields.DISPLAY_NAME, attendee.getCommonName())
+                        .put(ParticipantsFields.STATUS, Event2Appointment.getConfirm(attendee.getPartStat())));
+                }
+                break;
+            case RESOURCE:
+            case ROOM:
+                participantsArray.put(new JSONObject()
+                    .put(ParticipantsFields.ID, attendee.getEntity())
+                    .put(ParticipantsFields.TYPE, Participant.RESOURCE));
+                break;
+            case UNKNOWN:
+                break;
+            default:
+                break;
+        }
     }
 
     private static Long toJsonTime(Date date, TimeZone clientTimeZone) {
@@ -164,8 +245,12 @@ public class EventResultConverter implements ResultConverter {
         return null != date ? Long.valueOf(date.getTime()) : null;
     }
 
-    private static long addTimeZoneOffset(long date, TimeZone timeZone) {
-        return null == timeZone ? date : date + timeZone.getOffset(date);
+    private static TimeZone getClientTimeZone(AJAXRequestData requestData, ServerSession session) {
+        String timeZoneID = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        if (Strings.isEmpty(timeZoneID)) {
+            timeZoneID = session.getUser().getTimeZone();
+        }
+        return TimeZone.getTimeZone(timeZoneID);
     }
 
 }

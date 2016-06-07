@@ -66,7 +66,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.UserizedEvent;
-import com.openexchange.chronos.compat.AppointmentConstants;
+import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.exception.OXException;
@@ -176,7 +176,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
                 // intfield04
                 // intfield05
                 // intfield06
-                event.setStatus(AppointmentConstants.getEventStatus(resultSet.getInt("intfield06")));
+                event.setStatus(Appointment2Event.getEventStatus(resultSet.getInt("intfield06")));
                 event.setAllDay(resultSet.getBoolean("intfield07"));
                 // intfield08
                 event.setSummary(resultSet.getString("field01"));
@@ -232,8 +232,11 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
                 Attendee attendee = new Attendee();
-                attendee.setEntity(resultSet.getInt("r.id"));
-                attendee.setCuType(AppointmentConstants.getCalendarUserType(resultSet.getInt("r.type")));
+                int type = resultSet.getInt("r.type");
+                if (5 /* Participant.EXTERNAL_USER */!= type && 6 /* Participant.EXTERNAL_GROUP */!= type) {
+                    attendee.setEntity(resultSet.getInt("r.id"));
+                }
+                attendee.setCuType(Appointment2Event.getCalendarUserType(type));
                 String mailAddress = resultSet.getString("r.ma");
                 if (null != mailAddress) {
                     attendee.setUri("mailto:" + mailAddress);
@@ -241,9 +244,9 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
                 attendee.setCommonName(resultSet.getString("r.dn"));
                 int confirm = resultSet.getInt("m.confirm");
                 if (resultSet.wasNull()) {
-                    attendee.setPartStat(ParticipationStatus.ACCEPTED);
+                    attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
                 } else {
-                    attendee.setPartStat(AppointmentConstants.getParticipationStatus(confirm));
+                    attendee.setPartStat(Appointment2Event.getParticipationStatus(confirm));
                 }
                 attendee.setComment(resultSet.getString("m.reason"));
                 attendees.add(attendee);
@@ -269,7 +272,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
                     attendee.setUri("mailto:" + mailAddress);
                 }
                 attendee.setCommonName(resultSet.getString("displayName"));
-                attendee.setPartStat(AppointmentConstants.getParticipationStatus(resultSet.getInt("confirm")));
+                attendee.setPartStat(Appointment2Event.getParticipationStatus(resultSet.getInt("confirm")));
                 attendee.setComment(resultSet.getString("reason"));
                 attendees.add(attendee);
             }

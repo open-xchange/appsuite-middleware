@@ -57,6 +57,8 @@ import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.exception.OXException;
@@ -119,6 +121,12 @@ public class CalendarServiceImpl implements CalendarService {
          * return reloaded event
          */
         return getEvent(session, folder, event.getId());
+    }
+
+    @Override
+    public List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs, EventField[] fields) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
