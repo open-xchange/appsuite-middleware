@@ -111,7 +111,10 @@ public class RdbAliasStorage implements UserAliasStorage {
         ResultSet rs = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND alias LIKE ? COLLATE utf8_bin");
+            /*
+             *  Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
+             */
+            stmt = con.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND LOWER(alias) LIKE LOWER(?) COLLATE utf8_bin");
             stmt.setInt(++index, contextId);
             stmt.setString(++index, alias);
             rs = stmt.executeQuery();

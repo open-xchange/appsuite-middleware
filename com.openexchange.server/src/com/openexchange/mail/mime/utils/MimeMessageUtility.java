@@ -1259,6 +1259,9 @@ public final class MimeMessageUtility {
         final List<String> ret = new ArrayList<String>(sa.length);
         final StringBuilder tmp = new StringBuilder(24);
         for (final String string : sa) {
+            if (string.isEmpty()) {
+                continue;
+            }
             final String trim = string.trim();
             if (trim.charAt(0) == '"') {
                 tmp.setLength(0);

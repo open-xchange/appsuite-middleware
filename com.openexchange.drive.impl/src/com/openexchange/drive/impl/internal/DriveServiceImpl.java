@@ -54,8 +54,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryPattern;
@@ -421,6 +425,9 @@ public class DriveServiceImpl implements DriveService {
     public DriveSettings getSettings(DriveSession session) throws OXException {
         SyncSession syncSession = new SyncSession(session);
         LOG.debug("Handling get-settings for '{}'", session);
+        /*
+         * collect settings
+         */
         DriveSettings settings = new DriveSettings();
         Quota[] quota = syncSession.getStorage().getQuota();
         LOG.debug("Got quota for root folder '{}': {}", session.getRootFolderID(), quota);
@@ -429,6 +436,23 @@ public class DriveServiceImpl implements DriveService {
         settings.setServerVersion(com.openexchange.version.Version.getInstance().getVersionString());
         settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion()));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
+        /*
+         * evaluate relevant capabilities
+         */
+        Set<String> capabilities = new HashSet<String>();
+        CapabilitySet capabilitySet = DriveServiceLookup.getService(CapabilityService.class).getCapabilities(session.getServerSession());
+        capabilities.add("invite_users_and_groups");
+        if (capabilitySet.contains("invite_guests")) {
+            capabilities.add("invite_guests");
+        }
+        if (capabilitySet.contains("share_links")) {
+            capabilities.add("share_links");
+        }
+        /*
+         * indicate ability to listen for changes in multiple root folders via long polling (bug #45919)
+         */
+        capabilities.add("multiple_folder_long_polling");
+        settings.setCapabilities(capabilities);
         return settings;
     }
 
