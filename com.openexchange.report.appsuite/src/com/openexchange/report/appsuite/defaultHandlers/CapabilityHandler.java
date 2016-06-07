@@ -202,6 +202,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             // alphabetically sorted and comma separated String of capabilities combined with a quota specification
             String capSpec = entry.getKey() + "," + quotaSpec;
             HashMap<String, Object> counts = (HashMap) entry.getValue();
+            counts.put(Report.QUOTA, quota);
 
             // Retrieve or create (if this is the first merge) the total counts for the system thusfar
             HashMap<String, Object> savedCounts = report.get(Report.MACDETAIL, capSpec, HashMap.class);
