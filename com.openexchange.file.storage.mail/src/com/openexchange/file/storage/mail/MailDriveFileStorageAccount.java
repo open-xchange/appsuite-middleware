@@ -65,7 +65,7 @@ public final class MailDriveFileStorageAccount implements FileStorageAccount {
     private static final long serialVersionUID = 8675168697186715107L;
 
     private static final String ACCOUNT_ID = MailDriveConstants.ACCOUNT_ID;
-    private static final String ACCOUNT_DISPLAY_NAME = MailDriveStrings.ACCOUNT_DISPLAY_NAME;
+    private static final String ACCOUNT_DISPLAY_NAME = MailDriveStrings.NAME_ATTACHMENTS_ALL;
 
     // --------------------------------------------------------------------------------------------------------------
 

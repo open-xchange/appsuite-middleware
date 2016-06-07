@@ -102,7 +102,8 @@ public class NewTest extends AbstractMailFilterTest {
         rule1.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test"} ));
 
         final String id1 = insertRule(rule1, forUser, ajaxSession);
-
+        rule1.setId(id1);
+        
         final Rule rule2 = new Rule();
         rule2.setName("testNewWithTwoEntries2");
         rule2.setActioncmds(new AbstractAction[] { new Stop() });

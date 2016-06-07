@@ -49,6 +49,8 @@
 
 package com.openexchange.logback.clt;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
@@ -85,6 +87,13 @@ public class IncludeStackTraceCLT {
         options.addOption(createOption("u", "user", true, false, "The user identifier", true));
         options.addOption(createOption("c", "context", true, false, "The context identifier", true));
         options.addOption(createOption("h", "help", false, false, "Print usage of the command line tool", false));
+        
+        options.addOption("H", "host", true, "The optional JMX host (default:localhost)");
+        options.addOption("p", "port", true, "The optional JMX port (default:9999)");
+        options.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
+        options.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
+        options.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
+        
         options.addOptionGroup(og);
     }
 
@@ -110,6 +119,48 @@ public class IncludeStackTraceCLT {
                 printUsage(0);
                 return;
             }
+            
+            String host = "localhost";
+            if (cl.hasOption('H')) {
+                String tmp = cl.getOptionValue('H');
+                if (null != tmp) {
+                    host = tmp.trim();
+                }
+            }
+            
+            int port = 9999;
+            if (cl.hasOption('p')) {
+                final String val = cl.getOptionValue('p');
+                if (null != val) {
+                    try {
+                        port = Integer.parseInt(val.trim());
+                    } catch (final NumberFormatException e) {
+                        System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
+                        printUsage(0);
+                        System.exit(1);
+                    }
+                    if (port < 1 || port > 65535) {
+                        System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
+                            ". Valid range is from 1 to 65535.").toString());
+                        printUsage(0);
+                        System.exit(1);
+                    }
+                }
+            }
+
+            int responseTimeout = 0;
+            if (cl.hasOption("responsetimeout")) {
+                final String val = cl.getOptionValue('p');
+                if (null != val) {
+                    try {
+                        responseTimeout = Integer.parseInt(val.trim());
+                    } catch (final NumberFormatException e) {
+                        System.err.println("responsetimeout parameter is not a number: " + val);
+                        printUsage(0);
+                        System.exit(1);
+                    }
+                }
+            }
 
             if (!cl.hasOption("c")) {
                 System.out.println("Missing option -c/--context");
@@ -130,10 +181,42 @@ public class IncludeStackTraceCLT {
             final int contextID = getIntValue(cl.getOptionValue("c"));
             final int userID = getIntValue(cl.getOptionValue("u"));
             final boolean enable = cl.hasOption("e") ? true : false;
+            
+            if (responseTimeout > 0) {
+                /*
+                 * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
+                 * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
+                 * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
+                 * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
+                 *
+                 * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
+                 * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
+                 * zero indicates an infinite timeout. The default value is zero (no timeout).
+                 */
+                System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeout * 1000));
+            }
+            
+            String jmxLogin = null;
+            if (cl.hasOption('l')) {
+                jmxLogin = cl.getOptionValue('l');
+            }
+            String jmxPassword = null;
+            if (cl.hasOption('s')) {
+                jmxPassword = cl.getOptionValue('s');
+            }
+            
+            final Map<String, Object> environment;
+            if (jmxLogin == null || jmxPassword == null) {
+                environment = null;
+            } else {
+                environment = new HashMap<String, Object>(1);
+                String[] creds = new String[] { jmxLogin, jmxPassword };
+                environment.put(JMXConnector.CREDENTIALS, creds);
+            }
 
             // Invoke MBean
-            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
-            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"+host+":"+port+"/server");
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 

@@ -154,7 +154,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
      */
     private String getPassword(ComposeRequest request) {
         JSONObject jShareAttachmentOptions = optShareAttachmentOptions(request);
-        return null == jShareAttachmentOptions ? null : jShareAttachmentOptions.optString("password");
+        return null == jShareAttachmentOptions ? null : jShareAttachmentOptions.optString("password", null);
     }
 
     /**

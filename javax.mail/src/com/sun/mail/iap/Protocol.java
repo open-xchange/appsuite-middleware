@@ -64,6 +64,7 @@ import com.sun.mail.util.*;
  */
 
 public class Protocol {
+    private final boolean auditLogEnabled;
     protected String greeting;
     protected String host;
     protected int port;
@@ -112,6 +113,7 @@ public class Protocol {
 		    throws IOException, ProtocolException {
 	boolean connected = false;		// did constructor succeed?
 	try {
+	    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
 	    this.host = host;
 	    this.port = port;
 	    this.props = props;
@@ -165,7 +167,8 @@ public class Protocol {
      */
     public Protocol(InputStream in, PrintStream out, Properties props,
 				boolean debug) throws IOException {
-	this.host = "localhost";
+    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
+    this.host = "localhost";
 	this.port = 143;
 	this.props = props;
 	this.quote = false;
@@ -345,6 +348,7 @@ public class Protocol {
 	Response r = null;
 
 	// write the command
+	long start = auditLogEnabled ? System.currentTimeMillis() : 0L;
 	try {
 	    tag = writeCommand(command, args);
 	} catch (LiteralException lex) {
@@ -357,6 +361,7 @@ public class Protocol {
 	}
 
 	Response byeResp = null;
+	Response taggedResp = null;
 	while (!done) {
 	    try {
 		r = readResponse();
@@ -378,15 +383,23 @@ public class Protocol {
 	    v.add(r);
 
 	    // If this is a matching command completion response, we are done
-	    if (r.isTagged() && r.getTag().equals(tag))
+	    if (r.isTagged() && r.getTag().equals(tag)) {
 		done = true;
+		taggedResp = r;
+	    }
 	}
 
 	if (byeResp != null)
 		v.add(byeResp);	// must be last
 	Response[] responses = v.toArray(new Response[v.size()]);
-        timestamp = System.currentTimeMillis();
+	long end = System.currentTimeMillis();
+        timestamp = end;
 	commandEnd();
+
+	if (auditLogEnabled) {
+	    com.sun.mail.imap.AuditLog.LOG.info("command='{}' time={} timestamp={} taggedResponse='{}'", (null == args ? command : command + " " + args.toString()), Long.valueOf(end - start), Long.valueOf(end), null == taggedResp ? "<none>" : taggedResp.toString());
+	}
+
 	return responses;
     }
 

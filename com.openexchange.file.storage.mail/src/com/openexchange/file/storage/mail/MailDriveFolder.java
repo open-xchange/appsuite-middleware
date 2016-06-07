@@ -126,12 +126,12 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
 
             if (rootFolder) {
                 setParentId(null);
-                setName(StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.ACCOUNT_DISPLAY_NAME));
+                setName(StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_ALL));
                 setSubfolders(true);
                 setSubscribedSubfolders(true);
                 permission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
             } else {
-                setParentId(Type.DEFAULT.getFolderId());
+                setParentId(Type.ALL.getFolderId());
                 setName(getLocalizedNameFor(fullName, session));
                 setSubfolders(false);
                 setSubscribedSubfolders(false);
@@ -151,8 +151,6 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
                 return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_RECEIVED);
             case SENT:
                 return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_SENT);
-            case DEFAULT:
-                return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.ACCOUNT_DISPLAY_NAME);
             default:
                 return null;
         }

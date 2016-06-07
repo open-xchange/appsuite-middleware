@@ -76,7 +76,11 @@ public class AllResponse extends AbstractAJAXResponse {
         final List<Rule> rules = new ArrayList<Rule>();
         final JSONArray jsonArray = (JSONArray)getData();
         for (int a = 0; a < jsonArray.length(); a++) {
-            rules.add(parseRow(jsonArray.getJSONObject(a)));
+            try {
+                rules.add(parseRow(jsonArray.getJSONObject(a)));
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
         return rules.toArray(new Rule[rules.size()]);
     }

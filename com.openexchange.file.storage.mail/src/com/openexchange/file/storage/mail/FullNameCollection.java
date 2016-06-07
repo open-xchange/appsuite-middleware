@@ -108,8 +108,6 @@ public class FullNameCollection implements Iterable<FullName> {
                 return null == fullNameReceived ? null : new FullName(fullNameReceived, Type.RECEIVED);
             case SENT:
                 return null == fullNameSent ? null : new FullName(fullNameSent, Type.SENT);
-            case DEFAULT:
-                return new FullName("", Type.DEFAULT);
             default:
                 return null;
         }

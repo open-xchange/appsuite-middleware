@@ -138,7 +138,7 @@ public final class MailDriveFileStorageService implements AccountAware, RootFold
         DefaultFileStoragePermission p = DefaultFileStoragePermission.newInstance();
         p.setEntity(session.getUserId());
         p.setAdmin(false);
-        p.setAllPermissions(FileStoragePermission.READ_FOLDER, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS);
+        p.setAllPermissions(FileStoragePermission.READ_FOLDER, FileStoragePermission.READ_ALL_OBJECTS, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS);
         return Collections.<FileStoragePermission> singletonList(p);
     }
 

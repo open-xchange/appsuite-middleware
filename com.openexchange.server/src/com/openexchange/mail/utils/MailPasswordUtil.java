@@ -342,6 +342,19 @@ public final class MailPasswordUtil {
         return new SecretKeySpec(ensureLength(key.getBytes(com.openexchange.java.Charsets.UTF_8)), ALGORITHM_DES);
     }
 
+    /**
+     * Generates a secret key from specified bytes.
+     *
+     * @param bytes The bytes
+     * @return A secret key generated from specified bytes
+     */
+    public static Key generateSecretKey(final byte[] bytes) {
+        if (null == bytes) {
+            return null;
+        }
+        return new SecretKeySpec(ensureLength(bytes), ALGORITHM_DES);
+    }
+
     private static byte[] ensureLength(final byte[] bytes) {
         final byte[] keyBytes;
         final int len = bytes.length;

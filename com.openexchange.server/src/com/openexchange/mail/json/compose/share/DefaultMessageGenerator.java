@@ -306,7 +306,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
 
     @Override
     public ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
-        Map<String, String> headers = mapFor(HEADER_SHARE_REFERENCE, shareReference.generateReferenceString());
+        Map<String, String> headers = mapFor(HEADER_SHARE_REFERENCE, ShareReference.generateStringForMime(shareReference));
         ComposedMailMessage sentMessage = generateInternalVersion(info.getRecipients().get(0), info.getComposeContext(), info.getShareLink(), info.getPassword(), info.getExpirationDate(), shareReference, headers);
         sentMessage.addUserFlag(USER_SHARE_REFERENCE);
         return sentMessage;

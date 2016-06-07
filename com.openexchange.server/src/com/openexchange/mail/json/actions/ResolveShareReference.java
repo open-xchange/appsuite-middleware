@@ -139,7 +139,7 @@ public class ResolveShareReference extends AbstractMailAction {
         // Resolve...
         ShareReference shareReference;
         try {
-            shareReference = ShareReference.parseFromReferenceString(reference);
+            shareReference = ShareReference.parseFromMime(reference);
         } catch (Exception e) {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
         }
@@ -211,11 +211,9 @@ public class ResolveShareReference extends AbstractMailAction {
             requestResult = ox.perform(requestData, null, session);
             return requestResult;
         } catch (OXException x) {
-            // Omit result on error. Let the UI deal with this
             exc = x;
             throw x;
         } catch (RuntimeException x) {
-            // Omit result on error. Let the UI deal with this
             exc = x;
             throw MailExceptionCode.UNEXPECTED_ERROR.create(x, x.getMessage());
         } finally {

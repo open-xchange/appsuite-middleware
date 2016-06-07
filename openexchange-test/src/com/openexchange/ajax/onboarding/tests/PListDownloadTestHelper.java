@@ -100,6 +100,7 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
         if (properties == null) {
             //Scenario is probably deactivated
             System.err.println("Unable to test mail Download. Mail Scenario is probably deactivated.");
+            return;
         }
         for (String key : PLIST_MAIL_KEYS) {
             assertTrue("Plist does not contain the following property: " + key, properties.keySet().contains(key));

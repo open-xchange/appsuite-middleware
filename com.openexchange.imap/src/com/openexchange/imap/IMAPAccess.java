@@ -1316,6 +1316,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         imapProps.put("mail.imap.issueNoopToKeepConnectionAlive", "false");
         /*
+         * Enable/disable audit log
+         */
+        if (config.getIMAPProperties().isAuditLogEnabled()) {
+            imapProps.put("mail.imap.auditLog.enabled", "true");
+        }
+        /*
          * Check if a secure IMAP connection should be established
          */
         final String sPort = String.valueOf(config.getPort());

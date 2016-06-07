@@ -86,6 +86,7 @@ public class GABRestorerCLT {
         toolkitOptions = new Options();
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
         toolkitOptions.addOption("c", "context", true, "A valid context identifier contained in target schema");
+        toolkitOptions.addOption("H", "host", true, "The optional JMX host (default:localhost)");
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
@@ -113,6 +114,13 @@ public class GABRestorerCLT {
             if (cmd.hasOption('h')) {
                 printHelp();
                 System.exit(0);
+            }
+            String host = "localhost";
+            if (cmd.hasOption('H')) {
+                String tmp = cmd.getOptionValue('H');
+                if (null != tmp) {
+                    host = tmp.trim();
+                }
             }
             int port = 9999;
             if (cmd.hasOption('p')) {
@@ -192,7 +200,7 @@ public class GABRestorerCLT {
                 environment.put(JMXConnector.CREDENTIALS, creds);
             }
 
-            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
+            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
             final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();

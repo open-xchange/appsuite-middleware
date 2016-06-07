@@ -98,6 +98,7 @@ public class ListExecutedTasksCLT {
         Option portOption = new Option("p", "port", true, "The optional JMX port (default:9999)");
         portOption.setType(Integer.TYPE);
         toolkitOptions.addOption(portOption);
+        toolkitOptions.addOption("H", "host", true, "The optional JMX host (default:localhost)");
         Option loginOption = new Option("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         loginOption.setType(String.class);
         toolkitOptions.addOption(loginOption);
@@ -138,6 +139,13 @@ public class ListExecutedTasksCLT {
         }
 
         final String schemaName = cmd.getOptionValue('n');
+        String host = "localhost";
+        if (cmd.hasOption('H')) {
+            String tmp = cmd.getOptionValue('H');
+            if (null != tmp) {
+                host = tmp.trim();
+            }
+        }
         int port = 9999;
         String val = cmd.getOptionValue('p');
         if (null != val) {
@@ -195,7 +203,7 @@ public class ListExecutedTasksCLT {
         }
         final JMXServiceURL url;
         try {
-            url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
+            url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
         } catch (MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
             System.exit(1);

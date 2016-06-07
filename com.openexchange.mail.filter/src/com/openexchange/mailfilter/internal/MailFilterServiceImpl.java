@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -83,6 +83,7 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.jsieve.commands.test.ITestCommand;
 import com.openexchange.jsieve.export.Capabilities;
 import com.openexchange.jsieve.export.SieveHandler;
 import com.openexchange.jsieve.export.SieveHandlerFactory;
@@ -297,7 +298,6 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
     }
-
 
     @Override
     public void deleteFilterRule(Credentials credentials, int uid) throws OXException {
@@ -514,7 +514,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     List<MailFilterGroup> groups = getMailFilterGroups(uids);
                     List<Rule> tmpList = new ArrayList<>(clientrules);
                     clientrules.clear();
-                    for(MailFilterGroup group: groups){
+                    for (MailFilterGroup group : groups) {
                         clientrules.addAll(group.getOrderedRules(tmpList));
                     }
 
@@ -729,7 +729,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 argList.add(header);
                 argList.add(Arrays.asList(split));
                 TestCommand testcommand = ifCommand.getTestcommand();
-                Commands command = testcommand.getCommand();
+                ITestCommand command = testcommand.getCommand();
                 TestCommand newTestCommand = new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>());
                 if (Commands.TRUE.equals(command)) {
                     // No test until now

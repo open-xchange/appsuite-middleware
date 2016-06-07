@@ -281,7 +281,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
             assertEquals("abstract action size is not equals", abstractAction1.length, abstractAction2.length);
 
             for (int a = 0; a < abstractAction1.length; a++) {
-                OXTestToolkit.assertEqualsAndNotNull("abstract action at position " + a + " is not equals", abstractAction1[a], abstractAction2[a]);
+                OXTestToolkit.assertEqualsAndNotNull("abstract action at position " + a + " is not equals", abstractAction1[a].getName(), abstractAction2[a].getName());
             }
         }
     }
