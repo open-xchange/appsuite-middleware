@@ -64,7 +64,7 @@ public class RedirectParserImpl implements ActionParser {
 
 	@Override
     public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
-		final String mail = jsonObject.getString("mail");
+		final String mail = jsonObject.getString("to");
 
 		return new Redirect(mail);
 	}
