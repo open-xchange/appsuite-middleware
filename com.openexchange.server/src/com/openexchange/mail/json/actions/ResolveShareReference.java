@@ -211,11 +211,9 @@ public class ResolveShareReference extends AbstractMailAction {
             requestResult = ox.perform(requestData, null, session);
             return requestResult;
         } catch (OXException x) {
-            // Omit result on error. Let the UI deal with this
             exc = x;
             throw x;
         } catch (RuntimeException x) {
-            // Omit result on error. Let the UI deal with this
             exc = x;
             throw MailExceptionCode.UNEXPECTED_ERROR.create(x, x.getMessage());
         } finally {
