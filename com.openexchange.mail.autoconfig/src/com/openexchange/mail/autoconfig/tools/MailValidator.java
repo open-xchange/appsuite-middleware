@@ -83,18 +83,19 @@ public class MailValidator {
      * @param host The IMAP host
      * @param port The IMAP port
      * @param secure Whether to establish a secure connection
+     * @param requireTls Whether STARTTLS is required
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateImap(String host, int port, boolean secure, boolean startTls, String user, String pwd) {
+    public static boolean validateImap(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
         Store store = null;
         try {
             String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
             Properties props = new Properties();
             if (secure) {
                 props.put("mail.imap.socketFactory.class", socketFactoryClass);
-            } else if (startTls) {
+            } else if (requireTls) {
                 props.put("mail.imap.starttls.required", true);
                 props.put("mail.imap.ssl.trust", "*");
             } else {
@@ -140,18 +141,19 @@ public class MailValidator {
      * @param host The POP3 host
      * @param port The POP3 port
      * @param secure Whether to establish a secure connection
+     * @param requireTls Whether STARTTLS is required
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validatePop3(String host, int port, boolean secure, boolean startTls, String user, String pwd) {
+    public static boolean validatePop3(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
         Store store = null;
         try {
             Properties props = new Properties();
             String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
             if (secure) {
                 props.put("mail.pop3.socketFactory.class", socketFactoryClass);
-            } else if (startTls) {
+            } else if (requireTls) {
                 props.put("mail.pop3.starttls.required", true);
                 props.put("mail.pop3.ssl.trust", "*");
             } else {
@@ -211,19 +213,20 @@ public class MailValidator {
      * @param host The SMTP host
      * @param port The SMTP port
      * @param secure Whether to establish a secure connection
+     * @param requireTls Whether STARTTLS is required
      * @param user The login
      * @param pwd The password
      * @param optProperties The optional container for arbitrary properties
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateSmtp(String host, int port, boolean secure, boolean startTls, String user, String pwd, Map<String, Object> optProperties) {
+    public static boolean validateSmtp(String host, int port, boolean secure, boolean requireTls, String user, String pwd, Map<String, Object> optProperties) {
         Transport transport = null;
         try {
             String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
             Properties props = new Properties();
             if (secure) {
                 props.put("mail.smtp.socketFactory.class", socketFactoryClass);
-            } else if (startTls) {
+            } else if (requireTls) {
                 props.put("mail.smtp.starttls.required", true);
                 props.put("mail.smtp.ssl.trust", "*");
             } else {
@@ -278,7 +281,7 @@ public class MailValidator {
         Socket s = null;
         String greeting = null;
         try {
-            if (secure && 993 == port) {
+            if (secure) {
                 s = TrustAllSSLSocketFactory.getDefault().createSocket();
             } else {
                 s = new Socket();
@@ -334,7 +337,7 @@ public class MailValidator {
         Socket s = null;
         String greeting = null;
         try {
-            if (secure && 465 == port) {
+            if (secure) {
                 s = TrustAllSSLSocketFactory.getDefault().createSocket();
             } else {
                 s = new Socket();
@@ -389,7 +392,7 @@ public class MailValidator {
         Socket s = null;
         String greeting = null;
         try {
-            if (secure && 995 == port) {
+            if (secure) {
                 s = TrustAllSSLSocketFactory.getDefault().createSocket();
             } else {
                 s = new Socket();
