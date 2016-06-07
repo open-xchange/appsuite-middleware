@@ -54,6 +54,7 @@ import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
@@ -102,6 +103,34 @@ public final class LoginCounterTool {
                 printHelp();
                 System.exit(0);
                 return;
+            }
+
+            String host = "localhost";
+            if (cmd.hasOption('H')) {
+                String tmp = cmd.getOptionValue('H');
+                if (null != tmp) {
+                    host = tmp.trim();
+                }
+            }
+
+            int port = 9999;
+            if (cmd.hasOption('p')) {
+                final String val = cmd.getOptionValue('p');
+                if (null != val) {
+                    try {
+                        port = Integer.parseInt(val.trim());
+                    } catch (final NumberFormatException e) {
+                        System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
+                        printHelp();
+                        System.exit(1);
+                    }
+                    if (port < 1 || port > 65535) {
+                        System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
+                            ". Valid range is from 1 to 65535.").toString());
+                        printHelp();
+                        System.exit(1);
+                    }
+                }
             }
 
             int responseTimeout = 0;
@@ -188,9 +217,27 @@ public final class LoginCounterTool {
                 System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeout * 1000));
             }
 
+            String jmxLogin = null;
+            if (cmd.hasOption('l')) {
+                jmxLogin = cmd.getOptionValue('l');
+            }
+            String jmxPassword = null;
+            if (cmd.hasOption('s')) {
+                jmxPassword = cmd.getOptionValue('s');
+            }
+
+            final Map<String, Object> environment;
+            if (jmxLogin == null || jmxPassword == null) {
+                environment = null;
+            } else {
+                environment = new HashMap<String, Object>(1);
+                String[] creds = new String[] { jmxLogin, jmxPassword };
+                environment.put(JMXConnector.CREDENTIALS, creds);
+            }
+
             // Invoke MBean
-            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
-            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"+host+":"+port+"/server");
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
                 String regex = null;
@@ -325,13 +372,19 @@ public final class LoginCounterTool {
     }
 
     static {
-        countingOptions = new Options();
-        countingOptions.addOption("h", "help", false, "Prints a help text");
-        countingOptions.addOption("s", "start", true, "Required. Sets the start date for the detecting range. Example: 2009-12-31 00:00:00");
-        countingOptions.addOption("e", "end", true, "Required. Sets the end date for the detecting range. Example: 2010-01-1 23:59:59");
-        countingOptions.addOption("r", "regex", true, "Optional. Limits the counter to login devices that match regex.");
-        countingOptions.addOption("a", "aggregate", false, "Optional. Aggregates the counts by users. " +
+        Options opts = new Options();
+        opts.addOption("h", "help", false, "Prints a help text");
+        opts.addOption("s", "start", true, "Required. Sets the start date for the detecting range. Example: 2009-12-31 00:00:00");
+        opts.addOption("e", "end", true, "Required. Sets the end date for the detecting range. Example: 2010-01-1 23:59:59");
+        opts.addOption("r", "regex", true, "Optional. Limits the counter to login devices that match regex.");
+        opts.addOption("a", "aggregate", false, "Optional. Aggregates the counts by users. " +
         		"Only the total number of logins without duplicate counts (caused by multiple clients per user) is returned.");
-        countingOptions.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
+
+        opts.addOption("H", "host", true, "The optional JMX host (default:localhost)");
+        opts.addOption("p", "port", true, "The optional JMX port (default:9999)");
+        opts.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
+        opts.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
+        opts.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
+        countingOptions = opts;
     }
 }

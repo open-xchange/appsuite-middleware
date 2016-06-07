@@ -329,10 +329,6 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
     public TimedResult<File> getDocuments(final String folderId) throws OXException {
         final FullName fullName = checkFolderId(folderId);
 
-        if (fullName.isDefaultFolder()) {
-            return new FileTimedResult(Collections.<File> emptyList());
-        }
-
         List<File> files = perform(new MailDriveClosure<List<File>>() {
 
             @Override
@@ -397,10 +393,6 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order, final Range range) throws OXException {
         final FullName fullName = checkFolderId(folderId);
-
-        if (fullName.isDefaultFolder()) {
-            return new FileTimedResult(Collections.<File> emptyList());
-        }
 
         final BoolReference doSort = new BoolReference(true);
         List<File> files = perform(new MailDriveClosure<List<File>>() {
@@ -506,10 +498,6 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
     @Override
     public TimedResult<File> getDocuments(final String folderId, final List<Field> fields, final Field sort, final SortDirection order) throws OXException {
         final FullName fullName = checkFolderId(folderId);
-
-        if (fullName.isDefaultFolder()) {
-            return new FileTimedResult(Collections.<File> emptyList());
-        }
 
         List<File> files = perform(new MailDriveClosure<List<File>>() {
 

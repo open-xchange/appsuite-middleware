@@ -86,6 +86,7 @@ public final class PreviewCacheTool2 {
         sOptions.addOption("a", "all", false, "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.");
         sOptions.addOption("i", "invalids", true, "An optional comma-separated list of those MIME types that should be considered as broken/corrupt. Default is \"application/force-download, application/x-download, application/$suffix\"");
 
+        sOptions.addOption("H", "host", true, "The optional JMX host (default:localhost)");
         sOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         sOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         sOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
@@ -130,6 +131,14 @@ public final class PreviewCacheTool2 {
                     return;
                 }
                 contextOptionVal = cmd.getOptionValue('c');
+            }
+
+            String host = "localhost";
+            if (cmd.hasOption('H')) {
+                String tmp = cmd.getOptionValue('H');
+                if (null != tmp) {
+                    host = tmp.trim();
+                }
             }
 
             int port = 9999;
@@ -226,7 +235,7 @@ public final class PreviewCacheTool2 {
             final String password = cmd.getOptionValue('P');
 
             // Invoke MBean
-            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
