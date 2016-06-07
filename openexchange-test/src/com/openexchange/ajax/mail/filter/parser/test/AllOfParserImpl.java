@@ -69,7 +69,7 @@ public class AllOfParserImpl implements TestParser {
 		final AbstractTest[] abstractTests = new AbstractTest[jsonTestArray.length()];
 		for (int a = 0; a < jsonTestArray.length(); a++) {
 			final JSONObject jsobSubObj = jsonTestArray.getJSONObject(a);
-			final String subtestname = jsobSubObj.getString("name");
+			final String subtestname = jsobSubObj.getString("id");
 			final TestParser testParser = TestParserFactory.getParser(subtestname);
 			abstractTests[a] = testParser.parseTest(name, jsobSubObj);
 		}
