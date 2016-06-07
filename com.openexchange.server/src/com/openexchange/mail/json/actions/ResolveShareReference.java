@@ -139,7 +139,7 @@ public class ResolveShareReference extends AbstractMailAction {
         // Resolve...
         ShareReference shareReference;
         try {
-            shareReference = ShareReference.parseFromReferenceString(reference);
+            shareReference = ShareReference.parseFromMime(reference);
         } catch (Exception e) {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
         }
