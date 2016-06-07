@@ -382,6 +382,23 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
+    public boolean isAuditLogEnabled() {
+        String tmp = properties.get("com.openexchange.imap.auditLog.enabled");
+        if (null != tmp) {
+            return Boolean.parseBoolean(tmp.trim());
+        }
+
+        if (mailAccountId == PRIMARY) {
+            tmp = lookUpProperty("com.openexchange.imap.primary.auditLog.enabled");
+            if (null != tmp) {
+                return Boolean.parseBoolean(tmp.trim());
+            }
+        }
+
+        return IMAPProperties.getInstance().isAuditLogEnabled();
+    }
+
+    @Override
     public Set<String> getPropagateHostNames() {
         String tmp = properties.get("com.openexchange.imap.propagateHostNames");
         if (null != tmp) {
