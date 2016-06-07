@@ -426,4 +426,9 @@ public class DriveUtilityImpl implements DriveUtility {
         parameters.addWarnings(shareHelper.notifyEntities(target, parameters.getNotificationTransport(), parameters.getNotificationMessage(), entityIDs));
     }
 
+    @Override
+    public JSONArray autocomplete(final DriveSession session, final String query, Map<String, Object> parameters) throws OXException {
+        return AutocompleteHelper.autocomplete(session, query, parameters);
+    }
+
 }

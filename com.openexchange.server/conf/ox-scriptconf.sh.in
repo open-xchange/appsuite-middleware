@@ -4,7 +4,7 @@ PROPERTIESDIR=@propertiesdir@
 OSGIPATH=@oxgroupwaresysconfdir@/osgi
 
 # Defines the Java options for the groupware Java virtual machine.
-JAVA_XTRAOPTS="-Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10 -Dlogback.threadlocal.put.duplicate=false -server -Djava.awt.headless=true -Xmx512M -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:NewRatio=3 -XX:+UseTLAB -XX:+DisableExplicitGC -Dosgi.compatibility.bootdelegation=false -XX:-OmitStackTraceInFastThrow"
+JAVA_XTRAOPTS="-Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10 -Dlogback.threadlocal.put.duplicate=false -server -Djava.awt.headless=true -Xmx512M -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:NewRatio=3 -XX:+UseTLAB -Dosgi.compatibility.bootdelegation=false -XX:-OmitStackTraceInFastThrow"
 
 # Defines the Java options for all command line tools. CLTs need much less memory compared to the groupware process.
 JAVA_OXCMD_OPTS="-Djava.net.preferIPv4Stack=true"
