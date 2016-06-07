@@ -572,6 +572,21 @@ ox_move_config_file() {
     fi
 }
 
+# kill all leftover readerengine instances from a previous start
+ox_kill_readerengine_instances() {
+    local programname="soffice.bin"
+
+    for PID in $(pidof ${programname}); do
+        if ! ps ${PID} > /dev/null; then
+            return 0
+        fi
+
+        kill -KILL ${PID}
+    done
+
+    rm -f /tmp/OSL_PIPE_*
+}
+
 # ox_add_property property value /path/to/file
 # verifies first that the property does not already exist in file and adds it then
 ox_add_property() {
