@@ -91,8 +91,6 @@ import ch.qos.logback.classic.Level;
  */
 public class LogbackCLT {
 
-    private static final String serviceURL = "service:jmx:rmi:///jndi/rmi://localhost:";
-
     private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
 
     private static final Options options;
@@ -135,6 +133,8 @@ public class LogbackCLT {
         o = null;
 
         opts.addOption(createOption("p", "JMX-Port", true, false, "JMX port (default:9999)", false));
+        opts.addOption("H", "JMX-Host", true, "The optional JMX host (default:localhost)");
+        opts.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
 
         opts.addOptionGroup(og);
     }
@@ -183,12 +183,50 @@ public class LogbackCLT {
                 jmxPassword = cl.getOptionValue("P");
             }
 
+            String jmxHost = "localhost";
+            if (cl.hasOption('H')) {
+                String tmp = cl.getOptionValue('H');
+                if (null != tmp) {
+                    jmxHost = tmp.trim();
+                }
+            }
+
             String jmxPort = "9999";
             if (cl.hasOption("p")) {
                 jmxPort = cl.getOptionValue("p");
             }
 
-            if (cl.hasOption("s")) {
+            int responseTimeout = 0;
+            if (cl.hasOption("responsetimeout")) {
+                final String val = cl.getOptionValue('p');
+                if (null != val) {
+                    try {
+                        responseTimeout = Integer.parseInt(val.trim());
+                    } catch (final NumberFormatException e) {
+                        System.err.println("responsetimeout parameter is not a number: " + val);
+                        printUsage(0);
+                        System.exit(1);
+                    }
+                }
+            }
+
+            if (responseTimeout > 0) {
+                /*
+                 * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
+                 * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
+                 * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
+                 * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
+                 *
+                 * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
+                 * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
+                 * zero indicates an infinite timeout. The default value is zero (no timeout).
+                 */
+                System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeout * 1000));
+            }
+
+            if (cl.hasOption("h")) {
+                printUsage(0);
+            } else if (cl.hasOption("s")) {
                 sessionID = cl.getOptionValue("s");
                 method = cl.hasOption("a") ? "filterSession" : "removeSessionFilter";
                 params.add(sessionID);
@@ -245,10 +283,8 @@ public class LogbackCLT {
             } else if (cl.hasOption("cf")) {
                 method = "clearFilters";
             } else if (cl.hasOption("la")) {
-                printRootAppenderStats(jmxPort, jmxUser, jmxPassword);
+                printRootAppenderStats(jmxHost, jmxPort, jmxUser, jmxPassword);
                 System.exit(0);
-            } else if (cl.hasOption("h")) {
-                printUsage(0);
             } else {
                 printUsage(-1);
             }
@@ -259,7 +295,7 @@ public class LogbackCLT {
                 params.add(getLoggerList(cl.getOptionValues("l")));
             }
 
-            invokeMBeanMethod(method, params.toArray(new Object[params.size()]), getSignatureOf(method), jmxPort, jmxUser, jmxPassword);
+            invokeMBeanMethod(method, params.toArray(new Object[params.size()]), getSignatureOf(method), jmxHost, jmxPort, jmxUser, jmxPassword);
             System.exit(0);
 
         } catch (ParseException e) {
@@ -275,10 +311,10 @@ public class LogbackCLT {
         }
     }
 
-    private static void printRootAppenderStats(String jmxPort, String jmxUser, String jmxPassword) {
+    private static void printRootAppenderStats(String jmxHost, String jmxPort, String jmxUser, String jmxPassword) {
         boolean error = true;
         try {
-            LogbackConfigurationMBean mbean = MBeanServerInvocationHandler.newProxyInstance(connect(jmxPort, jmxUser, jmxPassword), getObjectName(), LogbackConfigurationMBean.class, false);
+            LogbackConfigurationMBean mbean = MBeanServerInvocationHandler.newProxyInstance(connect(jmxHost, jmxPort, jmxUser, jmxPassword), getObjectName(), LogbackConfigurationMBean.class, false);
             System.out.print(mbean.getRootAppenderStats());
             error = false;
         } catch (IOException e) {
@@ -294,7 +330,7 @@ public class LogbackCLT {
 
     /**
      * Convert array to map
-     * 
+     *
      * @param loggersLevels
      * @return
      */
@@ -319,7 +355,7 @@ public class LogbackCLT {
 
     /**
      * Convert array to list
-     * 
+     *
      * @param loggersArray
      * @return
      */
@@ -335,8 +371,8 @@ public class LogbackCLT {
         }
     }
 
-    private static MBeanServerConnection connect(String jmxPort, String jmxUser, String jmxPassword) throws IOException {
-        JMXServiceURL jmxServiceURL = new JMXServiceURL(serviceURL + jmxPort + "/server");
+    private static MBeanServerConnection connect(String host, String jmxPort, String jmxUser, String jmxPassword) throws IOException {
+        JMXServiceURL jmxServiceURL = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + jmxPort + "/server");
         JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, createEnvironment(jmxUser, jmxPassword));
         return jmxConnector.getMBeanServerConnection();
     }
@@ -353,11 +389,11 @@ public class LogbackCLT {
      * @param signature
      */
     @SuppressWarnings("unchecked")
-    private static final void invokeMBeanMethod(String methodName, Object[] params, String[] signature, String jmxPort, String jmxUser, String jmxPassword) {
+    private static final void invokeMBeanMethod(String methodName, Object[] params, String[] signature, String jmxHost, String jmxPort, String jmxUser, String jmxPassword) {
         boolean error = true;
         try {
             ObjectName logbackConfObjName = getObjectName();
-            MBeanServerConnection mbeanServerConnection = connect(jmxPort, jmxUser, jmxPassword);
+            MBeanServerConnection mbeanServerConnection = connect(jmxHost, jmxPort, jmxUser, jmxPassword);
 
             Object o = mbeanServerConnection.invoke(logbackConfObjName, methodName, params, signature);
             if (o instanceof Set) {
