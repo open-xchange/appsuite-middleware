@@ -100,7 +100,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             options.addOption("h", "help", false, "Prints a help text");
 
             // Option for JMX connect & authentication
-            options.addOption("t", "host", true, "The optional JMX host (default:localhost)");
+            options.addOption("H", "host", true, "The optional JMX host (default:localhost)");
             options.addOption("p", "port", true, "The optional JMX port (default:9999)");
             options.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
             options.addOption("l", "login", true, "The optional JMX login (if JMX authentication is enabled)");
