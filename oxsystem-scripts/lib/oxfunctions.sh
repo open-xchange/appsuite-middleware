@@ -319,8 +319,8 @@ if ( $found ) {
 s;\(^$prop[[:space:]]*[:=]\).*$;\1${val};
 EOF
         else
-	    # add a newline to the last line if it doesn't exist
-	    sed -i -e '$a\' $tmp
+        # add a newline to the last line if it doesn't exist
+        sed -i -e '$a\' $tmp
             echo "${prop}=$val" >> $tmp
         fi
         if [ $? -gt 0 ]; then
@@ -570,21 +570,6 @@ ox_move_config_file() {
         fi
         mv "${srcdir}/${srcname}" "${dstdir}/${dstname}"
     fi
-}
-
-# kill all leftover readerengine instances from a previous start
-ox_kill_readerengine_instances() {
-    local programname="soffice.bin"
-
-    for PID in $(pidof ${programname}); do
-        if ! ps ${PID} > /dev/null; then
-            return 0
-        fi
-
-        kill -KILL ${PID}
-    done
-
-    rm -f /tmp/OSL_PIPE_*
 }
 
 # ox_add_property property value /path/to/file
