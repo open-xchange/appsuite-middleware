@@ -232,7 +232,7 @@ public final class SessionCompositionParameters implements CompositionParameters
         try {
             return IDNA.toACE(address);
         } catch (AddressException e) {
-            throw MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.create(address);
+            throw MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.create(e, address);
         }
     }
 
