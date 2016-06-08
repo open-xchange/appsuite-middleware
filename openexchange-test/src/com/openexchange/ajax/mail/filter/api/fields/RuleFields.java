@@ -46,41 +46,17 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.ajax.mail.filter.api.fields;
 
-package com.openexchange.ajax.mail.filter.api;
+public class RuleFields {
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
-
-/**
- * {@link MailFilterAPI}
- *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- */
-public class MailFilterAPI {
-
-    private final AJAXClient client;
-
-    /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
-     */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
-    }
-
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
-    }
+    public static final String ID = "id";
+    public static final String RULENAME = "rulename";
+    public static final String ACTIVE = "active";
+    public static final String FLAGS = "flags";
+    public static final String POSITION = "position";
+    public static final String TEST = "test";
+    public static final String ACTIONCMDS = "actioncmds";
+    public static final String TEXT = "text";
+    public static final String ERRORMSG = "errormsg";
 }

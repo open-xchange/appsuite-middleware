@@ -47,40 +47,78 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.request;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.mail.filter.api.parser.DeleteParser;
 
 /**
- * {@link MailFilterAPI}
+ * Stores parameters for the delete request.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
+public class DeleteRequest extends AbstractMailFilterRequest {
 
-    private final AJAXClient client;
+	private final String objectId;
 
-    /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
-     */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
-    }
+	private boolean failOnError = true;
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
-    }
+	/**
+	 * Default constructor.
+	 */
+	public DeleteRequest(final String objectId) {
+		this(objectId, true);
+	}
+
+	public DeleteRequest(final String objectId, final boolean failOnError) {
+		super();
+		this.objectId = objectId;
+		this.failOnError = failOnError;
+	}
+
+	public void setFailOnError(final boolean failOnError) {
+		this.failOnError = failOnError;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Object getBody() throws JSONException {
+		final JSONObject json = new JSONObject();
+		json.put(DataFields.ID, objectId);
+
+		return json;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Method getMethod() {
+		return Method.PUT;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Parameter[] getParameters() {
+		return new Parameter[] {
+				new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
+				new Parameter(AJAXServlet.PARAMETER_ID, objectId)
+		};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public AbstractAJAXParser getParser() {
+		return new DeleteParser(failOnError);
+	}
 }

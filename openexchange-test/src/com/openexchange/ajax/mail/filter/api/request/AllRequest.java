@@ -47,40 +47,99 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.request;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.mail.filter.api.parser.AllParser;
+import com.openexchange.groupware.tasks.Task;
 
 /**
- * {@link MailFilterAPI}
+ * Contains the data for a mail filter all request.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
+public class AllRequest extends AbstractMailFilterRequest {
 
-    private final AJAXClient client;
+	public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID };
 
-    /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
-     */
-    public MailFilterAPI(AJAXClient client) {
+	private final String servletPath;
+
+	private final boolean failOnError;
+
+	private String userName = null;
+
+	/**
+	 * Default constructor.
+	 */
+	public AllRequest(final String servletPath) {
+		this(servletPath, true);
+	}
+
+	/**
+	 * Default constructor.
+	 */
+	public AllRequest(final String servletPath, final boolean failOnError) {
+		super();
+		this.servletPath = servletPath;
+		this.failOnError = failOnError;
+	}
+
+	public AllRequest(final String servletPath, final String userName, final boolean failOnError) {
         super();
-        this.client = client;
+        this.servletPath = servletPath;
+        this.userName = userName;
+        this.failOnError = failOnError;
     }
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
+	public AllRequest(final String servletPath, final String userName) {
+	    this(servletPath, userName, true);
     }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public String getServletPath() {
+		return servletPath;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Object getBody() throws JSONException {
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Method getMethod() {
+		return Method.GET;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Parameter[] getParameters() {
+		final List<Parameter> params = new ArrayList<Parameter>();
+		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
+		if (userName != null) {
+		    params.add(new Parameter("username", userName));
+		}
+		return params.toArray(new Parameter[params.size()]);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public AllParser getParser() {
+		return new AllParser(failOnError);
+	}
 }

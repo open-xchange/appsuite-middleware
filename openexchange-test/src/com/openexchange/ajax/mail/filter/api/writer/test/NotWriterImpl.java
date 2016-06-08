@@ -47,40 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.writer.test;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.test.NotTest;
+
 
 /**
- * {@link MailFilterAPI}
+ * NotWriterImpl
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
+public class NotWriterImpl implements TestWriter {
 
-    private final AJAXClient client;
+	@Override
+    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
+		final JSONObject jsonObj = new JSONObject();
+		final NotTest notTest = (NotTest)abstractTest;
+		final AbstractTest test = notTest.getTest();
 
-    /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
-     */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
-    }
+		final TestWriter testWriter = TestWriterFactory.getWriter(test.getName());
+		final JSONObject jsonTestObj = testWriter.writeTest(test.getName(), test);
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
-    }
+		jsonObj.put("id", name);
+		jsonObj.put("test", jsonTestObj);
+
+		return jsonObj;
+	}
 }

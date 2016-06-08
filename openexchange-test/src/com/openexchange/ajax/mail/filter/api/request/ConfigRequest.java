@@ -47,40 +47,58 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.request;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.mail.filter.api.parser.ConfigParser;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
 
 /**
- * {@link MailFilterAPI}
  *
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MailFilterAPI {
+public class ConfigRequest extends AbstractMailFilterRequest<ConfigResponse> {
 
-    private final AJAXClient client;
+    private final boolean failOnError;
 
     /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
+     * Initialises a new {@link ConfigRequest}. Does NOT fail in case of an error
      */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
+    public ConfigRequest() {
+        this(false);
     }
 
     /**
-     * Returns the configuration of the mail filter backend
+     * Initialises a new {@link ConfigRequest}.
      * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
+     * @param failOnError the fail on error flag
      */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
+    public ConfigRequest(final boolean failOnError) {
+        super();
+        this.failOnError = failOnError;
+    }
+
+    @Override
+    public Object getBody() throws JSONException {
+        return new JSONObject();
+    }
+
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public Parameter[] getParameters() {
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIG),
+        };
+    }
+
+    @Override
+    public ConfigParser getParser() {
+        return new ConfigParser(failOnError);
     }
 }

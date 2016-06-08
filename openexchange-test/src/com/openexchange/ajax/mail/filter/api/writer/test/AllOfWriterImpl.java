@@ -47,40 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.writer.test;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.test.AllOfTest;
+
 
 /**
- * {@link MailFilterAPI}
+ * AllOfWriterImpl
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
+public class AllOfWriterImpl implements TestWriter {
 
-    private final AJAXClient client;
+	@Override
+    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
+		final JSONObject jsonObj = new JSONObject();
+		final AllOfTest allOfTest = (AllOfTest)abstractTest;
 
-    /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
-     */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
-    }
+		final JSONArray jsonArrayTests = new JSONArray();
+		final AbstractTest[] abstractTests = allOfTest.getTests();
+		for (int a = 0; a < abstractTests.length; a++) {
+			final String subtestname = abstractTests[a].getName();
+			final TestWriter testWriter = TestWriterFactory.getWriter(subtestname);
+			final JSONObject jsonSubTest = testWriter.writeTest(subtestname, abstractTests[a]);
+			jsonArrayTests.put(jsonSubTest);
+		}
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
-    }
+		jsonObj.put("id", name);
+		jsonObj.put("tests", jsonArrayTests);
+
+		return jsonObj;
+	}
 }

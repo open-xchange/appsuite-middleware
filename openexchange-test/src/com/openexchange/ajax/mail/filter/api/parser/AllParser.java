@@ -47,40 +47,37 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.parser;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 
 /**
- * {@link MailFilterAPI}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class MailFilterAPI {
-
-    private final AJAXClient client;
+public class AllParser extends AbstractAJAXParser {
 
     /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
+     * Default constructor.
      */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
+    public AllParser(final boolean failOnError) {
+        super(failOnError);
+    }
+
+    @Override
+    protected AllResponse createResponse(final Response response)
+        throws JSONException {
+        final AllResponse retval = instanciateResponse(response);
+        return retval;
     }
 
     /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
+     * Create specialized response object.
      */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
+    protected AllResponse instanciateResponse(final Response response) {
+        return new AllResponse(response);
     }
 }

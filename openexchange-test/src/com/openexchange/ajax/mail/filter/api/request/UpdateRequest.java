@@ -47,40 +47,89 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.request;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.mail.filter.Rule;
+import com.openexchange.ajax.mail.filter.api.parser.UpdateParser;
 
 /**
- * {@link MailFilterAPI}
+ * Implements creating the necessary values for a rule update request. All
+ * necessary values are read from the rule object.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
+public class UpdateRequest extends AbstractMailFilterRequest {
 
-    private final AJAXClient client;
+	private final Rule rule;
 
-    /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
-     */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
-    }
+	private final String forUser;
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
-    }
+	private boolean failOnError = true;
+
+	/**
+	 * Default constructor.
+	 *
+	 * @param rule
+	 *            Rule object with updated attributes.
+	 */
+	public UpdateRequest(final Rule rule, final String forUser) {
+		this(rule, forUser, true);
+	}
+
+	/**
+	 * Default constructor.
+	 *
+	 * @param rule
+	 *            Rule object with updated attributes.
+	 */
+	public UpdateRequest(final Rule rule, final String forUser, boolean failOnError) {
+		super();
+		this.rule = rule;
+		this.forUser = forUser;
+		this.failOnError = failOnError;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Object getBody() throws JSONException {
+		return convert(rule);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Method getMethod() {
+		return Method.PUT;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Parameter[] getParameters() {
+		return new Parameter[] {
+				new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
+				new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(rule.getId()))
+		};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public UpdateParser getParser() {
+		return new UpdateParser(false);
+	}
+
+	/**
+	 * @return the rule
+	 */
+	protected Rule getRule() {
+		return rule;
+	}
 }

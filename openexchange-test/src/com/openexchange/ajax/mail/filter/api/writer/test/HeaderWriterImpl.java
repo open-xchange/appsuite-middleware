@@ -47,40 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.writer.test;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.writer.comparison.ComparisonWriter;
+import com.openexchange.ajax.mail.filter.api.writer.comparison.ComparisonWriterFactory;
+import com.openexchange.ajax.mail.filter.comparison.AbstractComparison;
+import com.openexchange.ajax.mail.filter.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.test.HeaderTest;
+
 
 /**
- * {@link MailFilterAPI}
+ * HeaderWriterImpl
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
+public class HeaderWriterImpl implements TestWriter {
 
-    private final AJAXClient client;
+	@Override
+    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
+		final JSONObject jsonObj = new JSONObject();
+		final HeaderTest headerTest = (HeaderTest)abstractTest;
 
-    /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
-     */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
-    }
+		jsonObj.put("id", name);
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
-    }
+		final AbstractComparison abstractComp = headerTest.getComparison();
+		final String comparisonName = abstractComp.getName();
+		final ComparisonWriter compWriter = ComparisonWriterFactory.getWriter(comparisonName);
+		compWriter.writeComparison(comparisonName, abstractComp, jsonObj);
+
+		final JSONArray jsonHeaderArray = new JSONArray();
+		final JSONArray jsonValueArray = new JSONArray();
+
+		final String[] headers = headerTest.getHeaders();
+		final String[] values = headerTest.getValues();
+
+		for (int a = 0; a < headers.length; a++) {
+			jsonHeaderArray.put(headers[a]);
+		}
+		jsonObj.put("headers", jsonHeaderArray);
+
+		for (int a = 0; a < values.length; a++) {
+			jsonValueArray.put(values[a]);
+		}
+		jsonObj.put("values", jsonValueArray);
+
+		return jsonObj;
+	}
 }

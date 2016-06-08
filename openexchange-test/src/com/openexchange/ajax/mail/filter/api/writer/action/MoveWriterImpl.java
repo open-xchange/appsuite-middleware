@@ -47,40 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.writer.action;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.action.Move;
+
 
 /**
- * {@link MailFilterAPI}
+ * MoveParserImpl
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
+public class MoveWriterImpl implements ActionWriter {
 
-    private final AJAXClient client;
+	@Override
+    public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException {
+		final JSONObject jsonObj = new JSONObject();
+		final Move moveAction = (Move)abstractAction;
 
-    /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
-     */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
-    }
+		jsonObj.put("id", name);
+		jsonObj.put("into", moveAction.getFolder());
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
-    }
+		return jsonObj;
+	}
 }

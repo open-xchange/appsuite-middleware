@@ -47,40 +47,98 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.request;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.mail.filter.Rule;
+import com.openexchange.ajax.mail.filter.api.parser.InsertParser;
 
 /**
- * {@link MailFilterAPI}
+ * Stores the parameters for inserting the appointment.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
+public class InsertRequest extends AbstractMailFilterRequest {
 
-    private final AJAXClient client;
+	/**
+	 * Rule to insert.
+	 */
+	final Rule rule;
 
-    /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
-     */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
-    }
+	/**
+	 * The affected user
+	 */
+	final String forUser;
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
-    }
+	/**
+	 * Should the parser fail on error in server response.
+	 */
+	final boolean failOnError;
+
+	/**
+	 * default constructor.
+	 *
+	 * @param rule
+	 *            Rule to insert.
+	 *            <code>true</code> to check the response for error messages.
+	 */
+	public InsertRequest(final Rule rule, final String forUser) {
+		this(rule, forUser, true);
+	}
+
+	/**
+	 * More detailed constructor.
+	 *
+	 * @param rule
+	 *            Rule to insert.
+	 * @param failOnError
+	 *            <code>true</code> to check the response for error messages.
+	 */
+	public InsertRequest(final Rule rule, final String forUser, final boolean failOnError) {
+		super();
+		this.rule = rule;
+		this.forUser = forUser;
+		this.failOnError = failOnError;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Object getBody() throws JSONException {
+		return convert(rule);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Method getMethod() {
+		return Method.PUT;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public Parameter[] getParameters() {
+		if (forUser != null) {
+			return new Parameter[] {
+					new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
+					new Parameter("for_user", forUser) };
+		} else {
+			return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION,
+					AJAXServlet.ACTION_NEW) };
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public AbstractAJAXParser getParser() {
+		return new InsertParser(failOnError);
+	}
 }

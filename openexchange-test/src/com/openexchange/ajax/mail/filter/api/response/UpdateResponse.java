@@ -47,40 +47,37 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.response;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link MailFilterAPI}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
+public class UpdateResponse extends AbstractAJAXResponse {
 
-    private final AJAXClient client;
+	private String id;
 
     /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
+     * @param response
      */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
+    public UpdateResponse(final Response response) {
+        super(response);
     }
 
     /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
+     * @return the id
      */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    void setId(final String id) {
+        this.id = id;
     }
 }

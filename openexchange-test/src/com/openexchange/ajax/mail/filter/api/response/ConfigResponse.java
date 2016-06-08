@@ -47,40 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.response;
 
-import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
 
 /**
- * {@link MailFilterAPI}
+ * {@link ConfigResponse}
  *
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MailFilterAPI {
+public class ConfigResponse extends AbstractAJAXResponse {
 
-    private final AJAXClient client;
+    private final MailFilterConfiguration mailFilterConfiguration;
 
     /**
-     * Initialises a new {@link MailFilterAPI}.
+     * Initialises a new {@link ConfigResponse}.
      * 
-     * @param client The {@link AJAXClient}
+     * @param response The response
+     * @param mailFilterConfiguration The {@link MailFilterConfiguration}
      */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
+    public ConfigResponse(final Response response, final MailFilterConfiguration mailFilterConfiguration) {
+        super(response);
+        this.mailFilterConfiguration = mailFilterConfiguration;
     }
 
     /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
+     * Gets the mailFilterConfiguration
+     *
+     * @return The mailFilterConfiguration
      */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
+    public MailFilterConfiguration getMailFilterConfiguration() {
+        return mailFilterConfiguration;
     }
 }

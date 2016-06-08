@@ -47,40 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.response;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.mail.filter.AbstractMailFilterTestParser;
+import com.openexchange.ajax.mail.filter.Rule;
 
 /**
- * {@link MailFilterAPI}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
-
-    private final AJAXClient client;
+public class AllResponse extends AbstractAJAXResponse {
 
     /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
+     * @param response
      */
-    public MailFilterAPI(AJAXClient client) {
-        super();
-        this.client = client;
+    public AllResponse(final Response response) {
+        super(response);
     }
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
+    public Rule[] getRules() throws JSONException {
+        final List<Rule> rules = new ArrayList<Rule>();
+        final JSONArray jsonArray = (JSONArray)getData();
+        for (int a = 0; a < jsonArray.length(); a++) {
+            try {
+                rules.add(parseRow(jsonArray.getJSONObject(a)));
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        return rules.toArray(new Rule[rules.size()]);
+    }
+
+    public Rule parseRow(final JSONObject jsonObj) throws JSONException {
+        final Rule rule = new Rule();
+        AbstractMailFilterTestParser.parse(jsonObj, rule);
+        return rule;
     }
 }

@@ -47,40 +47,46 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api;
+package com.openexchange.ajax.mail.filter.api.request;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
-import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.mail.filter.Rule;
+import com.openexchange.ajax.mail.filter.api.writer.MailFilterWriter;
 
 /**
- * {@link MailFilterAPI}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class MailFilterAPI {
-
-    private final AJAXClient client;
+public abstract class AbstractMailFilterRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
-     * Initialises a new {@link MailFilterAPI}.
-     * 
-     * @param client The {@link AJAXClient}
+     * URL of the calendar AJAX interface.
      */
-    public MailFilterAPI(AJAXClient client) {
+    public static final String URL = "/ajax/mailfilter";
+
+    protected AbstractMailFilterRequest() {
         super();
-        this.client = client;
     }
 
-    /**
-     * Returns the configuration of the mail filter backend
-     * 
-     * @return the {@link MailFilterConfiguration} of the mail filter backend
-     */
-    public MailFilterConfiguration getConfiguration() throws Exception {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        return response.getMailFilterConfiguration();
+    @Override
+    public String getServletPath() {
+        return URL;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    protected JSONObject convert(final Rule rule)
+        throws JSONException {
+		final JSONObject jsonObj = new JSONObject();
+        final MailFilterWriter mailFilterWriter = new MailFilterWriter();
+        mailFilterWriter.writeMailFilter(rule, jsonObj);
+        return jsonObj;
     }
 }

@@ -54,7 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.Rule;
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
-import com.openexchange.ajax.mail.filter.fields.RuleFields;
+import com.openexchange.ajax.mail.filter.api.fields.RuleFields;
 import com.openexchange.ajax.mail.filter.parser.action.ActionParser;
 import com.openexchange.ajax.mail.filter.parser.action.ActionParserFactory;
 import com.openexchange.ajax.mail.filter.parser.test.TestParser;
