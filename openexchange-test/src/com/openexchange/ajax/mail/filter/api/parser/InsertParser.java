@@ -54,12 +54,15 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.mail.filter.api.response.InsertResponse;
+import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
- *
+ * {@link InsertParser}
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class InsertParser extends AbstractAJAXParser {
+public class InsertParser extends AbstractAJAXParser<InsertResponse> {
 
     /**
      * Remembers if this parser fails out with an error.
@@ -74,13 +77,15 @@ public class InsertParser extends AbstractAJAXParser {
         this.failOnError = failOnError;
     }
 
-    /**
-     * {@inheritDoc}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
      */
     @Override
     protected InsertResponse createResponse(final Response response) throws JSONException {
         final InsertResponse retval = new InsertResponse(response);
-        final JSONObject jsonRespones = response.getJSON();
+        final JSONObject jsonRespones = ResponseWriter.getJSON(response);
         if (failOnError) {
             if (jsonRespones.has("data")) {
                 final String objectId = jsonRespones.getString("data");

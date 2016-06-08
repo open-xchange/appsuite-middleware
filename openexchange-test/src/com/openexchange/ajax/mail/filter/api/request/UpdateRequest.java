@@ -51,7 +51,7 @@ package com.openexchange.ajax.mail.filter.api.request;
 
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.mail.filter.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.parser.UpdateParser;
 
 /**

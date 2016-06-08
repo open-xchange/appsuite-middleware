@@ -56,8 +56,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.mail.filter.AbstractMailFilterTestParser;
-import com.openexchange.ajax.mail.filter.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTestParser;
 
 /**
  *

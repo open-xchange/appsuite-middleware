@@ -49,96 +49,110 @@
 
 package com.openexchange.ajax.mail.filter.api.request;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.mail.filter.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.parser.InsertParser;
+import com.openexchange.ajax.mail.filter.api.response.InsertResponse;
 
 /**
- * Stores the parameters for inserting the appointment.
+ * {@link InsertRequest}. Stores the parameters for inserting the appointment.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class InsertRequest extends AbstractMailFilterRequest {
+public class InsertRequest extends AbstractMailFilterRequest<InsertResponse> {
 
-	/**
-	 * Rule to insert.
-	 */
-	final Rule rule;
+    /**
+     * Rule to insert.
+     */
+    final Rule rule;
 
-	/**
-	 * The affected user
-	 */
-	final String forUser;
+    /**
+     * The affected user
+     */
+    final String forUser;
 
-	/**
-	 * Should the parser fail on error in server response.
-	 */
-	final boolean failOnError;
+    /**
+     * Should the parser fail on error in server response.
+     */
+    final boolean failOnError;
 
-	/**
-	 * default constructor.
-	 *
-	 * @param rule
-	 *            Rule to insert.
-	 *            <code>true</code> to check the response for error messages.
-	 */
-	public InsertRequest(final Rule rule, final String forUser) {
-		this(rule, forUser, true);
-	}
+    /**
+     * Initialises a new {@link InsertRequest}.
+     * 
+     * @param rule The {@link Rule} to insert
+     */
+    public InsertRequest(Rule rule) {
+        this(rule, null, true);
+    }
 
-	/**
-	 * More detailed constructor.
-	 *
-	 * @param rule
-	 *            Rule to insert.
-	 * @param failOnError
-	 *            <code>true</code> to check the response for error messages.
-	 */
-	public InsertRequest(final Rule rule, final String forUser, final boolean failOnError) {
-		super();
-		this.rule = rule;
-		this.forUser = forUser;
-		this.failOnError = failOnError;
-	}
+    /**
+     * default constructor.
+     *
+     * @param rule Rule to insert. <code>true</code> to check the response for error messages.
+     */
+    public InsertRequest(final Rule rule, final String forUser) {
+        this(rule, forUser, true);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * More detailed constructor.
+     *
+     * @param rule Rule to insert.
+     * @param failOnError <code>true</code> to check the response for error messages.
+     */
+    public InsertRequest(final Rule rule, final String forUser, final boolean failOnError) {
+        super();
+        this.rule = rule;
+        this.forUser = forUser;
+        this.failOnError = failOnError;
+    }
+
+    /*
+     * @Override(non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
     public Object getBody() throws JSONException {
-		return convert(rule);
-	}
+        return convert(rule);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
     public Parameter[] getParameters() {
-		if (forUser != null) {
-			return new Parameter[] {
-					new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-					new Parameter("for_user", forUser) };
-		} else {
-			return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION,
-					AJAXServlet.ACTION_NEW) };
-		}
-	}
+        List<Parameter> parameters = new LinkedList<Parameter>();
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
+        if (forUser != null) {
+            parameters.add(new Parameter("username", forUser));
+        }
+        return parameters.toArray(new Parameter[parameters.size()]);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-    public AbstractAJAXParser getParser() {
-		return new InsertParser(failOnError);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
+    public AbstractAJAXParser<InsertResponse> getParser() {
+        return new InsertParser(failOnError);
+    }
 }

@@ -51,7 +51,7 @@ package com.openexchange.ajax.mail.filter.api.writer.test;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 
 
 /**

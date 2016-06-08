@@ -52,14 +52,14 @@ package com.openexchange.ajax.mail.filter.api.writer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.Rule;
-import com.openexchange.ajax.mail.filter.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.fields.RuleFields;
 import com.openexchange.ajax.mail.filter.api.writer.action.ActionWriter;
 import com.openexchange.ajax.mail.filter.api.writer.action.ActionWriterFactory;
 import com.openexchange.ajax.mail.filter.api.writer.test.TestWriter;
 import com.openexchange.ajax.mail.filter.api.writer.test.TestWriterFactory;
-import com.openexchange.ajax.mail.filter.test.AbstractTest;
 import com.openexchange.ajax.writer.DataWriter;
 
 /**

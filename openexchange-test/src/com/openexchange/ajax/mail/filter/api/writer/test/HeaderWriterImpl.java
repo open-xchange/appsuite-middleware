@@ -52,11 +52,11 @@ package com.openexchange.ajax.mail.filter.api.writer.test;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
+import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 import com.openexchange.ajax.mail.filter.api.writer.comparison.ComparisonWriter;
 import com.openexchange.ajax.mail.filter.api.writer.comparison.ComparisonWriterFactory;
-import com.openexchange.ajax.mail.filter.comparison.AbstractComparison;
-import com.openexchange.ajax.mail.filter.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.test.HeaderTest;
 
 
 /**
