@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.tests;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertArrayEquals;
 import java.util.Date;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -215,7 +216,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     }
 
     public static void deleteRule(final String id, final String forUser, final AJAXSession ajaxSession) throws Exception {
-        final DeleteRequest deleteRequest = new DeleteRequest(id);
+        final DeleteRequest deleteRequest = new DeleteRequest(Integer.parseInt(id));
         Executor.execute(ajaxSession, deleteRequest);
     }
 
@@ -263,6 +264,23 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         return allResponse.getRules();
     }
 
+    /**
+     * Asserts that the expected {@link Rule} is equal the actual {@link Rule}
+     * 
+     * @param expected The expected {@link Rule}
+     * @param actual The actual {@link Rule}
+     */
+    public void assertRule(Rule expected, Rule actual) {
+        assertEquals("The 'id' attribute differs", expected.getId(), actual.getId());
+        assertEquals("The 'name' attribute differs", expected.getName(), actual.getName());
+        assertEquals("The 'active' attribute differs", expected.isActive(), actual.isActive());
+        assertEquals("The 'position' attribute differs", expected.getPosition(), actual.getPosition());
+
+        assertArrayEquals("The 'flags' differ", expected.getFlags(), actual.getFlags());
+        //assertActionCommands();
+        //assertTests();
+    }
+
     public static void compareRule(final Rule rule1, final Rule rule2) throws Exception {
         OXTestToolkit.assertEqualsAndNotNull("id is not equals", rule1.getId(), rule2.getId());
         OXTestToolkit.assertEqualsAndNotNull("name is not equals", rule1.getName(), rule2.getName());
@@ -273,7 +291,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         compareTest(rule1.getTest(), rule2.getTest());
     }
 
-    public static void compareFlags(final String[] flags1, final String[] flags2) throws Exception {
+    private static void compareFlags(final String[] flags1, final String[] flags2) throws Exception {
         if (flags1 != null) {
             assertNotNull("flags are null", flags2);
             assertEquals("flags size is not equals", flags1.length, flags2.length);
@@ -284,7 +302,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         }
     }
 
-    public static void compareActionCmds(final AbstractAction[] abstractAction1, final AbstractAction[] abstractAction2) throws Exception {
+    private static void compareActionCmds(final AbstractAction[] abstractAction1, final AbstractAction[] abstractAction2) throws Exception {
         if (abstractAction1 != null) {
             assertNotNull("abstract action array null", abstractAction2);
             assertEquals("abstract action size is not equals", abstractAction1.length, abstractAction2.length);
@@ -295,7 +313,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         }
     }
 
-    public static void compareTest(final AbstractTest abstractTest1, final AbstractTest abstractTest2) throws Exception {
+    private static void compareTest(final AbstractTest abstractTest1, final AbstractTest abstractTest2) throws Exception {
         OXTestToolkit.assertEqualsAndNotNull("abstract test is not equals", abstractTest1, abstractTest2);
     }
 }

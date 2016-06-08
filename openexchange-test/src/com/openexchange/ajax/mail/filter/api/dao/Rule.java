@@ -53,13 +53,14 @@ import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 
 /**
- * Rule
+ * {@link Rule}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Rule {
 
-	public static final int ID = 1200;
+    public static final int ID = 1200;
 
     public static final int RULENAME = 1201;
 
@@ -75,97 +76,97 @@ public class Rule {
 
     public static final int TEXT = 1207;
 
-	protected int position = 0;
+    protected int position = 0;
 
-	protected String id = null;
+    protected String id = null;
 
-	protected String name = null;
+    protected String name = null;
 
-	protected boolean active = false;
+    protected boolean active = false;
 
-	protected String[] flags = null;
+    protected String[] flags = null;
 
-	protected AbstractTest test = null;
+    protected AbstractTest test = null;
 
-	protected AbstractAction[] actioncmds = null;
+    protected AbstractAction[] actioncmds = null;
 
-	protected String rawData = null;
+    protected String rawData = null;
 
-	protected String errormsg = null;
+    protected String errormsg = null;
 
-	public Rule() {
+    public Rule() {
 
-	}
+    }
 
-	public int getPosition() {
-		return position;
-	}
+    public int getPosition() {
+        return position;
+    }
 
-	public void setPosition(int position) {
-		this.position = position;
-	}
+    public void setPosition(int position) {
+        this.position = position;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public boolean isActive() {
-		return active;
-	}
+    public boolean isActive() {
+        return active;
+    }
 
-	public void setActive(boolean active) {
-		this.active = active;
-	}
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
-	public String[] getFlags() {
-		return flags;
-	}
+    public String[] getFlags() {
+        return flags;
+    }
 
-	public void setFlags(String[] flags) {
-		this.flags = flags;
-	}
+    public void setFlags(String[] flags) {
+        this.flags = flags;
+    }
 
-	public AbstractTest getTest() {
-		return test;
-	}
+    public AbstractTest getTest() {
+        return test;
+    }
 
-	public void setTest(AbstractTest test) {
-		this.test = test;
-	}
+    public void setTest(AbstractTest test) {
+        this.test = test;
+    }
 
-	public AbstractAction[] getActioncmds() {
-		return actioncmds;
-	}
+    public AbstractAction[] getActioncmds() {
+        return actioncmds;
+    }
 
-	public void setActioncmds(AbstractAction[] actioncmds) {
-		this.actioncmds = actioncmds;
-	}
+    public void setActioncmds(AbstractAction[] actioncmds) {
+        this.actioncmds = actioncmds;
+    }
 
-	public String getRawData() {
-		return rawData;
-	}
+    public String getRawData() {
+        return rawData;
+    }
 
-	public void setRawData(String rawData) {
-		this.rawData = rawData;
-	}
+    public void setRawData(String rawData) {
+        this.rawData = rawData;
+    }
 
-	public String getErrormsg() {
-		return errormsg;
-	}
+    public String getErrormsg() {
+        return errormsg;
+    }
 
-	public void setErrormsg(String errormsg) {
-		this.errormsg = errormsg;
-	}
+    public void setErrormsg(String errormsg) {
+        this.errormsg = errormsg;
+    }
 }

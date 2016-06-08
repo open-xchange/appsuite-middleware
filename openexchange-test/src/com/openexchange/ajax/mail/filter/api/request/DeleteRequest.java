@@ -55,70 +55,81 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.mail.filter.api.parser.DeleteParser;
+import com.openexchange.ajax.mail.filter.api.response.DeleteResponse;
 
 /**
- * Stores parameters for the delete request.
+ * {@link DeleteRequest}. Stores parameters for the delete request.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DeleteRequest extends AbstractMailFilterRequest {
+public class DeleteRequest extends AbstractMailFilterRequest<DeleteResponse> {
 
-	private final String objectId;
+    private final int ruleId;
 
-	private boolean failOnError = true;
+    private boolean failOnError = true;
 
-	/**
-	 * Default constructor.
-	 */
-	public DeleteRequest(final String objectId) {
-		this(objectId, true);
-	}
+    /**
+     * Default constructor.
+     */
+    public DeleteRequest(final int ruleId) {
+        this(ruleId, true);
+    }
 
-	public DeleteRequest(final String objectId, final boolean failOnError) {
-		super();
-		this.objectId = objectId;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initialises a new {@link DeleteRequest}.
+     * 
+     * @param ruleId The rule identifier
+     * @param failOnError
+     */
+    public DeleteRequest(final int ruleId, final boolean failOnError) {
+        super();
+        this.ruleId = ruleId;
+        this.failOnError = failOnError;
+    }
 
-	public void setFailOnError(final boolean failOnError) {
-		this.failOnError = failOnError;
-	}
+    /**
+     * Sets the fail on error flag
+     * 
+     * @param failOnError
+     */
+    public void setFailOnError(final boolean failOnError) {
+        this.failOnError = failOnError;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Object getBody() throws JSONException {
-		final JSONObject json = new JSONObject();
-		json.put(DataFields.ID, objectId);
+        final JSONObject json = new JSONObject();
+        json.put(DataFields.ID, ruleId);
 
-		return json;
-	}
+        return json;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Parameter[] getParameters() {
-		return new Parameter[] {
-				new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
-				new Parameter(AJAXServlet.PARAMETER_ID, objectId)
-		};
-	}
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_ID, ruleId)
+        };
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-    public AbstractAJAXParser getParser() {
-		return new DeleteParser(failOnError);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AbstractAJAXParser<DeleteResponse> getParser() {
+        return new DeleteParser(failOnError);
+    }
 }

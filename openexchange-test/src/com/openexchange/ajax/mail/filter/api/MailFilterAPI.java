@@ -57,6 +57,7 @@ import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
+import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
 import com.openexchange.ajax.mail.filter.api.request.InsertRequest;
 import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
@@ -121,5 +122,16 @@ public class MailFilterAPI {
         Collections.addAll(rules, ruleArray);
 
         return Collections.unmodifiableList(rules);
+    }
+
+    /**
+     * Deletes the rule with the specified identifier
+     * 
+     * @param id The rule's identifier
+     * @throws Exception if the operation fails
+     */
+    public void deleteRule(int id) throws Exception {
+        DeleteRequest request = new DeleteRequest(id);
+        client.execute(request);
     }
 }

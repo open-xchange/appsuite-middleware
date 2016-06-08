@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.tests;
 
+import java.util.List;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
@@ -56,36 +57,53 @@ import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 
+/**
+ * {@link NewTest}. Tests for the PUT /ajax/mailfilter?action=new API call
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
 public class NewTest extends AbstractMailFilterTest {
 
+    /**
+     * Initialises a new {@link NewTest}.
+     * 
+     * @param name The test case's name
+     */
     public NewTest(String name) {
         super(name);
     }
 
+    /**
+     * Test the creation of a rule
+     */
     public void testNew() throws Exception {
         final AJAXSession ajaxSession = getSession();
-
         String forUser = null;
-
         deleteAllExistingRules(forUser, ajaxSession);
 
-        final Rule rule = new Rule();
-        rule.setName("testNew");
-        rule.setActioncmds(new AbstractAction[] { new Stop() });
+        // Create the rule
+        final Rule expected;
+        {
+            expected = new Rule();
+            expected.setName("testNew");
+            expected.setActioncmds(new AbstractAction[] { new Stop() });
+            final IsComparison isComp = new IsComparison();
+            expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
-        final IsComparison isComp = new IsComparison();
-        rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue"} ));
+            int id = mailFilterAPI.createRule(expected);
+            expected.setId(Integer.toString(id));
+        }
 
-        final String id = insertRule(rule, forUser, ajaxSession);
+        // Get all rules
+        List<Rule> rules = mailFilterAPI.listRules();
+        assertEquals("Only one rule was expected", 1, rules.size());
 
-        final String[] idArray = getIdArray(forUser, ajaxSession);
+        // Assert rules
+        Rule actual = rules.get(0);
+        compareRule(expected, actual);
 
-        assertEquals("one rules expected", 1, idArray.length);
-
-        final Rule loadRule = loadRules(forUser, id, ajaxSession);
-        compareRule(rule, loadRule);
-
-        deleteRule(id, forUser, ajaxSession);
+        // Delete
+        mailFilterAPI.deleteRule(Integer.parseInt(expected.getId()));
     }
 
     public void testNewWithTwoEntries() throws Exception {
@@ -100,17 +118,17 @@ public class NewTest extends AbstractMailFilterTest {
         rule1.setActioncmds(new AbstractAction[] { new Stop() });
 
         IsComparison isComp = new IsComparison();
-        rule1.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test"} ));
+        rule1.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
 
         final String id1 = insertRule(rule1, forUser, ajaxSession);
         rule1.setId(id1);
-        
+
         final Rule rule2 = new Rule();
         rule2.setName("testNewWithTwoEntries2");
         rule2.setActioncmds(new AbstractAction[] { new Stop() });
 
         isComp = new IsComparison();
-        rule2.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test"} ));
+        rule2.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
 
         final String id2 = insertRule(rule2, forUser, ajaxSession);
 
