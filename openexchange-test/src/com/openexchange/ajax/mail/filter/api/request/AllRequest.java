@@ -54,92 +54,82 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.mail.filter.api.parser.AllParser;
+import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * Contains the data for a mail filter all request.
+ * {@link AllRequest}. Contains the data for a mail filter all request.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AllRequest extends AbstractMailFilterRequest {
+public class AllRequest extends AbstractMailFilterRequest<AllResponse> {
 
-	public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID };
+    public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID };
 
-	private final String servletPath;
+    private final boolean failOnError;
 
-	private final boolean failOnError;
+    private String userName = null;
 
-	private String userName = null;
+    /**
+     * Default constructor.
+     */
+    public AllRequest() {
+        this(true);
+    }
 
-	/**
-	 * Default constructor.
-	 */
-	public AllRequest(final String servletPath) {
-		this(servletPath, true);
-	}
-
-	/**
-	 * Default constructor.
-	 */
-	public AllRequest(final String servletPath, final boolean failOnError) {
-		super();
-		this.servletPath = servletPath;
-		this.failOnError = failOnError;
-	}
-
-	public AllRequest(final String servletPath, final String userName, final boolean failOnError) {
+    /**
+     * Default constructor.
+     */
+    public AllRequest(final boolean failOnError) {
         super();
-        this.servletPath = servletPath;
+        this.failOnError = failOnError;
+    }
+
+    public AllRequest(final String userName, final boolean failOnError) {
+        super();
         this.userName = userName;
         this.failOnError = failOnError;
     }
 
-	public AllRequest(final String servletPath, final String userName) {
-	    this(servletPath, userName, true);
+    public AllRequest(final String userName) {
+        this(userName, true);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-    public String getServletPath() {
-		return servletPath;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Method getMethod() {
-		return Method.GET;
-	}
+        return Method.GET;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
-		if (userName != null) {
-		    params.add(new Parameter("username", userName));
-		}
-		return params.toArray(new Parameter[params.size()]);
-	}
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
+        if (userName != null) {
+            params.add(new Parameter("username", userName));
+        }
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public AllParser getParser() {
-		return new AllParser(failOnError);
-	}
+        return new AllParser(failOnError);
+    }
 }

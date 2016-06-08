@@ -55,27 +55,38 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 
 /**
+ * 
+ * {@link AllParser}
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AllParser extends AbstractAJAXParser {
+public class AllParser extends AbstractAJAXParser<AllResponse> {
 
     /**
-     * Default constructor.
+     * Initialises a new {@link AllParser}.
+     * 
+     * @param failOnError the foe flag
      */
     public AllParser(final boolean failOnError) {
         super(failOnError);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
     @Override
-    protected AllResponse createResponse(final Response response)
-        throws JSONException {
+    protected AllResponse createResponse(final Response response) throws JSONException {
         final AllResponse retval = instanciateResponse(response);
         return retval;
     }
 
     /**
-     * Create specialized response object.
+     * Create specialised response object.
+     * 
+     * @return the new {@link AllResponse}
      */
     protected AllResponse instanciateResponse(final Response response) {
         return new AllResponse(response);

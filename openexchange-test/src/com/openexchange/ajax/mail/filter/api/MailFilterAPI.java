@@ -49,11 +49,16 @@
 
 package com.openexchange.ajax.mail.filter.api;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
 import com.openexchange.ajax.mail.filter.api.request.InsertRequest;
+import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
 import com.openexchange.ajax.mail.filter.api.response.InsertResponse;
 
@@ -99,5 +104,22 @@ public class MailFilterAPI {
         InsertRequest request = new InsertRequest(rule);
         InsertResponse response = client.execute(request);
         return Integer.parseInt(response.getId());
+    }
+
+    /**
+     * Get all rules for the user
+     * 
+     * @return an unmodifiable list with all the rules for the user
+     * @throws Exception
+     */
+    public List<Rule> listRules() throws Exception {
+        AllRequest request = new AllRequest();
+        AllResponse response = client.execute(request);
+
+        Rule[] ruleArray = response.getRules();
+        List<Rule> rules = new ArrayList<>(ruleArray.length);
+        Collections.addAll(rules, ruleArray);
+
+        return Collections.unmodifiableList(rules);
     }
 }
