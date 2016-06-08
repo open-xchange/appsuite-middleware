@@ -101,7 +101,7 @@ public class Bug44363Test extends AbstractMailFilterTest {
             vacationRule.setActioncmds(new AbstractAction[] { new Vacation(7, new String[] { client.getValues().getDefaultAddress() }, "Vacation Notice for Bug 44363", "Multiline text with\n\n.\n\n a single lined dot character for bug 44363") });
             final ContainsComparison conComp = new ContainsComparison();
             vacationRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Vacation for 44363" }));
-            int vacationId = insertRule(vacationRule, null, ajaxSession);
+            int vacationId = mailFilterAPI.createRule(vacationRule);
             vacationRule.setId(vacationId);
         }
 
@@ -114,7 +114,7 @@ public class Bug44363Test extends AbstractMailFilterTest {
             otherRule.setActioncmds(new AbstractAction[] { new Discard() });
             ContainsComparison conComp = new ContainsComparison();
             otherRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug 44363" }));
-            int otherId = insertRule(otherRule, null, ajaxSession);
+            int otherId = mailFilterAPI.createRule(otherRule);
             otherRule.setId(otherId);
         }
 

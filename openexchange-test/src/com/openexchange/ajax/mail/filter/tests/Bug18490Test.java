@@ -108,7 +108,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
         final ContainsComparison conComp = new ContainsComparison();
         rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug18490" }));
 
-        final int id = insertRule(rule, forUser, ajaxSession);
+        final int id = mailFilterAPI.createRule(rule);
         rule.setId(id);
 
         final int[] idArray = getIdArray(forUser, ajaxSession);

@@ -77,7 +77,7 @@ public class MailFilterWriter extends DataWriter {
 	}
 
 	public void writeMailFilter(final Rule rule, final JSONObject jsonObj) throws JSONException {
-		if (rule.getId() > 0) {
+		if (rule.getId() >= 0) {
 			writeParameter(RuleFields.ID, rule.getId(), jsonObj);
 		}
 

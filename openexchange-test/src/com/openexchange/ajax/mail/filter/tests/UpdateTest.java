@@ -40,7 +40,7 @@ public class UpdateTest extends AbstractMailFilterTest {
         final IsComparison isComp = new IsComparison();
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
-        final int id = insertRule(rule, forUser, ajaxSession);
+        final int id = mailFilterAPI.createRule(rule);
         rule.setId(id);
         rule.setName("testUpdate - 2");
 
@@ -69,8 +69,8 @@ public class UpdateTest extends AbstractMailFilterTest {
         final IsComparison isComp = new IsComparison();
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
-        final int id1 = insertRule(rule, forUser, ajaxSession);
-        final int id2 = insertRule(rule, forUser, ajaxSession);
+        final int id1 = mailFilterAPI.createRule(rule);
+        final int id2 = mailFilterAPI.createRule(rule);
 
         final int[] idArray = getIdArray(forUser, ajaxSession);
 

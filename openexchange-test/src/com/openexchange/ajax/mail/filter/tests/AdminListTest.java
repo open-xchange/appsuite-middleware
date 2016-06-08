@@ -147,7 +147,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         final IsComparison isComp = new IsComparison();
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
-        rid = insertRule(rule, null, userSession);
+        rid = mailFilterAPI.createRule(rule);
 
         // Get rules of user
         final Rule[] userRules = listRules(userSession);
@@ -159,7 +159,6 @@ public class AdminListTest extends AbstractMailFilterTest {
         final String userImapLogin = description.getLogin();
 
         final Rule[] adminRules = listRulesForUser(adminSession, userImapLogin);
-
 
         for (final Rule ur : userRules) {
             boolean foundRule = false;
