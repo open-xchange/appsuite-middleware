@@ -150,8 +150,9 @@ public class InternetHeaders {
 	    if (i < 0)
 		return line;
 	    // skip whitespace after ':'
+	    int length = line.length();
 	    int j;
-	    for (j = i + 1; j < line.length(); j++) {
+        for (j = i + 1; j < length; j++) {
 		char c = line.charAt(j);
 		if (!(c == ' ' || c == '\t' || c == '\r' || c == '\n'))
 		    break;
@@ -235,7 +236,7 @@ public class InternetHeaders {
 		    return match ? null : h;
 
 		// check whether this header matches any of the names
-		for (int i = 0; i < names.length; i++) {
+		for (int i = 0, k = names.length; k-- > 0; i++) {
 		    if (names[i].equalsIgnoreCase(h.getName())) {
 			if (match)
 			    return h;
@@ -566,7 +567,7 @@ public class InternetHeaders {
     public void setHeader(String name, String value) {
 	boolean found = false;
 
-	for (int i = 0; i < headers.size(); i++) {
+	for (int i = 0, k = headers.size(); k-- > 0; i++) {
 	    InternetHeader h = (InternetHeader)headers.get(i);
 	    if (name.equalsIgnoreCase(h.getName())) {
 		if (!found) {
@@ -635,7 +636,7 @@ public class InternetHeaders {
      * @param	name 	header name
      */
     public void removeHeader(String name) { 
-	for (int i = 0; i < headers.size(); i++) {
+	for (int i = 0, k = headers.size(); k-- > 0; i++) {
 	    InternetHeader h = (InternetHeader)headers.get(i);
 	    if (name.equalsIgnoreCase(h.getName())) {
 		h.line = null;
