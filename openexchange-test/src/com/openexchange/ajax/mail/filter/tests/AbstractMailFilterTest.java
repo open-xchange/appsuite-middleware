@@ -59,10 +59,7 @@ import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
-import com.openexchange.ajax.mail.filter.api.request.InsertRequest;
-import com.openexchange.ajax.mail.filter.api.request.UpdateRequest;
 import com.openexchange.ajax.mail.filter.api.response.AllResponse;
-import com.openexchange.ajax.mail.filter.api.response.InsertResponse;
 import com.openexchange.ajax.mail.filter.api.writer.action.ActionWriterFactory;
 import com.openexchange.ajax.mail.filter.api.writer.action.AddFlagsWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.action.MoveWriterImpl;
@@ -199,38 +196,6 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
-    public String getHostName() {
-        return hostname;
-    }
-
-    public static void deleteRule(final int id, final String forUser, final AJAXSession ajaxSession) throws Exception {
-        final DeleteRequest deleteRequest = new DeleteRequest(id);
-        Executor.execute(ajaxSession, deleteRequest);
-    }
-
-    public static int[] getIdArray(final String forUser, final AJAXSession ajaxSession) throws Exception {
-        final AllRequest allRequest = new AllRequest();
-        final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
-        allResponse.getTimestamp();
-
-        final Rule[] ruleArray = allResponse.getRules();
-        final int[] idArray = new int[ruleArray.length];
-        for (int a = 0; a < ruleArray.length; a++) {
-            idArray[a] = ruleArray[a].getId();
-        }
-        return idArray;
-    }
-
-    public static Rule loadRules(final String forUser, final int id, final AJAXSession ajaxSession) throws Exception {
-        final Rule[] rules = listRules(ajaxSession);
-        for (int a = 0; a < rules.length; a++) {
-            if (rules[a].getId() == id) {
-                return rules[a];
-            }
-        }
-
-        return null;
-    }
 
     public static Rule[] listRules(final AJAXSession ajaxSession) throws Exception {
         final AllRequest allRequest = new AllRequest();

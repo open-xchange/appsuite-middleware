@@ -126,14 +126,18 @@ public class MailFilterAPI {
      * @throws Exception
      */
     public List<Rule> listRules() throws Exception {
-        AllRequest request = new AllRequest();
-        AllResponse response = client.execute(request);
+        return listRules(new AllRequest());
+    }
 
-        Rule[] ruleArray = response.getRules();
-        List<Rule> rules = new ArrayList<>(ruleArray.length);
-        Collections.addAll(rules, ruleArray);
-
-        return Collections.unmodifiableList(rules);
+    /**
+     * Gets all rules for the specified user
+     * 
+     * @param username The user for which to get the rules
+     * @return The list of all rules
+     * @throws Exception if the operation fails
+     */
+    public List<Rule> listRules(String username) throws Exception {
+        return listRules(new AllRequest(username));
     }
 
     /**
@@ -157,5 +161,22 @@ public class MailFilterAPI {
         for (Rule r : rules) {
             deleteRule(r.getId());
         }
+    }
+
+    /**
+     * Executes the specified {@link AllRequest} and returns the list with rules
+     * 
+     * @param request The {@link AllRequest} to execute
+     * @return An unmodifiable list with all rules
+     * @throws Exception if execution fails
+     */
+    private List<Rule> listRules(AllRequest request) throws Exception {
+        AllResponse response = client.execute(request);
+
+        Rule[] ruleArray = response.getRules();
+        List<Rule> rules = new ArrayList<>(ruleArray.length);
+        Collections.addAll(rules, ruleArray);
+
+        return Collections.unmodifiableList(rules);
     }
 }

@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.tests;
+package com.openexchange.ajax.mail.filter.tests.bug;
 
-import java.util.Arrays;
 import java.util.List;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -57,81 +56,32 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.mail.MailTestManager;
-import com.openexchange.ajax.mail.TestMail;
-import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
-import com.openexchange.ajax.mail.filter.api.dao.action.Move;
+import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
+import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link Bug18490Test}
- *
- * Important: This test should work as long as the mail server is cyrus older than 2.3.11 with mailfilter property com.openexchange.mail.filter.useUTF7FolderEncoding=true
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link Bug31253Test}
+ * 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Bug18490Test extends AbstractMailFilterTest {
+public class Bug31253Test extends AbstractMailFilterTest {
 
-    FolderObject folder;
+    private FolderObject folder;
 
-    AJAXClient client;
+    private AJAXClient client;
 
     /**
-     * Initializes a new {@link Bug18490Test}.
-     *
+     * Initializes a new {@link Bug31253Test}.
+     * 
      * @param name
      */
-    public Bug18490Test(final String name) {
+    public Bug31253Test(String name) {
         super(name);
-    }
-
-    public void testBug18490() throws Exception {
-        final AJAXSession ajaxSession = getSession();
-        client = getClient();
-        folder = Create.createPrivateFolder("Bug18490 test F\u00f6lder", FolderObject.MAIL, client.getValues().getUserId());
-        folder.setFullName(client.getValues().getInboxFolder() + "/Bug18490 test F\u00f6lder");
-        final InsertResponse folderInsertResponse = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
-        folderInsertResponse.fillObject(folder);
-
-        final String forUser = null;
-
-        final Rule rule = new Rule();
-        rule.setName("Bug18490 test rule");
-        rule.setActive(true);
-        rule.setActioncmds(new AbstractAction[] { new Move(folder.getFullName()) });
-
-        final ContainsComparison conComp = new ContainsComparison();
-        rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug18490" }));
-
-        final int id = mailFilterAPI.createRule(rule);
-        rule.setId(id);
-
-        final int[] idArray = getIdArray(forUser, ajaxSession);
-
-        assertEquals("one rules expected", 1, idArray.length);
-
-        final Rule loadRule = loadRules(forUser, id, ajaxSession);
-        assertRule(rule, loadRule);
-
-        // Send Mail to myself
-        final TestMail testMail = new TestMail();
-        testMail.setSubject("Bug18490 testmail");
-        testMail.setTo(Arrays.asList(new String[] { client.getValues().getSendAddress() }));
-        testMail.setFrom(client.getValues().getSendAddress());
-        testMail.setContentType(MailContentType.PLAIN.toString());
-        testMail.setBody("Move me...");
-        testMail.sanitize();
-        final MailTestManager mtm = new MailTestManager(client, true);
-        mtm.send(testMail);
-
-        final List<TestMail> mails = mtm.findAndLoadSimilarMails(testMail, client, folder.getFullName());
-
-        assertFalse("No mail was found", null == mails);
     }
 
     @Override
@@ -143,4 +93,28 @@ public class Bug18490Test extends AbstractMailFilterTest {
         super.tearDown();
     }
 
+    public void testBug31253() throws Exception {
+        client = getClient();
+        folder = Create.createPrivateFolder("Test for Bug31253", FolderObject.MAIL, client.getValues().getUserId());
+        folder.setFullName(client.getValues().getInboxFolder() + "/Test for Bug31253");
+
+        final InsertResponse folderInsertResponse = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+        folderInsertResponse.fillObject(folder);
+
+        final Rule rule = new Rule();
+        rule.setName("Test rule for Bug31253");
+        rule.setActive(true);
+        rule.setActioncmds(new AbstractAction[] { new Vacation(7, new String[] { client.getValues().getDefaultAddress() }, "Multiline subject with\nOK foobar for Bug 31253", "Multiline text with \nOK barfoo for Bug 31253") });
+
+        final ContainsComparison conComp = new ContainsComparison();
+        rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "31253" }));
+        final int id = mailFilterAPI.createRule(rule);
+        rule.setId(id);
+
+        List<Rule> rules = mailFilterAPI.listRules();
+        assertEquals("One rule was expected", 1, rules.size());
+
+        final Rule loadRule = rules.get(0);
+        assertRule(rule, loadRule);
+    }
 }

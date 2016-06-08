@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.mail.filter;
 
-import com.openexchange.ajax.mail.filter.tests.AdminListTest;
-import com.openexchange.ajax.mail.filter.tests.Bug18490Test;
-import com.openexchange.ajax.mail.filter.tests.Bug31253Test;
-import com.openexchange.ajax.mail.filter.tests.Bug44363Test;
-import com.openexchange.ajax.mail.filter.tests.ConfigTest;
-import com.openexchange.ajax.mail.filter.tests.NewTest;
-import com.openexchange.ajax.mail.filter.tests.UpdateTest;
+import com.openexchange.ajax.mail.filter.tests.api.AdminListTest;
+import com.openexchange.ajax.mail.filter.tests.api.ConfigTest;
+import com.openexchange.ajax.mail.filter.tests.api.NewTest;
+import com.openexchange.ajax.mail.filter.tests.api.UpdateTest;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug18490Test;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug31253Test;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug44363Test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

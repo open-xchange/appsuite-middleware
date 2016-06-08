@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.tests;
+package com.openexchange.ajax.mail.filter.tests.api;
 
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
+import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
  * {@link ConfigTest}

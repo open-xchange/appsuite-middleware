@@ -47,11 +47,12 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.tests;
+package com.openexchange.ajax.mail.filter.tests.api;
 
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -59,12 +60,13 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
+import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
 import com.openexchange.configuration.AJAXConfig;
@@ -75,11 +77,7 @@ public class AdminListTest extends AbstractMailFilterTest {
 
     private AJAXClient userClient;
 
-    private AJAXSession userSession;
-
     private AJAXClient adminClient;
-
-    private AJAXSession adminSession;
 
     private Rule rule;
     private int rid = -1;
@@ -125,7 +123,7 @@ public class AdminListTest extends AbstractMailFilterTest {
             Set<String> emptySet = Collections.emptySet();
             usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, emptySet, cap, emptySet, userCreds);
             if (rid > 0) {
-                deleteRule(rid, null, userClient.getSession());
+                mailFilterAPI.deleteRule(rid);
             }
             adminClient.logout();
             adminClient = null;
@@ -136,8 +134,6 @@ public class AdminListTest extends AbstractMailFilterTest {
 
     public void testUserHasAccessToOtherUsersRules() throws Exception {
         userClient = getClient();
-        userSession = userClient.getSession();
-        adminSession = adminClient.getSession();
 
         // Insert new rule as user
         rule = new Rule();
@@ -150,7 +146,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         rid = mailFilterAPI.createRule(rule);
 
         // Get rules of user
-        final Rule[] userRules = listRules(userSession);
+        List<Rule> rules = mailFilterAPI.listRules();
 
         // Get rules of user as admin
         MailAccountGetRequest getMailAcc = new MailAccountGetRequest(0, false);
@@ -158,9 +154,10 @@ public class AdminListTest extends AbstractMailFilterTest {
         MailAccountDescription description = response.getAsDescription();
         final String userImapLogin = description.getLogin();
 
-        final Rule[] adminRules = listRulesForUser(adminSession, userImapLogin);
+        MailFilterAPI adminFilterAPI = new MailFilterAPI(adminClient);
+        List<Rule> adminRules = adminFilterAPI.listRules(userImapLogin);
 
-        for (final Rule ur : userRules) {
+        for (final Rule ur : rules) {
             boolean foundRule = false;
             inner: for (final Rule ar : adminRules) {
                 if (ar.getId() == ur.getId()) {

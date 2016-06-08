@@ -1,4 +1,4 @@
-package com.openexchange.ajax.mail.filter.tests;
+package com.openexchange.ajax.mail.filter.tests.api;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

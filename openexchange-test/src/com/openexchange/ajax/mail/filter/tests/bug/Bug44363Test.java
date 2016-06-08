@@ -47,108 +47,87 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.tests;
+package com.openexchange.ajax.mail.filter.tests.bug;
 
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
-import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
+import com.openexchange.ajax.mail.filter.api.dao.action.Discard;
+import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
+import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
- * {@link NewTest}. Tests for the PUT /ajax/mailfilter?action=new API call
- *
+ * {@link Bug44363Test}
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class NewTest extends AbstractMailFilterTest {
+public class Bug44363Test extends AbstractMailFilterTest {
 
     /**
-     * Initialises a new {@link NewTest}.
+     * Initialises a new {@link Bug44363Test}.
      * 
-     * @param name The test case's name
+     * @param name
      */
-    public NewTest(String name) {
+    public Bug44363Test(String name) {
         super(name);
     }
 
     /**
-     * Test a simple creation life-cycle of a rule
+     * Test case for bug 44363
+     * <ul>
+     * <li>Create a vacation rule</li>
+     * <li>Create some other arbitrary rule</li>
+     * <li>Deactivate the other rule</li>
+     * <li>Deactivate the vacation rule</li>
+     * </ul>
+     * Assert there are still two rules present
+     * 
+     * @throws Exception if an error is occurred
      */
-    public void testNew() throws Exception {
-        // Create the rule
-        final Rule expected;
+    public void testBug44363() throws Exception {
+        // Create a vacation rule with a single lined dot '.' character
+        Rule vacationRule;
         {
-            expected = new Rule();
-            expected.setName("testNew");
-            expected.setActioncmds(new AbstractAction[] { new Stop() });
-            final IsComparison isComp = new IsComparison();
-            expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
-
-            int id = mailFilterAPI.createRule(expected);
-            expected.setId(id);
+            vacationRule = new Rule();
+            vacationRule.setName("Vacation Notice");
+            vacationRule.setActive(true);
+            String addr = client.getValues().getDefaultAddress();
+            vacationRule.setActioncmds(new AbstractAction[] { new Vacation(7, new String[] { addr }, "Vacation Notice for Bug 44363", "Multiline text with\n\n.\n\n a single lined dot character for bug 44363") });
+            final ContainsComparison conComp = new ContainsComparison();
+            vacationRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Vacation for 44363" }));
+            int vacationId = mailFilterAPI.createRule(vacationRule);
+            vacationRule.setId(vacationId);
         }
 
-        // Get all rules
-        List<Rule> rules = mailFilterAPI.listRules();
-        assertEquals("Only one rule was expected", 1, rules.size());
-
-        // Assert rules
-        Rule actual = rules.get(0);
-        assertRule(expected, actual);
-
-        // Delete
-        mailFilterAPI.deleteRule(expected.getId());
-    }
-
-    /**
-     * Test adding multiple filters
-     */
-    public void testNewWithTwoEntries() throws Exception {
-        // Create first rule
-        final Rule rule1;
+        // Create some other rule
+        Rule otherRule;
         {
-            rule1 = new Rule();
-            rule1.setName("testNewWithTwoEntries1");
-            rule1.setActioncmds(new AbstractAction[] { new Stop() });
-
-            IsComparison isComp = new IsComparison();
-            rule1.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
-
-            int id = mailFilterAPI.createRule(rule1);
-            rule1.setId(id);
-            rule1.setPosition(0);
+            otherRule = new Rule();
+            otherRule.setName("Some Rule for Bug 44363");
+            otherRule.setActive(true);
+            otherRule.setActioncmds(new AbstractAction[] { new Discard() });
+            ContainsComparison conComp = new ContainsComparison();
+            otherRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug 44363" }));
+            int otherId = mailFilterAPI.createRule(otherRule);
+            otherRule.setId(otherId);
         }
 
-        // Create second rule
-        final Rule rule2;
-        {
-            rule2 = new Rule();
-            rule2.setName("testNewWithTwoEntries2");
-            rule2.setActioncmds(new AbstractAction[] { new Stop() });
-
-            IsComparison isComp = new IsComparison();
-            rule2.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
-
-            int id = mailFilterAPI.createRule(rule2);
-            rule2.setId(id);
-            rule2.setPosition(1);
-        }
-
-        // List rules
+        // Assert we have 2 rules
         List<Rule> rules = mailFilterAPI.listRules();
         assertEquals("Two rules were expected", 2, rules.size());
 
-        // Assert first
-        Rule actual1 = rules.get(0);
-        assertRule(rule1, actual1);
+        // Deactivate the other rule
+        otherRule.setActive(false);
+        mailFilterAPI.updateRule(otherRule);
 
-        // Assert second
-        Rule actual2 = rules.get(1);
-        assertRule(rule2, actual2);
+        // Deactivate the vacation notice
+        vacationRule.setActive(false);
+        mailFilterAPI.updateRule(vacationRule);
 
-        // Delete both rules
-        mailFilterAPI.deleteRule(actual1.getId());
-        mailFilterAPI.deleteRule(rule2.getId());
+        // Assert that we still have two rules
+        rules = mailFilterAPI.listRules();
+        assertEquals("Two rules were expected", 2, rules.size());
     }
 }
