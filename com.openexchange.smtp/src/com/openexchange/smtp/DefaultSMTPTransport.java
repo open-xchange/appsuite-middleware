@@ -321,12 +321,15 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
 
     @Override
     protected ITransportProperties createNewMailProperties() throws OXException {
-        try {
-            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-            return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
-        } catch (final OXException e) {
-            throw e;
+        MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+        if (storageService.existsMailAccount(accountId, userId, contextId)) {
+            return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, userId, contextId));
         }
+
+        // Fall-back...
+        return new MailAccountSMTPProperties(accountId);
     }
 
     private static String quoteReplacement(final String str) {

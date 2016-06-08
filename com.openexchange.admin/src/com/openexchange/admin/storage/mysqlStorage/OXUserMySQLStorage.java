@@ -325,6 +325,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     try {
                         Cache cache = cacheService.getCache("MailAccount");
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
+                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
                         cache.invalidateGroup(ctx.getId().toString());
                     } catch (final OXException e) {
                         log.error("", e);

@@ -1746,6 +1746,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 final Cache mailAccountCache = cacheService.getCache("MailAccount");
                 mailAccountCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(0), String.valueOf(usr.getId())));
+                mailAccountCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(usr.getId())));
                 mailAccountCache.invalidateGroup(ctx.getId().toString());
 
                 final Cache globalFolderCache = cacheService.getCache("GlobalFolderCache");
