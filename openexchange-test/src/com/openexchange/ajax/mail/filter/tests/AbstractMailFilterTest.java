@@ -50,16 +50,11 @@
 package com.openexchange.ajax.mail.filter.tests;
 
 import static org.junit.Assert.assertArrayEquals;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.api.request.AllRequest;
-import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
-import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 import com.openexchange.ajax.mail.filter.api.writer.action.ActionWriterFactory;
 import com.openexchange.ajax.mail.filter.api.writer.action.AddFlagsWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.action.MoveWriterImpl;
@@ -194,21 +189,6 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         mailFilterAPI.purge();
 
         super.tearDown();
-    }
-
-
-    public static Rule[] listRules(final AJAXSession ajaxSession) throws Exception {
-        final AllRequest allRequest = new AllRequest();
-        final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
-
-        return allResponse.getRules();
-    }
-
-    public static Rule[] listRulesForUser(final AJAXSession ajaxSession, final String userName) throws Exception {
-        final AllRequest allRequest = new AllRequest(userName);
-        final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
-
-        return allResponse.getRules();
     }
 
     /**
