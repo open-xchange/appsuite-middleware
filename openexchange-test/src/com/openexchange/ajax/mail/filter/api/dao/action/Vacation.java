@@ -77,10 +77,11 @@ public class Vacation extends AbstractAction {
 	}
 
 	public Vacation(final int days, final String[] addresses, final String subject, final String text) {
-		name = VACATION;
+        name = VACATION;
 		this.addresses = addresses;
 		this.subject = subject;
 		this.text = text;
+		this.days = days;
 	}
 
 	public int getDays() {
