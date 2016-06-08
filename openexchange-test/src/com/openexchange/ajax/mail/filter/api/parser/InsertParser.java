@@ -88,7 +88,7 @@ public class InsertParser extends AbstractAJAXParser<InsertResponse> {
         final JSONObject jsonRespones = ResponseWriter.getJSON(response);
         if (failOnError) {
             if (jsonRespones.has("data")) {
-                final String objectId = jsonRespones.getString("data");
+                final int objectId = jsonRespones.getInt("data");
                 retval.setId(objectId);
             } else {
                 fail(response.getErrorMessage());

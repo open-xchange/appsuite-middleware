@@ -101,7 +101,7 @@ public class Bug44363Test extends AbstractMailFilterTest {
             vacationRule.setActioncmds(new AbstractAction[] { new Vacation(7, new String[] { client.getValues().getDefaultAddress() }, "Vacation Notice for Bug 44363", "Multiline text with\n\n.\n\n a single lined dot character for bug 44363") });
             final ContainsComparison conComp = new ContainsComparison();
             vacationRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Vacation for 44363" }));
-            String vacationId = insertRule(vacationRule, null, ajaxSession);
+            int vacationId = insertRule(vacationRule, null, ajaxSession);
             vacationRule.setId(vacationId);
         }
 
@@ -114,12 +114,12 @@ public class Bug44363Test extends AbstractMailFilterTest {
             otherRule.setActioncmds(new AbstractAction[] { new Discard() });
             ContainsComparison conComp = new ContainsComparison();
             otherRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug 44363" }));
-            String otherId = insertRule(otherRule, null, ajaxSession);
+            int otherId = insertRule(otherRule, null, ajaxSession);
             otherRule.setId(otherId);
         }
 
         // Assert we have 2 rules
-        String[] idArray = getIdArray(null, ajaxSession);
+        int[] idArray = getIdArray(null, ajaxSession);
         assertEquals("two rules expected", 2, idArray.length);
 
         // Deactivate the other rule

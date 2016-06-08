@@ -61,6 +61,7 @@ import com.openexchange.ajax.mail.filter.parser.action.ActionParserFactory;
 import com.openexchange.ajax.mail.filter.parser.test.TestParser;
 import com.openexchange.ajax.mail.filter.parser.test.TestParserFactory;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.exception.OXException;
 
 /**
  * MailFilterParser
@@ -73,8 +74,8 @@ public class MailFilterParser extends DataParser {
         super();
     }
 
-    public void parseMailFilter(final Rule rule, final JSONObject jsonObj) throws JSONException {
-        rule.setId(parseString(jsonObj, RuleFields.ID));
+    public void parseMailFilter(final Rule rule, final JSONObject jsonObj) throws JSONException, OXException {
+        rule.setId(parseInt(jsonObj, RuleFields.ID));
         rule.setName(parseString(jsonObj, RuleFields.RULENAME));
         rule.setActive(parseBoolean(jsonObj, RuleFields.ACTIVE));
 

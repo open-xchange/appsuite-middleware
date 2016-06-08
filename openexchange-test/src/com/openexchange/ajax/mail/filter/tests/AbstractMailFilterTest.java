@@ -50,14 +50,12 @@
 package com.openexchange.ajax.mail.filter.tests;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertThat;
-import java.util.Date;
-import org.hamcrest.CoreMatchers;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
@@ -205,7 +203,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         return hostname;
     }
 
-    public static String insertRule(final Rule rule, final String forUser, final AJAXSession ajaxSession) throws Exception {
+    public static int insertRule(final Rule rule, final String forUser, final AJAXSession ajaxSession) throws Exception {
         final InsertRequest insertRequest = new InsertRequest(rule, forUser);
         final InsertResponse insertResponse = (InsertResponse) Executor.execute(ajaxSession, insertRequest);
         return insertResponse.getId();
@@ -216,28 +214,28 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         Executor.execute(ajaxSession, updateRequest);
     }
 
-    public static void deleteRule(final String id, final String forUser, final AJAXSession ajaxSession) throws Exception {
-        final DeleteRequest deleteRequest = new DeleteRequest(Integer.parseInt(id));
+    public static void deleteRule(final int id, final String forUser, final AJAXSession ajaxSession) throws Exception {
+        final DeleteRequest deleteRequest = new DeleteRequest(id);
         Executor.execute(ajaxSession, deleteRequest);
     }
 
-    public static String[] getIdArray(final String forUser, final AJAXSession ajaxSession) throws Exception {
+    public static int[] getIdArray(final String forUser, final AJAXSession ajaxSession) throws Exception {
         final AllRequest allRequest = new AllRequest();
         final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
         allResponse.getTimestamp();
 
         final Rule[] ruleArray = allResponse.getRules();
-        final String[] idArray = new String[ruleArray.length];
+        final int[] idArray = new int[ruleArray.length];
         for (int a = 0; a < ruleArray.length; a++) {
             idArray[a] = ruleArray[a].getId();
         }
         return idArray;
     }
 
-    public static Rule loadRules(final String forUser, final String id, final AJAXSession ajaxSession) throws Exception {
+    public static Rule loadRules(final String forUser, final int id, final AJAXSession ajaxSession) throws Exception {
         final Rule[] rules = listRules(ajaxSession);
         for (int a = 0; a < rules.length; a++) {
-            if (rules[a].getId().equals(id)) {
+            if (rules[a].getId() == id) {
                 return rules[a];
             }
         }
@@ -272,8 +270,15 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         assertEquals("The 'position' attribute differs", expected.getPosition(), actual.getPosition());
 
         assertArrayEquals("The 'flags' differ", expected.getFlags(), actual.getFlags());
-        assertThat("The action command lists differ", actual.getActioncmds(), CoreMatchers.is(expected.getActioncmds()));
+        assertActions(expected.getActioncmds(), actual.getActioncmds());
         assertTest(expected.getTest(), actual.getTest());
+    }
+
+    private void assertActions(AbstractAction[] expected, AbstractAction[] actual) {
+        assertEquals("The size differs", expected.length, actual.length);
+        for (int index = 0; index < expected.length; index++) {
+            assertEquals("The 'actionCommand' differs", expected[index].getName(), actual[index].getName());
+        }
     }
 
     /**

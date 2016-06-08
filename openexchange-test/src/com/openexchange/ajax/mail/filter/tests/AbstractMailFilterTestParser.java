@@ -67,7 +67,7 @@ public final class AbstractMailFilterTestParser {
 
     public static void parse(final JSONObject jsonObj, final Rule rule) throws JSONException {
         if (jsonObj.has(RuleFields.ID)) {
-            rule.setId(jsonObj.getString(RuleFields.ID));
+            rule.setId(jsonObj.getInt(RuleFields.ID));
         }
 
         if (jsonObj.has(RuleFields.RULENAME)) {

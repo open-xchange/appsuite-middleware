@@ -104,7 +104,7 @@ public class MailFilterAPI {
     public int createRule(Rule rule) throws Exception {
         InsertRequest request = new InsertRequest(rule);
         InsertResponse response = client.execute(request);
-        return Integer.parseInt(response.getId());
+        return response.getId();
     }
 
     /**
@@ -143,7 +143,7 @@ public class MailFilterAPI {
     public void purge() throws Exception {
         List<Rule> rules = listRules();
         for (Rule r : rules) {
-            deleteRule(Integer.parseInt(r.getId()));
+            deleteRule(r.getId());
         }
     }
 }

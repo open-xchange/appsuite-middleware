@@ -108,9 +108,10 @@ public class Bug18490Test extends AbstractMailFilterTest {
         final ContainsComparison conComp = new ContainsComparison();
         rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug18490" }));
 
-        final String id = insertRule(rule, forUser, ajaxSession);
+        final int id = insertRule(rule, forUser, ajaxSession);
+        rule.setId(id);
 
-        final String[] idArray = getIdArray(forUser, ajaxSession);
+        final int[] idArray = getIdArray(forUser, ajaxSession);
 
         assertEquals("one rules expected", 1, idArray.length);
 

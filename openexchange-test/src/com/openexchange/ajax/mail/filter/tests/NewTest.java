@@ -86,7 +86,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
             int id = mailFilterAPI.createRule(expected);
-            expected.setId(Integer.toString(id));
+            expected.setId(id);
         }
 
         // Get all rules
@@ -98,7 +98,7 @@ public class NewTest extends AbstractMailFilterTest {
         assertRule(expected, actual);
 
         // Delete
-        mailFilterAPI.deleteRule(Integer.parseInt(expected.getId()));
+        mailFilterAPI.deleteRule(expected.getId());
     }
 
     /**
@@ -116,7 +116,8 @@ public class NewTest extends AbstractMailFilterTest {
             rule1.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
 
             int id = mailFilterAPI.createRule(rule1);
-            rule1.setId(Integer.toString(id));
+            rule1.setId(id);
+            rule1.setPosition(0);
         }
 
         // Create second rule
@@ -130,7 +131,8 @@ public class NewTest extends AbstractMailFilterTest {
             rule2.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
 
             int id = mailFilterAPI.createRule(rule2);
-            rule2.setId(Integer.toString(id));
+            rule2.setId(id);
+            rule2.setPosition(1);
         }
 
         // List rules
@@ -146,7 +148,7 @@ public class NewTest extends AbstractMailFilterTest {
         assertRule(rule2, actual2);
 
         // Delete both rules
-        mailFilterAPI.deleteRule(Integer.parseInt(actual1.getId()));
-        mailFilterAPI.deleteRule(Integer.parseInt(rule2.getId()));
+        mailFilterAPI.deleteRule(actual1.getId());
+        mailFilterAPI.deleteRule(rule2.getId());
     }
 }

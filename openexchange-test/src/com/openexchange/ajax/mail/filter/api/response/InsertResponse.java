@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class InsertResponse extends AbstractAJAXResponse {
 
-    private String id;
+    private int id;
 
     /**
      * @param response
@@ -70,14 +70,14 @@ public class InsertResponse extends AbstractAJAXResponse {
     /**
      * @return the id
      */
-    public String getId() {
+    public int getId() {
         return id;
     }
 
     /**
      * @param id the id to set
      */
-    public void setId(final String id) {
+    public void setId(final int id) {
         this.id = id;
     }
 }

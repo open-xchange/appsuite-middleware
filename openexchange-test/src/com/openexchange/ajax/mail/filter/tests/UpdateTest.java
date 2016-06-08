@@ -40,13 +40,13 @@ public class UpdateTest extends AbstractMailFilterTest {
         final IsComparison isComp = new IsComparison();
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
-        final String id = insertRule(rule, forUser, ajaxSession);
+        final int id = insertRule(rule, forUser, ajaxSession);
         rule.setId(id);
         rule.setName("testUpdate - 2");
 
         updateRule(rule, forUser, ajaxSession);
 
-        final String[] idArray = getIdArray(forUser, ajaxSession);
+        final int[] idArray = getIdArray(forUser, ajaxSession);
 
         assertEquals("one rules expected", 1, idArray.length);
 
@@ -69,10 +69,10 @@ public class UpdateTest extends AbstractMailFilterTest {
         final IsComparison isComp = new IsComparison();
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
-        final String id1 = insertRule(rule, forUser, ajaxSession);
-        final String id2 = insertRule(rule, forUser, ajaxSession);
+        final int id1 = insertRule(rule, forUser, ajaxSession);
+        final int id2 = insertRule(rule, forUser, ajaxSession);
 
-        final String[] idArray = getIdArray(forUser, ajaxSession);
+        final int[] idArray = getIdArray(forUser, ajaxSession);
 
         assertEquals("one rules expected", 2, idArray.length);
 

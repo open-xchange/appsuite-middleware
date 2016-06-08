@@ -78,7 +78,7 @@ public class Rule {
 
     protected int position = 0;
 
-    protected String id = null;
+    protected int id = -1;
 
     protected String name = null;
 
@@ -106,11 +106,11 @@ public class Rule {
         this.position = position;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

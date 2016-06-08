@@ -82,7 +82,7 @@ public class AdminListTest extends AbstractMailFilterTest {
     private AJAXSession adminSession;
 
     private Rule rule;
-    private String rid = null;
+    private int rid = -1;
 
     public AdminListTest(final String name) {
         super(name);
@@ -124,7 +124,7 @@ public class AdminListTest extends AbstractMailFilterTest {
             OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
             Set<String> emptySet = Collections.emptySet();
             usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, emptySet, cap, emptySet, userCreds);
-            if (rid != null) {
+            if (rid > 0) {
                 deleteRule(rid, null, userClient.getSession());
             }
             adminClient.logout();
@@ -164,7 +164,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         for (final Rule ur : userRules) {
             boolean foundRule = false;
             inner: for (final Rule ar : adminRules) {
-                if (ar.getId().equals(ur.getId())) {
+                if (ar.getId() == ur.getId()) {
                     foundRule = true;
                     break inner;
                 }
