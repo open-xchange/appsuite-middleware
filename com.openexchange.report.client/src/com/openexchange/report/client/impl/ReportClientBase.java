@@ -712,9 +712,9 @@ public class ReportClientBase extends AbstractJMXTools {
 
                 // TODO QS-VS uncomment when done
                 // wait until the report is done
-                //                if (!done) {
-                //                    Thread.sleep(silent ? 60000 : 10000);
-                //                }
+                                if (!done) {
+                                    Thread.sleep(silent ? 60000 : 10000);
+                                }
             }
         } catch (Exception e) {
             e.printStackTrace();
