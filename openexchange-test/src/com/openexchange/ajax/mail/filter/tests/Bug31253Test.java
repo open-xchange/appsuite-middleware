@@ -102,12 +102,10 @@ public class Bug31253Test extends AbstractMailFilterTest {
         final InsertResponse folderInsertResponse = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
         folderInsertResponse.fillObject(folder);
 
-        deleteAllExistingRules(client.getValues().getDefaultAddress(), ajaxSession);
-
         final Rule rule = new Rule();
         rule.setName("Test rule for Bug31253");
         rule.setActive(true);
-        rule.setActioncmds(new AbstractAction[] { new Vacation(7, new String[] {client.getValues().getDefaultAddress()}, "Multiline subject with\nOK foobar for Bug 31253", "Multiline text with \nOK barfoo for Bug 31253") });
+        rule.setActioncmds(new AbstractAction[] { new Vacation(7, new String[] { client.getValues().getDefaultAddress() }, "Multiline subject with\nOK foobar for Bug 31253", "Multiline text with \nOK barfoo for Bug 31253") });
 
         final ContainsComparison conComp = new ContainsComparison();
         rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "31253" }));

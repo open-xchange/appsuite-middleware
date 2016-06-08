@@ -134,4 +134,16 @@ public class MailFilterAPI {
         DeleteRequest request = new DeleteRequest(id);
         client.execute(request);
     }
+
+    /**
+     * Purges all mail filters for the specified user
+     * 
+     * @throws Exception if the operation fails
+     */
+    public void purge() throws Exception {
+        List<Rule> rules = listRules();
+        for (Rule r : rules) {
+            deleteRule(Integer.parseInt(r.getId()));
+        }
+    }
 }

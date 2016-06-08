@@ -74,13 +74,9 @@ public class NewTest extends AbstractMailFilterTest {
     }
 
     /**
-     * Test the creation of a rule
+     * Test a simple creation life-cycle of a rule
      */
     public void testNew() throws Exception {
-        final AJAXSession ajaxSession = getSession();
-        String forUser = null;
-        deleteAllExistingRules(forUser, ajaxSession);
-
         // Create the rule
         final Rule expected;
         {
@@ -110,8 +106,6 @@ public class NewTest extends AbstractMailFilterTest {
         final AJAXSession ajaxSession = getSession();
 
         String forUser = null;
-
-        deleteAllExistingRules(forUser, ajaxSession);
 
         final Rule rule1 = new Rule();
         rule1.setName("testNewWithTwoEntries1");

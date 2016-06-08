@@ -91,7 +91,6 @@ public class Bug44363Test extends AbstractMailFilterTest {
     public void testBug44363() throws Exception {
         final AJAXSession ajaxSession = getSession();
         client = getClient();
-        deleteAllExistingRules(client.getValues().getDefaultAddress(), ajaxSession);
 
         // Create a vacation rule with a single lined dot '.' character
         Rule vacationRule;

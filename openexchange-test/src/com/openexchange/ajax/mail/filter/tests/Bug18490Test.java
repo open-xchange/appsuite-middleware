@@ -100,8 +100,6 @@ public class Bug18490Test extends AbstractMailFilterTest {
 
         final String forUser = null;
 
-        deleteAllExistingRules(forUser, ajaxSession);
-
         final Rule rule = new Rule();
         rule.setName("Bug18490 test rule");
         rule.setActive(true);

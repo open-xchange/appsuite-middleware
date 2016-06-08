@@ -1,3 +1,4 @@
+
 package com.openexchange.ajax.mail.filter.tests;
 
 import com.openexchange.ajax.framework.AJAXSession;
@@ -9,85 +10,81 @@ import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 
 public class UpdateTest extends AbstractMailFilterTest {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTest.class);
 
-	public static final int[] cols = { Rule.ID };
+    public static final int[] cols = { Rule.ID };
 
-	public UpdateTest(String name) {
-		super(name);
-	}
+    public UpdateTest(String name) {
+        super(name);
+    }
 
-	@Override
+    @Override
     protected void setUp() throws Exception {
-		super.setUp();
-	}
+        super.setUp();
+    }
 
-	public void testDummy() {
+    public void testDummy() {
 
-	}
+    }
 
-	public void testUpdate() throws Exception {
-		final AJAXSession ajaxSession = getSession();
-		getClient();
+    public void testUpdate() throws Exception {
+        final AJAXSession ajaxSession = getSession();
+        getClient();
 
-		String forUser = null;
+        String forUser = null;
 
-		deleteAllExistingRules(forUser, ajaxSession);
+        final Rule rule = new Rule();
+        rule.setName("testUpdate");
+        rule.setActioncmds(new AbstractAction[] { new Stop() });
 
-		final Rule rule = new Rule();
-		rule.setName("testUpdate");
-		rule.setActioncmds(new AbstractAction[] { new Stop() });
+        final IsComparison isComp = new IsComparison();
+        rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
-		final IsComparison isComp = new IsComparison();
-		rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue"} ));
+        final String id = insertRule(rule, forUser, ajaxSession);
+        rule.setId(id);
+        rule.setName("testUpdate - 2");
 
-		final String id = insertRule(rule, forUser, ajaxSession);
-		rule.setId(id);
-		rule.setName("testUpdate - 2");
+        updateRule(rule, forUser, ajaxSession);
 
-		updateRule(rule, forUser, ajaxSession);
+        final String[] idArray = getIdArray(forUser, ajaxSession);
 
-		final String[] idArray = getIdArray(forUser, ajaxSession);
+        assertEquals("one rules expected", 1, idArray.length);
 
-		assertEquals("one rules expected", 1, idArray.length);
+        final Rule loadRule = loadRules(forUser, id, ajaxSession);
+        compareRule(rule, loadRule);
 
-		final Rule loadRule = loadRules(forUser, id, ajaxSession);
-		compareRule(rule, loadRule);
+        deleteRule(id, forUser, ajaxSession);
+    }
 
-		deleteRule(id, forUser, ajaxSession);
-	}
+    public void _notestMove() throws Exception {
+        final AJAXSession ajaxSession = getSession();
+        getClient();
 
-	public void _notestMove() throws Exception {
-		final AJAXSession ajaxSession = getSession();
-		getClient();
+        String forUser = null;
 
-		String forUser = null;
+        final Rule rule = new Rule();
+        rule.setName("testMove");
+        rule.setActioncmds(new AbstractAction[] { new Stop() });
 
-		deleteAllExistingRules(forUser, ajaxSession);
+        final IsComparison isComp = new IsComparison();
+        rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
-		final Rule rule = new Rule();
-		rule.setName("testMove");
-		rule.setActioncmds(new AbstractAction[] { new Stop() });
+        final String id1 = insertRule(rule, forUser, ajaxSession);
+        final String id2 = insertRule(rule, forUser, ajaxSession);
 
-		final IsComparison isComp = new IsComparison();
-		rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue"} ));
+        final String[] idArray = getIdArray(forUser, ajaxSession);
 
-		final String id1 = insertRule(rule, forUser, ajaxSession);
-		final String id2 = insertRule(rule, forUser, ajaxSession);
+        assertEquals("one rules expected", 2, idArray.length);
 
-		final String[] idArray = getIdArray(forUser, ajaxSession);
+        rule.setId(id2);
+        rule.setName("testMove - 2");
+        rule.setPosition(0);
+        updateRule(rule, forUser, ajaxSession);
 
-		assertEquals("one rules expected", 2, idArray.length);
+        final Rule loadRule = loadRules(forUser, id2, ajaxSession);
+        compareRule(rule, loadRule);
 
-		rule.setId(id2);
-		rule.setName("testMove - 2");
-		rule.setPosition(0);
-		updateRule(rule, forUser, ajaxSession);
-
-		final Rule loadRule = loadRules(forUser, id2, ajaxSession);
-		compareRule(rule, loadRule);
-
-		deleteRule(id1, forUser, ajaxSession);
-		deleteRule(id2, forUser, ajaxSession);
-	}
+        deleteRule(id1, forUser, ajaxSession);
+        deleteRule(id2, forUser, ajaxSession);
+    }
 }

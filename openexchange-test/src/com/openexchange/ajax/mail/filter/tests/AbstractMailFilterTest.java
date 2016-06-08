@@ -189,13 +189,24 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ComparisonWriterFactory.addWriter("contains", new ContainsWriterImpl());
         ComparisonWriterFactory.addWriter("regex", new RegexWriterImpl());
         ComparisonWriterFactory.addWriter("size", new SizeComparisonWriterImpl());
+
+        // Start fresh
+        mailFilterAPI.purge();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        // cleanup
+        mailFilterAPI.purge();
+        
+        super.tearDown();
     }
 
     public String getHostName() {
         return hostname;
     }
 
-    public static void deleteAllExistingRules(final String forUser, final AJAXSession ajaxSession) throws Exception {
+    public static void deleteAllaExistingRules(final String forUser, final AJAXSession ajaxSession) throws Exception {
         String[] idArray = getIdArray(forUser, ajaxSession);
         if (idArray != null) {
             for (int a = 0; a < idArray.length; a++) {
