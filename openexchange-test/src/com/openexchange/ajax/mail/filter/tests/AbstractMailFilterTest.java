@@ -58,7 +58,6 @@ import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.api.request.AbstractMailFilterRequest;
 import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
 import com.openexchange.ajax.mail.filter.api.request.InsertRequest;
@@ -221,7 +220,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     }
 
     public static String[] getIdArray(final String forUser, final AJAXSession ajaxSession) throws Exception {
-        final AllRequest allRequest = new AllRequest(AbstractMailFilterRequest.URL);
+        final AllRequest allRequest = new AllRequest();
         final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
         allResponse.getTimestamp();
 
@@ -234,7 +233,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     }
 
     public static Date getLastModified(final AJAXSession ajaxSession) throws Exception {
-        final AllRequest allRequest = new AllRequest(AbstractMailFilterRequest.URL);
+        final AllRequest allRequest = new AllRequest();
         final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
         return allResponse.getTimestamp();
     }
@@ -251,14 +250,14 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     }
 
     public static Rule[] listRules(final AJAXSession ajaxSession) throws Exception {
-        final AllRequest allRequest = new AllRequest(AbstractMailFilterRequest.URL);
+        final AllRequest allRequest = new AllRequest();
         final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
 
         return allResponse.getRules();
     }
 
     public static Rule[] listRulesForUser(final AJAXSession ajaxSession, final String userName) throws Exception {
-        final AllRequest allRequest = new AllRequest(AbstractMailFilterRequest.URL, userName);
+        final AllRequest allRequest = new AllRequest(userName);
         final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
 
         return allResponse.getRules();
