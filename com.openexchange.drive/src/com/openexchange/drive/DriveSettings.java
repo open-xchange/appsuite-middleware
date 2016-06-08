@@ -67,6 +67,7 @@ public class DriveSettings {
     private Map<String, String> localizedFolders;
     private Set<String> capabilities;
     private Long minUploadChunk;
+    private int minSearchChars;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -217,6 +218,24 @@ public class DriveSettings {
      */
     public void setMinUploadChunk(Long minUploadChunk) {
         this.minUploadChunk = minUploadChunk;
+    }
+
+    /**
+     * Gets the minSearchChars
+     *
+     * @return The minSearchChars
+     */
+    public int getMinSearchChars() {
+        return minSearchChars;
+    }
+
+    /**
+     * Sets the minSearchChars
+     *
+     * @param minSearchChars The minSearchChars to set
+     */
+    public void setMinSearchChars(int minSearchChars) {
+        this.minSearchChars = minSearchChars;
     }
 
 }

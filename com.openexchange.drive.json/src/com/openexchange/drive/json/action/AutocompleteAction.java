@@ -83,11 +83,11 @@ public class AutocompleteAction extends AbstractDriveAction {
         }
 
         Map<String, Object> parameters = new HashMap<String, Object>();
-        String context = requestData.getParameter("context");
-        if (Strings.isEmpty(context)) {
-            context = "invite";
+        String mode = requestData.getParameter("mode");
+        if (Strings.isEmpty(mode)) {
+            mode = "invite";
         }
-        parameters.put("context", context);
+        parameters.put("mode", mode);
         parameters.put("exclude_admin", Boolean.TRUE);
         parameters.put("require_email", Boolean.TRUE);
         /*

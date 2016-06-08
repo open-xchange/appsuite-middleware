@@ -113,6 +113,7 @@ public class SettingsAction extends AbstractDriveAction {
                 jsonObject.putOpt("minUploadChunk", settings.getMinUploadChunk());
                 jsonObject.put("localizedFolderNames", settings.getLocalizedFolders());
                 jsonObject.put("capabilities", settings.getCapabilities());
+                jsonObject.put("minSearchChars", settings.getMinSearchChars());
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }

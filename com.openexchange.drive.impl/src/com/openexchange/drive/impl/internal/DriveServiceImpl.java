@@ -63,6 +63,7 @@ import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryPattern;
@@ -481,6 +482,11 @@ public class DriveServiceImpl implements DriveService {
          */
         capabilities.add("multiple_folder_long_polling");
         settings.setCapabilities(capabilities);
+        /*
+         * add certain configuration values
+         */
+        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
+        settings.setMinSearchChars(configService.getIntProperty("com.openexchange.MinimumSearchCharacters", 0));
         return settings;
     }
 
