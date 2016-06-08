@@ -51,8 +51,11 @@ package com.openexchange.ajax.mail.filter.api;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
+import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
+import com.openexchange.ajax.mail.filter.api.request.InsertRequest;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import com.openexchange.ajax.mail.filter.api.response.InsertResponse;
 
 /**
  * {@link MailFilterAPI}
@@ -77,10 +80,24 @@ public class MailFilterAPI {
      * Returns the configuration of the mail filter backend
      * 
      * @return the {@link MailFilterConfiguration} of the mail filter backend
+     * @throws Exception if the operation fails
      */
     public MailFilterConfiguration getConfiguration() throws Exception {
         ConfigRequest request = new ConfigRequest();
         ConfigResponse response = client.execute(request);
         return response.getMailFilterConfiguration();
+    }
+
+    /**
+     * Creates the specified mail filter {@link Rule}
+     * 
+     * @param rule The mail filter {@link Rule} to create
+     * @return The identifier of the created rule
+     * @throws Exception if the operation fails
+     */
+    public int createRule(Rule rule) throws Exception {
+        InsertRequest request = new InsertRequest(rule);
+        InsertResponse response = client.execute(request);
+        return Integer.parseInt(response.getId());
     }
 }
