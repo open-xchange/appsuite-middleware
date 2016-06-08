@@ -3383,14 +3383,26 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private Message asMessage(MailMessage m, int behavior) throws OXException {
+        String messageId = m.getHeader("Message-ID", null);
+        Message message;
         if (m instanceof MimeRawSource) {
             Part part = ((MimeRawSource) m).getPart();
             if (part instanceof Message) {
-                return (Message) part;
+                message = (Message) part;
+            } else {
+                message = MimeMessageConverter.convertMailMessage(m, behavior);
             }
-            return MimeMessageConverter.convertMailMessage(m, behavior);
+        } else {
+            message = MimeMessageConverter.convertMailMessage(m, behavior);
         }
-        return MimeMessageConverter.convertMailMessage(m, behavior);
+        if (null != messageId) {
+            try {
+                message.setHeader("Message-ID", messageId);
+            } catch (MessagingException e) {
+                LOG.warn("Failed to keep \"Message-ID\" header.", e);
+            }
+        }
+        return message;
     }
 
 

@@ -3160,6 +3160,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             // State variables
             OXException oxError = null;
             boolean first = true;
+            String messageId = null;
             for (ComposedMailMessage composedMail : transportMails) {
                 boolean mailSent = false;
                 try {
@@ -3185,7 +3186,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 } else {
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                                 }
+                                messageId = sentMail.getHeader("Message-ID", null);
                             } else {
+                                composedMail.setHeader("Message-ID", messageId);
                                 sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                             }
                             mailSent = true;
@@ -3305,6 +3308,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
             // Append to Sent folder
             if (settingsAllowAppendToSend && null != mailToAppend) {
+                mailToAppend.setHeader("Message-ID", messageId);
                 ids.add(append2SentFolder(mailToAppend).toString());
             }
 
