@@ -209,7 +209,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         return insertResponse.getId();
     }
 
-    public static void updateRule(final Rule rule, final String forUser, final AJAXSession ajaxSession) throws Exception {
+    private static void updateRule(final Rule rule, final String forUser, final AJAXSession ajaxSession) throws Exception {
         final UpdateRequest updateRequest = new UpdateRequest(rule, forUser);
         Executor.execute(ajaxSession, updateRequest);
     }

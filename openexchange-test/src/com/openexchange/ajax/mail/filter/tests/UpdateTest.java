@@ -44,7 +44,7 @@ public class UpdateTest extends AbstractMailFilterTest {
         rule.setId(id);
         rule.setName("testUpdate - 2");
 
-        updateRule(rule, forUser, ajaxSession);
+        mailFilterAPI.updateRule(rule);
 
         final int[] idArray = getIdArray(forUser, ajaxSession);
 
@@ -79,7 +79,7 @@ public class UpdateTest extends AbstractMailFilterTest {
         rule.setId(id2);
         rule.setName("testMove - 2");
         rule.setPosition(0);
-        updateRule(rule, forUser, ajaxSession);
+        mailFilterAPI.updateRule(rule);
 
         final Rule loadRule = loadRules(forUser, id2, ajaxSession);
         assertRule(rule, loadRule);

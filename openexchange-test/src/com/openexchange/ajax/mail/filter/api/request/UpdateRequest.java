@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.mail.filter.api.request;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.parser.UpdateParser;
+import com.openexchange.ajax.mail.filter.api.response.UpdateResponse;
+import com.openexchange.java.Strings;
 
 /**
  * Implements creating the necessary values for a rule update request. All
@@ -60,76 +64,83 @@ import com.openexchange.ajax.mail.filter.api.parser.UpdateParser;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class UpdateRequest extends AbstractMailFilterRequest {
+public class UpdateRequest extends AbstractMailFilterRequest<UpdateResponse> {
 
-	private final Rule rule;
+    private final Rule rule;
+    private String forUser;
+    private boolean failOnError;
 
-	private final String forUser;
+    /**
+     * Initialises a new {@link UpdateRequest}.
+     */
+    public UpdateRequest(Rule rule) {
+        this(rule, null);
+    }
 
-	private boolean failOnError = true;
+    /**
+     * Default constructor.
+     *
+     * @param rule Rule object with updated attributes.
+     */
+    public UpdateRequest(final Rule rule, final String forUser) {
+        this(rule, forUser, true);
+    }
 
-	/**
-	 * Default constructor.
-	 *
-	 * @param rule
-	 *            Rule object with updated attributes.
-	 */
-	public UpdateRequest(final Rule rule, final String forUser) {
-		this(rule, forUser, true);
-	}
+    /**
+     * Default constructor.
+     *
+     * @param rule
+     *            Rule object with updated attributes.
+     */
+    public UpdateRequest(final Rule rule, final String forUser, boolean failOnError) {
+        super();
+        this.rule = rule;
+        this.forUser = forUser;
+        this.failOnError = failOnError;
+    }
 
-	/**
-	 * Default constructor.
-	 *
-	 * @param rule
-	 *            Rule object with updated attributes.
-	 */
-	public UpdateRequest(final Rule rule, final String forUser, boolean failOnError) {
-		super();
-		this.rule = rule;
-		this.forUser = forUser;
-		this.failOnError = failOnError;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Object getBody() throws JSONException {
-		return convert(rule);
-	}
+        return convert(rule);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Method getMethod() {
-		return Method.PUT;
-	}
+        return Method.PUT;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Parameter[] getParameters() {
-		return new Parameter[] {
-				new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-				new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(rule.getId()))
-		};
-	}
+        List<Parameter> parameters = new LinkedList<>();
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ID, rule.getId()));
+        if (!Strings.isEmpty(forUser)) {
+            parameters.add(new Parameter("username", forUser));
+        }
+        return parameters.toArray(new Parameter[parameters.size()]);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public UpdateParser getParser() {
-		return new UpdateParser(false);
-	}
+        return new UpdateParser(failOnError);
+    }
 
-	/**
-	 * @return the rule
-	 */
-	protected Rule getRule() {
-		return rule;
-	}
+    /**
+     * @return the rule
+     */
+    protected Rule getRule() {
+        return rule;
+    }
 }

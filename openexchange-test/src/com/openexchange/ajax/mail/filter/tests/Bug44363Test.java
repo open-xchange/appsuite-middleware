@@ -124,11 +124,11 @@ public class Bug44363Test extends AbstractMailFilterTest {
 
         // Deactivate the other rule
         otherRule.setActive(false);
-        updateRule(otherRule, client.getValues().getDefaultAddress(), ajaxSession);
+        mailFilterAPI.updateRule(otherRule);
 
         // Deactivate the vacation notice
         vacationRule.setActive(false);
-        updateRule(vacationRule, client.getValues().getDefaultAddress(), ajaxSession);
+        mailFilterAPI.updateRule(vacationRule);
 
         // Assert that we still have two rules
         idArray = getIdArray(null, ajaxSession);

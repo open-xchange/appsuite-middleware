@@ -59,6 +59,7 @@ import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
 import com.openexchange.ajax.mail.filter.api.request.InsertRequest;
+import com.openexchange.ajax.mail.filter.api.request.UpdateRequest;
 import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
 import com.openexchange.ajax.mail.filter.api.response.InsertResponse;
@@ -105,6 +106,17 @@ public class MailFilterAPI {
         InsertRequest request = new InsertRequest(rule);
         InsertResponse response = client.execute(request);
         return response.getId();
+    }
+
+    /**
+     * Updates the specified mail filter {@link Rule}
+     * 
+     * @param rule The mail filter {@link Rule} to update
+     * @throws Exception if the operation fails
+     */
+    public void updateRule(Rule rule) throws Exception {
+        UpdateRequest request = new UpdateRequest(rule);
+        client.execute(request);
     }
 
     /**
