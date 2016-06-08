@@ -68,6 +68,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AnyOfTestCo
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.BodyTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.CurrentDateTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.EnvelopeTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HasFlagCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HeaderTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.SizeTestCommandParser;
@@ -140,6 +141,7 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
         registry.register(Commands.NOT.getCommandName(), new NotTestCommandParser());
         registry.register(Commands.SIZE.getCommandName(), new SizeTestCommandParser());
         registry.register(Commands.TRUE.getCommandName(), new TrueTestCommandParser());
+        registry.register(Commands.HASFLAG.getCommandName(), new HasFlagCommandParser());
 
         registerService(TestCommandParserRegistry.class, registry);
         trackService(TestCommandParserRegistry.class);
