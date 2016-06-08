@@ -51,7 +51,7 @@ public class UpdateTest extends AbstractMailFilterTest {
         assertEquals("one rules expected", 1, idArray.length);
 
         final Rule loadRule = loadRules(forUser, id, ajaxSession);
-        compareRule(rule, loadRule);
+        assertRule(rule, loadRule);
 
         deleteRule(id, forUser, ajaxSession);
     }
@@ -82,7 +82,7 @@ public class UpdateTest extends AbstractMailFilterTest {
         updateRule(rule, forUser, ajaxSession);
 
         final Rule loadRule = loadRules(forUser, id2, ajaxSession);
-        compareRule(rule, loadRule);
+        assertRule(rule, loadRule);
 
         deleteRule(id1, forUser, ajaxSession);
         deleteRule(id2, forUser, ajaxSession);

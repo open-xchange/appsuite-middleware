@@ -96,12 +96,17 @@ public class NewTest extends AbstractMailFilterTest {
 
         // Assert rules
         Rule actual = rules.get(0);
-        compareRule(expected, actual);
+        assertRule(expected, actual);
 
         // Delete
         mailFilterAPI.deleteRule(Integer.parseInt(expected.getId()));
     }
 
+    /**
+     * Test adding multiple filters
+     * 
+     * @throws Exception
+     */
     public void testNewWithTwoEntries() throws Exception {
         final AJAXSession ajaxSession = getSession();
 
@@ -132,11 +137,11 @@ public class NewTest extends AbstractMailFilterTest {
 
         Rule loadRule = loadRules(forUser, id1, ajaxSession);
         rule1.setPosition(0);
-        compareRule(rule1, loadRule);
+        assertRule(rule1, loadRule);
 
         loadRule = loadRules(forUser, id2, ajaxSession);
         rule2.setPosition(1);
-        compareRule(rule2, loadRule);
+        assertRule(rule2, loadRule);
 
         deleteRule(id1, forUser, ajaxSession);
         deleteRule(id2, forUser, ajaxSession);

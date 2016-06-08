@@ -49,15 +49,15 @@
 
 package com.openexchange.ajax.mail.filter.tests;
 
-import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertThat;
 import java.util.Date;
+import org.hamcrest.CoreMatchers;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
@@ -111,7 +111,6 @@ import com.openexchange.ajax.mail.filter.parser.test.TestParserFactory;
 import com.openexchange.ajax.mail.filter.parser.test.TrueParserImpl;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.test.AjaxInit;
-import com.openexchange.test.OXTestToolkit;
 
 public class AbstractMailFilterTest extends AbstractAJAXSession {
 
@@ -198,7 +197,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         // cleanup
         mailFilterAPI.purge();
-        
+
         super.tearDown();
     }
 
@@ -288,43 +287,17 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         assertEquals("The 'position' attribute differs", expected.getPosition(), actual.getPosition());
 
         assertArrayEquals("The 'flags' differ", expected.getFlags(), actual.getFlags());
-        //assertActionCommands();
-        //assertTests();
+        assertThat("The action command lists differ", actual.getActioncmds(), CoreMatchers.is(expected.getActioncmds()));
+        assertTest(expected.getTest(), actual.getTest());
     }
 
-    public static void compareRule(final Rule rule1, final Rule rule2) throws Exception {
-        OXTestToolkit.assertEqualsAndNotNull("id is not equals", rule1.getId(), rule2.getId());
-        OXTestToolkit.assertEqualsAndNotNull("name is not equals", rule1.getName(), rule2.getName());
-        assertEquals("active is not equals", rule1.isActive(), rule2.isActive());
-        OXTestToolkit.assertEqualsAndNotNull("position is not equals", I(rule1.getPosition()), I(rule2.getPosition()));
-        compareFlags(rule1.getFlags(), rule2.getFlags());
-        compareActionCmds(rule1.getActioncmds(), rule2.getActioncmds());
-        compareTest(rule1.getTest(), rule2.getTest());
-    }
-
-    private static void compareFlags(final String[] flags1, final String[] flags2) throws Exception {
-        if (flags1 != null) {
-            assertNotNull("flags are null", flags2);
-            assertEquals("flags size is not equals", flags1.length, flags2.length);
-
-            for (int a = 0; a < flags1.length; a++) {
-                OXTestToolkit.assertEqualsAndNotNull("flag at position " + a + " is not equals", flags1[a], flags2[a]);
-            }
-        }
-    }
-
-    private static void compareActionCmds(final AbstractAction[] abstractAction1, final AbstractAction[] abstractAction2) throws Exception {
-        if (abstractAction1 != null) {
-            assertNotNull("abstract action array null", abstractAction2);
-            assertEquals("abstract action size is not equals", abstractAction1.length, abstractAction2.length);
-
-            for (int a = 0; a < abstractAction1.length; a++) {
-                OXTestToolkit.assertEqualsAndNotNull("abstract action at position " + a + " is not equals", abstractAction1[a].getName(), abstractAction2[a].getName());
-            }
-        }
-    }
-
-    private static void compareTest(final AbstractTest abstractTest1, final AbstractTest abstractTest2) throws Exception {
-        OXTestToolkit.assertEqualsAndNotNull("abstract test is not equals", abstractTest1, abstractTest2);
+    /**
+     * Asserts that the expected {@link AbstractTest} is equal the actual {@link AbstractTest}
+     * 
+     * @param expected
+     * @param actual
+     */
+    private void assertTest(AbstractTest expected, AbstractTest actual) {
+        assertEquals("The 'name' attribute of the test differs", expected.getName(), actual.getName());
     }
 }

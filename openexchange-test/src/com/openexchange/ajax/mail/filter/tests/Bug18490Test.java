@@ -115,7 +115,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
         assertEquals("one rules expected", 1, idArray.length);
 
         final Rule loadRule = loadRules(forUser, id, ajaxSession);
-        compareRule(rule, loadRule);
+        assertRule(rule, loadRule);
 
         // Send Mail to myself
         final TestMail testMail = new TestMail();

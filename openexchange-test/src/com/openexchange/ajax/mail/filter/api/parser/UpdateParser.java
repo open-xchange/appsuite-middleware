@@ -61,18 +61,11 @@ import com.openexchange.ajax.mail.filter.api.response.UpdateResponse;
 public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
 
     /**
-     * Remembers if this parser fails out with an error.
-     */
-    private final boolean failOnError;
-
-    /**
      * Default constructor.
      */
     public UpdateParser(final boolean failOnError) {
         super(failOnError);
-        this.failOnError = failOnError;
     }
-
 
     /**
      * {@inheritDoc}

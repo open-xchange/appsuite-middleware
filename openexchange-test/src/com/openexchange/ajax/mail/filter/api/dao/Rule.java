@@ -84,11 +84,11 @@ public class Rule {
 
     protected boolean active = false;
 
-    protected String[] flags = null;
+    protected String[] flags = new String[0];
 
     protected AbstractTest test = null;
 
-    protected AbstractAction[] actioncmds = null;
+    protected AbstractAction[] actioncmds = new AbstractAction[0];
 
     protected String rawData = null;
 
