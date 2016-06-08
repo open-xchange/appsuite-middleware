@@ -112,7 +112,7 @@ public class SyncTracker {
      */
     private static final int MAX_HISTORY_ENTRY_LENGTH = 10;
 
-    private static final String PARAM_RESULT_HISTORY = "com.openexchange.drive.resultHistory";
+    private static final String PARAM_RESULT_HISTORY_PREFIX = "com.openexchange.drive.resultHistory";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncTracker.class);
 
     private final SyncSession session;
@@ -427,13 +427,14 @@ public class SyncTracker {
     }
 
     private static ArrayList<HistoryEntry> extractHistory(SyncSession session) {
+        String parameterName = PARAM_RESULT_HISTORY_PREFIX + ':' + session.getRootFolderID();
         ArrayList<HistoryEntry> history;
-        Object value = session.getServerSession().getParameter(PARAM_RESULT_HISTORY);
+        Object value = session.getServerSession().getParameter(parameterName);
         if (null != value) {
-            history = (ArrayList<HistoryEntry>)value;
+            history = (ArrayList<HistoryEntry>) value;
         } else {
             history = new ArrayList<HistoryEntry>();
-            session.getServerSession().setParameter(PARAM_RESULT_HISTORY, history);
+            session.getServerSession().setParameter(parameterName, history);
         }
         return history;
     }
