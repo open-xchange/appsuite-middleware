@@ -205,15 +205,6 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         return hostname;
     }
 
-    public static void deleteAllaExistingRules(final String forUser, final AJAXSession ajaxSession) throws Exception {
-        String[] idArray = getIdArray(forUser, ajaxSession);
-        if (idArray != null) {
-            for (int a = 0; a < idArray.length; a++) {
-                deleteRule(idArray[a], forUser, ajaxSession);
-            }
-        }
-    }
-
     public static String insertRule(final Rule rule, final String forUser, final AJAXSession ajaxSession) throws Exception {
         final InsertRequest insertRequest = new InsertRequest(rule, forUser);
         final InsertResponse insertResponse = (InsertResponse) Executor.execute(ajaxSession, insertRequest);
@@ -241,12 +232,6 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
             idArray[a] = ruleArray[a].getId();
         }
         return idArray;
-    }
-
-    public static Date getLastModified(final AJAXSession ajaxSession) throws Exception {
-        final AllRequest allRequest = new AllRequest();
-        final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
-        return allResponse.getTimestamp();
     }
 
     public static Rule loadRules(final String forUser, final String id, final AJAXSession ajaxSession) throws Exception {
@@ -294,8 +279,8 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     /**
      * Asserts that the expected {@link AbstractTest} is equal the actual {@link AbstractTest}
      * 
-     * @param expected
-     * @param actual
+     * @param expected The expected {@link AbstractTest}
+     * @param actual The actual {@link AbstractTest}
      */
     private void assertTest(AbstractTest expected, AbstractTest actual) {
         assertEquals("The 'name' attribute of the test differs", expected.getName(), actual.getName());
