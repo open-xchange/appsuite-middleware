@@ -208,6 +208,13 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         assertTest(expected.getTest(), actual.getTest());
     }
 
+    /**
+     * Asserts that the expected {@link AbstractAction} is equal to actual {@link AbstractAction}
+     * 
+     * @param expected the expected {@link AbstractAction}
+     * @param actual the actual {@link AbstractAction}
+     */
+    // TODO Complete assertions
     private void assertActions(AbstractAction[] expected, AbstractAction[] actual) {
         assertEquals("The size differs", expected.length, actual.length);
         for (int index = 0; index < expected.length; index++) {
@@ -221,6 +228,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
      * @param expected The expected {@link AbstractTest}
      * @param actual The actual {@link AbstractTest}
      */
+    //TODO complete assertions
     private void assertTest(AbstractTest expected, AbstractTest actual) {
         assertEquals("The 'name' attribute of the test differs", expected.getName(), actual.getName());
     }
