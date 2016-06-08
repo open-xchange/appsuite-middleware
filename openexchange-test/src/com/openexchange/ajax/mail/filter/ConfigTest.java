@@ -51,19 +51,20 @@ package com.openexchange.ajax.mail.filter;
 
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
 
+/**
+ * {@link ConfigTest}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
 public class ConfigTest extends AbstractMailFilterTest {
 
-    protected static final String HOSTNAME = "hostname";
-
-    protected String hostname = null;
-
+    /**
+     * Initialises a new {@link ConfigTest}.
+     * 
+     * @param name The test case's name
+     */
     public ConfigTest(String name) {
         super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
     }
 
     /**
@@ -75,7 +76,7 @@ public class ConfigTest extends AbstractMailFilterTest {
         assertNotNull("The mail filter configuration is null", mailFilterConfiguration);
         assertNotNull("The 'tests' list is null", mailFilterConfiguration.getTests());
         assertNotNull("The 'actionCommands' list is null", mailFilterConfiguration.getActionCommands());
-        
+
         assertFalse("The 'tests' list is empty", mailFilterConfiguration.getTests().isEmpty());
         assertFalse("The 'actionCommands list is empty", mailFilterConfiguration.getActionCommands().isEmpty());
     }
