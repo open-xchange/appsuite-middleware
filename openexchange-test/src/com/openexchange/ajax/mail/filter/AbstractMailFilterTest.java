@@ -62,6 +62,7 @@ import com.openexchange.ajax.mail.filter.actions.DeleteRequest;
 import com.openexchange.ajax.mail.filter.actions.InsertRequest;
 import com.openexchange.ajax.mail.filter.actions.InsertResponse;
 import com.openexchange.ajax.mail.filter.actions.UpdateRequest;
+import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.parser.action.ActionParserFactory;
 import com.openexchange.ajax.mail.filter.parser.action.AddFlagsParserImpl;
 import com.openexchange.ajax.mail.filter.parser.action.MoveParserImpl;
@@ -119,6 +120,13 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
     protected String hostname = null;
 
+    protected MailFilterAPI mailFilterAPI;
+
+    /**
+     * Initialises a new {@link AbstractMailFilterTest}.
+     * 
+     * @param name The name of the test case
+     */
     public AbstractMailFilterTest(String name) {
         super(name);
     }
@@ -126,6 +134,8 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        mailFilterAPI = new MailFilterAPI(client);
 
         hostname = AjaxInit.getAJAXProperty(HOSTNAME);
 
@@ -213,7 +223,6 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         final AllRequest allRequest = new AllRequest(AbstractMailFilterRequest.URL);
         final AllResponse allResponse = (AllResponse) Executor.execute(ajaxSession, allRequest);
         allResponse.getTimestamp();
-
 
         final Rule[] ruleArray = allResponse.getRules();
         final String[] idArray = new String[ruleArray.length];

@@ -47,36 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter;
+package com.openexchange.ajax.mail.filter.api;
 
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.mail.filter.actions.ConfigRequest;
+import com.openexchange.ajax.mail.filter.actions.ConfigResponse;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
 
-public class ConfigTest extends AbstractMailFilterTest {
+/**
+ * {@link MailFilterAPI}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public class MailFilterAPI {
 
-    protected static final String HOSTNAME = "hostname";
+    private final AJAXClient client;
 
-    protected String hostname = null;
-
-    public ConfigTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    /**
+     * Initialises a new {@link MailFilterAPI}.
+     * 
+     * @param client The {@link AJAXClient}
+     */
+    public MailFilterAPI(AJAXClient client) {
+        super();
+        this.client = client;
     }
 
     /**
-     * Test the GET /ajax/mailfilter?action=config API call
+     * Returns the configuration of the mail filter backend
+     * 
+     * @return the {@link MailFilterConfiguration} of the mail filter backend
      */
-    public void testConfig() throws Exception {
-        MailFilterConfiguration mailFilterConfiguration = mailFilterAPI.getConfiguration();
-
-        assertNotNull("The mail filter configuration is null", mailFilterConfiguration);
-        assertNotNull("The 'tests' list is null", mailFilterConfiguration.getTests());
-        assertNotNull("The 'actionCommands' list is null", mailFilterConfiguration.getActionCommands());
-        
-        assertFalse("The 'tests' list is empty", mailFilterConfiguration.getTests().isEmpty());
-        assertFalse("The 'actionCommands list is empty", mailFilterConfiguration.getActionCommands().isEmpty());
+    public MailFilterConfiguration getConfiguration() throws Exception {
+        ConfigRequest request = new ConfigRequest();
+        ConfigResponse response = client.execute(request);
+        return response.getMailFilterConfiguration();
     }
 }

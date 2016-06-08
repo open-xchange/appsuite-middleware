@@ -56,54 +56,47 @@ import com.openexchange.ajax.AJAXServlet;
 /**
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ConfigRequest extends AbstractMailFilterRequest<ConfigResponse> {
 
     private final boolean failOnError;
 
     /**
-     * default constructor
+     * Initialises a new {@link ConfigRequest}. Does NOT fail in case of an error
      */
     public ConfigRequest() {
-    	this(false);
+        this(false);
     }
 
     /**
-     * Constructor with all parameters.
+     * Initialises a new {@link ConfigRequest}.
+     * 
+     * @param failOnError the fail on error flag
      */
     public ConfigRequest(final boolean failOnError) {
         super();
         this.failOnError = failOnError;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getBody() throws JSONException {
         return new JSONObject();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIG),
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIG),
         };
     }
 
-	@Override
+    @Override
     public ConfigParser getParser() {
-		return new ConfigParser(failOnError);
-	}
+        return new ConfigParser(failOnError);
+    }
 }

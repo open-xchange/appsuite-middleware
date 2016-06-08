@@ -47,36 +47,22 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter;
+package com.openexchange.ajax.mail.filter.api.dao;
 
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-
-public class ConfigTest extends AbstractMailFilterTest {
-
-    protected static final String HOSTNAME = "hostname";
-
-    protected String hostname = null;
-
-    public ConfigTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    /**
-     * Test the GET /ajax/mailfilter?action=config API call
-     */
-    public void testConfig() throws Exception {
-        MailFilterConfiguration mailFilterConfiguration = mailFilterAPI.getConfiguration();
-
-        assertNotNull("The mail filter configuration is null", mailFilterConfiguration);
-        assertNotNull("The 'tests' list is null", mailFilterConfiguration.getTests());
-        assertNotNull("The 'actionCommands' list is null", mailFilterConfiguration.getActionCommands());
-        
-        assertFalse("The 'tests' list is empty", mailFilterConfiguration.getTests().isEmpty());
-        assertFalse("The 'actionCommands list is empty", mailFilterConfiguration.getActionCommands().isEmpty());
-    }
+/**
+ * {@link TestCommand}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public enum TestCommand {
+    ALLOF,
+    ENVELOPE,
+    NOT,
+    ADDRESS,
+    SIZE,
+    HASFLAG,
+    FALSE,
+    TRUE,
+    HEADER,
+    ANYOF;
 }

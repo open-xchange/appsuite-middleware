@@ -49,53 +49,73 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.mail.filter.ConfigTestHolder;
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
+import com.openexchange.ajax.mail.filter.api.dao.Test;
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 
 /**
- *
+ * {@link ConfigParser}
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
 
     /**
-     * Default constructor.
+     * Initialises a new {@link ConfigParser}.
+     * 
+     * @param failOnError
      */
     public ConfigParser(final boolean failOnError) {
         super(failOnError);
     }
 
-    /**
-     * Create specialized response object.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
      */
     @Override
     protected ConfigResponse createResponse(final Response response) throws JSONException {
-    	final JSONObject jsonObj = (JSONObject)response.getData();
-    	final JSONArray jsonTestArray = jsonObj.getJSONArray("tests");
-    	final JSONArray jsonActionArray = jsonObj.getJSONArray("actioncommands");
+        final JSONObject jsonObj = (JSONObject) response.getData();
 
-    	final ConfigTestHolder[] configTests = new ConfigTestHolder[jsonTestArray.length()];
-    	for (int a = 0; a < configTests.length; a++) {
-    		final JSONObject jsonTestObj = jsonTestArray.getJSONObject(a);
-    		final String testString = jsonTestObj.getString("test");
-    		final JSONArray jsonComparisonArray = jsonTestObj.getJSONArray("comparison");
-    		final String[] comparisons = new String[jsonComparisonArray.length()];
-    		for (int b = 0; b < comparisons.length; b++) {
-    			comparisons[b] = jsonComparisonArray.getString(b);
-    		}
+        final JSONArray jsonTestArray = jsonObj.getJSONArray("tests");
+        final JSONArray jsonActionArray = jsonObj.getJSONArray("actioncommands");
 
-    		configTests[a] = new ConfigTestHolder(testString, comparisons);
-    	}
+        // Parse tests
+        List<Test> tests = new ArrayList<Test>(jsonTestArray.length());
+        for (int a = 0; a < jsonTestArray.length(); a++) {
+            final JSONObject jsonTestObj = jsonTestArray.getJSONObject(a);
 
-    	final String[] actions = new String[jsonActionArray.length()];
-    	for (int a = 0; a < actions.length; a++) {
-    		actions[a] = jsonActionArray.getString(a);
-    	}
+            // Parse test command
+            final String testString = jsonTestObj.getString("test");
+            TestCommand testCommand = TestCommand.valueOf(testString.toUpperCase());
 
-    	return new ConfigResponse(response, configTests, actions);
+            // Parse comparisons
+            final JSONArray jsonComparisonArray = jsonTestObj.getJSONArray("comparison");
+            List<Comparison> comparisons = new ArrayList<>(jsonComparisonArray.length());
+            for (int b = 0; b < jsonComparisonArray.length(); b++) {
+                comparisons.add(Comparison.valueOf(jsonComparisonArray.getString(b).toLowerCase()));
+            }
+
+            tests.add(new Test(testCommand, comparisons));
+        }
+
+        // Parse action commands
+        List<ActionCommand> actionCommands = new ArrayList<ActionCommand>(jsonActionArray.length());
+        for (int a = 0; a < jsonActionArray.length(); a++) {
+            actionCommands.add(ActionCommand.valueOf(jsonActionArray.getString(a).toUpperCase()));
+        }
+
+        return new ConfigResponse(response, new MailFilterConfiguration(tests, actionCommands));
     }
 }

@@ -51,32 +51,35 @@ package com.openexchange.ajax.mail.filter.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.mail.filter.ConfigTestHolder;
+import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
 
 /**
+ * {@link ConfigResponse}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ConfigResponse extends AbstractAJAXResponse {
 
-	protected ConfigTestHolder[] configTests;
-
-	protected String[] actions;
+    private final MailFilterConfiguration mailFilterConfiguration;
 
     /**
-	 * @param response
-	 */
-    public ConfigResponse(final Response response, final ConfigTestHolder[] configTests, final String[] actions) {
+     * Initialises a new {@link ConfigResponse}.
+     * 
+     * @param response The response
+     * @param mailFilterConfiguration The {@link MailFilterConfiguration}
+     */
+    public ConfigResponse(final Response response, final MailFilterConfiguration mailFilterConfiguration) {
         super(response);
-        this.configTests = configTests;
-        this.actions = actions;
+        this.mailFilterConfiguration = mailFilterConfiguration;
     }
 
-    public ConfigTestHolder[] getConfigTests() {
-    	return configTests;
-    }
-
-    public String[] getActionCommands() {
-    	return actions;
+    /**
+     * Gets the mailFilterConfiguration
+     *
+     * @return The mailFilterConfiguration
+     */
+    public MailFilterConfiguration getMailFilterConfiguration() {
+        return mailFilterConfiguration;
     }
 }

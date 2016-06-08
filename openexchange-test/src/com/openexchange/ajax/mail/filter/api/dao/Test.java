@@ -47,36 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter;
+package com.openexchange.ajax.mail.filter.api.dao;
 
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
+import java.util.Collections;
+import java.util.List;
 
-public class ConfigTest extends AbstractMailFilterTest {
+/**
+ * {@link Test}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public class Test {
 
-    protected static final String HOSTNAME = "hostname";
+    private final TestCommand testCommand;
+    private final List<Comparison> comparisons;
 
-    protected String hostname = null;
-
-    public ConfigTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    /**
+     * Initialises a new {@link Test}.
+     */
+    public Test(TestCommand testCommand, List<Comparison> comparisons) {
+        super();
+        this.testCommand = testCommand;
+        this.comparisons = Collections.unmodifiableList(comparisons);
     }
 
     /**
-     * Test the GET /ajax/mailfilter?action=config API call
+     * Gets the testCommand
+     *
+     * @return The testCommand
      */
-    public void testConfig() throws Exception {
-        MailFilterConfiguration mailFilterConfiguration = mailFilterAPI.getConfiguration();
+    public TestCommand getTestCommand() {
+        return testCommand;
+    }
 
-        assertNotNull("The mail filter configuration is null", mailFilterConfiguration);
-        assertNotNull("The 'tests' list is null", mailFilterConfiguration.getTests());
-        assertNotNull("The 'actionCommands' list is null", mailFilterConfiguration.getActionCommands());
-        
-        assertFalse("The 'tests' list is empty", mailFilterConfiguration.getTests().isEmpty());
-        assertFalse("The 'actionCommands list is empty", mailFilterConfiguration.getActionCommands().isEmpty());
+    /**
+     * Gets the comparisons
+     *
+     * @return The comparisons
+     */
+    public List<Comparison> getComparisons() {
+        return comparisons;
     }
 }

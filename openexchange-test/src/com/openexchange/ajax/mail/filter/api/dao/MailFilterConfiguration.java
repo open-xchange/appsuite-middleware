@@ -47,36 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter;
+package com.openexchange.ajax.mail.filter.api.dao;
 
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
+import java.util.Collections;
+import java.util.List;
 
-public class ConfigTest extends AbstractMailFilterTest {
+/**
+ * {@link MailFilterConfiguration}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public class MailFilterConfiguration {
 
-    protected static final String HOSTNAME = "hostname";
+    private final List<Test> tests;
+    private final List<ActionCommand> actionCommands;
 
-    protected String hostname = null;
-
-    public ConfigTest(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    /**
+     * Initialises a new {@link MailFilterConfiguration}.
+     */
+    public MailFilterConfiguration(List<Test> tests, List<ActionCommand> actionCommands) {
+        super();
+        this.tests = tests;
+        this.actionCommands = actionCommands;
     }
 
     /**
-     * Test the GET /ajax/mailfilter?action=config API call
+     * Gets the tests
+     *
+     * @return The tests
      */
-    public void testConfig() throws Exception {
-        MailFilterConfiguration mailFilterConfiguration = mailFilterAPI.getConfiguration();
+    public List<Test> getTests() {
+        return Collections.unmodifiableList(tests);
+    }
 
-        assertNotNull("The mail filter configuration is null", mailFilterConfiguration);
-        assertNotNull("The 'tests' list is null", mailFilterConfiguration.getTests());
-        assertNotNull("The 'actionCommands' list is null", mailFilterConfiguration.getActionCommands());
-        
-        assertFalse("The 'tests' list is empty", mailFilterConfiguration.getTests().isEmpty());
-        assertFalse("The 'actionCommands list is empty", mailFilterConfiguration.getActionCommands().isEmpty());
+    /**
+     * Gets the actionCommands
+     *
+     * @return The actionCommands
+     */
+    public List<ActionCommand> getActionCommands() {
+        return Collections.unmodifiableList(actionCommands);
     }
 }
