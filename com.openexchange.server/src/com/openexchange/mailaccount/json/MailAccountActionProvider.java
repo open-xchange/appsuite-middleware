@@ -51,7 +51,7 @@ package com.openexchange.mailaccount.json;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailAccountActionProvider} - A provider for actions of the mail account JSON interface.
@@ -69,7 +69,7 @@ public interface MailAccountActionProvider {
      * @return <code>true</code> if applicable; otherwise <code>false</code>
      * @throws OXException If check for applicability fails unexpectedly
      */
-    boolean isApplicableFor(ServerSession session) throws OXException;
+    boolean isApplicableFor(Session session) throws OXException;
 
     /**
      * Retrieves the appropriate <code>AJAXActionService</code> instance associated with given action identifier.
