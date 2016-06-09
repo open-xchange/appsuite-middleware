@@ -89,6 +89,7 @@ public class NewAction extends AbstractWriteAction {
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
         File file = request.getFile();
+        String originalFileName = file.getFileName();
 
         // Check folder
         if (Strings.isEmpty(file.getFolderId())) {
@@ -122,6 +123,9 @@ public class NewAction extends AbstractWriteAction {
         }
         if (null != newId && request.extendedResponse()) {
             File metadata = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
+            if (!metadata.getFileName().equals(originalFileName)) {
+                saveAction = "rename";
+            }
             result = result(metadata, (AJAXInfostoreRequest) request, saveAction);
         } else {
             result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
