@@ -54,22 +54,22 @@ import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.action.Redirect;
 
-
 /**
- * RedirectParserImpl
+ * {@link RedirectWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class RedirectWriterImpl implements ActionWriter {
 
-	@Override
+    @Override
     public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		final Redirect redirectAction = (Redirect)abstractAction;
+        final JSONObject jsonObj = new JSONObject();
+        final Redirect redirectAction = (Redirect) abstractAction;
 
-		jsonObj.put("id", name);
-		jsonObj.put("mail", redirectAction.getMail());
+        jsonObj.put("id", name);
+        jsonObj.put("to", redirectAction.getMail());
 
-		return jsonObj;
-	}
+        return jsonObj;
+    }
 }

@@ -75,8 +75,8 @@ public class HeaderParserImpl implements TestParser {
 		}
 
 		final JSONArray jsonValueArray = jsonObject.getJSONArray("values");
-		final String[] values = new String[jsonHeaderArray.length()];
-		for (int a = 0; a < headers.length; a++) {
+		final String[] values = new String[jsonValueArray.length()];
+		for (int a = 0; a < values.length; a++) {
 			values[a] = jsonValueArray.getString(a);
 		}
 
