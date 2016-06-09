@@ -89,6 +89,16 @@ public class InsertRequest extends AbstractMailFilterRequest<InsertResponse> {
     public InsertRequest(Rule rule) {
         this(rule, null, true);
     }
+    
+    /**
+     * Initialises a new {@link InsertRequest}.
+     * @param rule The {@link Rule} to insert
+     * @param failOnError The fail on error flag
+     */
+    public InsertRequest(Rule rule, boolean failOnError) {
+        this(rule, null, failOnError);
+    }
+    
 
     /**
      * default constructor.

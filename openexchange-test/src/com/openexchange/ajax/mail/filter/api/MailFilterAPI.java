@@ -73,6 +73,7 @@ import com.openexchange.ajax.mail.filter.api.response.InsertResponse;
 public class MailFilterAPI {
 
     private final AJAXClient client;
+    private boolean failOnError = true;
 
     /**
      * Initialises a new {@link MailFilterAPI}.
@@ -82,6 +83,24 @@ public class MailFilterAPI {
     public MailFilterAPI(AJAXClient client) {
         super();
         this.client = client;
+    }
+
+    /**
+     * Gets the failOnError
+     *
+     * @return The failOnError
+     */
+    public boolean isFailOnError() {
+        return failOnError;
+    }
+
+    /**
+     * Sets the failOnError
+     *
+     * @param failOnError The failOnError to set
+     */
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
     }
 
     /**
@@ -104,8 +123,11 @@ public class MailFilterAPI {
      * @throws Exception if the operation fails
      */
     public int createRule(Rule rule) throws Exception {
-        InsertRequest request = new InsertRequest(rule);
+        InsertRequest request = new InsertRequest(rule, failOnError);
         InsertResponse response = client.execute(request);
+        if (response.hasError()) {
+            throw response.getException();
+        }
         return response.getId();
     }
 
