@@ -54,26 +54,28 @@ import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
 
-
 /**
- * TrueWriterImpl
+ * {@link TrueWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class TrueWriterImpl implements TestWriter {
 
-	@Override
+    @Override
     public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		final TrueTest trueTest = (TrueTest)abstractTest;
-		final AbstractTest test = trueTest.getTest();
+        final JSONObject jsonObj = new JSONObject();
+        jsonObj.put("id", name);
 
-		final TestWriter testWriter = TestWriterFactory.getWriter(test.getName());
-		final JSONObject jsonTestObj = testWriter.writeTest(test.getName(), test);
+        final TrueTest trueTest = (TrueTest) abstractTest;
+        final AbstractTest test = trueTest.getTest();
 
-		jsonObj.put("id", name);
-		jsonObj.put("test", jsonTestObj);
+        if (test != null) {
+            final TestWriter testWriter = TestWriterFactory.getWriter(test.getName());
+            final JSONObject jsonTestObj = testWriter.writeTest(test.getName(), test);
+            jsonObj.put("test", jsonTestObj);
+        }
 
-		return jsonObj;
-	}
+        return jsonObj;
+    }
 }

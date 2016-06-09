@@ -18,6 +18,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 public abstract class AJAXTest {
 
@@ -56,6 +57,9 @@ public abstract class AJAXTest {
 
     private static final String LOGOUT_URL = "/ajax/login";
 
+    /**
+     * @deprecated Moved to {@link ConfigTest#testConfig()}
+     */
     @Test
     public void MailfilterconfigTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -66,6 +70,10 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated REMOVE. The list action is implicitly used in in {@link AbstractMailFilterTest#setUp()} and
+     *             {@link AbstractMailFilterTest#tearDown()}
+     */
     @Test
     public void MailfilterlistTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -76,6 +84,10 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated REMOVE. The delete action is implicitly used in {@link AbstractMailFilterTest#setUp()} and
+     *             {@link AbstractMailFilterTest#tearDown()}
+     */
     @Test
     public void MailfilterdeleteTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -89,7 +101,7 @@ public abstract class AJAXTest {
     }
 
     /**
-     * @deprecated Use {@link NewTest#testNewAllOf()} instead
+     * @deprecated Moved to {@link NewTest#testNewAllOf()}
      */
     @Test
     public void MailfilternewTest() throws MalformedURLException, IOException, SAXException, JSONException {
@@ -105,6 +117,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link VacationTest#testNewVacationWithoutSubject()}
+     */
     @Test
     public void MailfilterVacationTestWithOutSubject() throws MalformedURLException, IOException, SAXException, JSONException {
         WebconversationAndSessionID login;
@@ -195,6 +210,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Use {@link VacationTest#testNewVacation()} instead
+     */
     @Test
     public void MailfilternewVacationTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -215,6 +233,7 @@ public abstract class AJAXTest {
      * @throws IOException
      * @throws SAXException
      * @throws JSONException
+     * @deprecated Remove, identical with {@link #MailfilternewVacationTest()}
      */
     @Test
     public void MailfilternewVacation2Test() throws MalformedURLException, IOException, SAXException, JSONException {

@@ -116,9 +116,6 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setName("");
             expected.setActioncmds(new AbstractAction[] { new Move("default.INBOX/Spam"), new Stop() });
 
-            UserComparison userComparison = new UserComparison();
-            ContainsComparison containsComparison = new ContainsComparison();
-
             AddressTest userHeaderTest = new AddressTest(new UserComparison(), new String[] { "from" }, new String[] { "zitate.at" });
             HeaderTest headerTest = new HeaderTest(new ContainsComparison(), new String[] { "subject" }, new String[] { "Zitat des Tages" });
 
@@ -189,7 +186,7 @@ public class NewTest extends AbstractMailFilterTest {
             }
         }
     }
-
+    
     /**
      * Test adding multiple filters
      */
@@ -228,24 +225,5 @@ public class NewTest extends AbstractMailFilterTest {
         List<Rule> expectedRules = new ArrayList<>(2);
         Collections.addAll(expectedRules, rule1, rule2);
         getAndAssert(expectedRules);
-    }
-
-    /**
-     * Gets all rules and asserts with the expectedRules list
-     * 
-     * @param expectedRules The expected rules list
-     * @throws Exception if getting all rules fails
-     */
-    private void getAndAssert(List<Rule> expectedRules) throws Exception {
-        int expectedAmount = expectedRules.size();
-
-        // Get all rules
-        List<Rule> rules = mailFilterAPI.listRules();
-        assertEquals(expectedAmount + "rule(s) was/were expected", expectedAmount, rules.size());
-
-        // Assert rules
-        for (int index = 0; index < rules.size(); index++) {
-            assertRule(expectedRules.get(index), rules.get(index));
-        }
     }
 }
