@@ -56,9 +56,10 @@ import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
 
 /**
- * MoveParserImpl
- * 
+ * {@link VacationParserImpl}
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class VacationParserImpl implements ActionParser {
 
@@ -77,7 +78,7 @@ public class VacationParserImpl implements ActionParser {
         }
 
         String subject = null;
-        if (jsonObject.has("text")) {
+        if (jsonObject.has("subject")) {
             subject = jsonObject.getString("subject");
         }
 
