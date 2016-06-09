@@ -62,10 +62,12 @@ public enum ActionCommand {
     REJECT,
     STOP,
     VACATION,
+    NOTIFY,
     ADDFLAGS,
     REMOVEFLAGS,
     PGP,
     ADDHEADER,
     DELETEHEADER,
-    VARIABLES;
+    VARIABLES,
+    SET;
 }

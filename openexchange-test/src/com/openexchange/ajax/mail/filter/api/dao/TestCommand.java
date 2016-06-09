@@ -64,5 +64,7 @@ public enum TestCommand {
     FALSE,
     TRUE,
     HEADER,
-    ANYOF;
+    ANYOF,
+    CURRENTDATE,
+    BODY;
 }

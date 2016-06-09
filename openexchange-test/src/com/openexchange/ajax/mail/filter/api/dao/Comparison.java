@@ -62,5 +62,7 @@ public enum Comparison {
     user,
     detail,
     over,
-    under;
+    under,
+    ge,
+    le;
 }
