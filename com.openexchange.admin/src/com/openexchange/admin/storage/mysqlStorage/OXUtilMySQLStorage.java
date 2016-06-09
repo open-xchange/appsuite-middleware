@@ -94,6 +94,7 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.admin.tools.DatabaseTools;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageUnregisterListener;
@@ -2823,6 +2824,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     ResultSet result = null;
                     try {
                         con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
+
+                        if (!DatabaseTools.columnExists(con, "user","filestore_id")) {
+                            // This schema cannot hold users having an individual file storage assigned
+                        	return Collections.<Integer,Integer>emptyMap();
+                        }
+
                         stmt = con.prepareStatement("SELECT u.filestore_id, u.id FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id>0");
                         result = stmt.executeQuery();
 
