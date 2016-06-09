@@ -58,7 +58,6 @@ import static com.openexchange.file.storage.composition.internal.FileStorageTool
 import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer.fixIDs;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -89,7 +88,6 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageCapability;
-import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageETagProvider;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -117,10 +115,7 @@ import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.search.FileNameTerm;
-import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
-import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
@@ -831,7 +826,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             FolderID targetFolderID = new FolderID(document.getFolderId());
             String serviceID = targetFolderID.getService();
             String accountID = targetFolderID.getAccountId();
-            String sourceFolderId = document.getFolderId();
             document.setFolderId(targetFolderID.getFolderId());
             FileStorageFileAccess fileAccess = getFileAccess(serviceID, accountID);
             /*
@@ -842,46 +836,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 addWarnings(warnings);
                 if (false == ignoreWarnings) {
                     return null;
-                }
-            }
-            if (tryAddVersion) {
-                if (FileStorageCapabilityTools.supports(fileAccess, FileStorageCapability.FILE_VERSIONS)) {
-                    String name = document.getFileName() != null ? document.getFileName() : document.getTitle();
-                    SearchTerm<?> fileNameTerm = new FileNameTerm(name, true, false);
-                    SearchTerm<?> titleTerm = new TitleTerm(name, true, false);
-                    OrTerm searchTerm = new OrTerm(Arrays.asList(fileNameTerm, titleTerm));
-                    SearchIterator<File> it = search(Collections.singletonList(document.getFolderId()), searchTerm, Arrays.asList(Field.FOLDER_ID, Field.ID), null, null, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-                    if (it.hasNext()) {
-                        File existing = it.next();
-                        final DefaultFile metadata = new DefaultFile(getFileMetadata(existing.getId(), FileStorageFileAccess.CURRENT_VERSION));
-                        metadata.setFolderId(sourceFolderId);
-                        modifiedColumns.add(Field.ID);
-
-                        return save(metadata, data, 2116800000000L, modifiedColumns, ignoreWarnings, tryAddVersion, new TransactionAwareFileAccessDelegation<SaveResult>() {
-
-                            @Override
-                            protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
-                                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, metadata, modifiedColumns);
-                                IDTuple result;
-                                /*
-                                 * perform normal save operation
-                                 */
-                                Map<String, Object> meta = metadata.getMeta();
-                                meta.put("save_action", "new_version");
-                                metadata.setMeta(meta);
-                                result = access.saveDocument(metadata, data, 2116800000000L, modifiedColumns);
-                                metadata.setFolderId(result.getFolder());
-                                metadata.setId(result.getId());
-                                IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, metadata, comparedPermissions);
-                                SaveResult saveResult = new SaveResult();
-                                saveResult.setIDTuple(idTuple);
-                                saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
-                                return saveResult;
-                            }
-                        });
-                    }
-                } else {
-                    addWarning(FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(serviceID));
                 }
             }
 
@@ -977,9 +931,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         IDTuple idTuple = result.getIDTuple();
         FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
+        String newId = newFileID.toUniqueID();
         postEvent(FileStorageEventHelper.buildUpdateEvent(
-            session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
-        return newFileID.toUniqueID();
+            session, serviceID, accountID, newFolderID.toUniqueID(), newId, document.getFileName()));
+        return newId;
     }
 
 
@@ -1118,7 +1073,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     @Override
-    public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion, boolean ignoreWarnings, boolean tryAddVersion) throws OXException {
+    public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion, final boolean ignoreWarnings, final boolean tryAddVersion) throws OXException {
         return save(document, data, sequenceNumber, modifiedColumns, ignoreWarnings, tryAddVersion, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
@@ -1132,6 +1087,19 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                      */
                     result = ((FileStorageIgnorableVersionFileAccess) access).saveDocument(
                         document, data, sequenceNumber, modifiedColumns, ignoreVersion);
+                } else if (tryAddVersion && FileStorageFileAccess.NEW == document.getId()) {
+                    /*
+                     * try to add file version
+                     */
+                    if (!FileStorageTools.supports(access, FileStorageCapability.FILE_VERSIONS) || !FileStorageTools.supports(access, FileStorageCapability.AUTO_NEW_VERSION)) {
+                        addWarning(FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(access.getAccountAccess().getService().getId()));
+                    }
+                    FileStorageIgnorableVersionFileAccess fileAccess = (FileStorageIgnorableVersionFileAccess) access;
+                    com.openexchange.file.storage.SaveResult tmp = fileAccess.saveDocumentTryAddVersion(document, data, sequenceNumber, modifiedColumns);
+                    IDTuple idTuple = tmp.getIdTuple();
+                    String fullId = idTuple.getFolder() + "/" + idTuple.getId();
+                    addSaveAction(fullId, tmp.getSaveAction());
+                    result = idTuple;
                 } else {
                     /*
                      * perform normal save operation

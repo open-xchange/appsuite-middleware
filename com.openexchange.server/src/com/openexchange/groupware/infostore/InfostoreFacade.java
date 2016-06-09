@@ -57,6 +57,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.SaveResult;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
@@ -294,6 +295,18 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If save operation fails
      */
     IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException;
+
+    /**
+     * Saves given document meta data and binary content (if not <code>null</code>).
+     *
+     * @param document The document meta data
+     * @param data The optional binary content or <code>null</code>
+     * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+     * @param modifiedColumns The columns to modify
+     * @param session The session
+     * @throws OXException If save operation fails
+     */
+    SaveResult saveDocumentTryAddVersion(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
 
     /**
      * Removes all documents contained in specified folder.

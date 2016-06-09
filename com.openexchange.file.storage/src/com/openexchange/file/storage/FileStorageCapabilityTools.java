@@ -49,22 +49,6 @@
 
 package com.openexchange.file.storage;
 
-import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
-import com.openexchange.file.storage.FileStorageETagProvider;
-import com.openexchange.file.storage.FileStorageEfficientRetrieval;
-import com.openexchange.file.storage.FileStorageExtendedMetadata;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
-import com.openexchange.file.storage.FileStorageLockedFileAccess;
-import com.openexchange.file.storage.FileStoragePersistentIDs;
-import com.openexchange.file.storage.FileStorageRandomFileAccess;
-import com.openexchange.file.storage.FileStorageRangeFileAccess;
-import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageVersionedFileAccess;
-import com.openexchange.file.storage.ObjectPermissionAware;
-import com.openexchange.file.storage.ThumbnailAware;
-
-
 /**
  * {@link FileStorageCapabilityTools} - Utility class for file storage capabilities.
  *
@@ -174,6 +158,8 @@ public class FileStorageCapabilityTools {
             return FileStorageReadOnly.class.isInstance(fileAccess);
         case MAIL_ATTACHMENTS:
             return FileStorageMailAttachments.class.isInstance(fileAccess);
+            case AUTO_NEW_VERSION:
+                return FileStorageIgnorableVersionFileAccess.class.isInstance(fileAccess);
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return false;

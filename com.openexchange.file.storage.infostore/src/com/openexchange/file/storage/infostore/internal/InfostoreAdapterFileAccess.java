@@ -80,6 +80,7 @@ import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.SaveResult;
 import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.file.storage.infostore.InfostoreFile;
 import com.openexchange.file.storage.infostore.InfostoreSearchIterator;
@@ -396,6 +397,14 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
             checkUrl(file);
         }
         return getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), offset, session);
+    }
+
+    @Override
+    public SaveResult saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+        if (modifiedFields.contains(Field.URL)) {
+            checkUrl(file);
+        }
+        return getInfostore(file.getFolderId()).saveDocumentTryAddVersion(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), session);
     }
 
     @Override

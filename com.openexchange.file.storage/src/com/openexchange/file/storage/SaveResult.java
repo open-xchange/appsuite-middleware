@@ -49,41 +49,35 @@
 
 package com.openexchange.file.storage;
 
-import java.io.InputStream;
-import java.util.List;
-import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 
 /**
- * {@link FileStorageIgnorableVersionFileAccess} - Extends {@link FileStorageFileAccess} by a <tt>saveDocument()</tt> method that allows to
- * specify whether a document's version shall be set to a new value or not.
+ * {@link SaveResult}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.2
  */
-public interface FileStorageIgnorableVersionFileAccess extends FileStorageFileAccess {
+public final class SaveResult {
 
-    /**
-     * Save the file metadata and binary content.
-     * <p>
-     * It is allowed to specify whether that document's version shall be set to a new value or not
-     *
-     * @param file The metadata to save
-     * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
-     * @param modifiedFields The fields to save. All other fields will be ignored
-     * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
-     * @throws OXException If operation fails
-     */
-    IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields, boolean ignoreVersion) throws OXException;
+    public static final String NO_ACTION = "none";
+    public static final String RENAME = "rename";
+    public static final String NEW_VERSION = "new_version";
 
-    /**
-     * Save the file as new file version, if file exists in folder
-     * 
-     * @param file The metadata to save
-     * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
-     * @param modifiedFields The fields to save. All other fields will be ignored
-     * @return
-     * @throws OXException On error
-     */
-    SaveResult saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
+    private final IDTuple idTuple;
+    //    private final File file;
+    private final String saveAction;
+
+    public SaveResult(IDTuple idTuple, String saveAction) {
+        this.idTuple = idTuple;
+        this.saveAction = saveAction;
+    }
+
+    public IDTuple getIdTuple() {
+        return idTuple;
+    }
+
+    public String getSaveAction() {
+        return saveAction;
+    }
+
 }

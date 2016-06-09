@@ -60,6 +60,7 @@ import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.TryAddVersionAware;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
@@ -73,7 +74,7 @@ import com.openexchange.tx.TransactionAware;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
+public interface IDBasedFileAccess extends TransactionAware, WarningsAware, TryAddVersionAware {
 
     /**
      * Gets a value indicating whether a specific account supports one or more capabilities.
@@ -310,8 +311,8 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @param document The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass
-     *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
-     *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
+     *            {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
+     *            {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
      * @param ignoreWarnings <code>true</code> to force a file update even if warnings regarding potential data loss are detected, <code>false</code>, otherwise

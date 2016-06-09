@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.SaveResult;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -218,6 +219,12 @@ public class SimInfostoreFacade implements InfostoreFacade {
 
     @Override
     public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
+        // Nothing to do
+        return null;
+    }
+
+    @Override
+    public SaveResult saveDocumentTryAddVersion(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }

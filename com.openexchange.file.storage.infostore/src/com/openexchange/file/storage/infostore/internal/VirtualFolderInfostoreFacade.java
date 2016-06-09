@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.SaveResult;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -234,6 +235,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public SaveResult saveDocumentTryAddVersion(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
         throw virtualFolder();
     }
 
