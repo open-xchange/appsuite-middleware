@@ -52,8 +52,14 @@ package com.openexchange.ajax.mail.filter.tests.api;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Move;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.UserComparison;
+import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.AddressTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
@@ -85,6 +91,41 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setActioncmds(new AbstractAction[] { new Stop() });
             final IsComparison isComp = new IsComparison();
             expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
+
+            int id = mailFilterAPI.createRule(expected);
+            expected.setId(id);
+        }
+
+        // Get all rules
+        List<Rule> rules = mailFilterAPI.listRules();
+        assertEquals("Only one rule was expected", 1, rules.size());
+
+        // Assert rules
+        Rule actual = rules.get(0);
+        assertRule(expected, actual);
+
+        // Delete
+        mailFilterAPI.deleteRule(expected.getId());
+    }
+
+    /**
+     * Test the 'allof' test command  
+     */
+    public void testNewAllOf() throws Exception {
+        Rule expected;
+        {
+            expected = new Rule();
+            expected.setName("");
+            expected.setActioncmds(new AbstractAction[] { new Move("default.INBOX/Spam"), new Stop() });
+
+            UserComparison userComparison = new UserComparison();
+            ContainsComparison containsComparison = new ContainsComparison();
+            AddressTest userHeaderTest = new AddressTest(userComparison, new String[] { "from" }, new String[] { "zitate.at" });
+            HeaderTest headerTest = new HeaderTest(containsComparison, new String[] { "subject" }, new String[] { "Zitat des Tages" });
+            AbstractTest[] tests = new AbstractTest[] { userHeaderTest, headerTest };
+            AllOfTest allOfTest = new AllOfTest(tests);
+
+            expected.setTest(allOfTest);
 
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);

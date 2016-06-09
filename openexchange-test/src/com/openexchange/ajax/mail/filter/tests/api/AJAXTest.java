@@ -85,11 +85,15 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Use {@link NewTest#testNewAllOf()} instead 
+     */
     @Test
     public void MailfilternewTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
         try {
             final String test = "{\"active\":true,\"position\":0,\"flags\":[],\"actioncmds\":[{\"into\":\"default.INBOX/Spam\",\"id\":\"move\"},{\"id\":\"stop\"}],\"id\":0,\"test\":{\"tests\":[{\"headers\":[\"from\"],\"values\":[\"zitate.at\"],\"comparison\":\"user\",\"id\":\"address\"},{\"headers\":[\"subject\"],\"values\":[\"Zitat des Tages\"],\"comparison\":\"contains\",\"id\":\"header\"}],\"id\":\"allof\"},\"rulename\":\"\"}";
+            System.out.println(test);
             final String newid = mailfilternew(login, getHostname(), getUsername(), test, null);
             System.out.println("Rule created with newid: " + newid);
             mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
