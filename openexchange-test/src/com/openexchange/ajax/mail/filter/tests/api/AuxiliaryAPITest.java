@@ -47,53 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter;
+package com.openexchange.ajax.mail.filter.tests.api;
 
-import com.openexchange.ajax.mail.filter.tests.api.AdminListTest;
-import com.openexchange.ajax.mail.filter.tests.api.AuxiliaryAPITest;
-import com.openexchange.ajax.mail.filter.tests.api.ConfigTest;
-import com.openexchange.ajax.mail.filter.tests.api.NewTest;
-import com.openexchange.ajax.mail.filter.tests.api.PGPTest;
-import com.openexchange.ajax.mail.filter.tests.api.ReorderTest;
-import com.openexchange.ajax.mail.filter.tests.api.UpdateTest;
-import com.openexchange.ajax.mail.filter.tests.api.VacationTest;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug18490Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug31253Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug44363Test;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
- * {@link MailFilterTestSuite}
+ * {@link AuxiliaryAPITest}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class MailFilterTestSuite {
+public class AuxiliaryAPITest extends AbstractMailFilterTest {
 
     /**
-     * Initialises a new {@link MailFilterTestSuite}
+     * Initialises a new {@link AuxiliaryAPITest}.
+     * 
+     * @param name test case's name
      */
-    private MailFilterTestSuite() {
-        super();
+    public AuxiliaryAPITest(String name) {
+        super(name);
     }
 
     /**
-     * @return a test suite containing smoke tests.
+     * Tests the auxiliary API call 'deletescript'
      */
-    public static Test suite() {
-        TestSuite suite = new TestSuite("com.openexchange.ajax.mail.filter.MailFilterTestSuite");
-        suite.addTestSuite(AdminListTest.class);
-        suite.addTestSuite(Bug18490Test.class);
-        suite.addTestSuite(Bug31253Test.class);
-        suite.addTestSuite(Bug44363Test.class);
-        suite.addTestSuite(ConfigTest.class);
-        suite.addTestSuite(NewTest.class);
-        suite.addTestSuite(UpdateTest.class);
-        suite.addTestSuite(VacationTest.class);
-        suite.addTestSuite(PGPTest.class);
-        suite.addTestSuite(ReorderTest.class);
-        suite.addTestSuite(AuxiliaryAPITest.class);
-        return suite;
+    public void testDeleteScript() throws Exception {
+        //TODO
+        fail("Not implemented yet!");
+    }
+
+    /**
+     * Tests the auxiliary API call 'getscript'
+     */
+    public void testGetScript() throws Exception {
+        //TODO
+        fail("Not implemented yet!");
     }
 }
