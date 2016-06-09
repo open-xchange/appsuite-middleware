@@ -56,6 +56,7 @@ import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Move;
+import com.openexchange.ajax.mail.filter.api.dao.action.Redirect;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
@@ -186,7 +187,7 @@ public class NewTest extends AbstractMailFilterTest {
             }
         }
     }
-    
+
     /**
      * Test adding multiple filters
      */
@@ -225,5 +226,25 @@ public class NewTest extends AbstractMailFilterTest {
         List<Rule> expectedRules = new ArrayList<>(2);
         Collections.addAll(expectedRules, rule1, rule2);
         getAndAssert(expectedRules);
+    }
+
+    /**
+     * Test adding a filter with multiple headers and redirect action command
+     */
+    public void testNewWithHeadersAndRedirect() throws Exception {
+        final Rule expected;
+        {
+            expected = new Rule();
+            expected.setName("testNewWithHeadersAndRedirect");
+            expected.setActive(true);
+
+            expected.setActioncmds(new AbstractAction[] { new Redirect("xyz@bla.de") });
+            expected.setTest(new HeaderTest(new ContainsComparison(), new String[] { "X-Been-There", "X-MailingList" }, new String[] { "" }));
+
+            int id = mailFilterAPI.createRule(expected);
+            expected.setId(id);
+        }
+
+        getAndAssert(Collections.singletonList(expected));
     }
 }

@@ -180,6 +180,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link PGPTest#testNewPGPZero()}
+     */
     @Test
     public void MailfilternewPGPTestZero() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -192,6 +195,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link PGPTest#testNewPGPWithoutKey()}
+     */
     @Test
     public void MailfilternewPGPTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -204,6 +210,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link PGPTest#testNewPGPWithMultipleKeys()}
+     */
     @Test
     public void MailfilternewPGP2KeysTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -254,6 +263,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link NewTest#testNewWithHeadersAndRedirect()}
+     */
     @Test
     public void MailfilternewVacation3Test() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -377,6 +389,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Obsolete
+     */
     @Test
     public void MailfilternewTestWithoutPosition() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
