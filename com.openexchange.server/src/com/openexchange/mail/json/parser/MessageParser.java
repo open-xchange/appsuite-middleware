@@ -947,7 +947,7 @@ public final class MessageParser {
             if (length == 0) {
                 return EMPTY_ADDRS;
             }
-            return parseAdressArray(jAddresses, length);
+            return parseAdressArray(jAddresses, length, true);
         } catch (JSONException e) {
             LOG.error("", e);
             /*
@@ -965,20 +965,21 @@ public final class MessageParser {
      * </pre>
      *
      * @param jsonArray The JSON array
+     * @param strict boolean flag to enable/disable strict RFC822 parsing
      * @return Parsed address list combined in a {@link String} object
      * @throws JSONException If a JSON error occurs
      * @throws AddressException If constructing an address fails
      */
-    private static InternetAddress[] parseAdressArray(JSONArray jsonArray, int length) throws JSONException, AddressException {
+    public static InternetAddress[] parseAdressArray(JSONArray jsonArray, int length, boolean strict) throws JSONException, AddressException {
         List<InternetAddress> addresses = new ArrayList<InternetAddress>(length);
         for (int i = 0; i < length; i++) {
             JSONArray persAndAddr = jsonArray.getJSONArray(i);
             int pLen = persAndAddr.length();
             if (pLen != 0) {
                 if (1 == pLen) {
-                    addresses.add(new QuotedInternetAddress(persAndAddr.getString(0)));
+                    addresses.add(new QuotedInternetAddress(persAndAddr.getString(0), strict));
                 } else {
-                    String personal = persAndAddr.getString(0);
+                    String personal = persAndAddr.optString(0, null);
                     boolean hasPersonal = (personal != null && !"null".equals(personal));
                     if (hasPersonal) {
                         try {
@@ -987,14 +988,14 @@ public final class MessageParser {
                             // Cannot occur
                         }
                     } else {
-                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(1)));
+                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), strict));
                     }
                 }
             }
         }
         return addresses.toArray(new InternetAddress[addresses.size()]);
     }
-
+    
     private static InternetAddress getEmailAddress(String addrStr) {
         if (com.openexchange.java.Strings.isEmpty(addrStr)) {
             return null;
