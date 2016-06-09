@@ -148,6 +148,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link VacationTest#testNewVacationPlainAtTheEnd()}
+     */
     @Test
     public void MailfilternewVacationPlainAtTheEndTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -161,6 +164,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated REMOVE. Identical with {@link #MailfilternewVacationDeactiveAtTheEndTest()}
+     */
     @Test
     public void MailfilternewVacationPlainInBetweenTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();

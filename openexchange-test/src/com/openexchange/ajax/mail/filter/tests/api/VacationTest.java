@@ -70,6 +70,7 @@ public class VacationTest extends AbstractMailFilterTest {
      */
     public VacationTest(String name) {
         super(name);
+        System.out.println("{\"active\":true,\"position\":0,\"text\":\"if true \\r\\n{\\r\\n    vacation :days 13 :addresses [ \\\"root@localhost\\\" , \\\"billg@microsoft.com\\\" ] :mime :subject \\\"Betreff\\\" \\\"Text\\r\\nText\\\" ;\\r\\n}\\r\\n\",\"errormsg\":\"\",\"flags\":[\"vacation\"],\"id\":3,\"rulename\":\"Vacation Notice\"}");
     }
 
     /**
@@ -127,6 +128,28 @@ public class VacationTest extends AbstractMailFilterTest {
             expected.setFlags(new String[] { "vacation" });
 
             Vacation vacation = new Vacation(7, new String[] { client.getValues().getDefaultAddress() }, null, "I'm out of office");
+            expected.setActioncmds(new AbstractAction[] { vacation });
+            expected.setTest(new TrueTest());
+
+            int id = mailFilterAPI.createRule(expected);
+            expected.setId(id);
+        }
+
+        getAndAssert(Collections.singletonList(expected));
+    }
+
+    /**
+     * Test a vacation notice that has plain text and sieve keywords in the 'text' tag
+     */
+    public void testNewVacationPlainAtTheEnd() throws Exception {
+        Rule expected;
+        {
+            expected = new Rule();
+            expected.setName("Vacation Notice");
+            expected.setActive(true);
+            expected.setFlags(new String[] { "vacation" });
+
+            Vacation vacation = new Vacation(7, new String[] { client.getValues().getDefaultAddress() }, null, "if true \r\n{\r\n    vacation :days 13 :addresses [ \"root@localhost\" , \"billg@microsoft.com\" ] :mime :subject \"Betreff\" \"Text\r\nText\" ;\r\n}\r\n");
             expected.setActioncmds(new AbstractAction[] { vacation });
             expected.setTest(new TrueTest());
 
