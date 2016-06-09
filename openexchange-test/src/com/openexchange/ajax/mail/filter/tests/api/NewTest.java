@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
@@ -96,20 +98,12 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setId(id);
         }
 
-        // Get all rules
-        List<Rule> rules = mailFilterAPI.listRules();
-        assertEquals("Only one rule was expected", 1, rules.size());
-
-        // Assert rules
-        Rule actual = rules.get(0);
-        assertRule(expected, actual);
-
-        // Delete
-        mailFilterAPI.deleteRule(expected.getId());
+        // Assert
+        getAndAssert(Collections.singletonList(expected));
     }
 
     /**
-     * Test the 'allof' test command  
+     * Test the 'allof' test command
      */
     public void testNewAllOf() throws Exception {
         Rule expected;
@@ -120,8 +114,10 @@ public class NewTest extends AbstractMailFilterTest {
 
             UserComparison userComparison = new UserComparison();
             ContainsComparison containsComparison = new ContainsComparison();
+
             AddressTest userHeaderTest = new AddressTest(userComparison, new String[] { "from" }, new String[] { "zitate.at" });
             HeaderTest headerTest = new HeaderTest(containsComparison, new String[] { "subject" }, new String[] { "Zitat des Tages" });
+
             AbstractTest[] tests = new AbstractTest[] { userHeaderTest, headerTest };
             AllOfTest allOfTest = new AllOfTest(tests);
 
@@ -131,16 +127,8 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setId(id);
         }
 
-        // Get all rules
-        List<Rule> rules = mailFilterAPI.listRules();
-        assertEquals("Only one rule was expected", 1, rules.size());
-
-        // Assert rules
-        Rule actual = rules.get(0);
-        assertRule(expected, actual);
-
-        // Delete
-        mailFilterAPI.deleteRule(expected.getId());
+        // Assert
+        getAndAssert(Collections.singletonList(expected));
     }
 
     /**
@@ -177,20 +165,28 @@ public class NewTest extends AbstractMailFilterTest {
             rule2.setPosition(1);
         }
 
-        // List rules
+        // Assert
+        List<Rule> expectedRules = new ArrayList<>(2);
+        Collections.addAll(expectedRules, rule1, rule2);
+        getAndAssert(expectedRules);
+    }
+
+    /**
+     * Gets all rules and asserts with the expectedRules list
+     * 
+     * @param expectedRules The expected rules list
+     * @throws Exception if getting all rules fails
+     */
+    private void getAndAssert(List<Rule> expectedRules) throws Exception {
+        int expectedAmount = expectedRules.size();
+
+        // Get all rules
         List<Rule> rules = mailFilterAPI.listRules();
-        assertEquals("Two rules were expected", 2, rules.size());
+        assertEquals(expectedAmount + "rule(s) was/were expected", expectedAmount, rules.size());
 
-        // Assert first
-        Rule actual1 = rules.get(0);
-        assertRule(rule1, actual1);
-
-        // Assert second
-        Rule actual2 = rules.get(1);
-        assertRule(rule2, actual2);
-
-        // Delete both rules
-        mailFilterAPI.deleteRule(actual1.getId());
-        mailFilterAPI.deleteRule(rule2.getId());
+        // Assert rules
+        for (int index = 0; index < rules.size(); index++) {
+            assertRule(expectedRules.get(index), rules.get(index));
+        }
     }
 }
