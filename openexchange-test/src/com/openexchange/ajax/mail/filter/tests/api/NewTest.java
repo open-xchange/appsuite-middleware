@@ -67,6 +67,7 @@ import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.SizeTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link NewTest}. Tests for the PUT /ajax/mailfilter?action=new API call
@@ -118,8 +119,8 @@ public class NewTest extends AbstractMailFilterTest {
             UserComparison userComparison = new UserComparison();
             ContainsComparison containsComparison = new ContainsComparison();
 
-            AddressTest userHeaderTest = new AddressTest(userComparison, new String[] { "from" }, new String[] { "zitate.at" });
-            HeaderTest headerTest = new HeaderTest(containsComparison, new String[] { "subject" }, new String[] { "Zitat des Tages" });
+            AddressTest userHeaderTest = new AddressTest(new UserComparison(), new String[] { "from" }, new String[] { "zitate.at" });
+            HeaderTest headerTest = new HeaderTest(new ContainsComparison(), new String[] { "subject" }, new String[] { "Zitat des Tages" });
 
             AbstractTest[] tests = new AbstractTest[] { userHeaderTest, headerTest };
             AllOfTest allOfTest = new AllOfTest(tests);
@@ -147,12 +148,46 @@ public class NewTest extends AbstractMailFilterTest {
             SizeTest sizeTest = new SizeTest(new SizeComparison(SizeComparison.OVER, 88));
             expected.setTest(sizeTest);
             expected.setActive(true);
-            
+
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);
         }
-        
+
         getAndAssert(Collections.singletonList(expected));
+    }
+
+    /**
+     * Test the error case of missing headers
+     */
+    public void testNewMissingHeaders() throws Exception {
+        Rule expected = new Rule();
+        expected.setName("");
+        expected.setActioncmds(new AbstractAction[] { new Move("INBOX/Spam"), new Stop() });
+
+        AddressTest userHeaderTest = new AddressTest(new UserComparison(), null, new String[] { "zitate.at" });
+        HeaderTest headerTest = new HeaderTest(new ContainsComparison(), new String[] { "subject" }, new String[] { "Zitat des Tages" });
+
+        AbstractTest[] tests = new AbstractTest[] { userHeaderTest, headerTest };
+        AllOfTest allOfTest = new AllOfTest(tests);
+
+        expected.setTest(allOfTest);
+
+        int id = -1;
+        boolean exceptionThrown = true;
+        try {
+            mailFilterAPI.setFailOnError(false);
+            id = mailFilterAPI.createRule(expected);
+            exceptionThrown = false;
+            fail("Expected an exception");
+        } catch (Exception e) {
+            assertTrue(e instanceof OXException);
+            OXException oxe = (OXException) e;
+            assertEquals("Exception while parsing JSON: \"Error while reading command address. The parameter 'headers' is missing: : JSONObject[\"headers\"] not found.\".", oxe.getPlainLogMessage());
+        } finally {
+            if (!exceptionThrown) {
+                mailFilterAPI.deleteRule(id);
+            }
+        }
     }
 
     /**
