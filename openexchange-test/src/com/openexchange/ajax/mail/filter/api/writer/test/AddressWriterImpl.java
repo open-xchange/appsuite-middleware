@@ -58,7 +58,6 @@ import com.openexchange.ajax.mail.filter.api.dao.test.AddressTest;
 import com.openexchange.ajax.mail.filter.api.writer.comparison.ComparisonWriter;
 import com.openexchange.ajax.mail.filter.api.writer.comparison.ComparisonWriterFactory;
 
-
 /**
  * AddressWriterImpl
  *
@@ -66,35 +65,39 @@ import com.openexchange.ajax.mail.filter.api.writer.comparison.ComparisonWriterF
  */
 public class AddressWriterImpl implements TestWriter {
 
-	@Override
+    @Override
     public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		final AddressTest addressTest = (AddressTest)abstractTest;
+        final JSONObject jsonObj = new JSONObject();
+        final AddressTest addressTest = (AddressTest) abstractTest;
 
-		jsonObj.put("id", name);
-		
-		final AbstractComparison abstractComp = addressTest.getComparison();
+        jsonObj.put("id", name);
+
+        final AbstractComparison abstractComp = addressTest.getComparison();
         final String comparisonName = abstractComp.getName();
         final ComparisonWriter compWriter = ComparisonWriterFactory.getWriter(comparisonName);
         compWriter.writeComparison(comparisonName, abstractComp, jsonObj);
 
-		final String[] headers = addressTest.getHeaders();
-		final String[] values = addressTest.getValues();
+        final String[] headers = addressTest.getHeaders();
+        final String[] values = addressTest.getValues();
 
-		final JSONArray jsonHeaderArray = new JSONArray();
-		for (int a = 0; a < headers.length; a++) {
-			jsonHeaderArray.put(headers[a]);
-		}
+        if (headers != null) {
+            final JSONArray jsonHeaderArray = new JSONArray();
+            for (int a = 0; a < headers.length; a++) {
+                jsonHeaderArray.put(headers[a]);
+            }
 
-		jsonObj.put("headers", jsonHeaderArray);
+            jsonObj.put("headers", jsonHeaderArray);
+        }
 
-		final JSONArray jsonValueArray = new JSONArray();
-		for (int a = 0; a < values.length; a++) {
-			jsonValueArray.put(values[a]);
-		}
+        if (values != null) {
+            final JSONArray jsonValueArray = new JSONArray();
+            for (int a = 0; a < values.length; a++) {
+                jsonValueArray.put(values[a]);
+            }
 
-		jsonObj.put("values", jsonValueArray);
+            jsonObj.put("values", jsonValueArray);
+        }
 
-		return jsonObj;
-	}
+        return jsonObj;
+    }
 }
