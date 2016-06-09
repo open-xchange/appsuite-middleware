@@ -27,6 +27,7 @@
         <copy todir="${destDir}/${i18nDir}">
             <fileset dir="${basedir}">
                 <include name="backend.${language}.po"/>
+                <include name="client-onboarding-scenarios.${language}.po"/>
             </fileset>
         </copy>
     </target>
