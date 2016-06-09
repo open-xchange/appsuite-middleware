@@ -54,15 +54,18 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Move;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.SizeComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.UserComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AddressTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.SizeTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
@@ -82,7 +85,7 @@ public class NewTest extends AbstractMailFilterTest {
     }
 
     /**
-     * Test a simple creation life-cycle of a rule
+     * Test a simple creation of a rule
      */
     public void testNew() throws Exception {
         // Create the rule
@@ -128,6 +131,27 @@ public class NewTest extends AbstractMailFilterTest {
         }
 
         // Assert
+        getAndAssert(Collections.singletonList(expected));
+    }
+
+    /**
+     * Test the 'size' test command
+     */
+    public void testNewSize() throws Exception {
+        Rule expected;
+        {
+            expected = new Rule();
+            expected.setName("sizeTest");
+            expected.setActioncmds(new AbstractAction[] { new Keep() });
+
+            SizeTest sizeTest = new SizeTest(new SizeComparison(SizeComparison.OVER, 88));
+            expected.setTest(sizeTest);
+            expected.setActive(true);
+            
+            int id = mailFilterAPI.createRule(expected);
+            expected.setId(id);
+        }
+        
         getAndAssert(Collections.singletonList(expected));
     }
 
