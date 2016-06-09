@@ -68,6 +68,7 @@ import com.openexchange.ajax.mail.filter.api.writer.comparison.IsWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.comparison.MatchesWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.comparison.RegexWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.comparison.SizeComparisonWriterImpl;
+import com.openexchange.ajax.mail.filter.api.writer.comparison.UserComparisonWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.test.AddressWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.test.AllOfWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.test.AnyOfWriterImpl;
@@ -178,6 +179,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ComparisonWriterFactory.addWriter("contains", new ContainsWriterImpl());
         ComparisonWriterFactory.addWriter("regex", new RegexWriterImpl());
         ComparisonWriterFactory.addWriter("size", new SizeComparisonWriterImpl());
+        ComparisonWriterFactory.addWriter("user", new UserComparisonWriterImpl());
 
         // Start fresh
         mailFilterAPI.purge();
