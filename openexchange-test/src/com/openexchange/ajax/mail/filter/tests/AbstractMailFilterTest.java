@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.tests;
 
 import static org.junit.Assert.assertArrayEquals;
+import java.util.List;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
@@ -194,12 +195,31 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     }
 
     /**
+     * Gets all rules and asserts with the expectedRules list
+     * 
+     * @param expectedRules The expected rules list
+     * @throws Exception if getting all rules fails
+     */
+    protected void getAndAssert(List<Rule> expectedRules) throws Exception {
+        int expectedAmount = expectedRules.size();
+
+        // Get all rules
+        List<Rule> rules = mailFilterAPI.listRules();
+        assertEquals(expectedAmount + " rule(s) was/were expected", expectedAmount, rules.size());
+
+        // Assert rules
+        for (int index = 0; index < rules.size(); index++) {
+            assertRule(expectedRules.get(index), rules.get(index));
+        }
+    }
+
+    /**
      * Asserts that the expected {@link Rule} is equal the actual {@link Rule}
      * 
      * @param expected The expected {@link Rule}
      * @param actual The actual {@link Rule}
      */
-    public void assertRule(Rule expected, Rule actual) {
+    protected void assertRule(Rule expected, Rule actual) {
         assertEquals("The 'id' attribute differs", expected.getId(), actual.getId());
         assertEquals("The 'name' attribute differs", expected.getName(), actual.getName());
         assertEquals("The 'active' attribute differs", expected.isActive(), actual.isActive());
