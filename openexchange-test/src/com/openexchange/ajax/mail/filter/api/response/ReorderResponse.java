@@ -47,45 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.request;
+package com.openexchange.ajax.mail.filter.api.response;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.writer.MailFilterWriter;
 
 /**
+ * {@link ReorderResponse}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractMailFilterRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class ReorderResponse extends AbstractAJAXResponse {
 
     /**
-     * URL of the calendar AJAX interface.
+     * Initialises a new {@link ReorderResponse}.
+     * 
+     * @param response The response
      */
-    public static final String URL = "/ajax/mailfilter";
-
-    protected AbstractMailFilterRequest() {
-        super();
+    public ReorderResponse(Response response) {
+        super(response);
     }
 
-    @Override
-    public String getServletPath() {
-        return URL;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    protected JSONObject convert(final Rule rule) throws JSONException {
-        final JSONObject jsonObj = new JSONObject();
-        final MailFilterWriter mailFilterWriter = new MailFilterWriter();
-        mailFilterWriter.writeMailFilter(rule, jsonObj);
-        return jsonObj;
-    }
 }

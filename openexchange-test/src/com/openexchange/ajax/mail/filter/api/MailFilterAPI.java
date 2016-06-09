@@ -60,6 +60,7 @@ import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteScriptRequest;
 import com.openexchange.ajax.mail.filter.api.request.InsertRequest;
+import com.openexchange.ajax.mail.filter.api.request.ReorderRequest;
 import com.openexchange.ajax.mail.filter.api.request.UpdateRequest;
 import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
@@ -139,6 +140,17 @@ public class MailFilterAPI {
      */
     public void updateRule(Rule rule) throws Exception {
         UpdateRequest request = new UpdateRequest(rule);
+        client.execute(request);
+    }
+
+    /**
+     * Reorders the mail filters with the specified identifiers
+     * 
+     * @param ids The identifiers of the mail filters to reorder
+     * @throws Exception if the operation fails
+     */
+    public void reorder(int[] ids) throws Exception {
+        ReorderRequest request = new ReorderRequest(ids);
         client.execute(request);
     }
 

@@ -47,45 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.request;
+package com.openexchange.ajax.mail.filter.api.parser;
 
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.writer.MailFilterWriter;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.mail.filter.api.response.ReorderResponse;
 
 /**
+ * {@link ReorderParser}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractMailFilterRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class ReorderParser extends AbstractAJAXParser<ReorderResponse> {
 
     /**
-     * URL of the calendar AJAX interface.
+     * Initialises a new {@link ReorderParser}.
      */
-    public static final String URL = "/ajax/mailfilter";
-
-    protected AbstractMailFilterRequest() {
-        super();
+    public ReorderParser(boolean failOnError) {
+        super(failOnError);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
     @Override
-    public String getServletPath() {
-        return URL;
+    protected ReorderResponse createResponse(Response response) throws JSONException {
+        return new ReorderResponse(response);
     }
 
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    protected JSONObject convert(final Rule rule) throws JSONException {
-        final JSONObject jsonObj = new JSONObject();
-        final MailFilterWriter mailFilterWriter = new MailFilterWriter();
-        mailFilterWriter.writeMailFilter(rule, jsonObj);
-        return jsonObj;
-    }
 }

@@ -49,43 +49,81 @@
 
 package com.openexchange.ajax.mail.filter.api.request;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.writer.MailFilterWriter;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.mail.filter.api.parser.ReorderParser;
+import com.openexchange.ajax.mail.filter.api.response.ReorderResponse;
 
 /**
+ * {@link ReorderRequest}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractMailFilterRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class ReorderRequest extends AbstractMailFilterRequest<ReorderResponse> {
+
+    private int[] ids;
+    private boolean failOnError = true;
+    private String username;
 
     /**
-     * URL of the calendar AJAX interface.
+     * Initialises a new {@link ReorderRequest}.
      */
-    public static final String URL = "/ajax/mailfilter";
-
-    protected AbstractMailFilterRequest() {
+    public ReorderRequest(int[] ids) {
         super();
+        this.ids = ids;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
     @Override
-    public String getServletPath() {
-        return URL;
+    public Method getMethod() {
+        return Method.PUT;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
     @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
+    public Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> parameters = new LinkedList<Parameter>();
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "reorder"));
+        if (username != null) {
+            parameters.add(new Parameter("username", username));
+        }
+        return parameters.toArray(new Parameter[parameters.size()]);
     }
 
-    protected JSONObject convert(final Rule rule) throws JSONException {
-        final JSONObject jsonObj = new JSONObject();
-        final MailFilterWriter mailFilterWriter = new MailFilterWriter();
-        mailFilterWriter.writeMailFilter(rule, jsonObj);
-        return jsonObj;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
+    public AbstractAJAXParser<? extends ReorderResponse> getParser() {
+        return new ReorderParser(failOnError);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        JSONArray array = new JSONArray(ids.length);
+        for (int i : ids) {
+            array.put(i);
+        }
+        return array;
     }
 }
