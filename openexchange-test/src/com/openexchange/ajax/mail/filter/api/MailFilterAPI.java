@@ -58,6 +58,7 @@ import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
+import com.openexchange.ajax.mail.filter.api.request.DeleteScriptRequest;
 import com.openexchange.ajax.mail.filter.api.request.InsertRequest;
 import com.openexchange.ajax.mail.filter.api.request.UpdateRequest;
 import com.openexchange.ajax.mail.filter.api.response.AllResponse;
@@ -162,6 +163,18 @@ public class MailFilterAPI {
             deleteRule(r.getId());
         }
     }
+
+    /**
+     * Deletes the entire script of the user
+     * 
+     * @throws Exception if the operation fails
+     */
+    public void deleteScript() throws Exception {
+        DeleteScriptRequest request = new DeleteScriptRequest();
+        client.execute(request);
+    }
+
+    ///////////////////////////////// HELPERS ///////////////////////////////////
 
     /**
      * Executes the specified {@link AllRequest} and returns the list with rules
