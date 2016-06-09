@@ -51,28 +51,33 @@ package com.openexchange.ajax.mail.filter.api.writer.test;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-
+import com.openexchange.ajax.mail.filter.api.dao.test.SizeTest;
+import com.openexchange.ajax.mail.filter.api.writer.comparison.ComparisonWriter;
+import com.openexchange.ajax.mail.filter.api.writer.comparison.ComparisonWriterFactory;
 
 /**
- * SizeTestWriterImpl
+ * {@link SizeTestWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SizeTestWriterImpl implements TestWriter {
 
-	@Override
+    @Override
     public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
+        final JSONObject jsonObj = new JSONObject();
 
+        SizeTest sizeTest = (SizeTest) abstractTest;
+        jsonObj.put("id", name);
 
-		// TODO: write comparison
-		//final ComparisonWriter comparisonWriter = ComparisonWriterFactory.getWriter(test.getName());
-		//final JSONObject jsonTestObj = testWriter.writeTest(test.getName(), test);
+        AbstractComparison abstractComp = sizeTest.getComparison();
+        String comparisonName = abstractComp.getName();
 
-		//jsonObj.put("name", name);
-		//jsonObj.put("test", jsonTestObj);
+        ComparisonWriter compWriter = ComparisonWriterFactory.getWriter(comparisonName);
+        compWriter.writeComparison(name, abstractComp, jsonObj);
 
-		return jsonObj;
-	}
+        return jsonObj;
+    }
 }

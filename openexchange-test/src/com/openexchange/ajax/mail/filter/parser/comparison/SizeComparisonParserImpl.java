@@ -71,12 +71,12 @@ public class SizeComparisonParserImpl implements ComparisonParser {
 
 		int comperator = 0;
 
-		if (comperatorAsString.equals("higher")) {
-			comperator = SizeComparison.HIGHER;
+		if (comperatorAsString.equals("over")) {
+			comperator = SizeComparison.OVER;
 		} else {
-			comperator = SizeComparison.LOWER;
+			comperator = SizeComparison.UNDER;
 		}
 
-		return new SizeComparison(size, comperator);
+		return new SizeComparison(comperator, size);
 	}
 }

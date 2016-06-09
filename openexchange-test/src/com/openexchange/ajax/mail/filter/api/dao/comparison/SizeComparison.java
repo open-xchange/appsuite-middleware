@@ -58,9 +58,9 @@ public class SizeComparison extends AbstractComparison {
 
 	public static final String SIZE = "size";
 
-	public static final int HIGHER = 1;
+	public static final int OVER = 1;
 
-	public static final int LOWER = 2;
+	public static final int UNDER = 2;
 
 	protected int comparator;
 

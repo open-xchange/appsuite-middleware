@@ -54,28 +54,27 @@ import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.SizeComparison;
 
-
 /**
  * SizeWriterImpl
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SizeComparisonWriterImpl implements ComparisonWriter {
 
-	@Override
+    @Override
     public JSONObject writeComparison(final String name, final AbstractComparison abstractComparison, final JSONObject jsonObj) throws JSONException {
-		final SizeComparison sizeComparison = (SizeComparison)abstractComparison;
+        final SizeComparison sizeComparison = (SizeComparison) abstractComparison;
 
-		jsonObj.put("comparison", name);
-		jsonObj.put("size", sizeComparison.getSize());
+        jsonObj.put("size", sizeComparison.getSize());
 
-		final int comparator = sizeComparison.getComparator();
-		if (comparator == SizeComparison.HIGHER) {
-			jsonObj.put("comperator", "higher");
-		} else {
-			jsonObj.put("comperator", "lower");
-		}
+        final int comparator = sizeComparison.getComparator();
+        if (comparator == SizeComparison.OVER) {
+            jsonObj.put("comparison", "over");
+        } else {
+            jsonObj.put("comparison", "under");
+        }
 
-		return jsonObj;
-	}
+        return jsonObj;
+    }
 }
