@@ -59,6 +59,7 @@ import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.writer.action.ActionWriterFactory;
 import com.openexchange.ajax.mail.filter.api.writer.action.AddFlagsWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.action.MoveWriterImpl;
+import com.openexchange.ajax.mail.filter.api.writer.action.PGPWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.action.RedirectWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.action.RejectWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.action.SimpleActionWriterImpl;
@@ -82,6 +83,7 @@ import com.openexchange.ajax.mail.filter.api.writer.test.TrueWriterImpl;
 import com.openexchange.ajax.mail.filter.parser.action.ActionParserFactory;
 import com.openexchange.ajax.mail.filter.parser.action.AddFlagsParserImpl;
 import com.openexchange.ajax.mail.filter.parser.action.MoveParserImpl;
+import com.openexchange.ajax.mail.filter.parser.action.PGPParserImpl;
 import com.openexchange.ajax.mail.filter.parser.action.RedirectParserImpl;
 import com.openexchange.ajax.mail.filter.parser.action.RejectParserImpl;
 import com.openexchange.ajax.mail.filter.parser.action.SimpleActionParserImpl;
@@ -140,6 +142,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ActionParserFactory.addParser("reject", new RejectParserImpl());
         ActionParserFactory.addParser("stop", new SimpleActionParserImpl());
         ActionParserFactory.addParser("vacation", new VacationParserImpl());
+        ActionParserFactory.addParser("pgp", new PGPParserImpl());
 
         TestParserFactory.addParser("address", new AddressParserImpl());
         TestParserFactory.addParser("allof", new AllOfParserImpl());
@@ -165,6 +168,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ActionWriterFactory.addWriter("reject", new RejectWriterImpl());
         ActionWriterFactory.addWriter("stop", new SimpleActionWriterImpl());
         ActionWriterFactory.addWriter("vacation", new VacationWriterImpl());
+        ActionWriterFactory.addWriter("pgp", new PGPWriterImpl());
 
         TestWriterFactory.addWriter("address", new AddressWriterImpl());
         TestWriterFactory.addWriter("allof", new AllOfWriterImpl());
