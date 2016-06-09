@@ -1049,6 +1049,38 @@ public class DatabaseImpl extends DBService {
         return retval;
     }
 
+    /**
+     * Gets the total size of all document versions in a folder.
+     *
+     * @param context The context
+     * @param folderId The folder identifier
+     * @return The total size of all document versions in a folder
+     */
+    public long getTotalSize(Context context, long folderId) throws OXException {
+        String sql = new StringBuilder()
+            .append("SELECT SUM(infostore_document.file_size) ")
+            .append("FROM infostore LEFT JOIN infostore_document ")
+            .append("ON infostore.cid=infostore_document.cid AND infostore.id=infostore_document.infostore_id ")
+            .append("WHERE infostore.cid=? AND infostore.folder_id=?;")
+        .toString();
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            connection = getReadConnection(context);
+            stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, context.getContextId());
+            stmt.setLong(2, folderId);
+            result = stmt.executeQuery();
+            return result.next() ? result.getLong(1) : 0L;
+        } catch (SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } finally {
+            close(stmt, result);
+            releaseReadConnection(context, connection);
+        }
+    }
+
     public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user) throws OXException {
         boolean retval = true;
 

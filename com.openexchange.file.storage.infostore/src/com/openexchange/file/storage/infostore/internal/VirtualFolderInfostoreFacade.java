@@ -79,6 +79,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public long getTotalSize(long folderId, ServerSession session) throws OXException {
+        return 0;
+    }
+
+    @Override
     public boolean exists(final int id, final int version, ServerSession session) {
         return false;
     }

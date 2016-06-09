@@ -49,11 +49,10 @@
 
 package com.openexchange.groupware.infostore.facade.impl;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.*;
 import static com.openexchange.tools.arrays.Arrays.contains;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -168,8 +167,6 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 
 /**
  * {@link InfostoreFacadeImpl}
@@ -2093,6 +2090,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             onlyOwn = true;
         }
         return db.countDocuments(folderId, onlyOwn, session.getContext(), user);
+    }
+
+    @Override
+    public long getTotalSize(long folderId, ServerSession session) throws OXException {
+        return db.getTotalSize(session.getContext(), folderId);
     }
 
     @Override

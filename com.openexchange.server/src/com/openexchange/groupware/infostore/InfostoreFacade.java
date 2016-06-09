@@ -531,6 +531,15 @@ public interface InfostoreFacade extends TransactionAware {
     int countDocuments(long folderId, ServerSession session) throws OXException;
 
     /**
+     * Gets the total size of all document versions in a folder.
+     *
+     * @param folderId The folder identifier
+     * @param session The associated session
+     * @return The total size of all document versions in a folder
+     */
+    long getTotalSize(long folderId, ServerSession session) throws OXException;
+
+    /**
      * Signals if denoted folder contains documents not owned by specified user.
      *
      * @param folderId The folder identifier
@@ -552,10 +561,10 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Performs necessary clean-up operations if specified user has been deleted.
-     * 
+     *
      * Moves all shared files to the user specified by <code>destUserID</code>. If <code>destUserID</code> set to null the context admin will be used instead.
      * If set to 0 or below all shared files will be deleted instead.
-     * 
+     *
      * @param userId The user identifier
      * @param context The context
      * @param destUserID The user id the public files will be assigned to.

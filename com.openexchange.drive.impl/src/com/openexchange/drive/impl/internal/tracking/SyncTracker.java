@@ -116,7 +116,6 @@ public class SyncTracker {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncTracker.class);
 
     private final SyncSession session;
-    private ArrayList<HistoryEntry> resultHistory;
 
     /**
      * Initializes a new {@link SyncTracker}.
@@ -136,11 +135,32 @@ public class SyncTracker {
      * @return The checked and potentially adjusted sync results
      */
     public IntermediateSyncResult<DirectoryVersion> trackAndCheck(IntermediateSyncResult<DirectoryVersion> syncResult) {
+        ArrayList<HistoryEntry> history = extractHistory(session);
+        synchronized (history) {
+            return trackAndCheck(syncResult, history);
+        }
+    }
+
+    /**
+     * Tracks the supplied sync results.
+     *
+     * @param syncResult The sync results
+     * @param path The path where this sync result was resulting from, or <code>null</code> if not relevant
+     * @return The passed sync result
+     */
+    public IntermediateSyncResult<FileVersion> track(IntermediateSyncResult<FileVersion> syncResult, String path) {
+        ArrayList<HistoryEntry> history = extractHistory(session);
+        synchronized (history) {
+            return track(syncResult, path, history);
+        }
+    }
+
+    private IntermediateSyncResult<DirectoryVersion> trackAndCheck(IntermediateSyncResult<DirectoryVersion> syncResult, ArrayList<HistoryEntry> history) {
         /*
          * track sync result & check for potential cycles
          */
-        insert(syncResult, null);
-        RepeatedSequence<HistoryEntry> cycle = findCycle();
+        insert(syncResult, null, history);
+        RepeatedSequence<HistoryEntry> cycle = findCycle(history);
         if (null != cycle) {
             trace(session, cycle);
             List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>();
@@ -157,7 +177,7 @@ public class SyncTracker {
                 /*
                  * check if history already contains a (therefore probably failed) reset-attempt of individual directories
                  */
-                int resetAttempts = getFrequency(
+                int resetAttempts = getFrequency(history,
                     new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient));
                 if (1 == resetAttempts) {
                     /*
@@ -182,8 +202,8 @@ public class SyncTracker {
                     /*
                      * clear result history after aborting sync
                      */
-                    session.trace("Clrearing result history.");
-                    getResultHistory().clear();
+                    session.trace("Clearing result history.");
+                    history.clear();
                 }
             } else {
                 /*
@@ -193,7 +213,7 @@ public class SyncTracker {
                 /*
                  * check if history already contains a (therefore probably failed) reset-attempt of all directories
                  */
-                int resetAttempts = getFrequency(
+                int resetAttempts = getFrequency(history,
                     new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient));
                 if (1 == resetAttempts) {
                     session.trace("Cycle still detected after first attempt to reset directory checksums " +
@@ -209,7 +229,7 @@ public class SyncTracker {
             /*
              * track & return new sync result
              */
-            insert(newResult, null);
+            insert(newResult, null, history);
             if (session.isTraceEnabled()) {
                 session.trace(newResult);
             }
@@ -222,15 +242,8 @@ public class SyncTracker {
         }
     }
 
-    /**
-     * Tracks the supplied sync results.
-     *
-     * @param syncResult The sync results
-     * @param path The path where this sync result was resulting from, or <code>null</code> if not relevant
-     * @return The passed sync result
-     */
-    public IntermediateSyncResult<FileVersion> track(IntermediateSyncResult<FileVersion> syncResult, String path) {
-        insert(syncResult, path);
+    private IntermediateSyncResult<FileVersion> track(IntermediateSyncResult<FileVersion> syncResult, String path, ArrayList<HistoryEntry> history) {
+        insert(syncResult, path, history);
         return syncResult;
     }
 
@@ -239,11 +252,11 @@ public class SyncTracker {
      *
      * @param syncResult The sync result to add
      * @param path The path where this sync result was resulting from, or <code>null</code> if not relevant
+     * @param history The result history
      * @return The added history entry
      */
-    private HistoryEntry insert(IntermediateSyncResult<? extends DriveVersion> syncResult, String path) {
+    private HistoryEntry insert(IntermediateSyncResult<? extends DriveVersion> syncResult, String path, ArrayList<HistoryEntry> history) {
         HistoryEntry entry = new HistoryEntry(syncResult, path);
-        ArrayList<HistoryEntry> history = getResultHistory();
         history.add(session.isTraceEnabled() && MAX_HISTORY_ENTRY_LENGTH >= syncResult.length() ? entry : entry.compact());
         if (MAX_HISTORY_SIZE < history.size()) {
             history.remove(0);
@@ -252,24 +265,12 @@ public class SyncTracker {
     }
 
     /**
-     * Gets the result history.
-     *
-     * @return The result history
-     */
-    private ArrayList<HistoryEntry> getResultHistory() {
-        if (null == this.resultHistory) {
-            resultHistory = extractHistory(session);
-        }
-        return resultHistory;
-    }
-
-    /**
      * Checks the current sync history for cycles, i.e. repeated sequences of the same synchronization results.
      *
+     * @param history The result history
      * @return A repeated sequence identifying the cycle, or <code>null</code> if no cycle was detected.
      */
-    private RepeatedSequence<HistoryEntry> findCycle() {
-        ArrayList<HistoryEntry> history = getResultHistory();
+    private RepeatedSequence<HistoryEntry> findCycle(ArrayList<HistoryEntry> history) {
         for (int i = 0; i < history.size(); i++) {
             List<HistoryEntry> subList = history.subList(i, history.size());
             RepeatedSequence<HistoryEntry> repetitions = findRepetitions(subList);
@@ -285,11 +286,12 @@ public class SyncTracker {
     /**
      * Gets the number of occurrences of the supplied result in the result history.
      *
+     * @param history The result history
      * @param result The result to count
      * @return The number of occurrences
      */
-    private int getFrequency(IntermediateSyncResult<DirectoryVersion> result) {
-        return Collections.frequency(getResultHistory(), new HistoryEntry(result, null));
+    private int getFrequency(ArrayList<HistoryEntry> history, IntermediateSyncResult<DirectoryVersion> result) {
+        return Collections.frequency(history, new HistoryEntry(result, null));
     }
 
     private static Collection<DirectoryVersion> getAffectedDirectoryVersions(SyncSession session, RepeatedSequence<HistoryEntry> cycle) {
