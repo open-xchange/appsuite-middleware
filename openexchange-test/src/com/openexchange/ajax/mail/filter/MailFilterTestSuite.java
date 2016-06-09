@@ -52,6 +52,7 @@ package com.openexchange.ajax.mail.filter;
 import com.openexchange.ajax.mail.filter.tests.api.AdminListTest;
 import com.openexchange.ajax.mail.filter.tests.api.ConfigTest;
 import com.openexchange.ajax.mail.filter.tests.api.NewTest;
+import com.openexchange.ajax.mail.filter.tests.api.PGPTest;
 import com.openexchange.ajax.mail.filter.tests.api.UpdateTest;
 import com.openexchange.ajax.mail.filter.tests.api.VacationTest;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug18490Test;
@@ -88,6 +89,7 @@ public final class MailFilterTestSuite {
         suite.addTestSuite(NewTest.class);
         suite.addTestSuite(UpdateTest.class);
         suite.addTestSuite(VacationTest.class);
+        suite.addTestSuite(PGPTest.class);
         return suite;
     }
 }
