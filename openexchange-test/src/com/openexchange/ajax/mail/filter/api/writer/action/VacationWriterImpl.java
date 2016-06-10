@@ -75,6 +75,12 @@ public class VacationWriterImpl implements ActionWriter {
 			jsonObj.put("subject", vacationAction.getSubject());
 		}
 
+		if (vacationAction.getAddresses() != null) {
+		    for (String a : vacationAction.getAddresses()) {
+		        jsonObj.append("addresses", a);
+		    }
+		}
+		
 		if (vacationAction.getText() != null) {
 			jsonObj.put("text", vacationAction.getText());
 		}
