@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,70 +47,55 @@
  *
  */
 
-package com.openexchange.imap.storecache;
+package com.openexchange.log.audit.slf4j;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.mail.MessagingException;
-import com.openexchange.session.Session;
-import com.sun.mail.imap.IMAPStore;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
- * {@link NonCachingIMAPStoreContainer} - The non-caching {@link IMAPStoreContainer}.
+ * {@link SimpleDateFormatter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
+public class SimpleDateFormatter implements DateFormatter {
 
-    protected final String server;
-    protected final int port;
-    private final AtomicInteger inUseCount;
+    /** The GMT time zone */
+    private static final TimeZone TIMEZONE_GMT = TimeZone.getTimeZone("GMT");
 
     /**
-     * Initializes a new {@link NonCachingIMAPStoreContainer}.
+     * Creates a new instance from specified attributes.
+     *
+     * @param pattern The date pattern
+     * @param locale The locale
+     * @param timeZone The time zone
+     * @return The new formatter instance
      */
-    public NonCachingIMAPStoreContainer(int accountId, Session session, String server, int port, boolean propagateClientIp) {
-        super(accountId, session, propagateClientIp);
-        this.port = port;
-        this.server = server;
-        inUseCount = new AtomicInteger();
+    public static SimpleDateFormatter newInstance(String pattern, Locale locale, TimeZone timeZone) {
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern, null == locale ? Locale.US : locale);
+        sdf.setTimeZone(null == timeZone ? TIMEZONE_GMT : timeZone);
+        return new SimpleDateFormatter(sdf);
     }
 
-    @Override
-    public int getInUseCount() {
-        return inUseCount.get();
-    }
+    // ------------------------------------------------------------------------------------------------------------------
 
-    @Override
-    public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
-        inUseCount.incrementAndGet();
-        return newStore(server, port, login, pw, imapSession, session);
-    }
+    private final SimpleDateFormat sdf;
 
-    @Override
-    public void backStore(final IMAPStore imapStore) {
-        backStoreNoValidityCheck(imapStore);
-        inUseCount.decrementAndGet();
-    }
-
-    protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
-        closeSafe(imapStore);
-    }
-
-    @Override
-    public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
-        // Nothing to do
-    }
-
-    @Override
-    public void clear() {
-        // Nothing to do
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
+    /**
+     * Initializes a new {@link SimpleDateFormatter}.
      */
-    @Override
-    public boolean hasElapsed(long millis) {
-        return false;
+    private SimpleDateFormatter(SimpleDateFormat sdf) {
+        super();
+        this.sdf = sdf;
     }
+
+    @Override
+    public String format(Date date) {
+        synchronized (sdf) {
+            return sdf.format(date);
+        }
+    }
+
 }

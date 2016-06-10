@@ -61,6 +61,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
@@ -98,6 +99,9 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.audit.AuditLogService;
+import com.openexchange.log.audit.DefaultAttribute;
+import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
@@ -520,25 +524,31 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
     protected void connectTransport(final Transport transport, final SMTPConfig smtpConfig) throws OXException, MessagingException {
         final String server = IDNA.toASCII(smtpConfig.getServer());
         final int port = smtpConfig.getPort();
+        final String login = smtpConfig.getLogin();
         try {
             if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
                 final String encodedPassword = encodePassword(smtpConfig.getPassword());
                 if (isKerberosAuth()) {
                     try {
-                        Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, smtpConfig.getLogin(), encodedPassword));
+                        Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, login, encodedPassword));
                     } catch (final PrivilegedActionException e) {
                         handlePrivilegedActionException(e);
                     }
                 } else {
-                    final String login = smtpConfig.getLogin();
                     transport.connect(server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword);
                 }
             } else {
                 transport.connect(server, port, null, null);
             }
+
+            AuditLogService auditLogService = Services.optService(AuditLogService.class);
+            if (null != auditLogService) {
+                String eventId = MailAccount.DEFAULT_ID == accountId ? "smtp.primary.login" : "smtp.external.login";
+                auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("smtp.login", null == login ? "<none>" : login), DefaultAttribute.arbitraryFor("smtp.server", server), DefaultAttribute.arbitraryFor("smtp.port", Integer.toString(port)));
+            }
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.net.ssl.SSLHandshakeException) {
-                throw SMTPExceptionCode.SECURE_CONNECTION_NOT_POSSIBLE.create(e.getNextException(), server, smtpConfig.getLogin());
+                throw SMTPExceptionCode.SECURE_CONNECTION_NOT_POSSIBLE.create(e.getNextException(), server, login);
             }
             throw e;
         }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,70 +47,35 @@
  *
  */
 
-package com.openexchange.imap.storecache;
+package com.openexchange.log.audit;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.mail.MessagingException;
-import com.openexchange.session.Session;
-import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link NonCachingIMAPStoreContainer} - The non-caching {@link IMAPStoreContainer}.
+ * {@link Attribute} - A loggable attribute.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
-
-    protected final String server;
-    protected final int port;
-    private final AtomicInteger inUseCount;
+public interface Attribute<V> {
 
     /**
-     * Initializes a new {@link NonCachingIMAPStoreContainer}.
+     * Gets the attribute name
+     *
+     * @return The name
      */
-    public NonCachingIMAPStoreContainer(int accountId, Session session, String server, int port, boolean propagateClientIp) {
-        super(accountId, session, propagateClientIp);
-        this.port = port;
-        this.server = server;
-        inUseCount = new AtomicInteger();
-    }
+    String getName();
 
-    @Override
-    public int getInUseCount() {
-        return inUseCount.get();
-    }
-
-    @Override
-    public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
-        inUseCount.incrementAndGet();
-        return newStore(server, port, login, pw, imapSession, session);
-    }
-
-    @Override
-    public void backStore(final IMAPStore imapStore) {
-        backStoreNoValidityCheck(imapStore);
-        inUseCount.decrementAndGet();
-    }
-
-    protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
-        closeSafe(imapStore);
-    }
-
-    @Override
-    public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
-        // Nothing to do
-    }
-
-    @Override
-    public void clear() {
-        // Nothing to do
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
+    /**
+     * Gets the attribute value
+     *
+     * @return The value
      */
-    @Override
-    public boolean hasElapsed(long millis) {
-        return false;
-    }
+    V getValue();
+
+    /**
+     * Signals if this attribute provides a date value.
+     *
+     * @return <code>true</code> for date value; otherwise <code>false</code>
+     */
+    boolean isDate();
 }

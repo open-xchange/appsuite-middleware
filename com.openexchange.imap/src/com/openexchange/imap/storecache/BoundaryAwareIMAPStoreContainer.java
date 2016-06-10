@@ -67,8 +67,8 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
     /**
      * Initializes a new {@link BoundaryAwareIMAPStoreContainer}.
      */
-    public BoundaryAwareIMAPStoreContainer(String server, int port, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
-        super(server, port, propagateClientIp, checkConnectivityIfPolled);
+    public BoundaryAwareIMAPStoreContainer(int accountId, Session session, String server, int port, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
+        super(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
     }
 
     /**
