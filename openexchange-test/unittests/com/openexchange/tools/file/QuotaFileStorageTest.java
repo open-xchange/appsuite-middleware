@@ -199,6 +199,11 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
+        public void backForUpdateTaskAfterReading(Connection con) {
+            // Nothing to do.
+        }
+
+        @Override
         public void backReadOnly(final Context ctx, final Connection con) {
             // Nothing to do.
         }
