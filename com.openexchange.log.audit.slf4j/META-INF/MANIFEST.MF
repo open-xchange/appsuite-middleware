@@ -72,6 +72,7 @@ Import-Package: ch.qos.logback.classic,
  com.openexchange.osgi,
  com.openexchange.server,
  org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j,
  org.slf4j.spi
 Bundle-Activator: com.openexchange.log.audit.slf4j.osgi.Slf4jAuditLogActivator
