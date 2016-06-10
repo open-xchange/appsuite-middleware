@@ -215,7 +215,7 @@ public final class MimeMessageUtility {
             synchronized (MimeMessageUtility.class) {
                 set = dummyDomains;
                 if (null == set) {
-                    String def = "@unspecified-domain, @missing_domain";
+                    String def = "@unspecified-domain, @missing_domain, @syntax_error";
                     ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (null == service) {
                         return new LinkedHashSet<String>(Arrays.asList(Strings.splitByComma(def)));
