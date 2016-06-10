@@ -77,6 +77,10 @@ public class DefaultAttribute<V> implements Attribute<V> {
          * The time stamp of the event.
          */
         TIMESTAMP("timestamp"),
+        /**
+         * The client identifier.
+         */
+        CLIENT("client"),
         ;
 
         private final String id;
