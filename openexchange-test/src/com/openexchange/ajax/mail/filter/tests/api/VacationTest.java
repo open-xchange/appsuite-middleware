@@ -53,6 +53,9 @@ import java.util.Collections;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
+import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.CurrentDateTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
@@ -70,7 +73,6 @@ public class VacationTest extends AbstractMailFilterTest {
      */
     public VacationTest(String name) {
         super(name);
-        System.out.println("{\"active\":true,\"position\":0,\"text\":\"if true \\r\\n{\\r\\n    vacation :days 13 :addresses [ \\\"root@localhost\\\" , \\\"billg@microsoft.com\\\" ] :mime :subject \\\"Betreff\\\" \\\"Text\\r\\nText\\\" ;\\r\\n}\\r\\n\",\"errormsg\":\"\",\"flags\":[\"vacation\"],\"id\":3,\"rulename\":\"Vacation Notice\"}");
     }
 
     /**
@@ -82,6 +84,7 @@ public class VacationTest extends AbstractMailFilterTest {
             expected = new Rule();
             expected.setName("Vacation Notice");
             expected.setFlags(new String[] { "vacation" });
+            expected.setActive(true);
 
             Vacation vacation = new Vacation(13, new String[] { "root@localhost", "billg@microsoft.com" }, "Betreff", "Text\\u000aText");
             expected.setActioncmds(new AbstractAction[] { vacation });
@@ -127,7 +130,7 @@ public class VacationTest extends AbstractMailFilterTest {
             expected.setActive(true);
             expected.setFlags(new String[] { "vacation" });
 
-            Vacation vacation = new Vacation(7, new String[] { client.getValues().getDefaultAddress() }, null, "I'm out of office");
+            Vacation vacation = new Vacation(7, new String[] { "foo@invalid.tld" }, null, "I'm out of office");
             expected.setActioncmds(new AbstractAction[] { vacation });
             expected.setTest(new TrueTest());
 
@@ -149,9 +152,57 @@ public class VacationTest extends AbstractMailFilterTest {
             expected.setActive(true);
             expected.setFlags(new String[] { "vacation" });
 
-            Vacation vacation = new Vacation(7, new String[] { client.getValues().getDefaultAddress() }, null, "if true \r\n{\r\n    vacation :days 13 :addresses [ \"root@localhost\" , \"billg@microsoft.com\" ] :mime :subject \"Betreff\" \"Text\r\nText\" ;\r\n}\r\n");
+            Vacation vacation = new Vacation(7, new String[] { "foo@invalid.tld" }, null, "if true \r\n{\r\n    vacation :days 13 :addresses [ \"root@localhost\" , \"billg@microsoft.com\" ] :mime :subject \"Betreff\" \"Text\r\nText\" ;\r\n}\r\n");
             expected.setActioncmds(new AbstractAction[] { vacation });
             expected.setTest(new TrueTest());
+
+            int id = mailFilterAPI.createRule(expected);
+            expected.setId(id);
+        }
+
+        getAndAssert(Collections.singletonList(expected));
+    }
+
+    /**
+     * Tests the week day field for the vacation rule
+     */
+    public void testWeekDayField() throws Exception {
+        Rule expected;
+        {
+            expected = new Rule();
+            expected.setName("Vacation Notice (testWeekDayField)");
+            expected.setActive(true);
+            expected.setFlags(new String[] { "vacation" });
+
+            Vacation vacation = new Vacation(7, new String[] { "foo@invalid.tld" }, null, "if true \r\n{\r\n    vacation :days 13 :addresses [ \"root@localhost\" , \"billg@microsoft.com\" ] :mime :subject \"Betreff\" \"Text\r\nText\" ;\r\n}\r\n");
+            expected.setActioncmds(new AbstractAction[] { vacation });
+
+            AbstractTest[] tests = new AbstractTest[] { new CurrentDateTest(3, "is", "weekday") };
+            expected.setTest(new AllOfTest(tests));
+
+            int id = mailFilterAPI.createRule(expected);
+            expected.setId(id);
+        }
+
+        getAndAssert(Collections.singletonList(expected));
+    }
+
+    /**
+     * Tests the time field for the vacation rule
+     */
+    public void testTimeField() throws Exception {
+        Rule expected;
+        {
+            expected = new Rule();
+            expected.setName("Vacation Notice (testTimeField)");
+            expected.setActive(true);
+            expected.setFlags(new String[] { "vacation" });
+
+            Vacation vacation = new Vacation(7, new String[] { "foo@invalid.tld" }, null, "if true \r\n{\r\n    vacation :days 13 :addresses [ \"root@localhost\" , \"billg@microsoft.com\" ] :mime :subject \"Betreff\" \"Text\r\nText\" ;\r\n}\r\n");
+            expected.setActioncmds(new AbstractAction[] { vacation });
+
+            AbstractTest[] tests = new AbstractTest[] { new CurrentDateTest(3627279000000L, "is", "time") };
+            expected.setTest(new AllOfTest(tests));
 
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);
