@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,70 +47,70 @@
  *
  */
 
-package com.openexchange.imap.storecache;
+package com.openexchange.log.audit.slf4j;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.mail.MessagingException;
-import com.openexchange.session.Session;
-import com.sun.mail.imap.IMAPStore;
+import org.slf4j.spi.LocationAwareLogger;
+import com.openexchange.java.Strings;
 
 /**
- * {@link NonCachingIMAPStoreContainer} - The non-caching {@link IMAPStoreContainer}.
+ * {@link Slf4jLogLevel}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
+public enum Slf4jLogLevel {
 
-    protected final String server;
-    protected final int port;
-    private final AtomicInteger inUseCount;
+    TRACE("trace", LocationAwareLogger.TRACE_INT),
+    DEBUG("debug", LocationAwareLogger.DEBUG_INT),
+    INFO("info", LocationAwareLogger.INFO_INT),
+    WARN("warn", LocationAwareLogger.WARN_INT),
+    ERROR("error", LocationAwareLogger.ERROR_INT),
+    ;
+
+    private final String id;
+    private final int level;
+
+    private Slf4jLogLevel(String id, int level) {
+        this.id = id;
+        this.level = level;
+    }
 
     /**
-     * Initializes a new {@link NonCachingIMAPStoreContainer}.
+     * Gets the identifier
+     *
+     * @return The identifier
      */
-    public NonCachingIMAPStoreContainer(int accountId, Session session, String server, int port, boolean propagateClientIp) {
-        super(accountId, session, propagateClientIp);
-        this.port = port;
-        this.server = server;
-        inUseCount = new AtomicInteger();
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public int getInUseCount() {
-        return inUseCount.get();
-    }
-
-    @Override
-    public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
-        inUseCount.incrementAndGet();
-        return newStore(server, port, login, pw, imapSession, session);
-    }
-
-    @Override
-    public void backStore(final IMAPStore imapStore) {
-        backStoreNoValidityCheck(imapStore);
-        inUseCount.decrementAndGet();
-    }
-
-    protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
-        closeSafe(imapStore);
-    }
-
-    @Override
-    public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
-        // Nothing to do
-    }
-
-    @Override
-    public void clear() {
-        // Nothing to do
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
+    /**
+     * Gets the SLF4J log level
+     *
+     * @return The SLF4J log level
      */
-    @Override
-    public boolean hasElapsed(long millis) {
-        return false;
+    public int getLevel() {
+        return level;
     }
+
+    /**
+     * Gets the SLF4J log level for specified identifier.
+     *
+     * @param id The identifier
+     * @return The SLF4J log level or <code>null</code>
+     */
+    public static Slf4jLogLevel valueFor(String id) {
+        if (null == id) {
+            return null;
+        }
+
+        String tmp = Strings.asciiLowerCase(id);
+        for (Slf4jLogLevel logLevel : Slf4jLogLevel.values()) {
+            if (tmp.equals(logLevel.id)) {
+                return logLevel;
+            }
+        }
+        return null;
+    }
+
 }

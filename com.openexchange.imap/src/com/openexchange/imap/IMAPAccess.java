@@ -49,10 +49,10 @@
 
 package com.openexchange.imap;
 
-import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -97,6 +97,9 @@ import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.audit.AuditLogService;
+import com.openexchange.log.audit.DefaultAttribute;
+import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -194,7 +197,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         return b.booleanValue();
     }
-    
+
 
     /*-
      * Member section
@@ -995,14 +998,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     // Ignore
                 }
             }
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
         } catch (final AuthenticationFailedException e) {
             /*
              * Retry connect with AUTH=PLAIN disabled
              */
             imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
             imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
         }
 
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
@@ -1019,15 +1022,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * the IMAP session, this Kerberos subject object is used to only allow a single IMAP login per Kerberos subject. The service ticket for
      * the IMAP server is stored in the Kerberos subject once the IMAP login was successful. If multiple threads can execute this in
      * parallel, multiple IMAP service tickets are requested, which is discouraged for performance reasons.
+     *
      * @param imapSession The IMAP session
      * @param imapStore The IMAP store
      * @param server The host name
      * @param port The port
      * @param login The login
      * @param pw The password
+     * @param accountId The account identifier
+     * @param session The associated Groupware session
      * @throws MessagingException If operation fails
      */
-    public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw) throws MessagingException {
+    public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw, int accountId, Session session) throws MessagingException {
         Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
         if (null == kerberosSubject) {
             imapStore.connect(server, port, login, pw);
@@ -1035,6 +1041,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             synchronized (kerberosSubject) {
                 imapStore.connect(server, port, login, pw);
             }
+        }
+
+        AuditLogService auditLogService = Services.optService(AuditLogService.class);
+        if (null != auditLogService) {
+            String eventId = MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login";
+            auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
         }
     }
 

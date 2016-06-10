@@ -298,7 +298,7 @@ public final class IMAPStoreCache {
         }
     }
 
-    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws OXException {
+    private IMAPStoreContainer getContainer(int accountId, String server, int port, String login, Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws OXException {
         /*
          * Check for a cached one
          */
@@ -308,7 +308,7 @@ public final class IMAPStoreCache {
          */
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
-            final IMAPStoreContainer newContainer = newContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
+            final IMAPStoreContainer newContainer = newContainer(server, port, accountId, session, propagateClientIp, checkConnectivityIfPolled);
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;
@@ -328,16 +328,16 @@ public final class IMAPStoreCache {
         return container;
     }
 
-    private IMAPStoreContainer newContainer(final String server, final int port, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
+    private IMAPStoreContainer newContainer(String server, int port, int accountId, Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
         switch (containerType) {
         case UNBOUNDED:
-            return new UnboundedIMAPStoreContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
+            return new UnboundedIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
         case BOUNDARY_AWARE:
-            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
+            return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
         case NON_CACHING:
-            return new NonCachingIMAPStoreContainer(server, port, propagateClientIp);
+            return new NonCachingIMAPStoreContainer(accountId, session, server, port, propagateClientIp);
         default:
-            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
+            return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
         }
     }
 
