@@ -96,6 +96,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link ReorderTest#testReorder()}
+     */
     @Test
     public void MailfilterreorderTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -129,6 +132,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link AuxiliaryAPITest#testGetScript()}
+     */
     @Test
     public void MailfiltergetScriptTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -139,6 +145,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link AuxiliaryAPITest#testDeleteScript()}
+     */
     @Test
     public void MailfilterdeleteScriptTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
