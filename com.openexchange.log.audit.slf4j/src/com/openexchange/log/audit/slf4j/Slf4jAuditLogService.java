@@ -206,7 +206,7 @@ public class Slf4jAuditLogService implements AuditLogService {
         logger = createLogger(configuration);
         dateFormatter = configuration.getDateFormatter();
         level = configuration.getLevel();
-        delimiter = configuration.getDelimiter();
+        delimiter = null == configuration.getDelimiter() ? "" : configuration.getDelimiter();
         includeAttributeNames = configuration.isIncludeAttributeNames();
     }
 
