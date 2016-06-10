@@ -51,6 +51,7 @@ package com.openexchange.mail.categories.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.FailureAwareCapabilityChecker;
@@ -128,12 +129,18 @@ public class Activator extends HousekeepingActivator {
         getService(CapabilityService.class).declareCapability(sCapability);
 
         registerService(Reloadable.class, MailCategoriesConfigUtil.getInstance());
+
+        Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
+        logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
+
     }
 
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
         Services.setServiceLookup(null);
+        Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
+        logger.info("Bundle successfully stopped: {}", context.getBundle().getSymbolicName());
     }
 
 }
