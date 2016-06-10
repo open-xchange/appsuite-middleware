@@ -1,17 +1,21 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
-import java.util.List;
+import java.util.Collections;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.MatchesComparison;
+import com.openexchange.ajax.mail.filter.api.dao.test.AddressTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 public class UpdateTest extends AbstractMailFilterTest {
 
-    public static final int[] cols = { Rule.ID };
+    private Rule rule;
 
     public UpdateTest(String name) {
         super(name);
@@ -20,61 +24,74 @@ public class UpdateTest extends AbstractMailFilterTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-    }
 
-    public void testDummy() {
-
-    }
-
-    public void testUpdate() throws Exception {
-        final Rule rule = new Rule();
+        rule = new Rule();
         rule.setName("testUpdate");
-        rule.setActioncmds(new AbstractAction[] { new Stop() });
+        rule.setActioncmds(new AbstractAction[] { new Keep() });
 
         final IsComparison isComp = new IsComparison();
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
+        // Create the rule
         final int id = mailFilterAPI.createRule(rule);
         rule.setId(id);
-        rule.setName("testUpdate - 2");
-
-        mailFilterAPI.updateRule(rule);
-
-        List<Rule> rules = mailFilterAPI.listRules();
-        assertEquals("One rule was expected", 1, rules.size());
-
-        final Rule loadRule = rules.get(0);
-        assertRule(rule, loadRule);
-
-        mailFilterAPI.deleteRule(id);
     }
 
-    public void _notestMove() throws Exception {
-        final Rule rule = new Rule();
-        rule.setName("testMove");
-        rule.setActioncmds(new AbstractAction[] { new Stop() });
+    /**
+     * Tests a simple update name of the rule
+     */
+    public void testUpdate() throws Exception {
+        rule.setName("testUpdate - 2");
 
-        final IsComparison isComp = new IsComparison();
-        rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
-
-        final int id1 = mailFilterAPI.createRule(rule);
-        final int id2 = mailFilterAPI.createRule(rule);
-
-        List<Rule> rules = mailFilterAPI.listRules();
-        assertEquals("Two rules were expected", 2, rules.size());
-
-        rule.setId(id2);
-        rule.setName("testMove - 2");
-        rule.setPosition(0);
+        // Update the rule
         mailFilterAPI.updateRule(rule);
 
-        rules = mailFilterAPI.listRules();
-        assertEquals("Two rules were expected", 2, rules.size());
+        // Assert
+        getAndAssert(Collections.singletonList(rule));
+    }
 
-        Rule loadRule = rules.get(1);
-        assertRule(rule, loadRule);
+    /**
+     * Tests a condition update of the rule
+     */
+    public void testUpdateCondition() throws Exception {
+        // update condition
+        rule.setTest(new HeaderTest(new ContainsComparison(), new String[] { "updatedHeader" }, new String[] { "updatedValue" }));
+        mailFilterAPI.updateRule(rule);
 
-        mailFilterAPI.deleteRule(id1);
-        mailFilterAPI.deleteRule(id2);
+        // assert
+        getAndAssert(Collections.singletonList(rule));
+    }
+
+    /**
+     * Test add an action
+     */
+    public void testUpdateAddActionCommand() throws Exception {
+        AbstractAction[] actioncmds = rule.getActioncmds();
+        AbstractAction[] actions = new AbstractAction[actioncmds.length + 1];
+        // Retain already existing action commands
+        System.arraycopy(actioncmds, 0, actions, 0, actioncmds.length);
+        // Add new action command
+        actions[actioncmds.length] = new Stop();
+        rule.setActioncmds(actions);
+
+        // Update
+        mailFilterAPI.updateRule(rule);
+
+        // Assert
+        getAndAssert(Collections.singletonList(rule));
+    }
+
+    /**
+     * Test update test command
+     */
+    public void testUpdateTestCommand() throws Exception {
+        AddressTest addressTest = new AddressTest(new MatchesComparison(), new String[] { "matchesHeader" }, new String[] { "matchesValue1", "matchesValue2" });
+        rule.setTest(addressTest);
+
+        // Update
+        mailFilterAPI.updateRule(rule);
+
+        // Assert
+        getAndAssert(Collections.singletonList(rule));
     }
 }
