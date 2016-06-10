@@ -49,13 +49,12 @@
 
 package com.openexchange.carddav.reports;
 
+import static com.openexchange.dav.DAVProtocol.CARD_NS;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Attribute;
-import org.jdom2.Document;
 import org.jdom2.Element;
-import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.resources.CardDAVCollection;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.dav.DAVProtocol;
@@ -74,7 +73,6 @@ import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
-
 /**
  * {@link AddressbookQueryReport}
  *
@@ -83,7 +81,7 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  */
 public class AddressbookQueryReport extends PROPFINDAction {
 
-    public static final String NAMESPACE = CarddavProtocol.CARD_NS.getURI();
+    public static final String NAMESPACE = CARD_NS.getURI();
     public static final String NAME = "addressbook-query";
 
     /**
@@ -97,12 +95,9 @@ public class AddressbookQueryReport extends PROPFINDAction {
 
     @Override
     public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-        if (false == CardDAVCollection.class.isInstance(request.getResource())) {
-            throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-        }
-        Document requestBody = optRequestBody(request);
-        CardDAVCollection collection = (CardDAVCollection) request.getResource();
-        SearchTerm<?> searchTerm = parseFilter(requestBody.getRootElement().getChild("filter", CarddavProtocol.CARD_NS));
+        CardDAVCollection collection = requireResource(request, CardDAVCollection.class);
+        Element rootElement = requireRootElement(request, CARD_NS, "addressbook-query");
+        SearchTerm<?> searchTerm = parseFilter(rootElement.getChild("filter", CARD_NS));
         List<WebdavResource> resources;
         if (null == searchTerm) {
             /*
@@ -111,11 +106,11 @@ public class AddressbookQueryReport extends PROPFINDAction {
             resources = collection.getChildren();
         } else {
             /*
-             * get filterered resources
+             * get filtered resources
              */
             resources = collection.getFilteredObjects(searchTerm);
         }
-        ResourceMarshaller marshaller = getMarshaller(request, requestBody);
+        ResourceMarshaller marshaller = getMarshaller(request, optRequestBody(request));
         Element multistatusElement = prepareMultistatusElement();
         List<Element> elements = new ArrayList<Element>();
         for (WebdavResource resource : resources) {
@@ -129,9 +124,9 @@ public class AddressbookQueryReport extends PROPFINDAction {
         String name = propFilterElement.getAttributeValue("name");
         ContactField[] matchingFields = getMatchingFields(name);
         if (null == matchingFields || 0 == matchingFields.length) {
-            throw new PreconditionException(CarddavProtocol.CARD_NS.getURI(), "supported-filter", null, HttpServletResponse.SC_FORBIDDEN);
+            throw new PreconditionException(CARD_NS.getURI(), "supported-filter", null, HttpServletResponse.SC_FORBIDDEN);
         }
-        Element isNotDefinedElement = propFilterElement.getChild("is-not-defined", CarddavProtocol.CARD_NS);
+        Element isNotDefinedElement = propFilterElement.getChild("is-not-defined", CARD_NS);
         if (null != isNotDefinedElement) {
             if (1 == matchingFields.length) {
                 SingleSearchTerm isNullTerm = new SingleSearchTerm(SingleOperation.ISNULL);
@@ -146,7 +141,7 @@ public class AddressbookQueryReport extends PROPFINDAction {
             }
             return compositeTerm;
         }
-        Element textMatchElement = propFilterElement.getChild("text-match", CarddavProtocol.CARD_NS);
+        Element textMatchElement = propFilterElement.getChild("text-match", CARD_NS);
         String matchType = textMatchElement.getAttributeValue("match-type");
         String match = textMatchElement.getValue();
         if (Strings.isEmpty(matchType) || "contains".equals(matchType)) {
@@ -163,7 +158,7 @@ public class AddressbookQueryReport extends PROPFINDAction {
             singleSearchTerm.addOperand(new ConstantOperand<String>(match));
             term = singleSearchTerm;
         } else {
-            CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.AND);
+            CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.OR);
             for (ContactField field : matchingFields) {
                 SingleSearchTerm singleSearchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
                 singleSearchTerm.addOperand(new ContactFieldOperand(field));
@@ -195,6 +190,24 @@ public class AddressbookQueryReport extends PROPFINDAction {
                 return new ContactField[] { ContactField.NICKNAME };
             case "COMPANY":
                 return new ContactField[] { ContactField.COMPANY };
+            case "TEL":
+                return new ContactField[] { ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_TTYTDD, ContactField.TELEPHONE_ISDN,
+                    ContactField.TELEPHONE_CAR, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2, ContactField.TELEPHONE_CALLBACK,
+                    ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_ASSISTANT, ContactField.TELEPHONE_IP, ContactField.TELEPHONE_RADIO,
+                    ContactField.TELEPHONE_PRIMARY, ContactField.FAX_BUSINESS, ContactField.FAX_HOME, ContactField.FAX_OTHER,
+                    ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_HOME1, ContactField.TELEPHONE_HOME2,
+                    ContactField.TELEPHONE_OTHER
+                };
+            case "UID":
+                return new ContactField[] { ContactField.UID };
+            case "CATEGORIES":
+                return new ContactField[] { ContactField.CATEGORIES };
+            case "NOTE":
+                return new ContactField[] { ContactField.NOTE };
+            case "ORG":
+                return new ContactField[] { ContactField.COMPANY, ContactField.DEPARTMENT, ContactField.BRANCHES };
+            case "IM":
+                return new ContactField[] { ContactField.INSTANT_MESSENGER1, ContactField.INSTANT_MESSENGER2 };
             default:
                 return null;
         }
@@ -204,7 +217,7 @@ public class AddressbookQueryReport extends PROPFINDAction {
         if (null == filterElement) {
             return null;
         }
-        List<Element> propFilterElements = filterElement.getChildren("prop-filter", CarddavProtocol.CARD_NS);
+        List<Element> propFilterElements = filterElement.getChildren("prop-filter", CARD_NS);
         if (null == propFilterElements || 0 == propFilterElements.size()) {
             return null;
         }
