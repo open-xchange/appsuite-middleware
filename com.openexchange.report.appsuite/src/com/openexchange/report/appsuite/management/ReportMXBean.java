@@ -50,7 +50,6 @@
 package com.openexchange.report.appsuite.management;
 
 import java.util.Date;
-import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.ReportService;
 
 /**

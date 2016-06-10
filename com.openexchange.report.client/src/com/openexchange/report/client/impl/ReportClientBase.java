@@ -51,7 +51,6 @@ package com.openexchange.report.client.impl;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -134,8 +133,6 @@ public class ReportClientBase extends AbstractJMXTools {
     private static final String OPT_APPSUITE_INSPECT_REPORTS_LONG = "inspect-appsuite-reports";
 
     private static final String OPT_APPSUITE_CANCEL_REPORTS_LONG = "cancel-appsuite-reports";
-
-    private static final String OPT_APPSUITE_RUN_LOCAL_LONG = "run-local-reports";
 
     private static final char OPT_APPSUITE_GET_REPORT_SHORT = 'g';
 
