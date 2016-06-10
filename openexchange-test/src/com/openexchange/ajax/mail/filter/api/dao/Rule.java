@@ -169,4 +169,12 @@ public class Rule {
     public void setErrormsg(String errormsg) {
         this.errormsg = errormsg;
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "Rule [position=" + position + ", id=" + id + ", name=" + name + "]";
+    }
 }

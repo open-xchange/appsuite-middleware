@@ -49,6 +49,14 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Random;
+import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
+import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
+import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
@@ -71,10 +79,57 @@ public class ReorderTest extends AbstractMailFilterTest {
      * Test the reorder API call
      */
     public void testReorder() throws Exception {
-        //TODO: write the test
-        //   1. Create 5 random rules
-        //   2. Reorder them
-        //   3. Assert that the order is correct
-        fail("Not implemented yet!");
+        Random r = new Random(System.currentTimeMillis());
+
+        // Create 10 rules
+        LinkedList<Rule> expectedRules = new LinkedList<>();
+        for (int i = 0; i < 10; i++) {
+            Rule rule = new Rule();
+            rule.setName("testReorder" + i);
+            rule.setActive(true);
+            rule.setActioncmds(new AbstractAction[] { new Keep(), new Stop() });
+            rule.setTest(new TrueTest());
+
+            int id = mailFilterAPI.createRule(rule);
+            rule.setId(id);
+            rule.setPosition(i);
+            expectedRules.add(rule);
+        }
+
+        // Initialise the alreadyPicked array
+        int reorderSize = 5;
+        int[] alreadyPicked = new int[reorderSize];
+        for (int i = 0; i < alreadyPicked.length; i++) {
+            alreadyPicked[i] = -1;
+        }
+
+        int[] reorder = new int[reorderSize];
+        // Reorder 5 random rules
+        for (int i = 4; i >= 0; i--) {
+            int ri = -1;
+            do {
+                ri = r.nextInt(10 - reorderSize) + reorderSize;
+            } while (Arrays.binarySearch(alreadyPicked, ri) >= 0);
+            alreadyPicked[i] = ri;
+
+            // Remove the rule from the expected list
+            Rule removedRule = expectedRules.remove(ri);
+            // Added to the reorder list
+            reorder[i] = removedRule.getId();
+            // And add the removed rule  at the first position of the expected
+            expectedRules.addFirst(removedRule);
+        }
+
+        // Refresh the positions
+        int i = 0;
+        for (Rule rule : expectedRules) {
+            rule.setPosition(i++);
+        }
+
+        // Reorder
+        mailFilterAPI.reorder(reorder);
+
+        // Get and assert
+        getAndAssert(expectedRules);
     }
 }
