@@ -110,6 +110,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Move to {@link UpdateTest}
+     */
     @Test
     public void MailfilterupdateTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -121,6 +124,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Move to {@link UpdateTest}
+     */
     @Test
     public void MailfilterupdateTest2() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
