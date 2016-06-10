@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.json.writer;
 
-import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.Collection;
@@ -987,7 +986,7 @@ public final class MessageWriter {
         retval.put(personal == null || personal.length() == 0 ? JSONObject.NULL : preparePersonal(personal));
         // Address
         String address = addr.getAddress();
-        retval.put(address == null || address.length() == 0 ? JSONObject.NULL : prepareAddress(address));
+        retval.put(address == null || address.length() == 0 ? JSONObject.NULL : MimeMessageUtility.prepareAddress(address));
 
         return retval;
     }
@@ -996,26 +995,6 @@ public final class MessageWriter {
 
     private static String preparePersonal(String personal) {
         return MimeMessageUtility.quotePhrase(personal, false);
-    }
-
-    private static final String DUMMY_DOMAIN = "@unspecified-domain";
-
-    private static String prepareAddress(String address) {
-        String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
-        // Check for slash character -- the delimiting character for MSISDN addresses
-        int pos = decoded.indexOf('@');
-        if (pos < 0) {
-            pos = decoded.indexOf('/');
-            if (pos > 0) {
-                decoded = decoded.substring(0, pos);
-            }
-        }
-        // Check for dummy domain
-        pos = decoded.indexOf(DUMMY_DOMAIN);
-        if (pos >= 0) {
-            return decoded.substring(0, pos);
-        }
-        return decoded;
     }
 
 }

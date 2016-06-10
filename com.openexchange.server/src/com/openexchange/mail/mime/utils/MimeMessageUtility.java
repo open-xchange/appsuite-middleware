@@ -51,6 +51,7 @@ package com.openexchange.mail.mime.utils;
 
 import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -65,12 +66,14 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -128,6 +131,7 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
@@ -196,6 +200,77 @@ public final class MimeMessageUtility {
      */
     private MimeMessageUtility() {
         super();
+    }
+
+    private static volatile Set<String> dummyDomains;
+
+    /**
+     * Gets the dummy domains artificially set by IMAP servers; such as <code>"@unspecified-domain"</code> or <code>"@missing-domain"</code>.
+     *
+     * @return The dummy domains
+     */
+    public static Set<String> getDummyDomains() {
+        Set<String> set = dummyDomains;
+        if (null == set) {
+            synchronized (MimeMessageUtility.class) {
+                set = dummyDomains;
+                if (null == set) {
+                    String def = "@unspecified-domain, @missing-domain";
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return new LinkedHashSet<String>(Arrays.asList(Strings.splitByComma(def)));
+                    }
+
+                    String csv = Strings.asciiLowerCase(service.getProperty("com.openexchange.mail.dummyDomains", def).trim());
+                    set = Collections.unmodifiableSet(new LinkedHashSet<String>(Arrays.asList(Strings.splitByComma(csv))));
+                    dummyDomains = set;
+                }
+            }
+        }
+        return set;
+    }
+
+    /**
+     * Strips possibly dummy domain from specified address string.
+     *
+     * @param address The address string
+     * @return The address string with any dummy domain removed
+     */
+    public static String stripDummyDomain(String address) {
+        if (null == address) {
+            return null;
+        }
+
+        String toCheck = Strings.asciiLowerCase(address);
+        for (String dummyDomain : getDummyDomains()) {
+            int pos = toCheck.indexOf(dummyDomain);
+            if (pos >= 0) {
+                return address.substring(0, pos);
+            }
+        }
+
+        // Contains no dummy domain; return unchanged
+        return address;
+    }
+
+    /**
+     * Prepares given address string by checking for possible mail-safe encodings.
+     *
+     * @param address The address
+     * @return The prepared address
+     */
+    public static String prepareAddress(final String address) {
+        String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
+        // Check for slash character -- the delimiting character for MSISDN addresses
+        int pos = decoded.indexOf('@');
+        if (pos < 0) {
+            pos = decoded.indexOf('/');
+            if (pos > 0) {
+                decoded = decoded.substring(0, pos);
+            }
+        }
+        // Check for dummy domains
+        return MimeMessageUtility.stripDummyDomain(decoded);
     }
 
     /**

@@ -945,7 +945,7 @@ public final class MessageParser {
             if (length == 0) {
                 return EMPTY_ADDRS;
             }
-            return parseAdressArray(jAddresses, length, true);
+            return parseAdressArray(jAddresses, length, false);
         } catch (JSONException e) {
             LOG.error("", e);
             /*
