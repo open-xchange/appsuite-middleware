@@ -94,6 +94,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3134
     ox_add_property com.openexchange.imap.fallbackOnFailedSORT false $PFILE
+
+    # SoftwareChange_Request-3343
+    ox_add_property com.openexchange.imap.rootSubfoldersAllowed "" $PFILE
 fi
 
 %clean
