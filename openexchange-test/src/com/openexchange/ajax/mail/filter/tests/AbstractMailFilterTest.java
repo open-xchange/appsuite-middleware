@@ -74,6 +74,7 @@ import com.openexchange.ajax.mail.filter.api.writer.comparison.UserComparisonWri
 import com.openexchange.ajax.mail.filter.api.writer.test.AddressWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.test.AllOfWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.test.AnyOfWriterImpl;
+import com.openexchange.ajax.mail.filter.api.writer.test.CurrentDateWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.test.EnvelopeWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.test.HeaderWriterImpl;
 import com.openexchange.ajax.mail.filter.api.writer.test.NotWriterImpl;
@@ -97,6 +98,7 @@ import com.openexchange.ajax.mail.filter.parser.comparison.SizeComparisonParserI
 import com.openexchange.ajax.mail.filter.parser.test.AddressParserImpl;
 import com.openexchange.ajax.mail.filter.parser.test.AllOfParserImpl;
 import com.openexchange.ajax.mail.filter.parser.test.AnyOfParserImpl;
+import com.openexchange.ajax.mail.filter.parser.test.CurrenttDateParserImpl;
 import com.openexchange.ajax.mail.filter.parser.test.EnvelopeParserImpl;
 import com.openexchange.ajax.mail.filter.parser.test.HeaderParserImpl;
 import com.openexchange.ajax.mail.filter.parser.test.NotParserImpl;
@@ -152,6 +154,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         TestParserFactory.addParser("not", new NotParserImpl());
         TestParserFactory.addParser("true", new TrueParserImpl());
         TestParserFactory.addParser("size", new SizeTestParserImpl());
+        TestParserFactory.addParser("currentdate", new CurrenttDateParserImpl());
 
         ComparisonParserFactory.addParser("is", new IsParserImpl());
         ComparisonParserFactory.addParser("matches", new MatchesParserImpl());
@@ -178,6 +181,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         TestWriterFactory.addWriter("not", new NotWriterImpl());
         TestWriterFactory.addWriter("true", new TrueWriterImpl());
         TestWriterFactory.addWriter("size", new SizeTestWriterImpl());
+        TestWriterFactory.addWriter("currentdate", new CurrentDateWriterImpl());
 
         ComparisonWriterFactory.addWriter("is", new IsWriterImpl());
         ComparisonWriterFactory.addWriter("matches", new MatchesWriterImpl());
