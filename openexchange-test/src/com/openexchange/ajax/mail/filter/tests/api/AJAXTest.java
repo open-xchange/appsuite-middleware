@@ -164,6 +164,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link VacationTest#testWeekDayField()}
+     */
     @Test
     public void testWeekDayField() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -191,6 +194,9 @@ public abstract class AJAXTest {
         }
     }
 
+    /**
+     * @deprecated Moved to {@link VacationTest#testTimeField()}
+     */
     @Test
     public void testDateField() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
