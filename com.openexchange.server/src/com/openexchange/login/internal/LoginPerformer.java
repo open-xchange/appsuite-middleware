@@ -658,7 +658,8 @@ public final class LoginPerformer {
         if (null != auditLogService) {
             String login = request.getLogin();
             if (null != login) {
-                auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()));
+                String client = request.getClient();
+                auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client));
             }
         }
     }
