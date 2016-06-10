@@ -68,6 +68,7 @@ public class DriveSettings {
     private Set<String> capabilities;
     private Long minUploadChunk;
     private int minSearchChars;
+    private boolean hasTrashFolder;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -236,6 +237,24 @@ public class DriveSettings {
      */
     public void setMinSearchChars(int minSearchChars) {
         this.minSearchChars = minSearchChars;
+    }
+
+    /**
+     * Gets the hasTrashFolder
+     *
+     * @return The hasTrashFolder
+     */
+    public boolean hasTrashFolder() {
+        return hasTrashFolder;
+    }
+
+    /**
+     * Sets the hasTrashFolder
+     *
+     * @param hasTrashFolder The hasTrashFolder to set
+     */
+    public void setHasTrashFolder(boolean hasTrashFolder) {
+        this.hasTrashFolder = hasTrashFolder;
     }
 
 }

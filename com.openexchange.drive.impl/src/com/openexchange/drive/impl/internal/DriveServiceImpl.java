@@ -452,6 +452,7 @@ public class DriveServiceImpl implements DriveService {
         settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion()));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
         settings.setMinUploadChunk(Long.valueOf(syncSession.getOptimisticSaveThreshold()));
+        settings.setHasTrashFolder(syncSession.getStorage().hasTrashFolder());
         /*
          * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
          */
