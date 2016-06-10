@@ -49,6 +49,13 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
+import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
+import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
@@ -67,19 +74,46 @@ public class AuxiliaryAPITest extends AbstractMailFilterTest {
         super(name);
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        
+        // Create 10 rules
+        List<Rule> expectedRules = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Rule rule = new Rule();
+            rule.setName("testDeleteScript" + i);
+            rule.setActive(true);
+            rule.setActioncmds(new AbstractAction[] { new Keep(), new Stop() });
+            rule.setTest(new TrueTest());
+
+            int id = mailFilterAPI.createRule(rule);
+            rule.setId(id);
+            rule.setPosition(i);
+            expectedRules.add(rule);
+        }
+
+        // Get and assert
+        getAndAssert(expectedRules);
+    }
+
     /**
      * Tests the auxiliary API call 'deletescript'
      */
     public void testDeleteScript() throws Exception {
-        //TODO
-        fail("Not implemented yet!");
+        // Delete the entire script
+        mailFilterAPI.deleteScript();
+
+        // Assert that the rules were deleted
+        List<Rule> rules = mailFilterAPI.listRules();
+        assertTrue("The list of rules is not empty", rules.isEmpty());
     }
 
     /**
      * Tests the auxiliary API call 'getscript'
      */
     public void testGetScript() throws Exception {
-        //TODO
-        fail("Not implemented yet!");
+        String script = mailFilterAPI.getScript();
+        assertFalse("The script is empty", script.isEmpty());
     }
 }
