@@ -17,6 +17,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug11519Test;
 
 public abstract class AJAXTest {
 
@@ -62,6 +63,7 @@ public abstract class AJAXTest {
      * @throws IOException
      * @throws SAXException
      * @throws JSONException
+     * @deprecated Moved to {@link Bug11519Test#testBug11519()}
      */
     @Test
     public void MailfilternewCurrentDateTest() throws MalformedURLException, IOException, SAXException, JSONException {
@@ -85,6 +87,7 @@ public abstract class AJAXTest {
             action.put("text", "I'm out of office");
             base.append("actioncmds", action);
 
+            System.out.println(base.toString());
             final String newid = mailfilternew(login, getHostname(), getUsername(), base.toString(), null);
             System.out.println("Rule created with newid: " + newid);
             mailfilterdelete(login, getHostname(), getUsername(), Integer.parseInt(newid));
@@ -199,7 +202,7 @@ public abstract class AJAXTest {
             logout(login);
         }
     }
-    
+
     ///////////////////////////////////////////////// HELPERS /////////////////////////////////////////////////
 
     protected abstract String getHostname();

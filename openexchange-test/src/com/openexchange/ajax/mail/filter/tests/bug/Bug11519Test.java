@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,63 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter;
+package com.openexchange.ajax.mail.filter.tests.bug;
 
-import com.openexchange.ajax.mail.filter.tests.api.AdminListTest;
-import com.openexchange.ajax.mail.filter.tests.api.AuxiliaryAPITest;
-import com.openexchange.ajax.mail.filter.tests.api.ConfigTest;
-import com.openexchange.ajax.mail.filter.tests.api.NewTest;
-import com.openexchange.ajax.mail.filter.tests.api.PGPTest;
-import com.openexchange.ajax.mail.filter.tests.api.ReorderTest;
-import com.openexchange.ajax.mail.filter.tests.api.UpdateTest;
-import com.openexchange.ajax.mail.filter.tests.api.VacationTest;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug11519Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug18490Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug31253Test;
-import com.openexchange.ajax.mail.filter.tests.bug.Bug44363Test;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Collections;
+import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
+import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.CurrentDateTest;
+import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
- * {@link MailFilterTestSuite}
+ * {@link Bug11519Test}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class MailFilterTestSuite {
+public class Bug11519Test extends AbstractMailFilterTest {
 
     /**
-     * Initialises a new {@link MailFilterTestSuite}
+     * Initialises a new {@link Bug11519Test}.
+     * 
+     * @param name
      */
-    private MailFilterTestSuite() {
-        super();
+    public Bug11519Test(String name) {
+        super(name);
     }
 
     /**
-     * @return a test suite containing smoke tests.
+     * Test for Bug 11519 - sieve filter could not be saved
      */
-    public static Test suite() {
-        TestSuite suite = new TestSuite("com.openexchange.ajax.mail.filter.MailFilterTestSuite");
-        suite.addTestSuite(AdminListTest.class);
-        suite.addTestSuite(Bug11519Test.class);
-        suite.addTestSuite(Bug18490Test.class);
-        suite.addTestSuite(Bug31253Test.class);
-        suite.addTestSuite(Bug44363Test.class);
-        suite.addTestSuite(ConfigTest.class);
-        suite.addTestSuite(NewTest.class);
-        suite.addTestSuite(UpdateTest.class);
-        suite.addTestSuite(VacationTest.class);
-        suite.addTestSuite(PGPTest.class);
-        suite.addTestSuite(ReorderTest.class);
-        suite.addTestSuite(AuxiliaryAPITest.class);
-        return suite;
+    public void testBug11519() throws Exception {
+        // Create rule
+        Rule expectedRule = new Rule();
+        expectedRule.setName("testBug11519");
+        expectedRule.setActive(true);
+        expectedRule.setFlags(new String[] { "vacation" });
+
+        // Create tests
+        AbstractTest[] tests = new AbstractTest[3];
+        tests[0] = new CurrentDateTest(1183759200000L, "ge", "date");
+        tests[1] = new CurrentDateTest(1183759200000L, "le", "date");
+        tests[2] = new CurrentDateTest(1183759200000L, "is", "date");
+
+        // Add test
+        AllOfTest allOf = new AllOfTest(tests);
+        expectedRule.setTest(allOf);
+
+        // Add action
+        AbstractAction[] actions = new AbstractAction[1];
+        actions[0] = new Vacation(7, new String[] { "some.address@domain.tld" }, null, "I'm out of office");
+        expectedRule.setActioncmds(actions);
+
+        // Insert
+        int id = mailFilterAPI.createRule(expectedRule);
+        expectedRule.setId(id);
+
+        // Assert
+        getAndAssert(Collections.singletonList(expectedRule));
     }
 }
