@@ -59,11 +59,13 @@ import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteScriptRequest;
+import com.openexchange.ajax.mail.filter.api.request.GetScriptRequest;
 import com.openexchange.ajax.mail.filter.api.request.InsertRequest;
 import com.openexchange.ajax.mail.filter.api.request.ReorderRequest;
 import com.openexchange.ajax.mail.filter.api.request.UpdateRequest;
 import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
+import com.openexchange.ajax.mail.filter.api.response.GetScriptResponse;
 import com.openexchange.ajax.mail.filter.api.response.InsertResponse;
 
 /**
@@ -206,6 +208,18 @@ public class MailFilterAPI {
     public void deleteScript() throws Exception {
         DeleteScriptRequest request = new DeleteScriptRequest();
         client.execute(request);
+    }
+
+    /**
+     * Gets the whole script of the user as string
+     * 
+     * @return The script
+     * @throws Exception if the operation fails
+     */
+    public String getScript() throws Exception {
+        GetScriptRequest request = new GetScriptRequest();
+        GetScriptResponse response = client.execute(request);
+        return response.getScript();
     }
 
     ///////////////////////////////// HELPERS ///////////////////////////////////
