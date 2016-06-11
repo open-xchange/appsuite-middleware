@@ -47,69 +47,41 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.log.audit.slf4j;
 
-import java.util.List;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.java.ConcurrentList;
+import com.openexchange.log.audit.Attribute;
+import com.openexchange.log.audit.AuditLogFilter;
+
 
 /**
- * {@link NearRegistryServiceTracker} - A near-registry service tracker.
- * <p>
- * Occurrences of specified service type are collected and available via {@link #getServiceList()}.<br>
- * This is intended to replace {@link #getServices()} since it requires to obtain tracker's mutex on each invocation.
+ * {@link NoHarmAuditLogFilter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implements ServiceListing<S> {
+public class NoHarmAuditLogFilter implements AuditLogFilter {
 
-    private final List<S> services;
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(NoHarmAuditLogFilter.class);
+
+    private final AuditLogFilter filter;
 
     /**
-     * Initializes a new {@link NearRegistryServiceTracker}.
-     *
-     * @param context The bundle context
-     * @param clazz The service class
+     * Initializes a new {@link NoHarmAuditLogFilter}.
      */
-    public NearRegistryServiceTracker(final BundleContext context, final Class<S> clazz) {
-        super(context, clazz, null);
-        services = new ConcurrentList<S>();
+    public NoHarmAuditLogFilter(AuditLogFilter filter) {
+        super();
+        this.filter = filter;
     }
 
     @Override
-    public List<S> getServiceList() {
-        return services;
-    }
-
-    @Override
-    public S addingService(final ServiceReference<S> reference) {
-        S service = context.getService(reference);
-
-        S serviceToAdd = onServiceAvailable(service);
-        if (services.add(serviceToAdd)) {
-            return service;
+    public boolean accept(String eventId, Attribute<?>[] attributes) {
+        try {
+            return filter.accept(eventId, attributes);
+        } catch (Exception e) {
+            LOGGER.error("Failed filter invocation for {}", filter.getClass().getName(), e);
+            // We don't know better...
+            return true;
         }
-
-        context.ungetService(reference);
-        return null;
-    }
-
-    @Override
-    public void removedService(final ServiceReference<S> reference, final S service) {
-        services.remove(service);
-        context.ungetService(reference);
-    }
-
-    /**
-     * Invoked when a tracked service is available.
-     *
-     * @param service The available service
-     * @return The service to add
-     */
-    protected S onServiceAvailable(S service) {
-        return service;
     }
 
 }

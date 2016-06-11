@@ -289,7 +289,8 @@ public class Slf4jAuditLogService implements AuditLogService, Runnable {
             entries.offer(new Slf4jLogEntry(eventId, attributes));
         } else {
             // Worker thread inactive... Log with running thread
-            doLog(eventId, attributes);
+            List<AuditLogFilter> filters = this.filters.getServiceList();
+            doLog(eventId, attributes, filters);
         }
     }
 
@@ -323,8 +324,15 @@ public class Slf4jAuditLogService implements AuditLogService, Runnable {
                     return;
                 }
 
+                // Determine currently available filters
+                List<AuditLogFilter> filters = this.filters.getServiceList();
+                if (filters.isEmpty()) {
+                    filters = null;
+                }
+
+                // Iterate and process log entries, clear list afterwards
                 for (Slf4jLogEntry slf4jLogEntry : list) {
-                    doLog(slf4jLogEntry.entryId, slf4jLogEntry.attributes);
+                    doLog(slf4jLogEntry.entryId, slf4jLogEntry.attributes, filters);
                 }
                 list.clear();
             }
@@ -339,11 +347,14 @@ public class Slf4jAuditLogService implements AuditLogService, Runnable {
      *
      * @param eventId The event identifier
      * @param attributes The associated attributes
+     * @param filters The filters or <code>null</code>
      */
-    protected void doLog(String eventId, Attribute<?>[] attributes) {
-        for (AuditLogFilter filter : filters.getServiceList()) {
-            if (false == filter.accept(eventId, attributes)) {
-                return;
+    protected void doLog(String eventId, Attribute<?>[] attributes, List<AuditLogFilter> filters) {
+        if (null != filters) {
+            for (AuditLogFilter filter : filters) {
+                if (false == filter.accept(eventId, attributes)) {
+                    return;
+                }
             }
         }
 

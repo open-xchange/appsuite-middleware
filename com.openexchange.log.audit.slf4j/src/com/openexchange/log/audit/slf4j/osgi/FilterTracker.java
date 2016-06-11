@@ -47,69 +47,34 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.log.audit.slf4j.osgi;
 
-import java.util.List;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.java.ConcurrentList;
+import com.openexchange.log.audit.AuditLogFilter;
+import com.openexchange.log.audit.slf4j.NoHarmAuditLogFilter;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 
 /**
- * {@link NearRegistryServiceTracker} - A near-registry service tracker.
- * <p>
- * Occurrences of specified service type are collected and available via {@link #getServiceList()}.<br>
- * This is intended to replace {@link #getServices()} since it requires to obtain tracker's mutex on each invocation.
+ * {@link FilterTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implements ServiceListing<S> {
-
-    private final List<S> services;
+public class FilterTracker extends NearRegistryServiceTracker<AuditLogFilter> {
 
     /**
-     * Initializes a new {@link NearRegistryServiceTracker}.
+     * Initializes a new {@link FilterTracker}.
      *
      * @param context The bundle context
-     * @param clazz The service class
      */
-    public NearRegistryServiceTracker(final BundleContext context, final Class<S> clazz) {
-        super(context, clazz, null);
-        services = new ConcurrentList<S>();
+    public FilterTracker(BundleContext context) {
+        super(context, AuditLogFilter.class);
     }
 
     @Override
-    public List<S> getServiceList() {
-        return services;
-    }
-
-    @Override
-    public S addingService(final ServiceReference<S> reference) {
-        S service = context.getService(reference);
-
-        S serviceToAdd = onServiceAvailable(service);
-        if (services.add(serviceToAdd)) {
-            return service;
-        }
-
-        context.ungetService(reference);
-        return null;
-    }
-
-    @Override
-    public void removedService(final ServiceReference<S> reference, final S service) {
-        services.remove(service);
-        context.ungetService(reference);
-    }
-
-    /**
-     * Invoked when a tracked service is available.
-     *
-     * @param service The available service
-     * @return The service to add
-     */
-    protected S onServiceAvailable(S service) {
-        return service;
+    protected AuditLogFilter onServiceAvailable(AuditLogFilter filter) {
+        // Wrap filter to ensure no unexpected exception
+        return new NoHarmAuditLogFilter(filter);
     }
 
 }

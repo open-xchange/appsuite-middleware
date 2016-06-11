@@ -94,7 +94,7 @@ public class Slf4jAuditLogActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        NearRegistryServiceTracker<AuditLogFilter> filters = new NearRegistryServiceTracker<>(context, AuditLogFilter.class);
+        NearRegistryServiceTracker<AuditLogFilter> filters = new FilterTracker(context);
         this.filters = filters;
         rememberTracker(filters);
         openTrackers();
