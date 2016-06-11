@@ -49,16 +49,22 @@
 
 package com.openexchange.log.audit.slf4j;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.java.Strings;
 import com.openexchange.log.audit.Attribute;
+import com.openexchange.log.audit.AuditLogFilter;
 import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
+import com.openexchange.osgi.ServiceListing;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
@@ -74,7 +80,7 @@ import ch.qos.logback.core.status.Status;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class Slf4jAuditLogService implements AuditLogService {
+public class Slf4jAuditLogService implements AuditLogService, Runnable {
 
     private Logger createLogger(Configuration configuration) throws OXException {
         org.slf4j.Logger slf4jLogger = org.slf4j.LoggerFactory.getLogger(AuditLogService.class);
@@ -181,6 +187,24 @@ public class Slf4jAuditLogService implements AuditLogService {
 
     // --------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Initializes a new SLF4J audit log service.
+     *
+     * @param configuration The associated configuration
+     * @param filters The filter listing
+     * @return The new service instance
+     * @throws OXException If service instance cannot be created
+     */
+    public static Slf4jAuditLogService initInstance(Configuration configuration, ServiceListing<AuditLogFilter> filters) throws OXException {
+        Slf4jAuditLogService service = new Slf4jAuditLogService(configuration, filters);
+        service.startUp();
+        return service;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+
+    private static final Slf4jLogEntry POISON = new Slf4jLogEntry("poison", new Attribute[0]);
+
     /** The logger to use */
     private final org.slf4j.Logger logger;
 
@@ -196,22 +220,133 @@ public class Slf4jAuditLogService implements AuditLogService {
     /** Whether to include attribute names */
     private final boolean includeAttributeNames;
 
+    /** The tracked filter s*/
+    private final ServiceListing<AuditLogFilter> filters;
+
+    /** The work queue for log entries */
+    private final BlockingQueue<Slf4jLogEntry> entries;
+
+    /** The active flag */
+    private final AtomicBoolean active;
+
+    /** The shutting-down flag */
+    private boolean stopped; // Protected by synchronized
+
     /**
      * Initializes a new {@link Slf4jAuditLogService}.
      *
      * @throws OXException If initialization fails
      */
-    public Slf4jAuditLogService(Configuration configuration) throws OXException {
+    private Slf4jAuditLogService(Configuration configuration, ServiceListing<AuditLogFilter> filters) throws OXException {
         super();
+        this.filters = filters;
         logger = createLogger(configuration);
         dateFormatter = configuration.getDateFormatter();
         level = configuration.getLevel();
         delimiter = null == configuration.getDelimiter() ? "" : configuration.getDelimiter();
         includeAttributeNames = configuration.isIncludeAttributeNames();
+
+        active = new AtomicBoolean(false);
+        stopped = false;
+        entries = new LinkedBlockingQueue<Slf4jLogEntry>();
+    }
+
+    /**
+     * Starts-up this service.
+     */
+    private synchronized boolean startUp() {
+        if (stopped) {
+            // Stopped...
+            return false;
+        }
+
+        if (active.compareAndSet(false, true)) {
+            Thread thread = new Thread(this, Slf4jAuditLogService.class.getSimpleName());
+            thread.start();
+        }
+
+        return true;
+    }
+
+    /**
+     * Shuts-down this service.
+     */
+    public synchronized void shutDown() {
+        if (active.compareAndSet(true, false)) {
+            entries.offer(POISON);
+        }
+        stopped = true;
     }
 
     @Override
     public void log(String eventId, Attribute<?>... attributes) {
+        boolean stillRunning = true;
+        if (false == active.get()) {
+            stillRunning = startUp();
+        }
+
+        if (stillRunning) {
+            entries.offer(new Slf4jLogEntry(eventId, attributes));
+        } else {
+            // Worker thread inactive... Log with running thread
+            doLog(eventId, attributes);
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+            List<Slf4jLogEntry> list = new ArrayList<Slf4jLogEntry>(128);
+            while (active.get()) {
+                // Blocking take from queue
+                {
+                    Slf4jLogEntry next;
+                    try {
+                        next = entries.take();
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                    // Poisoned?
+                    if (POISON == next) {
+                        return;
+                    }
+                    list.add(next);
+                }
+
+                // Drain more entries (if any)
+                entries.drainTo(list);
+
+                // Poisoned?
+                boolean quit = list.remove(POISON);
+                if (quit) {
+                    return;
+                }
+
+                for (Slf4jLogEntry slf4jLogEntry : list) {
+                    doLog(slf4jLogEntry.entryId, slf4jLogEntry.attributes);
+                }
+                list.clear();
+            }
+        } finally {
+            // Going to leave...
+            active.set(false);
+        }
+    }
+
+    /**
+     * Logs the specified event identifier and attributes (in given order).
+     *
+     * @param eventId The event identifier
+     * @param attributes The associated attributes
+     */
+    protected void doLog(String eventId, Attribute<?>[] attributes) {
+        for (AuditLogFilter filter : filters.getServiceList()) {
+            if (false == filter.accept(eventId, attributes)) {
+                return;
+            }
+        }
+
         String message = compileMessage(eventId, attributes);
         if (null != message) {
             switch (level) {

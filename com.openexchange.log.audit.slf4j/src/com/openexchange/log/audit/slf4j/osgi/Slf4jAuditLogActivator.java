@@ -58,12 +58,14 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
+import com.openexchange.log.audit.AuditLogFilter;
 import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.log.audit.slf4j.Slf4jAuditLogService;
 import com.openexchange.log.audit.slf4j.Configuration;
 import com.openexchange.log.audit.slf4j.SimpleDateFormatter;
 import com.openexchange.log.audit.slf4j.Slf4jLogLevel;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 
 /**
  * {@link Slf4jAuditLogActivator}
@@ -74,6 +76,9 @@ import com.openexchange.osgi.HousekeepingActivator;
 public class Slf4jAuditLogActivator extends HousekeepingActivator {
 
     private ServiceRegistration<AuditLogService> serviceRegistration;
+    private Slf4jAuditLogService service;
+
+    private volatile NearRegistryServiceTracker<AuditLogFilter> filters;
 
     /**
      * Initializes a new {@link Slf4jAuditLogActivator}.
@@ -89,6 +94,11 @@ public class Slf4jAuditLogActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        NearRegistryServiceTracker<AuditLogFilter> filters = new NearRegistryServiceTracker<>(context, AuditLogFilter.class);
+        this.filters = filters;
+        rememberTracker(filters);
+        openTrackers();
+
         Reloadable reloadable = new Reloadable() {
 
             @Override
@@ -124,7 +134,9 @@ public class Slf4jAuditLogActivator extends HousekeepingActivator {
                 ConfigurationService configService = getService(ConfigurationService.class);
                 Configuration configuration = buildConfiguration(configService);
                 if (configuration.isEnabled()) {
-                    serviceRegistration = context.registerService(AuditLogService.class, new Slf4jAuditLogService(configuration), null);
+                    Slf4jAuditLogService service = Slf4jAuditLogService.initInstance(configuration, filters);
+                    this.service = service;
+                    serviceRegistration = context.registerService(AuditLogService.class, service, null);
                 }
             } catch (Exception e) {
                 org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Slf4jAuditLogActivator.class);
@@ -137,9 +149,16 @@ public class Slf4jAuditLogActivator extends HousekeepingActivator {
      * Unregisters audit logging.
      */
     synchronized void unregisterService() {
+        ServiceRegistration<AuditLogService> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
+            this.serviceRegistration = null;
             serviceRegistration.unregister();
-            serviceRegistration = null;
+        }
+
+        Slf4jAuditLogService service = this.service;
+        if (null != service) {
+            this.service = null;
+            service.shutDown();
         }
     }
 
