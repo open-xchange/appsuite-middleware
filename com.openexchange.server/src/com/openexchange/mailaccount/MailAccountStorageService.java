@@ -131,6 +131,17 @@ public interface MailAccountStorageService {
     void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException;
 
     /**
+     * Checks if the mail account referenced by specified identifier does exist.
+     *
+     * @param id The mail account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if exists; otherwise <code>false</code>
+     * @throws OXException If check for existence fails
+     */
+    boolean existsMailAccount(int id, int userId, int contextId) throws OXException;
+
+    /**
      * Gets the mail account identified by specified identifier.
      *
      * @param id The mail account identifier

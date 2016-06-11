@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.davekoelle,
  com.openexchange.api2,
  com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.configuration,
  com.openexchange.contact,
  com.openexchange.contacts.json.mapping,

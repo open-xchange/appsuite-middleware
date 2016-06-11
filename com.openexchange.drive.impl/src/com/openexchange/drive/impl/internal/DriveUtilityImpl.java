@@ -66,6 +66,7 @@ import com.openexchange.drive.DriveShareLink;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.FolderStats;
 import com.openexchange.drive.NotificationParameters;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
@@ -76,6 +77,7 @@ import com.openexchange.drive.impl.metadata.DirectoryMetadataParser;
 import com.openexchange.drive.impl.metadata.FileMetadataParser;
 import com.openexchange.drive.impl.metadata.JsonDirectoryMetadata;
 import com.openexchange.drive.impl.metadata.JsonFileMetadata;
+import com.openexchange.drive.impl.storage.DriveStorage;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -429,6 +431,27 @@ public class DriveUtilityImpl implements DriveUtility {
     @Override
     public JSONArray autocomplete(final DriveSession session, final String query, Map<String, Object> parameters) throws OXException {
         return AutocompleteHelper.autocomplete(session, query, parameters);
+    }
+
+    @Override
+    public FolderStats getTrashFolderStats(DriveSession session) throws OXException {
+        DriveStorage storage = new SyncSession(session).getStorage();
+        if (false == storage.hasTrashFolder()) {
+            return null;
+        }
+        FileStorageFolder trashFolder = storage.getTrashFolder();
+        return storage.getFolderStats(trashFolder.getId(), true);
+    }
+
+    @Override
+    public FolderStats emptyTrash(DriveSession session) throws OXException {
+        DriveStorage storage = new SyncSession(session).getStorage();
+        if (false == storage.hasTrashFolder()) {
+            return null;
+        }
+        FileStorageFolder trashFolder = storage.getTrashFolder();
+        storage.getFolderAccess().clearFolder(trashFolder.getId(), true);
+        return storage.getFolderStats(trashFolder.getId(), true);
     }
 
 }

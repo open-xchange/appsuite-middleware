@@ -141,6 +141,11 @@ public enum FileStorageCapability {
      */
     MAIL_ATTACHMENTS,
 
+    /**
+     * Automatic add new file version if file already exists
+     */
+    AUTO_NEW_VERSION,
+
 
     ;
 }

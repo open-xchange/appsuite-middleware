@@ -88,6 +88,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -1154,6 +1155,51 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final Connection rcon = Database.get(contextId, false);
         try {
             return getMailAccount(id, userId, contextId, rcon);
+        } finally {
+            Database.back(contextId, false, rcon);
+        }
+    }
+
+    /**
+     * Checks if the mail account referenced by specified identifier does exist.
+     *
+     * @param id The mail account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @return <code>true</code> if exists; otherwise <code>false</code>
+     * @throws OXException If check for existence fails
+     */
+    public boolean existsMailAccount(int id, int userId, int contextId, Connection con) throws OXException {
+        if (null == con) {
+            return existsMailAccount(id, userId, contextId);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, id);
+            stmt.setLong(3, userId);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final SQLException e) {
+            if (null != stmt) {
+                final String sql = stmt.toString();
+                LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() { @Override public String toString() { return sql.substring(sql.indexOf(": ") + 2);}});
+            }
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
+    public boolean existsMailAccount(int id, int userId, int contextId) throws OXException {
+        Connection rcon = Database.get(contextId, false);
+        try {
+            return existsMailAccount(id, userId, contextId, rcon);
         } finally {
             Database.back(contextId, false, rcon);
         }

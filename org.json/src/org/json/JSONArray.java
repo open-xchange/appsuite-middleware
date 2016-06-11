@@ -78,6 +78,9 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
 
     private static final long serialVersionUID = -3408431864592339725L;
 
+    /** The special JSON NULL object */
+    private static final Object NULL = JSONObject.NULL;
+
     /**
      * The arrayList where the JSONArray's properties are kept.
      */
@@ -441,7 +444,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
      * @return true if the value at the index is null, or if there is no value.
      */
     public boolean isNull(final int index) {
-        return JSONObject.NULL.equals(opt(index));
+        return NULL.equals(opt(index));
     }
 
     /**
@@ -640,7 +643,10 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
      */
     public String optString(final int index, final String defaultValue) {
         final Object o = opt(index);
-        return o != null ? o.toString() : defaultValue;
+        if (o == null) {
+            return defaultValue;
+        }
+        return NULL.equals(o) ? defaultValue : o.toString();
     }
 
     /**
@@ -824,7 +830,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
             this.myArrayList.set(index, value);
         } else {
             while (index != length()) {
-                put(JSONObject.NULL);
+                put(NULL);
             }
             put(value);
         }
@@ -851,7 +857,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
             this.myArrayList.add(index, value);
         } else {
             while (index != length()) {
-                put(JSONObject.NULL);
+                put(NULL);
             }
             put(value);
         }
@@ -1091,7 +1097,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                     ja.put(false);
                     break;
                 case VALUE_NULL:
-                    ja.put(JSONObject.NULL);
+                    ja.put(NULL);
                     break;
                 case VALUE_NUMBER_FLOAT:
                     ja.put(jParser.getDecimalValue());

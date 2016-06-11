@@ -451,6 +451,12 @@ public final class Databases {
         }
     }
 
+    /**
+     * Rolls specified connection back to given save-point.
+     *
+     * @param con The connection to roll-back
+     * @param savePoint The save-point to restore to
+     */
     public static void rollback(Connection con, Savepoint savePoint) {
         if (null == con || null == savePoint) {
             return;
@@ -462,6 +468,30 @@ public final class Databases {
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Checks if specified column exists.
+     *
+     * @param con The connection
+     * @param table The table name
+     * @param column The column name
+     * @return <code>true</code> if specified column exists; otherwise <code>false</code>
+     * @throws SQLException If an SQL error occurs
+     */
+    public static boolean columnExists(final Connection con, final String table, final String column) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getColumns(null, null, table, column);
+            while (rs.next()) {
+                retval = rs.getString(4).equalsIgnoreCase(column);
+            }
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return retval;
     }
 
 }

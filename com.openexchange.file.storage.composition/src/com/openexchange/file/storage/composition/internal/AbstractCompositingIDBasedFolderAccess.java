@@ -49,12 +49,11 @@
 
 package com.openexchange.file.storage.composition.internal;
 
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.containsForeignPermissions;
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
-import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withRelativeID;
-import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withUniqueID;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.*;
+import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.*;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
@@ -67,6 +66,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.DefaultTypeAwareFileStorageFolder;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -75,16 +76,19 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.FolderStatsAware;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.file.storage.RootFolderPermissionsAware;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.RootFolderPermissionsAware;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * {@link AbstractCompositingIDBasedFolderAccess}
@@ -402,6 +406,61 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
          * convert to array & return
          */
         return sharedFolders.toArray(new FileStorageFolder[sharedFolders.size()]);
+    }
+
+    @Override
+    public long getTotalSize(String folder) throws OXException {
+        /*
+         * get directly if supported
+         */
+        FolderID folderID = new FolderID(folder);
+        FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
+        if (FolderStatsAware.class.isInstance(folderAccess)) {
+            return ((FolderStatsAware) folderAccess).getTotalSize(folderID.getFolderId());
+        }
+        /*
+         * count manually as fallback
+         */
+        long totalSize = 0;
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = getFileAccess(folderID).getDocuments(folderID.getFolderId(), Arrays.asList(Field.FILE_SIZE)).results();
+            while (searchIterator.hasNext()) {
+                File file = searchIterator.next();
+                if (null != file) {
+                    totalSize += file.getFileSize();
+                }
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return Long.valueOf(totalSize);
+    }
+
+    @Override
+    public long getNumFiles(String folder) throws OXException {
+        /*
+         * get directly if supported
+         */
+        FolderID folderID = new FolderID(folder);
+        FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
+        if (FolderStatsAware.class.isInstance(folderAccess)) {
+            return ((FolderStatsAware) folderAccess).getNumFiles(folderID.getFolderId());
+        }
+        /*
+         * count manually as fallback
+         */
+        long numFiles = 0;
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = getFileAccess(folderID).getDocuments(folderID.getFolderId(), Arrays.asList(Field.ID)).results();
+            while (searchIterator.hasNext()) {
+                numFiles++;
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return Long.valueOf(numFiles);
     }
 
     private void fire(final Event event) {

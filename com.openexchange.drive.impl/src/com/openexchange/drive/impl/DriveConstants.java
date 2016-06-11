@@ -130,7 +130,7 @@ public class DriveConstants {
      * 2: client defined exclusion filters
      * 3: .drive-meta
      * 4: subfolders action, sharing
-     * 5: push for multiple root folders (listen/subscribe), inline .drive-meta
+     * 5: push for multiple root folders (listen/subscribe), inline .drive-meta, trash stats, empty trash
      */
     public static final int SUPPORTED_API_VERSION = 5;
 

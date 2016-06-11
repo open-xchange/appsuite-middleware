@@ -78,6 +78,7 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.Pair;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -92,9 +93,12 @@ import com.openexchange.tools.iterator.SearchIterator;
 public class AutocompleteHelper {
 
     public static JSONArray autocomplete(final DriveSession session, final String query, Map<String, Object> parameters) throws OXException {
-        String context = (String) parameters.get("context");
-        if (false == "invite".equals(context)) {
-            throw new UnsupportedOperationException(context);
+        /*
+         * only mode "invite" is supported for now
+         */
+        String mode = (String) parameters.get("mode");
+        if (false == "invite".equals(mode)) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Mode \"" + mode + "\" is not supported.");
         }
         JSONArray jsonArray = new JSONArray();
         /*

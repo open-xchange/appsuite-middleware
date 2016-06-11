@@ -93,6 +93,8 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("shares", new SharesAction());
         actions.put("notify", new NotifyAction());
         actions.put("autocomplete", new AutocompleteAction());
+        actions.put("trashStats", new TrashStatsAction());
+        actions.put("emptyTrash", new EmptyTrashAction());
     }
 
     @Override

@@ -1083,7 +1083,7 @@ public class DefaultShareService implements ShareService {
              * create new anonymous recipient for this target
              */
             AnonymousRecipient recipient = new AnonymousRecipient(LINK_PERMISSION_BITS, null, null);
-            LOG.info("Adding new share link to target {} for recipient {} in context {}...", target, recipient, I(session.getContextId()));
+            LOG.info("Adding new share link to {} for {} in context {}...", target, recipient, I(session.getContextId()));
             ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target);
             checkQuota(session, connectionHelper, Collections.singletonList(shareInfo));
             /*
@@ -1096,7 +1096,7 @@ public class DefaultShareService implements ShareService {
              */
             targetUpdate.run();
             connectionHelper.commit();
-            LOG.info("Share link to target {} for recipient {} in context {} added successfully.", target, recipient, I(session.getContextId()));
+            LOG.info("Share link to {} for {} in context {} added successfully.", target, recipient, I(session.getContextId()));
             Date timestamp = moduleSupport.load(target, session).getTimestamp();
             return new DefaultShareLink(shareInfo, timestamp, true);
         } finally {

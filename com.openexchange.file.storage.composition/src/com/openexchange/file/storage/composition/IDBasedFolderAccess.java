@@ -366,4 +366,20 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
      */
     Quota[] getQuotas(String folder, Quota.Type[] types) throws OXException;
 
+    /**
+     * Gets the total number of files in a folder.
+     *
+     * @param folderId The folder identifier
+     * @return The number of files, or <code>-1</code> if unknown
+     */
+    long getNumFiles(String folderId) throws OXException;
+
+    /**
+     * Gets the total size of all files (and file versions) in a folder.
+     *
+     * @param folderId The folder identifier
+     * @return The total size of all document versions in a folder, or <code>-1</code> if unknown
+     */
+    long getTotalSize(String folderId) throws OXException;
+
 }

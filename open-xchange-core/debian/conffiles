@@ -67,6 +67,7 @@ opt/open-xchange/etc/settings/participant-blacklist.properties
 opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties
 opt/open-xchange/etc/share.properties
+opt/open-xchange/etc/slf4j-auditlog.properties
 opt/open-xchange/etc/sms-tools.properties
 opt/open-xchange/etc/snippets.properties
 opt/open-xchange/etc/subscribe.properties

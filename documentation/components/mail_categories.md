@@ -6,6 +6,7 @@ title: Mail categories
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
+- [Prerequisites](#prerequisites)
 - [Quickstart guide](#quickstart-guide)
 	- [1. Install the open-xchange-mail-categories package.](#1-install-the-open-xchange-mail-categories-package)
 	- [2. Add 'mail_categories' capability](#2-add-mailcategories-capability)
@@ -35,14 +36,25 @@ title: Mail categories
 
 <!-- /TOC -->
 
+## Prerequisites
+
+The mail categorization feature has some requirements towards the used IMAP server for the primary mail accounts:
+
+1.	The server needs to fully support user flags, i.e.
+	*	SEARCH by KEYWORD and UNKEYWORD
+	*	STORE for user flags, e.g. `STORE 1:3 +FLAGS ($offers)`
+	*	providing fast results for keyword searches, otherwise responsiveness of the mail views might suffer
+2. A Sieve server supporting the [`imap4flags`](https://tools.ietf.org/html/rfc5232) extension.
+3. The App Suite middleware must have the `open-xchange-mailfilter` packaged installed and configured properly.
+
+Open-Xchange recommends the use of Dovecot 2.2 or higher along with the Pigeonhole Sieve implementation.
+
 
 ## Quickstart guide
 
 This guide gives a quick overview on how to get the mail categories feature running. If you instead want to know more about the feature and its configuration details take a look at the other chapters below.
 
 This guide provides the quickest way to get the feature running. It will activate the feature for every user on the system and it will create five categories (3 system and 2 user categories) in total. Therefore it will not scope all configuration details. But it can be used as a guideline to adapt the configuration to ones individual needs. This guide also assumes that mails will not already be flagged by another system (e.g. system wide sieve rules).
-
-This feature requires an imap server with support of the the imap4flags extension.
 
 In order to get the mail categories feature running you have to do the following steps:
 

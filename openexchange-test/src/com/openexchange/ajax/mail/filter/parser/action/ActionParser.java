@@ -51,7 +51,7 @@ package com.openexchange.ajax.mail.filter.parser.action;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 
 
 /**

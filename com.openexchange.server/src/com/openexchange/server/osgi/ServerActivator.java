@@ -169,6 +169,7 @@ import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
+import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.internal.LoginNameRecorder;
@@ -415,6 +416,10 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // I18n service load
         track(I18nService.class, new I18nServiceListener(context));
+
+        // Audit logger
+        track(AuditLogService.class, new RegistryCustomizer<AuditLogService>(context, AuditLogService.class));
+
 
         // Mail account delete listener
         track(MailAccountDeleteListener.class, new DeleteListenerServiceTracker(context));

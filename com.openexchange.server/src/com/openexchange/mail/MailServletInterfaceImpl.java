@@ -2749,7 +2749,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (autosave) {
             return autosaveDraft(draftMail, accountId);
         }
-        initConnection(accountId);
+        initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
         String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         if (!draftMail.containsSentDate()) {
             draftMail.setSentDate(new Date());
@@ -2767,7 +2767,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private MailPath autosaveDraft(ComposedMailMessage draftMail, int accountId) throws OXException {
-        initConnection(accountId);
+        initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
         String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         /*
          * Auto-save draft
@@ -3149,7 +3149,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage mailToAppend, ComposeType type, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException {
         // Initialize
-        initConnection(accountId);
+        initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
         MailTransport transport = MailTransport.getInstance(session, accountId);
         try {
             // Invariants
@@ -3160,6 +3160,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             // State variables
             OXException oxError = null;
             boolean first = true;
+            String messageId = null;
             for (ComposedMailMessage composedMail : transportMails) {
                 boolean mailSent = false;
                 try {
@@ -3185,7 +3186,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 } else {
                                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                                 }
+                                messageId = sentMail.getHeader("Message-ID", null);
                             } else {
+                                composedMail.setHeader("Message-ID", messageId);
                                 sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                             }
                             mailSent = true;
@@ -3305,6 +3308,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
             // Append to Sent folder
             if (settingsAllowAppendToSend && null != mailToAppend) {
+                mailToAppend.setHeader("Message-ID", messageId);
                 ids.add(append2SentFolder(mailToAppend).toString());
             }
 
@@ -4583,6 +4587,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         return ranges.contains(actual);
+    }
+
+    private boolean isTransportOnly(int accountId) throws OXException {
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+        return (null != storageService) && (false == storageService.existsMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
 }

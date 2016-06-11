@@ -62,6 +62,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.json.FileMetadataWriter;
+import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -140,6 +142,26 @@ public abstract class AbstractFileAction implements AJAXActionService {
      */
     protected AJAXRequestResult result(final File file, final InfostoreRequest request) throws OXException {
         return new AJAXRequestResult(file, new Date(file.getSequenceNumber()), "infostore");
+    }
+
+    /**
+     * Creates an appropriate result for a single file.
+     *
+     * @param file The file result
+     * @param request The request
+     * @param saveAction Action performed when saving the file
+     * @return The AJAX result for a single file
+     * @throws OXException If result cannot be created
+     */
+    protected AJAXRequestResult result(final File file, final AJAXInfostoreRequest request, String saveAction) throws OXException {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("save_action", saveAction);
+            json.put("file", new FileMetadataWriter(Services.getFieldCollector()).write(request, file));
+            return new AJAXRequestResult(json);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
     }
 
     protected AJAXRequestResult result(final List<String> ids, final InfostoreRequest request) throws OXException {

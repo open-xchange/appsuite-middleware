@@ -171,6 +171,10 @@ public abstract class CreateCore extends ContextAbstraction {
 
             int lineNumber = 2;
             for (String[] nextLine; (nextLine = reader.readNext()) != null;) {
+
+                if (nextLine.length == 0 || nextLine.length == 1 && nextLine[0].isEmpty()) {
+                    continue; // skip empty lines (Bug #45259)
+                }
                 // nextLine[] is an array of values from the line
                 try {
                     Context context = getContext(nextLine, idarray);

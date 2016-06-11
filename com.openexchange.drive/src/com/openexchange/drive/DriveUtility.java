@@ -226,4 +226,20 @@ public interface DriveUtility {
      */
     JSONArray autocomplete(DriveSession session, String query, Map<String, Object> parameters) throws OXException;
 
+    /**
+     * Gets statistics about the trash folder contents.
+     *
+     * @param session The session
+     * @return The statistics, or <code>null</code> if no trash folder available
+     */
+    FolderStats getTrashFolderStats(DriveSession session) throws OXException;
+
+    /**
+     * Empties the trash folder.
+     *
+     * @param session The session
+     * @return Updated statistics of the trash folder after emptying, or <code>null</code> if no trash folder available
+     */
+    FolderStats emptyTrash(DriveSession session) throws OXException;
+
 }

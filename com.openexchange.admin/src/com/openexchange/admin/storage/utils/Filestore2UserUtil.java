@@ -69,6 +69,7 @@ import java.util.concurrent.CompletionService;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -205,7 +206,7 @@ public class Filestore2UserUtil {
      * @return The user count
      * @throws StorageException If user count cannot be returned
      */
-    public static int getUserCountFor(int filestoreId, AdminCacheExtended cache) throws StorageException {
+    public static int getUserCountFor(int filestoreId, AdminCache cache) throws StorageException {
         Connection con = null;
         try {
             con = cache.getReadConnectionForConfigDB();
@@ -504,7 +505,7 @@ public class Filestore2UserUtil {
                         unmarkOnError = false;
                         return;
                     }
-                    
+
                     // Re-throw...
                     throw e;
                 }

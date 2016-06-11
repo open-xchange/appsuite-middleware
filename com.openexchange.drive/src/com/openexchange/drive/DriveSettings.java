@@ -67,6 +67,8 @@ public class DriveSettings {
     private Map<String, String> localizedFolders;
     private Set<String> capabilities;
     private Long minUploadChunk;
+    private int minSearchChars;
+    private boolean hasTrashFolder;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -217,6 +219,42 @@ public class DriveSettings {
      */
     public void setMinUploadChunk(Long minUploadChunk) {
         this.minUploadChunk = minUploadChunk;
+    }
+
+    /**
+     * Gets the minSearchChars
+     *
+     * @return The minSearchChars
+     */
+    public int getMinSearchChars() {
+        return minSearchChars;
+    }
+
+    /**
+     * Sets the minSearchChars
+     *
+     * @param minSearchChars The minSearchChars to set
+     */
+    public void setMinSearchChars(int minSearchChars) {
+        this.minSearchChars = minSearchChars;
+    }
+
+    /**
+     * Gets the hasTrashFolder
+     *
+     * @return The hasTrashFolder
+     */
+    public boolean hasTrashFolder() {
+        return hasTrashFolder;
+    }
+
+    /**
+     * Sets the hasTrashFolder
+     *
+     * @param hasTrashFolder The hasTrashFolder to set
+     */
+    public void setHasTrashFolder(boolean hasTrashFolder) {
+        this.hasTrashFolder = hasTrashFolder;
     }
 
 }

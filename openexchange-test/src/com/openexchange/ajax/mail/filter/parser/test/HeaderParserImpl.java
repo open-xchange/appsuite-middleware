@@ -52,11 +52,11 @@ package com.openexchange.ajax.mail.filter.parser.test;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.comparison.AbstractComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
+import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 import com.openexchange.ajax.mail.filter.parser.comparison.ComparisonParser;
 import com.openexchange.ajax.mail.filter.parser.comparison.ComparisonParserFactory;
-import com.openexchange.ajax.mail.filter.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.test.HeaderTest;
 
 
 /**
@@ -75,8 +75,8 @@ public class HeaderParserImpl implements TestParser {
 		}
 
 		final JSONArray jsonValueArray = jsonObject.getJSONArray("values");
-		final String[] values = new String[jsonHeaderArray.length()];
-		for (int a = 0; a < headers.length; a++) {
+		final String[] values = new String[jsonValueArray.length()];
+		for (int a = 0; a < values.length; a++) {
 			values[a] = jsonValueArray.getString(a);
 		}
 

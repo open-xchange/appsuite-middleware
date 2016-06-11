@@ -66,14 +66,18 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractIMAPStoreContainer.class);
 
+    protected final int accountId;
     protected final String name;
     protected final boolean propagateClientIp;
+    protected final Session session;
 
     /**
      * Initializes a new {@link AbstractIMAPStoreContainer}.
      */
-    protected AbstractIMAPStoreContainer(boolean propagateClientIp) {
+    protected AbstractIMAPStoreContainer(int accountId, Session session, boolean propagateClientIp) {
         super();
+        this.accountId = accountId;
+        this.session = session;
         this.propagateClientIp = propagateClientIp;
         name = PROTOCOL_NAME;
     }
@@ -103,14 +107,14 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
          * ... and connect it
          */
         try {
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
         } catch (final AuthenticationFailedException e) {
             /*
              * Retry connect with AUTH=PLAIN disabled
              */
             imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
             imapStore = (IMAPStore) imapSession.getStore(name);
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
         }
 
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());

@@ -80,6 +80,7 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.threader.references.ConversationCache;
 import com.openexchange.imap.util.ExtAccountFolderField;
+import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -155,6 +156,7 @@ public final class IMAPActivator extends HousekeepingActivator {
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             track(CacheEventService.class, new ListLsubInvalidator(context));
             trackService(FolderService.class);
+            trackService(AuditLogService.class);
             openTrackers();
             /*
              * Command provider

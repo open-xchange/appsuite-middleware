@@ -64,10 +64,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import org.osgi.framework.BundleContext;
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -85,9 +82,8 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
-import com.openexchange.admin.storage.utils.PoolAndSchema;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -109,9 +105,6 @@ import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INVERT;
 import com.openexchange.sql.grammar.Table;
 import com.openexchange.sql.grammar.UPDATE;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 
 /**
  * @author d7
@@ -1787,81 +1780,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     private boolean hasUsers(int id) throws StorageException {
-        Set<PoolAndSchema> pools;
-        {
-            Connection con = null;
-            try {
-                con = cache.getReadConnectionForConfigDB();
-                pools = PoolAndSchema.determinePoolsAndSchemas(cache.getServerId(), con);
-            } catch (PoolException e) {
-                log.error("Pooling Error", e);
-                throw new StorageException(e);
-            } finally {
-                if (null != con) {
-                    try {
-                        cache.pushReadConnectionForConfigDB(con);
-                    } catch (PoolException e) {
-                        log.error("Failed to push back read-only connection to configdb.", e);
-                    }
-                }
-            }
-        }
-
-        return hasUsers(pools, id);
-    }
-
-    private boolean hasUsers(Set<PoolAndSchema> pools, final int id) throws StorageException {
-        CompletionService<Boolean> completionService = new ThreadPoolCompletionService<Boolean>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
-        int taskCount = 0;
-
-        final AdminCacheExtended cache = ClientAdminThreadExtended.cache;
-        for (final PoolAndSchema poolAndSchema : pools) {
-            completionService.submit(new Callable<Boolean>() {
-
-                @Override
-                public Boolean call() throws StorageException {
-                    Connection con = null;
-                    PreparedStatement stmt = null;
-                    ResultSet result = null;
-                    try {
-                        con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.getPoolId(), poolAndSchema.getSchema());
-                        stmt = con.prepareStatement("SELECT u.filestore_id, u.id FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id=?");
-                        stmt.setInt(1, id);
-                        result = stmt.executeQuery();
-
-                        return Boolean.valueOf(result.next());
-                    } catch (PoolException e) {
-                        log.error("Pool Error", e);
-                        throw new StorageException(e);
-                    } catch (SQLException e) {
-                        log.error("SQL Error", e);
-                        throw new StorageException(e);
-                    } finally {
-                        closeSQLStuff(result, stmt);
-                        if (null != con) {
-                            try {
-                                cache.pushWRITENoTimeoutConnectionForPoolId(poolAndSchema.getPoolId(), con);
-                            } catch (PoolException e) {
-                                log.error("Error pushing connection to pool!", e);
-                            }
-                        }
-                    }
-                }
-            });
-            taskCount++;
-        }
-
-        // Await completion
-        List<Boolean> counts = ThreadPools.<Boolean, StorageException> takeCompletionService(completionService, taskCount, OXUtilMySQLStorage.EXCEPTION_FACTORY);
-
-        boolean retval = false;
-        for (Boolean bool : counts) {
-            if (bool.booleanValue()) {
-                return true;
-            }
-        }
-
-        return retval;
+        return Filestore2UserUtil.getUserCountFor(id, cache) > 0;
     }
 
     @Override

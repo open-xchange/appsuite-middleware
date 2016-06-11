@@ -317,6 +317,7 @@ public abstract class PasswordChangeService {
 
                 jcs = cacheService.getCache("MailAccount");
                 jcs.remove(cacheService.newCacheKey(contextId, String.valueOf(0), String.valueOf(userId)));
+                jcs.remove(cacheService.newCacheKey(contextId, Integer.toString(userId)));
                 jcs.invalidateGroup(Integer.toString(contextId));
             } catch (final OXException e) {
                 // Ignore

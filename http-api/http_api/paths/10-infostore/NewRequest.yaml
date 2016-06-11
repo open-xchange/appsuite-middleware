@@ -52,6 +52,11 @@
       - text/html
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: try_add_version
+        type: boolean
+        description: Add new file version if file name exists
+        required: false
       - in: formData
         name: json
         type: string

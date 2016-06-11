@@ -230,13 +230,29 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public int removeFileChecksumsInFolders(List<FolderID> folderIDs) throws OXException {
+        int deleted = 0;
         Connection connection = databaseService.getWritable(contextID);
         try {
-            return deleteFileChecksumsInFolders(connection, contextID, folderIDs.toArray(new FolderID[folderIDs.size()]));
+            for (int i = 0; i < folderIDs.size(); i += DELETE_CHUNK_SIZE) {
+                /*
+                 * prepare chunk
+                 */
+                int length = Math.min(folderIDs.size(), i + DELETE_CHUNK_SIZE) - i;
+                List<FolderID> chunk = folderIDs.subList(i, i + length);
+                /*
+                 * delete chunk
+                 */
+                deleted += deleteFileChecksumsInFolders(connection, contextID, chunk.toArray(new FolderID[chunk.size()]));
+            }
+            return deleted;
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backWritable(contextID, connection);
+            if (0 < deleted) {
+                databaseService.backWritable(contextID, connection);
+            } else {
+                databaseService.backWritableAfterReading(contextID, connection);
+            }
         }
     }
 
@@ -275,7 +291,11 @@ public class RdbChecksumStore implements ChecksumStore {
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backWritable(contextID, connection);
+            if (0 < deleted) {
+                databaseService.backWritable(contextID, connection);
+            } else {
+                databaseService.backWritableAfterReading(contextID, connection);
+            }
         }
         return deleted;
     }
@@ -438,9 +458,9 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public int touchDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException {
+        int touched = 0;
         Connection connection = databaseService.getWritable(contextID);
         try {
-            int touched = 0;
             for (int i = 0; i < directoryChecksums.size(); i += INSERT_CHUNK_SIZE) {
                 /*
                  * prepare chunk
@@ -459,12 +479,16 @@ public class RdbChecksumStore implements ChecksumStore {
                  */
                 touched += touchDirectoryChecksums(connection, contextID, uuids);
             }
-            return touched;
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backWritable(contextID, connection);
+            if (0 < touched) {
+                databaseService.backWritable(contextID, connection);
+            } else {
+                databaseService.backWritableAfterReading(contextID, connection);
+            }
         }
+        return touched;
     }
 
     @Override
@@ -490,8 +514,8 @@ public class RdbChecksumStore implements ChecksumStore {
             /*
              * select chunk-wise
              */
-            for (int i = 0; i < checksums.size(); i += SELECT_WHERE_IN_CHUNK_SIZE) {
-                int length = Math.min(checksums.size(), i + SELECT_WHERE_IN_CHUNK_SIZE) - i;
+            for (int i = 0; i < folderIDs.size(); i += SELECT_WHERE_IN_CHUNK_SIZE) {
+                int length = Math.min(folderIDs.size(), i + SELECT_WHERE_IN_CHUNK_SIZE) - i;
                 checksums.addAll(selectDirectoryChecksums(connection, contextID, folderIDs.subList(i, i + length)));
             }
             return checksums;
@@ -739,25 +763,6 @@ public class RdbChecksumStore implements ChecksumStore {
             DBUtils.closeSQLStuff(stmt);
         }
         return fileChecksums;
-    }
-
-    private static int insertDirectoryChecksum(Connection connection, int cid, DirectoryChecksum directoryChecksum) throws SQLException, OXException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(SQL.INSERT_DIRECTORY_CHECKSUM_STMT);
-            stmt.setString(1, directoryChecksum.getUuid());
-            stmt.setInt(2, cid);
-            stmt.setInt(3, directoryChecksum.getUserID());
-            stmt.setInt(4, directoryChecksum.getView());
-            stmt.setString(5, escapeFolder(directoryChecksum.getFolderID()));
-            stmt.setLong(6, directoryChecksum.getSequenceNumber());
-            stmt.setString(7, directoryChecksum.getETag());
-            stmt.setString(8, directoryChecksum.getChecksum());
-            stmt.setLong(9, System.currentTimeMillis());
-            return SQL.logExecuteUpdate(stmt);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
     }
 
     private static int insertDirectoryChecksums(Connection connection, int cid, DirectoryChecksum[] directoryChecksums) throws SQLException, OXException {

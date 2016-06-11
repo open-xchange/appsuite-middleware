@@ -118,7 +118,6 @@ import com.openexchange.imap.sort.IMAPSort.ImapSortResult;
 import com.openexchange.imap.util.AppendEmptyMessageTracer;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.imap.util.ImapUtility;
-import com.openexchange.imap.util.ImmutableReference;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -317,26 +316,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return property.isDefined() ? property.get().booleanValue() : false;
     }
 
-    private static volatile ImmutableReference<String> allMessagesFolder;
     /** The full name for the virtual "all messages" folder */
-    public static String allMessagesFolder() {
-        ImmutableReference<String> fa = allMessagesFolder;
-        if (null == fa) {
-            synchronized (IMAPMessageStorage.class) {
-                fa = allMessagesFolder;
-                if (null == fa) {
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
-                    if (null == service) {
-                        return null;
-                    }
+    public static String allMessagesFolder(Session session) throws OXException {
+        return allMessagesFolder(session.getUserId(), session.getContextId());
+    }
 
-                    String fn = service.getProperty("com.openexchange.find.basic.mail.allMessagesFolder", "").trim();
-                    fa = new ImmutableReference<String>(fn.length() <= 0 ? null : fn);
-                    allMessagesFolder = fa;
-                }
-            }
+    /** The full name for the virtual "all messages" folder */
+    public static String allMessagesFolder(int userId, int contextId) throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(userId, contextId);
+
+        ComposedConfigProperty<String> property = view.property("com.openexchange.find.basic.mail.allMessagesFolder", String.class);
+        if (false == property.isDefined()) {
+            return null;
         }
-        return fa.getValue();
+
+        String fn = property.get();
+        return Strings.isEmpty(fn) ? null : fn;
     }
 
     static {
@@ -361,11 +357,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      *
      * @param mailFields The requested mail fields by client
      * @param fullName The full name
+     * @param session The session to check for
      * @return The prepared mail fields
+     * @throws OXException If invocation fails
      */
-    static MailFields prepareMailFieldsForVirtualFolder(MailField[] mailFields, String fullName) {
+    static MailFields prepareMailFieldsForVirtualFolder(MailField[] mailFields, String fullName, Session session) throws OXException {
         MailFields fields = new MailFields(mailFields);
-        prepareMailFieldsForVirtualFolder(fields, fullName);
+        prepareMailFieldsForVirtualFolder(fields, fullName, session);
         return fields;
     }
 
@@ -374,10 +372,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      *
      * @param mailFields The current mail fields
      * @param fullName The full name
+     * @param session The session to check for
      * @return The prepared mail fields
+     * @throws OXException If invocation fails
      */
-    static void prepareMailFieldsForVirtualFolder(MailFields mailFields, String fullName) {
-        if (null == fullName || !fullName.equals(allMessagesFolder())) {
+    static void prepareMailFieldsForVirtualFolder(MailFields mailFields, String fullName, Session session) throws OXException {
+        if (null == fullName || !fullName.equals(allMessagesFolder(session))) {
             return;
         }
 
@@ -730,16 +730,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public MailMessage[] getMessagesLong(final String fullName, final long[] mailIds, final MailField[] mailFields) throws OXException {
+    public MailMessage[] getMessagesLong(String fullName, long[] mailIds, MailField[] mailFields) throws OXException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
         return getMessagesInternal(fullName, mailIds, mailFields, null);
     }
 
-    private MailMessage[] getMessagesInternal(final String fullName, final long[] uids, final MailField[] mailFields, final String[] headerNames) throws OXException {
+    private MailMessage[] getMessagesInternal(String fullName, long[] uids, MailField[] mailFields, String[] headerNames) throws OXException {
         final MailFields fieldSet = new MailFields(mailFields);
-        prepareMailFieldsForVirtualFolder(fieldSet, fullName);
+        prepareMailFieldsForVirtualFolder(fieldSet, fullName, session);
         /*
          * Check for field FULL
          */
@@ -1505,7 +1505,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 long start = System.currentTimeMillis();
                 // Force to pre-load envelope data
-                imapFolder.fetch(null, new long[] { msgUID }, null != fullName && fullName.equals(allMessagesFolder()) ? FETCH_PROFILE_GET_FOR_VIRTUAL : FETCH_PROFILE_GET, null);
+                imapFolder.fetch(null, new long[] { msgUID }, null != fullName && fullName.equals(allMessagesFolder(session)) ? FETCH_PROFILE_GET_FOR_VIRTUAL : FETCH_PROFILE_GET, null);
                 msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
                 if (null == msg) {
                     return null;
@@ -1741,7 +1741,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
             MailFields effectiveFields = prepareMailFieldsForSearch(mailFields, effectiveSortField);
-            prepareMailFieldsForVirtualFolder(effectiveFields, fullName);
+            prepareMailFieldsForVirtualFolder(effectiveFields, fullName, session);
             MailMessage[] mailMessages;
             if (searchViaIMAP(searchTerm == null ? new MailFields() : new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm)))) {
                 try {
@@ -2411,7 +2411,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Ensure mail ID is contained in requested fields
                  */
                 final MailFields fieldSet = new MailFields(mailFields);
-                IMAPMessageStorage.prepareMailFieldsForVirtualFolder(fieldSet, fullName);
+                IMAPMessageStorage.prepareMailFieldsForVirtualFolder(fieldSet, fullName, session);
                 final MailField[] fields = fieldSet.toArray();
                 /*
                  * Get ( & fetch) new messages
@@ -3383,14 +3383,26 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private Message asMessage(MailMessage m, int behavior) throws OXException {
+        String messageId = m.getHeader("Message-ID", null);
+        Message message;
         if (m instanceof MimeRawSource) {
             Part part = ((MimeRawSource) m).getPart();
             if (part instanceof Message) {
-                return (Message) part;
+                message = (Message) part;
+            } else {
+                message = MimeMessageConverter.convertMailMessage(m, behavior);
             }
-            return MimeMessageConverter.convertMailMessage(m, behavior);
+        } else {
+            message = MimeMessageConverter.convertMailMessage(m, behavior);
         }
-        return MimeMessageConverter.convertMailMessage(m, behavior);
+        if (null != messageId) {
+            try {
+                message.setHeader("Message-ID", messageId);
+            } catch (MessagingException e) {
+                LOG.warn("Failed to keep \"Message-ID\" header.", e);
+            }
+        }
+        return message;
     }
 
 

@@ -63,6 +63,7 @@ import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryPattern;
@@ -451,6 +452,7 @@ public class DriveServiceImpl implements DriveService {
         settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion()));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
         settings.setMinUploadChunk(Long.valueOf(syncSession.getOptimisticSaveThreshold()));
+        settings.setHasTrashFolder(syncSession.getStorage().hasTrashFolder());
         /*
          * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
          */
@@ -481,6 +483,11 @@ public class DriveServiceImpl implements DriveService {
          */
         capabilities.add("multiple_folder_long_polling");
         settings.setCapabilities(capabilities);
+        /*
+         * add certain configuration values
+         */
+        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
+        settings.setMinSearchChars(configService.getIntProperty("com.openexchange.MinimumSearchCharacters", 0));
         return settings;
     }
 

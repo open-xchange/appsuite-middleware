@@ -62,7 +62,7 @@ import com.openexchange.mailaccount.json.actions.ListAction;
 import com.openexchange.mailaccount.json.actions.NewAction;
 import com.openexchange.mailaccount.json.actions.UpdateAction;
 import com.openexchange.mailaccount.json.actions.ValidateAction;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * {@link DefaultMailAccountActionProvider}
@@ -84,7 +84,7 @@ public class DefaultMailAccountActionProvider implements MailAccountActionProvid
     }
 
     @Override
-    public boolean isApplicableFor(ServerSession session) throws OXException {
+    public boolean isApplicableFor(Session session) throws OXException {
         return true;
     }
 

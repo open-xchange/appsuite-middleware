@@ -154,7 +154,7 @@ public class FilenameReserverImpl implements FilenameReserver {
                 /*
                  * get conflicting filenames in target folder
                  */
-                Set<String> usedNames = getConflictingFilenames(con, context.getContextId(), folderID, getFileNames(documentsInFolder));
+                Map<String, DocumentMetadata> usedNames = getConflictingFilenames(con, context.getContextId(), folderID, getFileNames(documentsInFolder));
                 /*
                  * prepare required reservations, adjusting target filenames as needed
                  */
@@ -165,22 +165,23 @@ public class FilenameReserverImpl implements FilenameReserver {
                         continue;
                     }
                     boolean adjusted = false;
-                    if (usedNames.contains(fileName)) {
+                    if (usedNames.keySet().contains(fileName)) {
                         if (false == adjustAsNeeded) {
-                            throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(fileName, document);
+                            DocumentMetadata documentMetadata = usedNames.get(fileName);
+                            throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(fileName, documentMetadata.getFolderId(), documentMetadata.getId());
                         }
                         adjusted = true;
                         int count = 0;
                         do {
                             fileName = FileStorageUtility.enhance(fileName, ++count);
-                        } while (usedNames.contains(fileName));
+                        } while (usedNames.keySet().contains(fileName));
                     }
                     boolean sameTitle = null != document.getTitle() && document.getTitle().equals(document.getFileName());
                     FilenameReservationImpl reservation = new FilenameReservationImpl(
                         UUIDs.toByteArray(UUID.randomUUID()), fileName, adjusted, sameTitle);
                     reservations.put(document, reservation);
                     reservationsInFolder.add(reservation);
-                    usedNames.add(fileName);
+                    usedNames.put(fileName, new DocumentMetadataImpl());
                 }
                 /*
                  * perform & remember reservations
@@ -309,13 +310,13 @@ public class FilenameReserverImpl implements FilenameReserver {
         }
     }
 
-    private static Set<String> getConflictingFilenames(Connection connection, int contextID, long targetFolderID, Set<String> fileNames) throws SQLException {
+    private static Map<String, DocumentMetadata> getConflictingFilenames(Connection connection, int contextID, long targetFolderID, Set<String> fileNames) throws SQLException {
         if (null == fileNames || 0 == fileNames.size()) {
-            return Collections.emptySet();
+            return Collections.emptyMap();
         }
         Set<String> possibleWildcards = Tools.getEnhancedWildcards(fileNames);
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT DISTINCT infostore_document.filename AS name FROM infostore JOIN infostore_document ")
+        stringBuilder.append("SELECT DISTINCT infostore_document.filename AS name, infostore.id AS id FROM infostore JOIN infostore_document ")
             .append("ON infostore.cid=infostore_document.cid AND infostore.version=infostore_document.version_number ")
             .append("AND infostore.id=infostore_document.infostore_id WHERE infostore.cid=? AND infostore.folder_id=? ")
             .append("AND (infostore_document.filename")
@@ -332,7 +333,7 @@ public class FilenameReserverImpl implements FilenameReserver {
         for (int i = 0; i < possibleWildcards.size(); i++) {
             stringBuilder.append(" OR infostore_document.filename LIKE ?");
         }
-        stringBuilder.append(") UNION SELECT DISTINCT name FROM infostoreReservedPaths WHERE cid=? AND folder=? AND (name");
+        stringBuilder.append(") UNION SELECT DISTINCT name, -1 FROM infostoreReservedPaths WHERE cid=? AND folder=? AND (name");
         if (1 == fileNames.size()) {
             stringBuilder.append("=?");
         } else {
@@ -346,7 +347,7 @@ public class FilenameReserverImpl implements FilenameReserver {
             stringBuilder.append(" OR name LIKE ?");
         }
         stringBuilder.append(");");
-        Set<String> conflictingFilenames = new HashSet<String>();
+        Map<String, DocumentMetadata> conflictingFilenames = new HashMap<String, DocumentMetadata>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -370,7 +371,13 @@ public class FilenameReserverImpl implements FilenameReserver {
             }
             result = stmt.executeQuery();
             while (result.next()) {
-                conflictingFilenames.add(result.getString(1));
+                DocumentMetadata document = new DocumentMetadataImpl();
+                String name = result.getString(1);
+                int id = result.getInt(2);
+                document.setId(id);
+                document.setFolderId(targetFolderID);
+                document.setFileName(name);
+                conflictingFilenames.put(name, document);
             }
         } finally {
             DBUtils.closeSQLStuff(result, stmt);

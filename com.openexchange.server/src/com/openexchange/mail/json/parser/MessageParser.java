@@ -977,7 +977,7 @@ public final class MessageParser {
                 if (1 == pLen) {
                     addresses.add(new QuotedInternetAddress(persAndAddr.getString(0), strict));
                 } else {
-                    String personal = persAndAddr.getString(0);
+                    String personal = persAndAddr.optString(0, null);
                     boolean hasPersonal = (personal != null && !"null".equals(personal));
                     if (hasPersonal) {
                         try {

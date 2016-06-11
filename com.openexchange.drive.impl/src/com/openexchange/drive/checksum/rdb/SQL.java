@@ -151,10 +151,6 @@ public class SQL {
         return allocator.toString();
     }
 
-    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT =
-        "DELETE FROM fileChecksums " +
-        "WHERE cid=? AND folder=REVERSE(?);";
-
     public static final String DELETE_FILE_CHECKSUM_STMT =
         "DELETE FROM fileChecksums " +
         "WHERE cid=? AND folder=REVERSE(?) AND file=REVERSE(?) AND version=? AND sequence=?;";
@@ -170,14 +166,6 @@ public class SQL {
     public static final String SELECT_FILE_CHECKSUMS_IN_FOLDER_STMT =
         "SELECT LOWER(HEX(uuid)),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums " +
         "WHERE cid=? AND folder=REVERSE(?);";
-
-    public static final String SELECT_MATCHING_FILE_CHECKSUMS_STMT =
-        "SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence FROM fileChecksums " +
-        "WHERE cid=? AND checksum=UNHEX(?);";
-
-    public static final String INSERT_DIRECTORY_CHECKSUM_STMT =
-        "INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum,used) " +
-        "VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?);";
 
     /** INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum,used) VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?), ...; */
     public static final String INSERT_DIRECTORY_CHECKSUMS_STMT(int count) {
@@ -210,7 +198,7 @@ public class SQL {
 
     /**
      * DELETE FROM fileChecksums
-     * WHERE cid=? AND REVERSE(folder) IN (...);"
+     * WHERE cid=? AND folder IN (...);"
      */
     public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
