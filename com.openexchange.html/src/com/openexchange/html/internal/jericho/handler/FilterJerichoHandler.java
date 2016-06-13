@@ -167,6 +167,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
          */
         s = new HashSet<String>();
         s.add("wbr");
+        s.add("time");
         SINGLE_TAGS = Collections.unmodifiableSet(s);
     }
 
