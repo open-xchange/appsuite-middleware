@@ -185,7 +185,8 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
             return false;
         }
 
-        stanza.getSequencePrincipal().lock(lockScope);
+        ID sequencePrincipal = stanza.getSequencePrincipal();
+        sequencePrincipal.lock(lockScope);
         try {
             AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
             /* We haven't recorded a threshold (upper bound of last known sequence number) for this principal, yet so we'll add one */
@@ -293,7 +294,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
                 }
             }
         } finally {
-            stanza.getSequencePrincipal().unlock(lockScope);
+            sequencePrincipal.unlock(lockScope);
         }
 
     }
