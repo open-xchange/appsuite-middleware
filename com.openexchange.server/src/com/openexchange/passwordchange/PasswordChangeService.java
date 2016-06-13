@@ -183,7 +183,7 @@ public abstract class PasswordChangeService {
                 }
             }
             if (!user.isGuest()) {
-                authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties));
+                Authentication.login(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties), authenticationService);
             } else {
                 BasicAuthenticationService basicService = Authentication.getBasicService();
                 if (basicService == null) {
