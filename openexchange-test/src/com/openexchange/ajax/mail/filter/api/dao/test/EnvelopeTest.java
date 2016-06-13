@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
-import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 
 /**
  * AddressTest
@@ -58,30 +58,30 @@ import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
  */
 public class EnvelopeTest extends AbstractTest {
 
-	public static final String ENVELOPE = "envelope";
+    public static final String ENVELOPE = "envelope";
 
-	protected AbstractComparison comp;
+    protected Comparison comparison;
 
-	protected String[] headers;
+    protected String[] headers;
 
-	protected String[] values;
+    protected String[] values;
 
-	public EnvelopeTest(final AbstractComparison comp, final String[] headers, final String[] values) {
-		name = ENVELOPE;
-		this.comp = comp;
-		this.headers = headers;
-		this.values = values;
-	}
+    public EnvelopeTest(final Comparison comp, final String[] headers, final String[] values) {
+        name = ENVELOPE;
+        this.comparison = comp;
+        this.headers = headers;
+        this.values = values;
+    }
 
-	public AbstractComparison getComparison() {
-		return comp;
-	}
+    public Comparison getComparison() {
+        return comparison;
+    }
 
-	public String[] getHeaders() {
-		return headers;
-	}
+    public String[] getHeaders() {
+        return headers;
+    }
 
-	public String[] getValues() {
-		return values;
-	}
+    public String[] getValues() {
+        return values;
+    }
 }

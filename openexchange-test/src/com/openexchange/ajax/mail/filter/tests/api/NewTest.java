@@ -52,12 +52,14 @@ package com.openexchange.ajax.mail.filter.tests.api;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Move;
 import com.openexchange.ajax.mail.filter.api.dao.action.Redirect;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.SizeComparison;
@@ -96,7 +98,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected = new Rule();
             expected.setName("testNew");
             expected.setActioncmds(new AbstractAction[] { new Stop() });
-            final IsComparison isComp = new IsComparison();
+            final Comparison isComp = new IsComparison();
             expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
             int id = mailFilterAPI.createRule(expected);
@@ -143,7 +145,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setName("sizeTest");
             expected.setActioncmds(new AbstractAction[] { new Keep() });
 
-            SizeTest sizeTest = new SizeTest(new SizeComparison(SizeComparison.OVER, 88));
+            SizeTest sizeTest = new SizeTest(new SizeComparison(MatchType.over, 88));
             expected.setTest(sizeTest);
             expected.setActive(true);
 

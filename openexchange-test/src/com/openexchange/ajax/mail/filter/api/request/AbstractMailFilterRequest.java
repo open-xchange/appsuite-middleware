@@ -54,8 +54,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.mail.filter.api.conversion.writer.MailFilterWriter;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.writer.MailFilterWriter;
 
 /**
  *

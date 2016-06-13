@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+
 /**
  * {@link UserComparison}
  *
@@ -56,65 +58,10 @@ package com.openexchange.ajax.mail.filter.api.dao.comparison;
  */
 public class UserComparison extends AbstractComparison {
 
-    public static final String USER = "user";
-
     /**
      * Initialises a new {@link UserComparison}.
      */
     public UserComparison() {
-        super();
-        name = USER;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("UserComparison [name=").append(name).append("]");
-        return builder.toString();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final UserComparison other = (UserComparison) obj;
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
-            return false;
-        }
-        return true;
+        super(MatchType.user);
     }
 }

@@ -50,7 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
 import java.util.Arrays;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 
 /**
  * HeaderTest
@@ -59,79 +59,79 @@ import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
  */
 public class HeaderTest extends AbstractTest {
 
-	public static final String HEADER = "header";
+    public static final String HEADER = "header";
 
-	protected AbstractComparison comparision;
+    protected Comparison comparision;
 
-	protected String[] headers;
+    protected String[] headers;
 
-	protected String[] values;
+    protected String[] values;
 
-	public HeaderTest(final AbstractComparison comparision, final String[] headers, final String[] values) {
-		name = HEADER;
-		this.comparision = comparision;
-		this.headers = headers;
-		this.values = values;
-	}
+    public HeaderTest(final Comparison comparision, final String[] headers, final String[] values) {
+        name = HEADER;
+        this.comparision = comparision;
+        this.headers = headers;
+        this.values = values;
+    }
 
-	public AbstractComparison getComparison() {
-		return comparision;
-	}
+    public Comparison getComparison() {
+        return comparision;
+    }
 
-	public String[] getHeaders() {
-		return headers;
-	}
+    public String[] getHeaders() {
+        return headers;
+    }
 
-	public String[] getValues() {
-		return values;
-	}
+    public String[] getValues() {
+        return values;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((comparision == null) ? 0 : comparision.hashCode());
-		result = prime * result + Arrays.hashCode(headers);
-		result = prime * result + Arrays.hashCode(values);
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((comparision == null) ? 0 : comparision.hashCode());
+        result = prime * result + Arrays.hashCode(headers);
+        result = prime * result + Arrays.hashCode(values);
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-		if (obj == null) {
+        if (obj == null) {
             return false;
         }
-		if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
-		final HeaderTest other = (HeaderTest) obj;
-		if (comparision == null) {
-			if (other.comparision != null) {
+        final HeaderTest other = (HeaderTest) obj;
+        if (comparision == null) {
+            if (other.comparision != null) {
                 return false;
             }
-		} else if (!comparision.equals(other.comparision)) {
+        } else if (!comparision.equals(other.comparision)) {
             return false;
         }
-		if (!Arrays.equals(headers, other.headers)) {
+        if (!Arrays.equals(headers, other.headers)) {
             return false;
         }
-		if (!Arrays.equals(values, other.values)) {
+        if (!Arrays.equals(values, other.values)) {
             return false;
         }
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		final StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append("name: " + name + ", ");
-		stringBuffer.append("headers: " + Arrays.toString(headers) + ", ");
-		stringBuffer.append("values: " + Arrays.toString(headers) + ", ");
-		stringBuffer.append("comp: " + comparision);
+    @Override
+    public String toString() {
+        final StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("name: " + name + ", ");
+        stringBuffer.append("headers: " + Arrays.toString(headers) + ", ");
+        stringBuffer.append("values: " + Arrays.toString(headers) + ", ");
+        stringBuffer.append("comp: " + comparision);
 
-		return stringBuffer.toString();
-	}
+        return stringBuffer.toString();
+    }
 }

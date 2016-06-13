@@ -60,12 +60,12 @@ import java.util.List;
 public class Test {
 
     private final TestCommand testCommand;
-    private final List<Comparison> comparisons;
+    private final List<MatchType> comparisons;
 
     /**
      * Initialises a new {@link Test}.
      */
-    public Test(TestCommand testCommand, List<Comparison> comparisons) {
+    public Test(TestCommand testCommand, List<MatchType> comparisons) {
         super();
         this.testCommand = testCommand;
         this.comparisons = Collections.unmodifiableList(comparisons);
@@ -85,7 +85,7 @@ public class Test {
      *
      * @return The comparisons
      */
-    public List<Comparison> getComparisons() {
+    public List<MatchType> getComparisons() {
         return comparisons;
     }
 }

@@ -49,83 +49,24 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+
 /**
- * SizeComparison
+ * {@link SizeComparison}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SizeComparison extends AbstractComparison {
 
-	public static final String SIZE = "size";
-
-	public static final int OVER = 1;
-
-	public static final int UNDER = 2;
-
-	protected int comparator;
-
-	protected int size;
-
-	public SizeComparison(final int comparator, final int size) {
-		name = SIZE;
-		this.comparator = comparator;
-		this.size = size;
-	}
-
-	public int getComparator() {
-		return comparator;
-	}
-
-	public int getSize() {
-		return size;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + comparator;
-		result = prime * result + size;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-            return true;
-        }
-		if (obj == null) {
-            return false;
-        }
-		if (getClass() != obj.getClass()) {
-            return false;
-        }
-		final SizeComparison other = (SizeComparison) obj;
-		if (comparator != other.comparator) {
-            return false;
-        }
-		if (size != other.size) {
-            return false;
-        }
-		if (name == null) {
-			if (other.name != null) {
-                return false;
-            }
-		} else if (!name.equals(other.name)) {
-            return false;
-        }
-
-		return true;
-	}
-
-	@Override
-    public String toString() {
-		final StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append("name: " + name + ", ");
-		stringBuffer.append("comperator: " + comparator + ", ");
-		stringBuffer.append("size: " + size);
-
-		return stringBuffer.toString();
-	}
+    /**
+     * Initialises a new {@link SizeComparison}.
+     * 
+     * @param sizeComparator The {@link SizeComparison}
+     * @param size The size
+     */
+    public SizeComparison(MatchType matchType, int size) {
+        super(matchType);
+        addArgument("size", size);
+    }
 }

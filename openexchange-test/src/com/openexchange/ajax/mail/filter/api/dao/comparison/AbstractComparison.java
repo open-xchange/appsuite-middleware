@@ -49,17 +49,57 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+
 /**
- * AbstractAction
+ * {@link AbstractComparison}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractComparison {
+abstract class AbstractComparison implements Comparison {
 
-	protected String name;
+    private final Map<String, Object> arguments;
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * Initialises a new {@link AbstractComparison}.
+     */
+    public AbstractComparison(MatchType matchType) {
+        super();
+        arguments = new HashMap<>(2);
+        arguments.put("comparison", matchType.name());
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getType()
+     */
+    @Override
+    public MatchType getType() {
+        return MatchType.valueOf((String) arguments.get("comparison")); //FIXME: store comparison as field
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getArguments()
+     */
+    @Override
+    public Map<String, Object> getArguments() {
+        return Collections.unmodifiableMap(arguments);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#addArgument(com.openexchange.ajax.mail.filter.api.dao.Argument, java.lang.Object)
+     */
+    @Override
+    public void addArgument(String argument, Object value) {
+        arguments.put(argument, value);
+    }
 }
