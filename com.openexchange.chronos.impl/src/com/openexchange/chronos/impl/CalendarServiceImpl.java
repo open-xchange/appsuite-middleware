@@ -50,6 +50,8 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.CalendarUtils.containsAttendee;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
@@ -57,7 +59,6 @@ import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -124,9 +125,17 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs, EventField[] fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs) throws OXException {
+        List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
+        for (EventID eventID : eventIDs) {
+            events.add(getEvent(session, eventID.getFolderID(), eventID.getObjectID()));
+        }
+        return events;
+    }
+
+    @Override
+    public List<UserizedEvent> getEvents(ServerSession session, int folderID, Date from, Date until) throws OXException {
+        return getEvents(session, getFolder(session, folderID), from, until);
     }
 
     @Override
@@ -138,13 +147,9 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * check requested folder
          */
-        if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
-            throw new OXException();
-        }
-        if (Permission.READ_FOLDER > folder.getOwnPermission().getFolderPermission() ||
-            Permission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
-            throw new OXException();
-        }
+        requireCalendarContentType(folder);
+        requireFolderPermission(folder, Permission.READ_FOLDER);
+        requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
         /*
          * load event data from storage
          */
@@ -153,13 +158,42 @@ public class CalendarServiceImpl implements CalendarService {
         if (Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission() && session.getUserId() != event.getCreatedBy()) {
             throw new OXException();
         }
+        return userize(session, storage, folder, event);
+    }
+
+    private List<UserizedEvent> getEvents(ServerSession session, UserizedFolder folder, Date from, Date until) throws OXException {
+        /*
+         * check requested folder
+         */
+        requireCalendarContentType(folder);
+        requireFolderPermission(folder, Permission.READ_FOLDER);
+        requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
+        /*
+         * load event data from storage & return userized events
+         */
+        boolean onlyOwn = Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission();
+        CalendarStorage storage = getCalendarStorage(session);
+        List<Event> events = storage.loadEvents(session.getUserId(), Integer.parseInt(folder.getID()), from, until, onlyOwn);
+        return userize(session, storage, folder, events);
+    }
+
+    private static List<UserizedEvent> userize(ServerSession session, CalendarStorage storage, UserizedFolder folder, List<Event> events) throws OXException {
+        List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
+        for (Event event : events) {
+            userizedEvents.add(userize(session, storage, folder, event));
+        }
+        return userizedEvents;
+    }
+
+    private static UserizedEvent userize(ServerSession session, CalendarStorage storage, UserizedFolder folder, Event event) throws OXException {
         /*
          * load alarms
          * - of folder owner for shared/personal folder
          * - of session user for public folder, if user is attendee
+         * - otherwise not (not attending)
          */
         int targetAttendee = getTargetAttendee(session, folder, event.getAttendees());
-        List<Alarm> alarms = 0 < targetAttendee ? storage.loadAlarms(targetAttendee, objectID) : null;
+        List<Alarm> alarms = 0 < targetAttendee ? storage.loadAlarms(targetAttendee, event.getId()) : null;
         /*
          * build userized event & return
          */
@@ -186,6 +220,24 @@ public class CalendarServiceImpl implements CalendarService {
 
     private static CalendarStorage getCalendarStorage(ServerSession session) throws OXException {
         return Services.getService(CalendarStorageFactory.class).create(session);
+    }
+
+    private static void requireCalendarContentType(UserizedFolder folder) throws OXException {
+        if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
+            throw new OXException();
+        }
+    }
+
+    private static void requireFolderPermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getFolderPermission() < requiredPermission) {
+            throw new OXException();
+        }
+    }
+
+    private static void requireReadPermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getReadPermission() < requiredPermission) {
+            throw new OXException();
+        }
     }
 
 }

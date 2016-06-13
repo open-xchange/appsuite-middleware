@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -65,7 +66,6 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
@@ -91,11 +91,6 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
      */
     public RdbCalendarStorage(int contextID) throws OXException {
         super(contextID);
-    }
-
-    public UserizedEvent loadEvent(int userID, int objectID, int folderID) {
-
-        return null;
     }
 
     public List<Alarm> loadAlarms(int userID, int objectID) throws OXException {
@@ -135,6 +130,21 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             event.setAttendees(selectAttendees(connection, contextID, objectID));
 
             return event;
+        } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public List<Event> loadEvents(int userID, int folderID, Date from, Date until, boolean onlyOwn) throws OXException {
+        try (Connection connection = getConnection(false)) {
+            List<Event> events = selectEvents(connection, contextID, folderID, from, until);
+            for (Event event : events) {
+                event.setAttendees(selectAttendees(connection, contextID, event.getId()));
+            }
+            return events;
         } catch (SQLException e) {
             throw new OXException(e);
         } finally {
@@ -213,6 +223,77 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             DBUtils.closeSQLStuff(stmt);
         }
         return null;
+    }
+
+    private static List<Event> selectEvents(Connection connection, int contextID, int folderID, Date from, Date until, int createdBy) throws SQLException {
+        return null;
+    }
+
+    private static List<Event> selectEvents(Connection connection, int contextID, int folderID, Date from, Date until) throws SQLException {
+        List<Event> events = new ArrayList<Event>();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_EVENTS_IN_FOLDER_STMT);
+            stmt.setInt(1, contextID);
+            stmt.setTimestamp(2, new Timestamp(until.getTime()));
+            stmt.setTimestamp(3, new Timestamp(from.getTime()));
+            stmt.setInt(4, folderID);
+            stmt.setInt(5, folderID);
+            ResultSet resultSet = SQL.logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                Event event = new Event();
+                event.setId(resultSet.getInt("intfield01"));
+                event.setCreated(resultSet.getTimestamp("creating_date"));
+                event.setCreatedBy(resultSet.getInt("created_from"));
+                event.setLastModified(new Date(resultSet.getLong("changing_date")));
+                event.setModifiedBy(resultSet.getInt("changed_from"));
+                // fid
+                event.setClassification(resultSet.getBoolean("pflag") ? Classification.PRIVATE : Classification.PUBLIC);
+                event.setStartDate(resultSet.getTimestamp("timestampfield01"));
+                event.setEndDate(resultSet.getTimestamp("timestampfield02"));
+                event.setStartTimezone(resultSet.getString("timezone"));
+                event.setRecurrenceId(resultSet.getInt("intfield02"));
+                // intfield03
+                // intfield04
+                // intfield05
+                // intfield06
+                event.setStatus(Appointment2Event.getEventStatus(resultSet.getInt("intfield06")));
+                event.setAllDay(resultSet.getBoolean("intfield07"));
+                // intfield08
+                event.setSummary(resultSet.getString("field01"));
+                event.setLocation(resultSet.getString("field02"));
+                event.setDescription(resultSet.getString("field04"));
+                event.setRecurrenceRule(Recurrence.getRecurrenceRule(resultSet.getString("field06")));
+                event.setDeleteExceptionDates(parseExceptionDates(resultSet.getString("field07")));
+                event.setChangeExceptionDates(parseExceptionDates(resultSet.getString("field08")));
+                event.setCategories(parseSeparatedStrings(resultSet.getString("field09")));
+                event.setUid(resultSet.getString("uid"));
+                String organizerMail = resultSet.getString("organizer");
+                int organizerId = resultSet.getInt("organizerId");
+                if (Strings.isNotEmpty(organizerMail) || 0 < organizerId) {
+                    Organizer organizer = new Organizer();
+                    organizer.setCuType(CalendarUserType.INDIVIDUAL);
+                    if (Strings.isNotEmpty(organizerMail)) {
+                        organizer.setUri("mailto:" + organizerMail);
+                    }
+                    if (0 < organizerId) {
+                        organizer.setEntity(organizerId);
+                    }
+                    event.setOrganizer(organizer);
+                }
+                int sequence = resultSet.getInt("sequence");
+                if (false == resultSet.wasNull()) {
+                    event.setSequence(Integer.valueOf(sequence));
+                }
+                // principal
+                // principalId
+                event.setFilename(resultSet.getString("filename"));
+                events.add(event);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return events;
     }
 
     private static List<Attendee> selectAttendees(Connection connection, int contextID, int objectID) throws SQLException {

@@ -63,12 +63,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.calendar.CalendarField;
+import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -114,29 +116,42 @@ public class EventResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();
-        if (UserizedEvent.class.isInstance(resultObject)) {
-            try {
+        try {
+            if (UserizedEvent.class.isInstance(resultObject)) {
                 result.setResultObject(convertEvent((UserizedEvent) resultObject, getClientTimeZone(requestData, session)), getOutputFormat());
-            } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            } else if (Collection.class.isInstance(resultObject)) {
+                Collection<UserizedEvent> events = (Collection<UserizedEvent>) resultObject;
+                int[] columns = new AppointmentAJAXRequest(requestData, session).checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+                result.setResultObject(convertEvents(events, getClientTimeZone(requestData, session), columns), getOutputFormat());
             }
-        } else if (Collection.class.isInstance(resultObject)) {
-            Collection<UserizedEvent> events = (Collection<UserizedEvent>) resultObject;
-
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
 
     private JSONArray convertEvents(Collection<UserizedEvent> events, TimeZone clientTimeZone, int[] columns) throws JSONException {
         JSONArray jsonArray = new JSONArray(events.size());
-        for (UserizedEvent userizedEvent : events) {
-            JSONObject convertedEvent = convertEvent(userizedEvent, clientTimeZone);
-
-            
-
+        for (UserizedEvent event : events) {
+            jsonArray.put(convertEventColumns(event, clientTimeZone, columns));
         }
         return jsonArray;
     }
-    
+
+    private JSONArray convertEventColumns(UserizedEvent event, TimeZone clientTimeZone, int[] columns) throws JSONException {
+        JSONArray jsonArray = new JSONArray(columns.length);
+        JSONObject convertedEvent = convertEvent(event, clientTimeZone);
+        for (int i = 0; i < columns.length; i++) {
+            CalendarField field = CalendarField.getByColumn(columns[i]);
+            if (null == field) {
+                LOG.warn("Unknown column requested: {}", Autoboxing.I(columns[i]));
+                jsonArray.put(JSONObject.NULL);
+            } else {
+                jsonArray.put(convertedEvent.opt(field.getJsonName()));
+            }
+        }
+        return jsonArray;
+    }
+
     private JSONObject convertEvent(UserizedEvent event, TimeZone clientTimeZone) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.putOpt(AppointmentFields.TITLE, event.getSummary());

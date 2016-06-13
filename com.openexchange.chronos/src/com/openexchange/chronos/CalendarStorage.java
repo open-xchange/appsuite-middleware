@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos;
 
+import java.util.Date;
 import java.util.List;
-
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,13 +60,15 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public interface CalendarStorage {
-	
-	List<Alarm> loadAlarms(int userID, int objectID) throws OXException;
-	
-	Event loadEvent(int objectID) throws OXException;
-	
-	int insertEvent(Event event) throws OXException;
-	
-	void insertAlarms(int userID, int objectID, List<Alarm> alarms);
-		
+
+    List<Alarm> loadAlarms(int userID, int objectID) throws OXException;
+
+    Event loadEvent(int objectID) throws OXException;
+
+    int insertEvent(Event event) throws OXException;
+
+    void insertAlarms(int userID, int objectID, List<Alarm> alarms);
+
+    List<Event> loadEvents(int userID, int folderID, Date from, Date until, boolean onlyOwn) throws OXException;
+
 }

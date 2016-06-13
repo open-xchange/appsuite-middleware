@@ -68,6 +68,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.EventID;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -86,7 +89,6 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
-
 /**
  * {@link ListAction}
  *
@@ -97,7 +99,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data. The alias \"list\" uses the predefined columnset [1, 20, 207, 206, 2, 200, 201, 202, 203, 209, 221, 401, 402, 102, 400, 101, 220, 215, 100]."),
     @Parameter(name = "recurrence_master", description = "Extract the recurrence to several appointments. The default value is false so every appointment of the recurrence will be calculated.")
 }, requestBody = "An array with full object IDs (folder, id and optionally either recurrence_position or recurrence_date_position) of requested appointments.",
-responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+    responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class ListAction extends AppointmentAction {
 
@@ -106,6 +108,7 @@ public final class ListAction extends AppointmentAction {
 
     /**
      * Initializes a new {@link ListAction}.
+     * 
      * @param services
      */
     public ListAction(final ServiceLookup services) {
@@ -286,6 +289,35 @@ public final class ListAction extends AppointmentAction {
                 it.close();
             }
         }
+    }
+
+    protected AJAXRequestResult performNew(AppointmentAJAXRequest request) throws OXException, JSONException {
+        List<EventID> requestedIDs = parseRequestedIDs(request);
+        CalendarService calendarService = getService(CalendarService.class);
+        List<UserizedEvent> events = calendarService.getEvents(request.getSession(), requestedIDs);
+        Date lastModified = new Date(0L);
+        for (UserizedEvent event : events) {
+            if (null != event.getLastModified() && lastModified.before(event.getLastModified())) {
+                lastModified = event.getLastModified();
+            }
+        }
+        return new AJAXRequestResult(events, lastModified, "event");
+    }
+
+    private static List<EventID> parseRequestedIDs(AppointmentAJAXRequest request) throws OXException, JSONException {
+        JSONArray jsonArray = request.getData();
+        if (null == jsonArray) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
+        List<EventID> eventIDs = new ArrayList<EventID>(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            eventIDs.add(parseEventID(jsonArray.getJSONObject(i)));
+        }
+        return eventIDs;
+    }
+
+    private static EventID parseEventID(JSONObject jsonObject) throws OXException {
+        return new EventID(DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_FOLDERID), DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID));
     }
 
 }
