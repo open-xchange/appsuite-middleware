@@ -84,7 +84,9 @@ import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -456,6 +458,8 @@ public class DefaultMessageGenerator implements MessageGenerator {
 
         {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PREFIX);
+            FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
+            String fullName = fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator);
             translated = String.format(translated, buildLink(link));
             textBuilder.append(htmlFormat(translated)).append("<br>");
         }
@@ -521,6 +525,8 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // link
         {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PREFIX);
+            FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
+            String fullName = fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator);
             translated = String.format(translated, buildLink(link));
             vars.put(VARIABLE_LINK, translated);
         }

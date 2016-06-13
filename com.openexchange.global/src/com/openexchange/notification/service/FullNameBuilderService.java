@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,57 +47,27 @@
  *
  */
 
-package com.openexchange.notification.osgi;
+package com.openexchange.notification.service;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.HtmlService;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.notification.FullNameBuilder;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.notification.mail.impl.NotificationMailFactoryImpl;
-import com.openexchange.notification.service.FullNameBuilderService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.user.UserService;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.Translator;
 
 /**
- * {@link NotificationActivator}
+ * {@link FullNameBuilderService}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class NotificationActivator extends HousekeepingActivator {
+public interface FullNameBuilderService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TemplateService.class, HtmlService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.set(this);
-
-        trackService(MimeTypeMap.class);
-        trackService(UserService.class);
-        openTrackers();
-
-        NotificationMailFactoryImpl notificationMailFactory = new NotificationMailFactoryImpl(
-            getService(ConfigurationService.class),
-            getService(TemplateService.class),
-            getService(HtmlService.class));
-        registerService(NotificationMailFactory.class, notificationMailFactory);
-        registerService(FullNameBuilderService.class, FullNameBuilder.getInstance());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.set(null);
-        super.stopBundle();
-    }
-
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
-    }
+    /**
+     * Build the full name of the user consisting of given name and surname and orders them according to the user's locale.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The full name of the user
+     * @throws OXException If full name cannot be returned
+     */
+    String buildFullName(int userId, int contextId, Translator translator) throws OXException;
 
 }

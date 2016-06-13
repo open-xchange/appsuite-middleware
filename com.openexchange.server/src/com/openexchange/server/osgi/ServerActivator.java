@@ -214,6 +214,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
+import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
@@ -420,6 +421,8 @@ public final class ServerActivator extends HousekeepingActivator {
         // Audit logger
         track(AuditLogService.class, new RegistryCustomizer<AuditLogService>(context, AuditLogService.class));
 
+        // Full-name builder
+        track(FullNameBuilderService.class, new RegistryCustomizer<FullNameBuilderService>(context, FullNameBuilderService.class));
 
         // Mail account delete listener
         track(MailAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
