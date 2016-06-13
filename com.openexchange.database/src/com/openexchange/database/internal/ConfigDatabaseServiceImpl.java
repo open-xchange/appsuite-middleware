@@ -57,6 +57,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationExecutorService;
@@ -134,12 +135,20 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     private static void back(final Connection con) {
+        back(con, false);
+    }
+
+    static void back(Connection con, boolean usedAsRead) {
         if (null == con) {
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error("", e);
             return;
         }
         try {
+            if (usedAsRead && (con instanceof JDBC4ConnectionReturner)) {
+                // Not the nice way to tell the replication monitor not to increment the counter.
+                ((JDBC4ConnectionReturner) con).setUsedAsRead(true);
+            }
             con.close();
         } catch (SQLException e) {
             OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
