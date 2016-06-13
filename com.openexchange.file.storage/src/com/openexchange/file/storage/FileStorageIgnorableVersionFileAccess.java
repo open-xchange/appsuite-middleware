@@ -77,7 +77,7 @@ public interface FileStorageIgnorableVersionFileAccess extends FileStorageFileAc
 
     /**
      * Save the file as new file version, if file exists in folder
-     * 
+     *
      * @param file The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
@@ -85,5 +85,5 @@ public interface FileStorageIgnorableVersionFileAccess extends FileStorageFileAc
      * @return
      * @throws OXException On error
      */
-    SaveResult saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
+    IDTuple saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
 }

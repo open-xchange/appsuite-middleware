@@ -59,7 +59,6 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
 import com.openexchange.file.storage.AccountAware;
-import com.openexchange.file.storage.DefaultTryAddVersionAware;
 import com.openexchange.file.storage.DefaultWarningsAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -67,7 +66,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.TryAddVersionAware;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -80,14 +78,13 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractCompositingIDBasedAccess extends AbstractService<Transaction> implements WarningsAware, TryAddVersionAware {
+public abstract class AbstractCompositingIDBasedAccess extends AbstractService<Transaction> implements WarningsAware {
 
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
 
     protected final Session session;
     private final WarningsAware warningsAware;
-    private final TryAddVersionAware tryAddVersionAware;
 
     /**
      * Initializes a new {@link AbstractCompositingIDBasedAccess}.
@@ -98,19 +95,8 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         super();
         this.session = session;
         this.warningsAware = new DefaultWarningsAware();
-        this.tryAddVersionAware = new DefaultTryAddVersionAware();
         connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
         accessesToClose.set(new LinkedList<FileStorageAccountAccess>());
-    }
-
-    @Override
-    public void addSaveAction(String fileId, String action) {
-        tryAddVersionAware.addSaveAction(fileId, action);
-    }
-
-    @Override
-    public String getAndFlushSaveActions(String fileId) {
-        return tryAddVersionAware.getAndFlushSaveActions(fileId);
     }
 
     @Override
@@ -190,7 +176,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         return new StringBuilder("IDBasedAccess ")
             .append("[user=").append(session.getUserId()).append(", context=").append(session.getContextId())
             .append(", connectedAccounts=").append(connectedAccounts.get().keySet()).append(']')
-        .toString();
+            .toString();
     }
 
     /**

@@ -49,10 +49,11 @@
 
 package com.openexchange.groupware.infostore.facade.impl;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Arrays.contains;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -80,11 +81,11 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageUtility;
-import com.openexchange.file.storage.SaveResult;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.EffectiveObjectPermission;
 import com.openexchange.groupware.container.EffectiveObjectPermissions;
@@ -168,6 +169,8 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 
 /**
  * {@link InfostoreFacadeImpl}
@@ -587,17 +590,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
-    public SaveResult saveDocumentTryAddVersion(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
-        String saveAction = "none";
-        SaveResult result = null;
+    public IDTuple saveDocumentTryAddVersion(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         try {
-            result = saveDocument(document, data, sequenceNumber, true, session);
+            return saveDocument(document, data, sequenceNumber, true, session);
         } catch (OXException e) {
-            if (e.getCode() == InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.getNumber()) {
+            if (e.getCode() == InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.getNumber() && e.getPrefix().equals(EnumComponent.INFOSTORE.getAbbreviation())) {
                 long folderId = (long) e.getDisplayArgs()[1];
                 int id = (int) e.getDisplayArgs()[2];
                 if (id == 0) {
-                    throw InfostoreExceptionCodes.CONCURRENT_VERSION_CREATION.create();
+                    throw InfostoreExceptionCodes.MODIFIED_CONCURRENTLY.create();
                 } else {
                     try {
                         DocumentMetadata existing = getDocumentMetadata(folderId, id, CURRENT_VERSION, session);
@@ -605,12 +606,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         update.setFolderId(folderId);
                         update.setId(id);
                         update.setLastModified(new Date());
-                        IDTuple idTuple = saveDocument(update, data, existing.getSequenceNumber(), new Metadata[] { Metadata.LAST_MODIFIED_LITERAL }, session);
-                        saveAction = "new_version";
-                        result = new SaveResult(idTuple, saveAction);
+                        return saveDocument(update, data, existing.getSequenceNumber(), new Metadata[] { Metadata.LAST_MODIFIED_LITERAL }, session);
                     } catch (OXException x) {
-                        if (x.getCode() == InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.getNumber()) {
-                            result = saveDocument(document, data, sequenceNumber, false, session);
+                        if (x.getCode() == InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.getNumber() && x.getPrefix().equals(EnumComponent.INFOSTORE.getAbbreviation())) {
+                            return saveDocument(document, data, sequenceNumber, false, session);
                         } else {
                             throw x;
                         }
@@ -620,20 +619,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 throw e;
             }
         }
-        return result;
     }
 
     @Override
     public IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
-        return saveDocument(document, data, sequenceNumber, false, session).getIdTuple();
+        return saveDocument(document, data, sequenceNumber, false, session);
     }
 
-    private SaveResult saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final boolean tryAddVersion, final ServerSession session) throws OXException {
+    private IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final boolean tryAddVersion, final ServerSession session) throws OXException {
         if (document.getId() != InfostoreFacade.NEW) {
-            return new SaveResult(saveDocument(document, data, sequenceNumber, nonNull(document), session), "none");
+            return saveDocument(document, data, sequenceNumber, nonNull(document), session);
         }
-
-        String saveAction = "none";
 
         // Insert NEW document
         final Context context = session.getContext();
@@ -672,7 +668,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 if (reservation.wasSameTitle()) {
                     document.setTitle(reservation.getFilename());
                 }
-                saveAction = "rename";
             }
             Connection writeCon = null;
             try {
@@ -727,7 +722,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document), session), true);
             }
 
-            return new SaveResult(new IDTuple(String.valueOf(document.getFolderId()), String.valueOf(document.getId())), saveAction);
+            return new IDTuple(String.valueOf(document.getFolderId()), String.valueOf(document.getId()));
         } finally {
             if (null != filenameReserver) {
                 filenameReserver.cleanUp();
