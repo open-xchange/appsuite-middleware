@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-06-01 13:00+0100\n"
+"PO-Revision-Date: 2016-06-14 11:42+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1527,6 +1527,10 @@ msgstr "Ungültige Konfiguration für globale Datenbanken: %1$s"
 msgid "No global database for context group \"%1$s\" found."
 msgstr "Es konnte keine globale Datenbank für die Kontextgruppe \"%1$s\" gefunden werden."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.download.limit/src/com/openexchange/download/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
+msgid "Download denied because download limits have been exceeded. Please try again later."
+msgstr "Herunterladen verweigert, weil Download-Limits überschritten wurden. Bitte versuchen Sie es später noch einmal."
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
@@ -1679,30 +1683,18 @@ msgstr "Zu verwendender OAuth-Account"
 
 #. The name for the virtual folder containing all attachments from all messages
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:67
-msgid "All attachments"
-msgstr "Alle Anhänge"
+msgid "My mail attachments"
+msgstr "Meine E-Mail-Anhänge"
 
 #. The name for the virtual folder containing all attachments of received messages
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:70
-msgid "Received attachments"
-msgstr "Empfangene Anhänge"
+msgid "In Inbox"
+msgstr "In \"Posteingang\""
 
 #. The name for the virtual folder containing all attachments of sent messages
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:73
-msgid "Sent attachments"
-msgstr "Gesendete Anhänge"
-
-#. The account display name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:76
-msgid "Mail Drive"
-msgstr ""
-
-#. The name used for mail attachments that have no file name
-#. Fall-back name if a file has no valid name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
-msgid "Unnamed"
-msgstr "Unbenannt"
+msgid "In Sent objects"
+msgstr "In \"Gesendete Objekte\""
 
 #. Search in From sender.
 #. Search for mails sent from ...
@@ -2471,7 +2463,6 @@ msgid "From/To"
 msgstr "Von/An"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
-#, fuzzy
 msgid "in attachment file names"
 msgstr "in Anhangsdateinamen"
 
@@ -7375,8 +7366,13 @@ msgstr "Bitte verwenden Sie das folgende Passwort zum Zugriff auf die Anhänge %
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the file names for affected message's attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:94
-msgid "The following files are shared"
-msgstr "Die folgenden Dateien wurden freigegeben"
+msgid "The following attachments are accessible:"
+msgstr "Auf folgende Anhänge kann zugegriffen werden:"
+
+#. Fall-back name if a file has no valid name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
+msgid "Unnamed"
+msgstr "Unbenannt"
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -8021,10 +8017,6 @@ msgstr "Authentifizierung fehlgeschlagen für den Benutzernamen: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
 msgid "No session found for identifier: %1$s"
 msgstr "Kein Sitzung gefunden für die ID: %1$s"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.limit/src/com/openexchange/share/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
-msgid "Download denied because download limits have been exceeded. Please try again later."
-msgstr "Herunterladen verweigert, weil Download-Limits überschritten wurden. Bitte versuchen Sie es später noch einmal."
 
 #. subject
 #. * $username has shared file "$filename" with you.
@@ -11066,6 +11058,22 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "All attachments"
+#~ msgstr "Alle Anhänge"
+
+#~ msgid "Received attachments"
+#~ msgstr "Empfangene Anhänge"
+
+#~ msgid "Sent attachments"
+#~ msgstr "Gesendete Anhänge"
+
+#, fuzzy
+#~ msgid "Mail Drive"
+#~ msgstr "Mail Drive"
+
+#~ msgid "The following files are shared"
+#~ msgstr "Die folgenden Dateien wurden freigegeben"
 
 #~ msgid "The available attachments for this E-Mail can be accessed via the link:"
 #~ msgstr "Die zur Verfügung stehenden Anhänge für diese E-Mail können über den Link aufgerufen werden:"
