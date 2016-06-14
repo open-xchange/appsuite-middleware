@@ -58,6 +58,7 @@ import com.openexchange.ajax.mail.filter.api.conversion.parser.test.TestParser;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.TestParserFactory;
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.fields.RuleFields;
@@ -71,15 +72,19 @@ import com.openexchange.ajax.parser.DataParser;
  */
 public class MailFilterParser extends DataParser {
 
+    /**
+     * Initialises a new {@link MailFilterParser}.
+     */
     public MailFilterParser() {
         super();
     }
 
     /**
+     * Parses the specified {@link JSONObject} into the specified {@link Rule}
      * 
-     * @param jsonObj
-     * @param rule
-     * @throws JSONException
+     * @param jsonObj The {@link JSONObject} to parse
+     * @param rule The {@link Rule} to parse it into
+     * @throws JSONException if a JSON parsing error occurs
      */
     public void parse(final JSONObject jsonObj, final Rule rule) throws JSONException {
         if (jsonObj.has(RuleFields.ID)) {
@@ -112,10 +117,11 @@ public class MailFilterParser extends DataParser {
     }
 
     /**
+     * Parses the specified {@link JSONArray} with flags as an array of strings and sets it to the specified {@link Rule}
      * 
-     * @param jsonFlagArray
-     * @param rule
-     * @throws JSONException
+     * @param jsonFlagArray The {@link JSONArray} to parse
+     * @param rule The {@link Rule} to set the flags to
+     * @throws JSONException if a JSON parsing error occurs
      */
     private void parseFlags(final JSONArray jsonFlagArray, final Rule rule) throws JSONException {
         String[] flags = new String[jsonFlagArray.length()];
@@ -127,34 +133,39 @@ public class MailFilterParser extends DataParser {
     }
 
     /**
+     * Parses the specified {@link JSONArray} of {@link ActionCommand}s to {@link Action}s and sets those to
+     * the specified {@link Rule}
      * 
-     * @param jsonActionArray
-     * @param rule
-     * @throws JSONException
+     * @param jsonActionArray The {@link JSONArray} with the {@link ActionCommand}s
+     * @param rule The {@link Rule} to set the {@link Action}s to
+     * @throws JSONException if a JSON parsing error occurs
      */
     private void parseActionCommand(final JSONArray jsonActionArray, final Rule rule) throws JSONException {
-        final Action[] abstractActionArray = new Action[jsonActionArray.length()];
+        Action[] actionArray = new Action[jsonActionArray.length()];
         for (int a = 0; a < jsonActionArray.length(); a++) {
-            final JSONObject actionCommandObj = jsonActionArray.getJSONObject(a);
-            final String actionId = actionCommandObj.getString("id");
+            JSONObject actionCommandObject = jsonActionArray.getJSONObject(a);
+
+            String actionId = actionCommandObject.getString("id");
             ActionCommand actionCommand = ActionCommand.valueOf(actionId);
-            final ActionParser actionParser = ActionParserFactory.getWriter(actionCommand);
-            abstractActionArray[a] = actionParser.parse(actionCommandObj);
+
+            ActionParser actionParser = ActionParserFactory.getWriter(actionCommand);
+            actionArray[a] = actionParser.parse(actionCommandObject);
         }
 
-        rule.setActionCommands(abstractActionArray);
+        rule.setActionCommands(actionArray);
     }
 
     /**
+     * Parses the specified {@link JSONObject} as a {@link TestCommand} and sets it to the specified {@link Rule} object
      * 
-     * @param jsonObj
-     * @param rule
-     * @throws JSONException
+     * @param jsonObj The {@link JSONObject} with the {@link TestCommand}
+     * @param rule The {@link Rule} object to set the test to
+     * @throws JSONException if a JSON parsing error occurs
      */
     private void parseTest(final JSONObject jsonObj, final Rule rule) throws JSONException {
-        final String testId = jsonObj.getString("id");
-        final TestParser testParser = TestParserFactory.getParser(testId);
-        final AbstractTest abstractTest = testParser.parseTest(testId, jsonObj);
+        String testId = jsonObj.getString("id");
+        TestParser testParser = TestParserFactory.getParser(testId);
+        AbstractTest abstractTest = testParser.parseTest(testId, jsonObj);
         rule.setTest(abstractTest);
     }
 }
