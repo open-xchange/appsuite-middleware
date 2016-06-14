@@ -53,7 +53,6 @@ import static com.openexchange.mail.json.writer.MessageWriter.getAddressesAsArra
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.getAddressHeader;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -239,9 +238,7 @@ public final class MailDriveFile extends DefaultFile {
                 }
 
                 // Compose "meta" field
-                Map<String, Object> meta = new HashMap<String, Object>(2);
-                meta.put("mail", mailMetadata(message));
-                setMeta(meta);
+                setMeta(mapFor("virtual", mapFor("mail", mailMetadata(message))));
             } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
@@ -270,6 +267,23 @@ public final class MailDriveFile extends DefaultFile {
         {
             InternetAddress[] toHeaders = getAddressHeader("To", message);
             map.put("to", toHeaders == null || toHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(toHeaders).asList());
+        }
+        return map;
+    }
+
+    private static Map<String, Object> mapFor(Object... args) {
+        if (null == args) {
+            return null;
+        }
+
+        int length = args.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+
+        Map<String, Object> map = new LinkedHashMap<String, Object>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(args[i].toString(), args[i+1]);
         }
         return map;
     }

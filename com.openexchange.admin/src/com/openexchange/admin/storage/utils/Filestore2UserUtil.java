@@ -577,6 +577,12 @@ public class Filestore2UserUtil {
                     ResultSet result = null;
                     try {
                         con = databaseService.getNoTimeout(poolAndSchema.getPoolId(), poolAndSchema.getSchema());
+
+                        if (!columnExists(con, "user","filestore_id")) {
+                            // This schema cannot hold users having an individual file storage assigned
+                            return Collections.emptySet();
+                        }
+
                         stmt = con.prepareStatement("SELECT cid, id, filestore_id FROM user WHERE filestore_id>0 AND (filestore_owner=0 OR filestore_owner=id)");
                         result = stmt.executeQuery();
 
@@ -756,6 +762,21 @@ public class Filestore2UserUtil {
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return retval;
+    }
+
+    static boolean columnExists(final Connection con, final String table, final String column) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getColumns(null, null, table, column);
+            while (rs.next()) {
+                retval = rs.getString(4).equalsIgnoreCase(column);
+            }
         } finally {
             closeSQLStuff(rs);
         }
