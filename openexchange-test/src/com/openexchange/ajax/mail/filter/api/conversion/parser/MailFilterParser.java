@@ -81,7 +81,7 @@ public class MailFilterParser extends DataParser {
      * @param rule
      * @throws JSONException
      */
-    public static void parse(final JSONObject jsonObj, final Rule rule) throws JSONException {
+    public void parse(final JSONObject jsonObj, final Rule rule) throws JSONException {
         if (jsonObj.has(RuleFields.ID)) {
             rule.setId(jsonObj.getInt(RuleFields.ID));
         }
@@ -99,34 +99,17 @@ public class MailFilterParser extends DataParser {
         }
 
         if (jsonObj.has(RuleFields.FLAGS)) {
-            MailFilterParser.parseFlags(jsonObj.getJSONArray(RuleFields.FLAGS), rule);
+            parseFlags(jsonObj.getJSONArray(RuleFields.FLAGS), rule);
         }
 
         if (jsonObj.has(RuleFields.ACTIONCMDS)) {
-            MailFilterParser.parseActionCommand(jsonObj.getJSONArray(RuleFields.ACTIONCMDS), rule);
+            parseActionCommand(jsonObj.getJSONArray(RuleFields.ACTIONCMDS), rule);
         }
 
         if (jsonObj.has(RuleFields.TEST)) {
-            MailFilterParser.parseTest(jsonObj.getJSONObject(RuleFields.TEST), rule);
+            parseTest(jsonObj.getJSONObject(RuleFields.TEST), rule);
         }
     }
-
-    //    public void parseMailFilter(final Rule rule, final JSONObject jsonObj) throws JSONException, OXException {
-    //        rule.setId(parseInt(jsonObj, RuleFields.ID));
-    //        rule.setName(parseString(jsonObj, RuleFields.RULENAME));
-    //        rule.setActive(parseBoolean(jsonObj, RuleFields.ACTIVE));
-    //
-    //        if (jsonObj.has(RuleFields.FLAGS)) {
-    //            final JSONArray flagsArray = jsonObj.getJSONArray(RuleFields.FLAGS);
-    //            parseFlags(flagsArray, rule);
-    //        }
-    //
-    //        final JSONArray actionCommandArray = jsonObj.getJSONArray(RuleFields.ACTIONCMDS);
-    //        parseActionCommand(actionCommandArray, rule);
-    //
-    //        final JSONObject testObj = jsonObj.getJSONObject("test");
-    //        parseTest(testObj, rule);
-    //    }
 
     /**
      * 
@@ -134,7 +117,7 @@ public class MailFilterParser extends DataParser {
      * @param rule
      * @throws JSONException
      */
-    public static void parseFlags(final JSONArray jsonFlagArray, final Rule rule) throws JSONException {
+    private void parseFlags(final JSONArray jsonFlagArray, final Rule rule) throws JSONException {
         String[] flags = new String[jsonFlagArray.length()];
         for (int a = 0; a < jsonFlagArray.length(); a++) {
             flags[a] = jsonFlagArray.getString(a);
@@ -149,7 +132,7 @@ public class MailFilterParser extends DataParser {
      * @param rule
      * @throws JSONException
      */
-    public static void parseActionCommand(final JSONArray jsonActionArray, final Rule rule) throws JSONException {
+    private void parseActionCommand(final JSONArray jsonActionArray, final Rule rule) throws JSONException {
         final Action[] abstractActionArray = new Action[jsonActionArray.length()];
         for (int a = 0; a < jsonActionArray.length(); a++) {
             final JSONObject actionCommandObj = jsonActionArray.getJSONObject(a);
@@ -168,7 +151,7 @@ public class MailFilterParser extends DataParser {
      * @param rule
      * @throws JSONException
      */
-    public static void parseTest(final JSONObject jsonObj, final Rule rule) throws JSONException {
+    private void parseTest(final JSONObject jsonObj, final Rule rule) throws JSONException {
         final String testId = jsonObj.getString("id");
         final TestParser testParser = TestParserFactory.getParser(testId);
         final AbstractTest abstractTest = testParser.parseTest(testId, jsonObj);

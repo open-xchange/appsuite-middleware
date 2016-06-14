@@ -56,7 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.mail.filter.api.conversion.parser.AbstractMailFilterTestParser;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.MailFilterParser;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 
 /**
@@ -74,7 +74,7 @@ public class AllResponse extends AbstractAJAXResponse {
 
     public Rule[] getRules() throws JSONException {
         final List<Rule> rules = new ArrayList<Rule>();
-        final JSONArray jsonArray = (JSONArray)getData();
+        final JSONArray jsonArray = (JSONArray) getData();
         for (int a = 0; a < jsonArray.length(); a++) {
             try {
                 rules.add(parseRow(jsonArray.getJSONObject(a)));
@@ -87,7 +87,8 @@ public class AllResponse extends AbstractAJAXResponse {
 
     public Rule parseRow(final JSONObject jsonObj) throws JSONException {
         final Rule rule = new Rule();
-        AbstractMailFilterTestParser.parse(jsonObj, rule);
+        MailFilterParser parser = new MailFilterParser();
+        parser.parse(jsonObj, rule);
         return rule;
     }
 }
