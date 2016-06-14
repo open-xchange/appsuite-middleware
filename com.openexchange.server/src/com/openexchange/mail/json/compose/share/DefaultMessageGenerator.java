@@ -58,7 +58,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,6 +65,7 @@ import java.util.Locale;
 import java.util.Map;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -84,10 +84,15 @@ import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.notification.service.CommonNotificationVariables;
 import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.NotificationMailConfig;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
+import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
@@ -222,22 +227,19 @@ public class DefaultMessageGenerator implements MessageGenerator {
     public List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
         ShareComposeLink shareLink = info.getShareLink();
         Map<String, String> headers = mapFor(HEADER_SHARE_TYPE, shareLink.getType(), HEADER_SHARE_URL, shareLink.getLink());
-        return equalMessagesByLocale() ? generateEqualMessagesByLocale(info, shareLink, shareReference, headers) : generateIndividualMessages(info, shareLink, shareReference, headers);
+        return equalMessagesByLocale() ? generateEqualMessagesByLocale(info, shareReference, headers) : generateIndividualMessages(info, shareReference, headers);
     }
 
     /**
      * Generates equal messages by locale.
      *
      * @param info The message info providing the link and target recipients
-     * @param shareLink The share link to use
      * @param shareReference The share reference
      * @param headers The headers to apply
      * @return The generated messages
      * @throws OXException If messages cannot be generated
      */
-    protected List<ComposedMailMessage> generateEqualMessagesByLocale(ShareComposeMessageInfo info, ShareComposeLink shareLink, ShareReference shareReference, Map<String, String> headers) throws OXException {
-        String password = info.getPassword();
-        Date expirationDate = info.getExpirationDate();
+    protected List<ComposedMailMessage> generateEqualMessagesByLocale(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> headers) throws OXException {
         Collection<Recipient> recipients = info.getRecipients();
 
         Map<Locale, ComposedMailMessage> internalMessages = new LinkedHashMap<Locale, ComposedMailMessage>(recipients.size());
@@ -249,7 +251,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
                 Locale locale = recipient.getUser().getLocale();
                 ComposedMailMessage composedMessage = internalMessages.get(locale);
                 if (null == composedMessage) {
-                    composedMessage = generateInternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate, shareReference, headers);
+                    composedMessage = generateInternalVersion(recipient, info, shareReference, headers);
                     internalMessages.put(locale, composedMessage);
                 } else {
                     // Adds specified recipient
@@ -261,7 +263,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
                 }
                 ComposedMailMessage composedMessage = externalMessages.get(localeForExternalRecipients);
                 if (null == composedMessage) {
-                    composedMessage = generateExternalVersion(localeForExternalRecipients, recipient, info.getComposeContext(), shareLink, password, expirationDate, shareReference, headers);
+                    composedMessage = generateExternalVersion(localeForExternalRecipients, recipient, info, shareReference, headers);
                     externalMessages.put(localeForExternalRecipients, composedMessage);
                 } else {
                     // Adds specified recipient
@@ -279,15 +281,12 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * Generates individual messages for each recipient.
      *
      * @param info The message info providing the link and target recipients
-     * @param shareLink The share link to use
      * @param shareReference The share reference
      * @param headers The headers to apply
      * @return The individually generated messages
      * @throws OXException If messages cannot be generated
      */
-    protected List<ComposedMailMessage> generateIndividualMessages(ShareComposeMessageInfo info, ShareComposeLink shareLink, ShareReference shareReference, Map<String, String> headers) throws OXException {
-        String password = info.getPassword();
-        Date expirationDate = info.getExpirationDate();
+    protected List<ComposedMailMessage> generateIndividualMessages(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> headers) throws OXException {
         Collection<Recipient> recipients = info.getRecipients();
 
         List<ComposedMailMessage> messages = new ArrayList<ComposedMailMessage>(recipients.size());
@@ -295,12 +294,12 @@ public class DefaultMessageGenerator implements MessageGenerator {
         Locale localeForExternalRecipients = null;
         for (Recipient recipient : recipients) {
             if (recipient.isUser()) {
-                messages.add(generateInternalVersion(recipient, info.getComposeContext(), shareLink, password, expirationDate, shareReference, headers));
+                messages.add(generateInternalVersion(recipient, info, shareReference, headers));
             } else {
                 if (null == localeForExternalRecipients) {
                     localeForExternalRecipients = determineLocaleForExternalRecipients(info.getComposeContext());
                 }
-                messages.add(generateExternalVersion(localeForExternalRecipients, recipient, info.getComposeContext(), shareLink, password, expirationDate, shareReference, headers));
+                messages.add(generateExternalVersion(localeForExternalRecipients, recipient, info, shareReference, headers));
             }
         }
         return messages;
@@ -309,7 +308,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
     @Override
     public ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
         Map<String, String> headers = mapFor(HEADER_SHARE_REFERENCE, ShareReference.generateStringForMime(shareReference));
-        ComposedMailMessage sentMessage = generateInternalVersion(info.getRecipients().get(0), info.getComposeContext(), info.getShareLink(), info.getPassword(), info.getExpirationDate(), shareReference, headers);
+        ComposedMailMessage sentMessage = generateInternalVersion(info.getRecipients().get(0), info, shareReference, headers);
         sentMessage.addUserFlag(USER_SHARE_REFERENCE);
         return sentMessage;
     }
@@ -318,19 +317,16 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * Generates the compose message for an internal recipient.
      *
      * @param recipient The internal recipient
-     * @param composeContext The associated compose context
-     * @param link The link to insert
-     * @param password The optional password
-     * @param elapsedDate The optional expiration date
+     * @param info The share info object
      * @param shareReference The share reference
      * @param shareHeaders The optional share headers to set
      * @return The compose message
      * @throws OXException If compose message cannot be returned
      */
-    protected ComposedMailMessage generateInternalVersion(Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, ShareReference shareReference, Map<String, String> shareHeaders) throws OXException {
+    protected ComposedMailMessage generateInternalVersion(Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders) throws OXException {
         // Generate locale-specific version using user's locale
         Locale locale = recipient.getUser().getLocale();
-        return generateLocaleSpecificVersion(locale, recipient, composeContext, link, password, elapsedDate, shareReference, shareHeaders);
+        return generateLocaleSpecificVersion(locale, recipient, info, shareReference, shareHeaders);
     }
 
     /**
@@ -338,18 +334,15 @@ public class DefaultMessageGenerator implements MessageGenerator {
      *
      * @param localeForExternalRecipients The configured locale for external recipients
      * @param recipient The external recipient
-     * @param composeContext The associated compose context
-     * @param link The link to insert
-     * @param password The optional password
-     * @param elapsedDate The optional expiration date
+     * @param info The share info object
      * @param shareReference The share reference
      * @param shareHeaders The optional share headers to set
      * @return The compose message
      * @throws OXException If compose message cannot be returned
      */
-    protected ComposedMailMessage generateExternalVersion(Locale localeForExternalRecipients, Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, ShareReference shareReference, Map<String, String> shareHeaders) throws OXException {
+    protected ComposedMailMessage generateExternalVersion(Locale localeForExternalRecipients, Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders) throws OXException {
         // Generate locale-specific version using the configured locale for external recipients
-        return generateLocaleSpecificVersion(localeForExternalRecipients, recipient, composeContext, link, password, elapsedDate, shareReference, shareHeaders);
+        return generateLocaleSpecificVersion(localeForExternalRecipients, recipient, info, shareReference, shareHeaders);
     }
 
     /**
@@ -357,16 +350,14 @@ public class DefaultMessageGenerator implements MessageGenerator {
      *
      * @param locale The locale
      * @param recipient The recipient
-     * @param composeContext The compose context
-     * @param link The share link to insert
-     * @param password The optional password associated with the share link
-     * @param elapsedDate The optional expiration date associated with the share link
+     * @param info The share info object
      * @param shareReference The share reference
      * @param shareHeaders The share headers to add
      * @return The generated message for specified locale
      * @throws OXException If message cannot be generated
      */
-    protected ComposedMailMessage generateLocaleSpecificVersion(Locale locale, Recipient recipient, ShareTransportComposeContext composeContext, ShareComposeLink link, String password, Date elapsedDate, ShareReference shareReference, Map<String, String> shareHeaders) throws OXException {
+    protected ComposedMailMessage generateLocaleSpecificVersion(Locale locale, Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders) throws OXException {
+        ShareTransportComposeContext composeContext = info.getComposeContext();
         ComposedMailMessage composedMessage = Utilities.copyOfSourceMessage(composeContext);
 
         // Alter text content to include share reference
@@ -378,7 +369,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
             StringBuilder textBuilder = new StringBuilder(text.length() + 512);
 
             // Append the prefix that notifies about to access the message's attachment via provided share link
-            textBuilder.append(generatePrefix(locale, link, password, elapsedDate, shareReference, loadPrefixFromTemplate()));
+            textBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate()));
 
             // Append actual text
             textBuilder.append(text);
@@ -425,29 +416,26 @@ public class DefaultMessageGenerator implements MessageGenerator {
      *
      * @param locale The locale to use for translation
      * @param link The link
-     * @param password The optional password or <code>null</code>
-     * @param elapsedDate The optional expiration date or <code>null</code>
+     * @param info The share info object
      * @param shareReference The share reference
      * @param fromTemplate <code>true</code> to generate the prefix by loading from template; otherwise <code>false</code>
      * @return The generated prefix
      * @throws OXException If generating prefix from template fails
      */
-    protected String generatePrefix(Locale locale, ShareComposeLink link, String password, Date elapsedDate, ShareReference shareReference, boolean fromTemplate) throws OXException {
-        return fromTemplate ? loadPrefixFromTemplate(locale, link, password, elapsedDate, shareReference) : generatePrefixPlain(locale, link, password, elapsedDate, shareReference);
+    protected String generatePrefix(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, boolean fromTemplate) throws OXException {
+        return fromTemplate ? loadPrefixFromTemplate(locale, info, shareReference) : generatePrefixPlain(locale, info, shareReference);
     }
 
     /**
      * Generates the prefix to insert.
      *
      * @param locale The locale to use for translation
-     * @param link The link
-     * @param password The optional password or <code>null</code>
-     * @param elapsedDate The optional expiration date or <code>null</code>
+     * @param info The share info object
      * @param shareReference The share reference
      * @return The generated prefix
      * @throws OXException If generating prefix from template fails
      */
-    protected String generatePrefixPlain(Locale locale, ShareComposeLink link, String password, Date elapsedDate, ShareReference shareReference) throws OXException {
+    protected String generatePrefixPlain(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
         TranslatorFactory translatorFactory = MessageGenerators.getTranslatorFactory();
         if (null == translatorFactory) {
             throw ServiceExceptionCode.absentService(TranslatorFactory.class);
@@ -456,24 +444,48 @@ public class DefaultMessageGenerator implements MessageGenerator {
         Translator translator = translatorFactory.translatorFor(locale);
         StringBuilder textBuilder = new StringBuilder(512);
 
+        List<Item> items = shareReference.getItems();
+
+        // Intro
         {
-            String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PREFIX);
+            String translated = translator.translate(items.size() > 1 ? ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_MULTI : ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_SINGLE);
             FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
             String fullName = fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator);
-            translated = String.format(translated, buildLink(link));
+            translated = String.format(translated, fullName);
             textBuilder.append(htmlFormat(translated)).append("<br>");
         }
 
-        if (password != null) {
+        // Files
+        {
+            textBuilder.append("<ul>");
+            List<String> fileNames = new ArrayList<String>(items.size());
+            for (Item item : items) {
+                textBuilder.append("<li>");
+                String fileName = item.getName();
+                fileNames.add(Strings.isEmpty(fileName) ? translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME) : htmlFormat(fileName));
+                textBuilder.append("</li>");
+            }
+            textBuilder.append("</ul>").append("<br>");
+        }
+
+        // Link
+        {
+            String translated = translator.translate(items.size() > 1 ? NotificationStrings.VIEW_FILES : NotificationStrings.VIEW_FILE);
+            textBuilder.append(htmlFormat(translated)).append(": ").append(buildLink(info.getShareLink(), true)).append("<br>");
+        }
+
+        // password
+        if (null != info.getPassword()) {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PASSWORD);
-            translated = String.format(translated, password);
-            textBuilder.append(htmlFormat(translated)).append("<br>");
+            translated = String.format(translated, "<b>" + StringEscapeUtils.escapeHtml(info.getPassword()) + "</b>");
+            textBuilder.append(translated).append("<br>");
         }
 
-        if (elapsedDate != null) {
+        // expiration
+        if (null != info.getExpirationDate()) {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION);
-            translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate));
-            textBuilder.append(htmlFormat(translated)).append("<br>");
+            translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(info.getExpirationDate()));
+            textBuilder.append(translated).append("<br>");
         }
 
         // Extra line-break
@@ -482,17 +494,20 @@ public class DefaultMessageGenerator implements MessageGenerator {
         return textBuilder.toString();
     }
 
+    /** The template place-holder for the introduction text */
+    protected static final String VARIABLE_INTRO = "intro";
+
     /** The template place-holder for the share link */
     protected static final String VARIABLE_LINK = "link";
+
+    /** The template place-holder for the share link */
+    protected static final String VARIABLE_LINK_TEXT = "link_text";
 
     /** The template place-holder for the password */
     protected static final String VARIABLE_PASSWORD = "password";
 
     /** The template place-holder for the expiration date */
     protected static final String VARIABLE_EXPIRATION = "expiration";
-
-    /** The template place-holder for the files */
-    protected static final String VARIABLE_FILES = "files";
 
     /** The template place-holder for the listing of file names */
     protected static final String VARIABLE_FILE_NAMES = "filenames";
@@ -501,14 +516,12 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * Loads the prefix to insert from a template.
      *
      * @param locale The locale to use for translation
-     * @param link The link
-     * @param password The optional password or <code>null</code>
-     * @param elapsedDate The optional expiration date or <code>null</code>
+     * @param info The share info object
      * @param shareReference The share reference
      * @return The loaded prefix
      * @throws OXException If loading prefix from template fails
      */
-    protected String loadPrefixFromTemplate(Locale locale, ShareComposeLink link, String password, Date elapsedDate, ShareReference shareReference) throws OXException {
+    protected String loadPrefixFromTemplate(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
         TemplateService templateService = MessageGenerators.getTemplateService();
         if (null == templateService) {
             throw ServiceExceptionCode.absentService(TemplateService.class);
@@ -522,41 +535,57 @@ public class DefaultMessageGenerator implements MessageGenerator {
         Translator translator = translatorFactory.translatorFor(locale);
         Map<String, Object> vars = new HashMap<String, Object>(4);
 
-        // link
+        List<Item> items = shareReference.getItems();
+
+        // Intro
         {
-            String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PREFIX);
+            String translated = translator.translate(items.size() > 1 ? ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_MULTI : ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_SINGLE);
             FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
-            String fullName = fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator);
-            translated = String.format(translated, buildLink(link));
-            vars.put(VARIABLE_LINK, translated);
+            String fullName = StringEscapeUtils.escapeHtml(fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator));
+            translated = String.format(translated, fullName);
+            vars.put(VARIABLE_INTRO, translated);
+        }
+
+        // Files
+        {
+            List<String> fileNames = new ArrayList<String>(items.size());
+            for (Item item : items) {
+                String fileName = item.getName();
+                fileNames.add(Strings.isEmpty(fileName) ? translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME) : StringEscapeUtils.escapeHtml(fileName));
+            }
+            vars.put(VARIABLE_FILE_NAMES, fileNames);
+        }
+
+        // Link
+        {
+            String translated = translator.translate(items.size() > 1 ? NotificationStrings.VIEW_FILES : NotificationStrings.VIEW_FILE);
+            vars.put(VARIABLE_LINK_TEXT, translated);
+            vars.put(VARIABLE_LINK, buildLink(info.getShareLink(), false));
         }
 
         // password
-        if (null != password) {
+        if (null != info.getPassword()) {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_PASSWORD);
-            translated = String.format(translated, password);
+            translated = String.format(translated, "<b>" + StringEscapeUtils.escapeHtml(info.getPassword()) + "</b>");
             vars.put(VARIABLE_PASSWORD, translated);
         }
 
         // expiration
-        if (null != elapsedDate) {
+        if (null != info.getExpirationDate()) {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION);
-            translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate));
+            translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(info.getExpirationDate()));
             vars.put(VARIABLE_EXPIRATION, translated);
         }
 
-        // files
+        // Apply style
         {
-            String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_FILES);
-            vars.put(VARIABLE_FILES, translated);
-
-            List<Item> items = shareReference.getItems();
-            List<String> fileNames = new ArrayList<String>(items.size());
-            for (Item item : items) {
-                String fileName = item.getName();
-                fileNames.add(Strings.isEmpty(fileName) ? translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME) : fileName);
-            }
-            vars.put(VARIABLE_FILE_NAMES, fileNames);
+            ComposeRequest composeRequest = info.getComposeRequest();
+            ServerConfigService serverConfigService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+            ServerConfig serverConfig = serverConfigService.getServerConfig(composeRequest.getRequest().getHostname(), composeRequest.getSession());
+            NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
+            vars.put(CommonNotificationVariables.BUTTON_COLOR, mailConfig.getButtonTextColor());
+            vars.put(CommonNotificationVariables.BUTTON_BACKGROUND_COLOR, mailConfig.getButtonBackgroundColor());
+            vars.put(CommonNotificationVariables.BUTTON_BORDER_COLOR, mailConfig.getButtonBorderColor());
         }
 
         return compileTemplate(getTemplateName(), vars, templateService);
@@ -581,8 +610,12 @@ public class DefaultMessageGenerator implements MessageGenerator {
      *
      * @param composeLink The link to build from
      */
-    protected String buildLink(ShareComposeLink composeLink) {
+    protected String buildLink(ShareComposeLink composeLink, boolean withAnchor) {
         String link = composeLink.getLink();
+        if (false == withAnchor) {
+            return link;
+        }
+
         char quot = link.indexOf('"') < 0 ? '"' : '\'';
         StringBuilder linkBuilder = new StringBuilder(128);
         linkBuilder.append("<a href=").append(quot).append(link).append(quot).append('>');

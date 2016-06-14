@@ -49,12 +49,6 @@
 
 package com.openexchange.notification.mail.impl;
 
-import static com.openexchange.notification.mail.impl.CommonNotificationVariables.BUTTON_BACKGROUND_COLOR;
-import static com.openexchange.notification.mail.impl.CommonNotificationVariables.BUTTON_BORDER_COLOR;
-import static com.openexchange.notification.mail.impl.CommonNotificationVariables.BUTTON_COLOR;
-import static com.openexchange.notification.mail.impl.CommonNotificationVariables.FOOTER_IMAGE_ALT;
-import static com.openexchange.notification.mail.impl.CommonNotificationVariables.FOOTER_IMAGE_SRC;
-import static com.openexchange.notification.mail.impl.CommonNotificationVariables.FOOTER_TEXT;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -101,6 +95,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.notification.mail.MailAttachment;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
+import com.openexchange.notification.service.CommonNotificationVariables;
 import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -317,9 +312,9 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
      * @param vars The map containing the variables for template processing
      */
     private void applyStyle(NotificationMailConfig mailConfig, Map<String, Object> vars) {
-        vars.put(BUTTON_COLOR, mailConfig.getButtonTextColor());
-        vars.put(BUTTON_BACKGROUND_COLOR, mailConfig.getButtonBackgroundColor());
-        vars.put(BUTTON_BORDER_COLOR, mailConfig.getButtonBorderColor());
+        vars.put(CommonNotificationVariables.BUTTON_COLOR, mailConfig.getButtonTextColor());
+        vars.put(CommonNotificationVariables.BUTTON_BACKGROUND_COLOR, mailConfig.getButtonBackgroundColor());
+        vars.put(CommonNotificationVariables.BUTTON_BORDER_COLOR, mailConfig.getButtonBorderColor());
     }
 
     /**
@@ -332,16 +327,16 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
         String footerText = mailConfig.getFooterText();
         FooterImage footerImage = loadFooterImage(mailConfig);
         if (Strings.isNotEmpty(footerText)) {
-            vars.put(FOOTER_TEXT, footerText);
+            vars.put(CommonNotificationVariables.FOOTER_TEXT, footerText);
         }
 
         if (footerImage != null) {
-            vars.put(FOOTER_IMAGE_ALT, mailConfig.getFooterImageAltText());
+            vars.put(CommonNotificationVariables.FOOTER_IMAGE_ALT, mailConfig.getFooterImageAltText());
             if (mailConfig.embedFooterImage()) {
-                vars.put(FOOTER_IMAGE_SRC, "data:" + footerImage.getContentType() + ";base64," + footerImage.getB64Data());
+                vars.put(CommonNotificationVariables.FOOTER_IMAGE_SRC, "data:" + footerImage.getContentType() + ";base64," + footerImage.getB64Data());
             } else {
                 String cid = UUID.randomUUID().toString();
-                vars.put(FOOTER_IMAGE_SRC, "cid:" + cid);
+                vars.put(CommonNotificationVariables.FOOTER_IMAGE_SRC, "cid:" + cid);
                 footerImage.setContentId(cid);
             }
             return footerImage;

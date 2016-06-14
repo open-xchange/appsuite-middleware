@@ -77,9 +77,13 @@ public class ShareComposeStrings implements LocalizableStrings {
     // The name of the folder holding the attachments, which were shared to other recipients.
     public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
 
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Hints to the available attachments for affected message
-    public static final String SHARED_ATTACHMENTS_PREFIX = "The available attachments for this E-Mail can be accessed via the link %1$s";
+    public static final String SHARED_ATTACHMENTS_INTRO_SINGLE = "%1$s send you the following file:";
+
+    public static final String SHARED_ATTACHMENTS_INTRO_MULTI = "%1$s send you the following files:";
+
+    public static final String VIEW_FILE = "View file";
+
+    public static final String VIEW_FILES = "View files";
 
     // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
     // Indicates the elapsed date for affected message's attachments
@@ -87,11 +91,7 @@ public class ShareComposeStrings implements LocalizableStrings {
 
     // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
     // Indicates the password for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password to access the attachments %1$s";
-
-    // The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-    // Indicates the file names for affected message's attachments
-    public static final String SHARED_ATTACHMENTS_FILES = "The following attachments are accessible:";
+    public static final String SHARED_ATTACHMENTS_PASSWORD = "Please use the following password: %1$s";
 
     // Fall-back name if a file has no valid name
     public static final String DEFAULT_FILE_NAME = "Unnamed";

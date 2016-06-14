@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.share.notification;
 
 import com.openexchange.i18n.LocalizableStrings;
 

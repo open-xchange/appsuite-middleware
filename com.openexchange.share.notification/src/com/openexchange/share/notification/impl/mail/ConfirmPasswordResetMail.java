@@ -64,7 +64,7 @@ import com.openexchange.notification.mail.MailData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.share.notification.impl.NotificationStrings;
+import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.impl.PasswordResetConfirmNotification;
 import com.openexchange.user.UserService;
 

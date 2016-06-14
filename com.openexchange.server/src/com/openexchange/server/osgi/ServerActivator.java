@@ -235,6 +235,7 @@ import com.openexchange.server.impl.Starter;
 import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.spamhandler.SpamHandler;
@@ -422,6 +423,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(AuditLogService.class, new RegistryCustomizer<AuditLogService>(context, AuditLogService.class));
 
         // Full-name builder
+        track(ServerConfigService.class, new RegistryCustomizer<ServerConfigService>(context, ServerConfigService.class));
         track(FullNameBuilderService.class, new RegistryCustomizer<FullNameBuilderService>(context, FullNameBuilderService.class));
 
         // Mail account delete listener

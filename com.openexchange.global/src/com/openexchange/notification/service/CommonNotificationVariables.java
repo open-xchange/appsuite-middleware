@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.notification.mail.impl;
+package com.openexchange.notification.service;
 
 
 /**

@@ -1,28 +1,16 @@
-<div>
-  <div>
-  ${link}
-  </div>
-
-  <#if password?has_content>
-  <div>
-  ${password}
-  </div>
-  </#if>
-
-  <#if expiration?has_content>
-  <div>
-  ${expiration}
-  </div>
-  </#if>
-
-  <div>
-  ${files}
+<#include "notify.common.button.tmpl">
+<p>
+  ${intro}
   <ul>
     <#list filenames as filename>
     <li>${filename}</li>
     </#list>
   </ul>
-  </div>
-  
-</div>
-
+</p>
+<p>
+  <@styledButton link=link>${link_text}</@styledButton>
+</p>
+<p>
+  <#if expiration?has_content>${expiration}</#if>
+  <#if password?has_content>${password}</#if>
+</p>
