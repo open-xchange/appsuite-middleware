@@ -267,8 +267,12 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
                 changeIncomingVacationRule(rightRule.rule);
-                clientRulesAndReq.getRules().set(rightRule.position, rule);
-
+                if (rightRule.position == rule.getPosition()) {
+                    clientRulesAndReq.getRules().set(rightRule.position, rule);
+                } else {
+                    clientRulesAndReq.getRules().remove(rightRule.position);
+                    clientRulesAndReq.getRules().add(rule.getPosition(), rule);
+                }
                 String writeback = sieveTextFilter.writeback(clientRulesAndReq, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeback = sieveTextFilter.rewriteRequire(writeback, script);
                 LOGGER.debug("The following sieve script will be written:\n{}", writeback);
