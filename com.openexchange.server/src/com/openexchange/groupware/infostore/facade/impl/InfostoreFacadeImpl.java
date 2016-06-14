@@ -2560,6 +2560,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 }
             });
         } else {
+
+            if (null == permissionBits) {
+                throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+            }
             /*
              * load all / own objects from physical folder
              */
