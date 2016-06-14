@@ -137,7 +137,7 @@ public class MailFilterParser extends DataParser {
         for (int a = 0; a < jsonActionArray.length(); a++) {
             final JSONObject actionCommandObj = jsonActionArray.getJSONObject(a);
             final String actionId = actionCommandObj.getString("id");
-            ActionCommand actionCommand = ActionCommand.valueOf(actionId.toUpperCase());
+            ActionCommand actionCommand = ActionCommand.valueOf(actionId);
             final ActionParser actionParser = ActionParserFactory.getWriter(actionCommand);
             abstractActionArray[a] = actionParser.parse(actionCommandObj);
         }
