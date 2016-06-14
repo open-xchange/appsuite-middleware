@@ -1,9 +1,3 @@
-open-xchange-themes-default (7.8.2-1) stable; urgency=medium
-
-  * First candidate for 7.8.2 release
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 14 Jun 2016 19:09:24 +0200
-
 open-xchange-themes-default (7.8.2-0) unstable; urgency=medium
 
   * prepare for 7.8.2 release
