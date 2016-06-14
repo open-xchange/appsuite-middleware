@@ -144,15 +144,15 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         hostname = AjaxInit.getAJAXProperty(HOSTNAME);
 
         // parser
-        ActionParserFactory.addParser(ActionCommand.ADDFLAGS, new AddFlagsParserImpl());
-        ActionParserFactory.addParser(ActionCommand.DISCARD, new DiscardParserImpl());
-        ActionParserFactory.addParser(ActionCommand.KEEP, new KeepParserImpl());
-        ActionParserFactory.addParser(ActionCommand.MOVE, new MoveParserImpl());
-        ActionParserFactory.addParser(ActionCommand.REDIRECT, new RedirectParserImpl());
-        ActionParserFactory.addParser(ActionCommand.REJECT, new RejectParserImpl());
-        ActionParserFactory.addParser(ActionCommand.STOP, new StopParserImpl());
-        ActionParserFactory.addParser(ActionCommand.VACATION, new VacationParserImpl());
-        ActionParserFactory.addParser(ActionCommand.PGP, new PGPParserImpl());
+        ActionParserFactory.addParser(ActionCommand.addflags, new AddFlagsParserImpl());
+        ActionParserFactory.addParser(ActionCommand.discard, new DiscardParserImpl());
+        ActionParserFactory.addParser(ActionCommand.keep, new KeepParserImpl());
+        ActionParserFactory.addParser(ActionCommand.move, new MoveParserImpl());
+        ActionParserFactory.addParser(ActionCommand.redirect, new RedirectParserImpl());
+        ActionParserFactory.addParser(ActionCommand.reject, new RejectParserImpl());
+        ActionParserFactory.addParser(ActionCommand.stop, new StopParserImpl());
+        ActionParserFactory.addParser(ActionCommand.vacation, new VacationParserImpl());
+        ActionParserFactory.addParser(ActionCommand.pgp, new PGPParserImpl());
 
         TestParserFactory.addParser("address", new AddressParserImpl());
         TestParserFactory.addParser("allof", new AllOfParserImpl());
@@ -172,15 +172,15 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ComparisonParserRegistry.addParser(MatchType.over, new OverJSONParserImpl());
 
         // writer
-        ActionWriterFactory.addWriter(ActionCommand.ADDFLAGS, new AddFlagsWriterImpl());
-        ActionWriterFactory.addWriter(ActionCommand.DISCARD, new DiscardWriterImpl());
-        ActionWriterFactory.addWriter(ActionCommand.KEEP, new KeepWriterImpl());
-        ActionWriterFactory.addWriter(ActionCommand.MOVE, new MoveWriterImpl());
-        ActionWriterFactory.addWriter(ActionCommand.REDIRECT, new RedirectWriterImpl());
-        ActionWriterFactory.addWriter(ActionCommand.REJECT, new RejectWriterImpl());
-        ActionWriterFactory.addWriter(ActionCommand.STOP, new StopWriterImpl());
-        ActionWriterFactory.addWriter(ActionCommand.VACATION, new VacationWriterImpl());
-        ActionWriterFactory.addWriter(ActionCommand.PGP, new PGPWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.addflags, new AddFlagsWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.discard, new DiscardWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.keep, new KeepWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.move, new MoveWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.redirect, new RedirectWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.reject, new RejectWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.stop, new StopWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.vacation, new VacationWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.pgp, new PGPWriterImpl());
 
         TestWriterFactory.addWriter("address", new AddressWriterImpl());
         TestWriterFactory.addWriter("allof", new AllOfWriterImpl());

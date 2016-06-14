@@ -63,7 +63,7 @@ public class AddFlags extends AbstractAction {
      * Initialises a new {@link AddFlags}.
      */
     public AddFlags() {
-        super(ActionCommand.ADDFLAGS);
+        super(ActionCommand.addflags);
     }
     
     //TODO: add methods for setting/getting flags

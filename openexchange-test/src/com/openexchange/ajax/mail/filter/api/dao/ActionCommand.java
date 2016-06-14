@@ -55,19 +55,19 @@ package com.openexchange.ajax.mail.filter.api.dao;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum ActionCommand {
-    KEEP,
-    DISCARD,
-    REDIRECT,
-    MOVE,
-    REJECT,
-    STOP,
-    VACATION,
-    NOTIFY,
-    ADDFLAGS,
-    REMOVEFLAGS,
-    PGP,
-    ADDHEADER,
-    DELETEHEADER,
-    VARIABLES,
-    SET;
+    keep,
+    discard,
+    redirect,
+    move,
+    reject,
+    stop,
+    vacation,
+    notify,
+    addflags,
+    removeflags,
+    pgp,
+    addheader,
+    deleteheader,
+    variables,
+    set;
 }

@@ -63,6 +63,6 @@ public class Discard extends AbstractAction {
      * Initialises a new {@link Discard}.
      */
     public Discard() {
-        super(ActionCommand.DISCARD);
+        super(ActionCommand.discard);
     }
 }

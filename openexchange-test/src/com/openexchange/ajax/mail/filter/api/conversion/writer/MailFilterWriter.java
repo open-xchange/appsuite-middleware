@@ -64,93 +64,59 @@ import com.openexchange.ajax.mail.filter.api.fields.RuleFields;
 import com.openexchange.ajax.writer.DataWriter;
 
 /**
- * MailFilterWriter
+ * {@link MailFilterWriter}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-
 public class MailFilterWriter extends DataWriter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterWriter.class);
-
+    /**
+     * Initialises a new {@link MailFilterWriter}.
+     */
     public MailFilterWriter() {
         super(null, null);
     }
 
-    public void writeMailFilter(final Rule rule, final JSONObject jsonObj) throws JSONException {
+    /**
+     * Writes the specified {@link Rule} to the specified {@link JSONObject}
+     * 
+     * @param rule The {@link Rule} to write
+     * @param jsonObject The {@link JSONObject} to write it to
+     * @throws JSONException if a JSON error occurs
+     */
+    public void writeMailFilter(final Rule rule, final JSONObject jsonObject) throws JSONException {
         if (rule.getId() >= 0) {
-            writeParameter(RuleFields.ID, rule.getId(), jsonObj);
+            writeParameter(RuleFields.ID, rule.getId(), jsonObject);
         }
 
-        writeParameter(RuleFields.RULENAME, rule.getName(), jsonObj);
-        writeParameter(RuleFields.ACTIVE, rule.isActive(), jsonObj);
+        writeParameter(RuleFields.RULENAME, rule.getName(), jsonObject);
+        writeParameter(RuleFields.ACTIVE, rule.isActive(), jsonObject);
 
         final JSONArray flagsArray = getFlagsAsJSON(rule.getFlags());
         if (flagsArray != null) {
-            jsonObj.put(RuleFields.FLAGS, flagsArray);
+            jsonObject.put(RuleFields.FLAGS, flagsArray);
         }
 
-        final JSONArray actionCommandObj = getActionCommandsAsJSON(rule.getActionCommands());
-        if (actionCommandObj != null) {
-            jsonObj.put(RuleFields.ACTIONCMDS, actionCommandObj);
+        final JSONArray actionCommandsArray = getActionCommandsAsJSON(rule.getActionCommands());
+        if (actionCommandsArray != null && !actionCommandsArray.isEmpty()) {
+            jsonObject.put(RuleFields.ACTIONCMDS, actionCommandsArray);
         }
 
-        final JSONObject testObj = getTestAsJSON(rule.getTest());
+        final JSONObject testObj = getTestCommandAsJSON(rule.getTest());
         if (testObj != null) {
-            jsonObj.put(RuleFields.TEST, testObj);
+            jsonObject.put(RuleFields.TEST, testObj);
         }
     }
 
-    public void writeMailFilterAsArray(final Rule rule, final JSONArray jsonArray, final int[] cols) throws JSONException {
-        for (int a = 0; a < cols.length; a++) {
-            write(cols[a], rule, jsonArray);
-        }
-    }
-
-    public void write(final int field, final Rule rule, final JSONArray jsonArray) throws JSONException {
-        switch (field) {
-            case Rule.ID:
-                writeValue(rule.getId(), jsonArray);
-                break;
-            case Rule.RULENAME:
-                writeValue(rule.getName(), jsonArray);
-                break;
-            case Rule.ACTIVE:
-                writeValue(rule.isActive(), jsonArray);
-                break;
-            case Rule.POSITION:
-                writeValue(rule.getPosition(), jsonArray);
-                break;
-            case Rule.FLAGS:
-                final JSONArray flagsArray = getFlagsAsJSON(rule.getFlags());
-                if (flagsArray != null) {
-                    jsonArray.put(flagsArray);
-                } else {
-                    jsonArray.put(JSONObject.NULL);
-                }
-                break;
-            case Rule.ACTIONCMDS:
-                final JSONArray actionCommandObj = getActionCommandsAsJSON(rule.getActionCommands());
-                if (actionCommandObj != null) {
-                    jsonArray.put(actionCommandObj);
-                } else {
-                    jsonArray.put(JSONObject.NULL);
-                }
-                break;
-            case Rule.TEST:
-                final JSONObject testObj = getTestAsJSON(rule.getTest());
-                if (testObj != null) {
-                    jsonArray.put(testObj);
-                } else {
-                    jsonArray.put(JSONObject.NULL);
-                }
-                break;
-            default:
-                LOG.warn("missing field in mapping: {}", field);
-        }
-    }
-
-    protected JSONArray getFlagsAsJSON(String[] flags) throws JSONException {
+    /**
+     * Writes the specified flags array as a {@link JSONArray}
+     * 
+     * @param flags The flags array
+     * @return a {@link JSONArray}
+     * @throws JSONException if a JSON error occurs
+     */
+    private JSONArray getFlagsAsJSON(String[] flags) throws JSONException {
         if (flags != null) {
             final JSONArray jsonArray = new JSONArray();
             for (int a = 0; a < flags.length; a++) {
@@ -162,26 +128,40 @@ public class MailFilterWriter extends DataWriter {
         return null;
     }
 
-    protected JSONArray getActionCommandsAsJSON(Action[] actioncmds) throws JSONException {
-        if (actioncmds != null) {
-            final JSONArray jsonArray = new JSONArray();
-
-            for (int a = 0; a < actioncmds.length; a++) {
-                final Action abstractAction = actioncmds[a];
-                final String name = abstractAction.getAction().name().toLowerCase();
-                ActionCommand actionCommand = ActionCommand.valueOf(name.toUpperCase());
-                final ActionWriter actionWriter = ActionWriterFactory.getWriter(actionCommand);
-                final JSONObject jsonCommandObj = actionWriter.write(abstractAction, new JSONObject()); //FIXME: Don't use the JSONObject as a parameter, the method has to create it's own object
-                jsonArray.put(jsonCommandObj);
-            }
-
-            return jsonArray;
+    /**
+     * Writes the specified {@link Action}s as a {@link JSONArray}. If the actions array is null
+     * an empty {@link JSONArray} is returned.
+     * 
+     * @param actions The array with the {@link Action}s to write
+     * @return A {@link JSONArray} with the {@link Action}s as {@link JSONObject}s; or an empty array
+     * @throws JSONException if a JSON error occurs
+     */
+    private JSONArray getActionCommandsAsJSON(Action[] actions) throws JSONException {
+        if (actions == null) {
+            return new JSONArray();
         }
 
-        return null;
+        final JSONArray jsonArray = new JSONArray();
+
+        for (Action action : actions) {
+            final String name = action.getAction().name();
+            ActionCommand actionCommand = ActionCommand.valueOf(name);
+            final ActionWriter actionWriter = ActionWriterFactory.getWriter(actionCommand);
+            final JSONObject jsonCommandObj = actionWriter.write(action, new JSONObject()); //FIXME: Don't use the JSONObject as a parameter, the method has to create it's own object
+            jsonArray.put(jsonCommandObj);
+        }
+
+        return jsonArray;
     }
 
-    protected JSONObject getTestAsJSON(AbstractTest abstractTest) throws JSONException {
+    /**
+     * Writes the specified {@link AbstractTest} as a {@link JSONObject}
+     * 
+     * @param abstractTest The {@link AbstractTest}
+     * @return A {@link JSONObject}
+     * @throws JSONException if a JSON error occurs
+     */
+    private JSONObject getTestCommandAsJSON(AbstractTest abstractTest) throws JSONException {
         final String name = abstractTest.getName();
         final TestWriter testWriter = TestWriterFactory.getWriter(name);
         return testWriter.writeTest(name, abstractTest);

@@ -63,6 +63,6 @@ public class Stop extends AbstractAction {
      * Initialises a new {@link Stop}.
      */
     public Stop() {
-        super(ActionCommand.STOP);
+        super(ActionCommand.stop);
     }
 }

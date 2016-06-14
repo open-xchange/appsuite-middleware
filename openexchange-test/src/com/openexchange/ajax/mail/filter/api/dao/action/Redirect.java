@@ -63,7 +63,7 @@ public class Redirect extends AbstractAction {
      * Initialises a new {@link Redirect}.
      */
     public Redirect(String email) {
-        super(ActionCommand.REDIRECT);
+        super(ActionCommand.redirect);
         addArgument("to", email);
     }
 

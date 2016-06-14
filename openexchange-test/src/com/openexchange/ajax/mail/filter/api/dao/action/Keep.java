@@ -63,6 +63,6 @@ public class Keep extends AbstractAction {
      * Initialises a new {@link Keep}.
      */
     public Keep() {
-        super(ActionCommand.KEEP);
+        super(ActionCommand.keep);
     }
 }

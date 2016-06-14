@@ -63,7 +63,7 @@ public class Reject extends AbstractAction {
      * Initialises a new {@link Reject}.
      */
     public Reject() {
-        super(ActionCommand.REJECT);
+        super(ActionCommand.reject);
     }
 
     //TODO: add methods for setting/getting the rejection text

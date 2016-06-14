@@ -64,7 +64,7 @@ public class Vacation extends AbstractAction {
      * Initialises a new {@link Vacation}.
      */
     public Vacation() {
-        super(ActionCommand.VACATION);
+        super(ActionCommand.vacation);
     }
 
     public Vacation(int days, List<String> addresses, String subject, String text) {

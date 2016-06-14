@@ -63,7 +63,7 @@ public class PGP extends AbstractAction {
      * Initialises a new {@link PGP}.
      */
     public PGP() {
-        super(ActionCommand.PGP);
+        super(ActionCommand.pgp);
     }
 
     /**

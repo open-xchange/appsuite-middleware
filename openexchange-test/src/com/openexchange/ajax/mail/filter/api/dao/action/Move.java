@@ -63,7 +63,7 @@ public class Move extends AbstractAction {
      * Initialises a new {@link Move}.
      */
     public Move(String folder) {
-        super(ActionCommand.MOVE);
+        super(ActionCommand.move);
         addArgument("into", folder);
     }
 
