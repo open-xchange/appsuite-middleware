@@ -49,17 +49,12 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.comparison;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.conversion.writer.AbstractJSONWriter;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
-
 /**
  * {@link UserComparisonWriterImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class UserComparisonWriterImpl extends AbstractJSONWriter implements ComparisonWriter {
+public class UserComparisonWriterImpl extends AbstractComparisonJSONWriter {
 
     /**
      * Initialises a new {@link UserComparisonWriterImpl}.
@@ -67,13 +62,4 @@ public class UserComparisonWriterImpl extends AbstractJSONWriter implements Comp
     public UserComparisonWriterImpl() {
         super();
     }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
-     */
-    @Override
-    public JSONObject write(Comparison type, JSONObject jsonObject) throws JSONException {
-        return super.write(type, jsonObject);
-    }
-
 }
