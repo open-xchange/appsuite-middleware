@@ -96,6 +96,7 @@ import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
@@ -1919,6 +1920,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         */
 
         oxu.delete(ctx, users, destUser);
+        for (final User user : users) {
+            try {
+                Filestore2UserUtil.removeFilestore2UserEntry(ctx.getId().intValue(), user.getId().intValue(), cache);
+            } catch (Exception e) {
+                LOGGER.error("Failed to remove filestore2User entry for user {} in context {}", ctx.getId(), user.getId(), e);
+            }
+        }
 
         // JCS
         final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;

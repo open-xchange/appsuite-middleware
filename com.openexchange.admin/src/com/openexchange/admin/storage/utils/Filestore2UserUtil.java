@@ -365,14 +365,14 @@ public class Filestore2UserUtil {
     }
 
     /**
-     * Removes specified entry to <code>"filestore2user"</code> table.
+     * Removes specified entry from <code>"filestore2user"</code> table.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param cache The admin cache to use
      * @throws StorageException If operation fails
      */
-    public static void removeFilestore2UserEntry(int contextId, int userId, AdminCacheExtended cache) throws StorageException {
+    public static void removeFilestore2UserEntry(int contextId, int userId, AdminCache cache) throws StorageException {
         Connection con = null;
         boolean rollback = false;
         try {
@@ -411,6 +411,59 @@ public class Filestore2UserUtil {
                 Databases.autocommit(con);
                 try {
                     cache.pushConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    LOG.error("Pooling error", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes context-associated entries from <code>"filestore2user"</code> table.
+     *
+     * @param contextId The context identifier
+     * @param cache The admin cache to use
+     * @throws StorageException If operation fails
+     */
+    public static void removeFilestore2UserEntries(int contextId, AdminCache cache) throws StorageException {
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getWriteConnectionForConfigDB();
+            if (false == tableExists(con, "filestore2user")) {
+                LOG.warn("Table \"filestore2user\" does not exist.");
+                return;
+            }
+
+            // Check if processing
+            if (isNotTerminated(con)) {
+                throw new StorageException("Table \"filestore2user\" not yet initialized");
+            }
+
+            // Start database transaction
+            Databases.startTransaction(con);
+            rollback = true;
+
+            // Insert entry
+            deleteEntries(contextId, con);
+
+            // Commit
+            con.commit();
+            rollback = false;
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        } catch (RuntimeException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+                try {
+                    cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Pooling error", e);
                 }
@@ -466,6 +519,66 @@ public class Filestore2UserUtil {
                 Databases.autocommit(con);
                 try {
                     cache.pushConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    LOG.error("Pooling error", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Copies specified entry in <code>"filestore2user"</code> table.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param destContext The new context identifier
+     * @param destUserId The new user identifier
+     * @param adminCache The admin cache to use
+     * @throws StorageException If operation fails
+     */
+    public static void copyFilestore2UserEntry(int contextId, int userId, int destContext, int destUserId, AdminCache adminCache) throws StorageException {
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = adminCache.getWriteConnectionForConfigDB();
+            if (false == tableExists(con, "filestore2user")) {
+                LOG.warn("Table \"filestore2user\" does not exist.");
+                return;
+            }
+
+            // Check if processing
+            if (isNotTerminated(con)) {
+                throw new StorageException("Table \"filestore2user\" not yet initialized");
+            }
+
+            // Start database transaction
+            Databases.startTransaction(con);
+            rollback = true;
+
+            int filestoreId = selectEntry(new FilestoreEntry(contextId, userId, 0), con);
+
+            // Insert entry
+            if (filestoreId > 0) {
+                replaceEntry(new FilestoreEntry(destContext, destUserId, filestoreId), con);
+            }
+
+            // Commit
+            con.commit();
+            rollback = false;
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        } catch (RuntimeException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+                try {
+                    adminCache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Pooling error", e);
                 }
@@ -682,12 +795,37 @@ public class Filestore2UserUtil {
         }
     }
 
+    private static int selectEntry(FilestoreEntry filestoreEntry, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT filestore_id FROM filestore2user WHERE cid=? AND user=?");
+            stmt.setInt(1, filestoreEntry.cid);
+            stmt.setInt(2, filestoreEntry.user);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
     private static void deleteEntry(FilestoreEntry filestoreEntry, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM filestore2user (cid, user) VALUES (?, ?)");
+            stmt = con.prepareStatement("DELETE FROM filestore2user WHERE cid=? AND user=?");
             stmt.setInt(1, filestoreEntry.cid);
             stmt.setInt(2, filestoreEntry.user);
+            stmt.executeUpdate();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    private static void deleteEntries(int contextId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM filestore2user WHERE cid=?");
+            stmt.setInt(1, contextId);
             stmt.executeUpdate();
         } finally {
             Databases.closeSQLStuff(stmt);
