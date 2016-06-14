@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,40 +47,27 @@
  *
  */
 
-package com.openexchange.notification.mail.impl;
+package com.openexchange.notification.service;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.Translator;
 
 /**
- * Defines common variable names to be used in mail notification templates.
+ * {@link FullNameBuilderService}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class CommonNotificationVariables {
+public interface FullNameBuilderService {
 
     /**
-     * Variable <code>footer_text</code>
+     * Build the full name of the user consisting of given name and surname and orders them according to the user's locale.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The full name of the user
+     * @throws OXException If full name cannot be returned
      */
-    public static final String FOOTER_TEXT = "footer_text";
-    /**
-     * Variable <code>footer_image_src</code>
-     */
-    public static final String FOOTER_IMAGE_SRC = "footer_image_src";
-    /**
-     * Variable <code>footer_image_alt</code>
-     */
-    public static final String FOOTER_IMAGE_ALT = "footer_image_alt";
-    /**
-     * Variable <code>button_border_color</code>
-     */
-    public static final String BUTTON_BORDER_COLOR = "button_border_color";
-    /**
-     * Variable <code>button_background_color</code>
-     */
-    public static final String BUTTON_BACKGROUND_COLOR = "button_background_color";
-    /**
-     * Variable <code>button_color</code>
-     */
-    public static final String BUTTON_COLOR = "button_color";
+    String buildFullName(int userId, int contextId, Translator translator) throws OXException;
 
 }

@@ -51,7 +51,6 @@ package com.openexchange.file.storage.mail.find;
 
 import static com.openexchange.file.storage.mail.MailDriveFileAccess.FETCH_PROFILE_VIRTUAL;
 import static com.openexchange.file.storage.mail.sort.MailDriveSortUtility.performEsort;
-import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import static com.openexchange.find.common.CommonConstants.FIELD_DATE;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
@@ -735,7 +734,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             return null;
         }
 
-        return termFor(QUERY_FIELDS, queries, OP.OR, OP.AND);
+        return termFor(MailDriveFindConstants.QUERY_FIELDS, queries, OP.OR, OP.AND);
     }
 
     private SearchTerm prepareFilterTerm(List<Filter> filters, OP fieldOP, OP queryOP) throws OXException {

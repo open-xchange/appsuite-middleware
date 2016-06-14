@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,26 +47,40 @@
  *
  */
 
-package com.openexchange.file.storage.mail;
+package com.openexchange.notification.service;
 
-import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MailDriveStrings}
+ * Defines common variable names to be used in mail notification templates.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class MailDriveStrings implements LocalizableStrings {
+public class CommonNotificationVariables {
 
-    private MailDriveStrings() {
-        super();
-    }
-
-    // The name for the virtual folder containing all attachments from all messages
-    public static final String NAME_ATTACHMENTS_ALL = "My attachments";
-
-    // The name for the virtual folder containing all attachments of a certain folder/mailbox
-    public static final String NAME_ATTACHMENTS_DEDICATED = "In %1$s";
+    /**
+     * Variable <code>footer_text</code>
+     */
+    public static final String FOOTER_TEXT = "footer_text";
+    /**
+     * Variable <code>footer_image_src</code>
+     */
+    public static final String FOOTER_IMAGE_SRC = "footer_image_src";
+    /**
+     * Variable <code>footer_image_alt</code>
+     */
+    public static final String FOOTER_IMAGE_ALT = "footer_image_alt";
+    /**
+     * Variable <code>button_border_color</code>
+     */
+    public static final String BUTTON_BORDER_COLOR = "button_border_color";
+    /**
+     * Variable <code>button_background_color</code>
+     */
+    public static final String BUTTON_BACKGROUND_COLOR = "button_background_color";
+    /**
+     * Variable <code>button_color</code>
+     */
+    public static final String BUTTON_COLOR = "button_color";
 
 }

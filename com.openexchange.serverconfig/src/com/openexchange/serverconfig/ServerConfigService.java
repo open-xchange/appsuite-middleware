@@ -63,7 +63,7 @@ import com.openexchange.session.Session;
 public interface ServerConfigService {
 
     /**
-     * Get the computed server config
+     * Gets the computed server config
      *
      * @param hostname The hostname to use when building the {@link ServerConfig}
      * @param userID The userID when building the {@link ServerConfig}
@@ -74,7 +74,7 @@ public interface ServerConfigService {
     ServerConfig getServerConfig(String hostname, int userID, int contextID) throws OXException;
 
     /**
-     * Get the computed server config
+     * Gets the computed server config
      *
      * @param hostname The hostname to use when building the {@link ServerConfig}
      * @param session The session to use when building the {@link ServerConfig}
@@ -84,9 +84,9 @@ public interface ServerConfigService {
     ServerConfig getServerConfig(String hostname, Session session) throws OXException;
 
     /**
-     * Get the {@link ServerConfigServicesLookup} that is used when computing the server config.
+     * Gets the {@link ServerConfigServicesLookup} that is used when computing the server config.
      *
-     * @return
+     * @return The look-up
      */
     ServerConfigServicesLookup getServerConfigServicesLookup();
 }

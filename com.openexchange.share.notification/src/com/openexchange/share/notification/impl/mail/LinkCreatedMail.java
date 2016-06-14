@@ -74,8 +74,8 @@ import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.impl.LinkCreatedNotification;
-import com.openexchange.share.notification.impl.NotificationStrings;
 import com.openexchange.share.notification.impl.TextSnippets;
 import com.openexchange.user.UserService;
 

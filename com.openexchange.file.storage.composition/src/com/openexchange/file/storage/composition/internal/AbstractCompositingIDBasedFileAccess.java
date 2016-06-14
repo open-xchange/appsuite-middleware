@@ -80,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.Document;
@@ -123,6 +124,7 @@ import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -1593,8 +1595,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      *
      * @param event The event
      */
-    protected void postEvent(final Event event) {
-        getEventAdmin().postEvent(event);
+    protected void postEvent(final Event event) throws OXException {
+        EventAdmin eventAdmin = getEventAdmin();
+        if (eventAdmin == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(EventAdmin.class);
+        }
+        eventAdmin.postEvent(event);
     }
 
     /**
