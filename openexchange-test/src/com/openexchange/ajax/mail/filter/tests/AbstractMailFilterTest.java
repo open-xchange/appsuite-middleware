@@ -258,7 +258,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     private void assertActions(Action[] expected, Action[] actual) {
         assertEquals("The size differs", expected.length, actual.length);
         for (int index = 0; index < expected.length; index++) {
-            assertEquals("The 'actionCommand' differs", expected[index].getAction(), actual[index].getAction());
+            assertEquals("The 'actionCommand' differs", expected[index].getActionCommand(), actual[index].getActionCommand());
         }
     }
 

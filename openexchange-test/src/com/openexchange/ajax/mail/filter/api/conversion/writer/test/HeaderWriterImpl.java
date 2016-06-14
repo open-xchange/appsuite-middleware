@@ -74,7 +74,7 @@ public class HeaderWriterImpl implements TestWriter {
         jsonObj.put("id", name);
 
         final Comparison comparison = headerTest.getComparison();
-        final MatchType matchType = comparison.getType();
+        final MatchType matchType = comparison.getMatchType();
         final ComparisonWriter compWriter = ComparisonWriterRegistry.getWriter(matchType);
         compWriter.write(comparison, jsonObj);
 

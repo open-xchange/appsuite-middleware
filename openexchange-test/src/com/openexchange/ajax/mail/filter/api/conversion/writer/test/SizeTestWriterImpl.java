@@ -74,7 +74,7 @@ public class SizeTestWriterImpl implements TestWriter {
         jsonObj.put("id", name);
 
         Comparison comparison = sizeTest.getComparison();
-        MatchType matchType = comparison.getType();
+        MatchType matchType = comparison.getMatchType();
 
         ComparisonWriter compWriter = ComparisonWriterRegistry.getWriter(matchType);
         compWriter.write(comparison, jsonObj);

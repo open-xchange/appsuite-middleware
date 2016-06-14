@@ -64,5 +64,5 @@ public interface Comparison extends MailFilterDataObject {
      * 
      * @return the {@link MatchType}
      */
-    MatchType getType();
+    MatchType getMatchType();
 }

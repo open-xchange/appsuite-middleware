@@ -64,6 +64,6 @@ public interface Action extends MailFilterDataObject {
      * 
      * @return the {@link ActionCommand}
      */
-    ActionCommand getAction();
+    ActionCommand getActionCommand();
 
 }

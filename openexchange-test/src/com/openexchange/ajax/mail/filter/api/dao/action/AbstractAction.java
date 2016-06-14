@@ -80,7 +80,7 @@ abstract class AbstractAction implements Action {
      * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getAction()
      */
     @Override
-    public ActionCommand getAction() {
+    public ActionCommand getActionCommand() {
         return ActionCommand.valueOf((String) arguments.get("id"));
     }
 

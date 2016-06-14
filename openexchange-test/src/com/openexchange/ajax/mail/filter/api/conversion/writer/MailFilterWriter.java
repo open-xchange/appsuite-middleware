@@ -144,7 +144,7 @@ public class MailFilterWriter extends DataWriter {
         final JSONArray jsonArray = new JSONArray();
 
         for (Action action : actions) {
-            final String name = action.getAction().name();
+            final String name = action.getActionCommand().name();
             ActionCommand actionCommand = ActionCommand.valueOf(name);
             final ActionWriter actionWriter = ActionWriterFactory.getWriter(actionCommand);
             final JSONObject jsonCommandObj = actionWriter.write(action, new JSONObject()); //FIXME: Don't use the JSONObject as a parameter, the method has to create it's own object

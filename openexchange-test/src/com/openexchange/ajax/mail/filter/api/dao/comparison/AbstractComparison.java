@@ -79,7 +79,7 @@ abstract class AbstractComparison implements Comparison {
      * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getType()
      */
     @Override
-    public MatchType getType() {
+    public MatchType getMatchType() {
         return MatchType.valueOf((String) arguments.get("comparison")); //FIXME: store comparison as field
     }
 
