@@ -71,7 +71,7 @@ abstract class AbstractAction implements Action {
     public AbstractAction(ActionCommand actionCommand) {
         super();
         arguments = new HashMap<>(2);
-        arguments.put("id", actionCommand.name().toLowerCase());
+        arguments.put("id", actionCommand.name());
     }
 
     /*
@@ -81,7 +81,7 @@ abstract class AbstractAction implements Action {
      */
     @Override
     public ActionCommand getAction() {
-        return ActionCommand.valueOf(((String) arguments.get("id")).toUpperCase());
+        return ActionCommand.valueOf((String) arguments.get("id"));
     }
 
     /*
