@@ -52,11 +52,11 @@ package com.openexchange.ajax.mail.filter.api.dao;
 import java.util.Map;
 
 /**
- * {@link DataObject}. Defines the elements of a mail filter data object
+ * {@link MailFilterDataObject}. Defines the elements of a mail filter data object
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface DataObject {
+public interface MailFilterDataObject {
 
     /**
      * Adds an argument to this {@link MatchType}

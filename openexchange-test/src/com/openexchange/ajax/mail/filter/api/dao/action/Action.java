@@ -50,14 +50,14 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
-import com.openexchange.ajax.mail.filter.api.dao.DataObject;
+import com.openexchange.ajax.mail.filter.api.dao.MailFilterDataObject;
 
 /**
  * {@link Action}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Action extends DataObject {
+public interface Action extends MailFilterDataObject {
 
     /**
      * Returns the {@link ActionCommand}

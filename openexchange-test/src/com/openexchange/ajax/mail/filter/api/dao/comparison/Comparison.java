@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
-import com.openexchange.ajax.mail.filter.api.dao.DataObject;
+import com.openexchange.ajax.mail.filter.api.dao.MailFilterDataObject;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 
 /**
@@ -57,7 +57,7 @@ import com.openexchange.ajax.mail.filter.api.dao.MatchType;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Comparison extends DataObject {
+public interface Comparison extends MailFilterDataObject {
 
     /**
      * Returns the {@link MatchType}
