@@ -153,14 +153,20 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
 
     @Override
     public AvailabilityResult isAvailable(Session session) throws OXException {
-        boolean available = OnboardingUtility.hasCapability("emclient", session);
-        return new AvailabilityResult(available, "emclient");
+        boolean available = OnboardingUtility.hasCapability("emclient_basic", session);
+        if (!available) {
+            available = OnboardingUtility.hasCapability("emclient_premium", session);
+        }
+        return new AvailabilityResult(available, "emclient_basic", "emclient_premium");
     }
 
     @Override
     public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
-        boolean available = OnboardingUtility.hasCapability("emclient", userId, contextId);
-        return new AvailabilityResult(available, "emclient");
+        boolean available = OnboardingUtility.hasCapability("emclient_basic", userId, contextId);
+        if (!available) {
+            available = OnboardingUtility.hasCapability("emclient_premium", userId, contextId);
+        }
+        return new AvailabilityResult(available, "emclient_basic", "emclient_premium");
     }
 
 }
