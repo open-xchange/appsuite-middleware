@@ -47,22 +47,19 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao.action;
-
-import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
 /**
- * {@link Stop}
+ * {@link DiscardWriterImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Stop extends AbstractAction {
+public class DiscardWriterImpl extends AbstractActionWriterImpl {
 
     /**
-     * Initialises a new {@link Stop}.
+     * Initialises a new {@link DiscardWriterImpl}.
      */
-    public Stop() {
-        super(ActionCommand.STOP);
+    public DiscardWriterImpl() {
+        super();
     }
 }

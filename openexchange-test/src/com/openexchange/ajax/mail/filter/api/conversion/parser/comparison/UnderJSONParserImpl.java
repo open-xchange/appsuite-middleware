@@ -47,22 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao.action;
+package com.openexchange.ajax.mail.filter.api.conversion.parser.comparison;
 
-import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.UnderComparison;
 
 /**
- * {@link Stop}
+ * {@link UnderJSONParserImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Stop extends AbstractAction {
+public class UnderJSONParserImpl implements ComparisonParser {
 
     /**
-     * Initialises a new {@link Stop}.
+     * Initialises a new {@link UnderJSONParserImpl}.
      */
-    public Stop() {
-        super(ActionCommand.STOP);
+    public UnderJSONParserImpl() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
+    @Override
+    public UnderComparison parse(JSONObject jsonObject) throws JSONException {
+        int size = jsonObject.getInt("size");
+
+        return new UnderComparison(size);
     }
 }

@@ -49,10 +49,12 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.PGP;
 
 /**
@@ -72,23 +74,22 @@ public class PGPParserImpl implements ActionParser {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.ajax.mail.filter.parser.action.ActionParser#parseAction(java.lang.String, org.json.JSONObject)
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @Override
-    public AbstractAction parseAction(String name, JSONObject jsonObject) throws JSONException {
+    public Action parse(JSONObject jsonObject) throws JSONException {
         JSONArray keys = jsonObject.optJSONArray("keys");
 
         PGP pgp = new PGP();
         if (keys != null) {
-            String[] k = new String[keys.length()];
+            List<String> k = new ArrayList<>(keys.length());
             for (int index = 0; index < keys.length(); index++) {
                 String key = keys.getString(index);
-                k[index] = key;
+                k.add(key);
             }
-            pgp.setKeys(k);
+            pgp.addArgument("keys", k);
         }
 
         return pgp;
     }
-
 }

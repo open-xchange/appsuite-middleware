@@ -50,26 +50,27 @@
 package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
 import java.util.HashMap;
-
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 
 /**
- * ActionWriterFactory
- *
+ * {@link ActionWriterFactory}
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ActionWriterFactory {
 
-	final static HashMap<String, ActionWriter> writerMap = new HashMap<String, ActionWriter>();
+    final static HashMap<ActionCommand, ActionWriter> writerMap = new HashMap<ActionCommand, ActionWriter>();
 
-	public ActionWriterFactory() {
+    public ActionWriterFactory() {
 
-	}
+    }
 
-	public static void addWriter(final String name, final ActionWriter actionWriter) {
-		writerMap.put(name, actionWriter);
-	}
+    public static void addWriter(final ActionCommand name, final ActionWriter actionWriter) {
+        writerMap.put(name, actionWriter);
+    }
 
-	public static ActionWriter getWriter(String name) {
-		return writerMap.get(name);
-	}
+    public static ActionWriter getWriter(ActionCommand name) {
+        return writerMap.get(name);
+    }
 }

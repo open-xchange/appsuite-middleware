@@ -49,29 +49,47 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.AddFlags;
-import com.openexchange.ajax.mail.filter.api.fields.RuleFields;
-
 
 /**
- * AddFlagsParserImpl
+ * 
+ * {@link AddFlagsParserImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class AddFlagsParserImpl implements ActionParser {
 
-	@Override
-    public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
-		final JSONArray jsonArray = jsonObject.getJSONArray(RuleFields.FLAGS);
-		final String[] flags = new String[jsonArray.length()];
-		for (int a = 0; a < flags.length; a++) {
-			flags[a] = jsonArray.getString(a);
-		}
+    /**
+     * Initialises a new {@link AddFlagsParserImpl}.
+     */
+    public AddFlagsParserImpl() {
+        super();
+    }
 
-		return new AddFlags(flags);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
+    @Override
+    public Action parse(JSONObject jsonObject) throws JSONException {
+        final JSONArray jsonArray = jsonObject.getJSONArray("flags");
+
+        List<String> flags = new ArrayList<>(jsonArray.length());
+        for (int index = 0; index < jsonArray.length(); index++) {
+            flags.add(jsonArray.getString(index));
+        }
+
+        AddFlags addFlags = new AddFlags();
+        addFlags.addArgument("flags", flags);
+
+        return addFlags;
+    }
 }

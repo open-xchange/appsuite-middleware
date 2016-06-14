@@ -47,26 +47,19 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao.comparison;
-
-import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
 /**
- * {@link SizeComparison}
+ * {@link KeepWriterImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SizeComparison extends AbstractComparison {
+public class KeepWriterImpl extends AbstractActionWriterImpl {
 
     /**
-     * Initialises a new {@link SizeComparison}.
-     * 
-     * @param sizeComparator The {@link SizeComparison}
-     * @param size The size
+     * Initialises a new {@link KeepWriterImpl}.
      */
-    public SizeComparison(MatchType matchType, int size) {
-        super(matchType);
-        addArgument("size", size);
+    public KeepWriterImpl() {
+        super();
     }
 }

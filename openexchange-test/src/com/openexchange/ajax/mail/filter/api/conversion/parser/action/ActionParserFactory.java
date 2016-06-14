@@ -50,29 +50,33 @@
 package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 
 import java.util.HashMap;
-
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 
 /**
- * ActionParserFactory
+ * {@link ActionParserFactory}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ActionParserFactory {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActionParserFactory.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActionParserFactory.class);
 
-	final static HashMap<String, ActionParser> parserMap = new HashMap<String, ActionParser>();
+    final static HashMap<ActionCommand, ActionParser> parserMap = new HashMap<ActionCommand, ActionParser>();
 
-	public ActionParserFactory() {
+    /**
+     * Initialises a new {@link ActionParserFactory}.
+     */
+    public ActionParserFactory() {
+        super();
+    }
 
-	}
+    public static void addParser(final ActionCommand name, final ActionParser actionParser) {
+        parserMap.put(name, actionParser);
+    }
 
-	public static void addParser(final String name, final ActionParser actionParser) {
-		parserMap.put(name, actionParser);
-	}
-
-	public static ActionParser getWriter(String name) {
-		LOG.debug("getWriter for action: {}", name);
-		return parserMap.get(name);
-	}
+    public static ActionParser getWriter(ActionCommand name) {
+        LOG.debug("getWriter for action: {}", name);
+        return parserMap.get(name);
+    }
 }

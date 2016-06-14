@@ -47,25 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
+package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
-
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 
 /**
- * SimpleActionWriterImpl
+ * {@link KeepParserImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SimpleActionWriterImpl implements ActionWriter {
+public class KeepParserImpl implements ActionParser {
 
-	@Override
-    public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		jsonObj.put("id", name);
+    /**
+     * Initialises a new {@link KeepParserImpl}.
+     */
+    public KeepParserImpl() {
+        super();
+    }
 
-		return jsonObj;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
+    @SuppressWarnings("unused")
+    @Override
+    public Action parse(JSONObject jsonObject) throws JSONException {
+        return new Keep();
+    }
+
 }

@@ -47,22 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao.action;
+package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 
-import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
 
 /**
- * {@link Stop}
+ * {@link StopParserImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Stop extends AbstractAction {
+public class StopParserImpl implements ActionParser {
 
     /**
-     * Initialises a new {@link Stop}.
+     * Initialises a new {@link StopParserImpl}.
      */
-    public Stop() {
-        super(ActionCommand.STOP);
+    public StopParserImpl() {
+        super();
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
+    @SuppressWarnings("unused")
+    @Override
+    public Action parse(JSONObject jsonObject) throws JSONException {
+        return new Stop();
+    }
+
 }

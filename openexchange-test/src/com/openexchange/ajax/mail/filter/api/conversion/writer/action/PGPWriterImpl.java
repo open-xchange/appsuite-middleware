@@ -49,18 +49,12 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
-import com.openexchange.ajax.mail.filter.api.dao.action.PGP;
-
 /**
  * {@link PGPWriterImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PGPWriterImpl implements ActionWriter {
+public class PGPWriterImpl extends AbstractActionWriterImpl {
 
     /**
      * Initialises a new {@link PGPWriterImpl}.
@@ -68,28 +62,4 @@ public class PGPWriterImpl implements ActionWriter {
     public PGPWriterImpl() {
         super();
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.writer.action.ActionWriter#writeAction(java.lang.String, com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction)
-     */
-    @Override
-    public JSONObject writeAction(String name, AbstractAction abstractAction) throws JSONException {
-        JSONObject json = new JSONObject();
-        PGP pgp = (PGP) abstractAction;
-
-        json.put("id", name);
-        
-        if (pgp.getKeys() != null) {
-            JSONArray keys = new JSONArray(pgp.getKeys().length);
-            for (String s : pgp.getKeys()) {
-                keys.put(s);
-            }
-            json.put("keys", keys);
-        }
-
-        return json;
-    }
-
 }

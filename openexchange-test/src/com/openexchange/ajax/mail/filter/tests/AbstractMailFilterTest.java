@@ -55,18 +55,21 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.action.ActionParserFactory;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.action.AddFlagsParserImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.action.DiscardParserImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.action.KeepParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.action.MoveParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.action.PGPParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.action.RedirectParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.action.RejectParserImpl;
-import com.openexchange.ajax.mail.filter.api.conversion.parser.action.SimpleActionParserImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.action.StopParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.action.VacationParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.ComparisonParserRegistry;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.ContainsJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.IsJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.MatchesJSONParserImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.OverJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.RegexJSONParserImpl;
-import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.SizeJSONParserImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.UnderJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AddressParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AllOfParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AnyOfParserImpl;
@@ -79,17 +82,21 @@ import com.openexchange.ajax.mail.filter.api.conversion.parser.test.TestParserFa
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.TrueParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.action.ActionWriterFactory;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.action.AddFlagsWriterImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.writer.action.DiscardWriterImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.writer.action.KeepWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.action.MoveWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.action.PGPWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.action.RedirectWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.action.RejectWriterImpl;
-import com.openexchange.ajax.mail.filter.api.conversion.writer.action.SimpleActionWriterImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.writer.action.StopWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.action.VacationWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.ComparisonWriterRegistry;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.ContainsJSONWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.IsJSONWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.MatchesJSONWriterImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.OverJSONWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.RegexJSONWriterImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.UnderJSONWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.UserComparisonWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.test.AddressWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.test.AllOfWriterImpl;
@@ -101,9 +108,10 @@ import com.openexchange.ajax.mail.filter.api.conversion.writer.test.NotWriterImp
 import com.openexchange.ajax.mail.filter.api.conversion.writer.test.SizeTestWriterImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.test.TestWriterFactory;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.test.TrueWriterImpl;
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.test.AjaxInit;
@@ -136,15 +144,15 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         hostname = AjaxInit.getAJAXProperty(HOSTNAME);
 
         // parser
-        ActionParserFactory.addParser("addflags", new AddFlagsParserImpl());
-        ActionParserFactory.addParser("discard", new SimpleActionParserImpl());
-        ActionParserFactory.addParser("keep", new SimpleActionParserImpl());
-        ActionParserFactory.addParser("move", new MoveParserImpl());
-        ActionParserFactory.addParser("redirect", new RedirectParserImpl());
-        ActionParserFactory.addParser("reject", new RejectParserImpl());
-        ActionParserFactory.addParser("stop", new SimpleActionParserImpl());
-        ActionParserFactory.addParser("vacation", new VacationParserImpl());
-        ActionParserFactory.addParser("pgp", new PGPParserImpl());
+        ActionParserFactory.addParser(ActionCommand.ADDFLAGS, new AddFlagsParserImpl());
+        ActionParserFactory.addParser(ActionCommand.DISCARD, new DiscardParserImpl());
+        ActionParserFactory.addParser(ActionCommand.KEEP, new KeepParserImpl());
+        ActionParserFactory.addParser(ActionCommand.MOVE, new MoveParserImpl());
+        ActionParserFactory.addParser(ActionCommand.REDIRECT, new RedirectParserImpl());
+        ActionParserFactory.addParser(ActionCommand.REJECT, new RejectParserImpl());
+        ActionParserFactory.addParser(ActionCommand.STOP, new StopParserImpl());
+        ActionParserFactory.addParser(ActionCommand.VACATION, new VacationParserImpl());
+        ActionParserFactory.addParser(ActionCommand.PGP, new PGPParserImpl());
 
         TestParserFactory.addParser("address", new AddressParserImpl());
         TestParserFactory.addParser("allof", new AllOfParserImpl());
@@ -160,18 +168,19 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ComparisonParserRegistry.addParser(MatchType.matches, new MatchesJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.contains, new ContainsJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.regex, new RegexJSONParserImpl());
-        //ComparisonParserRegistry.addParser(MatchType.size, new SizeJSONParserImpl());
+        ComparisonParserRegistry.addParser(MatchType.under, new UnderJSONParserImpl());
+        ComparisonParserRegistry.addParser(MatchType.over, new OverJSONParserImpl());
 
         // writer
-        ActionWriterFactory.addWriter("addflags", new AddFlagsWriterImpl());
-        ActionWriterFactory.addWriter("discard", new SimpleActionWriterImpl());
-        ActionWriterFactory.addWriter("keep", new SimpleActionWriterImpl());
-        ActionWriterFactory.addWriter("move", new MoveWriterImpl());
-        ActionWriterFactory.addWriter("redirect", new RedirectWriterImpl());
-        ActionWriterFactory.addWriter("reject", new RejectWriterImpl());
-        ActionWriterFactory.addWriter("stop", new SimpleActionWriterImpl());
-        ActionWriterFactory.addWriter("vacation", new VacationWriterImpl());
-        ActionWriterFactory.addWriter("pgp", new PGPWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.ADDFLAGS, new AddFlagsWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.DISCARD, new DiscardWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.KEEP, new KeepWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.MOVE, new MoveWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.REDIRECT, new RedirectWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.REJECT, new RejectWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.STOP, new StopWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.VACATION, new VacationWriterImpl());
+        ActionWriterFactory.addWriter(ActionCommand.PGP, new PGPWriterImpl());
 
         TestWriterFactory.addWriter("address", new AddressWriterImpl());
         TestWriterFactory.addWriter("allof", new AllOfWriterImpl());
@@ -187,8 +196,9 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ComparisonWriterRegistry.addWriter(MatchType.matches, new MatchesJSONWriterImpl());
         ComparisonWriterRegistry.addWriter(MatchType.contains, new ContainsJSONWriterImpl());
         ComparisonWriterRegistry.addWriter(MatchType.regex, new RegexJSONWriterImpl());
-        //ComparisonWriterRegistry.addWriter(MatchType.size, new SizeJSONWriterImpl());
         ComparisonWriterRegistry.addWriter(MatchType.user, new UserComparisonWriterImpl());
+        ComparisonWriterRegistry.addWriter(MatchType.under, new UnderJSONWriterImpl());
+        ComparisonWriterRegistry.addWriter(MatchType.over, new OverJSONWriterImpl());
 
         // Start fresh
         mailFilterAPI.purge();
@@ -234,21 +244,21 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         assertEquals("The 'position' attribute differs", expected.getPosition(), actual.getPosition());
 
         assertArrayEquals("The 'flags' differ", expected.getFlags(), actual.getFlags());
-        assertActions(expected.getActioncmds(), actual.getActioncmds());
+        assertActions(expected.getActionCommands(), actual.getActionCommands());
         assertTest(expected.getTest(), actual.getTest());
     }
 
     /**
-     * Asserts that the expected {@link AbstractAction} is equal to actual {@link AbstractAction}
+     * Asserts that the expected {@link Action} is equal to actual {@link Action}
      * 
-     * @param expected the expected {@link AbstractAction}
-     * @param actual the actual {@link AbstractAction}
+     * @param expected the expected {@link Action}
+     * @param actual the actual {@link Action}
      */
     // TODO Complete assertions
-    private void assertActions(AbstractAction[] expected, AbstractAction[] actual) {
+    private void assertActions(Action[] expected, Action[] actual) {
         assertEquals("The size differs", expected.length, actual.length);
         for (int index = 0; index < expected.length; index++) {
-            assertEquals("The 'actionCommand' differs", expected[index].getName(), actual[index].getName());
+            assertEquals("The 'actionCommand' differs", expected[index].getAction(), actual[index].getAction());
         }
     }
 

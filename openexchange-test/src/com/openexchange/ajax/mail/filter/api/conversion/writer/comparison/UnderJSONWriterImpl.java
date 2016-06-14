@@ -47,32 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
+package com.openexchange.ajax.mail.filter.api.conversion.writer.comparison;
 
+import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
-import com.openexchange.ajax.mail.filter.api.dao.action.Discard;
-import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
-import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
-
+import com.openexchange.ajax.mail.filter.api.conversion.writer.AbstractJSONWriter;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 
 /**
- * SimpleActionParserImpl
+ * {@link UnderJSONWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SimpleActionParserImpl implements ActionParser {
+public class UnderJSONWriterImpl extends AbstractJSONWriter implements ComparisonWriter {
 
-	@Override
-    public AbstractAction parseAction(final String name, final JSONObject jsonObject) {
-		if (name.equalsIgnoreCase(Discard.DISCARD)) {
-			return new Discard();
-		} else if (name.equalsIgnoreCase(Keep.KEEP)) {
-			return new Keep();
-		} else if (name.equalsIgnoreCase(Stop.STOP)) {
-			return new Stop();
-		} else {
-			return null;
-		}
-	}
+    /**
+     * Initialises a new {@link UnderJSONWriterImpl}.
+     */
+    public UnderJSONWriterImpl() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
+    @Override
+    public JSONObject write(Comparison type, JSONObject jsonObject) throws JSONException {
+        return super.write(type, jsonObject);
+    }
 }

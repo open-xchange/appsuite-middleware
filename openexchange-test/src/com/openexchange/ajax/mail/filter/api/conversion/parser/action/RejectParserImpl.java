@@ -51,21 +51,34 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Reject;
 
-
 /**
- * RejectParserImpl
+ * {@link RejectParserImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class RejectParserImpl implements ActionParser {
 
-	@Override
-    public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
-		final String text = jsonObject.getString("text");
+    /**
+     * Initialises a new {@link RejectParserImpl}.
+     */
+    public RejectParserImpl() {
+        super();
+    }
 
-		return new Reject(text);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
+    @Override
+    public Action parse(JSONObject jsonObject) throws JSONException {
+        Reject reject = new Reject();
+        String text = jsonObject.getString("text");
+        reject.addArgument("text", text);
+        return reject;
+    }
 }

@@ -49,23 +49,23 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+
 /**
- * Redirect
+ * {@link Redirect}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Redirect extends AbstractAction {
 
-	public static final String REDIRECT = "redirect";
+    /**
+     * Initialises a new {@link Redirect}.
+     */
+    public Redirect(String email) {
+        super(ActionCommand.REDIRECT);
+        addArgument("to", email);
+    }
 
-	public String mail;
-
-	public Redirect(final String mail) {
-		name = REDIRECT;
-		this.mail = mail;
-	}
-
-	public String getMail() {
-		return mail;
-	}
+    //TODO: add methods for setting/getting the redirect e-mail address
 }

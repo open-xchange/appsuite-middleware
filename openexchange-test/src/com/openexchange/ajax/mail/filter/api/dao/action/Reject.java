@@ -49,63 +49,23 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+
 /**
- * Redirect
+ * {@link Reject}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Reject extends AbstractAction {
 
-	public static final String REJECT = "reject";
+    /**
+     * Initialises a new {@link Reject}.
+     */
+    public Reject() {
+        super(ActionCommand.REJECT);
+    }
 
-	protected String text;
+    //TODO: add methods for setting/getting the rejection text
 
-	public Reject(final String text) {
-		name = REJECT;
-		this.text = text;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-            return true;
-        }
-		if (obj == null) {
-            return false;
-        }
-		if (getClass() != obj.getClass()) {
-            return false;
-        }
-		final Reject other = (Reject) obj;
-		if (text == null) {
-			if (other.text != null) {
-                return false;
-            }
-		} else if (!text.equals(other.text)) {
-            return false;
-        }
-
-		if (name == null) {
-			if (other.getName() != null) {
-                return false;
-            }
-		} else if (!name.equals(other.getName())) {
-            return false;
-        }
-
-		return true;
-	}
 }

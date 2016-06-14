@@ -49,18 +49,16 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
-
+import com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 
 /**
- * ActionParser
- *
+ * 
+ * {@link ActionParser}
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ActionParser {
-
-	public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException;
+public interface ActionParser extends JSONParser<Action> {
 
 }

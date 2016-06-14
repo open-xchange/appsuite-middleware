@@ -52,7 +52,7 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
 
 /**
@@ -63,11 +63,27 @@ import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
  */
 public class VacationParserImpl implements ActionParser {
 
+    /**
+     * Initialises a new {@link VacationParserImpl}.
+     */
+    public VacationParserImpl() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
     @Override
-    public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
-        final int days = jsonObject.getInt("days");
-        final JSONArray jsonAddressArray = jsonObject.optJSONArray("addresses");
-        final String[] addresses;
+    public Action parse(JSONObject jsonObject) throws JSONException {
+        Vacation vacation = new Vacation();
+
+        int days = jsonObject.getInt("days");
+        vacation.addArgument("days", days);
+
+        JSONArray jsonAddressArray = jsonObject.optJSONArray("addresses");
+        String[] addresses;
         if (jsonAddressArray != null) {
             addresses = new String[jsonAddressArray.length()];
             for (int a = 0; a < addresses.length; a++) {
@@ -76,17 +92,20 @@ public class VacationParserImpl implements ActionParser {
         } else {
             addresses = new String[0];
         }
+        vacation.addArgument("addresses", addresses);
 
         String subject = null;
         if (jsonObject.has("subject")) {
             subject = jsonObject.getString("subject");
+            vacation.addArgument("subject", subject);
         }
 
         String text = null;
         if (jsonObject.has("text")) {
             text = jsonObject.getString("text");
+            vacation.addArgument("text", text);
         }
 
-        return new Vacation(days, addresses, subject, text);
+        return vacation;
     }
 }

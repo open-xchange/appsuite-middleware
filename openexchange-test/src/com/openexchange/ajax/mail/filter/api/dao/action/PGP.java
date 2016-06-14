@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
-import java.util.Arrays;
+import java.util.List;
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 
 /**
  * {@link PGP}
@@ -58,59 +59,22 @@ import java.util.Arrays;
  */
 public class PGP extends AbstractAction {
 
-    public static final String PGP = "pgp";
-
-    protected String[] keys;
-
+    /**
+     * Initialises a new {@link PGP}.
+     */
     public PGP() {
-        this(null);
+        super(ActionCommand.PGP);
     }
 
-    public PGP(String[] keys) {
-        name = PGP;
-        this.keys = keys;
+    /**
+     * Initialises a new {@link PGP}.
+     * 
+     * @param keys A list with PGP keys
+     */
+    public PGP(List<String> keys) {
+        this();
+        addArgument("keys", keys);
     }
 
-    public String[] getKeys() {
-        return keys;
-    }
-
-    public void setKeys(String[] keys) {
-        this.keys = keys;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((name == null) ? 0 : name.hashCode()) + Arrays.hashCode(keys);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final PGP other = (PGP) obj;
-        if (!Arrays.equals(keys, other.keys)) {
-            return false;
-        }
-        if (name == null) {
-            if (other.getName() != null) {
-                return false;
-            }
-        } else if (!name.equals(other.getName())) {
-            return false;
-        }
-
-        return true;
-    }
-
+    //TODO: add methods for setting/getting the PGP keys
 }

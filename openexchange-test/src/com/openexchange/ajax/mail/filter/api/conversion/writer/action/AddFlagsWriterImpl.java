@@ -49,35 +49,18 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
-import com.openexchange.ajax.mail.filter.api.dao.action.AddFlags;
-
-
 /**
- * AddFlagsWriterImpl
+ * {@link AddFlagsWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AddFlagsWriterImpl implements ActionWriter {
+public class AddFlagsWriterImpl extends AbstractActionWriterImpl {
 
-	@Override
-    public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		final AddFlags addFlagsAction = (AddFlags)abstractAction;
-
-		jsonObj.put("id", name);
-
-		final JSONArray jsonArray = new JSONArray();
-		final String[] flags = addFlagsAction.getFlags();
-		for (int a = 0; a < flags.length; a++) {
-			jsonArray.put(flags[a]);
-		}
-
-		jsonObj.put("flags", jsonArray);
-
-		return jsonObj;
-	}
+    /**
+     * Initialises a new {@link AddFlagsWriterImpl}.
+     */
+    public AddFlagsWriterImpl() {
+        super();
+    }
 }

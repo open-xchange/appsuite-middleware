@@ -52,7 +52,9 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.mail.filter.api.dao.DataObject;
+import com.openexchange.ajax.tools.JSONCoercion;
 
 /**
  * {@link AbstractJSONWriter}
@@ -68,13 +70,26 @@ public abstract class AbstractJSONWriter {
         super();
     }
 
+    /**
+     * Writes the specified {@link DataObject} to the specified {@link JSONObject}
+     * and coerces to {@link JSONValue}s all arguments of the {@link DataObject} that
+     * need coercion.
+     * 
+     * @param type The {@link DataObject} type
+     * @param jsonObject The {@link JSONObject} to write to
+     * @return The newly written {@link JSONObject}
+     * @throws JSONException if a JSON parsing error occurs
+     */
     public JSONObject write(DataObject type, JSONObject jsonObject) throws JSONException {
         Map<String, Object> arguments = type.getArguments();
         for (String key : arguments.keySet()) {
-            jsonObject.put(key, arguments.get(key));
-            //TODO: Maybe coerce nested lists and maps?
+            Object value = arguments.get(key);
+            if (JSONCoercion.needsJSONCoercion(value)) {
+                JSONValue jsonValue = (JSONValue) JSONCoercion.coerceToJSON(value);
+                value = jsonValue;
+            }
+            jsonObject.put(key, value);
         }
         return jsonObject;
     }
-
 }

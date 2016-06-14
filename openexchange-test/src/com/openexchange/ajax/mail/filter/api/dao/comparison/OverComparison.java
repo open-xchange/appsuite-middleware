@@ -47,22 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao.action;
+package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
-import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 
 /**
- * {@link Stop}
+ * {@link OverComparison}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Stop extends AbstractAction {
+public class OverComparison extends AbstractComparison {
 
     /**
-     * Initialises a new {@link Stop}.
+     * Initialises a new {@link OverComparison}.
+     * 
+     * @param size The size
      */
-    public Stop() {
-        super(ActionCommand.STOP);
+    public OverComparison(int size) {
+        super(MatchType.over);
+        addArgument("size", size);
     }
 }

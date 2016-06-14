@@ -49,18 +49,16 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
-
+import com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 
 /**
- * ActionWriter
+ * 
+ * {@link ActionWriter}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ActionWriter {
-
-	public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException;
+public interface ActionWriter extends JSONWriter<Action> {
 
 }

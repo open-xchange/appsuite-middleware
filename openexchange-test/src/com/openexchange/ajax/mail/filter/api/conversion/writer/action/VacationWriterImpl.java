@@ -49,63 +49,17 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
-import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
-
-
 /**
  * MoveParserImpl
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class VacationWriterImpl implements ActionWriter {
+public class VacationWriterImpl extends AbstractActionWriterImpl {
 
-	@Override
-    public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		final Vacation vacationAction = (Vacation)abstractAction;
-
-		jsonObj.put("id", name);
-		jsonObj.put("days", vacationAction.getDays());
-
-		if (vacationAction.getSubject() != null) {
-			jsonObj.put("subject", vacationAction.getSubject());
-		}
-
-		if (vacationAction.getAddresses() != null) {
-		    for (String a : vacationAction.getAddresses()) {
-		        jsonObj.append("addresses", a);
-		    }
-		}
-		
-		if (vacationAction.getText() != null) {
-			jsonObj.put("text", vacationAction.getText());
-		}
-
-		return jsonObj;
-	}
-
-	public AbstractAction parse(final String name, final JSONObject jsonObject) throws JSONException {
-		final int days = jsonObject.getInt("days");
-		final JSONArray jsonAddressArray = jsonObject.getJSONArray("addresses");
-		final String[] addresses = new String[jsonAddressArray.length()];
-		for (int a = 0; a < addresses.length; a++) {
-			addresses[a] = jsonAddressArray.getString(a);
-		}
-
-		String subject = null;
-		if (jsonObject.has("subject")) {
-			subject = jsonObject.getString("subject");
-		}
-
-		String text = null;
-		if (jsonObject.has("text")) {
-			text = jsonObject.getString("text");
-		}
-
-		return new Vacation(days, addresses, subject, text);
-	}
+    /**
+     * Initialises a new {@link VacationWriterImpl}.
+     */
+    public VacationWriterImpl() {
+        super();
+    }
 }

@@ -51,19 +51,32 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Move;
 
 /**
- * MoveParserImpl
+ * {@link MoveParserImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class MoveParserImpl implements ActionParser {
 
+    /**
+     * Initialises a new {@link MoveParserImpl}.
+     */
+    public MoveParserImpl() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
     @Override
-    public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
-        final String folder = jsonObject.getString("into");
+    public Action parse(JSONObject jsonObject) throws JSONException {
+        String folder = jsonObject.getString("into");
         return new Move(folder);
     }
 }

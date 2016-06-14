@@ -50,19 +50,20 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.DataObject;
 
 /**
- * {@link Stop}
+ * {@link Action}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Stop extends AbstractAction {
+public interface Action extends DataObject {
 
     /**
-     * Initialises a new {@link Stop}.
+     * Returns the {@link ActionCommand}
+     * 
+     * @return the {@link ActionCommand}
      */
-    public Stop() {
-        super(ActionCommand.STOP);
-    }
+    ActionCommand getAction();
+
 }

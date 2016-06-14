@@ -47,22 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao.action;
+package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
-import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.conversion.writer.AbstractJSONWriter;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 
 /**
- * {@link Stop}
+ * {@link AbstractActionWriterImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Stop extends AbstractAction {
+abstract class AbstractActionWriterImpl extends AbstractJSONWriter implements ActionWriter {
 
     /**
-     * Initialises a new {@link Stop}.
+     * Initialises a new {@link AbstractActionWriterImpl}.
      */
-    public Stop() {
-        super(ActionCommand.STOP);
+    AbstractActionWriterImpl() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.AbstractJSONWriter#write(com.openexchange.ajax.mail.filter.api.dao.DataObject, org.json.JSONObject)
+     */
+    @Override
+    public JSONObject write(Action type, JSONObject jsonObject) throws JSONException {
+        jsonObject.put("id", type.getAction().name().toLowerCase());
+        return super.write(type, jsonObject);
     }
 }

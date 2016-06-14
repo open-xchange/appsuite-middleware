@@ -51,20 +51,19 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.comparison;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.MatchType;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.SizeComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.OverComparison;
 
 /**
- * {@link SizeJSONParserImpl}
+ * {@link OverJSONParserImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SizeJSONParserImpl implements ComparisonParser {
+public class OverJSONParserImpl implements ComparisonParser {
 
     /**
-     * Initialises a new {@link SizeJSONParserImpl}.
+     * Initialises a new {@link OverJSONParserImpl}.
      */
-    public SizeJSONParserImpl() {
+    public OverJSONParserImpl() {
         super();
     }
 
@@ -74,11 +73,9 @@ public class SizeJSONParserImpl implements ComparisonParser {
      * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @Override
-    public SizeComparison parse(JSONObject jsonObject) throws JSONException {
-        String comparison = jsonObject.getString("comparison");
-        MatchType matchType = MatchType.valueOf(comparison);
+    public OverComparison parse(JSONObject jsonObject) throws JSONException {
         int size = jsonObject.getInt("size");
 
-        return new SizeComparison(matchType, size);
+        return new OverComparison(size);
     }
 }
