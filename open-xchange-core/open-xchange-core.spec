@@ -479,7 +479,7 @@ if [ $permval -lt 256 ]; then
     nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
 fi
 # -----------------------------------------------------------------------
-for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
+for opt in "-server" "-Djava.awt.headless=true" \
     "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
     "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
     "-XX:-OmitStackTraceInFastThrow"; do
@@ -1330,6 +1330,29 @@ if [ "" = "$VALUE" ]; then
     ox_set_property com.openexchange.mail.account.blacklist "127.0.0.1-127.255.255.255,localhost" /opt/open-xchange/etc/mail.properties
 fi
 ox_add_property com.openexchange.mail.account.whitelist.ports "143,993, 25,465,587, 110,995" /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-3225
+ox_add_property com.openexchange.tools.images.transformations.preferThumbnailThreshold 0.8 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-3246
+ox_add_property com.openexchange.mail.mailStartTls false /opt/open-xchange/etc/mail.properties
+ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-3350
+sed -ie '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+
+# SoftwareChange_Request-3355
+oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
+if [[ ${oldlink} == *"[uiwebpath]#m=[module]&i=[object]&f=[folder]" ]]
+then
+  newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/tasks\&id=[object]\&folder=[folder];')
+  ox_set_property object_link ${newlink} /opt/open-xchange/etc/notification.properties
+fi
+
+# SoftwareChange_Request-3356
+ox_add_property com.openexchange.ajax.login.checkPunyCodeLoginString false /opt/open-xchange/etc/login.properties
+
+
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
