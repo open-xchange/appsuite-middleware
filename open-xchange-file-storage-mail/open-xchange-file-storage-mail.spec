@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -61,5 +61,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jun 14 2016 Thorben Betten <thorben.betten@open-xchange.com>
+First candidate for 7.8.2 release
 * Fri Jun 03 2016 Thorben Betten <thorben.betten@open-xchange.com>
-First release candidate for 7.8.2
+prepare for 7.8.2
