@@ -1,9 +1,3 @@
-open-xchange-xerces-ibm (7.8.0-33) stable; urgency=medium
-
-  * Build for patch 2016-06-20 (3346)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 Jun 2016 10:21:06 +0200
-
 open-xchange-xerces-ibm (7.8.0-32) stable; urgency=medium
 
   * Build for patch 2015-06-06 (3316)
