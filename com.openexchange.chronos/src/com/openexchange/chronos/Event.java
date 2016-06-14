@@ -79,6 +79,7 @@ public class Event {
     private List<Attachment> attachments;
     private Classification classification;
     private List<String> categories;
+    private String color;
 
     Date startDate;
     String startTimezone;
@@ -597,6 +598,24 @@ public class Event {
      */
     public void setCategories(List<String> categories) {
         this.categories = categories;
+    }
+
+    /**
+     * Gets the color
+     * 
+     * @return The color
+     */
+    public String getColor() {
+        return color;
+    }
+
+    /**
+     * Sets the color
+     * 
+     * @param color The color to set
+     */
+    public void setColor(String color) {
+        this.color = color;
     }
 
 }

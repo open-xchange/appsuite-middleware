@@ -82,46 +82,11 @@ import com.openexchange.tools.session.ServerSession;
 public class CalendarServiceImpl implements CalendarService {
 
     public UserizedEvent createEvent(ServerSession session, int folderID, Event event, List<Alarm> alarms) throws OXException {
-        /*
-         * get & check requested folder
-         */
-        UserizedFolder folder = getFolder(session, folderID);
-        if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
-            throw new OXException();
-        }
-        if (Permission.CREATE_OBJECTS_IN_FOLDER > folder.getOwnPermission().getFolderPermission()) {
-            throw new OXException();
-        }
-        /*
-         * insert event data
-         */
-        CalendarStorage storage = getCalendarStorage(session);
-        int objectID = storage.insertEvent(event);
-        /*
-         * insert alarms
-         */
-        if (null != alarms && 0 < alarms.size()) {
-            int targetAttendee = getTargetAttendee(session, folder, event.getAttendees());
-            if (0 < targetAttendee) {
-                storage.insertAlarms(targetAttendee, objectID, alarms);
-            }
-        }
-        /*
-         * return reloaded event
-         */
-        return getEvent(session, folder, objectID);
+        return createEvent(session, getFolder(session, folderID), event, alarms);
     }
 
     public UserizedEvent updateEvent(ServerSession session, int folderID, Event event, List<Alarm> alarms) throws OXException {
         return updateEvent(session, getFolder(session, folderID), event, alarms);
-    }
-
-    private UserizedEvent updateEvent(ServerSession session, UserizedFolder folder, Event event, List<Alarm> alarms) throws OXException {
-
-        /*
-         * return reloaded event
-         */
-        return getEvent(session, folder, event.getId());
     }
 
     @Override
@@ -143,6 +108,47 @@ public class CalendarServiceImpl implements CalendarService {
         return getEvent(session, getFolder(session, folderID), objectID);
     }
 
+    private UserizedEvent createEvent(ServerSession session, UserizedFolder folder, Event event, List<Alarm> alarms) throws OXException {
+        requireCalendarContentType(folder);
+        requireFolderPermission(folder, Permission.CREATE_OBJECTS_IN_FOLDER);
+        /*
+         * insert event data
+         */
+        CalendarStorage storage = getCalendarStorage(session);
+        int objectID = storage.insertEvent(event);
+        /*
+         * insert alarms
+         */
+        if (null != alarms && 0 < alarms.size()) {
+            int targetAttendee = getTargetAttendee(session, folder, event.getAttendees());
+            if (0 < targetAttendee) {
+                storage.insertAlarms(targetAttendee, objectID, alarms);
+            }
+        }
+        /*
+         * return reloaded event
+         */
+        return getEvent(session, folder, objectID);
+    }
+
+    private UserizedEvent updateEvent(ServerSession session, UserizedFolder folder, Event event, List<Alarm> alarms) throws OXException {
+        requireCalendarContentType(folder);
+        requireWritePermission(folder, Permission.WRITE_OWN_OBJECTS);
+        /*
+         * get event to update
+         */
+        CalendarStorage storage = getCalendarStorage(session);
+        Event originalEvent = storage.loadEvent(event.getId());
+        if (session.getUserId() != event.getCreatedBy()) {
+            requireWritePermission(folder, Permission.WRITE_ALL_OBJECTS);
+        }
+
+        /*
+         * return reloaded event
+         */
+        return getEvent(session, folder, event.getId());
+    }
+
     private UserizedEvent getEvent(ServerSession session, UserizedFolder folder, int objectID) throws OXException {
         /*
          * check requested folder
@@ -155,8 +161,8 @@ public class CalendarServiceImpl implements CalendarService {
          */
         CalendarStorage storage = getCalendarStorage(session);
         Event event = storage.loadEvent(objectID);
-        if (Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission() && session.getUserId() != event.getCreatedBy()) {
-            throw new OXException();
+        if (session.getUserId() != event.getCreatedBy()) {
+            requireReadPermission(folder, Permission.READ_ALL_OBJECTS);
         }
         return userize(session, storage, folder, event);
     }
@@ -236,6 +242,12 @@ public class CalendarServiceImpl implements CalendarService {
 
     private static void requireReadPermission(UserizedFolder folder, int requiredPermission) throws OXException {
         if (folder.getOwnPermission().getReadPermission() < requiredPermission) {
+            throw new OXException();
+        }
+    }
+
+    private static void requireWritePermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getWritePermission() < requiredPermission) {
             throw new OXException();
         }
     }

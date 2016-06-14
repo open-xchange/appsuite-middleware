@@ -155,6 +155,62 @@ public class Event2Appointment {
     }
 
     /**
+     * Gets the "color label" value based on the supplied event color.
+     * 
+     * @param color The CSS3 event color
+     * @return The legacy color label, or <code>0</code> if not mappable
+     */
+    public static int getColorLabel(String color) {
+        if (null == color) {
+            return 0;
+        }
+        switch (color) {
+            case "lightblue":
+            case "#ADD8E6":
+            case "#9bceff":
+                return 1;
+            case "darkblue":
+            case "#6ca0df":
+            case "#00008B":
+                return 2;
+            case "purple":
+            case "#a889d6":
+            case "#800080":
+                return 3;
+            case "pink":
+            case "#e2b3e2":
+            case "#FFC0CB":
+                return 4;
+            case "red":
+            case "#e7a9ab":
+            case "#FF0000":
+                return 5;
+            case "orange":
+            case "#ffb870":
+            case "#FFA500":
+                return 6;
+            case "yellow":
+            case "#f2de88":
+            case "#FFFF00":
+                return 7;
+            case "lightgreen":
+            case "#c2d082":
+            case "#90EE90":
+                return 8;
+            case "darkgreen":
+            case "#809753":
+            case "#006400":
+                return 9;
+            case "gray":
+            case "#4d4d4d":
+            case "#808080":
+                return 10;
+            default:
+                return 0;
+        }
+    }
+
+    /**
      * Initializes a new {@link Event2Appointment}.
      */
     private Event2Appointment() {

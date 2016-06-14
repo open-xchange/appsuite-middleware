@@ -177,6 +177,7 @@ public class EventResultConverter implements ResultConverter {
         jsonObject.putOpt(AppointmentFields.SEQUENCE, event.getSequence());
         jsonObject.put(AppointmentFields.PRIVATE_FLAG, Event2Appointment.getPrivateFlag(event.getClassification()));
         jsonObject.putOpt(AppointmentFields.SHOW_AS, Event2Appointment.getShownAs(event.getStatus()));
+        jsonObject.putOpt(AppointmentFields.COLORLABEL, Event2Appointment.getColorLabel(event.getColor()));
         jsonObject.putOpt(AppointmentFields.ORGANIZER, Event2Appointment.getEMailAddress(event.getOrganizer().getUri()));
         if (null != event.getOrganizer() && 0 < event.getOrganizer().getEntity()) {
             jsonObject.putOpt(AppointmentFields.ORGANIZER_ID, event.getOrganizer().getEntity());

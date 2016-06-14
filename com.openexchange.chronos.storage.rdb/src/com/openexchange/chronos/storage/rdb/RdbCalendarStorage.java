@@ -62,7 +62,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
@@ -177,15 +176,14 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
                 event.setLastModified(new Date(resultSet.getLong("changing_date")));
                 event.setModifiedBy(resultSet.getInt("changed_from"));
                 // fid
-                event.setClassification(resultSet.getBoolean("pflag") ? Classification.PRIVATE : Classification.PUBLIC);
+                event.setClassification(Appointment2Event.getClassification(resultSet.getBoolean("pflag")));
                 event.setStartDate(resultSet.getTimestamp("timestampfield01"));
                 event.setEndDate(resultSet.getTimestamp("timestampfield02"));
                 event.setStartTimezone(resultSet.getString("timezone"));
                 event.setRecurrenceId(resultSet.getInt("intfield02"));
-                // intfield03
+                event.setColor(Appointment2Event.getColor(resultSet.getInt("intfield03")));
                 // intfield04
                 // intfield05
-                // intfield06
                 event.setStatus(Appointment2Event.getEventStatus(resultSet.getInt("intfield06")));
                 event.setAllDay(resultSet.getBoolean("intfield07"));
                 // intfield08
@@ -248,15 +246,14 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
                 event.setLastModified(new Date(resultSet.getLong("changing_date")));
                 event.setModifiedBy(resultSet.getInt("changed_from"));
                 // fid
-                event.setClassification(resultSet.getBoolean("pflag") ? Classification.PRIVATE : Classification.PUBLIC);
+                event.setClassification(Appointment2Event.getClassification(resultSet.getBoolean("pflag")));
                 event.setStartDate(resultSet.getTimestamp("timestampfield01"));
                 event.setEndDate(resultSet.getTimestamp("timestampfield02"));
                 event.setStartTimezone(resultSet.getString("timezone"));
                 event.setRecurrenceId(resultSet.getInt("intfield02"));
-                // intfield03
+                event.setColor(Appointment2Event.getColor(resultSet.getInt("intfield03")));
                 // intfield04
                 // intfield05
-                // intfield06
                 event.setStatus(Appointment2Event.getEventStatus(resultSet.getInt("intfield06")));
                 event.setAllDay(resultSet.getBoolean("intfield07"));
                 // intfield08
