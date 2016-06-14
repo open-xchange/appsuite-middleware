@@ -162,7 +162,9 @@ collect_command_output() {
    for i in ${PROCS}; do
        IFS=${OIFS}
        echo "  ${i}"
-       ${i} > "/${TMP}/${LOGDIR}/commands/${i}" 2>&1
+       # slashes are forbidden in file names
+       removed_path=$(echo ${i} | sed 's|/.*/||g')
+       ${i} > "/${TMP}/${LOGDIR}/commands/${removed_path}" 2>&1
        IFS=";"
    done
    IFS=${OIFS}
