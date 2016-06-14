@@ -75,7 +75,7 @@ abstract class AbstractActionWriterImpl extends AbstractJSONWriter implements Ac
      */
     @Override
     public JSONObject write(Action type, JSONObject jsonObject) throws JSONException {
-        jsonObject.put("id", type.getAction().name().toLowerCase());
+        jsonObject.put("id", type.getAction().name());
         return super.write(type, jsonObject);
     }
 }

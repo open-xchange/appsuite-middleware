@@ -105,7 +105,7 @@ public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
             final JSONArray jsonComparisonArray = jsonTestObj.getJSONArray("comparison");
             List<MatchType> comparisons = new ArrayList<>(jsonComparisonArray.length());
             for (int b = 0; b < jsonComparisonArray.length(); b++) {
-                comparisons.add(MatchType.valueOf(jsonComparisonArray.getString(b).toLowerCase()));
+                comparisons.add(MatchType.valueOf(jsonComparisonArray.getString(b)));
             }
 
             tests.add(new Test(testCommand, comparisons));
@@ -114,7 +114,7 @@ public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
         // Parse action commands
         List<ActionCommand> actionCommands = new ArrayList<ActionCommand>(jsonActionArray.length());
         for (int a = 0; a < jsonActionArray.length(); a++) {
-            actionCommands.add(ActionCommand.valueOf(jsonActionArray.getString(a).toUpperCase()));
+            actionCommands.add(ActionCommand.valueOf(jsonActionArray.getString(a)));
         }
 
         return new ConfigResponse(response, new MailFilterConfiguration(tests, actionCommands));
