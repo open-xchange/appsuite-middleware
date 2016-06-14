@@ -258,6 +258,17 @@ public class Utils {
     }
 
     /**
+     * Gets the {@code ImageInputStream} from specified input stream.
+     *
+     * @param imageStream The stream
+     * @return The image input stream
+     * @throws IOException If input stream cannot be returned
+     */
+    public static ImageInputStream getImageInputStream(InputStream imageStream) throws IOException {
+        return ImageIO.createImageInputStream(imageStream);
+    }
+
+    /**
      * Tries to read out the Exif orientation of an image using the supplied image reader.
      *
      * @param reader The image reader to use

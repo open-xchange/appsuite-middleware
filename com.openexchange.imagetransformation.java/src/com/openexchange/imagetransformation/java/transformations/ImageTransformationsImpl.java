@@ -611,15 +611,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @return The buffered image
      */
     private BufferedImage readAndExtractMetadataFromFile(IFileHolder imageFile, String formatName, long maxSize, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
-        ImageInputStream input = null;
+        ImageInputStream imageInputStream = null;
         ImageReader reader = null;
+        InputStream inputStream = null;
         try {
+            inputStream = imageFile.getStream();
             /*
              * create reader from image input stream
              */
-            input = getImageInputStream(imageFile);
-            reader = getImageReader(input, imageFile.getContentType(), imageFile.getName());
-            reader.setInput(input);
+            imageInputStream = getImageInputStream(inputStream);
+            reader = getImageReader(imageInputStream, imageFile.getContentType(), imageFile.getName());
+            reader.setInput(imageInputStream);
             /*
              * read original image dimensions & check against required dimensions for transformations
              */
@@ -677,11 +679,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
         } catch (RuntimeException e) {
             LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
         } finally {
             if (null != reader) {
                 reader.dispose();
             }
-            Streams.close(input);
+            Streams.close(imageInputStream, inputStream);
         }
     }
 
