@@ -49,59 +49,22 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
-import java.util.Arrays;
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 
 /**
- * AddFlags
+ * {@link AddFlags}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class AddFlags extends AbstractAction {
 
-	public static final String ADD_FLAGS = "addflags";
-
-	protected String[] flags;
-
-	public AddFlags(final String[] flags) {
-		name = ADD_FLAGS;
-		this.flags = flags;
-	}
-
-	public String[] getFlags() {
-		return flags;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((name == null) ? 0 : name.hashCode()) + Arrays.hashCode(flags);
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-            return true;
-        }
-		if (!super.equals(obj)) {
-            return false;
-        }
-		if (getClass() != obj.getClass()) {
-            return false;
-        }
-		final AddFlags other = (AddFlags) obj;
-		if (!Arrays.equals(flags, other.flags)) {
-            return false;
-        }
-		if (name == null) {
-			if (other.getName() != null) {
-                return false;
-            }
-		} else if (!name.equals(other.getName())) {
-            return false;
-        }
-
-		return true;
-	}
+    /**
+     * Initialises a new {@link AddFlags}.
+     */
+    public AddFlags() {
+        super(ActionCommand.addflags);
+    }
+    
+    //TODO: add methods for setting/getting flags
 }

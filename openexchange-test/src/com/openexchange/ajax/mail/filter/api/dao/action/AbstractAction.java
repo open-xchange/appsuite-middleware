@@ -49,46 +49,58 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+
 /**
- * AbstractAction
+ * 
+ * {@link AbstractAction}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractAction {
+abstract class AbstractAction implements Action {
 
-	protected String name;
+    private Map<String, Object> arguments;
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * Initialises a new {@link AbstractAction}.
+     */
+    public AbstractAction(ActionCommand actionCommand) {
+        super();
+        arguments = new HashMap<>(2);
+        arguments.put("id", actionCommand.name().toLowerCase());
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getAction()
+     */
+    @Override
+    public ActionCommand getAction() {
+        return ActionCommand.valueOf(((String) arguments.get("id")).toUpperCase());
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-            return true;
-        }
-		if (obj == null) {
-            return false;
-        }
-		if (getClass() != obj.getClass()) {
-            return false;
-        }
-		final AbstractAction other = (AbstractAction) obj;
-		if (name == null) {
-			if (other.name != null) {
-                return false;
-            }
-		} else if (!name.equals(other.name)) {
-            return false;
-        }
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.DataObject#getArguments()
+     */
+    @Override
+    public Map<String, Object> getArguments() {
+        return Collections.unmodifiableMap(arguments);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.DataObject#addArgument(java.lang.String, java.lang.Object)
+     */
+    @Override
+    public void addArgument(String argument, Object value) {
+        arguments.put(argument, value);
+    }
 }

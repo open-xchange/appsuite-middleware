@@ -49,47 +49,20 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+
 /**
- * Stop
+ * {@link Stop}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Stop extends AbstractAction {
 
-	public static final String STOP = "stop";
-
-	public Stop() {
-		name = STOP;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-            return true;
-        }
-		if (obj == null) {
-            return false;
-        }
-		if (getClass() != obj.getClass()) {
-            return false;
-        }
-		final Stop other = (Stop) obj;
-		if (name == null) {
-			if (other.getName() != null) {
-                return false;
-            }
-		} else if (!name.equals(other.getName())) {
-            return false;
-        }
-
-		return true;
-	}
+    /**
+     * Initialises a new {@link Stop}.
+     */
+    public Stop() {
+        super(ActionCommand.stop);
+    }
 }

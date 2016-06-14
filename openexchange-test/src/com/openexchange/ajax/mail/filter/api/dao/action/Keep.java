@@ -49,47 +49,20 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+
 /**
- * Keep
- *
+ * {@link Keep}
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Keep extends AbstractAction {
 
-	public static final String KEEP = "keep";
-
-	public Keep() {
-		name = KEEP;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-            return true;
-        }
-		if (obj == null) {
-            return false;
-        }
-		if (getClass() != obj.getClass()) {
-            return false;
-        }
-		final Keep other = (Keep) obj;
-		if (name == null) {
-			if (other.getName() != null) {
-                return false;
-            }
-		} else if (!name.equals(other.getName())) {
-            return false;
-        }
-
-		return true;
-	}
+    /**
+     * Initialises a new {@link Keep}.
+     */
+    public Keep() {
+        super(ActionCommand.keep);
+    }
 }

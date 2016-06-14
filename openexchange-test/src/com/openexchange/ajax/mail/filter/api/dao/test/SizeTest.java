@@ -49,8 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
-import com.openexchange.ajax.mail.filter.api.dao.comparison.SizeComparison;
-
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 
 /**
  * SizeTest
@@ -59,16 +58,16 @@ import com.openexchange.ajax.mail.filter.api.dao.comparison.SizeComparison;
  */
 public class SizeTest extends AbstractTest {
 
-	public static final String SIZE = "size";
+    public static final String SIZE = "size";
 
-	protected SizeComparison comp;
+    protected Comparison comparison;
 
-	public SizeTest(final SizeComparison comp) {
-		name = SIZE;
-		this.comp = comp;
-	}
+    public SizeTest(final Comparison comp) {
+        name = SIZE;
+        this.comparison = comp;
+    }
 
-	public SizeComparison getComparison() {
-		return comp;
-	}
+    public Comparison getComparison() {
+        return comparison;
+    }
 }

@@ -51,7 +51,7 @@ package com.openexchange.ajax.mail.filter.tests.bug;
 
 import java.util.Collections;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
@@ -95,9 +95,9 @@ public class Bug11519Test extends AbstractMailFilterTest {
         expectedRule.setTest(allOf);
 
         // Add action
-        AbstractAction[] actions = new AbstractAction[1];
-        actions[0] = new Vacation(7, new String[] { "some.address@domain.tld" }, null, "I'm out of office");
-        expectedRule.setActioncmds(actions);
+        Action[] actions = new Action[1];
+        actions[0] = new Vacation(7, Collections.singletonList("some.address@domain.tld"), null, "I'm out of office");
+        expectedRule.setActionCommands(actions);
 
         // Insert
         int id = mailFilterAPI.createRule(expectedRule);

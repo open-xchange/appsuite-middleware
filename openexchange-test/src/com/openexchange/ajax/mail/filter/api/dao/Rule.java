@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.dao;
 
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 
 /**
@@ -88,7 +88,7 @@ public class Rule {
 
     protected AbstractTest test = null;
 
-    protected AbstractAction[] actioncmds = new AbstractAction[0];
+    protected Action[] actioncmds = new Action[0];
 
     protected String rawData = null;
 
@@ -146,11 +146,11 @@ public class Rule {
         this.test = test;
     }
 
-    public AbstractAction[] getActioncmds() {
+    public Action[] getActionCommands() {
         return actioncmds;
     }
 
-    public void setActioncmds(AbstractAction[] actioncmds) {
+    public void setActionCommands(Action[] actioncmds) {
         this.actioncmds = actioncmds;
     }
 
@@ -170,7 +170,9 @@ public class Rule {
         this.errormsg = errormsg;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
