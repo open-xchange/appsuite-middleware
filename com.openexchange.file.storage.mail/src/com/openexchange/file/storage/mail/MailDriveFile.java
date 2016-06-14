@@ -118,6 +118,8 @@ public final class MailDriveFile extends DefaultFile {
 
     // -----------------------------------------------------------------------------------------------------------------------------
 
+    private MailMetadata metadata;
+
     /**
      * Initializes a new {@link MailDriveFile}.
      *
@@ -139,6 +141,15 @@ public final class MailDriveFile extends DefaultFile {
 
     private static boolean isRootFolder(String id, String rootFolderId) {
         return "".equals(id) || rootFolderId.equals(id);
+    }
+
+    /**
+     * Gets the mail metadata for this file.
+     *
+     * @return The mail metadata, or <code>null</code> if not yet parsed
+     */
+    public MailMetadata getMetadata() {
+        return metadata;
     }
 
     @Override
@@ -239,6 +250,7 @@ public final class MailDriveFile extends DefaultFile {
 
                 // Compose "meta" field
                 setMeta(mapFor("virtual", mapFor("mail", mailMetadata(message))));
+                this.metadata = new MailMetadata(message);
             } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
