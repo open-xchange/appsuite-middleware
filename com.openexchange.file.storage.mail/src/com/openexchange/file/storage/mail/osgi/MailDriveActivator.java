@@ -50,12 +50,14 @@
 package com.openexchange.file.storage.mail.osgi;
 
 import org.slf4j.Logger;
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
+import com.openexchange.file.storage.mail.MailMetadataField;
 import com.openexchange.file.storage.mail.find.MailDriveDriver;
 import com.openexchange.file.storage.mail.settings.AbstractMailDriveSetting;
 import com.openexchange.file.storage.mail.settings.AllAttachmentsFolder;
@@ -113,6 +115,10 @@ public final class MailDriveActivator extends HousekeepingActivator {
             setting = new SentAttachmentsFolder(service);
             registerService(PreferencesItemService.class, setting, null);
             registerService(ConfigTreeEquivalent.class, setting, null);
+            /*
+             * register an additional file field providing additional mail metadata
+             */
+            registerService(AdditionalFileField.class, new MailMetadataField());
         } catch (Exception e) {
             logger.error("", e);
             throw e;

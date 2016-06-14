@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
-import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 
 /**
  * BodyTest
@@ -58,30 +58,30 @@ import com.openexchange.ajax.mail.filter.api.dao.comparison.AbstractComparison;
  */
 public class BodyTest extends AbstractTest {
 
-	public static final String BODY = "body";
+    public static final String BODY = "body";
 
-	protected AbstractComparison comp;
+    protected Comparison comparison;
 
-	protected String extensionKey;
+    protected String extensionKey;
 
-	protected String extensionValue; // only two possible values content or text
+    protected String extensionValue; // only two possible values content or text
 
-	public BodyTest(final AbstractComparison comp, final String extensionKey, final String extensionValue) {
-		name = BODY;
-		this.comp = comp;
-		this.extensionKey = extensionKey;
-		this.extensionValue = extensionValue;
-	}
+    public BodyTest(final Comparison comp, final String extensionKey, final String extensionValue) {
+        name = BODY;
+        this.comparison = comp;
+        this.extensionKey = extensionKey;
+        this.extensionValue = extensionValue;
+    }
 
-	public AbstractComparison getComparison() {
-		return comp;
-	}
+    public Comparison getComparison() {
+        return comparison;
+    }
 
-	public String getExtensionKey() {
-		return extensionKey;
-	}
+    public String getExtensionKey() {
+        return extensionKey;
+    }
 
-	public String getExtensionValue() {
-		return extensionValue;
-	}
+    public String getExtensionValue() {
+        return extensionValue;
+    }
 }

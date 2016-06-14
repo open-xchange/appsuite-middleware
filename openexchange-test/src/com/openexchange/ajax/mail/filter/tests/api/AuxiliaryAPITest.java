@@ -52,7 +52,7 @@ package com.openexchange.ajax.mail.filter.tests.api;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.AbstractAction;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
 import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
@@ -77,14 +77,14 @@ public class AuxiliaryAPITest extends AbstractMailFilterTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         // Create 10 rules
         List<Rule> expectedRules = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             Rule rule = new Rule();
             rule.setName("testDeleteScript" + i);
             rule.setActive(true);
-            rule.setActioncmds(new AbstractAction[] { new Keep(), new Stop() });
+            rule.setActionCommands(new Action[] { new Keep(), new Stop() });
             rule.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(rule);
