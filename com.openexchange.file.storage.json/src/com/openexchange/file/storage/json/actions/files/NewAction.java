@@ -122,7 +122,7 @@ public class NewAction extends AbstractWriteAction {
             File metadata = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
             if (null != originalFileName && !originalFileName.equals(metadata.getFileName())) {
                 saveAction = "rename";
-            } else if (1 <= metadata.getNumberOfVersions()) {
+            } else if (1 < metadata.getNumberOfVersions()) {
                 saveAction = "new_version";
             }
             result = result(metadata, (AJAXInfostoreRequest) request, saveAction);
