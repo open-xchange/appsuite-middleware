@@ -10,7 +10,10 @@
 <p>
   <@styledButton link=link>${link_text}</@styledButton>
 </p>
-<p>
-  <#if expiration?has_content>${expiration}</#if>
-  <#if password?has_content>${password}</#if>
-</p>
+<#if expiration?has_content || password?has_content>
+  <p>
+    <#if expiration?has_content>${expiration}</#if>
+    <#if password?has_content>${password}</#if>
+  </p>
+</#if>
+<hr>
