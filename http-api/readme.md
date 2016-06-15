@@ -408,13 +408,13 @@ bootprint openapi PATH/TO/swagger.json PATH/TO/documentation
 ## Client API generation using Swagger Codegen
 ### Codegen introduction
 With [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) it is possible to generate client APIs using a
-previously created _swagger.json_ file. Swagger Codegen comes with templates for several languages and a command line tool - swagger-codegen-cli.jar - can be executed
+previously created _swagger.json_ file. Swagger Codegen comes with templates for several languages and a command line tool - swagger-codegen-cli-2.1.6.jar - can be executed
 and parameterized to generate a concrete client API.
 
 Example: Generation of a Java Client API
 
 ```sh
-java -jar PATH/TO/swagger-codegen-cli.jar generate -i PATH/TO/swagger.json -l java -o PATH/TO/OUTPUTFOLDER -t PATH/TO/TEMPLATES -c PATH/TO/CONFIGFILE
+java -jar PATH/TO/swagger-codegen-cli-2.1.6.jar generate -i PATH/TO/swagger.json -l java -o PATH/TO/OUTPUTFOLDER -t PATH/TO/TEMPLATES -c PATH/TO/CONFIGFILE
 ```
 
 Parameters:

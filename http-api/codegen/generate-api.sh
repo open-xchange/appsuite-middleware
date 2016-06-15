@@ -49,7 +49,7 @@ echo API FOLDER  = "${APIFOLDER}"
 echo LANGUAGE  = "${LANG}"
 
 rm -rf %outputFolder%
-java -jar ./lib/swagger-codegen-cli.jar generate -i ${SWAGGERJSON} -l ${LANG} -o ${OUTPUT} -t ${TEMPLATE} -c ${CONFIG}
+java -jar ./lib/swagger-codegen-cli-2.1.6.jar generate -i ${SWAGGERJSON} -l ${LANG} -o ${OUTPUT} -t ${TEMPLATE} -c ${CONFIG}
 
 echo "
 Generation complete, thanks for using Open-Xchange. Have a lot of fun!
