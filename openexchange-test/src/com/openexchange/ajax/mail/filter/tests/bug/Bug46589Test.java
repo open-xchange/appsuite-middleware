@@ -54,10 +54,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
-import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.IsComparisonArgument;
@@ -92,7 +90,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
             expected.setPosition(0);
             expected.setActive(true);
             expected.setName("testNew");
-            expected.setActions(Collections.<Action<? extends ActionArgument>> singletonList(new Stop()));
+            expected.addAction(new Stop());
             final Comparison<IsComparisonArgument> isComp = new IsComparison();
             expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
@@ -114,10 +112,8 @@ public class Bug46589Test extends AbstractMailFilterTest {
             Rule rule = new Rule();
             rule.setName("testBug46589_1_" + i);
             rule.setActive(true);
-            List<Action<? extends ActionArgument>> actions = new ArrayList<>(2);
-            actions.add(new Keep());
-            actions.add(new Stop());
-            rule.setActions(actions);
+            rule.addAction(new Keep());
+            rule.addAction(new Stop());
             rule.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(rule);
@@ -131,10 +127,8 @@ public class Bug46589Test extends AbstractMailFilterTest {
         rule.setName("testBug46589_1_" + 5);
         rule.setActive(true);
         rule.setPosition(3);
-        List<Action<? extends ActionArgument>> actions = new ArrayList<>(2);
-        actions.add(new Keep());
-        actions.add(new Stop());
-        rule.setActions(actions);
+        rule.addAction(new Keep());
+        rule.addAction(new Stop());
         rule.setTest(new TrueTest());
 
         int id = mailFilterAPI.createRule(rule);

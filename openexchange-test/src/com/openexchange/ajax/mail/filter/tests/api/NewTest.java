@@ -53,12 +53,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Move;
 import com.openexchange.ajax.mail.filter.api.dao.action.Redirect;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
-import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
@@ -98,7 +96,7 @@ public class NewTest extends AbstractMailFilterTest {
         {
             expected = new Rule();
             expected.setName("testNew");
-            expected.setActions(Collections.<Action<? extends ActionArgument>> singletonList(new Stop()));
+            expected.addAction(new Stop());
             expected.setTest(new HeaderTest(new IsComparison(), new String[] { "testheader" }, new String[] { "testvalue" }));
 
             int id = mailFilterAPI.createRule(expected);
@@ -119,10 +117,8 @@ public class NewTest extends AbstractMailFilterTest {
             expected = new Rule();
             expected.setName("");
 
-            List<Action<? extends ActionArgument>> actions = new ArrayList<>(2);
-            actions.add(new Move("default.INBOX/Spam"));
-            actions.add(new Stop());
-            expected.setActions(actions);
+            expected.addAction(new Move("default.INBOX/Spam"));
+            expected.addAction(new Stop());
 
             Comparison<UserComparisonArgument> comparison = new UserComparison();
             AddressTest userHeaderTest = new AddressTest(comparison, new String[] { "from" }, new String[] { "zitate.at" });
@@ -150,7 +146,7 @@ public class NewTest extends AbstractMailFilterTest {
         {
             expected = new Rule();
             expected.setName("sizeTest");
-            expected.setActions(Collections.<Action<? extends ActionArgument>> singletonList(new Keep()));
+            expected.addAction(new Keep());
 
             SizeTest sizeTest = new SizeTest(new OverComparison(88));
             expected.setTest(sizeTest);
@@ -171,10 +167,8 @@ public class NewTest extends AbstractMailFilterTest {
         Rule expected = new Rule();
         expected.setName("");
 
-        List<Action<? extends ActionArgument>> actions = new ArrayList<>(2);
-        actions.add(new Move("INBOX/Spam"));
-        actions.add(new Stop());
-        expected.setActions(actions);
+        expected.addAction(new Move("INBOX/Spam"));
+        expected.addAction(new Stop());
 
         AddressTest userHeaderTest = new AddressTest(new UserComparison(), null, new String[] { "zitate.at" });
         HeaderTest headerTest = new HeaderTest(new ContainsComparison(), new String[] { "subject" }, new String[] { "Zitat des Tages" });
@@ -211,7 +205,7 @@ public class NewTest extends AbstractMailFilterTest {
         {
             rule1 = new Rule();
             rule1.setName("testNewWithTwoEntries1");
-            rule1.setActions(Collections.<Action<? extends ActionArgument>> singletonList(new Stop()));
+            rule1.addAction(new Stop());
 
             IsComparison isComp = new IsComparison();
             rule1.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
@@ -226,7 +220,7 @@ public class NewTest extends AbstractMailFilterTest {
         {
             rule2 = new Rule();
             rule2.setName("testNewWithTwoEntries2");
-            rule2.setActions(Collections.<Action<? extends ActionArgument>> singletonList(new Stop()));
+            rule2.addAction(new Stop());
 
             IsComparison isComp = new IsComparison();
             rule2.setTest(new HeaderTest(isComp, new String[] { "test" }, new String[] { "test" }));
@@ -252,7 +246,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setName("testNewWithHeadersAndRedirect");
             expected.setActive(true);
 
-            expected.setActions(Collections.<Action<? extends ActionArgument>> singletonList(new Redirect("xyz@bla.de")));
+            expected.addAction(new Redirect("xyz@bla.de"));
             expected.setTest(new HeaderTest(new ContainsComparison(), new String[] { "X-Been-There", "X-MailingList" }, new String[] { "" }));
 
             int id = mailFilterAPI.createRule(expected);

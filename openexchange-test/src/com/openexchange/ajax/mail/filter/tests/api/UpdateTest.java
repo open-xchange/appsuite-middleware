@@ -1,14 +1,10 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
-import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.MatchesComparison;
@@ -30,7 +26,7 @@ public class UpdateTest extends AbstractMailFilterTest {
 
         rule = new Rule();
         rule.setName("testUpdate");
-        rule.setActions(Collections.<Action<? extends ActionArgument>> singletonList(new Keep()));
+        rule.addAction(new Keep());
 
         final IsComparison isComp = new IsComparison();
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
@@ -71,12 +67,7 @@ public class UpdateTest extends AbstractMailFilterTest {
      * Test add an action
      */
     public void testUpdateAddActionCommand() throws Exception {
-        List<Action<? extends ActionArgument>> actioncmds = rule.getActions();
-        // Retain already existing action commands
-        List<Action<? extends ActionArgument>> actions = new ArrayList<>(actioncmds);
-        // Add new action command
-        actions.add(new Stop());
-        rule.setActions(actions);
+        rule.addAction(new Stop());
         rule.setPosition(0);
 
         // Update
