@@ -17,6 +17,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -27,7 +30,6 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -41,7 +43,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
     InfostoreConfig.class, ServerConfig.class, AttachmentConfig.class, ContextStorage.class, QuotaFileStorage.class,
-    UserSettingMailStorage.class, UserSettingMail.class, FilestoreStorage.class })
+    UserSettingMailStorage.class, UserSettingMail.class, FilestoreStorage.class, FileStorages.class })
 public class SharedInfostoreJSlobTest {
 
     @InjectMocks
@@ -52,6 +54,9 @@ public class SharedInfostoreJSlobTest {
 
     @Mock
     private QuotaFileStorage quotaFileStorage;
+
+    @Mock
+    private QuotaFileStorageService quotaFileStorageService;
 
     @Mock
     private UserPermissionBits permissionBits;
@@ -91,8 +96,9 @@ public class SharedInfostoreJSlobTest {
         PowerMockito.mockStatic(FilestoreStorage.class);
         PowerMockito.when(FilestoreStorage.createURI(Matchers.eq(context))).thenReturn(new URI(""));
 
-        PowerMockito.mockStatic(QuotaFileStorage.class);
-        PowerMockito.when(QuotaFileStorage.getInstance((URI) Matchers.any(), Matchers.eq(context))).thenReturn(quotaFileStorage);
+        PowerMockito.mockStatic(FileStorages.class);
+        PowerMockito.when(FileStorages.getQuotaFileStorageService()).thenReturn(quotaFileStorageService);
+        PowerMockito.when(quotaFileStorageService.getQuotaFileStorage(Matchers.anyInt(), Matchers.anyInt())).thenReturn(quotaFileStorage);
         PowerMockito.when(quotaFileStorage.getQuota()).thenReturn(maxQuota);
         PowerMockito.when(quotaFileStorage.getUsage()).thenReturn(quotaUsage);
 
