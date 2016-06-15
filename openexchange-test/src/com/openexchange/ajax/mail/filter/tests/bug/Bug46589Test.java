@@ -49,17 +49,22 @@
 
 package com.openexchange.ajax.mail.filter.tests.bug;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
- * {@link Bug46589Test}
+ * {@link Bug46589Test}. Tests for Bug 46589 - [L3] inserting a mailfilter with position 0 and an empty list fails with BAD_POSITION Exception
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -75,12 +80,10 @@ public class Bug46589Test extends AbstractMailFilterTest {
     }
 
     /**
-     * Bug 46589 - [L3] inserting a mailfilter with position 0 and an empty list fails with BAD_POSITION Exception
-     * 
-     * @throws Exception
+     * Insert a single rule in position 0 when list is empty
      */
-    public void testBug46589() throws Exception {
-        /// Create the rule
+    public void testBug46589_0() throws Exception {
+        // Create the rule
         final Rule expected;
         {
             expected = new Rule();
@@ -97,5 +100,50 @@ public class Bug46589Test extends AbstractMailFilterTest {
 
         // Assert
         getAndAssert(Collections.singletonList(expected));
+    }
+
+    /**
+     * Insert multiple rules in positions when list is filled
+     */
+    public void testBug46589_1() throws Exception {
+        // Create 5 rules and insert them
+        LinkedList<Rule> expectedRules = new LinkedList<>();
+        for (int i = 0; i < 5; i++) {
+            Rule rule = new Rule();
+            rule.setName("testBug46589_1_" + i);
+            rule.setActive(true);
+            rule.setActionCommands(new Action[] { new Keep(), new Stop() });
+            rule.setTest(new TrueTest());
+
+            int id = mailFilterAPI.createRule(rule);
+            rule.setId(id);
+            rule.setPosition(i);
+            expectedRules.add(rule);
+        }
+
+        // Insert a rule in position 3
+        Rule rule = new Rule();
+        rule.setName("testBug46589_1_" + 5);
+        rule.setActive(true);
+        rule.setPosition(3);
+        rule.setActionCommands(new Action[] { new Keep(), new Stop() });
+        rule.setTest(new TrueTest());
+
+        int id = mailFilterAPI.createRule(rule);
+        rule.setId(id);
+        rule.setPosition(3);
+
+        // Adjust the expected rules
+        List<Rule> finalRules = new ArrayList<>(expectedRules.size() + 1);
+        Collections.addAll(finalRules, expectedRules.subList(0, 3).toArray(new Rule[3]));
+        finalRules.add(rule);
+        for (int index = 3; index < expectedRules.size(); index++) {
+            Rule r = expectedRules.get(index);
+            r.setPosition(index + 1);
+            finalRules.add(r);
+        }
+
+        // Assert
+        getAndAssert(finalRules);
     }
 }
