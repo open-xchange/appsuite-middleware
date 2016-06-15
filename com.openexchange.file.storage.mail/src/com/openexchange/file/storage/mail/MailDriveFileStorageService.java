@@ -133,7 +133,7 @@ public final class MailDriveFileStorageService implements AccountAware, RootFold
     @Override
     public List<FileStoragePermission> getRootFolderPermissions(String accountId, Session session) throws OXException {
         if (!MailDriveConstants.ACCOUNT_ID.equals(accountId)) {
-            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, MailDriveConstants.ID);
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, MailDriveConstants.ID, session.getUserId(), session.getContextId());
         }
         DefaultFileStoragePermission p = DefaultFileStoragePermission.newInstance();
         p.setEntity(session.getUserId());

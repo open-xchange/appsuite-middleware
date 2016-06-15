@@ -61,7 +61,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -426,7 +425,6 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             // Fetch messages
                             imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
-                            Locale locale = session.getUser().getLocale();
                             int i = 0;
                             for (int k = messages.length; k-- > 0;) {
                                 IMAPMessage message = (IMAPMessage) messages[i++];
@@ -470,7 +468,6 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                         // Fetch messages
                         imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
-                        Locale locale = session.getUser().getLocale();
                         int i = 0;
                         for (int k = messages.length; k-- > 0;) {
                             IMAPMessage message = (IMAPMessage) messages[i++];

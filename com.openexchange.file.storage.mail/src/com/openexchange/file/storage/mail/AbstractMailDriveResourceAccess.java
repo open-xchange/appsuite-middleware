@@ -53,7 +53,6 @@ import java.util.Locale;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPMessageStorage;
@@ -77,9 +76,6 @@ import com.sun.mail.imap.IMAPStore;
  * @since v7.8.2
  */
 public abstract class AbstractMailDriveResourceAccess {
-
-    /** The constant for full name of an account's root folder. */
-    private static final String ROOT_FULLNAME = FileStorageFolder.ROOT_FULLNAME;
 
     /** The associated session */
     protected final Session session;
