@@ -498,7 +498,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             oxcox.delete(ctx);
-            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), cache);
+            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), ClientAdminThread.cache);
             basicAuthenticator.removeFromAuthCache(ctx);
         } catch (final StorageException e) {
             LOGGER.error("", e);
