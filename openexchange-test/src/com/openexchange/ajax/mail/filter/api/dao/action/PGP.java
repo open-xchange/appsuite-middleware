@@ -84,8 +84,7 @@ public class PGP extends AbstractAction implements Action<PGPActionArgument> {
      */
     @Override
     public ActionCommand getActionCommand() {
-        // TODO Auto-generated method stub
-        return null;
+        return ActionCommand.pgp;
     }
 
     /*

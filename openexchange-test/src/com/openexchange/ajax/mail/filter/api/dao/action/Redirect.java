@@ -75,8 +75,7 @@ public class Redirect extends AbstractAction implements Action<RedirectActionArg
      */
     @Override
     public ActionCommand getActionCommand() {
-        // TODO Auto-generated method stub
-        return null;
+        return ActionCommand.redirect;
     }
 
     /*
