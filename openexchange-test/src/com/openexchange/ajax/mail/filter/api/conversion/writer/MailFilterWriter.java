@@ -89,6 +89,10 @@ public class MailFilterWriter extends DataWriter {
         if (rule.getId() >= 0) {
             writeParameter(RuleFields.ID, rule.getId(), jsonObject);
         }
+        
+        if (rule.getPosition() >=0) {
+            writeParameter("position", rule.getPosition(), jsonObject);
+        }
 
         writeParameter(RuleFields.RULENAME, rule.getName(), jsonObject);
         writeParameter(RuleFields.ACTIVE, rule.isActive(), jsonObject);

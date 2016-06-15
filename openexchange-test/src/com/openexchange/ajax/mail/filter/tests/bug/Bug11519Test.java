@@ -102,6 +102,7 @@ public class Bug11519Test extends AbstractMailFilterTest {
         // Insert
         int id = mailFilterAPI.createRule(expectedRule);
         expectedRule.setId(id);
+        expectedRule.setPosition(0);
 
         // Assert
         getAndAssert(Collections.singletonList(expectedRule));

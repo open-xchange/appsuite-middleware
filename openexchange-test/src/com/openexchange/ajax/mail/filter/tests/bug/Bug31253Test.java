@@ -111,6 +111,7 @@ public class Bug31253Test extends AbstractMailFilterTest {
         rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "31253" }));
         final int id = mailFilterAPI.createRule(rule);
         rule.setId(id);
+        rule.setPosition(0);
 
         List<Rule> rules = mailFilterAPI.listRules();
         assertEquals("One rule was expected", 1, rules.size());

@@ -107,6 +107,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
 
         final int id = mailFilterAPI.createRule(rule);
         rule.setId(id);
+        rule.setPosition(0);
 
         List<Rule> rules = mailFilterAPI.listRules();
         assertEquals("One rule was expected", 1, rules.size());

@@ -96,6 +96,7 @@ public class VacationTest extends AbstractMailFilterTest {
 
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);
+            expected.setPosition(0);
         }
 
         getAndAssert(Collections.singletonList(expected));
@@ -118,6 +119,7 @@ public class VacationTest extends AbstractMailFilterTest {
 
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);
+            expected.setPosition(0);
         }
 
         getAndAssert(Collections.singletonList(expected));
@@ -140,6 +142,7 @@ public class VacationTest extends AbstractMailFilterTest {
 
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);
+            expected.setPosition(0);
         }
 
         getAndAssert(Collections.singletonList(expected));
@@ -162,6 +165,7 @@ public class VacationTest extends AbstractMailFilterTest {
 
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);
+            expected.setPosition(0);
         }
 
         getAndAssert(Collections.singletonList(expected));
@@ -186,6 +190,7 @@ public class VacationTest extends AbstractMailFilterTest {
 
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);
+            expected.setPosition(0);
         }
 
         getAndAssert(Collections.singletonList(expected));
@@ -210,6 +215,7 @@ public class VacationTest extends AbstractMailFilterTest {
 
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);
+            expected.setPosition(0);
         }
 
         getAndAssert(Collections.singletonList(expected));

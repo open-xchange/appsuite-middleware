@@ -45,6 +45,7 @@ public class UpdateTest extends AbstractMailFilterTest {
 
         // Update the rule
         mailFilterAPI.updateRule(rule);
+        rule.setPosition(0);
 
         // Assert
         getAndAssert(Collections.singletonList(rule));
@@ -57,6 +58,7 @@ public class UpdateTest extends AbstractMailFilterTest {
         // update condition
         rule.setTest(new HeaderTest(new ContainsComparison(), new String[] { "updatedHeader" }, new String[] { "updatedValue" }));
         mailFilterAPI.updateRule(rule);
+        rule.setPosition(0);
 
         // assert
         getAndAssert(Collections.singletonList(rule));
@@ -73,6 +75,7 @@ public class UpdateTest extends AbstractMailFilterTest {
         // Add new action command
         actions[actioncmds.length] = new Stop();
         rule.setActionCommands(actions);
+        rule.setPosition(0);
 
         // Update
         mailFilterAPI.updateRule(rule);
@@ -90,6 +93,7 @@ public class UpdateTest extends AbstractMailFilterTest {
 
         // Update
         mailFilterAPI.updateRule(rule);
+        rule.setPosition(0);
 
         // Assert
         getAndAssert(Collections.singletonList(rule));

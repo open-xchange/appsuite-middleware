@@ -76,7 +76,7 @@ public class Rule {
 
     public static final int TEXT = 1207;
 
-    protected int position = 0;
+    protected int position = -1;
 
     protected int id = -1;
 
