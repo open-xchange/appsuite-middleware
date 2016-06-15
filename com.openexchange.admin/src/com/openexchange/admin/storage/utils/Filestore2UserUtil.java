@@ -429,7 +429,7 @@ public class Filestore2UserUtil {
         Connection con = null;
         boolean rollback = false;
         try {
-            con = cache.getWriteConnectionForConfigDB();
+            con = cache.getConnectionForConfigDB();
             if (false == tableExists(con, "filestore2user")) {
                 LOG.warn("Table \"filestore2user\" does not exist.");
                 return;
@@ -463,7 +463,7 @@ public class Filestore2UserUtil {
                 }
                 Databases.autocommit(con);
                 try {
-                    cache.pushWriteConnectionForConfigDB(con);
+                    cache.pushConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Pooling error", e);
                 }
@@ -540,7 +540,7 @@ public class Filestore2UserUtil {
         Connection con = null;
         boolean rollback = false;
         try {
-            con = adminCache.getWriteConnectionForConfigDB();
+            con = adminCache.getConnectionForConfigDB();
             if (false == tableExists(con, "filestore2user")) {
                 LOG.warn("Table \"filestore2user\" does not exist.");
                 return;
@@ -578,7 +578,7 @@ public class Filestore2UserUtil {
                 }
                 Databases.autocommit(con);
                 try {
-                    adminCache.pushWriteConnectionForConfigDB(con);
+                    adminCache.pushConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Pooling error", e);
                 }
