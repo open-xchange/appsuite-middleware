@@ -53,6 +53,7 @@ import java.util.Collections;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.CurrentDateTest;
@@ -95,9 +96,8 @@ public class Bug11519Test extends AbstractMailFilterTest {
         expectedRule.setTest(allOf);
 
         // Add action
-        Action<?>[] actions = new Action[1];
-        actions[0] = new Vacation(7, Collections.singletonList("some.address@domain.tld"), null, "I'm out of office");
-        expectedRule.setActionCommands(actions);
+        Vacation vacation = new Vacation(7, Collections.singletonList("some.address@domain.tld"), null, "I'm out of office");
+        expectedRule.setActions(Collections.<Action<? extends ActionArgument>> singletonList(vacation));
 
         // Insert
         int id = mailFilterAPI.createRule(expectedRule);

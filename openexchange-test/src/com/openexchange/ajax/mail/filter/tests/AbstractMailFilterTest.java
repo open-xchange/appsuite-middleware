@@ -112,6 +112,7 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.test.AjaxInit;
@@ -244,7 +245,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         assertEquals("The 'position' attribute differs", expected.getPosition(), actual.getPosition());
 
         assertArrayEquals("The 'flags' differ", expected.getFlags(), actual.getFlags());
-        assertActions(expected.getActionCommands(), actual.getActionCommands());
+        assertActions(expected.getActions(), actual.getActions());
         assertTest(expected.getTest(), actual.getTest());
     }
 
@@ -255,10 +256,10 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
      * @param actual the actual {@link Action}
      */
     // TODO Complete assertions
-    private void assertActions(Action<?>[] expected, Action<?>[] actual) {
-        assertEquals("The size differs", expected.length, actual.length);
-        for (int index = 0; index < expected.length; index++) {
-            assertEquals("The 'actionCommand' differs", expected[index].getActionCommand(), actual[index].getActionCommand());
+    private void assertActions(List<Action<? extends ActionArgument>> expected, List<Action<? extends ActionArgument>> actual) {
+        assertEquals("The size differs", expected.size(), actual.size());
+        for (int index = 0; index < expected.size(); index++) {
+            assertEquals("The 'actionCommand' differs", expected.get(index).getActionCommand(), actual.get(index).getActionCommand());
         }
     }
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.parser;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +62,7 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.fields.RuleFields;
 import com.openexchange.ajax.parser.DataParser;
@@ -141,7 +144,7 @@ public class MailFilterParser extends DataParser {
      * @throws JSONException if a JSON parsing error occurs
      */
     private void parseActionCommand(final JSONArray jsonActionArray, final Rule rule) throws JSONException {
-        Action[] actionArray = new Action[jsonActionArray.length()];
+        List<Action<? extends ActionArgument>> actionList = new ArrayList<>(jsonActionArray.length());
         for (int a = 0; a < jsonActionArray.length(); a++) {
             JSONObject actionCommandObject = jsonActionArray.getJSONObject(a);
 
@@ -149,10 +152,10 @@ public class MailFilterParser extends DataParser {
             ActionCommand actionCommand = ActionCommand.valueOf(actionId);
 
             ActionParser actionParser = ActionParserFactory.getWriter(actionCommand);
-            actionArray[a] = actionParser.parse(actionCommandObject);
+            actionList.add(actionParser.parse(actionCommandObject));
         }
 
-        rule.setActionCommands(actionArray);
+        rule.setActions(actionList);
     }
 
     /**

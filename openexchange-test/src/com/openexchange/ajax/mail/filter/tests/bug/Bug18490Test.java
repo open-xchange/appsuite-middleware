@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.tests.bug;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -63,6 +64,7 @@ import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Move;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
@@ -100,7 +102,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
         final Rule rule = new Rule();
         rule.setName("Bug18490 test rule");
         rule.setActive(true);
-        rule.setActionCommands(new Action[] { new Move(folder.getFullName()) });
+        rule.setActions(Collections.<Action<? extends ActionArgument>> singletonList(new Move(folder.getFullName())));
 
         final ContainsComparison conComp = new ContainsComparison();
         rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug18490" }));

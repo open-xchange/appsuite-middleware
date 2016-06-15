@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.mail.filter.api.dao;
 
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 
 /**
@@ -88,14 +91,14 @@ public class Rule {
 
     protected AbstractTest test = null;
 
-    protected Action<?>[] actioncmds = new Action[0];
+    protected List<Action<? extends ActionArgument>> actions;
 
     protected String rawData = null;
 
     protected String errormsg = null;
 
     public Rule() {
-
+        actions = Collections.emptyList();
     }
 
     public int getPosition() {
@@ -146,12 +149,12 @@ public class Rule {
         this.test = test;
     }
 
-    public Action<?>[] getActionCommands() {
-        return actioncmds;
+    public List<Action<? extends ActionArgument>> getActions() {
+        return actions;
     }
 
-    public void setActionCommands(Action<?>[] actioncmds) {
-        this.actioncmds = actioncmds;
+    public void setActions(List<Action<? extends ActionArgument>> actions) {
+        this.actions = actions;
     }
 
     public String getRawData() {

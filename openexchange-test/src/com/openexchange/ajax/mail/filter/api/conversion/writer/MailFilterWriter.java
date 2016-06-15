@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer;
 
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,6 +60,7 @@ import com.openexchange.ajax.mail.filter.api.conversion.writer.test.TestWriterFa
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.fields.RuleFields;
 import com.openexchange.ajax.writer.DataWriter;
@@ -102,7 +104,7 @@ public class MailFilterWriter extends DataWriter {
             jsonObject.put(RuleFields.FLAGS, flagsArray);
         }
 
-        final JSONArray actionCommandsArray = getActionCommandsAsJSON(rule.getActionCommands());
+        final JSONArray actionCommandsArray = getActionCommandsAsJSON(rule.getActions());
         if (actionCommandsArray != null && !actionCommandsArray.isEmpty()) {
             jsonObject.put(RuleFields.ACTIONCMDS, actionCommandsArray);
         }
@@ -140,18 +142,18 @@ public class MailFilterWriter extends DataWriter {
      * @return A {@link JSONArray} with the {@link Action}s as {@link JSONObject}s; or an empty array
      * @throws JSONException if a JSON error occurs
      */
-    private JSONArray getActionCommandsAsJSON(Action[] actions) throws JSONException {
+    private JSONArray getActionCommandsAsJSON(List<Action<? extends ActionArgument>> actions) throws JSONException {
         if (actions == null) {
             return new JSONArray();
         }
 
         final JSONArray jsonArray = new JSONArray();
 
-        for (Action action : actions) {
+        for (Action<? extends ActionArgument> action : actions) {
             final String name = action.getActionCommand().name();
             ActionCommand actionCommand = ActionCommand.valueOf(name);
             final ActionWriter actionWriter = ActionWriterFactory.getWriter(actionCommand);
-            final JSONObject jsonCommandObj = actionWriter.write(action, new JSONObject()); //FIXME: Don't use the JSONObject as a parameter, the method has to create it's own object
+            final JSONObject jsonCommandObj = actionWriter.write((Action<ActionArgument>) action, new JSONObject()); //FIXME: Don't use the JSONObject as a parameter, the method has to create it's own object
             jsonArray.put(jsonCommandObj);
         }
 
