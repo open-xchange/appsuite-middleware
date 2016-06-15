@@ -98,8 +98,7 @@ public class NewTest extends AbstractMailFilterTest {
             expected = new Rule();
             expected.setName("testNew");
             expected.setActionCommands(new Action[] { new Stop() });
-            final Comparison isComp = new IsComparison();
-            expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
+            expected.setTest(new HeaderTest(new IsComparison(), new String[] { "testheader" }, new String[] { "testvalue" }));
 
             int id = mailFilterAPI.createRule(expected);
             expected.setId(id);
