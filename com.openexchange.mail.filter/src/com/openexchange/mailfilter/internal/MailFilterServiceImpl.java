@@ -834,25 +834,25 @@ public final class MailFilterServiceImpl implements MailFilterService {
      *
      * @param rule the rule to add
      * @param rules the rules list
-     * @param clientrulesandrequire
+     * @param clientRulesAndRequire
      * @return the UID of rule and hence the position
      * @throws OXException
      */
-    private int insertIntoPosition(Rule rule, RuleListAndNextUid rules, ClientRulesAndRequire clientrulesandrequire) throws OXException {
+    private int insertIntoPosition(Rule rule, RuleListAndNextUid rules, ClientRulesAndRequire clientRulesAndRequire) throws OXException {
         int position = rule.getPosition();
-        List<Rule> clientrules = clientrulesandrequire.getRules();
-        if (position >= clientrules.size()) {
+        List<Rule> clientRules = clientRulesAndRequire.getRules();
+        if (position > clientRules.size()) {
             throw MailFilterExceptionCode.BAD_POSITION.create(Integer.valueOf(position));
         }
-        int nextuid = rules.getNextuid();
-        setUIDInRule(rule, nextuid);
+        int nextUid = rules.getNextuid();
+        setUIDInRule(rule, nextUid);
         if (position != -1) {
-            clientrules.add(position, rule);
+            clientRules.add(position, rule);
         } else {
-            clientrules.add(rule);
-            position = clientrules.size() - 1;
+            clientRules.add(rule);
+            position = clientRules.size() - 1;
         }
-        return nextuid;
+        return nextUid;
     }
 
     private static final class Key {
