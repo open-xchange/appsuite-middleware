@@ -88,7 +88,7 @@ public class Rule {
 
     protected AbstractTest test = null;
 
-    protected Action[] actioncmds = new Action[0];
+    protected Action<?>[] actioncmds = new Action[0];
 
     protected String rawData = null;
 
@@ -146,11 +146,11 @@ public class Rule {
         this.test = test;
     }
 
-    public Action[] getActionCommands() {
+    public Action<?>[] getActionCommands() {
         return actioncmds;
     }
 
-    public void setActionCommands(Action[] actioncmds) {
+    public void setActionCommands(Action<?>[] actioncmds) {
         this.actioncmds = actioncmds;
     }
 
