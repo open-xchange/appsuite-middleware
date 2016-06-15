@@ -255,7 +255,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
      * @param actual the actual {@link Action}
      */
     // TODO Complete assertions
-    private void assertActions(Action[] expected, Action[] actual) {
+    private void assertActions(Action<?>[] expected, Action<?>[] actual) {
         assertEquals("The size differs", expected.length, actual.length);
         for (int index = 0; index < expected.length; index++) {
             assertEquals("The 'actionCommand' differs", expected[index].getActionCommand(), actual[index].getActionCommand());

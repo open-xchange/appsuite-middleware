@@ -95,7 +95,7 @@ public class Bug11519Test extends AbstractMailFilterTest {
         expectedRule.setTest(allOf);
 
         // Add action
-        Action[] actions = new Action[1];
+        Action<?>[] actions = new Action[1];
         actions[0] = new Vacation(7, Collections.singletonList("some.address@domain.tld"), null, "I'm out of office");
         expectedRule.setActionCommands(actions);
 

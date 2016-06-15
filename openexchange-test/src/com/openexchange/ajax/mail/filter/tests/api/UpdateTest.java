@@ -68,8 +68,8 @@ public class UpdateTest extends AbstractMailFilterTest {
      * Test add an action
      */
     public void testUpdateAddActionCommand() throws Exception {
-        Action[] actioncmds = rule.getActionCommands();
-        Action[] actions = new Action[actioncmds.length + 1];
+        Action<?>[] actioncmds = rule.getActionCommands();
+        Action<?>[] actions = new Action[actioncmds.length + 1];
         // Retain already existing action commands
         System.arraycopy(actioncmds, 0, actions, 0, actioncmds.length);
         // Add new action command
