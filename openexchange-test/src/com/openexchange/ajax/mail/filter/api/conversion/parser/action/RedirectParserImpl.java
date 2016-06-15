@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Redirect;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.RedirectActionArgument;
 
 /**
  * {@link RedirectParserImpl}
@@ -75,8 +76,8 @@ public class RedirectParserImpl implements ActionParser {
      * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @Override
-    public Action parse(JSONObject jsonObject) throws JSONException {
-        String to = jsonObject.getString("to");
+    public Action<RedirectActionArgument> parse(JSONObject jsonObject) throws JSONException {
+        String to = jsonObject.getString(RedirectActionArgument.to.name());
         return new Redirect(to);
     }
 }

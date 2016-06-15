@@ -47,49 +47,13 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.conversion.writer;
-
-import java.util.Map;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONValue;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterDataObject;
-import com.openexchange.ajax.tools.JSONCoercion;
+package com.openexchange.ajax.mail.filter.api.dao.comparison.argument;
 
 /**
- * {@link AbstractJSONWriter}
+ * {@link CommonComparisonArgument}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractJSONWriter {
-
-    /**
-     * Initialises a new {@link AbstractJSONWriter}.
-     */
-    public AbstractJSONWriter() {
-        super();
-    }
-
-    /**
-     * Writes the specified {@link MailFilterDataObject} to the specified {@link JSONObject}
-     * and coerces to {@link JSONValue}s all arguments of the {@link MailFilterDataObject} that
-     * need coercion.
-     * 
-     * @param type The {@link MailFilterDataObject} type
-     * @param jsonObject The {@link JSONObject} to write to
-     * @return The newly written {@link JSONObject}
-     * @throws JSONException if a JSON parsing error occurs
-     */
-    public JSONObject write(MailFilterDataObject type, JSONObject jsonObject) throws JSONException {
-        Map<String, Object> arguments = type.getArguments();
-        for (String key : arguments.keySet()) {
-            Object value = arguments.get(key);
-            if (JSONCoercion.needsJSONCoercion(value)) {
-                JSONValue jsonValue = (JSONValue) JSONCoercion.coerceToJSON(value);
-                value = jsonValue;
-            }
-            jsonObject.put(key, value);
-        }
-        return jsonObject;
-    }
+public enum CommonComparisonArgument implements ComparisonArgument {
+    comparison;
 }

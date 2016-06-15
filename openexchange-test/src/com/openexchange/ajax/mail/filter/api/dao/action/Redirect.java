@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.RedirectActionArgument;
 
 /**
  * {@link Redirect}
@@ -57,15 +58,44 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Redirect extends AbstractAction {
+public class Redirect extends AbstractAction implements Action<RedirectActionArgument> {
 
     /**
      * Initialises a new {@link Redirect}.
      */
     public Redirect(String email) {
         super(ActionCommand.redirect);
-        addArgument("to", email);
+        addArgument(RedirectActionArgument.to, email);
     }
 
-    //TODO: add methods for setting/getting the redirect e-mail address
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
+     */
+    @Override
+    public ActionCommand getActionCommand() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
+     */
+    @Override
+    public void setArgument(RedirectActionArgument argument, Object value) {
+        addArgument(argument, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
+     */
+    @Override
+    public Object getArgument(RedirectActionArgument argument) {
+        return getArguments().get(argument);
+    }
 }

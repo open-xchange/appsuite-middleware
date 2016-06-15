@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.ajax.mail.filter.api.dao.AbstractMailFilterDataObject;
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.CommonActionArgument;
 
 /**
  * 
@@ -61,46 +61,13 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractAction implements Action {
-
-    private Map<String, Object> arguments;
+abstract class AbstractAction extends AbstractMailFilterDataObject<ActionArgument> {
 
     /**
      * Initialises a new {@link AbstractAction}.
      */
     public AbstractAction(ActionCommand actionCommand) {
         super();
-        arguments = new HashMap<>(2);
-        arguments.put("id", actionCommand.name());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getAction()
-     */
-    @Override
-    public ActionCommand getActionCommand() {
-        return ActionCommand.valueOf((String) arguments.get("id"));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.DataObject#getArguments()
-     */
-    @Override
-    public Map<String, Object> getArguments() {
-        return Collections.unmodifiableMap(arguments);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.DataObject#addArgument(java.lang.String, java.lang.Object)
-     */
-    @Override
-    public void addArgument(String argument, Object value) {
-        arguments.put(argument, value);
+        addArgument(CommonActionArgument.id, actionCommand.name());
     }
 }

@@ -49,17 +49,21 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.conversion.writer.AbstractJSONWriter;
+import org.json.JSONValue;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.CommonActionArgument;
+import com.openexchange.ajax.tools.JSONCoercion;
 
 /**
  * {@link AbstractActionWriterImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractActionWriterImpl extends AbstractJSONWriter implements ActionWriter {
+abstract class AbstractActionWriterImpl<A extends ActionArgument> implements ActionWriter {
 
     /**
      * Initialises a new {@link AbstractActionWriterImpl}.
@@ -68,14 +72,17 @@ abstract class AbstractActionWriterImpl extends AbstractJSONWriter implements Ac
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.AbstractJSONWriter#write(com.openexchange.ajax.mail.filter.api.dao.DataObject, org.json.JSONObject)
-     */
-    @Override
-    public JSONObject write(Action type, JSONObject jsonObject) throws JSONException {
-        jsonObject.put("id", type.getActionCommand().name());
-        return super.write(type, jsonObject);
+    JSONObject write(Action<ActionArgument> type, Set<A> arguments, JSONObject jsonObject) throws JSONException {
+        jsonObject.put(CommonActionArgument.id.name(), type.getActionCommand().name());
+
+        for (A argument : arguments) {
+            Object value = type.getArgument(argument);
+            if (JSONCoercion.needsJSONCoercion(value)) {
+                JSONValue jsonValue = (JSONValue) JSONCoercion.coerceToJSON(value);
+                value = jsonValue;
+            }
+            jsonObject.put(argument.toString(), value);
+        }
+        return jsonObject;
     }
 }

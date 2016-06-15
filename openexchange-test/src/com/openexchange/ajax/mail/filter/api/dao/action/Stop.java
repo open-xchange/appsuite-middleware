@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.StopActionArgument;
 
 /**
  * {@link Stop}
@@ -57,12 +58,42 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Stop extends AbstractAction {
+public class Stop extends AbstractAction implements Action<StopActionArgument> {
 
     /**
      * Initialises a new {@link Stop}.
      */
     public Stop() {
         super(ActionCommand.stop);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
+     */
+    @SuppressWarnings("unused")
+    public void setArgument(StopActionArgument argument, Object value) {
+        throw new UnsupportedOperationException("The '" + ActionCommand.stop + "' action can not have any arguments");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
+     */
+    @SuppressWarnings("unused")
+    public Object getArgument(StopActionArgument argument) {
+        throw new UnsupportedOperationException("The '" + ActionCommand.stop + "' action does not have any arguments");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
+     */
+    @Override
+    public ActionCommand getActionCommand() {
+        return ActionCommand.stop;
     }
 }

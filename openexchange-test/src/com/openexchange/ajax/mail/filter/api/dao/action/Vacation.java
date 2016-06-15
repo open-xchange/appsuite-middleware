@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.VacationActionArgument;
 
 /**
  * {@link Vacation}
@@ -58,7 +59,7 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Vacation extends AbstractAction {
+public class Vacation extends AbstractAction implements Action<VacationActionArgument> {
 
     /**
      * Initialises a new {@link Vacation}.
@@ -69,12 +70,39 @@ public class Vacation extends AbstractAction {
 
     public Vacation(int days, List<String> addresses, String subject, String text) {
         this();
-        addArgument("days", days);
-        addArgument("addresses", addresses);
-        addArgument("subject", subject);
-        addArgument("text", text);
+        addArgument(VacationActionArgument.days, days);
+        addArgument(VacationActionArgument.addresses, addresses);
+        addArgument(VacationActionArgument.subject, subject);
+        addArgument(VacationActionArgument.text, text);
     }
 
-    //TODO: add methods for setting/getting the addresses, subject, days and text
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
+     */
+    @Override
+    public ActionCommand getActionCommand() {
+        return ActionCommand.vacation;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
+     */
+    @Override
+    public void setArgument(VacationActionArgument argument, Object value) {
+        addArgument(argument, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
+     */
+    @Override
+    public Object getArgument(VacationActionArgument argument) {
+        return getArguments().get(argument);
+    }
 }

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.DiscardActionArgument;
 
 /**
  * {@link Discard}
@@ -57,12 +58,44 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Discard extends AbstractAction {
+public class Discard extends AbstractAction implements Action<DiscardActionArgument> {
 
     /**
      * Initialises a new {@link Discard}.
      */
     public Discard() {
         super(ActionCommand.discard);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
+     */
+    @Override
+    public ActionCommand getActionCommand() {
+        return ActionCommand.discard;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
+     */
+    @SuppressWarnings("unused")
+    @Override
+    public void setArgument(DiscardActionArgument argument, Object value) {
+        throw new UnsupportedOperationException("The '" + ActionCommand.discard + "' action can not have any arguments");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
+     */
+    @SuppressWarnings("unused")
+    @Override
+    public Object getArgument(DiscardActionArgument argument) {
+        throw new UnsupportedOperationException("The '" + ActionCommand.discard + "' action does not have any arguments");
     }
 }

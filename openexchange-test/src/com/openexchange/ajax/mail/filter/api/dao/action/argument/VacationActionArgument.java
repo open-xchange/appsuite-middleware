@@ -47,29 +47,16 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao;
-
-import java.util.Map;
+package com.openexchange.ajax.mail.filter.api.dao.action.argument;
 
 /**
- * {@link MailFilterDataObject}. Defines the elements of a mail filter data object
+ * {@link VacationActionArgument}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailFilterDataObject {
-
-    /**
-     * Adds an argument to this {@link MatchType}
-     * 
-     * @param argument The {@link Argument} to add
-     * @param value The value of the {@link Argument}
-     */
-    void addArgument(String argument, Object value);
-
-    /**
-     * Returns an unmodifiable map of {@link Argument}s
-     * 
-     * @return an unmodifiable map of {@link Argument}s
-     */
-    Map<String, Object> getArguments();
+public enum VacationActionArgument implements ActionArgument {
+    days,
+    addresses,
+    subject,
+    text;
 }

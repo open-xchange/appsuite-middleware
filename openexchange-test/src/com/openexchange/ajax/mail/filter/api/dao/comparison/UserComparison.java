@@ -50,18 +50,51 @@
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.UserComparisonArgument;
 
 /**
  * {@link UserComparison}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class UserComparison extends AbstractComparison {
+public class UserComparison extends AbstractComparison implements Comparison<UserComparisonArgument> {
 
     /**
-     * Initialises a new {@link UserComparison}.
+     * Initialises a new {@link RegexComparison}.
      */
     public UserComparison() {
         super(MatchType.user);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getMatchType()
+     */
+    @Override
+    public MatchType getMatchType() {
+        return MatchType.user;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#setArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument, java.lang.Object)
+     */
+    @SuppressWarnings("unused")
+    @Override
+    public void setArgument(UserComparisonArgument argument, Object value) {
+        throw new UnsupportedOperationException("The '" + MatchType.user + "' comparison type can not have any arguments");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument)
+     */
+    @SuppressWarnings("unused")
+    @Override
+    public Object getArgument(UserComparisonArgument argument) {
+        throw new UnsupportedOperationException("The '" + MatchType.user + "' comparison type does not have any arguments");
     }
 }

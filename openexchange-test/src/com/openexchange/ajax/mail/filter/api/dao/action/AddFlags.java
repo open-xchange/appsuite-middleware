@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.AddFlagsActionArgument;
 
 /**
  * {@link AddFlags}
@@ -57,7 +58,7 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AddFlags extends AbstractAction {
+public class AddFlags extends AbstractAction implements Action<AddFlagsActionArgument> {
 
     /**
      * Initialises a new {@link AddFlags}.
@@ -65,6 +66,34 @@ public class AddFlags extends AbstractAction {
     public AddFlags() {
         super(ActionCommand.addflags);
     }
-    
-    //TODO: add methods for setting/getting flags
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.ActionArgument)
+     */
+    @Override
+    public Object getArgument(AddFlagsActionArgument argument) {
+        return getArguments().get(argument);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.ActionArgument, java.lang.Object)
+     */
+    @Override
+    public void setArgument(AddFlagsActionArgument argument, Object value) {
+        addArgument(argument, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
+     */
+    @Override
+    public ActionCommand getActionCommand() {
+        return ActionCommand.addflags;
+    }
 }

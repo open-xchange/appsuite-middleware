@@ -59,6 +59,7 @@ import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.IsComparisonArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
@@ -91,7 +92,7 @@ public class Bug46589Test extends AbstractMailFilterTest {
             expected.setActive(true);
             expected.setName("testNew");
             expected.setActionCommands(new Action[] { new Stop() });
-            final Comparison isComp = new IsComparison();
+            final Comparison<IsComparisonArgument> isComp = new IsComparison();
             expected.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
             int id = mailFilterAPI.createRule(expected);

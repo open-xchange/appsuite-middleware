@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.OverComparisonArgument;
 
 /**
  * {@link OverComparison}
@@ -57,7 +58,7 @@ import com.openexchange.ajax.mail.filter.api.dao.MatchType;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OverComparison extends AbstractComparison {
+public class OverComparison extends AbstractComparison implements Comparison<OverComparisonArgument> {
 
     /**
      * Initialises a new {@link OverComparison}.
@@ -66,6 +67,36 @@ public class OverComparison extends AbstractComparison {
      */
     public OverComparison(int size) {
         super(MatchType.over);
-        addArgument("size", size);
+        addArgument(OverComparisonArgument.size, size);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getMatchType()
+     */
+    @Override
+    public MatchType getMatchType() {
+        return MatchType.over;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#setArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument, java.lang.Object)
+     */
+    @Override
+    public void setArgument(OverComparisonArgument argument, Object value) {
+        addArgument(argument, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument)
+     */
+    @Override
+    public Object getArgument(OverComparisonArgument argument) {
+        return getArguments().get(argument);
     }
 }

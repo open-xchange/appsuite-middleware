@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Discard;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.DiscardActionArgument;
 
 /**
  * {@link DiscardParserImpl}
@@ -60,8 +61,7 @@ import com.openexchange.ajax.mail.filter.api.dao.action.Discard;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DiscardParserImpl implements ActionParser {
-    
-    
+
     /**
      * Initialises a new {@link DiscardParserImpl}.
      */
@@ -69,12 +69,14 @@ public class DiscardParserImpl implements ActionParser {
         super();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @SuppressWarnings("unused")
     @Override
-    public Action parse(JSONObject jsonObject) throws JSONException {
+    public Action<DiscardActionArgument> parse(JSONObject jsonObject) throws JSONException {
         return new Discard();
     }
 

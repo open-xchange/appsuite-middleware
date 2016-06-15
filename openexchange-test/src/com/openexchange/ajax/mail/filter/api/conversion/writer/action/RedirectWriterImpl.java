@@ -49,18 +49,35 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
+import java.util.EnumSet;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.RedirectActionArgument;
+
 /**
  * {@link RedirectWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RedirectWriterImpl extends AbstractActionWriterImpl {
+public class RedirectWriterImpl extends AbstractActionWriterImpl<RedirectActionArgument> implements ActionWriter {
 
     /**
      * Initialises a new {@link RedirectWriterImpl}.
      */
     public RedirectWriterImpl() {
         super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
+    @Override
+    public JSONObject write(Action<ActionArgument> type, JSONObject jsonObject) throws JSONException {
+        return write(type, EnumSet.allOf(RedirectActionArgument.class), jsonObject);
     }
 }

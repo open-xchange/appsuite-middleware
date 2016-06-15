@@ -63,6 +63,7 @@ import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.OverComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.UserComparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.UserComparisonArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AddressTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
@@ -119,7 +120,8 @@ public class NewTest extends AbstractMailFilterTest {
             expected.setName("");
             expected.setActionCommands(new Action[] { new Move("default.INBOX/Spam"), new Stop() });
 
-            AddressTest userHeaderTest = new AddressTest(new UserComparison(), new String[] { "from" }, new String[] { "zitate.at" });
+            Comparison<UserComparisonArgument> comparison = new UserComparison();
+            AddressTest userHeaderTest = new AddressTest(comparison, new String[] { "from" }, new String[] { "zitate.at" });
             HeaderTest headerTest = new HeaderTest(new ContainsComparison(), new String[] { "subject" }, new String[] { "Zitat des Tages" });
 
             AbstractTest[] tests = new AbstractTest[] { userHeaderTest, headerTest };

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.KeepActionArgument;
 
 /**
  * {@link Keep}
@@ -57,12 +58,42 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Keep extends AbstractAction {
+public class Keep extends AbstractAction implements Action<KeepActionArgument> {
 
     /**
      * Initialises a new {@link Keep}.
      */
     public Keep() {
         super(ActionCommand.keep);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
+     */
+    @Override
+    public ActionCommand getActionCommand() {
+        return ActionCommand.keep;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
+     */
+    @SuppressWarnings("unused")
+    public void setArgument(KeepActionArgument argument, Object value) {
+        throw new UnsupportedOperationException("The '" + ActionCommand.keep + "' action can not have any arguments");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
+     */
+    @SuppressWarnings("unused")
+    public Object getArgument(KeepActionArgument argument) {
+        throw new UnsupportedOperationException("The '" + ActionCommand.keep + "' action does not have any arguments");
     }
 }

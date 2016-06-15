@@ -49,6 +49,13 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.comparison;
 
+import java.util.EnumSet;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ContainsComparisonArgument;
+
 /**
  * 
  * {@link ContainsJSONWriterImpl}
@@ -56,7 +63,7 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer.comparison;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ContainsJSONWriterImpl extends AbstractComparisonJSONWriter {
+public class ContainsJSONWriterImpl extends AbstractComparisonJSONWriter<ContainsComparisonArgument> implements ComparisonWriter {
 
     /**
      * Initialises a new {@link ContainsJSONWriterImpl}.
@@ -64,4 +71,15 @@ public class ContainsJSONWriterImpl extends AbstractComparisonJSONWriter {
     public ContainsJSONWriterImpl() {
         super();
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
+    @Override
+    public JSONObject write(Comparison<ComparisonArgument> type, JSONObject jsonObject) throws JSONException {
+        return write(type, EnumSet.allOf(ContainsComparisonArgument.class), jsonObject);
+    }
+
 }

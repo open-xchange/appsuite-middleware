@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.PGP;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.PGPActionArgument;
 
 /**
  * {@link PGPParserImpl}
@@ -77,8 +78,8 @@ public class PGPParserImpl implements ActionParser {
      * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @Override
-    public Action parse(JSONObject jsonObject) throws JSONException {
-        JSONArray keys = jsonObject.optJSONArray("keys");
+    public Action<PGPActionArgument> parse(JSONObject jsonObject) throws JSONException {
+        JSONArray keys = jsonObject.optJSONArray(PGPActionArgument.keys.name());
 
         PGP pgp = new PGP();
         if (keys != null) {
@@ -87,7 +88,7 @@ public class PGPParserImpl implements ActionParser {
                 String key = keys.getString(index);
                 k.add(key);
             }
-            pgp.addArgument("keys", k);
+            pgp.setArgument(PGPActionArgument.keys, k);
         }
 
         return pgp;

@@ -49,17 +49,34 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
+import java.util.EnumSet;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.VacationActionArgument;
+
 /**
  * MoveParserImpl
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class VacationWriterImpl extends AbstractActionWriterImpl {
+public class VacationWriterImpl extends AbstractActionWriterImpl<VacationActionArgument> implements ActionWriter {
 
     /**
      * Initialises a new {@link VacationWriterImpl}.
      */
     public VacationWriterImpl() {
         super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
+    @Override
+    public JSONObject write(Action<ActionArgument> type, JSONObject jsonObject) throws JSONException {
+        return write(type, EnumSet.allOf(VacationActionArgument.class), jsonObject);
     }
 }
