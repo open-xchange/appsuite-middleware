@@ -53,19 +53,19 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * {@link Test}
+ * {@link TestCondition}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Test {
+public class TestCondition {
 
     private final TestCommand testCommand;
     private final List<MatchType> comparisons;
 
     /**
-     * Initialises a new {@link Test}.
+     * Initialises a new {@link TestCondition}.
      */
-    public Test(TestCommand testCommand, List<MatchType> comparisons) {
+    public TestCondition(TestCommand testCommand, List<MatchType> comparisons) {
         super();
         this.testCommand = testCommand;
         this.comparisons = Collections.unmodifiableList(comparisons);
