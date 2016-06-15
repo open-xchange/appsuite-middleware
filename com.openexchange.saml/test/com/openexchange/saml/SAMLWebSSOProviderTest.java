@@ -894,6 +894,7 @@ public class SAMLWebSSOProviderTest {
                 Collections.<IPRange>emptyList(),
                 true,
                 true,
+                false,
                 false);
         }
 

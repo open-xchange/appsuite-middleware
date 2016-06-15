@@ -60,6 +60,7 @@ import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.file.storage.mail.osgi.Services;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -148,9 +149,17 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
             case ALL:
                 return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_ALL);
             case RECEIVED:
-                return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_RECEIVED);
+                {
+                    StringHelper stringHelper = StringHelper.valueOf(getSessionUserLocale(session));
+                    String translated = stringHelper.getString(MailDriveStrings.NAME_ATTACHMENTS_DEDICATED);
+                    return String.format(translated, stringHelper.getString(MailStrings.INBOX));
+                }
             case SENT:
-                return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_SENT);
+                {
+                    StringHelper stringHelper = StringHelper.valueOf(getSessionUserLocale(session));
+                    String translated = stringHelper.getString(MailDriveStrings.NAME_ATTACHMENTS_DEDICATED);
+                    return String.format(translated, stringHelper.getString(MailStrings.SENT));
+                }
             default:
                 return null;
         }

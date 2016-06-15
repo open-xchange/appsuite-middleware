@@ -97,6 +97,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3343
     ox_add_property com.openexchange.imap.rootSubfoldersAllowed "" $PFILE
+    
+    # SoftwareChange_Request-3345
+    ox_add_property com.openexchange.imap.auditLog.enabled false $PFILE
 fi
 
 %clean

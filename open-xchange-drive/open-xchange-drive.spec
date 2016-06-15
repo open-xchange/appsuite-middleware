@@ -62,6 +62,10 @@ ox_add_property com.openexchange.drive.maxFilesPerDirectory 65535 $PFILE
 ox_add_property com.openexchange.drive.enabledServices com.openexchange.infostore $PFILE
 ox_add_property com.openexchange.drive.excludedFolders '' $PFILE
 
+# SoftwareChange_Request-3244
+ox_add_property com.openexchange.drive.checksum.cleaner.interval 1D $PFILE
+ox_add_property com.openexchange.drive.checksum.cleaner.maxAge 4W $PFILE
+
 ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
 
 %files

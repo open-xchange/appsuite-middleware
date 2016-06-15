@@ -74,13 +74,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @Actions({@Action(method = RequestMethod.PUT, name = "new", description = "Create an infoitem via PUT", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included.",
-responseDescription = "FolderID/ObjectID of the newly created infoitem."),
-@Action(method = RequestMethod.POST, name = "new", description = "Create an infoitem via POST", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included."),
-    @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")
-}, requestBody = "Body of content-type \"multipart/form-data\" or \"multipart/mixed\" containing the above mentioned fields and file-data.",
-responseDescription = "FolderID/ObjectID of the newly created infoitem. The response is sent as a HTML document (see introduction).")})
+    responseDescription = "FolderID/ObjectID of the newly created infoitem."),
+    @Action(method = RequestMethod.POST, name = "new", description = "Create an infoitem via POST", parameters = {
+        @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+        @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included."),
+        @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")
+    }, requestBody = "Body of content-type \"multipart/form-data\" or \"multipart/mixed\" containing the above mentioned fields and file-data.",
+    responseDescription = "FolderID/ObjectID of the newly created infoitem. The response is sent as a HTML document (see introduction).")})
 public class NewAction extends AbstractWriteAction {
 
     @Override
@@ -117,14 +117,13 @@ public class NewAction extends AbstractWriteAction {
 
         // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
         AJAXRequestResult result;
-        String saveAction = fileAccess.getAndFlushSaveActions(newId);
-        if (null == saveAction || Strings.isEmpty(saveAction)) {
-            saveAction = "none";
-        }
+        String saveAction = "none";
         if (null != newId && request.extendedResponse()) {
             File metadata = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
-            if (!metadata.getFileName().equals(originalFileName)) {
+            if (null != originalFileName && !originalFileName.equals(metadata.getFileName())) {
                 saveAction = "rename";
+            } else if (1 < metadata.getNumberOfVersions()) {
+                saveAction = "new_version";
             }
             result = result(metadata, (AJAXInfostoreRequest) request, saveAction);
         } else {

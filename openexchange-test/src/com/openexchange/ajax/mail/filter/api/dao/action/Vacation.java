@@ -49,109 +49,32 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
-import java.util.Arrays;
+import java.util.List;
+import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 
 /**
- * Vacation
+ * {@link Vacation}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Vacation extends AbstractAction {
 
-	public static final String VACATION = "vacation";
+    /**
+     * Initialises a new {@link Vacation}.
+     */
+    public Vacation() {
+        super(ActionCommand.vacation);
+    }
 
-	protected int days;
+    public Vacation(int days, List<String> addresses, String subject, String text) {
+        this();
+        addArgument("days", days);
+        addArgument("addresses", addresses);
+        addArgument("subject", subject);
+        addArgument("text", text);
+    }
 
-	protected String[] addresses;
+    //TODO: add methods for setting/getting the addresses, subject, days and text
 
-	protected String subject;
-
-	protected String text;
-
-	public Vacation(final int days, final String[] addresses) {
-		this(days, addresses, null, null);
-	}
-
-	public Vacation(final int days, final String[] addresses, final String subject) {
-		this(days, addresses, subject, null);
-	}
-
-	public Vacation(final int days, final String[] addresses, final String subject, final String text) {
-        name = VACATION;
-		this.addresses = addresses;
-		this.subject = subject;
-		this.text = text;
-		this.days = days;
-	}
-
-	public int getDays() {
-		return days;
-	}
-
-	public String[] getAddresses() {
-		return addresses;
-	}
-
-	public String getSubject() {
-		return subject;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Arrays.hashCode(addresses);
-		result = prime * result + days;
-		result = prime * result + ((subject == null) ? 0 : subject.hashCode());
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-            return true;
-        }
-		if (!super.equals(obj)) {
-            return false;
-        }
-		if (getClass() != obj.getClass()) {
-            return false;
-        }
-		final Vacation other = (Vacation) obj;
-		if (!Arrays.equals(addresses, other.addresses)) {
-            return false;
-        }
-		if (days != other.days) {
-            return false;
-        }
-		if (subject == null) {
-			if (other.subject != null) {
-                return false;
-            }
-		} else if (!subject.equals(other.subject)) {
-            return false;
-        }
-		if (text == null) {
-			if (other.text != null) {
-                return false;
-            }
-		} else if (!text.equals(other.text)) {
-            return false;
-        }
-
-		if (name == null) {
-			if (other.getName() != null) {
-                return false;
-            }
-		} else if (!name.equals(other.getName())) {
-            return false;
-        }
-		return true;
-	}
 }

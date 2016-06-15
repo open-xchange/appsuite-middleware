@@ -80,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.Document;
@@ -123,6 +124,7 @@ import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -779,7 +781,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
-        return save(document, data, sequenceNumber, modifiedColumns, false, false, saveDelegation);
+        return save(document, data, sequenceNumber, modifiedColumns, false, saveDelegation);
     }
 
     private static final class SaveResult {
@@ -809,7 +811,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     }
 
-    protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, boolean tryAddVersion, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
+    protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
 
         if (Strings.isNotEmpty(document.getFileName())) {
             FilenameValidationUtils.checkCharacters(document.getFileName());
@@ -1074,7 +1076,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion, final boolean ignoreWarnings, final boolean tryAddVersion) throws OXException {
-        return save(document, data, sequenceNumber, modifiedColumns, ignoreWarnings, tryAddVersion, new TransactionAwareFileAccessDelegation<SaveResult>() {
+        return save(document, data, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
             protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
@@ -1091,15 +1093,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     /*
                      * try to add file version
                      */
-                    if (!FileStorageTools.supports(access, FileStorageCapability.FILE_VERSIONS) || !FileStorageTools.supports(access, FileStorageCapability.AUTO_NEW_VERSION)) {
+                    if (FileStorageTools.supports(access, FileStorageCapability.FILE_VERSIONS) && FileStorageTools.supports(access, FileStorageCapability.AUTO_NEW_VERSION)) {
+                        FileStorageIgnorableVersionFileAccess fileAccess = (FileStorageIgnorableVersionFileAccess) access;
+                        result = fileAccess.saveDocumentTryAddVersion(document, data, sequenceNumber, modifiedColumns);
+                    } else {
                         addWarning(FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(access.getAccountAccess().getService().getId()));
+                        result = access.saveDocument(document, data, sequenceNumber, modifiedColumns);
                     }
-                    FileStorageIgnorableVersionFileAccess fileAccess = (FileStorageIgnorableVersionFileAccess) access;
-                    com.openexchange.file.storage.SaveResult tmp = fileAccess.saveDocumentTryAddVersion(document, data, sequenceNumber, modifiedColumns);
-                    IDTuple idTuple = tmp.getIdTuple();
-                    String fullId = idTuple.getFolder() + "/" + idTuple.getId();
-                    addSaveAction(fullId, tmp.getSaveAction());
-                    result = idTuple;
                 } else {
                     /*
                      * perform normal save operation
@@ -1165,7 +1165,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, boolean tryAddVersion) throws OXException {
-        return save(document, null, sequenceNumber, modifiedColumns, ignoreWarnings, tryAddVersion, new TransactionAwareFileAccessDelegation<SaveResult>() {
+        return save(document, null, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
             protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
@@ -1595,8 +1595,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      *
      * @param event The event
      */
-    protected void postEvent(final Event event) {
-        getEventAdmin().postEvent(event);
+    protected void postEvent(final Event event) throws OXException {
+        EventAdmin eventAdmin = getEventAdmin();
+        if (eventAdmin == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(EventAdmin.class);
+        }
+        eventAdmin.postEvent(event);
     }
 
     /**

@@ -49,54 +49,20 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+
 /**
- * IsComparison
+ * {@link IsComparison}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class IsComparison extends AbstractComparison {
 
-	public static final String IS = "is";
-
-	public IsComparison() {
-		name = IS;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-            return true;
-        }
-		if (obj == null) {
-            return false;
-        }
-		if (getClass() != obj.getClass()) {
-            return false;
-        }
-		final IsComparison other = (IsComparison) obj;
-		if (name == null) {
-			if (other.name != null) {
-                return false;
-            }
-		} else if (!name.equals(other.name)) {
-            return false;
-        }
-		return true;
-	}
-
-	@Override
-    public String toString() {
-		final StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append("name: " + name);
-
-		return stringBuffer.toString();
-	}
+    /**
+     * Initialises a new {@link IsComparison}.
+     */
+    public IsComparison() {
+        super(MatchType.is);
+    }
 }

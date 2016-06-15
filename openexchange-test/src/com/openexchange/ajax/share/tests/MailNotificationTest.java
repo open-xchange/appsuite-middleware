@@ -90,8 +90,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
-import com.openexchange.share.notification.impl.NotificationStrings;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.test.TestInit;
 

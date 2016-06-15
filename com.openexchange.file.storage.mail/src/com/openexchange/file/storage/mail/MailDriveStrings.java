@@ -64,12 +64,9 @@ public class MailDriveStrings implements LocalizableStrings {
     }
 
     // The name for the virtual folder containing all attachments from all messages
-    public static final String NAME_ATTACHMENTS_ALL = "My mail attachments";
+    public static final String NAME_ATTACHMENTS_ALL = "My attachments";
 
-    // The name for the virtual folder containing all attachments of received messages
-    public static final String NAME_ATTACHMENTS_RECEIVED = "In Inbox";
-
-    // The name for the virtual folder containing all attachments of sent messages
-    public static final String NAME_ATTACHMENTS_SENT = "In Sent objects";
+    // The name for the virtual folder containing all attachments of a certain folder/mailbox
+    public static final String NAME_ATTACHMENTS_DEDICATED = "In %1$s";
 
 }

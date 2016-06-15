@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
-import com.openexchange.ajax.mail.filter.api.dao.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
 import com.openexchange.ajax.mail.filter.api.dao.Test;
 import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
@@ -103,9 +103,9 @@ public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
 
             // Parse comparisons
             final JSONArray jsonComparisonArray = jsonTestObj.getJSONArray("comparison");
-            List<Comparison> comparisons = new ArrayList<>(jsonComparisonArray.length());
+            List<MatchType> comparisons = new ArrayList<>(jsonComparisonArray.length());
             for (int b = 0; b < jsonComparisonArray.length(); b++) {
-                comparisons.add(Comparison.valueOf(jsonComparisonArray.getString(b).toLowerCase()));
+                comparisons.add(MatchType.valueOf(jsonComparisonArray.getString(b)));
             }
 
             tests.add(new Test(testCommand, comparisons));
@@ -114,7 +114,7 @@ public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
         // Parse action commands
         List<ActionCommand> actionCommands = new ArrayList<ActionCommand>(jsonActionArray.length());
         for (int a = 0; a < jsonActionArray.length(); a++) {
-            actionCommands.add(ActionCommand.valueOf(jsonActionArray.getString(a).toUpperCase()));
+            actionCommands.add(ActionCommand.valueOf(jsonActionArray.getString(a)));
         }
 
         return new ConfigResponse(response, new MailFilterConfiguration(tests, actionCommands));

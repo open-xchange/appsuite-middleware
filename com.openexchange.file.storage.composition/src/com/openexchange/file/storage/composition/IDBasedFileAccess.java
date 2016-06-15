@@ -60,7 +60,6 @@ import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.Range;
-import com.openexchange.file.storage.TryAddVersionAware;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
@@ -74,7 +73,7 @@ import com.openexchange.tx.TransactionAware;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface IDBasedFileAccess extends TransactionAware, WarningsAware, TryAddVersionAware {
+public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
 
     /**
      * Gets a value indicating whether a specific account supports one or more capabilities.

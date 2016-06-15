@@ -60,9 +60,7 @@ import java.util.Map;
 public final class DefaultLoginInfo implements LoginInfo {
 
     private final String userName;
-
     private final String password;
-
     private final Map<String, Object> properties;
 
     /**

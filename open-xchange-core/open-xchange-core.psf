@@ -152,6 +152,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.secret.recovery.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.serverconfig"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.serverconfig.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.session.reservation.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.sessionstorage"/>

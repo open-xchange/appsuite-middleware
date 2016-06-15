@@ -669,7 +669,8 @@ public class LoginServlet extends AJAXServlet {
         final boolean disableTrimLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.DISABLE_TRIM_LOGIN.getPropertyName()));
         final boolean formLoginWithoutAuthId = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID.getPropertyName()));
         final boolean isRandomTokenEnabled = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.RANDOM_TOKEN.getPropertyName()));
-        LoginConfiguration conf = new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ipCheckWhitelist, redirectIPChangeAllowed, ranges, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled);
+        final boolean checkPunyCodeLoginString = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.CHECK_PUNY_CODE_LOGIN.getPropertyName()));
+        LoginConfiguration conf = new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ipCheckWhitelist, redirectIPChangeAllowed, ranges, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled, checkPunyCodeLoginString);
         confReference.set(conf);
         ShareLoginConfiguration shareConf = initShareLoginConfig(config);
         shareConfReference.set(shareConf);

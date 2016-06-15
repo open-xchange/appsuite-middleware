@@ -85,6 +85,84 @@ The root folder consists of three sub-folders:
      ... 
  ```
 
+Complete example for a Dovecot configuration:
+
+```
+doveconf -n
+# 2.3.devel (d8aa10d): /etc/dovecot/dovecot.conf
+# OS: Linux 3.16.0-4-amd64 x86_64 Debian 8.4 ext4
+disable_plaintext_auth = no
+imap_capability = +XDOVECOT
+info_log_path = /var/log/dovecot-info.log
+log_path = /var/log/dovecot.log
+mail_location = maildir:/var/vmail/%u
+mail_plugins = virtual virtual_attachments
+namespace VirtualAttachments {
+  hidden = yes
+  list = no
+  location = attachments:/var/vmail/%u/virtual-attachments
+  mailbox INBOX {
+    auto = create
+  }
+  mailbox Sent {
+    auto = create
+  }
+  mailbox virtual/all {
+    auto = create
+  }
+  prefix = VirtualAttachments/
+  separator = /
+  subscriptions = no
+}
+namespace inbox {
+  inbox = yes
+  location =
+  mailbox Drafts {
+    auto = subscribe
+    special_use = \Drafts
+  }
+  mailbox Junk {
+    auto = subscribe
+    special_use = \Junk
+  }
+  mailbox Sent {
+    auto = subscribe
+    special_use = \Sent
+  }
+  mailbox Trash {
+    auto = subscribe
+    special_use = \Trash
+  }
+  prefix =
+  separator = /
+}
+namespace virtual {
+  hidden = yes
+  list = no
+  location = virtual:/etc/dovecot/virtual:INDEX=/var/vmail/%u/virtual
+  mailbox all {
+    special_use = \All
+  }
+  prefix = virtual/
+  separator = /
+  subscriptions = no
+}
+passdb {
+  args = scheme=SHA1 /etc/dovecot/passwd
+  driver = passwd-file
+}
+protocols = imap lmtp
+ssl = no
+userdb {
+  args = uid=vmail gid=vmail home=/var/vmail/%u
+  driver = static
+}
+protocol lda {
+  info_log_path = /var/log/dovecot-lda.log
+  log_path = /var/log/dovecot-lda-errors.log
+}
+```
+
 # Installation
 Deploying the Open-Xchange Virtual Mail Attachments Connector simply requires to install the `open-xchange-file-storage-mail` package.
 

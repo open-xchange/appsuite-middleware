@@ -57,6 +57,7 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetProxyType;
+import com.openexchange.share.notification.NotificationStrings;
 
 /**
  * {@link TextSnippets}
