@@ -1,3 +1,9 @@
+open-xchange-core (7.8.2-1) stable; urgency=medium
+
+  * First candidate for 7.8.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 16 Jun 2016 12:32:36 +0200
+
 open-xchange-core (7.8.2-0) unstable; urgency=medium
 
   * prepare for 7.8.2 release
