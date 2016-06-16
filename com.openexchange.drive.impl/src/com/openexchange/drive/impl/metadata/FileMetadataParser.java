@@ -93,7 +93,7 @@ public class FileMetadataParser {
                     JSONArray jsonArray = jsonObject.getJSONArray(Field.OBJECT_PERMISSIONS.getName());
                     List<FileStorageObjectPermission> objectPermissions = new ArrayList<FileStorageObjectPermission>(jsonArray.length());
                     for (int i = 0; i < jsonArray.length(); i++) {
-                        objectPermissions.add(parseObjetPermission(jsonArray.getJSONObject(i), TimeZones.UTC));
+                        objectPermissions.add(parseObjectPermission(jsonArray.getJSONObject(i), TimeZones.UTC));
                     }
                     file.setObjectPermissions(objectPermissions);
                 }
@@ -111,7 +111,7 @@ public class FileMetadataParser {
      * @param timeZone The client timezone to consider, or <code>null</code> to not apply timezone offsets to parsed timestamps
      * @return The parsed permission
      */
-    private static FileStorageObjectPermission parseObjetPermission(JSONObject jsonObject, TimeZone timeZone) throws OXException, JSONException {
+    private static FileStorageObjectPermission parseObjectPermission(JSONObject jsonObject, TimeZone timeZone) throws OXException, JSONException {
         if (false == jsonObject.hasAndNotNull("bits")) {
             throw OXException.mandatoryField("bits");
         }
@@ -133,10 +133,11 @@ public class FileMetadataParser {
              * parse as already known permission entity
              */
             DefaultFileStorageObjectPermission parsedPermission = new DefaultFileStorageObjectPermission();
-            if (false == jsonObject.has("entity")) {
+            int entity = jsonObject.optInt("entity", 0);
+            if (0 >= entity) {
                 throw OXException.mandatoryField("entity");
             }
-            parsedPermission.setEntity(jsonObject.getInt("entity"));
+            parsedPermission.setEntity(entity);
             if (jsonObject.has("group")) {
                 parsedPermission.setGroup(jsonObject.getBoolean("group"));
             } else if (null != type) {

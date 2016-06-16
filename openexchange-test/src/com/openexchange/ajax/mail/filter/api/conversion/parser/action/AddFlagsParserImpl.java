@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.AddFlags;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.AddFlagsActionArgument;
 
 /**
  * 
@@ -79,16 +80,16 @@ public class AddFlagsParserImpl implements ActionParser {
      * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @Override
-    public Action parse(JSONObject jsonObject) throws JSONException {
-        final JSONArray jsonArray = jsonObject.getJSONArray("flags");
+    public Action<AddFlagsActionArgument> parse(JSONObject jsonObject) throws JSONException {
+        final JSONArray jsonArray = jsonObject.getJSONArray(AddFlagsActionArgument.flags.name());
 
         List<String> flags = new ArrayList<>(jsonArray.length());
         for (int index = 0; index < jsonArray.length(); index++) {
             flags.add(jsonArray.getString(index));
         }
 
-        AddFlags addFlags = new AddFlags();
-        addFlags.addArgument("flags", flags);
+        Action<AddFlagsActionArgument> addFlags = new AddFlags();
+        addFlags.setArgument(AddFlagsActionArgument.flags, flags);
 
         return addFlags;
     }

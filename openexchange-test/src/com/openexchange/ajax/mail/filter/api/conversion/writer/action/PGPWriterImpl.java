@@ -49,17 +49,34 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
+import java.util.EnumSet;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.PGPActionArgument;
+
 /**
  * {@link PGPWriterImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PGPWriterImpl extends AbstractActionWriterImpl {
+public class PGPWriterImpl extends AbstractActionWriterImpl<PGPActionArgument> implements ActionWriter {
 
     /**
      * Initialises a new {@link PGPWriterImpl}.
      */
     public PGPWriterImpl() {
         super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
+    @Override
+    public JSONObject write(Action<ActionArgument> type, JSONObject jsonObject) throws JSONException {
+        return write(type, EnumSet.allOf(PGPActionArgument.class), jsonObject);
     }
 }

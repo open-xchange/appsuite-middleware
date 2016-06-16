@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.RejectActionArgument;
 
 /**
  * {@link Reject}
@@ -57,7 +58,7 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Reject extends AbstractAction {
+public class Reject extends AbstractAction implements Action<RejectActionArgument> {
 
     /**
      * Initialises a new {@link Reject}.
@@ -66,6 +67,33 @@ public class Reject extends AbstractAction {
         super(ActionCommand.reject);
     }
 
-    //TODO: add methods for setting/getting the rejection text
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
+     */
+    @Override
+    public ActionCommand getActionCommand() {
+        return ActionCommand.reject;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
+     */
+    @Override
+    public void setArgument(RejectActionArgument argument, Object value) {
+        addArgument(argument, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
+     */
+    @Override
+    public Object getArgument(RejectActionArgument argument) {
+        return getArguments().get(argument);
+    }
 }

@@ -49,13 +49,16 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
@@ -87,7 +90,10 @@ public class ReorderTest extends AbstractMailFilterTest {
             Rule rule = new Rule();
             rule.setName("testReorder" + i);
             rule.setActive(true);
-            rule.setActionCommands(new Action[] { new Keep(), new Stop() });
+            List<Action<? extends ActionArgument>> actions = new ArrayList<>(2);
+            actions.add(new Keep());
+            actions.add(new Stop());
+            rule.setActions(actions);
             rule.setTest(new TrueTest());
 
             int id = mailFilterAPI.createRule(rule);

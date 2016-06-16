@@ -52,7 +52,6 @@ package com.openexchange.ajax.mail.filter.tests.bug;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Discard;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
@@ -94,7 +93,8 @@ public class Bug44363Test extends AbstractMailFilterTest {
             vacationRule = new Rule();
             vacationRule.setName("Vacation Notice");
             vacationRule.setActive(true);
-            vacationRule.setActionCommands(new Action[] { new Vacation(7, Collections.singletonList("foo@invalid.tld"), "Vacation Notice for Bug 44363", "Multiline text with\n\n.\n\n a single lined dot character for bug 44363") });
+            Vacation vacation = new Vacation(7, Collections.singletonList("foo@invalid.tld"), "Vacation Notice for Bug 44363", "Multiline text with\n\n.\n\n a single lined dot character for bug 44363");
+            vacationRule.addAction(vacation);
             final ContainsComparison conComp = new ContainsComparison();
             vacationRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Vacation for 44363" }));
             int vacationId = mailFilterAPI.createRule(vacationRule);
@@ -107,7 +107,7 @@ public class Bug44363Test extends AbstractMailFilterTest {
             otherRule = new Rule();
             otherRule.setName("Some Rule for Bug 44363");
             otherRule.setActive(true);
-            otherRule.setActionCommands(new Action[] { new Discard() });
+            otherRule.addAction(new Discard());
             ContainsComparison conComp = new ContainsComparison();
             otherRule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug 44363" }));
             int otherId = mailFilterAPI.createRule(otherRule);

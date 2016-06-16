@@ -50,14 +50,14 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterDataObject;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 
 /**
  * {@link Action}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Action extends MailFilterDataObject {
+public interface Action<A extends ActionArgument> {
 
     /**
      * Returns the {@link ActionCommand}
@@ -66,4 +66,19 @@ public interface Action extends MailFilterDataObject {
      */
     ActionCommand getActionCommand();
 
+    /**
+     * Sets the value for the specified {@link ActionArgument}
+     * 
+     * @param argument The {@link ActionArgument} for which to set the value
+     * @param value The value of the {@link ActionArgument} to set
+     */
+    void setArgument(A argument, Object value);
+
+    /**
+     * Returns the value of the specified {@link ActionArgument}
+     * 
+     * @param argument The {@link ActionArgument} to return
+     * @return The value of the {@link ActionArgument}
+     */
+    Object getArgument(A argument);
 }

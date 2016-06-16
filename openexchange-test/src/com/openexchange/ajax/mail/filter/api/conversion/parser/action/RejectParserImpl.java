@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Reject;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.RejectActionArgument;
 
 /**
  * {@link RejectParserImpl}
@@ -75,10 +76,10 @@ public class RejectParserImpl implements ActionParser {
      * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @Override
-    public Action parse(JSONObject jsonObject) throws JSONException {
+    public Action<RejectActionArgument> parse(JSONObject jsonObject) throws JSONException {
         Reject reject = new Reject();
-        String text = jsonObject.getString("text");
-        reject.addArgument("text", text);
+        String text = jsonObject.getString(RejectActionArgument.text.name());
+        reject.setArgument(RejectActionArgument.text, text);
         return reject;
     }
 }

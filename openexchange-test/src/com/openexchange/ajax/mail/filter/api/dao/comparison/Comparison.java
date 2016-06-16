@@ -49,15 +49,15 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
-import com.openexchange.ajax.mail.filter.api.dao.MailFilterDataObject;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
 
 /**
  * {@link Comparison}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Comparison extends MailFilterDataObject {
+public interface Comparison<A extends ComparisonArgument> {
 
     /**
      * Returns the {@link MatchType}
@@ -65,4 +65,20 @@ public interface Comparison extends MailFilterDataObject {
      * @return the {@link MatchType}
      */
     MatchType getMatchType();
+
+    /**
+     * Sets the value for the specified {@link ComparisonArgument}
+     * 
+     * @param argument The {@link ComparisonArgument} for which to set the value
+     * @param value The value of the {@link ComparisonArgument} to set
+     */
+    void setArgument(A argument, Object value);
+
+    /**
+     * Returns the value of the specified {@link ComparisonArgument}
+     * 
+     * @param argument The {@link ComparisonArgument} to return
+     * @return The value of the {@link ComparisonArgument}
+     */
+    Object getArgument(A argument);
 }

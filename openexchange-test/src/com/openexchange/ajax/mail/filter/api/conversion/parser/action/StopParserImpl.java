@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.StopActionArgument;
 
 /**
  * {@link StopParserImpl}
@@ -75,7 +76,7 @@ public class StopParserImpl implements ActionParser {
      */
     @SuppressWarnings("unused")
     @Override
-    public Action parse(JSONObject jsonObject) throws JSONException {
+    public Action<StopActionArgument> parse(JSONObject jsonObject) throws JSONException {
         return new Stop();
     }
 

@@ -249,6 +249,7 @@ public class DriveUtilityImpl implements DriveUtility {
             return;
         }
         final SyncSession syncSession = new SyncSession(session);
+        syncSession.trace("About to update metadata for file [" + fileVersion + "]: " + jsonObject);
         final boolean notify = null != parameters.getNotificationTransport();
         final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
         Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
@@ -283,6 +284,7 @@ public class DriveUtilityImpl implements DriveUtility {
                 return null;
             }
         });
+        syncSession.trace("Metadata for file [" + fileVersion + "] updated successfully.");
         /*
          * send notifications if needed
          */
@@ -297,6 +299,7 @@ public class DriveUtilityImpl implements DriveUtility {
     public void updateDirectory(DriveSession session, final DirectoryVersion directoryVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException {
         final FileStorageFolder folder = DirectoryMetadataParser.parse(jsonObject);
         final SyncSession syncSession = new SyncSession(session);
+        syncSession.trace("About to update metadata for directory [" + directoryVersion + "]: " + jsonObject);
         final boolean notify = null != parameters.getNotificationTransport();
         final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
         Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
@@ -326,6 +329,7 @@ public class DriveUtilityImpl implements DriveUtility {
                 return null;
             }
         });
+        syncSession.trace("Metadata for directory [" + directoryVersion + "] updated successfully.");
         /*
          * send notifications if needed
          */

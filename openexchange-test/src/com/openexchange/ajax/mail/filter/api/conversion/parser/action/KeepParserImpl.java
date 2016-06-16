@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.KeepActionArgument;
 
 /**
  * {@link KeepParserImpl}
@@ -75,7 +76,7 @@ public class KeepParserImpl implements ActionParser {
      */
     @SuppressWarnings("unused")
     @Override
-    public Action parse(JSONObject jsonObject) throws JSONException {
+    public Action<KeepActionArgument> parse(JSONObject jsonObject) throws JSONException {
         return new Keep();
     }
 

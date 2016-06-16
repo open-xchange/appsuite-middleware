@@ -3,7 +3,6 @@ package com.openexchange.ajax.mail.filter.tests.api;
 
 import java.util.Collections;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
 import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
@@ -27,7 +26,7 @@ public class UpdateTest extends AbstractMailFilterTest {
 
         rule = new Rule();
         rule.setName("testUpdate");
-        rule.setActionCommands(new Action[] { new Keep() });
+        rule.addAction(new Keep());
 
         final IsComparison isComp = new IsComparison();
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
@@ -45,6 +44,7 @@ public class UpdateTest extends AbstractMailFilterTest {
 
         // Update the rule
         mailFilterAPI.updateRule(rule);
+        rule.setPosition(0);
 
         // Assert
         getAndAssert(Collections.singletonList(rule));
@@ -57,6 +57,7 @@ public class UpdateTest extends AbstractMailFilterTest {
         // update condition
         rule.setTest(new HeaderTest(new ContainsComparison(), new String[] { "updatedHeader" }, new String[] { "updatedValue" }));
         mailFilterAPI.updateRule(rule);
+        rule.setPosition(0);
 
         // assert
         getAndAssert(Collections.singletonList(rule));
@@ -66,13 +67,8 @@ public class UpdateTest extends AbstractMailFilterTest {
      * Test add an action
      */
     public void testUpdateAddActionCommand() throws Exception {
-        Action[] actioncmds = rule.getActionCommands();
-        Action[] actions = new Action[actioncmds.length + 1];
-        // Retain already existing action commands
-        System.arraycopy(actioncmds, 0, actions, 0, actioncmds.length);
-        // Add new action command
-        actions[actioncmds.length] = new Stop();
-        rule.setActionCommands(actions);
+        rule.addAction(new Stop());
+        rule.setPosition(0);
 
         // Update
         mailFilterAPI.updateRule(rule);
@@ -90,6 +86,7 @@ public class UpdateTest extends AbstractMailFilterTest {
 
         // Update
         mailFilterAPI.updateRule(rule);
+        rule.setPosition(0);
 
         // Assert
         getAndAssert(Collections.singletonList(rule));

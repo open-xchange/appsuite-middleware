@@ -88,7 +88,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
         mailAccountDescription.setSent("sent");
         mailAccountDescription.setSpam("Spam");
         mailAccountDescription.setSpamHandler("spamHandler");
-        mailAccountDescription.parseTransportServerURL("localhost");
+        mailAccountDescription.parseTransportServerURL("smtp://mail.test.invalid");
         mailAccountDescription.setTransportLogin("login");
         mailAccountDescription.setTransportPassword("Password");
         mailAccountDescription.setTrash("trash");

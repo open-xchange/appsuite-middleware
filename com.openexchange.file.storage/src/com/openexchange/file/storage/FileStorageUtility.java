@@ -146,6 +146,32 @@ public final class FileStorageUtility {
     }
 
     /**
+     * Tries to cast a concrete {@link File} implementation to the class or interface represented by the supplied {@link Class}
+     * object recursively, also considering possible underlying delegates.
+     *
+     * @param file The file implementation to launder
+     * @param clazz The target interface or class
+     * @return The target class implementation, or <code>null</code> if no suitable type found
+     */
+    public static <T extends File> T launderDelegate(File file, Class<T> clazz) {
+        if (null == file) {
+            return null;
+        }
+        if (clazz.isInstance(file)) {
+            return clazz.cast(file);
+        }
+        if (DelegatingFile.class.isInstance(file)) {
+            DelegatingFile delegatingFile = (DelegatingFile) file;
+            File fileDelegate = delegatingFile.getDelegate();
+            if (null != fileDelegate && clazz.isInstance(fileDelegate)) {
+                return clazz.cast(fileDelegate);
+            }
+            return launderDelegate(fileDelegate, clazz);
+        }
+        return null;
+    }
+
+    /**
      * Appends or modifies a counter in the 'name' part of the supplied filename. For example, passing the filename
      * <code>test.txt</code> and a counter of <code>2</code> will result in the string <code>test (2).txt</code>, while the filename
      * <code>test (1).txt</code> would be changed to <code>test (2).txt</code>.

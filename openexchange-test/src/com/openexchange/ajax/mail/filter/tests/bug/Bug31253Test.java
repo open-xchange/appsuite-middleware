@@ -58,7 +58,6 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
@@ -105,12 +104,14 @@ public class Bug31253Test extends AbstractMailFilterTest {
         final Rule rule = new Rule();
         rule.setName("Test rule for Bug31253");
         rule.setActive(true);
-        rule.setActionCommands(new Action[] { new Vacation(7, Collections.singletonList("foo@invalid.tld"), "Multiline subject with\nOK foobar for Bug 31253", "Multiline text with \nOK barfoo for Bug 31253") });
+        Vacation vacation = new Vacation(7, Collections.singletonList("foo@invalid.tld"), "Multiline subject with\nOK foobar for Bug 31253", "Multiline text with \nOK barfoo for Bug 31253");
+        rule.addAction(vacation);
 
         final ContainsComparison conComp = new ContainsComparison();
         rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "31253" }));
         final int id = mailFilterAPI.createRule(rule);
         rule.setId(id);
+        rule.setPosition(0);
 
         List<Rule> rules = mailFilterAPI.listRules();
         assertEquals("One rule was expected", 1, rules.size());

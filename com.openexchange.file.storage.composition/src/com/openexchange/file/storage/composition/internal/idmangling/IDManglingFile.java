@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.file.storage.DelegatingFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
@@ -63,7 +64,7 @@ import com.openexchange.file.storage.composition.FolderID;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class IDManglingFile implements File {
+public class IDManglingFile implements DelegatingFile {
 
     private final File file;
     private final String id;
@@ -81,6 +82,11 @@ public class IDManglingFile implements File {
         id = new FileID(service, account, file.getFolderId(), file.getId()).toUniqueID();
         folder = new FolderID(service, account, file.getFolderId()).toUniqueID();
         this.file = file;
+    }
+
+    @Override
+    public File getDelegate() {
+        return file;
     }
 
     @Override

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.MoveActionArgument;
 
 /**
  * {@link Move}
@@ -57,15 +58,43 @@ import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Move extends AbstractAction {
+public class Move extends AbstractAction implements Action<MoveActionArgument> {
 
     /**
      * Initialises a new {@link Move}.
      */
     public Move(String folder) {
         super(ActionCommand.move);
-        addArgument("into", folder);
+        addArgument(MoveActionArgument.into, folder);
     }
 
-    //TODO: add methods for setting/getting the folder
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
+     */
+    @Override
+    public ActionCommand getActionCommand() {
+        return ActionCommand.move;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
+     */
+    @Override
+    public void setArgument(MoveActionArgument argument, Object value) {
+        addArgument(argument, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
+     */
+    @Override
+    public Object getArgument(MoveActionArgument argument) {
+        return getArguments().get(argument);
+    }
 }

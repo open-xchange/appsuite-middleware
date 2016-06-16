@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
-import com.openexchange.ajax.mail.filter.api.dao.Test;
+import com.openexchange.ajax.mail.filter.api.dao.TestCondition;
 import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
 
@@ -93,7 +93,7 @@ public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
         final JSONArray jsonActionArray = jsonObj.getJSONArray("actioncommands");
 
         // Parse tests
-        List<Test> tests = new ArrayList<Test>(jsonTestArray.length());
+        List<TestCondition> tests = new ArrayList<TestCondition>(jsonTestArray.length());
         for (int a = 0; a < jsonTestArray.length(); a++) {
             final JSONObject jsonTestObj = jsonTestArray.getJSONObject(a);
 
@@ -108,7 +108,7 @@ public class ConfigParser extends AbstractAJAXParser<ConfigResponse> {
                 comparisons.add(MatchType.valueOf(jsonComparisonArray.getString(b)));
             }
 
-            tests.add(new Test(testCommand, comparisons));
+            tests.add(new TestCondition(testCommand, comparisons));
         }
 
         // Parse action commands

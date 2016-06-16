@@ -55,6 +55,7 @@ import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -113,9 +114,8 @@ public class MailMetadataField implements AdditionalFileField {
     }
 
     private static MailMetadata getMailMetadata(File file) {
-        if (null != file && MailDriveFile.class.isInstance(file)) {
-            return ((MailDriveFile) file).getMetadata();
-        }
-        return null;
+        MailDriveFile mailDriveFile = FileStorageUtility.launderDelegate(file, MailDriveFile.class);
+        return null != mailDriveFile ? mailDriveFile.getMetadata() : null;
     }
+
 }

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ContainsComparisonArgument;
 
 /**
  * {@link ContainsComparison}
@@ -57,12 +58,44 @@ import com.openexchange.ajax.mail.filter.api.dao.MatchType;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ContainsComparison extends AbstractComparison {
+public class ContainsComparison extends AbstractComparison implements Comparison<ContainsComparisonArgument> {
 
     /**
      * Initialises a new {@link ContainsComparison}.
      */
     public ContainsComparison() {
         super(MatchType.contains);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getMatchType()
+     */
+    @Override
+    public MatchType getMatchType() {
+        return MatchType.contains;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#setArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument, java.lang.Object)
+     */
+    @SuppressWarnings("unused")
+    @Override
+    public void setArgument(ContainsComparisonArgument argument, Object value) {
+        throw new UnsupportedOperationException("The '" + MatchType.contains + "' comparison type can not have any arguments");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument)
+     */
+    @SuppressWarnings("unused")
+    @Override
+    public Object getArgument(ContainsComparisonArgument argument) {
+        throw new UnsupportedOperationException("The '" + MatchType.contains + "' comparison type does not have any arguments");
     }
 }

@@ -51,13 +51,14 @@ package com.openexchange.ajax.mail.filter.api.dao.action;
 
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.PGPActionArgument;
 
 /**
  * {@link PGP}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PGP extends AbstractAction {
+public class PGP extends AbstractAction implements Action<PGPActionArgument> {
 
     /**
      * Initialises a new {@link PGP}.
@@ -73,8 +74,36 @@ public class PGP extends AbstractAction {
      */
     public PGP(List<String> keys) {
         this();
-        addArgument("keys", keys);
+        addArgument(PGPActionArgument.keys, keys);
     }
 
-    //TODO: add methods for setting/getting the PGP keys
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
+     */
+    @Override
+    public ActionCommand getActionCommand() {
+        return ActionCommand.pgp;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
+     */
+    @Override
+    public void setArgument(PGPActionArgument argument, Object value) {
+        addArgument(argument, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
+     */
+    @Override
+    public Object getArgument(PGPActionArgument argument) {
+        return getArguments().get(argument);
+    }
 }

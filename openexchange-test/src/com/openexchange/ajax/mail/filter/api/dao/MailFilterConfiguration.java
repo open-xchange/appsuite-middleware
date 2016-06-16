@@ -59,13 +59,13 @@ import java.util.List;
  */
 public class MailFilterConfiguration {
 
-    private final List<Test> tests;
+    private final List<TestCondition> tests;
     private final List<ActionCommand> actionCommands;
 
     /**
      * Initialises a new {@link MailFilterConfiguration}.
      */
-    public MailFilterConfiguration(List<Test> tests, List<ActionCommand> actionCommands) {
+    public MailFilterConfiguration(List<TestCondition> tests, List<ActionCommand> actionCommands) {
         super();
         this.tests = tests;
         this.actionCommands = actionCommands;
@@ -76,7 +76,7 @@ public class MailFilterConfiguration {
      *
      * @return The tests
      */
-    public List<Test> getTests() {
+    public List<TestCondition> getTests() {
         return Collections.unmodifiableList(tests);
     }
 

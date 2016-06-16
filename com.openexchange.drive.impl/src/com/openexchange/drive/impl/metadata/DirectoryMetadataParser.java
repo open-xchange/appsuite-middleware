@@ -138,10 +138,11 @@ public class DirectoryMetadataParser {
              * parse as already known permission entity
              */
             permission = DefaultFileStoragePermission.newInstance();
-            if (false == jsonObject.has("entity")) {
+            int entity = jsonObject.optInt("entity", 0);
+            if (0 >= entity) {
                 throw OXException.mandatoryField("entity");
             }
-            permission.setEntity(jsonObject.getInt("entity"));
+            permission.setEntity(entity);
             if (false == jsonObject.has("group")) {
                 throw OXException.mandatoryField("group");
             }

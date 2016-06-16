@@ -51,12 +51,14 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.comparison;
 
 import com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
 
 /**
- * ComparisonParser
+ * {@link ComparisonParser}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ComparisonParser extends JSONParser<Comparison> {
+public interface ComparisonParser extends JSONParser<Comparison<? extends ComparisonArgument>> {
 
 }

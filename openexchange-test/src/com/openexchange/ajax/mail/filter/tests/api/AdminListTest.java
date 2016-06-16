@@ -62,9 +62,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.filter.api.MailFilterAPI;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
@@ -139,10 +137,9 @@ public class AdminListTest extends AbstractMailFilterTest {
         // Insert new rule as user
         rule = new Rule();
         rule.setName("testUserHasAccessToOtherUsersRules");
-        rule.setActionCommands(new Action[] { new Keep() });
+        rule.addAction(new Keep());
 
-        final Comparison isComp = new IsComparison();
-        rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
+        rule.setTest(new HeaderTest(new IsComparison(), new String[] { "testheader" }, new String[] { "testvalue" }));
 
         rid = mailFilterAPI.createRule(rule);
 

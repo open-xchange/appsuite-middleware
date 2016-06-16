@@ -61,7 +61,6 @@ import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
-import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Move;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.ContainsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
@@ -100,13 +99,14 @@ public class Bug18490Test extends AbstractMailFilterTest {
         final Rule rule = new Rule();
         rule.setName("Bug18490 test rule");
         rule.setActive(true);
-        rule.setActionCommands(new Action[] { new Move(folder.getFullName()) });
+        rule.addAction(new Move(folder.getFullName()));
 
         final ContainsComparison conComp = new ContainsComparison();
         rule.setTest(new HeaderTest(conComp, new String[] { "Subject" }, new String[] { "Bug18490" }));
 
         final int id = mailFilterAPI.createRule(rule);
         rule.setId(id);
+        rule.setPosition(0);
 
         List<Rule> rules = mailFilterAPI.listRules();
         assertEquals("One rule was expected", 1, rules.size());

@@ -106,7 +106,7 @@ public class MailDriveFileStorageAccountManager implements FileStorageAccountMan
         if(DEFAULT_ID.equals(id)) {
             return defaultAccount;
         }
-        throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, MailDriveConstants.ID);
+        throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, MailDriveConstants.ID, session.getUserId(), session.getContextId());
     }
 
     @Override

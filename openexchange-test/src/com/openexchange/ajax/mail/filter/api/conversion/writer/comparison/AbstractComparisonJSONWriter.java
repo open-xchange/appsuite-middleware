@@ -49,33 +49,40 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.comparison;
 
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.conversion.writer.AbstractJSONWriter;
+import org.json.JSONValue;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.CommonComparisonArgument;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
+import com.openexchange.ajax.tools.JSONCoercion;
 
 /**
  * {@link AbstractComparisonJSONWriter}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractComparisonJSONWriter extends AbstractJSONWriter implements ComparisonWriter {
+abstract class AbstractComparisonJSONWriter<A extends ComparisonArgument> implements ComparisonWriter {
 
     /**
      * Initialises a new {@link AbstractComparisonJSONWriter}.
      */
-    public AbstractComparisonJSONWriter() {
+    AbstractComparisonJSONWriter() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
-     */
-    @Override
-    public JSONObject write(Comparison type, JSONObject jsonObject) throws JSONException {
-        return super.write(type, jsonObject);
+    JSONObject write(Comparison<ComparisonArgument> type, Set<A> arguments, JSONObject jsonObject) throws JSONException {
+        jsonObject.put(CommonComparisonArgument.comparison.name(), type.getMatchType().name());
+        
+        for (A argument : arguments) {
+            Object value = type.getArgument(argument);
+            if (JSONCoercion.needsJSONCoercion(value)) {
+                JSONValue jsonValue = (JSONValue) JSONCoercion.coerceToJSON(value);
+                value = jsonValue;
+            }
+            jsonObject.put(argument.toString(), value);
+        }
+        return jsonObject;
     }
-
 }

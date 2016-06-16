@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.Move;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.MoveActionArgument;
 
 /**
  * {@link MoveParserImpl}
@@ -75,8 +76,8 @@ public class MoveParserImpl implements ActionParser {
      * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @Override
-    public Action parse(JSONObject jsonObject) throws JSONException {
-        String folder = jsonObject.getString("into");
+    public Action<MoveActionArgument> parse(JSONObject jsonObject) throws JSONException {
+        String folder = jsonObject.getString(MoveActionArgument.into.name());
         return new Move(folder);
     }
 }

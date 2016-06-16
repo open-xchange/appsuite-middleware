@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer.comparison;
 
 import com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
 
 /**
  * {@link ComparisonWriter}
@@ -58,6 +59,6 @@ import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ComparisonWriter extends JSONWriter<Comparison> {
+public interface ComparisonWriter extends JSONWriter<Comparison<ComparisonArgument>> {
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer.action;
 
 import com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
+import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 
 /**
  * 
@@ -59,6 +60,6 @@ import com.openexchange.ajax.mail.filter.api.dao.action.Action;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ActionWriter extends JSONWriter<Action> {
+public interface ActionWriter extends JSONWriter<Action<ActionArgument>> {
 
 }
