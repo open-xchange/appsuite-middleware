@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -134,6 +135,18 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
      */
     protected String getScope() {
         return "server";
+    }
+
+    /**
+     * Reconnects the client
+     * 
+     * @throws Exception
+     */
+    protected void reconnect() throws Exception {
+        if (client != null) {
+            client.logout();
+        }
+        client = new AJAXClient(User.User1);
     }
 
 }
