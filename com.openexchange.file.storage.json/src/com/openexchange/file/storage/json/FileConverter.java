@@ -94,6 +94,25 @@ public class FileConverter implements ResultConverter {
              * write single file result
              */
             resultObject = writer.write(infostoreRequest, (File) resultObject);
+        } else if (Delta.class.isInstance(resultObject)) {
+            /*
+             * write delta result
+             */
+            SearchIterator<File> newAndModifiedIterator = null;
+            SearchIterator<File> deletedIterator = null;
+            try {
+                Delta<File> deltaResult = (Delta<File>) resultObject;
+                newAndModifiedIterator = deltaResult.results();
+                JSONArray jsonArray = writer.write(infostoreRequest, newAndModifiedIterator);
+                deletedIterator = deltaResult.getDeleted();
+                while (deletedIterator.hasNext()) {
+                    jsonArray.put(deletedIterator.next().getId());
+                }
+                resultObject = jsonArray;
+            } finally {
+                SearchIterators.close(newAndModifiedIterator);
+                SearchIterators.close(deletedIterator);
+            }
         } else if (TimedResult.class.isInstance(resultObject)) {
             /*
              * write timed files result
@@ -117,25 +136,6 @@ public class FileConverter implements ResultConverter {
                 resultObject = writer.write(infostoreRequest, searchIterator);
             } finally {
                 SearchIterators.close(searchIterator);
-            }
-        } else if (Delta.class.isInstance(resultObject)) {
-            /*
-             * write delta result
-             */
-            SearchIterator<File> newAndModifiedIterator = null;
-            SearchIterator<File> deletedIterator = null;
-            try {
-                Delta<File> deltaResult = (Delta<File>) resultObject;
-                newAndModifiedIterator = deltaResult.results();
-                JSONArray jsonArray = writer.write(infostoreRequest, newAndModifiedIterator);
-                deletedIterator = deltaResult.getDeleted();
-                while (deletedIterator.hasNext()) {
-                    jsonArray.put(deletedIterator.next().getId());
-                }
-                resultObject = jsonArray;
-            } finally {
-                SearchIterators.close(newAndModifiedIterator);
-                SearchIterators.close(deletedIterator);
             }
         } else {
             throw new UnsupportedOperationException("unknown result object");
