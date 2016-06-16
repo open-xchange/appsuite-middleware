@@ -1,3 +1,9 @@
+open-xchange-oauth (7.6.2-56) stable; urgency=medium
+
+  * Build for patch 2016-06-24 (3362)
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Thu, 16 Jun 2016 12:23:18 +0200
+
 open-xchange-oauth (7.6.2-55) stable; urgency=medium
 
   * Build for patch 2016-06-06 (3314)
