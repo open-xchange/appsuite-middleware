@@ -350,7 +350,12 @@ public final class AllAction extends AppointmentAction {
         Date until = request.applyTimeZone2Date(endUTC.getTime());
         int folderID = request.getFolderId();
         CalendarService calendarService = getService(CalendarService.class);
-        List<UserizedEvent> events = calendarService.getEvents(request.getSession(), folderID, from, until);
+        List<UserizedEvent> events;
+        if (0 < folderID) {
+            events = calendarService.getEventsInFolder(request.getSession(), folderID, from, until);
+        } else {
+            events = calendarService.getEventsOfUser(request.getSession(), from, until);
+        }
         Date lastModified = new Date(0L);
         for (UserizedEvent event : events) {
             if (null != event.getLastModified() && lastModified.before(event.getLastModified())) {

@@ -62,6 +62,7 @@ import java.util.List;
 public class Event {
 
     int id;
+    int publicFolderId;
     String uid;
     String filename;
     String iCalId;
@@ -616,6 +617,20 @@ public class Event {
      */
     public void setColor(String color) {
         this.color = color;
+    }
+
+    /**
+     * @return the publicFolderID
+     */
+    public int getPublicFolderId() {
+        return publicFolderId;
+    }
+
+    /**
+     * @param publicFolderId the publicFolderID to set
+     */
+    public void setPublicFolderId(int publicFolderId) {
+        this.publicFolderId = publicFolderId;
     }
 
 }

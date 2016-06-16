@@ -49,10 +49,13 @@
 
 package com.openexchange.chronos.compat;
 
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.Trigger;
 
 /**
  * {@link Appointment2Event}
@@ -159,7 +162,22 @@ public class Appointment2Event {
             default:
                 return null;
         }
+    }
 
+    /**
+     * Gets an alarm appropriate for the supplied reminder minutes.
+     * 
+     * @param reminder The legacy reminder value
+     * @return The alarm
+     */
+    public static Alarm getAlarm(int reminder) {
+        Alarm alarm = new Alarm();
+        alarm.setAction(AlarmAction.DISPLAY);
+        alarm.setDescription("Reminder");
+        Trigger trigger = new Trigger();
+        trigger.setDuration("-PT" + reminder + 'M');
+        alarm.setTrigger(trigger);
+        return alarm;
     }
 
     /**

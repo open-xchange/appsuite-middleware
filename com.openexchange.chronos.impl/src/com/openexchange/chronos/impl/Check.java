@@ -47,130 +47,47 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.impl;
+
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 
 /**
- * {@link CalendarUser}
+ * {@link CalendarService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
- * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.3.3">RFC 5545, section 3.3.3</a>
  */
-public class CalendarUser {
+public class Check {
 
-    String uri;
-    String commonName;
-    int entity;
-    String sentBy;
-    CalendarUserType cuType;
-    String email;
-
-    /**
-     * Gets the uri
-     *
-     * @return The uri
-     */
-    public String getUri() {
-        return uri;
+    public static void requireCalendarContentType(UserizedFolder folder) throws OXException {
+        if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
+            throw new OXException();
+        }
     }
 
-    /**
-     * Sets the uri
-     *
-     * @param uri The uri to set
-     */
-    public void setUri(String uri) {
-        this.uri = uri;
+    public static void requireFolderPermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getFolderPermission() < requiredPermission) {
+            throw new OXException();
+        }
     }
 
-    /**
-     * Gets the commonName
-     *
-     * @return The commonName
-     */
-    public String getCommonName() {
-        return commonName;
+    public static void requireReadPermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getReadPermission() < requiredPermission) {
+            throw new OXException();
+        }
     }
 
-    /**
-     * Sets the commonName
-     *
-     * @param commonName The commonName to set
-     */
-    public void setCommonName(String commonName) {
-        this.commonName = commonName;
+    public static void requireWritePermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getWritePermission() < requiredPermission) {
+            throw new OXException();
+        }
     }
 
-    /**
-     * Gets the entity
-     *
-     * @return The entity
-     */
-    public int getEntity() {
-        return entity;
-    }
-
-    /**
-     * Sets the entity
-     *
-     * @param entity The entity to set
-     */
-    public void setEntity(int entity) {
-        this.entity = entity;
-    }
-
-    /**
-     * Gets the sentBy
-     *
-     * @return The sentBy
-     */
-    public String getSentBy() {
-        return sentBy;
-    }
-
-    /**
-     * Sets the sentBy
-     *
-     * @param sentBy The sentBy to set
-     */
-    public void setSentBy(String sentBy) {
-        this.sentBy = sentBy;
-    }
-
-    /**
-     * Gets the cuType
-     *
-     * @return The cuType
-     */
-    public CalendarUserType getCuType() {
-        return cuType;
-    }
-
-    /**
-     * Sets the cuType
-     *
-     * @param cuType The cuType to set
-     */
-    public void setCuType(CalendarUserType cuType) {
-        this.cuType = cuType;
-    }
-
-    /**
-     * Gets the email
-     * 
-     * @return The email
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Sets the email
-     * 
-     * @param email The email to set
-     */
-    public void setEmail(String email) {
-        this.email = email;
+    private Check() {
+        super();
     }
 
 }

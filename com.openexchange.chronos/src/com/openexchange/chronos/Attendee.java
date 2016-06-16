@@ -62,6 +62,7 @@ public class Attendee extends CalendarUser {
     ParticipationStatus partStat;
     String comment;
     Boolean rsvp;
+    int folderID;
 
     /**
      * Gets the role
@@ -133,6 +134,24 @@ public class Attendee extends CalendarUser {
      */
     public void setRsvp(Boolean rsvp) {
         this.rsvp = rsvp;
+    }
+
+    /**
+     * Gets the folderID
+     *
+     * @return The folderID
+     */
+    public int getFolderID() {
+        return folderID;
+    }
+
+    /**
+     * Sets the folderID
+     *
+     * @param folderID The folderID to set
+     */
+    public void setFolderID(int folderID) {
+        this.folderID = folderID;
     }
 
 }

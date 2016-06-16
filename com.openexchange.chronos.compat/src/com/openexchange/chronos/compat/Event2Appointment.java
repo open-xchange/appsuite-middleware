@@ -49,10 +49,15 @@
 
 package com.openexchange.chronos.compat;
 
+import java.util.List;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.Trigger;
+import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.java.Strings;
 
 /**
@@ -208,6 +213,43 @@ public class Event2Appointment {
             default:
                 return 0;
         }
+    }
+
+    /**
+     * Gets the "reminder" value based on the supplied alarm list.
+     * 
+     * @param alarms The alarms
+     * @return The legacy reminder value, or <code>null</code> if no suitable reminder found
+     */
+    public static Integer getReminder(List<Alarm> alarms) {
+        if (null != alarms && 0 < alarms.size()) {
+            for (Alarm alarm : alarms) {
+                if (AlarmAction.DISPLAY == alarm.getAction()) {
+                    Trigger trigger = alarm.getTrigger();
+                    if (null != trigger && (null == trigger.getRelated() || Related.START.equals(trigger.getRelated()))) {
+                        Integer reminder = parseTriggerDuration(trigger.getDuration());
+                        if (null != reminder) {
+                            return reminder;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static Integer parseTriggerDuration(String duration) {
+        //TODO: richtig
+        if (Strings.isNotEmpty(duration)) {
+            if (duration.startsWith("-PT") && duration.endsWith("M")) {
+                try {
+                    return Integer.valueOf(duration.substring(3, duration.length() - 1));
+                } catch (NumberFormatException e) {
+                    //
+                }
+            }
+        }
+        return null;
     }
 
     /**

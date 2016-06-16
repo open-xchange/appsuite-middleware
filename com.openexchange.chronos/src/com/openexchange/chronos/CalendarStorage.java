@@ -61,14 +61,14 @@ import com.openexchange.exception.OXException;
  */
 public interface CalendarStorage {
 
-    List<Alarm> loadAlarms(int userID, int objectID) throws OXException;
-
     Event loadEvent(int objectID) throws OXException;
 
-    int insertEvent(Event event) throws OXException;
+    List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
 
-    void insertAlarms(int userID, int objectID, List<Alarm> alarms);
+    List<Event> loadEventsInFolder(int folderID, Date from, Date until) throws OXException;
 
-    List<Event> loadEvents(int userID, int folderID, Date from, Date until, boolean onlyOwn) throws OXException;
+    List<Event> loadEventsInFolderCreatedBy(int folderID, int createdBy, Date from, Date until) throws OXException;
+
+    List<Event> loadEventsOfUser(int userID, Date from, Date until) throws OXException;
 
 }

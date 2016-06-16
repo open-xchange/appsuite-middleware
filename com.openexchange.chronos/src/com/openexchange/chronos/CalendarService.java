@@ -66,6 +66,8 @@ public interface CalendarService {
 
     List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs) throws OXException;
 
-    List<UserizedEvent> getEvents(ServerSession session, int folderID, Date from, Date until) throws OXException;
+    List<UserizedEvent> getEventsInFolder(ServerSession session, int folderID, Date from, Date until) throws OXException;
+
+    List<UserizedEvent> getEventsOfUser(ServerSession session, Date from, Date until) throws OXException;
 
 }

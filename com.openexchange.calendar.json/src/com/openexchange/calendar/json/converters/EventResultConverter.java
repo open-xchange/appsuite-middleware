@@ -182,6 +182,7 @@ public class EventResultConverter implements ResultConverter {
         if (null != event.getOrganizer() && 0 < event.getOrganizer().getEntity()) {
             jsonObject.putOpt(AppointmentFields.ORGANIZER_ID, event.getOrganizer().getEntity());
         }
+        jsonObject.putOpt(AppointmentFields.ALARM, Event2Appointment.getReminder(event.getAlarms()));
         List<Attendee> attendees = event.getAttendees();
         if (null != attendees && 0 < attendees.size()) {
             JSONArray participantsArray = new JSONArray(attendees.size());
