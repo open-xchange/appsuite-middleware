@@ -27,7 +27,7 @@ properties:
     description: The size of the document in bytes.
   version:
     type: string
-    description: Version of the document. New documents start at 1. Every update increments the version by 1.
+    description: Version of the document. NULL can be used to denote the most recent version and will be set in responses if versions are not supported by the underlying storage.
   description:
     type: string
     description: A description if the item.
