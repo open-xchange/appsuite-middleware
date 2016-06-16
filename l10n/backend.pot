@@ -52,6 +52,12 @@ msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
+msgid ""
+"The server configuration cannot be retrieved due to an internal server "
+"error. Please try again later."
+msgstr ""
+
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
 msgid "Verification of client ticket failed."
