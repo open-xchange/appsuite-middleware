@@ -88,19 +88,29 @@ public class MailMetadata extends DefaultFile {
         toHeaders = getAddressHeader("To", message);
     }
 
-    public Object renderJSON() {
+    /**
+     * Serializes the mail metadata to JSON.
+     *
+     * @return The mail metadata as JSON object, or <code>null</code> if an error occurs during serialization
+     */
+    public JSONObject renderJSON() {
         try {
-            JSONObject map = new JSONObject();
-            map.put("subject", null == originalSubject ? JSONObject.NULL : MimeMessageUtility.decodeMultiEncodedHeader(originalSubject));
-            map.put("id", null == origUid ? JSONObject.NULL : origUid.toString());
-            map.put("folder", null == origFolder ? JSONObject.NULL : MailFolderUtility.prepareFullname(0, origFolder));
-            map.put("from", fromHeaders == null || fromHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(fromHeaders).asList());
-            map.put("to", toHeaders == null || toHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(toHeaders).asList());
-            return map;
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("subject", null == originalSubject ? JSONObject.NULL : MimeMessageUtility.decodeMultiEncodedHeader(originalSubject));
+            jsonObject.put("id", null == origUid ? JSONObject.NULL : origUid.toString());
+            jsonObject.put("folder", null == origFolder ? JSONObject.NULL : MailFolderUtility.prepareFullname(0, origFolder));
+            jsonObject.put("from", fromHeaders == null || fromHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(fromHeaders));
+            jsonObject.put("to", toHeaders == null || toHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(toHeaders));
+            return jsonObject;
         } catch (JSONException e) {
             org.slf4j.LoggerFactory.getLogger(MailMetadata.class).warn("Error seriliazing mail metadata to JSON", e);
             return null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(renderJSON());
     }
 
 }
