@@ -49,37 +49,32 @@
 
 package com.openexchange.server.ajax.ping;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PingAJAXActionFactory}
+ * {@link TimeAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public class PingAJAXActionFactory implements AJAXActionServiceFactory {
+@DispatcherNotes(noSession = true)
+public class TimeAction implements AJAXActionService {
 
-    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping", "time", "whoami");
-    private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>() {{
-        put("ping", new PingAction());
-        put("time", new TimeAction());
-        put("whoami", new WhoAmIAction());
-    }};
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return SUPPORTED_SERVICES;
+    /**
+     * Initializes a new {@link TimeAction}.
+     */
+    public TimeAction() {
+        super();
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return ACTIONS.get(action);
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        return new AJAXRequestResult(Long.valueOf(System.currentTimeMillis()), "json");
     }
 
 }
