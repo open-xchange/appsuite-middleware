@@ -65,8 +65,8 @@ public class SQL {
 
     public static final String SELECT_EVENT_STMT =
         "SELECT creating_date,created_from,changing_date,changed_from,fid,pflag,timestampfield01,timestampfield02,timezone," +
-            "intfield02,intfield03,intfield04,intfield05,intfield06,intfield07,intfield08,field01,field02,field04,field06,field07," +
-            "field08,field09,uid,organizer,sequence,organizerId,principal,principalId,filename " +
+            "intfield01,intfield02,intfield03,intfield04,intfield05,intfield06,intfield07,intfield08,field01,field02,field04,field06," +
+            "field07,field08,field09,uid,organizer,sequence,organizerId,principal,principalId,filename " +
             "FROM prg_dates WHERE cid=? AND intfield01=?;";
 
     public static final String SELECT_EVENTS_IN_FOLDER_STMT =
@@ -77,6 +77,14 @@ public class SQL {
             "AND prg_dates.intfield01=prg_dates_members.object_id " +
             "WHERE prg_dates.cid=? AND prg_dates.timestampfield01<=? AND prg_dates.timestampfield02>=? " +
             "AND (prg_dates.fid=? OR prg_dates_members.pfid=?);";
+
+    public static final String SELECT_EVENTS_OF_USER_STMT =
+        "SELECT creating_date,created_from,changing_date,changed_from,fid,pflag,timestampfield01,timestampfield02,timezone," +
+            "intfield01,intfield02,intfield03,intfield04,intfield05,intfield06,intfield07,intfield08,field01,field02,field04,field06," +
+            "field07,field08,field09,uid,organizer,sequence,organizerId,principal,principalId,filename, " +
+            "m.pfid " +
+            "FROM prg_dates AS d LEFT JOIN prg_dates_members AS m ON d.cid=m.cid AND d.intfield01=m.object_id " +
+            "WHERE d.cid=? AND d.timestampfield01<=? AND d.timestampfield02>=? AND m.member_uid=?;";
 
     public static final String SELECT_ALARMS_STMT =
         "SELECT r.alarm,r.recurrence,r.description,m.reminder FROM reminder AS r LEFT JOIN prg_dates_members AS m ";
