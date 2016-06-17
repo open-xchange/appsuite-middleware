@@ -56,7 +56,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.sms.SMSExceptionCode;
 
 /**
  * {@link PlistSMSRateLimitTest}
@@ -84,16 +86,14 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 3, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMS", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
 
         // Expecting an SENT_QUOTA_EXCEEDED exeption
         response = client.execute(req);
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 20, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED.create().getErrorCode(), response.getException().getErrorCode());
 
         // Wait until user should be able to send sms again 
         Thread.sleep(11000);
@@ -102,8 +102,7 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 3, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMS", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
     }
 
     @Override

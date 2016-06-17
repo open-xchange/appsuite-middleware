@@ -58,7 +58,9 @@ import org.json.JSONObject;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.sms.SMSExceptionCode;
 
 /**
  * {@link PlistSMSTest}
@@ -91,8 +93,8 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
                 // scenario disabled
                 continue;
             }
-            assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 3, response.getException().getCode());
-            assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMS", response.getException().getPrefix());
+
+            assertEquals("Unexpected response from the server! Response does contain a wrong exception.", SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
         }
     }
 
@@ -106,8 +108,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 22, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
     }
 
     public void testExecute_invalidNumber() throws Exception {
@@ -120,8 +121,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 22, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
 
         jsonString = "{\"sms\":\"abcde\"}";
         body = new JSONObject(jsonString);
@@ -130,8 +130,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 22, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
     }
 
     public void testDownload() throws Exception {
