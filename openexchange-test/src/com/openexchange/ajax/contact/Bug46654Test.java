@@ -49,40 +49,53 @@
 
 package com.openexchange.ajax.contact;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.contact.action.AllRequest;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.java.util.UUIDs;
 
-public final class ContactBugTestSuite extends TestSuite {
+/**
+ * {@link Bug46654Test}
+ *
+ * list of contacts not displayed in address book
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
+ */
+public class Bug46654Test extends AbstractManagedContactTest {
 
-    private ContactBugTestSuite() {
-        super();
-    }
+    /**
+     * Initializes a new {@link Bug46654Test}.
+     *
+     * @param name The test name
+     */
+	public Bug46654Test(String name) {
+		super(name);
+	}
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug4409Test.class);
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug12716Test.class);
-        tests.addTestSuite(Bug13931Test.class);
-        tests.addTestSuite(Bug13960Test.class);
-        tests.addTestSuite(Bug15317Test.class);
-        tests.addTestSuite(Bug15315Test.class);
-        tests.addTestSuite(Bug15937Test.class);
-        tests.addTestSuite(Bug16515Test.class);
-        tests.addTestSuite(Bug16618Test.class);
-        tests.addTestSuite(Bug17513Test.class);
-        tests.addTestSuite(Bug13915FileAsViaJSON.class);
-        tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
-        tests.addTestSuite(Bug19827Test.class);
-        tests.addTestSuite(Bug25300Test.class);
-        tests.addTestSuite(Bug28185Test.class);
-        tests.addTestSuite(Bug31993Test.class);
-        tests.addTestSuite(Bug34075Test.class);
-        tests.addTestSuite(Bug32635Test.class);
-        tests.addTestSuite(Bug35059Test.class);
-        tests.addTestSuite(Bug36943Test.class);
-        tests.addTestSuite(Bug42225Test.class);
-        tests.addTestSuite(Bug46654Test.class);
-        return tests;
-    }
+    public void testSortUnnamedList() throws Exception {
+        /*
+         * generate test contact on server (and two more to make sorting kick in)
+         */
+        Contact list = new Contact();
+        list.setParentFolderID(folderID);
+        list.setMarkAsDistributionlist(true);
+        list.setDistributionList(new DistributionListEntryObject[] {
+            new DistributionListEntryObject("Otto", "otto@exmample.com", DistributionListEntryObject.INDEPENDENT),
+            new DistributionListEntryObject("Horst", "horst@exmample.com", DistributionListEntryObject.INDEPENDENT)
+        });
+        list = manager.newAction(list);
+        manager.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
+        manager.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
+        /*
+         * get all contacts, sorted by column 607
+         */
+        int[] columns = { 1,20,101,607 };
+        AllRequest allRequest = new AllRequest(folderID, columns, Contact.SPECIAL_SORTING, Order.ASCENDING, null);
+        CommonAllResponse allResponse = getClient().execute(allRequest);
+        assertFalse(allResponse.hasError());
+	}
+
 }
