@@ -1510,7 +1510,7 @@ Responsible for sending out notifications for changed object permissions of an i
 |filename|Displayed filename of the document.|false|string||
 |file_mimetype|MIME type of the document. The client converts known types to more readable names before displaying them.|false|string||
 |file_size|The size of the document in bytes.|false|integer (int64)||
-|version|Version of the document. New documents start at 1. Every update increments the version by 1.|false|string||
+|version|Version of the document. NULL can be used to denote the most recent version and will be set in responses if versions are not supported by the underlying storage.|false|string||
 |description|A description if the item.|false|string||
 |locked_until|The time until which this item will presumably be locked. Only set if the docment is currently locked, 0 otherwise.|false|integer (int64)||
 |file_md5sum|MD5Sum of the document.|false|string||
