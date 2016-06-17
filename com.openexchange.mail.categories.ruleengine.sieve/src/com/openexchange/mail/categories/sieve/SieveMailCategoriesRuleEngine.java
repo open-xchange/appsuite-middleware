@@ -144,6 +144,7 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             Rule newRule = mailCategoryRule2SieveRule(rule, type);
 
             if (oldRule != null) {
+                newRule.setPosition(oldRule.getPosition());
                 mailFilterService.updateFilterRule(creds, newRule, oldRule.getUniqueId());
             } else {
                 mailFilterService.createFilterRule(creds, newRule);

@@ -843,7 +843,7 @@ public class Filestore2UserUtil {
                 return true;
             } catch (SQLException e) {
                 if (Databases.isPrimaryKeyConflictInMySQL(e)) {
-                    // Another machine is currently processing
+                    // Another machine is currently processing or the update has already been applied (text = TERMINATED)
                     return false;
                 }
                 throw e;

@@ -126,7 +126,6 @@ public class DefaultNotificationParticipantResolver implements
 				appointment.getParticipants().length);
 		final Set<String> externalGuardian = new HashSet<String>();
 
-		final Set<Integer> groupIds = new HashSet<Integer>();
 		final Set<Integer> resourceIds = new HashSet<Integer>();
 
 		Participant[] participants = appointment.getParticipants();
@@ -144,9 +143,6 @@ public class DefaultNotificationParticipantResolver implements
 						externalGuardian
 								.add(ep.getEmailAddress().toLowerCase());
 					}
-				} else if (participant instanceof GroupParticipant) {
-					final GroupParticipant gp = (GroupParticipant) participant;
-					groupIds.add(gp.getIdentifier());
 				} else if (participant instanceof ResourceParticipant) {
 					final ResourceParticipant rp = (ResourceParticipant) participant;
 					resourceIds.add(rp.getIdentifier());
@@ -190,19 +186,7 @@ public class DefaultNotificationParticipantResolver implements
 							externalGuardian.add(ep.getEmailAddress()
 									.toLowerCase());
 						}
-					} else if (participant instanceof GroupParticipant) {
-						final GroupParticipant gp = (GroupParticipant) participant;
-						groupIds.add(gp.getIdentifier());
 					}
-				}
-			}
-		}
-
-		for (final int id : groupIds) {
-			final int[] member = groupService.getGroup(ctx, id).getMember();
-			for (final int i : member) {
-				if (!userIds.containsKey(i)) {
-					userIds.put(i, new UserParticipant(i));
 				}
 			}
 		}

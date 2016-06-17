@@ -1694,8 +1694,8 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlContent;
     }
 
-    private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);
-    private static final Pattern PATTERN_CC2 = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
+    private static final Pattern PATTERN_CC = Pattern.compile("(<!?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])??>)", Pattern.DOTALL);
+    private static final Pattern PATTERN_CC2 = Pattern.compile("(<!?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)(<!\\[endif\\]?>)", Pattern.DOTALL);
 
     private static final String CC_START_IF = "<!-- [if";
 

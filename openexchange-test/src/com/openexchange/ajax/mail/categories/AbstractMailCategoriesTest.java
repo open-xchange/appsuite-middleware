@@ -50,23 +50,13 @@
 package com.openexchange.ajax.mail.categories;
 
 import java.io.IOException;
-import java.rmi.Naming;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import org.json.JSONException;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.AbstractMailTest;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConstants;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link AbstractMailCategoriesTest}
@@ -87,7 +77,6 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
     
     protected String EML;
     
-
     /**
      * Initializes a new {@link AbstractMailCategoriesTest}.
      * 
@@ -100,19 +89,12 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
         super(name);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        reconnect();
         values = getClient().getValues();
         clearFolder(values.getInboxFolder()); // always start with an empty inbox
-        OXUserInterface oxUserRemote = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        String login = AJAXConfig.getProperty(User.OXAdmin.getLogin());
-        String password = AJAXConfig.getProperty(User.OXAdmin.getPassword());
-        Set<String> capsToAdd = new HashSet<String>();
-        capsToAdd.add("mail_categories");
-        oxUserRemote.changeCapabilities(new Context(values.getContextId()), new com.openexchange.admin.rmi.dataobjects.User(values.getUserId()), capsToAdd, Collections.emptySet(), Collections.emptySet(), new Credentials(login, password));
-        
         EML = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 
             "From: " + getSendAddress() + "\n" +
             "To: " + getSendAddress() + "\n" +
