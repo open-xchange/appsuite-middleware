@@ -114,7 +114,10 @@ public class ListenerRegistrar implements DriveEventPublisher  {
                      * remove from root folder <=> listener id mapping, too
                      */
                     LongPollingListener listener = notification.getValue();
-                    listenersPerFolder.remove(getFolderKey(listener.getSession()), notification.getKey());
+                    int contextID = listener.getSession().getServerSession().getContextId();
+                    for (String rootFolderID : listener.getRootFolderIDs()) {
+                        listenersPerFolder.remove(getFolderKey(rootFolderID, contextID), notification.getKey());
+                    }
                     LOG.debug("Unregistered listener: {}", listener);
                 }
             })
@@ -204,10 +207,6 @@ public class ListenerRegistrar implements DriveEventPublisher  {
 
     private static String getFolderKey(String folderID, int contextID) {
         return String.valueOf(contextID) + ':' + folderID;
-    }
-
-    private static String getFolderKey(DriveSession session) {
-        return getFolderKey(session.getRootFolderID(), session.getServerSession().getContextId());
     }
 
     private static String getListenerID(DriveSession session, List<String> rootFolderIDs) {
