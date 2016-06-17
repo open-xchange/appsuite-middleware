@@ -70,6 +70,7 @@ import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.Matche
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.OverJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.RegexJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.UnderJSONParserImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.UserJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AddressParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AllOfParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AnyOfParserImpl;
@@ -171,6 +172,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ComparisonParserRegistry.addParser(MatchType.contains, new ContainsJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.regex, new RegexJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.under, new UnderJSONParserImpl());
+        ComparisonParserRegistry.addParser(MatchType.user, new UserJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.over, new OverJSONParserImpl());
 
         // writer
