@@ -85,7 +85,7 @@ public class AllOfParserImpl implements TestParser {
         for (int a = 0; a < jsonTestArray.length(); a++) {
             final JSONObject jsobSubObj = jsonTestArray.getJSONObject(a);
             final String subtestname = jsobSubObj.getString("id");
-            TestCommand testCommand = TestCommand.valueOf(subtestname.toLowerCase());
+            TestCommand testCommand = TestCommand.valueOf(subtestname.toUpperCase());
             final TestParser testParser = TestParserFactory.getParser(testCommand);
             tests[a] = testParser.parse(jsobSubObj);
         }
