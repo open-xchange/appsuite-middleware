@@ -52,7 +52,13 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 import java.util.EnumSet;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.ComparisonWriter;
+import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.ComparisonWriterRegistry;
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.CommonTestArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.argument.SizeTestArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
@@ -77,7 +83,17 @@ public class SizeTestWriterImpl extends AbstractWriterImpl<SizeTestArgument> {
      * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
      */
     @Override
-    public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
-        return super.write((Test<TestArgument>) type, EnumSet.allOf(SizeTestArgument.class), jsonObject);
+    public JSONObject write(Test<? extends TestArgument> test, JSONObject jsonObject) throws JSONException {
+        jsonObject.put(CommonTestArgument.id.name(), test.getTestCommand().name().toLowerCase());
+
+        final Comparison<? extends ComparisonArgument> comparison = test.getComparison();
+
+        if (comparison != null) {
+            final MatchType matchType = comparison.getMatchType();
+            final ComparisonWriter compWriter = ComparisonWriterRegistry.getWriter(matchType);
+            compWriter.write((Comparison<ComparisonArgument>) comparison, jsonObject);
+        }
+        
+        return jsonObject;
     }
 }
