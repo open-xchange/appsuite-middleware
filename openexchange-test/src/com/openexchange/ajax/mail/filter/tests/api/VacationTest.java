@@ -54,9 +54,9 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.CurrentDateTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
@@ -184,7 +184,7 @@ public class VacationTest extends AbstractMailFilterTest {
             Vacation vacation = new Vacation(7, Collections.singletonList("foo@invalid.tld"), null, "if true \r\n{\r\n    vacation :days 13 :addresses [ \"root@localhost\" , \"billg@microsoft.com\" ] :mime :subject \"Betreff\" \"Text\r\nText\" ;\r\n}\r\n");
             expected.addAction(vacation);
 
-            AbstractTest[] tests = new AbstractTest[] { new CurrentDateTest(3, "is", "weekday") };
+            Test<?>[] tests = new Test<?>[] { new CurrentDateTest(3, "is", "weekday") };
             expected.setTest(new AllOfTest(tests));
 
             int id = mailFilterAPI.createRule(expected);
@@ -209,7 +209,7 @@ public class VacationTest extends AbstractMailFilterTest {
             Vacation vacation = new Vacation(7, Collections.singletonList("foo@invalid.tld"), null, "if true \r\n{\r\n    vacation :days 13 :addresses [ \"root@localhost\" , \"billg@microsoft.com\" ] :mime :subject \"Betreff\" \"Text\r\nText\" ;\r\n}\r\n");
             expected.addAction(vacation);
 
-            AbstractTest[] tests = new AbstractTest[] { new CurrentDateTest(3627279000000L, "is", "time") };
+            Test<?>[] tests = new Test<?>[] { new CurrentDateTest(3627279000000L, "is", "time") };
             expected.setTest(new AllOfTest(tests));
 
             int id = mailFilterAPI.createRule(expected);

@@ -52,31 +52,57 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.test;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.EnvelopeTest;
-
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.EnvelopeTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * EnvelopeParserImpl
+ * {@link EnvelopeParserImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class EnvelopeParserImpl implements TestParser {
 
-	@Override
-    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
-		final JSONArray jsonHeaderArray = jsonObject.getJSONArray("headers");
-		final String[] headers = new String[jsonHeaderArray.length()];
-		for (int a = 0; a < headers.length; a++) {
-			headers[a] = jsonHeaderArray.getString(a);
-		}
+    /**
+     * Initialises a new {@link EnvelopeParserImpl}.
+     */
+    public EnvelopeParserImpl() {
+        super();
+    }
 
-		final JSONArray jsonValueArray = jsonObject.getJSONArray("values");
-		final String[] values = new String[jsonHeaderArray.length()];
-		for (int a = 0; a < headers.length; a++) {
-			values[a] = jsonValueArray.getString(a);
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
+    @Override
+    public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
+        final JSONArray jsonHeaderArray = jsonObject.getJSONArray("headers");
+        final String[] headers = new String[jsonHeaderArray.length()];
+        for (int a = 0; a < headers.length; a++) {
+            headers[a] = jsonHeaderArray.getString(a);
+        }
 
-		return new EnvelopeTest(null, headers, values);
-	}
+        final JSONArray jsonValueArray = jsonObject.getJSONArray("values");
+        final String[] values = new String[jsonValueArray.length()];
+        for (int a = 0; a < values.length; a++) {
+            values[a] = jsonValueArray.getString(a);
+        }
+
+        // TODO: Check if comparison is needed
+        //        final String comparisonName = jsonObject.getString("comparison");
+        //        MatchType matchType = MatchType.valueOf(comparisonName);
+        //
+        //        final ComparisonParser compParser = ComparisonParserRegistry.getParser(matchType);
+        //        final Comparison<? extends ComparisonArgument> comparison = compParser.parse(jsonObject);
+
+        Test<EnvelopeTestArgument> addressTest = new EnvelopeTest();
+        //addressTest.setComparison(comparison);
+        addressTest.setTestArgument(EnvelopeTestArgument.headers, headers);
+        addressTest.setTestArgument(EnvelopeTestArgument.values, values);
+
+        return addressTest;
+    }
 }

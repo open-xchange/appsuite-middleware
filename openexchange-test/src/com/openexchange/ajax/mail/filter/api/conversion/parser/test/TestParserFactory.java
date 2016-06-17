@@ -50,7 +50,7 @@
 package com.openexchange.ajax.mail.filter.api.conversion.parser.test;
 
 import java.util.HashMap;
-
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 
 /**
  * TestParserFactory
@@ -59,17 +59,17 @@ import java.util.HashMap;
  */
 public class TestParserFactory {
 
-	final static HashMap<String, TestParser> parserMap = new HashMap<String, TestParser>();
+    final static HashMap<TestCommand, TestParser> parserMap = new HashMap<TestCommand, TestParser>();
 
-	public TestParserFactory() {
+    public TestParserFactory() {
 
-	}
+    }
 
-	public static void addParser(final String name, final TestParser actionWriter) {
-		parserMap.put(name, actionWriter);
-	}
+    public static void addParser(final TestCommand name, final TestParser actionWriter) {
+        parserMap.put(name, actionWriter);
+    }
 
-	public static TestParser getParser(String name) {
-		return parserMap.get(name);
-	}
+    public static TestParser getParser(TestCommand name) {
+        return parserMap.get(name);
+    }
 }

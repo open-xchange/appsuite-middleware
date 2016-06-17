@@ -63,11 +63,11 @@ import com.openexchange.ajax.mail.filter.api.dao.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.OverComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.UserComparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.UserComparisonArgument;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AddressTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.SizeTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 import com.openexchange.exception.OXException;
 
@@ -124,7 +124,7 @@ public class NewTest extends AbstractMailFilterTest {
             AddressTest userHeaderTest = new AddressTest(comparison, new String[] { "from" }, new String[] { "zitate.at" });
             HeaderTest headerTest = new HeaderTest(new ContainsComparison(), new String[] { "subject" }, new String[] { "Zitat des Tages" });
 
-            AbstractTest[] tests = new AbstractTest[] { userHeaderTest, headerTest };
+            Test<?>[] tests = new Test<?>[] { userHeaderTest, headerTest };
             AllOfTest allOfTest = new AllOfTest(tests);
 
             expected.setTest(allOfTest);
@@ -173,7 +173,7 @@ public class NewTest extends AbstractMailFilterTest {
         AddressTest userHeaderTest = new AddressTest(new UserComparison(), null, new String[] { "zitate.at" });
         HeaderTest headerTest = new HeaderTest(new ContainsComparison(), new String[] { "subject" }, new String[] { "Zitat des Tages" });
 
-        AbstractTest[] tests = new AbstractTest[] { userHeaderTest, headerTest };
+        Test<?>[] tests = new Test<?>[] { userHeaderTest, headerTest };
         AllOfTest allOfTest = new AllOfTest(tests);
 
         expected.setTest(allOfTest);

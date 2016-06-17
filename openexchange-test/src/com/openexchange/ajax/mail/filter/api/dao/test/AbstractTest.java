@@ -49,16 +49,28 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
+import com.openexchange.ajax.mail.filter.api.dao.AbstractMailFilterDataObject;
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.CommonTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
+
 /**
- * AbstractTest
+ * {@link AbstractTest}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractTest {
+abstract class AbstractTest extends AbstractMailFilterDataObject<TestArgument> {
 
-	protected String name;
+    Comparison<? extends ComparisonArgument> comparison;
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * Initialises a new {@link AbstractTest}.
+     */
+    public AbstractTest(TestCommand testCommand) {
+        super();
+        addArgument(CommonTestArgument.id, testCommand.name().toLowerCase());
+    }
 }

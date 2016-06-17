@@ -49,89 +49,75 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
-import java.util.Arrays;
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.HeaderTestArgument;
 
 /**
  * HeaderTest
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class HeaderTest extends AbstractTest {
+public class HeaderTest extends AbstractTest implements Test<HeaderTestArgument> {
 
-    public static final String HEADER = "header";
-
-    protected Comparison comparision;
-
-    protected String[] headers;
-
-    protected String[] values;
-
-    public HeaderTest(final Comparison comparision, final String[] headers, final String[] values) {
-        name = HEADER;
-        this.comparision = comparision;
-        this.headers = headers;
-        this.values = values;
+    /**
+     * Initialises a new {@link HeaderTest}.
+     */
+    public HeaderTest(Comparison<? extends ComparisonArgument> comparison, String[] headers, String[] values) {
+        super(TestCommand.HEADER);
+        this.comparison = comparison;
+        setTestArgument(HeaderTestArgument.headers, headers);
+        setTestArgument(HeaderTestArgument.values, values);
     }
 
-    public Comparison getComparison() {
-        return comparision;
-    }
-
-    public String[] getHeaders() {
-        return headers;
-    }
-
-    public String[] getValues() {
-        return values;
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestCommand()
+     */
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((comparision == null) ? 0 : comparision.hashCode());
-        result = prime * result + Arrays.hashCode(headers);
-        result = prime * result + Arrays.hashCode(values);
-        return result;
+    public TestCommand getTestCommand() {
+        return TestCommand.HEADER;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setComparison(com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison)
+     */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final HeaderTest other = (HeaderTest) obj;
-        if (comparision == null) {
-            if (other.comparision != null) {
-                return false;
-            }
-        } else if (!comparision.equals(other.comparision)) {
-            return false;
-        }
-        if (!Arrays.equals(headers, other.headers)) {
-            return false;
-        }
-        if (!Arrays.equals(values, other.values)) {
-            return false;
-        }
-        return true;
+    public void setComparison(Comparison<? extends ComparisonArgument> comparison) {
+        this.comparison = comparison;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument, java.lang.Object)
+     */
     @Override
-    public String toString() {
-        final StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("name: " + name + ", ");
-        stringBuffer.append("headers: " + Arrays.toString(headers) + ", ");
-        stringBuffer.append("values: " + Arrays.toString(headers) + ", ");
-        stringBuffer.append("comp: " + comparision);
+    public void setTestArgument(HeaderTestArgument argument, Object value) {
+        addArgument(argument, value);
+    }
 
-        return stringBuffer.toString();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument)
+     */
+    @Override
+    public Object getTestArgument(HeaderTestArgument argument) {
+        return getArguments().get(argument);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getComparison()
+     */
+    @Override
+    public Comparison<? extends ComparisonArgument> getComparison() {
+        return comparison;
     }
 }

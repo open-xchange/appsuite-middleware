@@ -49,56 +49,35 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 
-import org.json.JSONArray;
+import java.util.EnumSet;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.ComparisonWriter;
-import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.ComparisonWriterRegistry;
-import com.openexchange.ajax.mail.filter.api.dao.MatchType;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.api.dao.test.AddressTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.AddressTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * AddressWriterImpl
+ * {@link AddressWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AddressWriterImpl implements TestWriter {
+public class AddressWriterImpl extends AbstractWriterImpl<AddressTestArgument> {
 
+    /**
+     * Initialises a new {@link AddressWriterImpl}.
+     */
+    public AddressWriterImpl() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
     @Override
-    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
-        final JSONObject jsonObj = new JSONObject();
-        final AddressTest addressTest = (AddressTest) abstractTest;
-
-        jsonObj.put("id", name);
-
-        final Comparison comparison = addressTest.getComparison();
-        final MatchType matchType = comparison.getMatchType();
-        final ComparisonWriter compWriter = ComparisonWriterRegistry.getWriter(matchType);
-        compWriter.write(comparison, jsonObj);
-
-        final String[] headers = addressTest.getHeaders();
-        final String[] values = addressTest.getValues();
-
-        if (headers != null) {
-            final JSONArray jsonHeaderArray = new JSONArray();
-            for (int a = 0; a < headers.length; a++) {
-                jsonHeaderArray.put(headers[a]);
-            }
-
-            jsonObj.put("headers", jsonHeaderArray);
-        }
-
-        if (values != null) {
-            final JSONArray jsonValueArray = new JSONArray();
-            for (int a = 0; a < values.length; a++) {
-                jsonValueArray.put(values[a]);
-            }
-
-            jsonObj.put("values", jsonValueArray);
-        }
-
-        return jsonObj;
+    public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
+        return super.write((Test<TestArgument>) type, EnumSet.allOf(AddressTestArgument.class), jsonObject);
     }
 }

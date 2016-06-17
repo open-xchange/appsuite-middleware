@@ -63,7 +63,7 @@ import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 import com.openexchange.ajax.mail.filter.api.fields.RuleFields;
 import com.openexchange.ajax.parser.DataParser;
 
@@ -167,8 +167,9 @@ public class MailFilterParser extends DataParser {
      */
     private void parseTest(final JSONObject jsonObj, final Rule rule) throws JSONException {
         String testId = jsonObj.getString("id");
-        TestParser testParser = TestParserFactory.getParser(testId);
-        AbstractTest abstractTest = testParser.parseTest(testId, jsonObj);
+        TestCommand tc = TestCommand.valueOf(testId.toUpperCase());
+        TestParser testParser = TestParserFactory.getParser(tc);
+        Test<?> abstractTest = testParser.parse(jsonObj);
         rule.setTest(abstractTest);
     }
 }

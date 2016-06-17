@@ -49,89 +49,77 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.CurrentDateTestArgument;
+
 /**
  * {@link CurrentDateTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CurrentDateTest extends AbstractTest {
-
-    private long time;
-    private String comparison;
-    private String dateTag;
+public class CurrentDateTest extends AbstractTest implements Test<CurrentDateTestArgument> {
 
     /**
-     * Initialises a new {@link CurrentDateTest}.
+     * Initialises a new {@link AllOfTest}.
+     * 
+     * @param testCommand
      */
-    public CurrentDateTest(long time, String comparison, String dateTag) {
-        super();
-        name = "currentdate";
-        this.time = time;
-        this.comparison = comparison;
-        this.dateTag = dateTag;
-    }
-
-    /**
-     * Gets the time
-     *
-     * @return The time
-     */
-    public long getTime() {
-        return time;
-    }
-
-    /**
-     * Sets the time
-     *
-     * @param time The time to set
-     */
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    /**
-     * Gets the comparison
-     *
-     * @return The comparison
-     */
-    public String getComparison() {
-        return comparison;
-    }
-
-    /**
-     * Sets the comparison
-     *
-     * @param comparison The comparison to set
-     */
-    public void setComparison(String comparison) {
-        this.comparison = comparison;
-    }
-
-    /**
-     * Gets the dateTag
-     *
-     * @return The dateTag
-     */
-    public String getDateTag() {
-        return dateTag;
-    }
-
-    /**
-     * Sets the dateTag
-     *
-     * @param dateTag The dateTag to set
-     */
-    public void setDateTag(String dateTag) {
-        this.dateTag = dateTag;
+    public CurrentDateTest(long dateValue, String datePart, String comparison) {
+        super(TestCommand.CURRENTDATE);
+        setTestArgument(CurrentDateTestArgument.datevalue, dateValue);
+        setTestArgument(CurrentDateTestArgument.datepart, datePart);
+        setTestArgument(CurrentDateTestArgument.comparison, comparison);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see java.lang.Object#toString()
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestCommand()
      */
     @Override
-    public String toString() {
-        return "CurrentDateTest [time=" + time + ", comparison=" + comparison + ", dateTag=" + dateTag + "]";
+    public TestCommand getTestCommand() {
+        return TestCommand.CURRENTDATE;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setComparison(com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison)
+     */
+    @Override
+    public void setComparison(Comparison<? extends ComparisonArgument> comparison) {
+        this.comparison = comparison;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getComparison()
+     */
+    @Override
+    public Comparison<? extends ComparisonArgument> getComparison() {
+        return comparison;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument, java.lang.Object)
+     */
+    @Override
+    public void setTestArgument(CurrentDateTestArgument argument, Object value) {
+        addArgument(argument, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument)
+     */
+    @Override
+    public Object getTestArgument(CurrentDateTestArgument argument) {
+        return getArguments().get(argument);
     }
 }

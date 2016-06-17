@@ -52,34 +52,49 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
-
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
+import com.openexchange.ajax.mail.filter.api.dao.test.AnyOfTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.AnyOfTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * AnyOfWriterImpl
+ * {@link AnyOfWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AnyOfWriterImpl implements TestWriter {
+public class AnyOfWriterImpl extends AbstractWriterImpl<AnyOfTestArgument> {
 
-	@Override
-    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		final AllOfTest allOfTest = (AllOfTest)abstractTest;
+    /**
+     * Initialises a new {@link AnyOfWriterImpl}.
+     */
+    public AnyOfWriterImpl() {
+        super();
+    }
 
-		final JSONArray jsonArrayTests = new JSONArray();
-		final AbstractTest[] abstractTests = allOfTest.getTests();
-		for (int a = 0; a < abstractTests.length; a++) {
-			final String subtestname = abstractTests[a].getName();
-			final TestWriter testWriter = TestWriterFactory.getWriter(subtestname);
-			final JSONObject jsonSubTest = testWriter.writeTest(subtestname, abstractTests[a]);
-			jsonArrayTests.put(jsonSubTest);
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
+    @Override
+    public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
+        final JSONObject jsonObj = new JSONObject();
+        final Test<AnyOfTestArgument> anyOfTest = (AnyOfTest) type;
 
-		jsonObj.put("id", name);
-		jsonObj.put("tests", jsonArrayTests);
+        final JSONArray jsonArrayTests = new JSONArray();
+        Test<?>[] tests = (Test<?>[]) anyOfTest.getTestArgument(AnyOfTestArgument.tests);
+        for (int a = 0; a < tests.length; a++) {
+            TestCommand testCommand = tests[a].getTestCommand();
+            TestWriter testWriter = TestWriterFactory.getWriter(testCommand);
+            JSONObject jsonSubTest = testWriter.write(tests[a], new JSONObject());
+            jsonArrayTests.put(jsonSubTest);
+        }
 
-		return jsonObj;
-	}
+        jsonObj.put("id", anyOfTest.getTestCommand().name().toLowerCase());
+        jsonObj.put("tests", jsonArrayTests);
+
+        return jsonObj;
+    }
 }

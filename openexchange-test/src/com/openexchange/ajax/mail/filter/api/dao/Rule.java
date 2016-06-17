@@ -53,7 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 
 /**
  * {@link Rule}
@@ -89,7 +89,7 @@ public class Rule {
 
     protected String[] flags = new String[0];
 
-    protected AbstractTest test = null;
+    protected Test<?> test = null;
 
     protected List<Action<? extends ActionArgument>> actions;
 
@@ -141,11 +141,11 @@ public class Rule {
         this.flags = flags;
     }
 
-    public AbstractTest getTest() {
+    public Test<?> getTest() {
         return test;
     }
 
-    public void setTest(AbstractTest test) {
+    public void setTest(Test<?> test) {
         this.test = test;
     }
 

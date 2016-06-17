@@ -52,28 +52,44 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.test;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
-
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * AllOfParserImpl
+ * {@link AllOfParserImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class AllOfParserImpl implements TestParser {
 
-	@Override
-    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
-		final JSONArray jsonTestArray = jsonObject.getJSONArray("tests");
-		final AbstractTest[] abstractTests = new AbstractTest[jsonTestArray.length()];
-		for (int a = 0; a < jsonTestArray.length(); a++) {
-			final JSONObject jsobSubObj = jsonTestArray.getJSONObject(a);
-			final String subtestname = jsobSubObj.getString("id");
-			final TestParser testParser = TestParserFactory.getParser(subtestname);
-			abstractTests[a] = testParser.parseTest(name, jsobSubObj);
-		}
+    /**
+     * Initialises a new {@link AllOfParserImpl}.
+     */
+    public AllOfParserImpl() {
+        super();
+    }
 
-		return new AllOfTest(abstractTests);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
+    @Override
+    public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
+        final JSONArray jsonTestArray = jsonObject.getJSONArray("tests");
+        final Test<?>[] tests = new Test<?>[jsonTestArray.length()];
+
+        for (int a = 0; a < jsonTestArray.length(); a++) {
+            final JSONObject jsobSubObj = jsonTestArray.getJSONObject(a);
+            final String subtestname = jsobSubObj.getString("id");
+            TestCommand testCommand = TestCommand.valueOf(subtestname.toLowerCase());
+            final TestParser testParser = TestParserFactory.getParser(testCommand);
+            tests[a] = testParser.parse(jsobSubObj);
+        }
+
+        return new AllOfTest(tests);
+    }
 }

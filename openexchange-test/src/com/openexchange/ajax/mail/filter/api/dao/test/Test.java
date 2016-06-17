@@ -59,7 +59,7 @@ import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Test {
+public interface Test<T extends TestArgument> {
 
     /**
      * Returns the {@link TestCommand}
@@ -88,7 +88,7 @@ public interface Test {
      * @param argument The {@link TestArgument} for which to set the value
      * @param value The value of the {@link TestArgument} to set
      */
-    <T extends TestArgument> void setTestArgument(T argument, Object value);
+    void setTestArgument(T argument, Object value);
 
     /**
      * Returns the value of the specified {@link TestArgument}
@@ -96,5 +96,5 @@ public interface Test {
      * @param argument The {@link TestArgument} to return
      * @return The value of the {@link TestArgument}
      */
-    <T extends TestArgument> Object getTestArgument(T argument);
+    Object getTestArgument(T argument);
 }

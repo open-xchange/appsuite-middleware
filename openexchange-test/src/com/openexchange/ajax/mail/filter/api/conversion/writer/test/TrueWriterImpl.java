@@ -51,8 +51,10 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TrueTestArgument;
 
 /**
  * {@link TrueWriterImpl}
@@ -60,21 +62,35 @@ import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class TrueWriterImpl implements TestWriter {
+public class TrueWriterImpl extends AbstractWriterImpl<TrueTestArgument> {
 
+    /**
+     * Initialises a new {@link TrueWriterImpl}.
+     */
+    public TrueWriterImpl() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
     @Override
-    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
+    public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
+        final TrueTest trueTest = (TrueTest) type;
+
         final JSONObject jsonObj = new JSONObject();
-        jsonObj.put("id", name);
+        jsonObj.put("id", type.getTestCommand().name().toLowerCase());
 
-        final TrueTest trueTest = (TrueTest) abstractTest;
-        final AbstractTest test = trueTest.getTest();
-
-        if (test != null) {
-            final TestWriter testWriter = TestWriterFactory.getWriter(test.getName());
-            final JSONObject jsonTestObj = testWriter.writeTest(test.getName(), test);
-            jsonObj.put("test", jsonTestObj);
-        }
+        // TODO: check if 'true' command can have a test argument
+        //        final Test<?> test = trueTest.getTestArgument(TrueTestArgument. test);
+        //
+        //        if (test != null) {
+        //            final TestWriter testWriter = TestWriterFactory.getWriter(test.getName());
+        //            final JSONObject jsonTestObj = testWriter.writeTest(test.getName(), test);
+        //            jsonObj.put("test", jsonTestObj);
+        //        }
 
         return jsonObj;
     }

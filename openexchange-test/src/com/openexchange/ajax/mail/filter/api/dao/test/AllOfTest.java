@@ -49,23 +49,76 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.AllOfTestArgument;
+
 /**
- * AllOfTest
+ * {@link AllOfTest}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AllOfTest extends AbstractTest {
+public class AllOfTest extends AbstractTest implements Test<AllOfTestArgument> {
 
-	public static final String ALLOF = "allof";
+    /**
+     * Initialises a new {@link AllOfTest}.
+     * 
+     * @param testCommand
+     */
+    public AllOfTest(Test<?>[] tests) {
+        super(TestCommand.ALLOF);
+        setTestArgument(AllOfTestArgument.tests, tests);
+    }
 
-	protected AbstractTest[] tests;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestCommand()
+     */
+    @Override
+    public TestCommand getTestCommand() {
+        return TestCommand.ALLOF;
+    }
 
-	public AllOfTest(final AbstractTest[] tests) {
-		name = ALLOF;
-		this.tests = tests;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setComparison(com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison)
+     */
+    @Override
+    public void setComparison(Comparison<? extends ComparisonArgument> comparison) {
+        this.comparison = comparison;
+    }
 
-	public AbstractTest[] getTests() {
-		return tests;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getComparison()
+     */
+    @Override
+    public Comparison<? extends ComparisonArgument> getComparison() {
+        return comparison;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument, java.lang.Object)
+     */
+    @Override
+    public void setTestArgument(AllOfTestArgument argument, Object value) {
+        addArgument(argument, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument)
+     */
+    @Override
+    public Object getTestArgument(AllOfTestArgument argument) {
+        return getArguments().get(argument);
+    }
 }

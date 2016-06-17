@@ -51,20 +51,42 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.test;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.ComparisonParser;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.ComparisonParserRegistry;
+import com.openexchange.ajax.mail.filter.api.dao.MatchType;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.SizeTest;
-
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * TrueParserImpl
+ * {@link SizeTestParserImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SizeTestParserImpl implements TestParser {
 
-	@Override
-    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
-		// TODO: parse comparator and size
-		return new SizeTest(null);
-	}
+    /**
+     * Initialises a new {@link SizeTestParserImpl}.
+     */
+    public SizeTestParserImpl() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
+    @Override
+    public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
+        final String comparisonName = jsonObject.getString("comparison");
+        MatchType matchType = MatchType.valueOf(comparisonName);
+
+        final ComparisonParser compParser = ComparisonParserRegistry.getParser(matchType);
+        final Comparison<? extends ComparisonArgument> comparison = compParser.parse(jsonObject);
+        return new SizeTest(comparison);
+    }
 }

@@ -52,8 +52,9 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.test;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.CurrentDateTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
  * {@link CurrenttDateParserImpl}
@@ -72,19 +73,23 @@ public class CurrenttDateParserImpl implements TestParser {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.ajax.mail.filter.parser.test.TestParser#parseTest(java.lang.String, org.json.JSONObject)
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @Override
-    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
+    public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
         JSONArray dateValueArray = jsonObject.optJSONArray("datevalue");
         long time = -1;
         if (dateValueArray != null && !dateValueArray.isEmpty()) {
             time = dateValueArray.getLong(0);
         }
-        String comparison = jsonObject.getString("comparison");
         String dateTag = jsonObject.getString("datepart");
-
-        return new CurrentDateTest(time, comparison, dateTag);
+        String comparisonName = jsonObject.getString("comparison");
+        //        MatchType matchType = MatchType.valueOf(comparisonName);
+        //
+        //        final ComparisonParser compParser = ComparisonParserRegistry.getParser(matchType);
+        //        final Comparison<? extends ComparisonArgument> comparison = compParser.parse(jsonObject);
+        
+        return new CurrentDateTest(time, dateTag, comparisonName);
     }
 
 }

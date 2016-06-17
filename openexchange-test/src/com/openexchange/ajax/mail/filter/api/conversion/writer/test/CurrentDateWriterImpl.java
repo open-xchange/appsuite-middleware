@@ -49,17 +49,19 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 
+import java.util.EnumSet;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.api.dao.test.CurrentDateTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.CurrentDateTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
  * {@link CurrentDateWriterImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CurrentDateWriterImpl implements TestWriter {
+public class CurrentDateWriterImpl extends AbstractWriterImpl<CurrentDateTestArgument> {
 
     /**
      * Initialises a new {@link CurrentDateWriterImpl}.
@@ -71,17 +73,10 @@ public class CurrentDateWriterImpl implements TestWriter {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.ajax.mail.filter.api.writer.test.TestWriter#writeTest(java.lang.String, com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest)
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
      */
     @Override
-    public JSONObject writeTest(String name, AbstractTest abstractTest) throws JSONException {
-        CurrentDateTest test = (CurrentDateTest) abstractTest;
-        JSONObject json = new JSONObject();
-        json.put("id", name);
-        json.put("comparison", test.getComparison());
-        json.append("datevalue", test.getTime());
-        json.put("datepart", test.getDateTag());
-        return json;
+    public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
+        return super.write((Test<TestArgument>) type, EnumSet.allOf(CurrentDateTestArgument.class), jsonObject);
     }
-
 }

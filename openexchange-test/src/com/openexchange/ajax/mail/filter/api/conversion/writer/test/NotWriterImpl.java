@@ -51,29 +51,43 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.NotTest;
-
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.NotTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * NotWriterImpl
+ * {@link NotWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class NotWriterImpl implements TestWriter {
+public class NotWriterImpl extends AbstractWriterImpl<NotTestArgument> {
 
-	@Override
-    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		final NotTest notTest = (NotTest)abstractTest;
-		final AbstractTest test = notTest.getTest();
+    /**
+     * Initialises a new {@link NotWriterImpl}.
+     */
+    public NotWriterImpl() {
+        super();
+    }
 
-		final TestWriter testWriter = TestWriterFactory.getWriter(test.getName());
-		final JSONObject jsonTestObj = testWriter.writeTest(test.getName(), test);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
+    @Override
+    public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
+        final JSONObject jsonObj = new JSONObject();
+        final NotTest notTest = (NotTest) type;
+        final Test<?> test = (Test<?>) notTest.getTestArgument(NotTestArgument.test);
 
-		jsonObj.put("id", name);
-		jsonObj.put("test", jsonTestObj);
+        final TestWriter testWriter = TestWriterFactory.getWriter(test.getTestCommand());
+        final JSONObject jsonTestObj = testWriter.write(test, new JSONObject());
 
-		return jsonObj;
-	}
+        jsonObj.put("id", notTest.getTestCommand().name().toLowerCase());
+        jsonObj.put("test", jsonTestObj);
+
+        return jsonObj;
+    }
 }
