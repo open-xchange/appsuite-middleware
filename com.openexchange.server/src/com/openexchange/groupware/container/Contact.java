@@ -4084,6 +4084,9 @@ public class Contact extends CommonObject {
             String sortName = getDisplayName();
             if (Strings.isEmpty(sortName)) {
                 sortName = getSurName();
+                if (Strings.isEmpty(sortName)) {
+                    sortName = ""; // empty
+                }
             }
             return sortName;
         }
