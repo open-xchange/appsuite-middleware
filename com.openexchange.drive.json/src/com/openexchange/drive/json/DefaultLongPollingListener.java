@@ -100,6 +100,11 @@ public abstract class DefaultLongPollingListener implements LongPollingListener 
         return null == tokenRef ? null == token : tokenRef.equals(token) || tokenRef.equals(getMD5(token));
     }
 
+    @Override
+    public List<String> getRootFolderIDs() {
+        return rootFolderIDs;
+    }
+
     /**
      * Creates an AJAX request result containing the sync actions for the client based on the supplied drive event.
      *
