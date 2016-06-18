@@ -49,18 +49,17 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-
+import com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
  * TestWriter
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface TestWriter {
+public interface TestWriter extends JSONWriter<Test<? extends TestArgument>> {
 
-	public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException;
+    //public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException;
 
 }

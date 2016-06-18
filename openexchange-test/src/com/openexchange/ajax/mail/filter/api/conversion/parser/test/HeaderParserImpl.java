@@ -56,18 +56,34 @@ import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.Compar
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.ComparisonParserRegistry;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.HeaderTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * HeaderParserImpl
+ * {@link HeaderParserImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class HeaderParserImpl implements TestParser {
 
+    /**
+     * Initialises a new {@link HeaderParserImpl}.
+     */
+    public HeaderParserImpl() {
+        super();
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
     @Override
-    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
+    public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
         final JSONArray jsonHeaderArray = jsonObject.getJSONArray("headers");
         final String[] headers = new String[jsonHeaderArray.length()];
         for (int a = 0; a < headers.length; a++) {
@@ -83,8 +99,8 @@ public class HeaderParserImpl implements TestParser {
         final String comparisonName = jsonObject.getString("comparison");
         MatchType matchType = MatchType.valueOf(comparisonName);
 
-        final ComparisonParser compParser = ComparisonParserRegistry.getParser(matchType); //FIXME: Will throw a CCE, fix when registry is implemented
-        final Comparison comparison = compParser.parse(jsonObject);
+        final ComparisonParser compParser = ComparisonParserRegistry.getParser(matchType);
+        final Comparison<? extends ComparisonArgument> comparison = compParser.parse(jsonObject);
 
         return new HeaderTest(comparison, headers, values);
     }

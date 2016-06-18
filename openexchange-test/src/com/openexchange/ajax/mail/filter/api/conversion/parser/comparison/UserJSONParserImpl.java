@@ -47,60 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.conversion.parser.test;
+package com.openexchange.ajax.mail.filter.api.conversion.parser.comparison;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.ComparisonParser;
-import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.ComparisonParserRegistry;
-import com.openexchange.ajax.mail.filter.api.dao.MatchType;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
-import com.openexchange.ajax.mail.filter.api.dao.test.AddressTest;
-import com.openexchange.ajax.mail.filter.api.dao.test.Test;
-import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.UserComparison;
 
 /**
- * {@link AddressParserImpl}
+ * {@link UserJSONParserImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AddressParserImpl implements TestParser {
+public class UserJSONParserImpl implements ComparisonParser {
 
     /**
-     * Initialises a new {@link AddressParserImpl}.
+     * Initialises a new {@link UserJSONParserImpl}.
      */
-    public AddressParserImpl() {
+    public UserJSONParserImpl() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     * @see com.openexchange.ajax.mail.filter.parser.JSONParser#parse(org.json.JSONObject)
      */
+    @SuppressWarnings("unused")
     @Override
-    public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
-        final JSONArray jsonHeaderArray = jsonObject.getJSONArray("headers");
-        final String[] headers = new String[jsonHeaderArray.length()];
-        for (int a = 0; a < headers.length; a++) {
-            headers[a] = jsonHeaderArray.getString(a);
-        }
-
-        final JSONArray jsonValueArray = jsonObject.getJSONArray("values");
-        final String[] values = new String[jsonValueArray.length()];
-        for (int a = 0; a < values.length; a++) {
-            values[a] = jsonValueArray.getString(a);
-        }
-
-        final String comparisonName = jsonObject.getString("comparison");
-        MatchType matchType = MatchType.valueOf(comparisonName);
-
-        final ComparisonParser compParser = ComparisonParserRegistry.getParser(matchType);
-        final Comparison<? extends ComparisonArgument> comparison = compParser.parse(jsonObject);
-
-        return new AddressTest(comparison, headers, values);
+    public UserComparison parse(JSONObject jsonObject) throws JSONException {
+        return new UserComparison();
     }
 }

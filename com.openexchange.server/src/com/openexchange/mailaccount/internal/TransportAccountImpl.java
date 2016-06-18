@@ -291,10 +291,8 @@ public class TransportAccountImpl implements TransportAccount {
     public void setTransportProperties(final Map<String, String> transportProperties) {
         if (null == transportProperties) {
             this.transportProperties = new HashMap<String, String>(4);
-        } else if (transportProperties.isEmpty()) {
-            this.transportProperties = new HashMap<String, String>(4);
         } else {
-            this.transportProperties = new HashMap<String, String>(transportProperties);
+            this.transportProperties = transportProperties;
         }
     }
 

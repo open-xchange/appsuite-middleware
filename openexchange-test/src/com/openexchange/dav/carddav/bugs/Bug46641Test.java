@@ -47,54 +47,63 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao.test;
+package com.openexchange.dav.carddav.bugs;
 
-import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
-import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
+import static org.junit.Assert.*;
+import java.util.Date;
+import org.junit.Test;
+import com.openexchange.dav.SyncToken;
+import com.openexchange.dav.carddav.CardDAVTest;
+import com.openexchange.dav.reports.SyncCollectionResponse;
 
 /**
- * {@link Test}
+ * {@link Bug46641Test}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * immediate deletion of contacts group which was created via OS X contacts app fails with NPE
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public interface Test<T extends TestArgument> {
+public class Bug46641Test extends CardDAVTest {
 
     /**
-     * Returns the {@link TestCommand}
-     * 
-     * @return the {@link TestCommand}
+     * Initializes a new {@link Bug46641Test}.
      */
-    TestCommand getTestCommand();
+	public Bug46641Test() {
+		super();
+	}
 
-    /**
-     * Sets the specified {@link Comparison} to the {@link Test}
-     * 
-     * @param comparison The {@link Comparison} to set
-     */
-    void setComparison(Comparison<? extends ComparisonArgument> comparison);
-
-    /**
-     * Returns the {@link Comparison}
-     * 
-     * @return the {@link Comparison}
-     */
-    Comparison<? extends ComparisonArgument> getComparison();
-
-    /**
-     * Sets the value for the specified {@link TestArgument}
-     * 
-     * @param argument The {@link TestArgument} for which to set the value
-     * @param value The value of the {@link TestArgument} to set
-     */
-    void setTestArgument(T argument, Object value);
-
-    /**
-     * Returns the value of the specified {@link TestArgument}
-     * 
-     * @param argument The {@link TestArgument} to return
-     * @return The value of the {@link TestArgument}
-     */
-    Object getTestArgument(T argument);
+	@Test
+	public void testBulkImportContactGroup() throws Exception {
+		/*
+		 * fetch sync token for later synchronization
+		 */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+		/*
+		 * try to create contact group using bulk-import
+		 */
+    	String uid = randomUID();
+    	String vCard =
+			"BEGIN:VCARD" + "\r\n" +
+			"VERSION:3.0" + "\r\n" +
+            "PRODID:-//Apple Inc.//AddressBook 9.0//EN" + "\r\n" +
+            "N:untitled group" + "\r\n" +
+            "FN:untitled group" + "\r\n" +
+            "X-ADDRESSBOOKSERVER-KIND:group" + "\r\n" +
+			"REV:" + formatAsUTC(new Date()) + "\r\n" +
+            "UID:" + uid + "\r\n" +
+			"END:VCARD" + "\r\n"
+		;
+    	postVCard(uid, vCard, 0);
+    	/*
+    	 * check that no contact was created on server
+    	 */
+        assertNull(getContact(uid));
+        /*
+         * check that sync-collection reports the resource as deleted
+         */
+        SyncCollectionResponse syncCollectionResponse = syncCollection(syncToken);
+        assertEquals("no resource deletions reported on sync collection", 1, syncCollectionResponse.getHrefsStatusNotFound().size());
+        assertTrue(syncCollectionResponse.getHrefsStatusNotFound().get(0).contains(uid));
+	}
 }

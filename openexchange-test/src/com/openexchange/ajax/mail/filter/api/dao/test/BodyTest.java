@@ -49,39 +49,75 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.BodyTestArgument;
 
 /**
- * BodyTest
+ * {@link BodyTest}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BodyTest extends AbstractTest {
+public class BodyTest extends AbstractTest implements Test<BodyTestArgument> {
 
-    public static final String BODY = "body";
-
-    protected Comparison comparison;
-
-    protected String extensionKey;
-
-    protected String extensionValue; // only two possible values content or text
-
-    public BodyTest(final Comparison comp, final String extensionKey, final String extensionValue) {
-        name = BODY;
-        this.comparison = comp;
-        this.extensionKey = extensionKey;
-        this.extensionValue = extensionValue;
+    /**
+     * Initialises a new {@link BodyTest}.
+     * 
+     * @param testCommand
+     */
+    public BodyTest() {
+        super(TestCommand.BODY);
     }
 
-    public Comparison getComparison() {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestCommand()
+     */
+    @Override
+    public TestCommand getTestCommand() {
+        return TestCommand.BODY;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setComparison(com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison)
+     */
+    @Override
+    public void setComparison(Comparison<? extends ComparisonArgument> comparison) {
+        this.comparison = comparison;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getComparison()
+     */
+    @Override
+    public Comparison<? extends ComparisonArgument> getComparison() {
         return comparison;
     }
 
-    public String getExtensionKey() {
-        return extensionKey;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument, java.lang.Object)
+     */
+    @Override
+    public void setTestArgument(BodyTestArgument argument, Object value) {
+        addArgument(argument, value);
     }
 
-    public String getExtensionValue() {
-        return extensionValue;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument)
+     */
+    @Override
+    public Object getTestArgument(BodyTestArgument argument) {
+        return getArguments().get(argument);
     }
 }

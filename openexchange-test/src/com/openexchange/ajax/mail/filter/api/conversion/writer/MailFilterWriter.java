@@ -59,9 +59,10 @@ import com.openexchange.ajax.mail.filter.api.conversion.writer.test.TestWriter;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.test.TestWriterFactory;
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 import com.openexchange.ajax.mail.filter.api.fields.RuleFields;
 import com.openexchange.ajax.writer.DataWriter;
 
@@ -167,9 +168,9 @@ public class MailFilterWriter extends DataWriter {
      * @return A {@link JSONObject}
      * @throws JSONException if a JSON error occurs
      */
-    private JSONObject getTestCommandAsJSON(AbstractTest abstractTest) throws JSONException {
-        final String name = abstractTest.getName();
+    private JSONObject getTestCommandAsJSON(Test<?> abstractTest) throws JSONException {
+        final TestCommand name = abstractTest.getTestCommand();
         final TestWriter testWriter = TestWriterFactory.getWriter(name);
-        return testWriter.writeTest(name, abstractTest);
+        return testWriter.write(abstractTest, new JSONObject());
     }
 }

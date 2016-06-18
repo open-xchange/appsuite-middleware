@@ -51,25 +51,42 @@ package com.openexchange.ajax.mail.filter.api.conversion.parser.test;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.test.NotTest;
-
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.NotTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * NotParserImpl
+ * {@link NotParserImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class NotParserImpl implements TestParser {
 
-	@Override
-    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
-		final JSONObject jsonTestObject = jsonObject.getJSONObject("test");
-		final String testname = jsonTestObject.getString("test");
+    /**
+     * Initialises a new {@link NotParserImpl}.
+     */
+    public NotParserImpl() {
+        super();
+    }
 
-		final TestParser testParser = TestParserFactory.getParser(testname);
-		final AbstractTest test = testParser.parseTest(testname, jsonTestObject);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
+     */
+    @Override
+    public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
+        final JSONObject jsonTestObject = jsonObject.getJSONObject("test");
+        final String testname = jsonTestObject.getString("test");
+        TestCommand testCommand = TestCommand.valueOf(testname.toLowerCase());
+        final TestParser testParser = TestParserFactory.getParser(testCommand);
+        final Test<? extends TestArgument> test = testParser.parse(jsonTestObject);
 
-		return new NotTest(test);
-	}
+        Test<NotTestArgument> notTest = new NotTest();
+        notTest.setTestArgument(NotTestArgument.test, test);
+        return notTest;
+    }
 }

@@ -49,18 +49,15 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.parser.test;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-
+import com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
  * TestParser
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface TestParser {
-
-	public AbstractTest parseTest(final String name, final JSONObject jsonObject) throws JSONException;
+public interface TestParser extends JSONParser<Test<? extends TestArgument>> {
 
 }

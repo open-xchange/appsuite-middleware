@@ -47,54 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao.test;
+package com.openexchange.ajax.contact;
 
-import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
-import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
-import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
+import com.openexchange.ajax.contact.action.AllRequest;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.java.util.UUIDs;
 
 /**
- * {@link Test}
+ * {@link Bug46654Test}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * list of contacts not displayed in address book
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public interface Test<T extends TestArgument> {
+public class Bug46654Test extends AbstractManagedContactTest {
 
     /**
-     * Returns the {@link TestCommand}
-     * 
-     * @return the {@link TestCommand}
+     * Initializes a new {@link Bug46654Test}.
+     *
+     * @param name The test name
      */
-    TestCommand getTestCommand();
+	public Bug46654Test(String name) {
+		super(name);
+	}
 
-    /**
-     * Sets the specified {@link Comparison} to the {@link Test}
-     * 
-     * @param comparison The {@link Comparison} to set
-     */
-    void setComparison(Comparison<? extends ComparisonArgument> comparison);
+    public void testSortUnnamedList() throws Exception {
+        /*
+         * generate test contact on server (and two more to make sorting kick in)
+         */
+        Contact list = new Contact();
+        list.setParentFolderID(folderID);
+        list.setMarkAsDistributionlist(true);
+        list.setDistributionList(new DistributionListEntryObject[] {
+            new DistributionListEntryObject("Otto", "otto@exmample.com", DistributionListEntryObject.INDEPENDENT),
+            new DistributionListEntryObject("Horst", "horst@exmample.com", DistributionListEntryObject.INDEPENDENT)
+        });
+        list = manager.newAction(list);
+        manager.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
+        manager.newAction(generateContact(UUIDs.getUnformattedStringFromRandom()));
+        /*
+         * get all contacts, sorted by column 607
+         */
+        int[] columns = { 1,20,101,607 };
+        AllRequest allRequest = new AllRequest(folderID, columns, Contact.SPECIAL_SORTING, Order.ASCENDING, null);
+        CommonAllResponse allResponse = getClient().execute(allRequest);
+        assertFalse(allResponse.hasError());
+	}
 
-    /**
-     * Returns the {@link Comparison}
-     * 
-     * @return the {@link Comparison}
-     */
-    Comparison<? extends ComparisonArgument> getComparison();
-
-    /**
-     * Sets the value for the specified {@link TestArgument}
-     * 
-     * @param argument The {@link TestArgument} for which to set the value
-     * @param value The value of the {@link TestArgument} to set
-     */
-    void setTestArgument(T argument, Object value);
-
-    /**
-     * Returns the value of the specified {@link TestArgument}
-     * 
-     * @param argument The {@link TestArgument} to return
-     * @return The value of the {@link TestArgument}
-     */
-    Object getTestArgument(T argument);
 }

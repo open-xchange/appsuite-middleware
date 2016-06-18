@@ -49,14 +49,18 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 
+import java.util.EnumSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.ComparisonWriter;
 import com.openexchange.ajax.mail.filter.api.conversion.writer.comparison.ComparisonWriterRegistry;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.api.dao.test.SizeTest;
+import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.CommonTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.SizeTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
  * {@link SizeTestWriterImpl}
@@ -64,21 +68,32 @@ import com.openexchange.ajax.mail.filter.api.dao.test.SizeTest;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SizeTestWriterImpl implements TestWriter {
+public class SizeTestWriterImpl extends AbstractWriterImpl<SizeTestArgument> {
 
+    /**
+     * Initialises a new {@link SizeTestWriterImpl}.
+     */
+    public SizeTestWriterImpl() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
     @Override
-    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
-        final JSONObject jsonObj = new JSONObject();
+    public JSONObject write(Test<? extends TestArgument> test, JSONObject jsonObject) throws JSONException {
+        jsonObject.put(CommonTestArgument.id.name(), test.getTestCommand().name().toLowerCase());
 
-        SizeTest sizeTest = (SizeTest) abstractTest;
-        jsonObj.put("id", name);
+        final Comparison<? extends ComparisonArgument> comparison = test.getComparison();
 
-        Comparison comparison = sizeTest.getComparison();
-        MatchType matchType = comparison.getMatchType();
-
-        ComparisonWriter compWriter = ComparisonWriterRegistry.getWriter(matchType);
-        compWriter.write(comparison, jsonObj);
-
-        return jsonObj;
+        if (comparison != null) {
+            final MatchType matchType = comparison.getMatchType();
+            final ComparisonWriter compWriter = ComparisonWriterRegistry.getWriter(matchType);
+            compWriter.write((Comparison<ComparisonArgument>) comparison, jsonObject);
+        }
+        
+        return jsonObject;
     }
 }

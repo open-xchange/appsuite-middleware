@@ -72,6 +72,7 @@ import com.openexchange.webdav.action.WebdavPutAction.SizeExceededInputStream;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
@@ -192,7 +193,10 @@ public class CardDAVPOSTAction extends POSTAction {
                 Element propElement = new Element("prop", DAV_NS);
 //                propElement.addContent(marshaller.marshalProperty(child.getProperty(DAV_NS.getURI(), "getetag"), protocol));
                 propElement.addContent(new Element("uid", CarddavProtocol.CALENDARSERVER_NS).setText(importResult.getUid()));
-                propElement.addContent(marshaller.marshalProperty(child.getProperty(DAVProtocol.CARD_NS.getURI(), "address-data"), protocol));
+                WebdavProperty addressDataProperty = child.getProperty(DAVProtocol.CARD_NS.getURI(), "address-data");
+                if (null != addressDataProperty) {
+                    propElement.addContent(marshaller.marshalProperty(addressDataProperty, protocol));
+                }
                 propstatElement.addContent(propElement);
                 propstatElement.addContent(marshaller.marshalStatus(HttpServletResponse.SC_OK));
             } else {

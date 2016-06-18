@@ -464,7 +464,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private static void fillTransportProperties(final TransportAccountImpl transportAccount, final int contextId, final int userId, final int id, final Connection con) throws SQLException {
+    private void fillTransportProperties(final TransportAccountImpl transportAccount, final int contextId, final int userId, final int id, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -490,9 +490,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (null != sTransAuth) {
                     transportAccount.setTransportAuth(TransportAuth.transportAuthFor(sTransAuth));
                 }
-                if (!properties.isEmpty()) {
-                    transportAccount.setTransportProperties(properties);
-                }
+                transportAccount.setTransportProperties(properties);
 
             }
         } finally {
@@ -884,7 +882,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     public void deleteTransportAccount(final int id, final int userId, final int contextId, final Connection con) throws OXException {
         dropPOP3StorageFolders(userId, contextId);
-        final boolean restoreConstraints = disableForeignKeyChecks(con);
         PreparedStatement stmt = null;
         try {
             // First delete properties
@@ -916,13 +913,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            if (restoreConstraints) {
-                try {
-                    enableForeignKeyChecks(con);
-                } catch (final SQLException e) {
-                    LOG.error("", e);
-                }
-            }
         }
     }
 
@@ -2422,8 +2412,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                  */
                 fillTransportProperties(transportAccount, contextId, userId, accountId, con);
             } else {
-                // throw MailAccountExceptionMessages.NOT_FOUND, I(id), I(user), I(contextId));
-                return null;
+                throw MailAccountExceptionCodes.NOT_FOUND.create(I(accountId), I(userId), I(contextId));
             }
         } catch (final SQLException e) {
             if (null != stmt) {

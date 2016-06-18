@@ -70,6 +70,7 @@ import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.Matche
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.OverJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.RegexJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.UnderJSONParserImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.UserJSONParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AddressParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AllOfParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AnyOfParserImpl;
@@ -111,9 +112,10 @@ import com.openexchange.ajax.mail.filter.api.conversion.writer.test.TrueWriterIm
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.test.AjaxInit;
 
@@ -155,21 +157,22 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ActionParserFactory.addParser(ActionCommand.vacation, new VacationParserImpl());
         ActionParserFactory.addParser(ActionCommand.pgp, new PGPParserImpl());
 
-        TestParserFactory.addParser("address", new AddressParserImpl());
-        TestParserFactory.addParser("allof", new AllOfParserImpl());
-        TestParserFactory.addParser("anyof", new AnyOfParserImpl());
-        TestParserFactory.addParser("envelope", new EnvelopeParserImpl());
-        TestParserFactory.addParser("header", new HeaderParserImpl());
-        TestParserFactory.addParser("not", new NotParserImpl());
-        TestParserFactory.addParser("true", new TrueParserImpl());
-        TestParserFactory.addParser("size", new SizeTestParserImpl());
-        TestParserFactory.addParser("currentdate", new CurrenttDateParserImpl());
+        TestParserFactory.addParser(TestCommand.ADDRESS, new AddressParserImpl());
+        TestParserFactory.addParser(TestCommand.ALLOF, new AllOfParserImpl());
+        TestParserFactory.addParser(TestCommand.ANYOF, new AnyOfParserImpl());
+        TestParserFactory.addParser(TestCommand.ENVELOPE, new EnvelopeParserImpl());
+        TestParserFactory.addParser(TestCommand.HEADER, new HeaderParserImpl());
+        TestParserFactory.addParser(TestCommand.NOT, new NotParserImpl());
+        TestParserFactory.addParser(TestCommand.TRUE, new TrueParserImpl());
+        TestParserFactory.addParser(TestCommand.SIZE, new SizeTestParserImpl());
+        TestParserFactory.addParser(TestCommand.CURRENTDATE, new CurrenttDateParserImpl());
 
         ComparisonParserRegistry.addParser(MatchType.is, new IsJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.matches, new MatchesJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.contains, new ContainsJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.regex, new RegexJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.under, new UnderJSONParserImpl());
+        ComparisonParserRegistry.addParser(MatchType.user, new UserJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.over, new OverJSONParserImpl());
 
         // writer
@@ -183,15 +186,15 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         ActionWriterFactory.addWriter(ActionCommand.vacation, new VacationWriterImpl());
         ActionWriterFactory.addWriter(ActionCommand.pgp, new PGPWriterImpl());
 
-        TestWriterFactory.addWriter("address", new AddressWriterImpl());
-        TestWriterFactory.addWriter("allof", new AllOfWriterImpl());
-        TestWriterFactory.addWriter("anyof", new AnyOfWriterImpl());
-        TestWriterFactory.addWriter("envelope", new EnvelopeWriterImpl());
-        TestWriterFactory.addWriter("header", new HeaderWriterImpl());
-        TestWriterFactory.addWriter("not", new NotWriterImpl());
-        TestWriterFactory.addWriter("true", new TrueWriterImpl());
-        TestWriterFactory.addWriter("size", new SizeTestWriterImpl());
-        TestWriterFactory.addWriter("currentdate", new CurrentDateWriterImpl());
+        TestWriterFactory.addWriter(TestCommand.ADDRESS, new AddressWriterImpl());
+        TestWriterFactory.addWriter(TestCommand.ALLOF, new AllOfWriterImpl());
+        TestWriterFactory.addWriter(TestCommand.ANYOF, new AnyOfWriterImpl());
+        TestWriterFactory.addWriter(TestCommand.ENVELOPE, new EnvelopeWriterImpl());
+        TestWriterFactory.addWriter(TestCommand.HEADER, new HeaderWriterImpl());
+        TestWriterFactory.addWriter(TestCommand.NOT, new NotWriterImpl());
+        TestWriterFactory.addWriter(TestCommand.TRUE, new TrueWriterImpl());
+        TestWriterFactory.addWriter(TestCommand.SIZE, new SizeTestWriterImpl());
+        TestWriterFactory.addWriter(TestCommand.CURRENTDATE, new CurrentDateWriterImpl());
 
         ComparisonWriterRegistry.addWriter(MatchType.is, new IsJSONWriterImpl());
         ComparisonWriterRegistry.addWriter(MatchType.matches, new MatchesJSONWriterImpl());
@@ -270,7 +273,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
      * @param actual The actual {@link AbstractTest}
      */
     //TODO complete assertions
-    private void assertTest(AbstractTest expected, AbstractTest actual) {
-        assertEquals("The 'name' attribute of the test differs", expected.getName(), actual.getName());
+    private void assertTest(Test<?> expected, Test<?> actual) {
+        assertEquals("The 'name' attribute of the test differs", expected.getTestCommand(), actual.getTestCommand());
     }
 }

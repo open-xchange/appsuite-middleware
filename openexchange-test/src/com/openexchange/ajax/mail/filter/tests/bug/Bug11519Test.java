@@ -52,9 +52,9 @@ package com.openexchange.ajax.mail.filter.tests.bug;
 import java.util.Collections;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
 import com.openexchange.ajax.mail.filter.api.dao.action.Vacation;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.AllOfTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.CurrentDateTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
 
 /**
@@ -84,7 +84,7 @@ public class Bug11519Test extends AbstractMailFilterTest {
         expectedRule.setFlags(new String[] { "vacation" });
 
         // Create tests
-        AbstractTest[] tests = new AbstractTest[3];
+        Test<?>[] tests = new Test<?>[3];
         tests[0] = new CurrentDateTest(1183759200000L, "ge", "date");
         tests[1] = new CurrentDateTest(1183759200000L, "le", "date");
         tests[2] = new CurrentDateTest(1183759200000L, "is", "date");

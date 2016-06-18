@@ -97,7 +97,7 @@ public class TransportAccountDescription {
     }
 
     /**
-     * Parses specified transport server URL
+     * Parses specified transport server URL. If the given url is <code>null</code>, then the transportserver url will be set to <code>null</code> too.
      *
      * @param mailServerURL The transport server URL to parse
      * @throws OXException If URL cannot be parsed
@@ -115,7 +115,7 @@ public class TransportAccountDescription {
     }
 
     /**
-     * Generates transport server URL
+     * Generates the transport server URL. If the transportServer string is empty or null, then this method will return null.
      *
      * @return The transport server URL
      * @throws OXException If URL cannot be parsed
@@ -424,10 +424,8 @@ public class TransportAccountDescription {
     public void setTransportProperties(final Map<String, String> transportProperties) {
         if (null == transportProperties) {
             this.transportProperties = new HashMap<String, String>(4);
-        } else if (transportProperties.isEmpty()) {
-            this.transportProperties = new HashMap<String, String>(4);
         } else {
-            this.transportProperties = new HashMap<String, String>(transportProperties);
+            this.transportProperties = transportProperties;
         }
     }
 

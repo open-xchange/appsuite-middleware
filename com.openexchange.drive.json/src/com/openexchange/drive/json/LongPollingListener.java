@@ -49,9 +49,10 @@
 
 package com.openexchange.drive.json;
 
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.exception.OXException;
 
 /**
@@ -93,5 +94,12 @@ public interface LongPollingListener {
      *         otherwise
      */
     boolean matches(String tokenRef);
+
+    /**
+     * Gets the root folder identifiers monitored by this listener.
+     *
+     * @return The root folder identifiers
+     */
+    List<String> getRootFolderIDs();
 
 }

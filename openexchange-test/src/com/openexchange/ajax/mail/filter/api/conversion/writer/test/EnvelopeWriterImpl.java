@@ -49,43 +49,36 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 
-import org.json.JSONArray;
+import java.util.EnumSet;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mail.filter.api.dao.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.api.dao.test.EnvelopeTest;
+import com.openexchange.ajax.mail.filter.api.dao.test.Test;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.EnvelopeTestArgument;
+import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * EnvelopeWriterImpl
+ * 
+ * {@link EnvelopeWriterImpl}
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class EnvelopeWriterImpl implements TestWriter {
+public class EnvelopeWriterImpl extends AbstractWriterImpl<EnvelopeTestArgument> {
 
-	@Override
-    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		final EnvelopeTest envelopeTest = (EnvelopeTest)abstractTest;
+    /**
+     * Initialises a new {@link EnvelopeWriterImpl}.
+     */
+    public EnvelopeWriterImpl() {
+        super();
+    }
 
-		jsonObj.put("id", name);
-
-		final String[] headers = envelopeTest.getHeaders();
-		final String[] values = envelopeTest.getValues();
-
-		final JSONArray jsonHeaderArray = new JSONArray();
-		for (int a = 0; a < jsonHeaderArray.length(); a++) {
-			jsonHeaderArray.put(headers[a]);
-		}
-
-		jsonObj.put("headers", jsonHeaderArray);
-
-		final JSONArray jsonValueArray = new JSONArray();
-		for (int a = 0; a < jsonValueArray.length(); a++) {
-			jsonValueArray.put(values[a]);
-		}
-
-		jsonObj.put("values", jsonValueArray);
-
-		return jsonObj;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
+     */
+    @Override
+    public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
+        return super.write((Test<TestArgument>) type, EnumSet.allOf(EnvelopeTestArgument.class), jsonObject);
+    }
 }
