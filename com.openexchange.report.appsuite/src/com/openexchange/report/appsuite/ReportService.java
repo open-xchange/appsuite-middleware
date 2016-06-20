@@ -52,6 +52,7 @@ package com.openexchange.report.appsuite;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link ReportService} runs reports and manages pending and finished reports. This service is available via OSGi
@@ -61,19 +62,6 @@ import com.openexchange.report.appsuite.serialization.Report;
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public interface ReportService {
-
-    /**
-     * Same as calling {@link #run(String)} with the 'default' reportType
-     */
-    String run() throws OXException;
-
-    /**
-     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is triggered and the
-     * uuid of the running report is returned instead
-     * 
-     * @return The uuid of triggered or the already running report
-     */
-    String run(String reportType) throws OXException;
 
     /**
      * Same as calling {@link #getLastReport(String)} with the 'default' reportType
@@ -138,35 +126,5 @@ public interface ReportService {
      */
     Report getLastErrorReport(String reportType);
 
-    /**
-     * Run a report of the given reportType. Consider the given dates as timerange.
-     * Note that when a report of this type is already running, no new report is
-     * triggered and the uuid of the running report is returned instead.
-     * 
-     * @param reportType
-     * @param startDate, start of the timerange
-     * @param endDate, end of the timerange
-     *            @return, uuid of the report
-     * @throws Exception
-     */
-    String run(String reportType, Date startDate, Date endDate) throws OXException;
-
-    /**
-     * Run a report of the given report-type. The given parameters will be used to set the created
-     * reports parameters. Note that when a report of this type is already running, no new report is
-     * triggered and the uuid of the running report is returned instead.
-     * 
-     * @param reportType, the report-type to be run
-     * @param startDate, start of the timerange
-     * @param endDate, end of the timerange
-     * @param isCustomTimerange, is the timerange relevant
-     * @param isShowSingleTenant, is only one tenant relevant
-     * @param singleTenantId, the tenants id
-     * @param isIgnoreAdmin, should admins be ignored in the calculation
-     * @param isShowDriveMetrics, are drive metrics relevant
-     * @param isShowMailMetrics, are mail metrics relevant
-     *            @return, uuid of the report
-     * @throws Exception
-     */
-    String run(String reportType, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) throws OXException;
+    String run(ReportConfigs reportConfig) throws OXException;
 }

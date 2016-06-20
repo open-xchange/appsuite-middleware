@@ -229,10 +229,6 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
         return Services.getService(UserService.class).getUser(ctx, true, false);
     }
 
-    protected User[] loadGuests(Context ctx) throws OXException {
-        return Services.getService(UserService.class).getUser(ctx, true, false);
-    }
-
     protected Context loadContext(int contextId) throws OXException {
         return Services.getService(ContextService.class).getContext(contextId);
     }

@@ -52,8 +52,6 @@ package com.openexchange.report.appsuite.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -83,6 +81,7 @@ import com.openexchange.report.appsuite.ReportSystemHandler;
 import com.openexchange.report.appsuite.jobs.AnalyzeContextBatch;
 import com.openexchange.report.appsuite.serialization.PortableReport;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link HazelcastReportService} class uses hazelcast to coordinate the clusters efforts in producing reports. It maintains the following resources via hazelcast:
@@ -123,52 +122,6 @@ public class HazelcastReportService extends AbstractReportService {
         IMap<String, PortableReport> map = Services.getService(HazelcastInstance.class).getMap(REPORTS_KEY);
         PortableReport portableReport = map.get(reportType);
         return PortableReport.unwrap(portableReport);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String run(final String reportType) throws OXException {
-        // Start a new report run or retrieve the UUID of an already running report
-        if (useLocal()) {
-            return delegate.run(reportType);
-        }
-
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        final String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
-        List<Integer> allContextIds;
-        // Firstly retrieve the global lock per this report type to make sure, we are the only one coordinating a report run of this type for now.
-        ILock lock = hazelcast.getLock("com.openexchange.report.Reports." + reportType);
-        lock.lock();
-        try {
-            // Is a report pending?
-            IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
-
-            if ((pendingReports != null) && !pendingReports.isEmpty()) {
-                // Yes, there is a report running, so retrieve its UUID and return it.
-                return pendingReports.keySet().iterator().next();
-            }
-
-            // Load all contextIds
-            allContextIds = Services.getService(ContextService.class).getAllContextIds();
-
-            // Set up the report instance
-            Report report = new Report(uuid, reportType, System.currentTimeMillis(), null, null, false, false, null, false, false, false);
-            report.setNumberOfTasks(allContextIds.size());
-
-            // Put it into hazelcast for others to discover
-            pendingReports.put(uuid, PortableReport.wrap(report));
-
-        } finally {
-            if (lock != null) {
-                lock.forceUnlock();
-            }
-        }
-
-        // Set up an AnalyzeContextBatch instance for every chunk of contextIds
-        setUpContextAnalyzer(hazelcast, uuid, reportType, allContextIds, null);
-        return uuid;
     }
 
     /**
@@ -348,53 +301,12 @@ public class HazelcastReportService extends AbstractReportService {
         return PortableReport.unwrap(errorReports.get(reportType));
     }
 
+    
     @Override
-    public String run(String reportType, Date startDate, Date endDate) throws OXException {
+    public String run(ReportConfigs reportConfig) throws OXException {
         // Start a new report run or retrieve the UUID of an already running report
         if (useLocal()) {
-            return delegate.run(reportType, startDate, endDate);
-        }
-
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        final String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
-        List<Integer> allContextIds;
-        // Firstly retrieve the global lock per this report type to make sure, we are the only one coordinating a report run of this type for now.
-        ILock lock = hazelcast.getLock("com.openexchange.report.Reports." + reportType);
-        lock.lock();
-        try {
-            // Is a report pending?
-            IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
-
-            if ((pendingReports != null) && !pendingReports.isEmpty()) {
-                // Yes, there is a report running, so retrieve its UUID and return it.
-                return pendingReports.keySet().iterator().next();
-            }
-
-            // Load all contextIds
-            allContextIds = Services.getService(ContextService.class).getAllContextIds();
-
-            // Set up the report instance
-            Report report = new Report(uuid, reportType, System.currentTimeMillis(), startDate, endDate, true, false, null, false, false, false);
-            report.setNumberOfTasks(allContextIds.size());
-            // Put it into hazelcast for others to discover
-            pendingReports.put(uuid, PortableReport.wrap(report));
-
-        } finally {
-            if (lock != null) {
-                lock.forceUnlock();
-            }
-        }
-
-        // Set up an AnalyzeContextBatch instance for every chunk of contextIds
-        setUpContextAnalyzer(hazelcast, uuid, reportType, allContextIds, null);
-        return uuid;
-    }
-
-    @Override
-    public String run(String reportType, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) throws OXException {
-        // Start a new report run or retrieve the UUID of an already running report
-        if (useLocal()) {
-            return delegate.run(reportType, startDate, endDate, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
+            return delegate.run(reportConfig);
         }
 
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
@@ -402,11 +314,11 @@ public class HazelcastReportService extends AbstractReportService {
         List<Integer> allContextIds;
         Report report = null;
         // Firstly retrieve the global lock per this report type to make sure, we are the only one coordinating a report run of this type for now.
-        ILock lock = hazelcast.getLock("com.openexchange.report.Reports." + reportType);
+        ILock lock = hazelcast.getLock("com.openexchange.report.Reports." + reportConfig.getType());
         lock.lock();
         try {
             // Is a report pending?
-            IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
+            IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportConfig.getType());
 
             if ((pendingReports != null) && !pendingReports.isEmpty()) {
                 // Yes, there is a report running, so retrieve its UUID and return it.
@@ -417,7 +329,7 @@ public class HazelcastReportService extends AbstractReportService {
             allContextIds = Services.getService(ContextService.class).getAllContextIds();
 
             // Set up the report instance
-            report = new Report(uuid, reportType, System.currentTimeMillis(), startDate, endDate, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
+            report = new Report(uuid, System.currentTimeMillis(), reportConfig);
             report.setNumberOfTasks(allContextIds.size());
             // Put it into hazelcast for others to discover
             pendingReports.put(uuid, PortableReport.wrap(report));
@@ -429,7 +341,7 @@ public class HazelcastReportService extends AbstractReportService {
         }
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
-        setUpContextAnalyzer(hazelcast, uuid, reportType, allContextIds, report);
+        setUpContextAnalyzer(hazelcast, uuid, reportConfig.getType(), allContextIds, report);
         return uuid;
     }
 
@@ -448,7 +360,7 @@ public class HazelcastReportService extends AbstractReportService {
         IExecutorService executorService = hazelcast.getExecutorService(REPORT_TYPE_DEFAULT);
         DatabaseService databaseService = Services.getService(DatabaseService.class);
 
-        List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
+        ArrayList<Integer> contextsToProcess = new ArrayList<>(allContextIds);
 
         LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
@@ -525,4 +437,6 @@ public class HazelcastReportService extends AbstractReportService {
         pendingReports.remove(report.getUUID());
         lock.destroy();
     }
+
+   
 }

@@ -242,6 +242,33 @@ public class Report implements Serializable {
         this.isShowDriveMetrics = isShowDriveMetrics;
         this.isShowMailMetrics = isShowMailMetrics;
     }
+    
+    public Report(String uuid, long startTime, ReportConfigs reportConfig) {
+        this.uuid = uuid;
+        this.type = reportConfig.getType();
+        this.startTime = startTime;
+        this.tenantMap = new LinkedHashMap<>();
+        this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
+        this.singleTenantId = 0l;
+        if (reportConfig.isConfigTimerange()) {
+            this.consideredTimeframeStart = reportConfig.getConsideredTimeframeStart();
+            this.consideredTimeframeEnd = reportConfig.getConsideredTimeframeEnd();
+        } else {
+            Calendar cal = Calendar.getInstance();
+            Date ed = cal.getTime();
+            cal.add(Calendar.YEAR, -1);
+            Date sd = cal.getTime();
+            this.consideredTimeframeStart = sd.getTime();
+            this.consideredTimeframeEnd = ed.getTime();
+        }
+        this.isShowSingleTenant = reportConfig.isShowSingleTenant();
+        if (isShowSingleTenant) {
+            this.singleTenantId = reportConfig.getSingleTenantId();
+        }
+        this.isAdminIgnore = reportConfig.isAdminIgnore();
+        this.isShowDriveMetrics = reportConfig.isShowDriveMetrics();
+        this.isShowMailMetrics = reportConfig.isShowMailMetrics();
+    }
 
     private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
 

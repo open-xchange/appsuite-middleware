@@ -70,6 +70,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.MacDetail;
@@ -280,7 +281,7 @@ public class ReportClientBase extends AbstractJMXTools {
             boolean isIgnoreAdmin = false;
             boolean isShowDriveMetrics = false;
             boolean isShowMailMetrics = false;
-            if (reportType.equals("oxcs-extended")) {
+            if (reportType.equals("oxaas-extended")) {
                 if (parser.getOptionValue(singleTenant) != null) {
                     isSingleTenant = true;
                     singeTenantId = Long.parseLong(((String) parser.getOptionValue(singleTenant)));
@@ -295,6 +296,8 @@ public class ReportClientBase extends AbstractJMXTools {
                     isShowMailMetrics = true;
                 }
             }
+            
+            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
 
             //Start the report generation
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
@@ -310,7 +313,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     System.out.println(ADVANCED_NOT_SUPPORTED_MSG);
                 }
                 if (null != parser.getOptionValue(this.runAsReport)) {
-                    runASReport(reportType, initConnection, isCustomTimeframe, timeframeStart, timeframeEnd);
+                    runASReport(reportType, initConnection, reportConfigs);
                     inspectASReports(reportType, initConnection);
                     return;
                 } else if (null != parser.getOptionValue(this.inspectAsReports)) {
@@ -324,7 +327,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     return;
                 } else {
                     // run and deliver AS report is no default
-                    runAndDeliverASReport(reportType, mode, null != parser.getOptionValue(this.asReportType), savereport, initConnection, isCustomTimeframe, timeframeStart, timeframeEnd, isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
+                    runAndDeliverASReport(mode, false, savereport, initConnection, reportConfigs);
                     return;
                 }
             }
@@ -664,32 +667,31 @@ public class ReportClientBase extends AbstractJMXTools {
      * @param isShowDriveMetrics, calculate drive metrics
      * @param isShowMailMetrics, calculate mail metrics
      */
-    private void runAndDeliverASReport(Object reportType, ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, boolean isCustomTimerange, Date start, Date end, boolean isShowSingleTenant, Long singleTenantId, boolean isIgnoreAdmin, boolean isShowDriveMetrics, boolean isShowMailMetrics) {
-        if (reportType == null) {
-            reportType = "default";
-        }
+    private void runAndDeliverASReport(ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, ReportConfigs reportConfig) {
+        
         try {
             String uuid = "";
-            if (reportType.equals("oxcs-extended")) {
-                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName() });
-                if (uuid == null && isShowSingleTenant) {
-                    System.out.println("No contexts for this brand or the sid is invalid. Report generation aborted.");
-                    return;
-                }
-            } else {
-                if (isCustomTimerange) {
-                    uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName() });
-                } else {
-                    uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
-                }
-            }
-
+//            if (reportType.equals("oxaas-extended")) {
+//                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName() });
+//                if (uuid == null && isShowSingleTenant) {
+//                    System.out.println("No contexts for this brand or the sid is invalid. Report generation aborted.");
+//                    return;
+//                }
+//            } else {
+//                if (isCustomTimerange) {
+//                    uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName() });
+//                } else {
+//                    
+//                }
+//            }
+            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
+            
             // Start polling
             boolean done = false;
             int charNum = 0;
 
             while (!done) {
-                CompositeData[] reports = (CompositeData[]) server.invoke(getAppSuiteReportingName(), "retrievePendingReports", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
+                CompositeData[] reports = (CompositeData[]) server.invoke(getAppSuiteReportingName(), "retrievePendingReports", new Object[] { reportConfig.getType() }, new String[] { String.class.getCanonicalName() });
                 //                if ((reports == null) || (reports.length == 0)) {
                 //                    Object o = server.invoke(getAppSuiteReportingName(), "retrieveLastErrorReport", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
                 //                }
@@ -707,11 +709,10 @@ public class ReportClientBase extends AbstractJMXTools {
 
                 done = !found;
 
-                // TODO QS-VS uncomment when done
                 // wait until the report is done
-                                if (!done) {
-                                    Thread.sleep(silent ? 60000 : 10000);
-                                }
+                if (!done) {
+                    Thread.sleep(silent ? 60000 : 10000);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -719,7 +720,7 @@ public class ReportClientBase extends AbstractJMXTools {
         }
 
         // retrieve the latest report of this type and do what the mode tells to do
-        getASReport(reportType, mode, savereport, server);
+        getASReport(reportConfig.getType(), mode, savereport, server);
     }
 
     /**
@@ -839,17 +840,13 @@ public class ReportClientBase extends AbstractJMXTools {
      * @param start, starting date of the timerange
      * @param end, ending time of the timerange
      */
-    private void runASReport(Object reportType, MBeanServerConnection server, boolean isCustomTimerange, Date start, Date end) {
+    private void runASReport(Object reportType, MBeanServerConnection server, ReportConfigs reportConfig) {
         if (reportType == null) {
             reportType = "default";
         }
         try {
             String uuid = "";
-            if (isCustomTimerange) {
-                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName() });
-            } else {
-                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
-            }
+            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
             System.out.println("\nRunning report with uuid: " + uuid);
         } catch (Exception e) {
             e.printStackTrace();
@@ -858,7 +855,7 @@ public class ReportClientBase extends AbstractJMXTools {
     }
 
     /**
-     * Print a given reports header with probable time left. 
+     * Print a given reports header with probable time left.
      * 
      * @param compositeData
      */
@@ -929,7 +926,7 @@ public class ReportClientBase extends AbstractJMXTools {
      * 0 hours, 28 minutes, 3 seconds
      * 
      * @param interval, the time in milliseconds
-     * @return, a pretty time String
+     *            @return, a pretty time String
      */
     private String prettyPrintTimeInterval(long interval) {
         // FROM: http://stackoverflow.com/questions/635935/how-can-i-calculate-a-time-span-in-java-and-format-the-output
