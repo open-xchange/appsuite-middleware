@@ -7481,11 +7481,11 @@ msgid "My shared mail attachments"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:80
-msgid "%1$s send you the following file:"
+msgid "%1$s has shared the following file with you:"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
-msgid "%1$s send you the following files:"
+msgid "%1$s has shared the following files with you:"
 msgstr ""
 
 #. * View file
