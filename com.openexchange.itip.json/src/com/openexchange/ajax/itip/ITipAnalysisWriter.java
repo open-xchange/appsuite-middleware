@@ -51,9 +51,14 @@ package com.openexchange.ajax.itip;
 
 import java.util.List;
 import java.util.TimeZone;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
@@ -68,6 +73,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -120,9 +126,9 @@ public class ITipAnalysisWriter {
 
 
     private void writeChange(final ITipChange change, final JSONObject changeObject) throws JSONException {
-    	if (change.getIntroduction() != null) {
-        	changeObject.put("introduction", change.getIntroduction());
-    	}
+        if (change.getIntroduction() != null) {
+            changeObject.put("introduction", escapeHtml(change.getIntroduction()));
+        }
 
         changeObject.put("type", change.getType().name().toLowerCase());
         changeObject.put("exception", change.isException());
@@ -179,7 +185,7 @@ public class ITipAnalysisWriter {
         if (diff != null && diffDescription != null && !diffDescription.isEmpty()) {
             final JSONArray array = new JSONArray();
             for (final String description : diffDescription) {
-                array.put(description);
+                array.put(escapeHtml(description));
             }
             changeObject.put("diffDescription", array);
         }
@@ -288,4 +294,9 @@ public class ITipAnalysisWriter {
             annotationObject.put("appointment", appointmentObject);
         }
     }
+
+    private String escapeHtml(String string) {
+        return StringEscapeUtils.escapeHtml(string);
+    }
+
 }
