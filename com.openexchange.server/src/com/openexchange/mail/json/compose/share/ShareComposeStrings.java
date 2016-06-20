@@ -77,9 +77,9 @@ public class ShareComposeStrings implements LocalizableStrings {
     // The name of the folder holding the attachments, which were shared to other recipients.
     public static final String FOLDER_NAME_SHARED_MAIL_ATTACHMENTS = "My shared mail attachments";
 
-    public static final String SHARED_ATTACHMENTS_INTRO_SINGLE = "%1$s send you the following file:";
+    public static final String SHARED_ATTACHMENTS_INTRO_SINGLE = "%1$s has shared the following file with you:";
 
-    public static final String SHARED_ATTACHMENTS_INTRO_MULTI = "%1$s send you the following files:";
+    public static final String SHARED_ATTACHMENTS_INTRO_MULTI = "%1$s has shared the following files with you:";
 
     public static final String VIEW_FILE = "View file";
 
