@@ -64,7 +64,9 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.logging.LogLevelService;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
+import com.openexchange.logging.internal.LogLevelServiceImpl;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.Level;
@@ -101,6 +103,7 @@ public class Activator implements BundleActivator, Reloadable {
     private volatile RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
     private ServiceRegistration<Reloadable> reloadable;
+    private ServiceRegistration<LogLevelService> logLevelService;
 
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
@@ -144,6 +147,8 @@ public class Activator implements BundleActivator, Reloadable {
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
         registerIncludeStackTraceService(serviceImpl, context);
         reloadable = context.registerService(Reloadable.class, this, null);
+
+        logLevelService = context.registerService(LogLevelService.class, new LogLevelServiceImpl(), null);
     }
 
     @Override
@@ -180,6 +185,11 @@ public class Activator implements BundleActivator, Reloadable {
         if (null != reloadable) {
             reloadable.unregister();
             reloadable = null;
+        }
+
+        if (logLevelService != null) {
+            logLevelService.unregister();
+            logLevelService = null;
         }
     }
 

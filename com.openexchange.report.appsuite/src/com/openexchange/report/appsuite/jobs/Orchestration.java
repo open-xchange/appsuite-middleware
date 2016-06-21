@@ -60,6 +60,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
@@ -71,6 +72,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.logging.LogLevelService;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
 import com.openexchange.report.appsuite.ReportExceptionCodes;
@@ -143,6 +145,12 @@ public class Orchestration implements ReportService {
      */
     @Override
     public String run(String reportType) throws OXException {
+        LogLevelService logLevelService = Services.getService(LogLevelService.class);
+        if (logLevelService != null) {
+            logLevelService.set("com.hazelcast.spi.impl.operationservice.impl.Invocation", Level.SEVERE);
+            logLevelService.set("com.hazelcast.spi.impl.operationservice.impl.IsStillRunningService.InvokeIsStillRunningOperationRunnable", Level.SEVERE);
+        }
+
         // Start a new report run or retrieve the UUID of an already running report
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
 
@@ -315,6 +323,16 @@ public class Orchestration implements ReportService {
 
         if (report.getNumberOfPendingTasks() == 0) {
             finishUpReport(reportType, hazelcast, pendingReports, lock, report);
+            
+            resetLogLevels();
+        }
+    }
+    
+    private void resetLogLevels() {
+        LogLevelService logLevelService = Services.getService(LogLevelService.class);
+        if (logLevelService != null) {
+            logLevelService.reset("com.hazelcast.spi.impl.operationservice.impl.Invocation");
+            logLevelService.reset("com.hazelcast.spi.impl.operationservice.impl.IsStillRunningService.InvokeIsStillRunningOperationRunnable");
         }
     }
 
@@ -380,6 +398,8 @@ public class Orchestration implements ReportService {
 
         if (report.getNumberOfPendingTasks() == 0) {
             finishUpReport(reportType, hazelcast, pendingReports, lock, report);
+            
+            resetLogLevels();
         }
     }
 }
