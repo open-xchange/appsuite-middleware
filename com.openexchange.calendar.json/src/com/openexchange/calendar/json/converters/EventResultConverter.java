@@ -72,7 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,16 +86,16 @@ public class EventResultConverter implements ResultConverter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventResultConverter.class);
 
-    private final ServiceLookup services;
+    private final EventMapper mapper;
 
     /**
      * Initializes a new {@link EventResultConverter}.
      * 
-     * @param services A service lookup reference
+     * @param mapper The event mapper to use
      */
-    public EventResultConverter(final ServiceLookup services) {
+    public EventResultConverter(EventMapper mapper) {
         super();
-        this.services = services;
+        this.mapper = mapper;
     }
 
     @Override
@@ -116,14 +116,27 @@ public class EventResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();
+        String timeZoneID = getTimeZoneID(requestData, session);
+        if (UserizedEvent.class.isInstance(resultObject)) {
+            result.setResultObject(convertEvent((UserizedEvent) resultObject, timeZoneID, session), getOutputFormat());
+        } else if (List.class.isInstance(resultObject)) {
+            List<UserizedEvent> events = (List<UserizedEvent>) resultObject;
+            int[] columns = new AppointmentAJAXRequest(requestData, session).checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+            result.setResultObject(convertEvents(events, timeZoneID, session, columns), getOutputFormat());
+        }
+    }
+
+    private JSONObject convertEvent(UserizedEvent event, String timeZoneID, Session session) throws OXException {
         try {
-            if (UserizedEvent.class.isInstance(resultObject)) {
-                result.setResultObject(convertEvent((UserizedEvent) resultObject, getClientTimeZone(requestData, session)), getOutputFormat());
-            } else if (Collection.class.isInstance(resultObject)) {
-                Collection<UserizedEvent> events = (Collection<UserizedEvent>) resultObject;
-                int[] columns = new AppointmentAJAXRequest(requestData, session).checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-                result.setResultObject(convertEvents(events, getClientTimeZone(requestData, session), columns), getOutputFormat());
-            }
+            return mapper.serialize(event, mapper.getAssignedFields(event), timeZoneID, session);
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+    }
+
+    private JSONArray convertEvents(List<UserizedEvent> events, String timeZoneID, Session session, int[] columns) throws OXException {
+        try {
+            return mapper.serialize(events, mapper.getFields(columns), timeZoneID, session);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
@@ -268,6 +281,14 @@ public class EventResultConverter implements ResultConverter {
             timeZoneID = session.getUser().getTimeZone();
         }
         return TimeZone.getTimeZone(timeZoneID);
+    }
+
+    private static String getTimeZoneID(AJAXRequestData requestData, ServerSession session) {
+        String timeZoneID = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        if (Strings.isEmpty(timeZoneID)) {
+            timeZoneID = session.getUser().getTimeZone();
+        }
+        return timeZoneID;
     }
 
 }

@@ -49,14 +49,15 @@
 
 package com.openexchange.chronos.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import com.openexchange.chronos.CalendarService;
-import com.openexchange.chronos.EventID;
+import com.openexchange.chronos.CalendarStorage;
+import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.UserizedEvent;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -65,51 +66,31 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarServiceImpl implements CalendarService {
+public class CalendarWriter {
 
-    @Override
-    public UserizedEvent getEvent(ServerSession session, int folderID, int objectID) throws OXException {
-        try (CalendarReader reader = new CalendarReader(session)) {
-            return reader.readEvent(folderID, objectID);
-        } catch (IOException e) {
-            throw new OXException(e);
-        }
-    }
+    private final ServerSession session;
+    private final CalendarStorage storage;
+	
+    /**
+     * Initializes a new {@link CalendarWriter}.
+     * 
+     * @param session The session
+     */
+    public CalendarWriter(ServerSession session) throws OXException {
+		super();
+        this.session = session;
+        this.storage = Services.getService(CalendarStorageFactory.class).create(session);
+	}
 
-    @Override
-    public List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs) throws OXException {
-        List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
-        try (CalendarReader reader = new CalendarReader(session)) {
-            for (EventID eventID : eventIDs) {
-                events.add(reader.readEvent(eventID));
-            }
-        } catch (IOException e) {
-            throw new OXException(e);
-        }
-        return events;
-    }
+    public UserizedEvent insertEvent(UserizedEvent event) {
 
-    @Override
-    public List<UserizedEvent> getEventsInFolder(ServerSession session, int folderID, Date from, Date until) throws OXException {
-        try (CalendarReader reader = new CalendarReader(session)) {
-            return reader.readEventsInFolder(folderID, from, until);
-        } catch (IOException e) {
-            throw new OXException(e);
-        }
-    }
-
-    @Override
-    public List<UserizedEvent> getEventsOfUser(ServerSession session, Date from, Date until) throws OXException {
-        try (CalendarReader reader = new CalendarReader(session)) {
-            return reader.readEventsOfUser(from, until);
-        } catch (IOException e) {
-            throw new OXException(e);
-        }
-    }
-
-    public UserizedEvent createEvent(ServerSession session, UserizedEvent event) throws OXException {
 
         return null;
+    }
+
+
+    private UserizedFolder getFolder(int folderID) throws OXException {
+        return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session, null);
     }
 
 }

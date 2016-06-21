@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.compat;
 
+import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
@@ -56,6 +57,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Trigger;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Appointment2Event}
@@ -162,6 +164,20 @@ public class Appointment2Event {
             default:
                 return null;
         }
+    }
+
+    /**
+     * Gets a list of categories for the supplied comma-separated categories string.
+     * 
+     * @param categories The legacy categories string
+     * @return The categories list
+     */
+    public static List<String> getCategories(String categories) {
+        // TODO: escaping?
+        if (Strings.isEmpty(categories)) {
+            return null;
+        }
+        return Strings.splitAndTrim(categories, ",");
     }
 
     /**

@@ -125,6 +125,9 @@ public class Event2Appointment {
      * @return The legacy "participant type" constant
      */
     public static int getParticipantType(CalendarUserType cuType, boolean internal) {
+        if (null == cuType) {
+            return 5;
+        }
         switch (cuType) {
             case GROUP:
                 if (internal) {
@@ -213,6 +216,25 @@ public class Event2Appointment {
             default:
                 return 0;
         }
+    }
+
+    /**
+     * Gets the comma-separated "categories" string based on the supplied categories list.
+     * 
+     * @param categories The list of categories
+     * @return The legacy categories value
+     */
+    public static String getCategories(List<String> categories) {
+        // TODO: escaping?
+        if (null == categories || 0 == categories.size()) {
+            return null;
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(categories.get(0));
+        for (int i = 1; i < categories.size(); i++) {
+            stringBuilder.append(", ").append(categories.get(0));
+        }
+        return stringBuilder.toString();
     }
 
     /**

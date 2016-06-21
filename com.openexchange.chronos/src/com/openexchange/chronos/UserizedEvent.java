@@ -337,4 +337,24 @@ public class UserizedEvent extends Event {
         delegate.setCategories(categories);
     }
 
+    public String getColor() {
+        return delegate.getColor();
+    }
+
+    public void setColor(String color) {
+        delegate.setColor(color);
+    }
+
+    public int getPublicFolderId() {
+        return delegate.getPublicFolderId();
+    }
+
+    public void setPublicFolderId(int publicFolderId) {
+        delegate.setPublicFolderId(publicFolderId);
+    }
+
+    public String toString() {
+        return delegate.toString();
+    }
+
 }
