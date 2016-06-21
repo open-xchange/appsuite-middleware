@@ -52,6 +52,7 @@ package com.openexchange.webdav;
 import java.util.Properties;
 import junit.framework.TestCase;
 import org.jdom2.Namespace;
+import org.jdom2.input.SAXBuilder;
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -126,6 +127,11 @@ public abstract class AbstractWebdavTest extends TestCase {
 
         hostName = AbstractConfigWrapper.parseProperty(webdavProps, "hostname", "localhost");
 
+        try {
+            new SAXBuilder();
+        } catch (Throwable t) {
+            throw new Exception(t);
+        }
         userId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         assertTrue("user not found", userId != -1);
 
