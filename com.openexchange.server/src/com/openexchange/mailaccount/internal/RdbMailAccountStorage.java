@@ -2373,7 +2373,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT name, id, url, login, password, personal, replyTo, starttls FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT name, id, url, login, password, personal, replyTo, starttls, send_addr FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, accountId);
             stmt.setLong(3, userId);
@@ -2407,6 +2407,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     transportAccount.setReplyTo(replyTo);
                 }
                 transportAccount.setTransportStartTls(result.getBoolean(8));
+                transportAccount.setSendAddress(result.getString(9));
                 /*
                  * Fill properties
                  */
