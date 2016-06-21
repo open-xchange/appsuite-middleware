@@ -52,7 +52,6 @@ package com.openexchange.report.appsuite.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -61,6 +60,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
@@ -73,6 +73,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.logging.LogLevelService;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
 import com.openexchange.report.appsuite.ReportExceptionCodes;
@@ -130,6 +131,12 @@ public class HazelcastReportService extends AbstractReportService {
             return delegate.run(reportType);
         }
 
+        LogLevelService logLevelService = Services.getService(LogLevelService.class);
+        if (logLevelService != null) {
+            logLevelService.set("com.hazelcast.spi.impl.operationservice.impl.Invocation", Level.SEVERE);
+            logLevelService.set("com.hazelcast.spi.impl.operationservice.impl.IsStillRunningService.InvokeIsStillRunningOperationRunnable", Level.SEVERE);
+        }
+
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         final String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
         IMap<String, PortableReport> pendingReports;
@@ -165,7 +172,7 @@ public class HazelcastReportService extends AbstractReportService {
         IExecutorService executorService = hazelcast.getExecutorService(REPORT_TYPE_DEFAULT);
         DatabaseService databaseService = Services.getService(DatabaseService.class);
 
-        List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
+        List<Integer> contextsToProcess = new ArrayList<>(allContextIds);
 
         LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
@@ -302,6 +309,16 @@ public class HazelcastReportService extends AbstractReportService {
 
         if (report.getNumberOfPendingTasks() == 0) {
             finishUpReport(reportType, hazelcast, pendingReports, lock, report);
+
+            resetLogLevels();
+        }
+    }
+
+    private void resetLogLevels() {
+        LogLevelService logLevelService = Services.getService(LogLevelService.class);
+        if (logLevelService != null) {
+            logLevelService.reset("com.hazelcast.spi.impl.operationservice.impl.Invocation");
+            logLevelService.reset("com.hazelcast.spi.impl.operationservice.impl.IsStillRunningService.InvokeIsStillRunningOperationRunnable");
         }
     }
 
@@ -398,6 +415,8 @@ public class HazelcastReportService extends AbstractReportService {
         stoppedPendingReports.put(reportType, PortableReport.wrap(stoppedReport));
 
         pendingReports.remove(uuid);
+        resetLogLevels();
+
         LOG.info("Report abortion triggered by a cluster member with reason: {}. Trying to stop generation and cancel remote threads.", reason);
     }
 
