@@ -232,12 +232,14 @@ public class MailFilterAPI {
     ///////////////////////////////// HELPERS ///////////////////////////////////
 
     /**
+     * Execute the specified {@link AbstractMailFilterRequest} while considering the 'failOnError' flag. If an {@link OXException} is thrown from the
+     * server and the 'failOnError' flag is set to false, then that exception is also thrown from this method.
      * 
-     * @param request
-     * @return
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
+     * @param request The {@link AbstractMailFilterRequest} to execute
+     * @return The {@link T} response
+     * @throws OXException if a server error occurs
+     * @throws IOException if an I/O error occurs
+     * @throws JSONException if a JSON parsing error occurs
      */
     private <T extends AbstractAJAXResponse> T execute(AbstractMailFilterRequest<T> request) throws OXException, IOException, JSONException {
         request.setFailOnError(failOnError);
