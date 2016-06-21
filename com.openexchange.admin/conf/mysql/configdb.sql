@@ -62,6 +62,13 @@ CREATE TABLE filestore (
     CONSTRAINT filestore_uri_unique UNIQUE(uri)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE filestore2user (
+    cid INT4 UNSIGNED NOT NULL,
+    user INT4 UNSIGNED NOT NULL,
+    filestore_id INT4 UNSIGNED,
+    PRIMARY KEY (cid, user, filestore_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE server (
     server_id INT4 UNSIGNED NOT NULL,
     name VARCHAR(255) NOT NULL,

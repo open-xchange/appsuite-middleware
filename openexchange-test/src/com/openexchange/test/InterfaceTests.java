@@ -49,14 +49,14 @@
 
 package com.openexchange.test;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
 import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
 import com.openexchange.ajax.share.ShareAJAXSuite;
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -96,7 +96,6 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.publish.PublishTestSuite.suite());
         tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
-        tests.addTest(com.openexchange.ajax.xing.XINGTestSuite.suite());
         tests.addTest(com.openexchange.subscribe.google.GoogleTestSuite.suite());
         // TODO: enable when MSLiveOAuthClient is implemented
         // tests.addTest(com.openexchange.subscribe.mslive.MSLiveTestSuite.suite());

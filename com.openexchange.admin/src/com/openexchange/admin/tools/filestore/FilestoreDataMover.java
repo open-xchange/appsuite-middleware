@@ -74,6 +74,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -81,6 +82,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -286,6 +288,11 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @throws ProgrammErrorException If a program error occurs
      */
     private void copy() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
+        // Check "filestore2user" table
+        if (Filestore2UserUtil.isNotTerminated(ClientAdminThreadExtended.cache)) {
+            throw new StorageException("Table \"filestore2user\" not yet initialized");
+        }
+
         // Pre-copy
         preDoCopy();
 

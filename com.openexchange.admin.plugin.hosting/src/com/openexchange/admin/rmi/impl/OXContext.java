@@ -96,6 +96,7 @@ import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.DatabaseDataMover;
@@ -493,6 +494,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             oxcox.delete(ctx);
+            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), ClientAdminThread.cache);
             basicAuthenticator.removeFromAuthCache(ctx);
         } catch (final StorageException e) {
             LOGGER.error("", e);
