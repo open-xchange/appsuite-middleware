@@ -61,6 +61,7 @@ import com.openexchange.ajax.mail.filter.tests.bug.Bug11519Test;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug18490Test;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug31253Test;
 import com.openexchange.ajax.mail.filter.tests.bug.Bug44363Test;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug46714Test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -89,6 +90,7 @@ public final class MailFilterTestSuite {
         suite.addTestSuite(Bug18490Test.class);
         suite.addTestSuite(Bug31253Test.class);
         suite.addTestSuite(Bug44363Test.class);
+        suite.addTestSuite(Bug46714Test.class);
         suite.addTestSuite(ConfigTest.class);
         suite.addTestSuite(NewTest.class);
         suite.addTestSuite(UpdateTest.class);
@@ -99,3 +101,4 @@ public final class MailFilterTestSuite {
         return suite;
     }
 }
+
