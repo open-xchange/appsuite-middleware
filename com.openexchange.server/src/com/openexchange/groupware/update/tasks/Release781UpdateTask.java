@@ -77,9 +77,7 @@ public class Release781UpdateTask extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[] {
-            com.openexchange.groupware.update.tasks.DropVersionTableTask.class.getName(),
             com.openexchange.groupware.update.tasks.MigrateUUIDsForUserAliasTable.class.getName(),
-            com.openexchange.groupware.update.tasks.RemoveAliasInUserAttributesTable.class.getName(),
             com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableTask.class.getName(),
             com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTaskV2.class.getName(),
             com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask.class.getName(),

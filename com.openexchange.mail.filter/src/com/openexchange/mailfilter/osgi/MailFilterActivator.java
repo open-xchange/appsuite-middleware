@@ -54,6 +54,7 @@ import java.util.Properties;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -122,6 +123,9 @@ public class MailFilterActivator extends HousekeepingActivator {
             registerService(MailFilterService.class, new MailFilterServiceImpl());
 
             registerTestCommandRegistry();
+
+            Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterActivator.class);
+            logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
 
         } catch (final Exception e) {
             LOG.error("", e);

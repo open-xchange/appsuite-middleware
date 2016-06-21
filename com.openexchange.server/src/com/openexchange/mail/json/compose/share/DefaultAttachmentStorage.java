@@ -474,15 +474,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      */
     protected String discoverEMailAttachmentsFolderID(DefaultAttachmentStorageContext storageContext) throws OXException {
         Session session = storageContext.session;
-
-        Locale locale = getSessionUserLocale(session);
-        String name = Utilities.getValueFromProperty("com.openexchange.mail.compose.share.folderName." + locale.getLanguage() + "_" + locale.getCountry(), null, session);
-        if (Strings.isEmpty(name)) {
-            name = Utilities.getValueFromProperty("com.openexchange.mail.compose.share.folderName", "i18n-defined", session);
-            if ("i18n-defined".equalsIgnoreCase(name)) {
-                name = StringHelper.valueOf(locale).getString(ShareComposeStrings.FOLDER_NAME_SHARED_MAIL_ATTACHMENTS);
-            }
-        }
+        String name = Utilities.getValueFromProperty("com.openexchange.mail.compose.share.name", "Drive Mail", session);
 
         IDBasedFolderAccess folderAccess = storageContext.folderAccess;
         FolderID placeholderID = new FolderID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID, "0");

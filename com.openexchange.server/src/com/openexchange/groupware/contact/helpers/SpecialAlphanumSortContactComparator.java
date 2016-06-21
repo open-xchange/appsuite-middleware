@@ -127,7 +127,16 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
 
     @Override
     public int compare(final Contact contact1, final Contact contact2) {
-        int compared = stringComparator.compare(contact1.getSortName(), contact2.getSortName());
+        String sortName1 = contact1.getSortName();
+        String sortName2 = contact2.getSortName();
+        int compared;
+        if (null == sortName1) {
+            compared = null == sortName2 ? 0 : -1;
+        } else if (null == sortName2) {
+            compared = 1;
+        } else {
+            compared = stringComparator.compare(sortName1, sortName2);
+        }
         return inverse * compared;
     }
 
