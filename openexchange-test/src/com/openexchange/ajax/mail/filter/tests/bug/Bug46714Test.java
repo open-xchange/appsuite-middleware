@@ -47,82 +47,65 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.request;
+package com.openexchange.ajax.mail.filter.tests.bug;
 
-import java.io.IOException;
 import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.mail.filter.api.parser.ReorderParser;
-import com.openexchange.ajax.mail.filter.api.response.ReorderResponse;
+import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.dao.action.Keep;
+import com.openexchange.ajax.mail.filter.api.dao.action.Stop;
+import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
+import com.openexchange.ajax.mail.filter.tests.AbstractMailFilterTest;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ReorderRequest}
+ * {@link Bug46714Test}. Test for Bug 46714 - IOOBE at GeneralMailFilterGroup.getOrderedRules
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ReorderRequest extends AbstractMailFilterRequest<ReorderResponse> {
-
-    private int[] ids;
-    private String username;
+public class Bug46714Test extends AbstractMailFilterTest {
 
     /**
-     * Initialises a new {@link ReorderRequest}.
-     */
-    public ReorderRequest(int[] ids) {
-        super();
-        this.ids = ids;
-    }
-    
-    /*
-     * (non-Javadoc)
+     * Initialises a new {@link Bug46714Test}.
      * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     * @param name the test's name
      */
-    @Override
-    public Method getMethod() {
-        return Method.PUT;
+    public Bug46714Test(String name) {
+        super(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+    /**
+     * Insert 5 rules and try to reorder with an array of 6
      */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> parameters = new LinkedList<Parameter>();
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "reorder"));
-        if (username != null) {
-            parameters.add(new Parameter("username", username));
+    public void testBug46714() throws Exception {
+        // Create 5 rules and insert them
+        LinkedList<Rule> expectedRules = new LinkedList<>();
+        for (int i = 0; i < 5; i++) {
+            Rule rule = new Rule();
+            rule.setName("testBug46714_1_" + i);
+            rule.setActive(true);
+            rule.addAction(new Keep());
+            rule.addAction(new Stop());
+            rule.setTest(new TrueTest());
+
+            int id = mailFilterAPI.createRule(rule);
+            rule.setId(id);
+            rule.setPosition(i);
+            expectedRules.add(rule);
         }
-        return parameters.toArray(new Parameter[parameters.size()]);
-    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends ReorderResponse> getParser() {
-        return new ReorderParser(failOnError);
-    }
+        int reorder[] = new int[] { 1, 1, 1, 1, 1, 1 };
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        JSONArray array = new JSONArray(ids.length);
-        for (int i : ids) {
-            array.put(i);
+        // Reorder
+        try {
+            // We are expecting an exception so we disable the failOnError 
+            mailFilterAPI.setFailOnError(false);
+            mailFilterAPI.reorder(reorder);
+            fail("Expected an exception");
+        } catch (Exception e) {
+            assertTrue("The exception is not an OXException", e instanceof OXException);
+            OXException oxe = (OXException) e;
+            assertEquals("The exception code does not match", 28, oxe.getCode());
+            assertEquals("The exception prefix does not match", "MAIL_FILTER", oxe.getPrefix());
         }
-        return array;
     }
 }
