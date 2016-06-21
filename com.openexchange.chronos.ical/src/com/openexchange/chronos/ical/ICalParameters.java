@@ -66,6 +66,12 @@ public interface ICalParameters {
     String OUTLOOK_TIMEZONES = "OUTLOOK_TIMEZONES";
 
     /**
+     * {@link Boolean} value to indicate whether attendee comments meant for the organizer (<code>X-CALENDARSERVER-ATTENDEE-COMMENT</code>)
+     * should be exported or not.
+     */
+    String ATTENDEE_COMMENTS = "";
+
+    /**
      * Gets the value of an arbitrary extended parameter.
      *
      * @param name The parameter name
