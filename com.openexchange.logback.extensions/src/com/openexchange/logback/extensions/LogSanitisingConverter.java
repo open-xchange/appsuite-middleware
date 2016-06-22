@@ -49,54 +49,80 @@
 
 package com.openexchange.logback.extensions;
 
-import ch.qos.logback.classic.PatternLayout;
-import ch.qos.logback.core.spi.ContextAwareBase;
-import ch.qos.logback.core.spi.PropertyDefiner;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import ch.qos.logback.classic.pattern.ClassicConverter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
- * Ensures to have the {@link ExtendedPatternLayoutEncoder} with its additional layouts gets initialized. This is required if no other
- * appender with PatterLayout is initialized within the logback config (logback.xml).<br>
- * <br>
- * Hint: this does not overwrite configurations made within com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * {@link LogSanitisingConverter}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SyslogPatternLayoutActivator extends ContextAwareBase implements PropertyDefiner {
+public class LogSanitisingConverter extends ClassicConverter {
 
     /**
-     * Initializes a new {@link SyslogPatternLayoutActivator}.
+     * Initialises a new {@link LogSanitisingConverter}.
      */
-    public SyslogPatternLayoutActivator() {
+    public LogSanitisingConverter() {
         super();
-
-        addPatternLayouts();
     }
 
-    /**
-     * Adds pattern layouts if currently not available in defaultConverterMap
-     */
-    private void addPatternLayouts() {
-        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.LMDC)) {
-            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.LMDC, LineMDCConverter.class.getName());
-        }
-        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.EREPLACE)) {
-            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.EREPLACE, ExtendedReplacingCompositeConverter.class.getName());
-        }
-        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.TID)) {
-            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.TID, ThreadIdConverter.class.getName());
-        }
-        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.SAN)) {
-            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.SAN, ThreadIdConverter.class.getName());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see ch.qos.logback.core.pattern.Converter#convert(java.lang.Object)
      */
     @Override
-    public String getPropertyValue() {
-        // Nothing to do
-        return null;
+    public String convert(ILoggingEvent event) {
+        // If there are no arguments attached to the logging event, try to sanitise the already formatted message
+        if (event.getArgumentArray() == null || event.getArgumentArray().length == 0) {
+            return sanitise(event.getFormattedMessage());
+        }
+
+        // Go through the arguments list and sanitise each argument
+        List<String> arguments = new ArrayList<String>(event.getArgumentArray().length);
+        for (Object o : event.getArgumentArray()) {
+            String string;
+            if (!(o instanceof String)) {
+                string = o.toString();
+            } else {
+                string = (String) o;
+            }
+            arguments.add(sanitise(string));
+        }
+
+        // Re-compile the formatted message
+        String message = event.getMessage();
+        for (String argument : arguments) {
+            message = message.replaceFirst("\\{\\}", argument);
+        }
+
+        return message;
+    }
+
+    private static final Pattern ANSI_ESCAPE_PATTERN = Pattern.compile("(\\]|\\[)([0-9]*(;|[a-z]*))*");
+
+    /**
+     * Sanitises the specified string from any ANSI escape sequences
+     * 
+     * @param string The string to sanitise
+     * @return The sanitised string
+     */
+    private String sanitise(String string) {
+        Matcher matcher = ANSI_ESCAPE_PATTERN.matcher(string);
+        int lastMatch = 0;
+        StringBuilder s = new StringBuilder();
+        while (matcher.find()) {
+            String substring = string.substring(lastMatch, matcher.start());
+            s.append(substring);
+            lastMatch = matcher.end();
+        }
+        if (s.length() != 0) {
+            string = s.toString();
+        }
+        return string;
     }
 }

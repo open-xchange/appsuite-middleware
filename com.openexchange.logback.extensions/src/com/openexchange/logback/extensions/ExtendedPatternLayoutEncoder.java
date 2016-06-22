@@ -52,7 +52,6 @@ package com.openexchange.logback.extensions;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 
-
 /**
  * {@link ExtendedPatternLayoutEncoder} - Puts additional converters to <code>PatternLayout</code>'s default converter mapping.
  *
@@ -76,6 +75,11 @@ public class ExtendedPatternLayoutEncoder extends PatternLayoutEncoder {
     public static final String TID = "tid";
 
     /**
+     * Key for sanitisedMessage
+     */
+    public static final String SAN = "sanitisedMessage";
+
+    /**
      * Initializes a new {@link ExtendedPatternLayoutEncoder}.
      */
     public ExtendedPatternLayoutEncoder() {
@@ -83,6 +87,7 @@ public class ExtendedPatternLayoutEncoder extends PatternLayoutEncoder {
         PatternLayout.defaultConverterMap.put(LMDC, LineMDCConverter.class.getName());
         PatternLayout.defaultConverterMap.put(EREPLACE, ExtendedReplacingCompositeConverter.class.getName());
         PatternLayout.defaultConverterMap.put(TID, ThreadIdConverter.class.getName());
+        PatternLayout.defaultConverterMap.put(SAN, LogSanitisingConverter.class.getName());
     }
 
 }
