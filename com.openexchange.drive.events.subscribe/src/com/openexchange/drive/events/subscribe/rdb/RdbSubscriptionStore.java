@@ -66,6 +66,7 @@ import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -90,10 +91,11 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
 
     @Override
     public Subscription subscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException {
-        Subscription subscription = new Subscription(
+        Subscription subscription = new Subscription(UUIDs.getUnformattedStringFromRandom(),
             session.getContextId(), session.getUserId(), serviceID, token, rootFolderID, System.currentTimeMillis());
         Connection connection = databaseService.getWritable(session.getContextId());
         try {
+            deleteSubscription(connection, session.getContextId(), serviceID, token, rootFolderID);
             if (0 == replaceSubscription(connection, subscription)) {
                 throw DriveExceptionCodes.DB_ERROR.create("Subscription not added: " + subscription);
             }
@@ -251,12 +253,13 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.REPLACE_SUBSCRIPTION_STMT);
-            stmt.setInt(1, subscription.getContextID());
-            stmt.setString(2, subscription.getServiceID());
-            stmt.setString(3, subscription.getToken());
-            stmt.setInt(4, subscription.getUserID());
-            stmt.setString(5, SQL.escape(subscription.getRootFolderID()));
-            stmt.setLong(6, subscription.getTimestamp());
+            stmt.setString(1, subscription.getUuid());
+            stmt.setInt(2, subscription.getContextID());
+            stmt.setString(3, subscription.getServiceID());
+            stmt.setString(4, subscription.getToken());
+            stmt.setInt(5, subscription.getUserID());
+            stmt.setString(6, SQL.escape(subscription.getRootFolderID()));
+            stmt.setLong(7, subscription.getTimestamp());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -270,6 +273,20 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setInt(1, cid);
             stmt.setString(2, service);
             stmt.setString(3, token);
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int deleteSubscription(Connection connection, int cid, String service, String token, String folder) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.DELETE_SUBSCRIPTION_FOR_FOLDER_STMT);
+            stmt.setInt(1, cid);
+            stmt.setString(2, service);
+            stmt.setString(3, token);
+            stmt.setString(4, SQL.escape(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -347,12 +364,13 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             }
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
-                String service = resultSet.getString(1);
-                String token = resultSet.getString(2);
-                int user = resultSet.getInt(3);
-                String folder = SQL.unescape(resultSet.getString(4));
-                long timestamp = resultSet.getLong(5);
-                subscriptions.add(new Subscription(cid, user, service, token, folder, timestamp));
+                String uuid = resultSet.getString(1);
+                String service = resultSet.getString(2);
+                String token = resultSet.getString(3);
+                int user = resultSet.getInt(4);
+                String folder = SQL.unescape(resultSet.getString(5));
+                long timestamp = resultSet.getLong(6);
+                subscriptions.add(new Subscription(uuid, cid, user, service, token, folder, timestamp));
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -371,13 +389,14 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             }
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
-                int cid = resultSet.getInt(1);
-                String service = resultSet.getString(2);
-                String token = resultSet.getString(3);
-                int user = resultSet.getInt(4);
-                String folder = SQL.unescape(resultSet.getString(5));
-                long timestamp = resultSet.getLong(6);
-                subscriptions.add(new Subscription(cid, user, service, token, folder, timestamp));
+                String uuid = resultSet.getString(1);
+                int cid = resultSet.getInt(2);
+                String service = resultSet.getString(3);
+                String token = resultSet.getString(4);
+                int user = resultSet.getInt(5);
+                String folder = SQL.unescape(resultSet.getString(6));
+                long timestamp = resultSet.getLong(7);
+                subscriptions.add(new Subscription(uuid, cid, user, service, token, folder, timestamp));
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);

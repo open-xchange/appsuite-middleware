@@ -47,71 +47,88 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
-
-import java.io.IOException;
-import java.util.List;
-
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+package com.openexchange.dav.carddav.reports;
 
 
 /**
- * {@link DeleteCommentRequest}
+ * {@link PropFilter}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public class DeleteCommentRequest extends AbstractXingRequest<DeleteCommentResponse> {
+public class PropFilter {
 
-    private final String activityId;
+    private String name;
+    private String matchType;
+    private String textMatch;
     
-    private final String commentId;
+    /**
+     * Initializes a new {@link PropFilter}.
+     * 
+     * @param name
+     * @param matchType
+     * @param textMatch
+     */
+    public PropFilter(String name, String matchType, String textMatch) {
+        super();
+        this.name = name;
+        this.matchType = matchType;
+        this.textMatch = textMatch;
+    }
+    
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+    
+    /**
+     * Sets the name
+     *
+     * @param name The name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
     /**
-     * Initializes a new {@link DeleteCommentRequest}.
-     * @param foe
+     * Gets the matchType
+     *
+     * @return The matchType
      */
-    public DeleteCommentRequest(final String activityId, final String commentId, final boolean foe) {
-        super(foe);
-        this.activityId = activityId;
-        this.commentId = commentId;
+    public String getMatchType() {
+        return matchType;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+    /**
+     * Sets the matchType
+     *
+     * @param matchType The matchType to set
      */
-    @Override
-    public Method getMethod() {
-        return Method.POST;
+    public void setMatchType(String matchType) {
+        this.matchType = matchType;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+    /**
+     * Gets the textMatch
+     *
+     * @return The textMatch
      */
-    @Override
-    public AbstractAJAXParser<? extends DeleteCommentResponse> getParser() {
-        return new DeleteCommentParser(failOnError);
+    public String getTextMatch() {
+        return textMatch;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+    /**
+     * Sets the textMatch
+     *
+     * @param textMatch The textMatch to set
      */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    public void setTextMatch(String textMatch) {
+        this.textMatch = textMatch;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
-     */
-    @Override
-    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "delete_comment"));
-        params.add(new URLParameter("activity_id", activityId));
-        params.add(new URLParameter("comment_id", commentId));
-    }
 
 }

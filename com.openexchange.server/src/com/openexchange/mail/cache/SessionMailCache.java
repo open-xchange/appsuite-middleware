@@ -68,15 +68,42 @@ import com.openexchange.session.Session;
 public final class SessionMailCache {
 
     /**
+     * (Optionally) Gets the session-bound mail cache.
+     *
+     * @param session The session whose mail cache shall be returned
+     * @param accountId The account identifier
+     * @return The session-bound mail cache or <code>null</code>
+     */
+    public static SessionMailCache optInstance(Session session, int accountId) {
+        MailSessionCache mailSessionCache = MailSessionCache.optInstance(session);
+        if (null == mailSessionCache) {
+            return null;
+        }
+
+        String key = MailSessionParameterNames.getParamMailCache();
+        SessionMailCache mailCache = null;
+        try {
+            mailCache = (SessionMailCache) mailSessionCache.getParameter(accountId, key);
+        } catch (final ClassCastException e) {
+            /*
+             * Class version does not match; just renew session cache.
+             */
+            mailCache = null;
+            mailSessionCache.removeParameter(accountId, key);
+        }
+        return mailCache;
+    }
+
+    /**
      * Gets the session-bound mail cache.
      *
      * @param session The session whose mail cache shall be returned
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @return The session-bound mail cache.
      */
-    public static SessionMailCache getInstance(final Session session, final int accountId) {
-        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
-        final String key = MailSessionParameterNames.getParamMailCache();
+    public static SessionMailCache getInstance(Session session, int accountId) {
+        MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        String key = MailSessionParameterNames.getParamMailCache();
         SessionMailCache mailCache = null;
         try {
             mailCache = (SessionMailCache) mailSessionCache.getParameter(accountId, key);

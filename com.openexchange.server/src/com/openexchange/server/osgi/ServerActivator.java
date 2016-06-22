@@ -85,6 +85,7 @@ import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.auth.rmi.impl.RemoteAuthenticatorImpl;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.config.ConfigurationService;
@@ -188,6 +189,7 @@ import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.osgi.MailCapabilityServiceTracker;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
+import com.openexchange.mail.osgi.MailSessionCacheInvalidator;
 import com.openexchange.mail.osgi.MailcapServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
@@ -416,6 +418,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(MailAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
 
         // Mail provider service tracker
+        track(CacheEventService.class, new MailSessionCacheInvalidator(context));
         track(MailProvider.class, new MailProviderServiceTracker(context));
         track(MailcapCommandMap.class, new MailcapServiceTracker(context));
         track(CapabilityService.class, new MailCapabilityServiceTracker(context));
@@ -429,6 +432,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Spam handler provider service tracker
         track(SpamHandler.class, new SpamHandlerServiceTracker(context));
+
+        // CacheEventService
+        track(CacheEventService.class, new RegistryCustomizer<CacheEventService>(context, CacheEventService.class));
 
         // AJAX request handler
         track(AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context));

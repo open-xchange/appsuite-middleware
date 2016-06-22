@@ -47,25 +47,60 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
+package com.openexchange.drive.events.subscribe.rdb;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import static com.openexchange.tools.sql.DBUtils.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link ShareLinkResponse}
- * 
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * {@link DriveEventSubscriptionsAddUuidColumnTask}
+ *
+ * Adds the column <code>uuid BINARY(16) DEFAULT NULL</code> to the <code>driveEventSubscriptions</code>.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public class ShareLinkResponse extends AbstractAJAXResponse {
+public class DriveEventSubscriptionsAddUuidColumnTask extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link ShareLinkResponse}.
-     * 
-     * @param response
-     */
-    protected ShareLinkResponse(Response response) {
-        super(response);
+    @Override
+    public String[] getDependencies() {
+        return new String[] { DriveEventSubscriptionsCreateTableTask.class.getName() };
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        DatabaseService dbService = SubscribeServiceLookup.getService(DatabaseService.class, true);
+        Connection connection = dbService.getForUpdateTask(contextID);
+        boolean committed = false;
+        try {
+            connection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connection, "driveEventSubscriptions", new Column("uuid", "BINARY(16) DEFAULT NULL"));
+            connection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connection);
+            if (committed) {
+                dbService.backForUpdateTask(contextID, connection);
+            } else {
+                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            }
+        }
     }
 
 }

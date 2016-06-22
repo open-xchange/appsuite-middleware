@@ -47,35 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
+package com.openexchange.dav.carddav.reports;
 
-import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import org.apache.jackrabbit.webdav.DavException;
+import org.apache.jackrabbit.webdav.DavResource;
+import org.apache.jackrabbit.webdav.version.DeltaVConstants;
+import org.apache.jackrabbit.webdav.version.report.Report;
+import org.apache.jackrabbit.webdav.version.report.ReportInfo;
+import org.apache.jackrabbit.webdav.version.report.ReportType;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import com.openexchange.dav.PropertyNames;
 
 /**
- * {@link ContactJoinRevokeParser}
+ * {@link AddressbookQueryReport}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public class ContactJoinRevokeParser extends AbstractAJAXParser<ContactJoinRevokeResponse> {
+public class AddressbookQueryReport implements Report, DeltaVConstants {
 
-    /**
-     * Initializes a new {@link ContactJoinRevokeParser}.
-     * 
-     * @param failOnError
-     */
-    protected ContactJoinRevokeParser(boolean failOnError) {
-        super(failOnError);
-    }
+    public static final ReportType ADDRESSBOOK_QUERY = ReportType.register(PropertyNames.ADDRESSBOOK_QUERY.getName(),
+    		PropertyNames.ADDRESSBOOK_QUERY.getNamespace(), AddressbookQueryReport.class);
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
-    protected ContactJoinRevokeResponse createResponse(Response response) throws JSONException {
-        return new ContactJoinRevokeResponse(response);
+    public ReportType getType() {
+        return ADDRESSBOOK_QUERY;
     }
 
+    @Override
+    public boolean isMultiStatusReport() {
+        return true;
+    }
+
+    @Override
+    public void init(DavResource dr, ReportInfo ri) throws DavException {
+    }
+
+	@Override
+    public Element toXml(Document arg0) {
+        throw new UnsupportedOperationException();
+	}
 }

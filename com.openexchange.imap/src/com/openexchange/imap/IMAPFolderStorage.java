@@ -117,6 +117,7 @@ import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
@@ -1260,11 +1261,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                     /*
                                      * Apply new ACLs
                                      */
+                                    List<ACL> validatedACL = new ArrayList<ACL>(initialACLs.length);
                                     final Map<String, ACL> om = acl2map(initialACLs);
                                     for (int i = 0; i < newACLs.length; i++) {
                                         ACL validated = validate(newACLs[i], om);
                                         if (null != validated) {
                                             createMe.addACL(validated);
+                                            validatedACL.add(validated);
                                         }
                                     }
                                     /*
@@ -1278,12 +1281,19 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                             }
                                         }
                                     }
+                                    // Affected users, too
+                                    dropListLsubCachesForOther(validatedACL.toArray(new ACL[validatedACL.size()]));
                                 } else {
                                     /*
                                      * Add a warning
                                      */
                                     imapAccess.addWarnings(Collections.<OXException> singletonList(IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, imapConfig, session, createMe.getFullName())));
+                                    // Affected users, too
+                                    dropListLsubCachesForOther(initialACLs);
                                 }
+                            } else {
+                                // Affected users, too
+                                dropListLsubCachesForOther(initialACLs);
                             }
                         }
                     }
@@ -3063,16 +3073,19 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
 
         UserStorage us = UserStorage.getInstance();
+        String myLogin = imapConfig.getLogin();
+        int myUserId = session.getUserId();
         for (ACL acl : acls) {
             if (null != acl) {
                 String entityName = acl.getName();
-                if (!imapConfig.getLogin().equals(entityName)) {
+                if (!myLogin.equals(entityName)) {
                     try {
                         User[] users = us.searchUserByMailLogin(entityName, ctx);
                         for (User user : users) {
                             int userId = user.getId();
-                            if (userId != session.getUserId()) {
+                            if (userId != myUserId) {
                                 ListLsubCache.dropFor(userId, ctx.getContextId());
+                                MailSessionCache.clearFor(userId, ctx.getContextId());
                             }
                         }
                     } catch (OXException e) {
@@ -3089,15 +3102,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
 
         UserStorage us = UserStorage.getInstance();
+        String myLogin = imapConfig.getLogin();
+        int myUserId = session.getUserId();
         for (String entityName : entityNames) {
             if (null != entityName) {
-                if (!imapConfig.getLogin().equals(entityName)) {
+                if (!myLogin.equals(entityName)) {
                     try {
                         User[] users = us.searchUserByMailLogin(entityName, ctx);
                         for (User user : users) {
                             int userId = user.getId();
-                            if (userId != session.getUserId()) {
+                            if (userId != myUserId) {
                                 ListLsubCache.dropFor(userId, ctx.getContextId());
+                                MailSessionCache.clearFor(userId, ctx.getContextId());
                             }
                         }
                     } catch (OXException e) {
