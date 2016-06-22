@@ -2,3701 +2,4238 @@
 title: API Definitions
 classes: no-affix
 ---
+
+<a name="acquiretokenresponse"></a>
 # AcquireTokenResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[data](#acquiretokenresponse-data)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
+
+<a name="acquiretokenresponse-data"></a>
+**data**
+
+|Name|Description|Schema|
+|---|---|---|
+|**token**  <br>*optional*|The token that can be used for a new session.|string|
 
 
+<a name="allresourcesresponse"></a>
 # AllResourcesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of resource identifiers.|false|integer array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of resource identifiers.|< integer > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="appointmentconfirmationbody"></a>
 # AppointmentConfirmationBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|confirmation|0 (none), 1 (accepted), 2 (declined), 3 (tentative).|true|integer||
-|confirmmessage|The confirmation message or comment.|true|string||
-|id|User ID. Confirming for other users only works for appointments and not for tasks.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**confirmation**  <br>*required*|0 (none), 1 (accepted), 2 (declined), 3 (tentative).|integer|
+|**confirmmessage**  <br>*required*|The confirmation message or comment.|string|
+|**id**  <br>*optional*|User ID. Confirming for other users only works for appointments and not for tasks.|integer|
 
 
+<a name="appointmentcreationconflict"></a>
 # AppointmentCreationConflict
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|hard_conflicts|"true" if appointment represents a resource conflict.|false|boolean||
-|recurrence_id|Object ID of the entire appointment sequence. Present on series and change exception appointments. Equals to object identifier on series appointment and is different to object identifier on change exceptions.|false|integer||
-|recurrence_position|1-based position of an individual appointment in a sequence. Present if and only if recurrence_type > 0.|false|integer||
-|recurrence_date_position|Date of an individual appointment in a sequence. Present if and only if recurrence_type > 0.|false|integer (int64)||
-|change_exceptions|An array of Dates, representing all change exceptions of a sequence.|false|integer (int64) array||
-|delete_exceptions|An array of Dates, representing all delete exceptions of a sequence.|false|integer (int64) array||
-|location|The location of the appointment.|false|string||
-|shown_as|Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).|false|integer||
-|timezone|The timezone of the appointment.|false|string||
-|recurrence_start|Start of a sequence without time.|false|integer (int64)||
-|ignore_conflicts|Ignore soft conflicts for the new or modified appointment. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|false|boolean||
-|title|Short description.|false|string||
-|start_date|Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).|false|integer (int64)||
-|end_date|Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).|false|integer (int64)||
-|note|Long description.|false|string||
-|alarm|Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|false|integer (int64)||
-|recurrence_type|Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).|false|integer||
-|days|Specifies which days of the week are part of a sequence. The value is a bitfield with bit 0 indicating sunday, bit 1 indicating monday and so on. May be present if recurrence_type > 1. If allowed but not present, the value defaults to 127 (all 7 days).|false|integer||
-|day_in_month|Specifies which day of a month is part of the sequence. Counting starts with 1. If the field "days" is also present, only days selected by that field are counted. If the number is bigger than the number of available days, the last available day is selected. Present if and only if recurrence_type > 2.|false|integer||
-|month|Month of the year in yearly sequencies. 0 represents January, 1 represents February and so on. Present if and only if recurrence_type = 4.|false|integer||
-|interval|Specifies an integer multiplier to the interval specified by recurrence_type. Present if and only if recurrence_type > 0. Must be 1 if recurrence_type = 4.|false|integer||
-|until|Inclusive end date of a sequence. May be present only if recurrence_type > 0. The sequence has no end date if recurrence_type > 0 and this field is not present. Note: since this is a Date, the entire day after the midnight specified by the value is included.|false|integer (int64)||
-|notification|If true, all participants are notified of any changes to this object. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|false|boolean||
-|participants|Each element identifies a participant, user, group or booked resource.|false|TaskParticipant array||
-|users|Each element represents a participant. User groups are resolved and are represented by their members. Any user can occur only once.|false|TaskUser array||
-|occurrences|Specifies how often a recurrence should appear. May be present only if recurrence_type > 0.|false|integer||
-|uid|Can only be written when the object is created. Internal and external globally unique identifier of the appointment or task. Is used to recognize appointments within iCal files. If this attribute is not written it contains an automatic generated UUID.|false|string||
-|organizer|Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.|false|string||
-|sequence|iCal sequence number. Not implemented for tasks. Must be incremented on update. Will be incremented by the server, if not set.|false|integer||
-|confirmations|Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.|false|TaskConfirmation array||
-|organizerId|Contains the userIId of the appointment organizer if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|false|integer||
-|principal|Contains the email address of the appointment principal which is not necessarily an internal user. Not implemented for tasks (introduced with 6.20.1).|false|string||
-|principalId|Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|false|integer||
-|full_time|True if the event is a whole day appointment or task, false otherwise.|false|boolean||
-|id|Object ID.|false|string||
-|created_by|User ID of the user who created this object.|false|string||
-|modified_by|User ID of the user who last modified this object.|false|string||
-|creation_date|Date and time of creation.|false|integer (int64)||
-|last_modified|Date and time of the last modification.|false|integer (int64)||
-|folder_id|Object ID of the parent folder.|false|string||
-|categories|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|false|string||
-|private_flag|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|false|boolean||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|false|integer||
-|number_of_attachments|Number of attachments.|false|integer||
-|lastModifiedOfNewestAttachmentUTC|Timestamp of the newest attachment written with UTC time zone.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**alarm**  <br>*optional*|Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|integer(int64)|
+|**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
+|**change_exceptions**  <br>*optional*|An array of Dates, representing all change exceptions of a sequence.|< integer(int64) > array|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**confirmations**  <br>*optional*|Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.|< [TaskConfirmation](#taskconfirmation) > array|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**day_in_month**  <br>*optional*|Specifies which day of a month is part of the sequence. Counting starts with 1. If the field "days" is also present, only days selected by that field are counted. If the number is bigger than the number of available days, the last available day is selected. Present if and only if recurrence_type > 2.|integer|
+|**days**  <br>*optional*|Specifies which days of the week are part of a sequence. The value is a bitfield with bit 0 indicating sunday, bit 1 indicating monday and so on. May be present if recurrence_type > 1. If allowed but not present, the value defaults to 127 (all 7 days).|integer|
+|**delete_exceptions**  <br>*optional*|An array of Dates, representing all delete exceptions of a sequence.|< integer(int64) > array|
+|**end_date**  <br>*optional*|Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).|integer(int64)|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**full_time**  <br>*optional*|True if the event is a whole day appointment or task, false otherwise.|boolean|
+|**hard_conflicts**  <br>*optional*|"true" if appointment represents a resource conflict.|boolean|
+|**id**  <br>*optional*|Object ID.|string|
+|**ignore_conflicts**  <br>*optional*|Ignore soft conflicts for the new or modified appointment. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|boolean|
+|**interval**  <br>*optional*|Specifies an integer multiplier to the interval specified by recurrence_type. Present if and only if recurrence_type > 0. Must be 1 if recurrence_type = 4.|integer|
+|**lastModifiedOfNewestAttachmentUTC**  <br>*optional*|Timestamp of the newest attachment written with UTC time zone.|integer(int64)|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**location**  <br>*optional*|The location of the appointment.|string|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**month**  <br>*optional*|Month of the year in yearly sequencies. 0 represents January, 1 represents February and so on. Present if and only if recurrence_type = 4.|integer|
+|**note**  <br>*optional*|Long description.|string|
+|**notification**  <br>*optional*|If true, all participants are notified of any changes to this object. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|boolean|
+|**number_of_attachments**  <br>*optional*|Number of attachments.|integer|
+|**occurrences**  <br>*optional*|Specifies how often a recurrence should appear. May be present only if recurrence_type > 0.|integer|
+|**organizer**  <br>*optional*|Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.|string|
+|**organizerId**  <br>*optional*|Contains the userIId of the appointment organizer if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|integer|
+|**participants**  <br>*optional*|Each element identifies a participant, user, group or booked resource.|< [TaskParticipant](#taskparticipant) > array|
+|**principal**  <br>*optional*|Contains the email address of the appointment principal which is not necessarily an internal user. Not implemented for tasks (introduced with 6.20.1).|string|
+|**principalId**  <br>*optional*|Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|integer|
+|**private_flag**  <br>*optional*|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|boolean|
+|**recurrence_date_position**  <br>*optional*|Date of an individual appointment in a sequence. Present if and only if recurrence_type > 0.|integer(int64)|
+|**recurrence_id**  <br>*optional*|Object ID of the entire appointment sequence. Present on series and change exception appointments. Equals to object identifier on series appointment and is different to object identifier on change exceptions.|integer|
+|**recurrence_position**  <br>*optional*|1-based position of an individual appointment in a sequence. Present if and only if recurrence_type > 0.|integer|
+|**recurrence_start**  <br>*optional*|Start of a sequence without time.|integer(int64)|
+|**recurrence_type**  <br>*optional*|Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).|integer|
+|**sequence**  <br>*optional*|iCal sequence number. Not implemented for tasks. Must be incremented on update. Will be incremented by the server, if not set.|integer|
+|**shown_as**  <br>*optional*|Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).|integer|
+|**start_date**  <br>*optional*|Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).|integer(int64)|
+|**timezone**  <br>*optional*|The timezone of the appointment.|string|
+|**title**  <br>*optional*|Short description.|string|
+|**uid**  <br>*optional*|Can only be written when the object is created. Internal and external globally unique identifier of the appointment or task. Is used to recognize appointments within iCal files. If this attribute is not written it contains an automatic generated UUID.|string|
+|**until**  <br>*optional*|Inclusive end date of a sequence. May be present only if recurrence_type > 0. The sequence has no end date if recurrence_type > 0 and this field is not present. Note: since this is a Date, the entire day after the midnight specified by the value is included.|integer(int64)|
+|**users**  <br>*optional*|Each element represents a participant. User groups are resolved and are represented by their members. Any user can occur only once.|< [TaskUser](#taskuser) > array|
 
 
+<a name="appointmentcreationdata"></a>
 # AppointmentCreationData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|ID of the appointment.|false|string||
-|conflicts|An array of appointments which cause conflicts.|false|AppointmentCreationConflict array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**conflicts**  <br>*optional*|An array of appointments which cause conflicts.|< [AppointmentCreationConflict](#appointmentcreationconflict) > array|
+|**id**  <br>*optional*|ID of the appointment.|string|
 
 
+<a name="appointmentcreationresponse"></a>
 # AppointmentCreationResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|AppointmentCreationData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[AppointmentCreationData](#appointmentcreationdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="appointmentdata"></a>
 # AppointmentData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|recurrence_id|Object ID of the entire appointment sequence. Present on series and change exception appointments. Equals to object identifier on series appointment and is different to object identifier on change exceptions.|false|integer||
-|recurrence_position|1-based position of an individual appointment in a sequence. Present if and only if recurrence_type > 0.|false|integer||
-|recurrence_date_position|Date of an individual appointment in a sequence. Present if and only if recurrence_type > 0.|false|integer (int64)||
-|change_exceptions|An array of Dates, representing all change exceptions of a sequence.|false|integer (int64) array||
-|delete_exceptions|An array of Dates, representing all delete exceptions of a sequence.|false|integer (int64) array||
-|location|The location of the appointment.|false|string||
-|shown_as|Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).|false|integer||
-|timezone|The timezone of the appointment.|false|string||
-|recurrence_start|Start of a sequence without time.|false|integer (int64)||
-|ignore_conflicts|Ignore soft conflicts for the new or modified appointment. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|false|boolean||
-|title|Short description.|false|string||
-|start_date|Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).|false|integer (int64)||
-|end_date|Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).|false|integer (int64)||
-|note|Long description.|false|string||
-|alarm|Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|false|integer (int64)||
-|recurrence_type|Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).|false|integer||
-|days|Specifies which days of the week are part of a sequence. The value is a bitfield with bit 0 indicating sunday, bit 1 indicating monday and so on. May be present if recurrence_type > 1. If allowed but not present, the value defaults to 127 (all 7 days).|false|integer||
-|day_in_month|Specifies which day of a month is part of the sequence. Counting starts with 1. If the field "days" is also present, only days selected by that field are counted. If the number is bigger than the number of available days, the last available day is selected. Present if and only if recurrence_type > 2.|false|integer||
-|month|Month of the year in yearly sequencies. 0 represents January, 1 represents February and so on. Present if and only if recurrence_type = 4.|false|integer||
-|interval|Specifies an integer multiplier to the interval specified by recurrence_type. Present if and only if recurrence_type > 0. Must be 1 if recurrence_type = 4.|false|integer||
-|until|Inclusive end date of a sequence. May be present only if recurrence_type > 0. The sequence has no end date if recurrence_type > 0 and this field is not present. Note: since this is a Date, the entire day after the midnight specified by the value is included.|false|integer (int64)||
-|notification|If true, all participants are notified of any changes to this object. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|false|boolean||
-|participants|Each element identifies a participant, user, group or booked resource.|false|TaskParticipant array||
-|users|Each element represents a participant. User groups are resolved and are represented by their members. Any user can occur only once.|false|TaskUser array||
-|occurrences|Specifies how often a recurrence should appear. May be present only if recurrence_type > 0.|false|integer||
-|uid|Can only be written when the object is created. Internal and external globally unique identifier of the appointment or task. Is used to recognize appointments within iCal files. If this attribute is not written it contains an automatic generated UUID.|false|string||
-|organizer|Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.|false|string||
-|sequence|iCal sequence number. Not implemented for tasks. Must be incremented on update. Will be incremented by the server, if not set.|false|integer||
-|confirmations|Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.|false|TaskConfirmation array||
-|organizerId|Contains the userIId of the appointment organizer if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|false|integer||
-|principal|Contains the email address of the appointment principal which is not necessarily an internal user. Not implemented for tasks (introduced with 6.20.1).|false|string||
-|principalId|Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|false|integer||
-|full_time|True if the event is a whole day appointment or task, false otherwise.|false|boolean||
-|id|Object ID.|false|string||
-|created_by|User ID of the user who created this object.|false|string||
-|modified_by|User ID of the user who last modified this object.|false|string||
-|creation_date|Date and time of creation.|false|integer (int64)||
-|last_modified|Date and time of the last modification.|false|integer (int64)||
-|folder_id|Object ID of the parent folder.|false|string||
-|categories|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|false|string||
-|private_flag|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|false|boolean||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|false|integer||
-|number_of_attachments|Number of attachments.|false|integer||
-|lastModifiedOfNewestAttachmentUTC|Timestamp of the newest attachment written with UTC time zone.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**alarm**  <br>*optional*|Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|integer(int64)|
+|**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
+|**change_exceptions**  <br>*optional*|An array of Dates, representing all change exceptions of a sequence.|< integer(int64) > array|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**confirmations**  <br>*optional*|Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.|< [TaskConfirmation](#taskconfirmation) > array|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**day_in_month**  <br>*optional*|Specifies which day of a month is part of the sequence. Counting starts with 1. If the field "days" is also present, only days selected by that field are counted. If the number is bigger than the number of available days, the last available day is selected. Present if and only if recurrence_type > 2.|integer|
+|**days**  <br>*optional*|Specifies which days of the week are part of a sequence. The value is a bitfield with bit 0 indicating sunday, bit 1 indicating monday and so on. May be present if recurrence_type > 1. If allowed but not present, the value defaults to 127 (all 7 days).|integer|
+|**delete_exceptions**  <br>*optional*|An array of Dates, representing all delete exceptions of a sequence.|< integer(int64) > array|
+|**end_date**  <br>*optional*|Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).|integer(int64)|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**full_time**  <br>*optional*|True if the event is a whole day appointment or task, false otherwise.|boolean|
+|**id**  <br>*optional*|Object ID.|string|
+|**ignore_conflicts**  <br>*optional*|Ignore soft conflicts for the new or modified appointment. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|boolean|
+|**interval**  <br>*optional*|Specifies an integer multiplier to the interval specified by recurrence_type. Present if and only if recurrence_type > 0. Must be 1 if recurrence_type = 4.|integer|
+|**lastModifiedOfNewestAttachmentUTC**  <br>*optional*|Timestamp of the newest attachment written with UTC time zone.|integer(int64)|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**location**  <br>*optional*|The location of the appointment.|string|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**month**  <br>*optional*|Month of the year in yearly sequencies. 0 represents January, 1 represents February and so on. Present if and only if recurrence_type = 4.|integer|
+|**note**  <br>*optional*|Long description.|string|
+|**notification**  <br>*optional*|If true, all participants are notified of any changes to this object. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|boolean|
+|**number_of_attachments**  <br>*optional*|Number of attachments.|integer|
+|**occurrences**  <br>*optional*|Specifies how often a recurrence should appear. May be present only if recurrence_type > 0.|integer|
+|**organizer**  <br>*optional*|Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.|string|
+|**organizerId**  <br>*optional*|Contains the userIId of the appointment organizer if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|integer|
+|**participants**  <br>*optional*|Each element identifies a participant, user, group or booked resource.|< [TaskParticipant](#taskparticipant) > array|
+|**principal**  <br>*optional*|Contains the email address of the appointment principal which is not necessarily an internal user. Not implemented for tasks (introduced with 6.20.1).|string|
+|**principalId**  <br>*optional*|Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|integer|
+|**private_flag**  <br>*optional*|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|boolean|
+|**recurrence_date_position**  <br>*optional*|Date of an individual appointment in a sequence. Present if and only if recurrence_type > 0.|integer(int64)|
+|**recurrence_id**  <br>*optional*|Object ID of the entire appointment sequence. Present on series and change exception appointments. Equals to object identifier on series appointment and is different to object identifier on change exceptions.|integer|
+|**recurrence_position**  <br>*optional*|1-based position of an individual appointment in a sequence. Present if and only if recurrence_type > 0.|integer|
+|**recurrence_start**  <br>*optional*|Start of a sequence without time.|integer(int64)|
+|**recurrence_type**  <br>*optional*|Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).|integer|
+|**sequence**  <br>*optional*|iCal sequence number. Not implemented for tasks. Must be incremented on update. Will be incremented by the server, if not set.|integer|
+|**shown_as**  <br>*optional*|Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).|integer|
+|**start_date**  <br>*optional*|Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).|integer(int64)|
+|**timezone**  <br>*optional*|The timezone of the appointment.|string|
+|**title**  <br>*optional*|Short description.|string|
+|**uid**  <br>*optional*|Can only be written when the object is created. Internal and external globally unique identifier of the appointment or task. Is used to recognize appointments within iCal files. If this attribute is not written it contains an automatic generated UUID.|string|
+|**until**  <br>*optional*|Inclusive end date of a sequence. May be present only if recurrence_type > 0. The sequence has no end date if recurrence_type > 0 and this field is not present. Note: since this is a Date, the entire day after the midnight specified by the value is included.|integer(int64)|
+|**users**  <br>*optional*|Each element represents a participant. User groups are resolved and are represented by their members. Any user can occur only once.|< [TaskUser](#taskuser) > array|
 
 
+<a name="appointmentdeletionselement"></a>
 # AppointmentDeletionsElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The object ID of the appointment.|true|string||
-|folder|The object ID of the related folder.|true|string||
-|pos|Value of the field recurrence_position, if present in the appointment.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*required*|The object ID of the related folder.|string|
+|**id**  <br>*required*|The object ID of the appointment.|string|
+|**pos**  <br>*optional*|Value of the field recurrence_position, if present in the appointment.|integer|
 
 
+<a name="appointmentdeletionsresponse"></a>
 # AppointmentDeletionsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array with object IDs of appointments which were modified after the specified timestamp and were therefore not deleted.|false|AppointmentDeletionsElement array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array with object IDs of appointments which were modified after the specified timestamp and were therefore not deleted.|< [AppointmentDeletionsElement](#appointmentdeletionselement) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="appointmentfreebusyitem"></a>
 # AppointmentFreeBusyItem
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|full_time|True if the event is a whole day appointment or task, false otherwise.|false|boolean||
-|confirmations|Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.|false|TaskConfirmation array||
-|title|Short description.|false|string||
-|start_date|Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).|false|integer (int64)||
-|end_date|Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).|false|integer (int64)||
-|participants|Each element identifies a participant, user, group or booked resource.|false|TaskParticipant array||
-|recurrence_type|Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).|false|integer||
-|shown_as|Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).|false|integer||
-|id|Object ID.|false|string||
-|created_by|User ID of the user who created this object.|false|string||
-|modified_by|User ID of the user who last modified this object.|false|string||
-|creation_date|Date and time of creation.|false|integer (int64)||
-|last_modified|Date and time of the last modification.|false|integer (int64)||
-|folder_id|Object ID of the parent folder.|false|string||
-|categories|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|false|string||
-|private_flag|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|false|boolean||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|false|integer||
-|number_of_attachments|Number of attachments.|false|integer||
-|lastModifiedOfNewestAttachmentUTC|Timestamp of the newest attachment written with UTC time zone.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**confirmations**  <br>*optional*|Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.|< [TaskConfirmation](#taskconfirmation) > array|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**end_date**  <br>*optional*|Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).|integer(int64)|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**full_time**  <br>*optional*|True if the event is a whole day appointment or task, false otherwise.|boolean|
+|**id**  <br>*optional*|Object ID.|string|
+|**lastModifiedOfNewestAttachmentUTC**  <br>*optional*|Timestamp of the newest attachment written with UTC time zone.|integer(int64)|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**number_of_attachments**  <br>*optional*|Number of attachments.|integer|
+|**participants**  <br>*optional*|Each element identifies a participant, user, group or booked resource.|< [TaskParticipant](#taskparticipant) > array|
+|**private_flag**  <br>*optional*|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|boolean|
+|**recurrence_type**  <br>*optional*|Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).|integer|
+|**shown_as**  <br>*optional*|Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).|integer|
+|**start_date**  <br>*optional*|Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).|integer(int64)|
+|**title**  <br>*optional*|Short description.|string|
 
 
+<a name="appointmentfreebusyresponse"></a>
 # AppointmentFreeBusyResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|AppointmentFreeBusyItem array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||< [AppointmentFreeBusyItem](#appointmentfreebusyitem) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="appointmentinforesponse"></a>
 # AppointmentInfoResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array with elements that correspond with days in the time range, explaining whether a day has appointments or not.|false|boolean array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**data**  <br>*optional*|Array with elements that correspond with days in the time range, explaining whether a day has appointments or not.|< boolean > array|
 
 
+<a name="appointmentlistelement"></a>
 # AppointmentListElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The object ID of the appointment.|true|string||
-|folder|The object ID of the related folder.|true|string||
-|recurrence_position|1-based position of an individual appointment in a sequence.|false|integer||
-|recurrence_date_position|Date of an individual appointment in a sequence.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*required*|The object ID of the related folder.|string|
+|**id**  <br>*required*|The object ID of the appointment.|string|
+|**recurrence_date_position**  <br>*optional*|Date of an individual appointment in a sequence.|integer(int64)|
+|**recurrence_position**  <br>*optional*|1-based position of an individual appointment in a sequence.|integer|
 
 
+<a name="appointmentresponse"></a>
 # AppointmentResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|AppointmentData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[AppointmentData](#appointmentdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="appointmentsearchbody"></a>
 # AppointmentSearchBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|pattern|Search pattern to find appointments. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|false|string||
-|startletter|Search appointments with the given starting letter.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**pattern**  <br>*optional*|Search pattern to find appointments. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|string|
+|**startletter**  <br>*optional*|Search appointments with the given starting letter.|string|
 
 
+<a name="appointmentupdatedata"></a>
 # AppointmentUpdateData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|ID of the appointment.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|ID of the appointment.|string|
 
 
+<a name="appointmentupdateresponse"></a>
 # AppointmentUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|AppointmentUpdateData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[AppointmentUpdateData](#appointmentupdatedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="appointmentupdatesresponse"></a>
 # AppointmentUpdatesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of appointments.|false|object array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of appointments.|< object > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="appointmentsresponse"></a>
 # AppointmentsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of appointments. Each appointment is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of appointments. Each appointment is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="attachmentdata"></a>
 # AttachmentData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|folder|The ID of the first folder in which the attached object resides.|false|integer||
-|attached|The ID of the object this attachment is attached to.|false|integer||
-|module|The module type of the object: 1 (appointment), 4 (task), 7 (contact), 137 (infostore).|false|integer||
-|filename|The filename of the attached file.|false|string||
-|file_size|The file size (in bytes) of the attached file.|false|integer (int64)||
-|file_mimetype|The MIME type of the attached file.|false|string||
-|rft_flag|If the attachment is a RTF attachment of outlook (outlook descriptions can be stored as RTF documents).|false|boolean||
-|id|Object ID.|false|string||
-|created_by|User ID of the user who created this object.|false|string||
-|modified_by|User ID of the user who last modified this object.|false|string||
-|creation_date|Date and time of creation.|false|integer (int64)||
-|last_modified|Date and time of the last modification.|false|integer (int64)||
-|folder_id|Object ID of the parent folder.|false|string||
-|categories|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|false|string||
-|private_flag|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|false|boolean||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|false|integer||
-|number_of_attachments|Number of attachments.|false|integer||
-|lastModifiedOfNewestAttachmentUTC|Timestamp of the newest attachment written with UTC time zone.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**attached**  <br>*optional*|The ID of the object this attachment is attached to.|integer|
+|**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**file_mimetype**  <br>*optional*|The MIME type of the attached file.|string|
+|**file_size**  <br>*optional*|The file size (in bytes) of the attached file.|integer(int64)|
+|**filename**  <br>*optional*|The filename of the attached file.|string|
+|**folder**  <br>*optional*|The ID of the first folder in which the attached object resides.|integer|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**id**  <br>*optional*|Object ID.|string|
+|**lastModifiedOfNewestAttachmentUTC**  <br>*optional*|Timestamp of the newest attachment written with UTC time zone.|integer(int64)|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**module**  <br>*optional*|The module type of the object: 1 (appointment), 4 (task), 7 (contact), 137 (infostore).|integer|
+|**number_of_attachments**  <br>*optional*|Number of attachments.|integer|
+|**private_flag**  <br>*optional*|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|boolean|
+|**rft_flag**  <br>*optional*|If the attachment is a RTF attachment of outlook (outlook descriptions can be stored as RTF documents).|boolean|
 
 
+<a name="attachmentresponse"></a>
 # AttachmentResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|AttachmentData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[AttachmentData](#attachmentdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="attachmentupdatesresponse"></a>
 # AttachmentUpdatesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of attachments.|false|object array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of attachments.|< object > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="attachmentsresponse"></a>
 # AttachmentsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of attachments. Each attachment is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of attachments. Each attachment is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="autoconfigresponse"></a>
 # AutoConfigResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MailAccountData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MailAccountData](#mailaccountdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="capabilitiesresponse"></a>
 # CapabilitiesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array of JSON objects each describing one capability.|false|CapabilityData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array of JSON objects each describing one capability.|< [CapabilityData](#capabilitydata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="capabilitydata"></a>
 # CapabilityData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The identifier of the capability.|false|string||
-|attributes|A JSON object holding properties of the capability.|false|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**attributes**  <br>*optional*|A JSON object holding properties of the capability.|object|
+|**id**  <br>*optional*|The identifier of the capability.|string|
 
 
+<a name="capabilityresponse"></a>
 # CapabilityResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|CapabilityData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[CapabilityData](#capabilitydata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="changeipresponse"></a>
 # ChangeIPResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="commonresponse"></a>
 # CommonResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="configbody"></a>
 # ConfigBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The new value of the node specified by path.|true|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**data**  <br>*required*|The new value of the node specified by path.|object|
 
 
+<a name="configproperty"></a>
 # ConfigProperty
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|name|The name of the property.|false|string||
-|value|The value of the property.|false|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**name**  <br>*optional*|The name of the property.|string|
+|**value**  <br>*optional*|The value of the property.|object|
 
 
+<a name="configpropertybody"></a>
 # ConfigPropertyBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|value|The concrete value to set.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**value**  <br>*optional*|The concrete value to set.|string|
 
 
+<a name="configpropertyresponse"></a>
 # ConfigPropertyResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|ConfigProperty||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[ConfigProperty](#configproperty)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="configresponse"></a>
 # ConfigResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Generic type which can be object, string, array, etc.|false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Generic type which can be object, string, array, etc.|object|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="contactdata"></a>
 # ContactData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|uid|Can only be written when the object is created. Internal and external globally unique identifier of the contact. Is used to recognize contacts within vCard files. If this attribute is not written it contains an automatic generated UUID.|false|string||
-|display_name|The display name.|false|string||
-|first_name|The given name.|false|string||
-|last_name|The sur name.|false|string||
-|second_name|The middle name.|false|string||
-|suffix|The suffix.|false|string||
-|title|The title.|false|string||
-|street_home|The street of the home address.|false|string||
-|postal_code_home|The postal code of the home address.|false|string||
-|city_home|The city of the home address.|false|string||
-|state_home|The state of the home address.|false|string||
-|country_home|The country of the home address.|false|string||
-|birthday|The date of birth.|false|integer (int64)||
-|marital_status|The marital status.|false|string||
-|number_of_children|The number of children.|false|string||
-|profession|The profession.|false|string||
-|nickname|The nickname.|false|string||
-|spouse_name|The name of the spouse.|false|string||
-|anniversary|The anniversary.|false|integer (int64)||
-|note|A note.|false|string||
-|department|The department.|false|string||
-|position|The position.|false|string||
-|employee_type|The type of the employee.|false|string||
-|room_number|The room number.|false|string||
-|street_business|The street of the business address.|false|string||
-|postal_code_business|The postal code of the business address.|false|string||
-|city_business|The city of the business address.|false|string||
-|state_business|The state of the business address.|false|string||
-|country_business|The country of the business address.|false|string||
-|user_id|The internal user id.|false|integer||
-|number_of_employees|The number of employees.|false|string||
-|sales_volume|The sales volume.|false|string||
-|tax_id|The tax id.|false|string||
-|commercial_register|The commercial register.|false|string||
-|branches|The branches.|false|string||
-|business_category|The business category.|false|string||
-|info|An information.|false|string||
-|manager_name|The manager's name.|false|string||
-|assistant_name|The assistant's name.|false|string||
-|street_other|The street of another address.|false|string||
-|postal_code_other|The postal code of another address.|false|string||
-|city_other|The city of another address.|false|string||
-|state_other|The state of another address.|false|string||
-|country_other|The country of another address.|false|string||
-|telephone_business1|The business telephone number 1.|false|string||
-|telephone_business2|The business telephone number 2.|false|string||
-|fax_business|The business fax number.|false|string||
-|telephone_callback|The callback telephone number.|false|string||
-|telephone_car|The car telephone number.|false|string||
-|telephone_company|The company telephone number.|false|string||
-|telephone_home1|The home telephone number 1.|false|string||
-|telephone_home2|The home telephone number 2.|false|string||
-|fax_home|The home fax number.|false|string||
-|cellular_telephone1|The cellular telephone number 1.|false|string||
-|cellular_telephone2|The cellular telephone number 2.|false|string||
-|telephone_other|The other telephone number.|false|string||
-|fax_other|The other fax number.|false|string||
-|email1|The email address 1.|false|string||
-|email2|The email address 2.|false|string||
-|email3|The email address 3.|false|string||
-|url|The url address or homepage.|false|string||
-|telephone_isdn|The ISDN telephone number.|false|string||
-|telephone_pager|The pager telephone number.|false|string||
-|telephone_primary|The primary telephone number.|false|string||
-|telephone_radio|The radio telephone number.|false|string||
-|telephone_telex|The telex telephone number.|false|string||
-|telephone_ttytdd|The TTY/TDD telephone number.|false|string||
-|instant_messenger1|The instant messenger address 1.|false|string||
-|instant_messenger2|The instant messenger address 2.|false|string||
-|telephone_ip|The IP telephone number.|false|string||
-|telephone_assistant|The assistant telephone number.|false|string||
-|company|The company name.|false|string||
-|image1||false|string||
-|image1_content_type|The content type of the image (like "image/png").|false|string||
-|image1_url|The url to the image.|false|string||
-|number_of_images|The number of images.|false|integer||
-|image_last_modified|The last modification of the image.|false|integer (int64)||
-|distribution_list|If this contact is a distribution list, then this field is an array of objects. Each object describes a member of the list.|false|DistributionListMember array||
-|number_of_distribution_list|The number of objects in the distribution list.|false|integer||
-|mark_as_distributionlist||false|boolean||
-|file_as|The file name.|false|string||
-|default_address|The default address.|false|integer||
-|useCount|In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.|false|integer||
-|yomiFirstName|Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|false|string||
-|yomiLastName|Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|false|string||
-|yomiCompany|Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|false|string||
-|addressHome|Support for Outlook 'home' address field. (since 6.20.1)|false|string||
-|addressBusiness|Support for Outlook 'business' address field. (since 6.20.1)|false|string||
-|addressOther|Support for Outlook 'other' address field. (since 6.20.1)|false|string||
-|userfield01|Dynamic Field 1.|false|string||
-|userfield02|Dynamic Field 2.|false|string||
-|userfield03|Dynamic Field 3.|false|string||
-|userfield04|Dynamic Field 4.|false|string||
-|userfield05|Dynamic Field 5.|false|string||
-|userfield06|Dynamic Field 6.|false|string||
-|userfield07|Dynamic Field 7.|false|string||
-|userfield08|Dynamic Field 8.|false|string||
-|userfield09|Dynamic Field 9.|false|string||
-|userfield10|Dynamic Field 10.|false|string||
-|userfield11|Dynamic Field 11.|false|string||
-|userfield12|Dynamic Field 12.|false|string||
-|userfield13|Dynamic Field 13.|false|string||
-|userfield14|Dynamic Field 14.|false|string||
-|userfield15|Dynamic Field 15.|false|string||
-|userfield16|Dynamic Field 16.|false|string||
-|userfield17|Dynamic Field 17.|false|string||
-|userfield18|Dynamic Field 18.|false|string||
-|userfield19|Dynamic Field 19.|false|string||
-|userfield20|Dynamic Field 20.|false|string||
-|id|Object ID.|false|string||
-|created_by|User ID of the user who created this object.|false|string||
-|modified_by|User ID of the user who last modified this object.|false|string||
-|creation_date|Date and time of creation.|false|integer (int64)||
-|last_modified|Date and time of the last modification.|false|integer (int64)||
-|folder_id|Object ID of the parent folder.|false|string||
-|categories|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|false|string||
-|private_flag|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|false|boolean||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|false|integer||
-|number_of_attachments|Number of attachments.|false|integer||
-|lastModifiedOfNewestAttachmentUTC|Timestamp of the newest attachment written with UTC time zone.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**addressBusiness**  <br>*optional*|Support for Outlook 'business' address field. (since 6.20.1)|string|
+|**addressHome**  <br>*optional*|Support for Outlook 'home' address field. (since 6.20.1)|string|
+|**addressOther**  <br>*optional*|Support for Outlook 'other' address field. (since 6.20.1)|string|
+|**anniversary**  <br>*optional*|The anniversary.|integer(int64)|
+|**assistant_name**  <br>*optional*|The assistant's name.|string|
+|**birthday**  <br>*optional*|The date of birth.|integer(int64)|
+|**branches**  <br>*optional*|The branches.|string|
+|**business_category**  <br>*optional*|The business category.|string|
+|**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
+|**cellular_telephone1**  <br>*optional*|The cellular telephone number 1.|string|
+|**cellular_telephone2**  <br>*optional*|The cellular telephone number 2.|string|
+|**city_business**  <br>*optional*|The city of the business address.|string|
+|**city_home**  <br>*optional*|The city of the home address.|string|
+|**city_other**  <br>*optional*|The city of another address.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**commercial_register**  <br>*optional*|The commercial register.|string|
+|**company**  <br>*optional*|The company name.|string|
+|**country_business**  <br>*optional*|The country of the business address.|string|
+|**country_home**  <br>*optional*|The country of the home address.|string|
+|**country_other**  <br>*optional*|The country of another address.|string|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**default_address**  <br>*optional*|The default address.|integer|
+|**department**  <br>*optional*|The department.|string|
+|**display_name**  <br>*optional*|The display name.|string|
+|**distribution_list**  <br>*optional*|If this contact is a distribution list, then this field is an array of objects. Each object describes a member of the list.|< [DistributionListMember](#distributionlistmember) > array|
+|**email1**  <br>*optional*|The email address 1.|string|
+|**email2**  <br>*optional*|The email address 2.|string|
+|**email3**  <br>*optional*|The email address 3.|string|
+|**employee_type**  <br>*optional*|The type of the employee.|string|
+|**fax_business**  <br>*optional*|The business fax number.|string|
+|**fax_home**  <br>*optional*|The home fax number.|string|
+|**fax_other**  <br>*optional*|The other fax number.|string|
+|**file_as**  <br>*optional*|The file name.|string|
+|**first_name**  <br>*optional*|The given name.|string|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**id**  <br>*optional*|Object ID.|string|
+|**image1**  <br>*optional*||string|
+|**image1_content_type**  <br>*optional*|The content type of the image (like "image/png").|string|
+|**image1_url**  <br>*optional*|The url to the image.|string|
+|**image_last_modified**  <br>*optional*|The last modification of the image.|integer(int64)|
+|**info**  <br>*optional*|An information.|string|
+|**instant_messenger1**  <br>*optional*|The instant messenger address 1.|string|
+|**instant_messenger2**  <br>*optional*|The instant messenger address 2.|string|
+|**lastModifiedOfNewestAttachmentUTC**  <br>*optional*|Timestamp of the newest attachment written with UTC time zone.|integer(int64)|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**last_name**  <br>*optional*|The sur name.|string|
+|**manager_name**  <br>*optional*|The manager's name.|string|
+|**marital_status**  <br>*optional*|The marital status.|string|
+|**mark_as_distributionlist**  <br>*optional*||boolean|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**nickname**  <br>*optional*|The nickname.|string|
+|**note**  <br>*optional*|A note.|string|
+|**number_of_attachments**  <br>*optional*|Number of attachments.|integer|
+|**number_of_children**  <br>*optional*|The number of children.|string|
+|**number_of_distribution_list**  <br>*optional*|The number of objects in the distribution list.|integer|
+|**number_of_employees**  <br>*optional*|The number of employees.|string|
+|**number_of_images**  <br>*optional*|The number of images.|integer|
+|**position**  <br>*optional*|The position.|string|
+|**postal_code_business**  <br>*optional*|The postal code of the business address.|string|
+|**postal_code_home**  <br>*optional*|The postal code of the home address.|string|
+|**postal_code_other**  <br>*optional*|The postal code of another address.|string|
+|**private_flag**  <br>*optional*|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|boolean|
+|**profession**  <br>*optional*|The profession.|string|
+|**room_number**  <br>*optional*|The room number.|string|
+|**sales_volume**  <br>*optional*|The sales volume.|string|
+|**second_name**  <br>*optional*|The middle name.|string|
+|**spouse_name**  <br>*optional*|The name of the spouse.|string|
+|**state_business**  <br>*optional*|The state of the business address.|string|
+|**state_home**  <br>*optional*|The state of the home address.|string|
+|**state_other**  <br>*optional*|The state of another address.|string|
+|**street_business**  <br>*optional*|The street of the business address.|string|
+|**street_home**  <br>*optional*|The street of the home address.|string|
+|**street_other**  <br>*optional*|The street of another address.|string|
+|**suffix**  <br>*optional*|The suffix.|string|
+|**tax_id**  <br>*optional*|The tax id.|string|
+|**telephone_assistant**  <br>*optional*|The assistant telephone number.|string|
+|**telephone_business1**  <br>*optional*|The business telephone number 1.|string|
+|**telephone_business2**  <br>*optional*|The business telephone number 2.|string|
+|**telephone_callback**  <br>*optional*|The callback telephone number.|string|
+|**telephone_car**  <br>*optional*|The car telephone number.|string|
+|**telephone_company**  <br>*optional*|The company telephone number.|string|
+|**telephone_home1**  <br>*optional*|The home telephone number 1.|string|
+|**telephone_home2**  <br>*optional*|The home telephone number 2.|string|
+|**telephone_ip**  <br>*optional*|The IP telephone number.|string|
+|**telephone_isdn**  <br>*optional*|The ISDN telephone number.|string|
+|**telephone_other**  <br>*optional*|The other telephone number.|string|
+|**telephone_pager**  <br>*optional*|The pager telephone number.|string|
+|**telephone_primary**  <br>*optional*|The primary telephone number.|string|
+|**telephone_radio**  <br>*optional*|The radio telephone number.|string|
+|**telephone_telex**  <br>*optional*|The telex telephone number.|string|
+|**telephone_ttytdd**  <br>*optional*|The TTY/TDD telephone number.|string|
+|**title**  <br>*optional*|The title.|string|
+|**uid**  <br>*optional*|Can only be written when the object is created. Internal and external globally unique identifier of the contact. Is used to recognize contacts within vCard files. If this attribute is not written it contains an automatic generated UUID.|string|
+|**url**  <br>*optional*|The url address or homepage.|string|
+|**useCount**  <br>*optional*|In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.|integer|
+|**user_id**  <br>*optional*|The internal user id.|integer|
+|**userfield01**  <br>*optional*|Dynamic Field 1.|string|
+|**userfield02**  <br>*optional*|Dynamic Field 2.|string|
+|**userfield03**  <br>*optional*|Dynamic Field 3.|string|
+|**userfield04**  <br>*optional*|Dynamic Field 4.|string|
+|**userfield05**  <br>*optional*|Dynamic Field 5.|string|
+|**userfield06**  <br>*optional*|Dynamic Field 6.|string|
+|**userfield07**  <br>*optional*|Dynamic Field 7.|string|
+|**userfield08**  <br>*optional*|Dynamic Field 8.|string|
+|**userfield09**  <br>*optional*|Dynamic Field 9.|string|
+|**userfield10**  <br>*optional*|Dynamic Field 10.|string|
+|**userfield11**  <br>*optional*|Dynamic Field 11.|string|
+|**userfield12**  <br>*optional*|Dynamic Field 12.|string|
+|**userfield13**  <br>*optional*|Dynamic Field 13.|string|
+|**userfield14**  <br>*optional*|Dynamic Field 14.|string|
+|**userfield15**  <br>*optional*|Dynamic Field 15.|string|
+|**userfield16**  <br>*optional*|Dynamic Field 16.|string|
+|**userfield17**  <br>*optional*|Dynamic Field 17.|string|
+|**userfield18**  <br>*optional*|Dynamic Field 18.|string|
+|**userfield19**  <br>*optional*|Dynamic Field 19.|string|
+|**userfield20**  <br>*optional*|Dynamic Field 20.|string|
+|**yomiCompany**  <br>*optional*|Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|string|
+|**yomiFirstName**  <br>*optional*|Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|string|
+|**yomiLastName**  <br>*optional*|Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|string|
 
 
+<a name="contactdeletionsresponse"></a>
 # ContactDeletionsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||object|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="contactlistelement"></a>
 # ContactListElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The object ID of the contact.|true|string||
-|folder|The object ID of the related folder.|true|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*required*|The object ID of the related folder.|string|
+|**id**  <br>*required*|The object ID of the contact.|string|
 
 
+<a name="contactresponse"></a>
 # ContactResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|ContactData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[ContactData](#contactdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="contactsearchbody"></a>
 # ContactSearchBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|pattern|Search pattern to find contacts. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves. Matching is performed against any substring of the field display_name.|false|string||
-|startletter|Search contacts with the given startletter. If this field is present, the pattern is matched against the contact field which is specified by the property "contact_first_letter_field" on the server (default: last name). Otherwise, the pattern is matched against the display name.|false|boolean||
-|folder|If a list of folder identifiers or at least a single folder identifier is given, only in that folders will be searched for contacts. This paramenter is optional but searching in all contact folders that are viewable and where objects can be read in is more expensive on that database than searching in a dedicated number of them. The possibility to provide here an array of folder identifier has been added with 6.10.|false|integer array||
-|last_name|Searches contacts where the last name match with the given last name.|false|string||
-|first_name|Searches contacts where the first name match with the given first name.|false|string||
-|display_name|Searches contacts where the display name match with the given display name.|false|string||
-|email1|Searches contacts where the email1 address match with the given search pattern. (requires version >= 6.12)|false|string||
-|email2|Searches contacts where the email2 address match with the given search pattern. (requires version >= 6.12)|false|string||
-|email3|Searches contacts where the email3 address match with the given search pattern. (requires version >= 6.12)|false|string||
-|company|Searches contacts where the company match with the given search pattern. (requires version >= 6.12)|false|string||
-|categories|Searches contacts where the categories match with the given search pattern.|false|string||
-|orSearch|If set to true, a contact is returned if any specified pattern matches at the start of the corresponding field. Otherwise, a contact is returned if all specified patterns match any substring of the corresponding field.|false|boolean||
-|emailAutoComplete|If set to true, results are guaranteed to contain at least one email adress and the search is performed as if orSearch were set to true. The actual value of orSearch is ignored.|false|boolean||
-|exactMatch|If set to true, contacts are returned where the specified patterns match the corresponding fields exactly. Otherwise, a "startsWith" or "substring" comparison is used based on the "orSearch" parameter. (requires version > 6.22.1)|false|boolean||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Searches contacts where the categories match with the given search pattern.|string|
+|**company**  <br>*optional*|Searches contacts where the company match with the given search pattern. (requires version >= 6.12)|string|
+|**display_name**  <br>*optional*|Searches contacts where the display name match with the given display name.|string|
+|**email1**  <br>*optional*|Searches contacts where the email1 address match with the given search pattern. (requires version >= 6.12)|string|
+|**email2**  <br>*optional*|Searches contacts where the email2 address match with the given search pattern. (requires version >= 6.12)|string|
+|**email3**  <br>*optional*|Searches contacts where the email3 address match with the given search pattern. (requires version >= 6.12)|string|
+|**emailAutoComplete**  <br>*optional*|If set to true, results are guaranteed to contain at least one email adress and the search is performed as if orSearch were set to true. The actual value of orSearch is ignored.|boolean|
+|**exactMatch**  <br>*optional*|If set to true, contacts are returned where the specified patterns match the corresponding fields exactly. Otherwise, a "startsWith" or "substring" comparison is used based on the "orSearch" parameter. (requires version > 6.22.1)|boolean|
+|**first_name**  <br>*optional*|Searches contacts where the first name match with the given first name.|string|
+|**folder**  <br>*optional*|If a list of folder identifiers or at least a single folder identifier is given, only in that folders will be searched for contacts. This paramenter is optional but searching in all contact folders that are viewable and where objects can be read in is more expensive on that database than searching in a dedicated number of them. The possibility to provide here an array of folder identifier has been added with 6.10.|< integer > array|
+|**last_name**  <br>*optional*|Searches contacts where the last name match with the given last name.|string|
+|**orSearch**  <br>*optional*|If set to true, a contact is returned if any specified pattern matches at the start of the corresponding field. Otherwise, a contact is returned if all specified patterns match any substring of the corresponding field.|boolean|
+|**pattern**  <br>*optional*|Search pattern to find contacts. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves. Matching is performed against any substring of the field display_name.|string|
+|**startletter**  <br>*optional*|Search contacts with the given startletter. If this field is present, the pattern is matched against the contact field which is specified by the property "contact_first_letter_field" on the server (default: last name). Otherwise, the pattern is matched against the display name.|boolean|
 
 
+<a name="contactupdatedata"></a>
 # ContactUpdateData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|ID of a newly created contact.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|ID of a newly created contact.|string|
 
 
+<a name="contactupdateresponse"></a>
 # ContactUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|ContactUpdateData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[ContactUpdateData](#contactupdatedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="contactupdatesresponse"></a>
 # ContactUpdatesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of contacts.|false|object array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of contacts.|< object > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="contactsresponse"></a>
 # ContactsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of contacts. Each contact is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of contacts. Each contact is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="conversionbody"></a>
 # ConversionBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|datasource||false|ConversionDataSource||
-|datahandler||false|ConversionDataHandler||
+
+|Name|Description|Schema|
+|---|---|---|
+|**datahandler**  <br>*optional*||[ConversionDataHandler](#conversiondatahandler)|
+|**datasource**  <br>*optional*||[ConversionDataSource](#conversiondatasource)|
 
 
+<a name="conversiondatahandler"></a>
 # ConversionDataHandler
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|identifier|The identifier of the data handler.|false|string||
-|args|A JSON array of optional JSON objects containing the name-value-pairs.|false|ConversionDataHandlerPair array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**args**  <br>*optional*|A JSON array of optional JSON objects containing the name-value-pairs.|< [ConversionDataHandlerPair](#conversiondatahandlerpair) > array|
+|**identifier**  <br>*optional*|The identifier of the data handler.|string|
 
 
+<a name="conversiondatahandlerpair"></a>
 # ConversionDataHandlerPair
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|com.openexchange.groupware.calendar.folder|The calendar folder ID.|false|string||
-|com.openexchange.groupware.task.folder|The task folder ID.|false|string||
-|com.openexchange.groupware.calendar.confirmstatus|The status.|false|string||
-|com.openexchange.groupware.calendar.confirmmessage|The message.|false|string||
-|com.openexchange.groupware.calendar.timezone|The timezone ID.|false|string||
-|com.openexchange.grouware.calendar.recurrencePosition|The recurrence position.|false|string||
-|com.openexchange.groupware.calendar.searchobject|Can be `true` or `false`.|false|string||
-|com.openexchange.groupware.contact.folder|The contact folder ID.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**com.openexchange.groupware.calendar.confirmmessage**  <br>*optional*|The message.|string|
+|**com.openexchange.groupware.calendar.confirmstatus**  <br>*optional*|The status.|string|
+|**com.openexchange.groupware.calendar.folder**  <br>*optional*|The calendar folder ID.|string|
+|**com.openexchange.groupware.calendar.searchobject**  <br>*optional*|Can be `true` or `false`.|string|
+|**com.openexchange.groupware.calendar.timezone**  <br>*optional*|The timezone ID.|string|
+|**com.openexchange.groupware.contact.folder**  <br>*optional*|The contact folder ID.|string|
+|**com.openexchange.groupware.task.folder**  <br>*optional*|The task folder ID.|string|
+|**com.openexchange.grouware.calendar.recurrencePosition**  <br>*optional*|The recurrence position.|string|
 
 
+<a name="conversiondatasource"></a>
 # ConversionDataSource
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|identifier|The identifier of the data source.|false|string||
-|args|A JSON array of optional JSON objects containing the name-value-pairs.|false|ConversionDataSourcePair array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**args**  <br>*optional*|A JSON array of optional JSON objects containing the name-value-pairs.|< [ConversionDataSourcePair](#conversiondatasourcepair) > array|
+|**identifier**  <br>*optional*|The identifier of the data source.|string|
 
 
+<a name="conversiondatasourcepair"></a>
 # ConversionDataSourcePair
-
 A name-value-pair where only one name with a value must be filled out except the case when VCard data from speicified contact object(s) is obtained then the `folder` and `id` must be specified.
 
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|com.openexchange.mail.conversion.fullname|The folder's full name.|false|string||
-|com.openexchange.mail.conversion.mailid|The object ID of the mail.|false|string||
-|com.openexchange.mail.conversion.sequenceid|The attachment sequence ID.|false|string||
-|folder|A folder ID.|false|string||
-|id|The ID.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**com.openexchange.mail.conversion.fullname**  <br>*optional*|The folder's full name.|string|
+|**com.openexchange.mail.conversion.mailid**  <br>*optional*|The object ID of the mail.|string|
+|**com.openexchange.mail.conversion.sequenceid**  <br>*optional*|The attachment sequence ID.|string|
+|**folder**  <br>*optional*|A folder ID.|string|
+|**id**  <br>*optional*|The ID.|string|
 
 
+<a name="conversionresponse"></a>
 # ConversionResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||object|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="currentuserdata"></a>
 # CurrentUserData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|context_id|The unique identifier of the user's context.|false|integer||
-|user_id|The unique identifier of the user himself.|false|integer||
-|context_admin|The ID of the context's administrator user.|false|integer||
-|login_name|The login name of the user.|false|string||
-|display_name|The display name of the user.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**context_admin**  <br>*optional*|The ID of the context's administrator user.|integer|
+|**context_id**  <br>*optional*|The unique identifier of the user's context.|integer|
+|**display_name**  <br>*optional*|The display name of the user.|string|
+|**login_name**  <br>*optional*|The login name of the user.|string|
+|**user_id**  <br>*optional*|The unique identifier of the user himself.|integer|
 
 
+<a name="currentuserresponse"></a>
 # CurrentUserResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|CurrentUserData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[CurrentUserData](#currentuserdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="distributionlistmember"></a>
 # DistributionListMember
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|Object ID of the member's contact if the member is an existing contact.|false|string||
-|folder_id|Parent folder ID of the member's contact if the member is an existing contact (preliminary, from 6.22 on).|false|string||
-|display_name|The display name.|false|string||
-|mail|The email address (mandatory before 6.22, afterwards optional if you are referring to an internal contact).|false|string||
-|mail_field|Which email field of an existing contact (if any) is used for the mail field: 0 (independent contact), 1 (default email field, email1), 2 (second email field, email2), 3 (third email field, email3).|false|number||
+
+|Name|Description|Schema|
+|---|---|---|
+|**display_name**  <br>*optional*|The display name.|string|
+|**folder_id**  <br>*optional*|Parent folder ID of the member's contact if the member is an existing contact (preliminary, from 6.22 on).|string|
+|**id**  <br>*optional*|Object ID of the member's contact if the member is an existing contact.|string|
+|**mail**  <br>*optional*|The email address (mandatory before 6.22, afterwards optional if you are referring to an internal contact).|string|
+|**mail_field**  <br>*optional*|Which email field of an existing contact (if any) is used for the mail field: 0 (independent contact), 1 (default email field, email1), 2 (second email field, email2), 3 (third email field, email3).|number|
 
 
+<a name="fileaccountcreationresponse"></a>
 # FileAccountCreationResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The ID of the newly created account.|false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The ID of the newly created account.|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="fileaccountdata"></a>
 # FileAccountData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The identifier of the file storage account in the scope of its file storage service (e.g. Infostore, Dropbox, ...). This is not writeable and is generated by the server.|false|string||
-|filestorageService|The identifier of the file storage service this account belongs to.|false|string||
-|qualifiedId|A global identifier of the file storage account across all file storage services. This is not writeable and is generated by the server.|false|string||
-|displayName|A user chosen, human-readable name to identify the account. Will also be translated into the folder name of the folder representing the accounts content.|false|string||
-|rootFolder|The ID of the account's root folder within the folder tree. This is not writeable and is generated by the server.|false|string||
-|isDefaultAccount|Indicates whether this account is the user's default account. Exactly one account will have this flag set to `true`.|false|boolean||
-|capabilities|An array of capability names. Possible values are: FILE_VERSIONS, EXTENDED_METADATA, RANDOM_FILE_ACCESS, and LOCKS.|false|string array||
-|configuration|The configuration data according to the form description of the relevant file storage service.|false|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**capabilities**  <br>*optional*|An array of capability names. Possible values are: FILE_VERSIONS, EXTENDED_METADATA, RANDOM_FILE_ACCESS, and LOCKS.|< string > array|
+|**configuration**  <br>*optional*|The configuration data according to the form description of the relevant file storage service.|object|
+|**displayName**  <br>*optional*|A user chosen, human-readable name to identify the account. Will also be translated into the folder name of the folder representing the accounts content.|string|
+|**filestorageService**  <br>*optional*|The identifier of the file storage service this account belongs to.|string|
+|**id**  <br>*optional*|The identifier of the file storage account in the scope of its file storage service (e.g. Infostore, Dropbox, ...). This is not writeable and is generated by the server.|string|
+|**isDefaultAccount**  <br>*optional*|Indicates whether this account is the user's default account. Exactly one account will have this flag set to `true`.|boolean|
+|**qualifiedId**  <br>*optional*|A global identifier of the file storage account across all file storage services. This is not writeable and is generated by the server.|string|
+|**rootFolder**  <br>*optional*|The ID of the account's root folder within the folder tree. This is not writeable and is generated by the server.|string|
 
 
+<a name="fileaccountresponse"></a>
 # FileAccountResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|FileAccountData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[FileAccountData](#fileaccountdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="fileaccountupdateresponse"></a>
 # FileAccountUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Returns 1 on success.|false|integer||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Returns 1 on success.|integer|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="fileaccountsresponse"></a>
 # FileAccountsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array of JSON objects each describing one file storage account.|false|FileAccountData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array of JSON objects each describing one file storage account.|< [FileAccountData](#fileaccountdata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="fileserviceconfiguration"></a>
 # FileServiceConfiguration
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|widget|The name of the widget.|false|string||
-|name|The name of the field.|false|string||
-|displayName|The display name of the field.|false|string||
-|mandatory|Indicates whether the field is mandatory.|false|boolean||
-|options|A list of available options in the field.|false|object array||
-|defaultValue|Can contain a default value.|false|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**defaultValue**  <br>*optional*|Can contain a default value.|object|
+|**displayName**  <br>*optional*|The display name of the field.|string|
+|**mandatory**  <br>*optional*|Indicates whether the field is mandatory.|boolean|
+|**name**  <br>*optional*|The name of the field.|string|
+|**options**  <br>*optional*|A list of available options in the field.|< object > array|
+|**widget**  <br>*optional*|The name of the widget.|string|
 
 
+<a name="fileservicedata"></a>
 # FileServiceData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The identifier of the file storage service, e.g. "boxcom".|false|string||
-|displayName|A human-readable display name of the service, e.g. "Box File Storage Service"|false|string||
-|configuration|An array of dynamic form fields. Same as in PubSub.|false|FileServiceConfiguration array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**configuration**  <br>*optional*|An array of dynamic form fields. Same as in PubSub.|< [FileServiceConfiguration](#fileserviceconfiguration) > array|
+|**displayName**  <br>*optional*|A human-readable display name of the service, e.g. "Box File Storage Service"|string|
+|**id**  <br>*optional*|The identifier of the file storage service, e.g. "boxcom".|string|
 
 
+<a name="fileserviceresponse"></a>
 # FileServiceResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|FileServiceData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[FileServiceData](#fileservicedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="fileservicesresponse"></a>
 # FileServicesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array of JSON objects each describing one service.|false|FileServiceData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array of JSON objects each describing one service.|< [FileServiceData](#fileservicedata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="findactivefacet"></a>
 # FindActiveFacet
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of the according facet.|false|string||
-|value|The ID of the according value. Must always be copied from the value object, not from a possibly according option (in the two-dimensional case).|false|string||
-|filter||false|FindActiveFacetFilter||
+
+|Name|Description|Schema|
+|---|---|---|
+|**filter**  <br>*optional*||[FindActiveFacetFilter](#findactivefacetfilter)|
+|**id**  <br>*optional*|The ID of the according facet.|string|
+|**value**  <br>*optional*|The ID of the according value. Must always be copied from the value object, not from a possibly according option (in the two-dimensional case).|string|
 
 
+<a name="findactivefacetfilter"></a>
 # FindActiveFacetFilter
-
 The filter object, copied from the value or option.
 
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|fields|An array of fields to search for.|false|string array||
-|queries|An array of corresponding search values.|false|string array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**fields**  <br>*optional*|An array of fields to search for.|< string > array|
+|**queries**  <br>*optional*|An array of corresponding search values.|< string > array|
 
 
+<a name="findautocompletebody"></a>
 # FindAutoCompleteBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|prefix|The user's search input.|false|string||
-|facets|An array of already selected facets, meaning categories the user has filtered by before.|false|FindFacetData array||
-|options||false|FindOptionsData||
+
+|Name|Description|Schema|
+|---|---|---|
+|**facets**  <br>*optional*|An array of already selected facets, meaning categories the user has filtered by before.|< [FindFacetData](#findfacetdata) > array|
+|**options**  <br>*optional*||[FindOptionsData](#findoptionsdata)|
+|**prefix**  <br>*optional*|The user's search input.|string|
 
 
+<a name="findautocompletedata"></a>
 # FindAutoCompleteData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|facets|An array of facets each describing a possible search category or an already applied category.|false|FindFacetData array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**facets**  <br>*optional*|An array of facets each describing a possible search category or an already applied category.|< [FindFacetData](#findfacetdata) > array|
 
 
+<a name="findautocompleteresponse"></a>
 # FindAutoCompleteResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|FindAutoCompleteData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[FindAutoCompleteData](#findautocompletedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="findfacetdata"></a>
 # FindFacetData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|style|The facet style, which can be one of: simple, default, or exclusive. Dependent on the style some fields are present and others are not.|false|string||
-|id|The ID of this facet. Must be unique within an autocomplete response. Can be used to distinguish and filter certain facets. (for simple, default, and exclusive)|false|string||
-|name|A displayable (and localized) name for this facet. If absent, an `item` attribute is present. (for simple, default, and exclusive)|false|string||
-|item||false|FindFacetItem||
-|flags|An array of flags. Available flags: conflicts (specified as "conflicts:<other-id>", facets carrying this flag must not be combined with a facet of type <other-id>). (for simple, default, and exclusive)|false|string array||
-|filter||false|FindFacetFilter||
-|values|An array of facet values. (for default)|false|FindFacetValue array||
-|options|An array of facet values. (for exclusive)|false|FindFacetValue array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**filter**  <br>*optional*||[FindFacetFilter](#findfacetfilter)|
+|**flags**  <br>*optional*|An array of flags. Available flags: conflicts (specified as "conflicts:<other-id>", facets carrying this flag must not be combined with a facet of type <other-id>). (for simple, default, and exclusive)|< string > array|
+|**id**  <br>*optional*|The ID of this facet. Must be unique within an autocomplete response. Can be used to distinguish and filter certain facets. (for simple, default, and exclusive)|string|
+|**item**  <br>*optional*||[FindFacetItem](#findfacetitem)|
+|**name**  <br>*optional*|A displayable (and localized) name for this facet. If absent, an `item` attribute is present. (for simple, default, and exclusive)|string|
+|**options**  <br>*optional*|An array of facet values. (for exclusive)|< [FindFacetValue](#findfacetvalue) > array|
+|**style**  <br>*optional*|The facet style, which can be one of: simple, default, or exclusive. Dependent on the style some fields are present and others are not.|string|
+|**values**  <br>*optional*|An array of facet values. (for default)|< [FindFacetValue](#findfacetvalue) > array|
 
 
+<a name="findfacetfilter"></a>
 # FindFacetFilter
-
 The filter to refine the search. (for simple)
 
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|fields|An array of fields to search for.|false|string array||
-|queries|An array of corresponding search values.|false|string array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**fields**  <br>*optional*|An array of fields to search for.|< string > array|
+|**queries**  <br>*optional*|An array of corresponding search values.|< string > array|
 
 
+<a name="findfacetitem"></a>
 # FindFacetItem
-
 A more complex object to display this facet. Attributes are `name`, `detail` (optional), and `image_url` (optional). (for simple, default, and exclusive)
 
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|name|A displayable (and localized) name for the facet.|false|string||
-|detail|A displayable (and localized) detail name, like "in mail text".|false|string||
-|image_url|An URL to a displayable image.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**detail**  <br>*optional*|A displayable (and localized) detail name, like "in mail text".|string|
+|**image_url**  <br>*optional*|An URL to a displayable image.|string|
+|**name**  <br>*optional*|A displayable (and localized) name for the facet.|string|
 
 
+<a name="findfacetvalue"></a>
 # FindFacetValue
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of the value. Must be unique within one facet.|false|string||
-|name|A displayable (and localized) name for this facet. If absent, an `item` attribute is present.|false|string||
-|item||false|FindFacetValueItem||
-|filter||false|FindFacetValueFilter||
-|options|An array of options to refine the search.|false|FindFacetValueOption array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**filter**  <br>*optional*||[FindFacetValueFilter](#findfacetvaluefilter)|
+|**id**  <br>*optional*|The ID of the value. Must be unique within one facet.|string|
+|**item**  <br>*optional*||[FindFacetValueItem](#findfacetvalueitem)|
+|**name**  <br>*optional*|A displayable (and localized) name for this facet. If absent, an `item` attribute is present.|string|
+|**options**  <br>*optional*|An array of options to refine the search.|< [FindFacetValueOption](#findfacetvalueoption) > array|
 
 
+<a name="findfacetvaluefilter"></a>
 # FindFacetValueFilter
-
 The filter to refine the search.
 
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|fields|An array of fields to search for.|false|string array||
-|queries|An array of corresponding search values.|false|string array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**fields**  <br>*optional*|An array of fields to search for.|< string > array|
+|**queries**  <br>*optional*|An array of corresponding search values.|< string > array|
 
 
+<a name="findfacetvalueitem"></a>
 # FindFacetValueItem
-
 A more complex object to display this facet. Attributes are `name`, `detail` (optional), and `image_url` (optional).
 
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|name|A displayable (and localized) name for the facet.|false|string||
-|detail|A displayable (and localized) detail name, like "in mail text".|false|string||
-|image_url|An URL to a displayable image.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**detail**  <br>*optional*|A displayable (and localized) detail name, like "in mail text".|string|
+|**image_url**  <br>*optional*|An URL to a displayable image.|string|
+|**name**  <br>*optional*|A displayable (and localized) name for the facet.|string|
 
 
+<a name="findfacetvalueoption"></a>
 # FindFacetValueOption
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of the option. Must be unique within a set of options.|false|string||
-|name|The displayable (and localized) name for this option.|false|string||
-|filter||false|FindFacetValueFilter||
+
+|Name|Description|Schema|
+|---|---|---|
+|**filter**  <br>*optional*||[FindFacetValueFilter](#findfacetvaluefilter)|
+|**id**  <br>*optional*|The ID of the option. Must be unique within a set of options.|string|
+|**name**  <br>*optional*|The displayable (and localized) name for this option.|string|
 
 
+<a name="findoptionsdata"></a>
 # FindOptionsData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|timezone|The timezone to use if any dates are returned.|false|string||
-|admin|Indicates whether the context admin shall be included if it matches any search criteria. If the context admin shall always be ignored (i.e. not returned), `false` has to be set.|false|boolean||
+
+|Name|Description|Schema|
+|---|---|---|
+|**admin**  <br>*optional*|Indicates whether the context admin shall be included if it matches any search criteria. If the context admin shall always be ignored (i.e. not returned), `false` has to be set.|boolean|
+|**timezone**  <br>*optional*|The timezone to use if any dates are returned.|string|
 
 
+<a name="findquerybody"></a>
 # FindQueryBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|facets|An array of selected facets that shall be applied for search.|false|FindActiveFacet array||
-|options||false|FindOptionsData||
-|start|The start of a pagination, if desired.|false|integer||
-|size|The page size of a pagination, if desired.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**facets**  <br>*optional*|An array of selected facets that shall be applied for search.|< [FindActiveFacet](#findactivefacet) > array|
+|**options**  <br>*optional*||[FindOptionsData](#findoptionsdata)|
+|**size**  <br>*optional*|The page size of a pagination, if desired.|integer|
+|**start**  <br>*optional*|The start of a pagination, if desired.|integer|
 
 
+<a name="findqueryresponse"></a>
 # FindQueryResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|num_found|The number of found items.|false|integer||
-|start|The start of the pagination.|false|integer||
-|size|The page size.|false|integer||
-|results|An array of search results. Each result is described by a JSON object containing the fields specified in the `columns` parameter.|false|object array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**num_found**  <br>*optional*|The number of found items.|integer|
+|**results**  <br>*optional*|An array of search results. Each result is described by a JSON object containing the fields specified in the `columns` parameter.|< object > array|
+|**size**  <br>*optional*|The page size.|integer|
+|**start**  <br>*optional*|The start of the pagination.|integer|
 
 
+<a name="folderbody"></a>
 # FolderBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|folder||true|FolderData||
-|notification||false|FolderBodyNotification||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*required*||[FolderData](#folderdata)|
+|**notification**  <br>*optional*||[FolderBodyNotification](#folderbodynotification)|
 
 
+<a name="folderbodynotification"></a>
 # FolderBodyNotification
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|transport|E.g. "mail".|false|string||
-|message||false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**message**  <br>*optional*||string|
+|**transport**  <br>*optional*|E.g. "mail".|string|
 
 
+<a name="folderdata"></a>
 # FolderData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|Object ID|false|string||
-|created_by|User ID of the user who created this object.|false|string||
-|modified_by|User ID of the user who last modified this object.|false|string||
-|creation_date|Date and time of creation.|false|integer (int64)||
-|last_modified|Date and time of the last modification.|false|integer (int64)||
-|last_modified_utc|Timestamp of the last modification. Note that the type is Timestamp, not Time (added 2008-10-17, with SP5, temporary workaround).|false|integer (int64)||
-|folder_id|Object ID of the parent folder.|false|string||
-|title|Name of this folder.|false|string||
-|module|Name of the module which implements this folder; e.g. "tasks", "calendar", "contacts", "infostore", or "mail"|false|string||
-|type|Type of folder.|false|integer||
-|subfolders|true if this folder has subfolders.|false|boolean||
-|own_rights|Permissions which apply to the current user, as described either in [Permission flags](#permission-flags) or in http://tools.ietf.org/html/rfc2086.|false|integer||
-|permissions||false|FolderPermission array||
-|summary|Information about contained objects.|false|string||
-|standard_folder|Indicates whether or not folder is marked as a default folder (only OX folder).|false|boolean||
-|total|The number of objects in this Folder.|false|integer||
-|new|The number of new objects in this Folder.|false|integer||
-|unread|The number of unread objects in this Folder.|false|integer||
-|deleted|The number of deleted objects in this Folder.|false|integer||
-|capabilities|Bit mask containing information about mailing system capabilites: bit 0 (mailing system supports permissions), bit 1 (mailing system supports ordering mails by their thread reference), bit 2 (mailing system supports quota restrictions), bit 3 (mailing system supports sorting), bit 4 (mailing system supports folder subscription).|false|integer||
-|subscribed|Indicates whether this folder should appear in folder tree or not. Standard folders cannot be unsubscribed.|false|boolean||
-|subscr_subflds|Indicates whether subfolders should appear in folder tree or not.|false|boolean||
-|standard_folder_type|Indicates the default folder type: 0 (non-default folder), 1 (task), 2 (calendar), 3 (contact), 7 (inbox), 8 (infostore), 9 (drafts), 10 (sent), 11 (spam), 12 (trash).|false|integer||
-|supported_capabilities|Can contain "permissions", "publication", "quota", "sort", "subscription".|false|string array||
-|account_id|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder. Since 7.8.0.|false|string||
-|com.openexchange.publish.publicationFlag|Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin, since 6.14.|false|boolean||
-|com.openexchange.subscribe.subscriptionFlag|Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin, since 6.14.|false|boolean||
-|com.openexchange.folderstorage.displayName|Provides the display of the folder's owner. Read Only, Since 6.20.|false|string||
-|com.openexchange.share.extendedPermissions||false|FolderExtendedPermission array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**account_id**  <br>*optional*|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder. Since 7.8.0.|string|
+|**capabilities**  <br>*optional*|Bit mask containing information about mailing system capabilites: bit 0 (mailing system supports permissions), bit 1 (mailing system supports ordering mails by their thread reference), bit 2 (mailing system supports quota restrictions), bit 3 (mailing system supports sorting), bit 4 (mailing system supports folder subscription).|integer|
+|**com.openexchange.folderstorage.displayName**  <br>*optional*|Provides the display of the folder's owner. Read Only, Since 6.20.|string|
+|**com.openexchange.publish.publicationFlag**  <br>*optional*|Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin, since 6.14.|boolean|
+|**com.openexchange.share.extendedPermissions**  <br>*optional*||< [FolderExtendedPermission](#folderextendedpermission) > array|
+|**com.openexchange.subscribe.subscriptionFlag**  <br>*optional*|Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin, since 6.14.|boolean|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**deleted**  <br>*optional*|The number of deleted objects in this Folder.|integer|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**id**  <br>*optional*|Object ID|string|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**last_modified_utc**  <br>*optional*|Timestamp of the last modification. Note that the type is Timestamp, not Time (added 2008-10-17, with SP5, temporary workaround).|integer(int64)|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**module**  <br>*optional*|Name of the module which implements this folder; e.g. "tasks", "calendar", "contacts", "infostore", or "mail"|string|
+|**new**  <br>*optional*|The number of new objects in this Folder.|integer|
+|**own_rights**  <br>*optional*|Permissions which apply to the current user, as described either in [Permission flags](#permission-flags) or in http://tools.ietf.org/html/rfc2086.|integer|
+|**permissions**  <br>*optional*||< [FolderPermission](#folderpermission) > array|
+|**standard_folder**  <br>*optional*|Indicates whether or not folder is marked as a default folder (only OX folder).|boolean|
+|**standard_folder_type**  <br>*optional*|Indicates the default folder type: 0 (non-default folder), 1 (task), 2 (calendar), 3 (contact), 7 (inbox), 8 (infostore), 9 (drafts), 10 (sent), 11 (spam), 12 (trash).|integer|
+|**subfolders**  <br>*optional*|true if this folder has subfolders.|boolean|
+|**subscr_subflds**  <br>*optional*|Indicates whether subfolders should appear in folder tree or not.|boolean|
+|**subscribed**  <br>*optional*|Indicates whether this folder should appear in folder tree or not. Standard folders cannot be unsubscribed.|boolean|
+|**summary**  <br>*optional*|Information about contained objects.|string|
+|**supported_capabilities**  <br>*optional*|Can contain "permissions", "publication", "quota", "sort", "subscription".|< string > array|
+|**title**  <br>*optional*|Name of this folder.|string|
+|**total**  <br>*optional*|The number of objects in this Folder.|integer|
+|**type**  <br>*optional*|Type of folder.|integer|
+|**unread**  <br>*optional*|The number of unread objects in this Folder.|integer|
 
 
+<a name="folderextendedpermission"></a>
 # FolderExtendedPermission
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|entity|Identifier of the permission entity (i.e. user-, group- or guest-ID).|false|integer||
-|bits|A number as described in [Permission flags](#permission-flags).|false|integer||
-|type|Set "user" for an internal user, "group" for a group, "guest" for a guest, or "anonymous" for an anonymous permission entity.|false|string||
-|display_name|A display name for the permission entity.|false|string||
-|contact|A (reduced) set of [Detailed contact data](#detailed-contact-data) for "user" and "guest" entities.|false|object||
-|share_url|The share link for "anonymous" entities.|false|string||
-|password|The optionally set password for "anonymous" entities.|false|string||
-|expiry_date|The optionally set expiry date for "anonymous" entities.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**bits**  <br>*optional*|A number as described in [Permission flags](#permission-flags).|integer|
+|**contact**  <br>*optional*|A (reduced) set of [Detailed contact data](#detailed-contact-data) for "user" and "guest" entities.|object|
+|**display_name**  <br>*optional*|A display name for the permission entity.|string|
+|**entity**  <br>*optional*|Identifier of the permission entity (i.e. user-, group- or guest-ID).|integer|
+|**expiry_date**  <br>*optional*|The optionally set expiry date for "anonymous" entities.|integer(int64)|
+|**password**  <br>*optional*|The optionally set password for "anonymous" entities.|string|
+|**share_url**  <br>*optional*|The share link for "anonymous" entities.|string|
+|**type**  <br>*optional*|Set "user" for an internal user, "group" for a group, "guest" for a guest, or "anonymous" for an anonymous permission entity.|string|
 
 
+<a name="folderpermission"></a>
 # FolderPermission
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|bits|For non-mail folders, a number as described in [Permission flags](#permission-flags).|false|integer||
-|rights|For mail folders, the rights string as defined in http://tools.ietf.org/html/rfc2086.|false|string||
-|entity|User ID of the user or group to which this permission applies (ignored for type "anonymous" or "guest").|false|integer||
-|group|true if entity refers to a group, false if it refers to a user (ignored for type "anonymous" or "guest").|false|boolean||
-|type|The recipient type, i.e. one of "user", "group", "guest", "anonymous" (required if no internal "entity" defined).|false|string||
-|password|An additional secret / pin number an anonymous user needs to enter when accessing the share (for type "anonymous", optional).|false|string||
-|email_address|The e-mail address of the recipient (for type "guest").|false|string||
-|display_name|The display name of the recipient (for type "guest", optional).|false|string||
-|contact_id|The object identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", optional).|false|string||
-|contact_folder|The folder identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", required if "contact_id" is set).|false|string||
-|expiry_date|The end date / expiration time after which the share link is no longer accessible (for type "anonymous", optional).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**bits**  <br>*optional*|For non-mail folders, a number as described in [Permission flags](#permission-flags).|integer|
+|**contact_folder**  <br>*optional*|The folder identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", required if "contact_id" is set).|string|
+|**contact_id**  <br>*optional*|The object identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", optional).|string|
+|**display_name**  <br>*optional*|The display name of the recipient (for type "guest", optional).|string|
+|**email_address**  <br>*optional*|The e-mail address of the recipient (for type "guest").|string|
+|**entity**  <br>*optional*|User ID of the user or group to which this permission applies (ignored for type "anonymous" or "guest").|integer|
+|**expiry_date**  <br>*optional*|The end date / expiration time after which the share link is no longer accessible (for type "anonymous", optional).|integer(int64)|
+|**group**  <br>*optional*|true if entity refers to a group, false if it refers to a user (ignored for type "anonymous" or "guest").|boolean|
+|**password**  <br>*optional*|An additional secret / pin number an anonymous user needs to enter when accessing the share (for type "anonymous", optional).|string|
+|**rights**  <br>*optional*|For mail folders, the rights string as defined in http://tools.ietf.org/html/rfc2086.|string|
+|**type**  <br>*optional*|The recipient type, i.e. one of "user", "group", "guest", "anonymous" (required if no internal "entity" defined).|string|
 
 
+<a name="folderresponse"></a>
 # FolderResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|FolderData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[FolderData](#folderdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="foldersharingnotificationbody"></a>
 # FolderSharingNotificationBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|entities|Array containing the entity ID(s) of the users or groups that shall be notified.|true|string array||
-|notification||false|FolderBodyNotification||
+
+|Name|Description|Schema|
+|---|---|---|
+|**entities**  <br>*required*|Array containing the entity ID(s) of the users or groups that shall be notified.|< string > array|
+|**notification**  <br>*optional*||[FolderBodyNotification](#folderbodynotification)|
 
 
+<a name="foldersharingnotificationdata"></a>
 # FolderSharingNotificationData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|warnings|Can contain transport warnings that occured during sending the notifications.|false|object array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**warnings**  <br>*optional*|Can contain transport warnings that occured during sending the notifications.|< object > array|
 
 
+<a name="foldersharingnotificationresponse"></a>
 # FolderSharingNotificationResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|FolderSharingNotificationData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[FolderSharingNotificationData](#foldersharingnotificationdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="folderupdateresponse"></a>
 # FolderUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The object id of the folder.|false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The object id of the folder.|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="folderupdatesresponse"></a>
 # FolderUpdatesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of folders.|false|object array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of folders.|< object > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="folderscleanupresponse"></a>
 # FoldersCleanUpResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array with object IDs of folders that could not be processed because of a concurrent modification or something else.
-|false|string array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array with object IDs of folders that could not be processed because of a concurrent modification or something else.|< string > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="foldersresponse"></a>
 # FoldersResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of folders. Each folder is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of folders. Each folder is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="foldersvisibilitydata"></a>
 # FoldersVisibilityData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|private|Array of private folders. Each folder is described as an array itself.|false|object array array||
-|public|Array of public folders. Each folder is described as an array itself.|false|object array array||
-|shared|Array of shared folders. Each folder is described as an array itself.|false|object array array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**private**  <br>*optional*|Array of private folders. Each folder is described as an array itself.|< < object > array > array|
+|**public**  <br>*optional*|Array of public folders. Each folder is described as an array itself.|< < object > array > array|
+|**shared**  <br>*optional*|Array of shared folders. Each folder is described as an array itself.|< < object > array > array|
 
 
+<a name="foldersvisibilityresponse"></a>
 # FoldersVisibilityResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|FoldersVisibilityData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[FoldersVisibilityData](#foldersvisibilitydata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="freebusydata"></a>
 # FreeBusyData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The object ID of the corresponding appointment if available.|false|string||
-|folder_id|The folder ID of the corresponding appointment if available.|false|string||
-|title|The title of the corresponding appointment if available.|false|string||
-|start_date|The start time of the interval.|false|integer (int64)||
-|end_date|The end time of the interval.|false|integer (int64)||
-|shown_as|The busy status of this interval, one of: 0 (unknown), 1 (reserved), 2 (temporary), 3 (absent), 4 (free).|false|integer||
-|location|The location of the corresponding appointment if available.|false|string||
-|full_time|Indicates whether the corresponding appointment is a whole day appointment, not present otherwise.|false|boolean||
+
+|Name|Description|Schema|
+|---|---|---|
+|**end_date**  <br>*optional*|The end time of the interval.|integer(int64)|
+|**folder_id**  <br>*optional*|The folder ID of the corresponding appointment if available.|string|
+|**full_time**  <br>*optional*|Indicates whether the corresponding appointment is a whole day appointment, not present otherwise.|boolean|
+|**id**  <br>*optional*|The object ID of the corresponding appointment if available.|string|
+|**location**  <br>*optional*|The location of the corresponding appointment if available.|string|
+|**shown_as**  <br>*optional*|The busy status of this interval, one of: 0 (unknown), 1 (reserved), 2 (temporary), 3 (absent), 4 (free).|integer|
+|**start_date**  <br>*optional*|The start time of the interval.|integer(int64)|
+|**title**  <br>*optional*|The title of the corresponding appointment if available.|string|
 
 
+<a name="freebusyresponse"></a>
 # FreeBusyResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array of free/busy intervals.|false|FreeBusyData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array of free/busy intervals.|< [FreeBusyData](#freebusydata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="freebusysresponse"></a>
 # FreeBusysResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The free/busy data for all requested participants inside a JSON object with the participant IDs as keys,
-like `{"data":{"3":{"data":[{"start_date":...},{"start_date":...]}},"19":{"data":[{"start_date":...}]}}}`. Besides a combined data
-element for a requested group, all group members are resolved and listed separately in the result. If the `merged` parameter
-is specified, an additional data element named `merged` representing a combined view for all requested participants is added
-to the results implicity.
-|false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The free/busy data for all requested participants inside a JSON object with the participant IDs as keys,<br>like `{"data":{"3":{"data":[{"start_date":...},{"start_date":...]}},"19":{"data":[{"start_date":...}]}}}`. Besides a combined data<br>element for a requested group, all group members are resolved and listed separately in the result. If the `merged` parameter<br>is specified, an additional data element named `merged` representing a combined view for all requested participants is added<br>to the results implicity.|object|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="groupdata"></a>
 # GroupData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The group ID.|false|integer||
-|display_name|Display name of the group.|false|string||
-|name|Internal name with character restrictions.|false|string||
-|members|The array contains identifiers of users that are member of the group.|false|integer array||
-|last_modified_utc|Timestamp of the last modification.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**display_name**  <br>*optional*|Display name of the group.|string|
+|**id**  <br>*optional*|The group ID.|integer|
+|**last_modified_utc**  <br>*optional*|Timestamp of the last modification.|integer(int64)|
+|**members**  <br>*optional*|The array contains identifiers of users that are member of the group.|< integer > array|
+|**name**  <br>*optional*|Internal name with character restrictions.|string|
 
 
+<a name="grouplistelement"></a>
 # GroupListElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|ID of a group.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|ID of a group.|integer|
 
 
+<a name="groupresponse"></a>
 # GroupResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|GroupData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[GroupData](#groupdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="groupsearchbody"></a>
 # GroupSearchBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|pattern|Search pattern to find groups. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**pattern**  <br>*optional*|Search pattern to find groups. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|string|
 
 
+<a name="groupupdatedata"></a>
 # GroupUpdateData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of a newly created group.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|The ID of a newly created group.|integer|
 
 
+<a name="groupupdateresponse"></a>
 # GroupUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|GroupUpdateData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[GroupUpdateData](#groupupdatedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="groupupdatesdata"></a>
 # GroupUpdatesData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|new|Array of new group objects.|false|GroupData array||
-|modified|Array of modified group objects.|false|GroupData array||
-|deleted|Array of deleted group objects.|false|GroupData array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**deleted**  <br>*optional*|Array of deleted group objects.|< [GroupData](#groupdata) > array|
+|**modified**  <br>*optional*|Array of modified group objects.|< [GroupData](#groupdata) > array|
+|**new**  <br>*optional*|Array of new group objects.|< [GroupData](#groupdata) > array|
 
 
+<a name="groupupdatesresponse"></a>
 # GroupUpdatesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|GroupUpdatesData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[GroupUpdatesData](#groupupdatesdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="groupsresponse"></a>
 # GroupsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of group objects.|false|GroupData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of group objects.|< [GroupData](#groupdata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="haloinvestigationresponse"></a>
 # HaloInvestigationResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of halo data objects. Each object is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of halo data objects. Each object is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="haloservicesresponse"></a>
 # HaloServicesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array with available halo providers.|false|string array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array with available halo providers.|< string > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="infoitembody"></a>
 # InfoItemBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|file||true|InfoItemData||
-|notification||false|InfoItemBodyNotification||
+
+|Name|Description|Schema|
+|---|---|---|
+|**file**  <br>*required*||[InfoItemData](#infoitemdata)|
+|**notification**  <br>*optional*||[InfoItemBodyNotification](#infoitembodynotification)|
 
 
+<a name="infoitembodynotification"></a>
 # InfoItemBodyNotification
-
 Responsible for sending out notifications for changed object permissions of an infoitem.
 
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|transport|E.g. "mail".|false|string||
-|message||false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**message**  <br>*optional*||string|
+|**transport**  <br>*optional*|E.g. "mail".|string|
 
 
+<a name="infoitemdata"></a>
 # InfoItemData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|object_permissions|An array of object permissions (preliminary, available since v7.8.0).|false|InfoItemPermission array||
-|shareable|(read-only) Indicates if the item can be shared (preliminary, available since v7.8.0).|false|boolean||
-|title|The title.|false|string||
-|url|Link/URL to item.|false|string||
-|filename|Displayed filename of the document.|false|string||
-|file_mimetype|MIME type of the document. The client converts known types to more readable names before displaying them.|false|string||
-|file_size|The size of the document in bytes.|false|integer (int64)||
-|version|Version of the document. NULL can be used to denote the most recent version and will be set in responses if versions are not supported by the underlying storage.|false|string||
-|description|A description if the item.|false|string||
-|locked_until|The time until which this item will presumably be locked. Only set if the docment is currently locked, 0 otherwise.|false|integer (int64)||
-|file_md5sum|MD5Sum of the document.|false|string||
-|version_comment|A version comment is used to file a changelog for the file.|false|string||
-|current_version|"true" if this version is the current version, "false" otherwise. Note: This is not writeable.|false|boolean||
-|number_of_versions|The number of all versions of the item. Note: This is not writeable.|false|integer||
-|com.openexchange.share.extendedObjectPermissions|An array of extended object permissions (read-only). (available since 7.8.0)|false|InfoItemExtendedPermission array||
-|com.openexchange.realtime.resourceID|The resource identifier for the infoitem for usage within the realtime component (read-only). (available since 7.8.0)|false|string||
-|id|Object ID.|false|string||
-|created_by|User ID of the user who created this object.|false|string||
-|modified_by|User ID of the user who last modified this object.|false|string||
-|creation_date|Date and time of creation.|false|integer (int64)||
-|last_modified|Date and time of the last modification.|false|integer (int64)||
-|folder_id|Object ID of the parent folder.|false|string||
-|categories|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|false|string||
-|private_flag|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|false|boolean||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|false|integer||
-|number_of_attachments|Number of attachments.|false|integer||
-|lastModifiedOfNewestAttachmentUTC|Timestamp of the newest attachment written with UTC time zone.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**com.openexchange.realtime.resourceID**  <br>*optional*|The resource identifier for the infoitem for usage within the realtime component (read-only). (available since 7.8.0)|string|
+|**com.openexchange.share.extendedObjectPermissions**  <br>*optional*|An array of extended object permissions (read-only). (available since 7.8.0)|< [InfoItemExtendedPermission](#infoitemextendedpermission) > array|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**current_version**  <br>*optional*|"true" if this version is the current version, "false" otherwise. Note: This is not writeable.|boolean|
+|**description**  <br>*optional*|A description if the item.|string|
+|**file_md5sum**  <br>*optional*|MD5Sum of the document.|string|
+|**file_mimetype**  <br>*optional*|MIME type of the document. The client converts known types to more readable names before displaying them.|string|
+|**file_size**  <br>*optional*|The size of the document in bytes.|integer(int64)|
+|**filename**  <br>*optional*|Displayed filename of the document.|string|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**id**  <br>*optional*|Object ID.|string|
+|**lastModifiedOfNewestAttachmentUTC**  <br>*optional*|Timestamp of the newest attachment written with UTC time zone.|integer(int64)|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**locked_until**  <br>*optional*|The time until which this item will presumably be locked. Only set if the docment is currently locked, 0 otherwise.|integer(int64)|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**number_of_attachments**  <br>*optional*|Number of attachments.|integer|
+|**number_of_versions**  <br>*optional*|The number of all versions of the item. Note: This is not writeable.|integer|
+|**object_permissions**  <br>*optional*|An array of object permissions (preliminary, available since v7.8.0).|< [InfoItemPermission](#infoitempermission) > array|
+|**private_flag**  <br>*optional*|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|boolean|
+|**shareable**  <br>*optional*|(read-only) Indicates if the item can be shared (preliminary, available since v7.8.0).|boolean|
+|**title**  <br>*optional*|The title.|string|
+|**url**  <br>*optional*|Link/URL to item.|string|
+|**version**  <br>*optional*|Version of the document. NULL can be used to denote the most recent version and will be set in responses if versions are not supported by the underlying storage.|string|
+|**version_comment**  <br>*optional*|A version comment is used to file a changelog for the file.|string|
 
 
+<a name="infoitemdetachresponse"></a>
 # InfoItemDetachResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|integer array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||< integer > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="infoitemextendedpermission"></a>
 # InfoItemExtendedPermission
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|entity|Identifier of the permission entity (i.e. user-, group- or guest-ID).|false|integer||
-|bits|A number specifying the permission flags: 0 (the numerical value indicating no object permissions), 1 (the numerical value indicating read object permissions), 2 (the numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask)).|false|integer||
-|type|"user" for an internal user, "group" for a group, "guest" for a guest, or "anonymous" for an anonymous permission entity.|false|string||
-|display_name|A display name for the permission entity.|false|string||
-|contact||false|ContactData||
-|share_url|The share link for "anonymous" entities.|false|string||
-|password|The optionally set password for "anonymous" entities.|false|string||
-|expiry_date|The optionally set expiry date for "anonymous" entities.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**bits**  <br>*optional*|A number specifying the permission flags: 0 (the numerical value indicating no object permissions), 1 (the numerical value indicating read object permissions), 2 (the numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask)).|integer|
+|**contact**  <br>*optional*||[ContactData](#contactdata)|
+|**display_name**  <br>*optional*|A display name for the permission entity.|string|
+|**entity**  <br>*optional*|Identifier of the permission entity (i.e. user-, group- or guest-ID).|integer|
+|**expiry_date**  <br>*optional*|The optionally set expiry date for "anonymous" entities.|integer(int64)|
+|**password**  <br>*optional*|The optionally set password for "anonymous" entities.|string|
+|**share_url**  <br>*optional*|The share link for "anonymous" entities.|string|
+|**type**  <br>*optional*|"user" for an internal user, "group" for a group, "guest" for a guest, or "anonymous" for an anonymous permission entity.|string|
 
 
+<a name="infoitemlistelement"></a>
 # InfoItemListElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The object ID of the infoitem (e.g. "31841/36639").|true|string||
-|folder|The object ID of the related folder (e.g. "31841").|true|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*required*|The object ID of the related folder (e.g. "31841").|string|
+|**id**  <br>*required*|The object ID of the infoitem (e.g. "31841/36639").|string|
 
 
+<a name="infoitempermission"></a>
 # InfoItemPermission
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|bits|A number specifying the permission flags: 0 (the numerical value indicating no object permissions), 1 (the numerical value indicating read object permissions), 2 (the numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask)).|false|integer||
-|entity|User ID of the user or group to which this permission applies.|false|integer||
-|group|Is true if entity refers to a group, false if it refers to a user.|false|boolean||
-|type|The recipient type, i.e. one of "user", "group", "guest", "anonymous" (required if no internal "entity" defined).|false|string||
-|password|An additional secret / pin number an anonymous user needs to enter when accessing the share (for type "anonymous", optional).|false|string||
-|email_address|The e-mail address of the recipient (for type "guest").|false|string||
-|display_name|The display name of the recipient (for type "guest", optional).|false|string||
-|contact_id|The object identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", optional).|false|string||
-|contact_folder|The folder identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", required if "contact_id" is set).|false|string||
-|expiry_date|The end date / expiration time after which the share link is no longer accessible (for type "anonymous", optional).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**bits**  <br>*optional*|A number specifying the permission flags: 0 (the numerical value indicating no object permissions), 1 (the numerical value indicating read object permissions), 2 (the numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask)).|integer|
+|**contact_folder**  <br>*optional*|The folder identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", required if "contact_id" is set).|string|
+|**contact_id**  <br>*optional*|The object identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", optional).|string|
+|**display_name**  <br>*optional*|The display name of the recipient (for type "guest", optional).|string|
+|**email_address**  <br>*optional*|The e-mail address of the recipient (for type "guest").|string|
+|**entity**  <br>*optional*|User ID of the user or group to which this permission applies.|integer|
+|**expiry_date**  <br>*optional*|The end date / expiration time after which the share link is no longer accessible (for type "anonymous", optional).|integer(int64)|
+|**group**  <br>*optional*|Is true if entity refers to a group, false if it refers to a user.|boolean|
+|**password**  <br>*optional*|An additional secret / pin number an anonymous user needs to enter when accessing the share (for type "anonymous", optional).|string|
+|**type**  <br>*optional*|The recipient type, i.e. one of "user", "group", "guest", "anonymous" (required if no internal "entity" defined).|string|
 
 
+<a name="infoitemresponse"></a>
 # InfoItemResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|InfoItemData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[InfoItemData](#infoitemdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="infoitemsearchbody"></a>
 # InfoItemSearchBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|pattern|The search pattern, where "*" matches any sequence of characters.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**pattern**  <br>*optional*|The search pattern, where "*" matches any sequence of characters.|string|
 
 
+<a name="infoitemsharingnotificationbody"></a>
 # InfoItemSharingNotificationBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|entities|Array containing the entity ID(s) of the users or groups that shall be notified.|true|string array||
-|notification||false|InfoItemBodyNotification||
+
+|Name|Description|Schema|
+|---|---|---|
+|**entities**  <br>*required*|Array containing the entity ID(s) of the users or groups that shall be notified.|< string > array|
+|**notification**  <br>*optional*||[InfoItemBodyNotification](#infoitembodynotification)|
 
 
+<a name="infoitemsharingnotificationdata"></a>
 # InfoItemSharingNotificationData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|warnings|Can contain transport warnings that occured during sending the notifications.|false|object array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**warnings**  <br>*optional*|Can contain transport warnings that occured during sending the notifications.|< object > array|
 
 
+<a name="infoitemsharingnotificationresponse"></a>
 # InfoItemSharingNotificationResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|InfoItemSharingNotificationData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[InfoItemSharingNotificationData](#infoitemsharingnotificationdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="infoitemupdateresponse"></a>
 # InfoItemUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The object ID of the updated infoitem.|false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The object ID of the updated infoitem.|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="infoitemupdatesresponse"></a>
 # InfoItemUpdatesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of infoitems.|false|object array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of infoitems.|< object > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="infoitemzipelement"></a>
 # InfoItemZipElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The object ID of the infoitem (e.g. "31841/36639").|true|string||
-|folder|The object ID of the related folder (e.g. "31841").|true|string||
-|version|The version of the infoitem.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*required*|The object ID of the related folder (e.g. "31841").|string|
+|**id**  <br>*required*|The object ID of the infoitem (e.g. "31841/36639").|string|
+|**version**  <br>*optional*|The version of the infoitem.|string|
 
 
+<a name="infoitemsmovedresponse"></a>
 # InfoItemsMovedResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of infoitem identifiers that could not be moved (due to a conflict).|false|object array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of infoitem identifiers that could not be moved (due to a conflict).|< object > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="infoitemsresponse"></a>
 # InfoItemsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of infoitems. Each infoitem is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of infoitems. Each infoitem is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="jslobdata"></a>
 # JSlobData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The identifier of the JSlob.|false|string||
-|tree|The JSON object that is stored in the JSlob.|false|object||
-|meta|A JSON object containing meta data.|false|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|The identifier of the JSlob.|string|
+|**meta**  <br>*optional*|A JSON object containing meta data.|object|
+|**tree**  <br>*optional*|The JSON object that is stored in the JSlob.|object|
 
 
+<a name="jslobsresponse"></a>
 # JSlobsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array containing JSON configurations.|false|JSlobData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array containing JSON configurations.|< [JSlobData](#jslobdata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="jumpresponse"></a>
 # JumpResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|JumpTokenData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[JumpTokenData](#jumptokendata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="jumptokendata"></a>
 # JumpTokenData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|token|The identifier of the token.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**token**  <br>*optional*|The identifier of the token.|string|
 
 
+<a name="loginresponse"></a>
 # LoginResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|session|The session ID.|false|string||
-|user|The username.|false|string||
-|user_id|The user ID.|false|integer||
-|context_id|The context ID.|false|integer||
-|locale|The users locale (e.g. "en_US").|false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**context_id**  <br>*optional*|The context ID.|integer|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**locale**  <br>*optional*|The users locale (e.g. "en_US").|string|
+|**session**  <br>*optional*|The session ID.|string|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
+|**user**  <br>*optional*|The username.|string|
+|**user_id**  <br>*optional*|The user ID.|integer|
 
 
+<a name="mailaccountdata"></a>
 # MailAccountData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The account identifier.|false|integer||
-|name|The account's display name.|false|string||
-|login|The login name.|false|string||
-|password|The (optional) password.|false|string||
-|mail_url|The mail server URL, e.g. "imap://imap.somewhere.com:143". **URL is preferred over single fields** (like `mail_server`, `mail_port`, etc.).|false|string||
-|mail_server|The mail server's hostname or IP address.|false|string||
-|mail_port|The mail server's port.|false|integer||
-|mail_protocol|The mail server's protocol. **Always use basic protocol name.** E.g. use "imap" instead of "imaps".|false|string||
-|mail_secure|Whether to establish a secure connection to mail server (SSL, TLS).|false|boolean||
-|mail_starttls|Whether to establish a secure connection to mail server via STARTTLS (available since v7.8.2).|false|boolean||
-|transport_url|The transport server URL, e.g. "smtp://smtp.somewhere.com:25". **URL is preferred over single fields** (like `transport_server`, `transport_port`, etc.).|false|string||
-|transport_server|The transport server's hostname or IP address.|false|string||
-|transport_port|The transport server's port.|false|integer||
-|transport_protocol|The transport server's protocol. **Always use basic protocol name.** E.g. use "smtp" instead of "smtps".|false|string||
-|transport_secure|Whether to establish a secure connection to transport server (SSL, TLS).|false|boolean||
-|transport_login|The transport login. **Please see `transport_auth` for the handling of this field.**|false|string||
-|transport_password|The transport password. **Please see `transport_auth` for the handling of this field.**|false|string||
-|transport_auth|Specifies the source for mail transport (SMTP) credentials. Possible values: mail (signals to use the same credentials as given in associated mail store, e.g. IMAP or POP3), custom (signals that individual credentials are supposed to be used (fields `transport_login` and `transport_password` are considered), none (means the mail transport does not support any authentication mechansim). (available since v7.6.1)|false|string||
-|transport_starttls|Whether to establish a secure connection to transport server via STARTTLS (available since v7.8.2).|false|boolean||
-|primary_address|The user's primary address in account, e.g. "someone@somewhere.com".|false|string||
-|spam_handler|The name of the spam handler used by account.|false|string||
-|trash|The name of the default trash folder.|false|string||
-|sent|The name of the default sent folder.|false|string||
-|drafts|The name of the default drafts folder.|false|string||
-|spam|The name of the default spam folder.|false|string||
-|confirmed_spam|The name of the default confirmed-spam folder.|false|string||
-|confirmed_ham|The name of the default confirmed-ham folder.|false|string||
-|unified_inbox_enabled|Whether Unified INBOX is enabled.|false|boolean||
-|trash_fullname|Path to default trash folder. Preferred over `trash`.|false|string||
-|sent_fullname|Path to default sent folder. Preferred over `sent`.|false|string||
-|drafts_fullname|Path to default drafts folder. Preferred over `drafts`.|false|string||
-|spam_fullname|Path to default spam folder. Preferred over `spam`.|false|string||
-|confirmed_span_fullname|Path to default confirmed-spam folder. Preferred over `confirmed_spam`.|false|string||
-|confirmed_ham_fullname|Path to default confirmed-ham folder. Preferred over `confirmed_ham`.|false|string||
-|pop3_refresh_rate|The interval in minutes the POP3 account is refreshed.|false|integer||
-|pop3_expunge_on_quit|Whether POP3 messages shall be deleted on actual POP3 account after retrieval or not.|false|boolean||
-|pop3_delete_write_through|If option `pop3_expunge_on_quite` is disabled, this field defines whether a deleted in local INBOX also deletes affected message in actual POP3 account.|false|boolean||
-|pop3_storage|The name of POP3 storage provider, default is "mailaccount".|false|string||
-|pop3_path|Path to POP3's virtual root folder in storage, default name of the POP3 account beside default folders.|false|string||
-|personal|The customizable personal part of the email address.|false|string||
-|reply_to|The customizable reply-to email address.|false|string||
-|addresses|The comma-separated list of available email addresses including aliases (**only available for primary mail account**).|false|string||
-|meta|Stores arbitrary JSON data as specified by client associated with the mail account.|false|string||
-|archive|The name of the archive folder. **Currently not functional!**|false|string||
-|archive_fullname|The full name of the archive folder. **Currently not functional!**|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**addresses**  <br>*optional*|The comma-separated list of available email addresses including aliases (**only available for primary mail account**).|string|
+|**archive**  <br>*optional*|The name of the archive folder. **Currently not functional!**|string|
+|**archive_fullname**  <br>*optional*|The full name of the archive folder. **Currently not functional!**|string|
+|**confirmed_ham**  <br>*optional*|The name of the default confirmed-ham folder.|string|
+|**confirmed_ham_fullname**  <br>*optional*|Path to default confirmed-ham folder. Preferred over `confirmed_ham`.|string|
+|**confirmed_spam**  <br>*optional*|The name of the default confirmed-spam folder.|string|
+|**confirmed_span_fullname**  <br>*optional*|Path to default confirmed-spam folder. Preferred over `confirmed_spam`.|string|
+|**drafts**  <br>*optional*|The name of the default drafts folder.|string|
+|**drafts_fullname**  <br>*optional*|Path to default drafts folder. Preferred over `drafts`.|string|
+|**id**  <br>*optional*|The account identifier.|integer|
+|**login**  <br>*optional*|The login name.|string|
+|**mail_port**  <br>*optional*|The mail server's port.|integer|
+|**mail_protocol**  <br>*optional*|The mail server's protocol. **Always use basic protocol name.** E.g. use "imap" instead of "imaps".|string|
+|**mail_secure**  <br>*optional*|Whether to establish a secure connection to mail server (SSL, TLS).|boolean|
+|**mail_server**  <br>*optional*|The mail server's hostname or IP address.|string|
+|**mail_starttls**  <br>*optional*|Whether to establish a secure connection to mail server via STARTTLS (available since v7.8.2).|boolean|
+|**mail_url**  <br>*optional*|The mail server URL, e.g. "imap://imap.somewhere.com:143". **URL is preferred over single fields** (like `mail_server`, `mail_port`, etc.).|string|
+|**meta**  <br>*optional*|Stores arbitrary JSON data as specified by client associated with the mail account.|string|
+|**name**  <br>*optional*|The account's display name.|string|
+|**password**  <br>*optional*|The (optional) password.|string|
+|**personal**  <br>*optional*|The customizable personal part of the email address.|string|
+|**pop3_delete_write_through**  <br>*optional*|If option `pop3_expunge_on_quite` is disabled, this field defines whether a deleted in local INBOX also deletes affected message in actual POP3 account.|boolean|
+|**pop3_expunge_on_quit**  <br>*optional*|Whether POP3 messages shall be deleted on actual POP3 account after retrieval or not.|boolean|
+|**pop3_path**  <br>*optional*|Path to POP3's virtual root folder in storage, default name of the POP3 account beside default folders.|string|
+|**pop3_refresh_rate**  <br>*optional*|The interval in minutes the POP3 account is refreshed.|integer|
+|**pop3_storage**  <br>*optional*|The name of POP3 storage provider, default is "mailaccount".|string|
+|**primary_address**  <br>*optional*|The user's primary address in account, e.g. "someone@somewhere.com".|string|
+|**reply_to**  <br>*optional*|The customizable reply-to email address.|string|
+|**sent**  <br>*optional*|The name of the default sent folder.|string|
+|**sent_fullname**  <br>*optional*|Path to default sent folder. Preferred over `sent`.|string|
+|**spam**  <br>*optional*|The name of the default spam folder.|string|
+|**spam_fullname**  <br>*optional*|Path to default spam folder. Preferred over `spam`.|string|
+|**spam_handler**  <br>*optional*|The name of the spam handler used by account.|string|
+|**transport_auth**  <br>*optional*|Specifies the source for mail transport (SMTP) credentials. Possible values: mail (signals to use the same credentials as given in associated mail store, e.g. IMAP or POP3), custom (signals that individual credentials are supposed to be used (fields `transport_login` and `transport_password` are considered), none (means the mail transport does not support any authentication mechansim). (available since v7.6.1)|string|
+|**transport_login**  <br>*optional*|The transport login. **Please see `transport_auth` for the handling of this field.**|string|
+|**transport_password**  <br>*optional*|The transport password. **Please see `transport_auth` for the handling of this field.**|string|
+|**transport_port**  <br>*optional*|The transport server's port.|integer|
+|**transport_protocol**  <br>*optional*|The transport server's protocol. **Always use basic protocol name.** E.g. use "smtp" instead of "smtps".|string|
+|**transport_secure**  <br>*optional*|Whether to establish a secure connection to transport server (SSL, TLS).|boolean|
+|**transport_server**  <br>*optional*|The transport server's hostname or IP address.|string|
+|**transport_starttls**  <br>*optional*|Whether to establish a secure connection to transport server via STARTTLS (available since v7.8.2).|boolean|
+|**transport_url**  <br>*optional*|The transport server URL, e.g. "smtp://smtp.somewhere.com:25". **URL is preferred over single fields** (like `transport_server`, `transport_port`, etc.).|string|
+|**trash**  <br>*optional*|The name of the default trash folder.|string|
+|**trash_fullname**  <br>*optional*|Path to default trash folder. Preferred over `trash`.|string|
+|**unified_inbox_enabled**  <br>*optional*|Whether Unified INBOX is enabled.|boolean|
 
 
+<a name="mailaccountdeletionresponse"></a>
 # MailAccountDeletionResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array containing the identifiers of the mail accounts that were deleted.|false|integer array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array containing the identifiers of the mail accounts that were deleted.|< integer > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailaccountresponse"></a>
 # MailAccountResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MailAccountData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MailAccountData](#mailaccountdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailaccountupdateresponse"></a>
 # MailAccountUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MailAccountData||
-|warnings|An array of error objects that occurred during the creation of the account.|false|CommonResponse array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MailAccountData](#mailaccountdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
+|**warnings**  <br>*optional*|An array of error objects that occurred during the creation of the account.|< [CommonResponse](#commonresponse) > array|
 
 
+<a name="mailaccountvalidationresponse"></a>
 # MailAccountValidationResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|A boolean if parameter `tree` is not specified indicating the validation result otherwise the folder
-tree object (see **FolderData** model) extended by a field `subfolder_array` that contains possible subfolders.
-In the tree case a value of `null` indicating a failed validation.
-|false|object||
-|warnings||false|CommonResponse||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|A boolean if parameter `tree` is not specified indicating the validation result otherwise the folder<br>tree object (see **FolderData** model) extended by a field `subfolder_array` that contains possible subfolders.<br>In the tree case a value of `null` indicating a failed validation.|object|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
+|**warnings**  <br>*optional*||[CommonResponse](#commonresponse)|
 
 
+<a name="mailaccountsresponse"></a>
 # MailAccountsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of mail accounts. Each account is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of mail accounts. Each account is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailackbody"></a>
 # MailAckBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|from|The from email address.|false|string||
-|folder|The ID of the folder where the mail is placed.|false|string||
-|id|The ID of the mail.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*optional*|The ID of the folder where the mail is placed.|string|
+|**from**  <br>*optional*|The from email address.|string|
+|**id**  <br>*optional*|The ID of the mail.|string|
 
 
+<a name="mailackresponse"></a>
 # MailAckResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||object|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailattachment"></a>
 # MailAttachment
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|Object ID (unique only inside the same message).|false|string||
-|content_type|MIME type.|false|string||
-|content|Content as text. Present only if easily convertible to text.|false|string||
-|filename|Displayed filename (mutually exclusive with content).|false|string||
-|size|Size of the attachment in bytes.|false|integer (int64)||
-|disp|Attachment's disposition: null, inline, attachment or alternative.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**content**  <br>*optional*|Content as text. Present only if easily convertible to text.|string|
+|**content_type**  <br>*optional*|MIME type.|string|
+|**disp**  <br>*optional*|Attachment's disposition: null, inline, attachment or alternative.|string|
+|**filename**  <br>*optional*|Displayed filename (mutually exclusive with content).|string|
+|**id**  <br>*optional*|Object ID (unique only inside the same message).|string|
+|**size**  <br>*optional*|Size of the attachment in bytes.|integer(int64)|
 
 
+<a name="mailconversationdata"></a>
 # MailConversationData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|unreadCount||false|integer||
-|thread|JSON array consisting of JSON objects, each representing a message in the conversation.|false|MailData array||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).|false|integer||
-|id|Object ID of the mail.|false|string||
-|folder_id|Object ID of the parent folder.|false|string||
-|attachment|Indicates whether this mail has attachments.|false|boolean||
-|from|Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.|false|string array array||
-|to|Each element is a two-element array (see the from field) specifying one receiver.|false|string array array||
-|cc|Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|false|string array array||
-|bcc|Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.|false|string array array||
-|subject|The mail's subject.|false|string||
-|size|The size if the mail in bytes.|false|integer (int64)||
-|sent_date|Date and time as specified in the mail by the sending client.|false|integer (int64)||
-|received_date|Date and time as measured by the receiving server.|false|integer (int64)||
-|flags|Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).|false|integer||
-|level|Zero-based nesting level in a thread.|false|integer||
-|disp_notification_to|Content of message's header "Disposition-Notification-To".|false|string||
-|priority|Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high).|false|integer||
-|msg_ref|Message reference on reply/forward.|false|string||
-|flag_seen|Special field to sort mails by seen status.|false|string||
-|account_name|Message's account name.|false|string||
-|account_id|Message's account identifier. Since v6.20.2.|false|integer||
-|user|An array with user-defined flags as strings.|false|string array||
-|headers|A map with fields for every non-standard header. The header name is the field name. The header value is the value of the field as string.|false|object||
-|attachments|Each element is an attachment. The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|false|MailAttachment array||
-|truncated|true/false if the mail content was trimmed. Since v7.6.1|false|boolean||
-|source|RFC822 source of the mail. Only present for "?action=get&attach_src=true".|false|string||
-|cid|The value of the "Content-ID" header, if the header is present.|false|string||
-|original_id|The original mail identifier (e.g. if fetched from "virtual/all" folder).|false|string||
-|original_folder_id|The original folder identifier (e.g. if fetched from "virtual/all" folder).|false|string||
-|content_type|The MIME type of the mail.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**account_id**  <br>*optional*|Message's account identifier. Since v6.20.2.|integer|
+|**account_name**  <br>*optional*|Message's account name.|string|
+|**attachment**  <br>*optional*|Indicates whether this mail has attachments.|boolean|
+|**attachments**  <br>*optional*|Each element is an attachment. The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|< [MailAttachment](#mailattachment) > array|
+|**bcc**  <br>*optional*|Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.|< < string > array > array|
+|**cc**  <br>*optional*|Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|< < string > array > array|
+|**cid**  <br>*optional*|The value of the "Content-ID" header, if the header is present.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).|integer|
+|**content_type**  <br>*optional*|The MIME type of the mail.|string|
+|**disp_notification_to**  <br>*optional*|Content of message's header "Disposition-Notification-To".|string|
+|**flag_seen**  <br>*optional*|Special field to sort mails by seen status.|string|
+|**flags**  <br>*optional*|Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).|integer|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**from**  <br>*optional*|Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.|< < string > array > array|
+|**headers**  <br>*optional*|A map with fields for every non-standard header. The header name is the field name. The header value is the value of the field as string.|object|
+|**id**  <br>*optional*|Object ID of the mail.|string|
+|**level**  <br>*optional*|Zero-based nesting level in a thread.|integer|
+|**msg_ref**  <br>*optional*|Message reference on reply/forward.|string|
+|**original_folder_id**  <br>*optional*|The original folder identifier (e.g. if fetched from "virtual/all" folder).|string|
+|**original_id**  <br>*optional*|The original mail identifier (e.g. if fetched from "virtual/all" folder).|string|
+|**priority**  <br>*optional*|Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high).|integer|
+|**received_date**  <br>*optional*|Date and time as measured by the receiving server.|integer(int64)|
+|**sent_date**  <br>*optional*|Date and time as specified in the mail by the sending client.|integer(int64)|
+|**size**  <br>*optional*|The size if the mail in bytes.|integer(int64)|
+|**source**  <br>*optional*|RFC822 source of the mail. Only present for "?action=get&attach_src=true".|string|
+|**subject**  <br>*optional*|The mail's subject.|string|
+|**thread**  <br>*optional*|JSON array consisting of JSON objects, each representing a message in the conversation.|< [MailData](#maildata) > array|
+|**to**  <br>*optional*|Each element is a two-element array (see the from field) specifying one receiver.|< < string > array > array|
+|**truncated**  <br>*optional*|true/false if the mail content was trimmed. Since v7.6.1|boolean|
+|**unreadCount**  <br>*optional*||integer|
+|**user**  <br>*optional*|An array with user-defined flags as strings.|< string > array|
 
 
+<a name="mailconversationsresponse"></a>
 # MailConversationsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array of JSON objects each representing a conversation's root message.|false|MailConversationData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array of JSON objects each representing a conversation's root message.|< [MailConversationData](#mailconversationdata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailcountresponse"></a>
 # MailCountResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The folder's mail count.|false|integer||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The folder's mail count.|integer|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="maildata"></a>
 # MailData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).|false|integer||
-|id|Object ID of the mail.|false|string||
-|folder_id|Object ID of the parent folder.|false|string||
-|attachment|Indicates whether this mail has attachments.|false|boolean||
-|from|Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.|false|string array array||
-|to|Each element is a two-element array (see the from field) specifying one receiver.|false|string array array||
-|cc|Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|false|string array array||
-|bcc|Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.|false|string array array||
-|subject|The mail's subject.|false|string||
-|size|The size if the mail in bytes.|false|integer (int64)||
-|sent_date|Date and time as specified in the mail by the sending client.|false|integer (int64)||
-|received_date|Date and time as measured by the receiving server.|false|integer (int64)||
-|flags|Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).|false|integer||
-|level|Zero-based nesting level in a thread.|false|integer||
-|disp_notification_to|Content of message's header "Disposition-Notification-To".|false|string||
-|priority|Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high).|false|integer||
-|msg_ref|Message reference on reply/forward.|false|string||
-|flag_seen|Special field to sort mails by seen status.|false|string||
-|account_name|Message's account name.|false|string||
-|account_id|Message's account identifier. Since v6.20.2.|false|integer||
-|user|An array with user-defined flags as strings.|false|string array||
-|headers|A map with fields for every non-standard header. The header name is the field name. The header value is the value of the field as string.|false|object||
-|attachments|Each element is an attachment. The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|false|MailAttachment array||
-|truncated|true/false if the mail content was trimmed. Since v7.6.1|false|boolean||
-|source|RFC822 source of the mail. Only present for "?action=get&attach_src=true".|false|string||
-|cid|The value of the "Content-ID" header, if the header is present.|false|string||
-|original_id|The original mail identifier (e.g. if fetched from "virtual/all" folder).|false|string||
-|original_folder_id|The original folder identifier (e.g. if fetched from "virtual/all" folder).|false|string||
-|content_type|The MIME type of the mail.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**account_id**  <br>*optional*|Message's account identifier. Since v6.20.2.|integer|
+|**account_name**  <br>*optional*|Message's account name.|string|
+|**attachment**  <br>*optional*|Indicates whether this mail has attachments.|boolean|
+|**attachments**  <br>*optional*|Each element is an attachment. The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|< [MailAttachment](#mailattachment) > array|
+|**bcc**  <br>*optional*|Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.|< < string > array > array|
+|**cc**  <br>*optional*|Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|< < string > array > array|
+|**cid**  <br>*optional*|The value of the "Content-ID" header, if the header is present.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).|integer|
+|**content_type**  <br>*optional*|The MIME type of the mail.|string|
+|**disp_notification_to**  <br>*optional*|Content of message's header "Disposition-Notification-To".|string|
+|**flag_seen**  <br>*optional*|Special field to sort mails by seen status.|string|
+|**flags**  <br>*optional*|Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).|integer|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**from**  <br>*optional*|Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.|< < string > array > array|
+|**headers**  <br>*optional*|A map with fields for every non-standard header. The header name is the field name. The header value is the value of the field as string.|object|
+|**id**  <br>*optional*|Object ID of the mail.|string|
+|**level**  <br>*optional*|Zero-based nesting level in a thread.|integer|
+|**msg_ref**  <br>*optional*|Message reference on reply/forward.|string|
+|**original_folder_id**  <br>*optional*|The original folder identifier (e.g. if fetched from "virtual/all" folder).|string|
+|**original_id**  <br>*optional*|The original mail identifier (e.g. if fetched from "virtual/all" folder).|string|
+|**priority**  <br>*optional*|Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high).|integer|
+|**received_date**  <br>*optional*|Date and time as measured by the receiving server.|integer(int64)|
+|**sent_date**  <br>*optional*|Date and time as specified in the mail by the sending client.|integer(int64)|
+|**size**  <br>*optional*|The size if the mail in bytes.|integer(int64)|
+|**source**  <br>*optional*|RFC822 source of the mail. Only present for "?action=get&attach_src=true".|string|
+|**subject**  <br>*optional*|The mail's subject.|string|
+|**to**  <br>*optional*|Each element is a two-element array (see the from field) specifying one receiver.|< < string > array > array|
+|**truncated**  <br>*optional*|true/false if the mail content was trimmed. Since v7.6.1|boolean|
+|**user**  <br>*optional*|An array with user-defined flags as strings.|< string > array|
 
 
+<a name="maildestinationbody"></a>
 # MailDestinationBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|folder_id|The object ID of the destination folder.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder_id**  <br>*optional*|The object ID of the destination folder.|string|
 
 
+<a name="maildestinationdata"></a>
 # MailDestinationData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|folder_id|Object ID of the destination folder.|false|string||
-|id|Object ID of the "new" mail.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder_id**  <br>*optional*|Object ID of the destination folder.|string|
+|**id**  <br>*optional*|Object ID of the "new" mail.|string|
 
 
+<a name="maildestinationresponse"></a>
 # MailDestinationResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MailDestinationData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MailDestinationData](#maildestinationdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailfilteraction"></a>
 # MailFilterAction
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|A string defining the object itself (e.g. "keep" or "discard").|false|string||
-|to|A string containing where the mail should be redirected to (for redirect-command).|false|string||
-|into|This string takes the object id of the destination mail folder (for move-command).|false|string||
-|text|A string containing the reason why the mail is rejected (for reject-command) or a string containing the vacation text itself (for vacation-command).|false|string||
-|days|The days for which a vacation text is returned (for vacation-command).|false|string||
-|addresses|The addresses for which this vacation is responsible. That means for which addresses out of the aliases array of the user defining this filter, vacations will be sent.|false|string array||
-|from|Support for the ":from" tag. Specifies the value of the from header for the auto-reply mail, e.g. Foo Bear <foo.bear@ox.io> (Since 7.8.1). The array of strings should be a simple JSONArray with length 2; the first element should include the personal part of the e-mail address and the second element the actual e-mail address. If only the e-mail address is available, that should be the only element of the array. (for vacation-command)|false|object||
-|subject|The new subject for the returned message (can be left empty, when only adding RE:) (for vacation-command).|false|string||
-|flags|An array containing the flags which should be added to the mail. A flag can either be a system flag or a user flag. System flags begin with a backslash and can be: "seen", "answered", "flagged", "deleted", "draft" or "recent". User flags begin with a dollar sign and can contain any ASCII characters between 0x21 ("!") and 0x7E ("~") (inclusive), except for 0x22 ("), 0x25 (%), 0x28 ((), 0x29 ()), 0x2A (*), 0x5C (backslash), 0x5D (]) and 0x7B ({). Mail color flags as used by OX are implemented by user flags of the form `$cl_n`, where "n" is a number between 1 and 10 (inclusive). (for addflags-command)|false|string array||
-|message|The content of the notification message (for notify-command).|false|string||
-|method|The method of the notification message, eg. `mailto:012345678@sms.gateway` (for notify-command).|false|string||
-|keys|The public keys which should be used for encryption (for pgp-command).|false|string array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**addresses**  <br>*optional*|The addresses for which this vacation is responsible. That means for which addresses out of the aliases array of the user defining this filter, vacations will be sent.|< string > array|
+|**days**  <br>*optional*|The days for which a vacation text is returned (for vacation-command).|string|
+|**flags**  <br>*optional*|An array containing the flags which should be added to the mail. A flag can either be a system flag or a user flag. System flags begin with a backslash and can be: "seen", "answered", "flagged", "deleted", "draft" or "recent". User flags begin with a dollar sign and can contain any ASCII characters between 0x21 ("!") and 0x7E ("~") (inclusive), except for 0x22 ("), 0x25 (%), 0x28 ((), 0x29 ()), 0x2A (*), 0x5C (backslash), 0x5D (]) and 0x7B ({). Mail color flags as used by OX are implemented by user flags of the form `$cl_n`, where "n" is a number between 1 and 10 (inclusive). (for addflags-command)|< string > array|
+|**from**  <br>*optional*|Support for the ":from" tag. Specifies the value of the from header for the auto-reply mail, e.g. Foo Bear <foo.bear@ox.io> (Since 7.8.1). The array of strings should be a simple JSONArray with length 2; the first element should include the personal part of the e-mail address and the second element the actual e-mail address. If only the e-mail address is available, that should be the only element of the array. (for vacation-command)|object|
+|**id**  <br>*optional*|A string defining the object itself (e.g. "keep" or "discard").|string|
+|**into**  <br>*optional*|This string takes the object id of the destination mail folder (for move-command).|string|
+|**keys**  <br>*optional*|The public keys which should be used for encryption (for pgp-command).|< string > array|
+|**message**  <br>*optional*|The content of the notification message (for notify-command).|string|
+|**method**  <br>*optional*|The method of the notification message, eg. `mailto:012345678@sms.gateway` (for notify-command).|string|
+|**subject**  <br>*optional*|The new subject for the returned message (can be left empty, when only adding RE:) (for vacation-command).|string|
+|**text**  <br>*optional*|A string containing the reason why the mail is rejected (for reject-command) or a string containing the vacation text itself (for vacation-command).|string|
+|**to**  <br>*optional*|A string containing where the mail should be redirected to (for redirect-command).|string|
 
 
+<a name="mailfilterconfigdata"></a>
 # MailFilterConfigData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|tests|Array of available test-objects.|false|MailFilterConfigTest array||
-|actioncommands|Array of available action commands.|false|string array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**actioncommands**  <br>*optional*|Array of available action commands.|< string > array|
+|**tests**  <br>*optional*|Array of available test-objects.|< [MailFilterConfigTest](#mailfilterconfigtest) > array|
 
 
+<a name="mailfilterconfigresponse"></a>
 # MailFilterConfigResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MailFilterConfigData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MailFilterConfigData](#mailfilterconfigdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailfilterconfigtest"></a>
 # MailFilterConfigTest
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|test|The name of the test, see [Possible tests](#possible-tests).|false|string||
-|comparison|An array of the valid comparison types for this test, see [Possible comparisons](#possible-comparisons).|false|string array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**comparison**  <br>*optional*|An array of the valid comparison types for this test, see [Possible comparisons](#possible-comparisons).|< string > array|
+|**test**  <br>*optional*|The name of the test, see [Possible tests](#possible-tests).|string|
 
 
+<a name="mailfiltercreationresponse"></a>
 # MailFilterCreationResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The id of the newly created rule.|false|integer||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The id of the newly created rule.|integer|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailfilterdeletionbody"></a>
 # MailFilterDeletionBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of the rule that shall be deleted.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|The ID of the rule that shall be deleted.|integer|
 
 
+<a name="mailfilternottest"></a>
 # MailFilterNotTest
-
 A test object which result will be negated.
 
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The name of the test command, see [Possible tests](#possible-tests).|false|string||
-|comparison|The comparison type, see [Possible comparisons](#possible-comparisons).|false|string||
-|headers|An array containing the header fields (for address-, envelope- and header-test).|false|string array||
-|values|An array containing the value for the header fields or the values for the body. The test will be true if any of the strings matches (for address-, envelope-, header-test and body-test).|false|string array||
-|size|The size in bytes (for size-test).|false|integer (int64)||
-|datepart|Type of the comparison, which can be "date", "weekday" or "time" (available since v7.6.1) (for currentdate-test).|false|string||
-|datevalue|Contains the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 (sunday) to 6 (saturday) reflecting the equivalent weekday (for currentdate-test).|false|integer (int64) array||
-|extensionskey|The [extension key](#possible-extensions) (for body-test).|false|string||
-|extensionsvalue|A value for the given key. If the key has no value the value given here is ignored (for body-test).|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**comparison**  <br>*optional*|The comparison type, see [Possible comparisons](#possible-comparisons).|string|
+|**datepart**  <br>*optional*|Type of the comparison, which can be "date", "weekday" or "time" (available since v7.6.1) (for currentdate-test).|string|
+|**datevalue**  <br>*optional*|Contains the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 (sunday) to 6 (saturday) reflecting the equivalent weekday (for currentdate-test).|< integer(int64) > array|
+|**extensionskey**  <br>*optional*|The [extension key](#possible-extensions) (for body-test).|string|
+|**extensionsvalue**  <br>*optional*|A value for the given key. If the key has no value the value given here is ignored (for body-test).|string|
+|**headers**  <br>*optional*|An array containing the header fields (for address-, envelope- and header-test).|< string > array|
+|**id**  <br>*optional*|The name of the test command, see [Possible tests](#possible-tests).|string|
+|**size**  <br>*optional*|The size in bytes (for size-test).|integer(int64)|
+|**values**  <br>*optional*|An array containing the value for the header fields or the values for the body. The test will be true if any of the strings matches (for address-, envelope-, header-test and body-test).|< string > array|
 
 
+<a name="mailfilterrule"></a>
 # MailFilterRule
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|A unique identifier of the rule (once created must not be changed).|false|integer||
-|position|The position inside the mail filter list (starts with 0).|false|integer||
-|rulename|A name describing the rule, can be empty but must not contain a line break.|false|string||
-|active|If this rule is active or not.|false|boolean||
-|flags|An array containing flags which are set on this rule. Each flag can only contain the following characters: 1-9 a-z A-Z. Currently 3 flags are reserved here: "spam" which marks the default spam rule, "vacation" which marks the vacation rules and "autoforward" which marks an autoforwarding rule.|false|string array||
-|test||false|MailFilterTest||
-|actioncmds|An array of action commands.|false|MailFilterAction array||
-|text|If this rule cannot be read in this string is filled containing the whole lines of this command.|false|string||
-|errormsg|If this rule cannot be read in this string is filled containing a message why, or what part of the rule isn't known.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**actioncmds**  <br>*optional*|An array of action commands.|< [MailFilterAction](#mailfilteraction) > array|
+|**active**  <br>*optional*|If this rule is active or not.|boolean|
+|**errormsg**  <br>*optional*|If this rule cannot be read in this string is filled containing a message why, or what part of the rule isn't known.|string|
+|**flags**  <br>*optional*|An array containing flags which are set on this rule. Each flag can only contain the following characters: 1-9 a-z A-Z. Currently 3 flags are reserved here: "spam" which marks the default spam rule, "vacation" which marks the vacation rules and "autoforward" which marks an autoforwarding rule.|< string > array|
+|**id**  <br>*optional*|A unique identifier of the rule (once created must not be changed).|integer|
+|**position**  <br>*optional*|The position inside the mail filter list (starts with 0).|integer|
+|**rulename**  <br>*optional*|A name describing the rule, can be empty but must not contain a line break.|string|
+|**test**  <br>*optional*||[MailFilterTest](#mailfiltertest)|
+|**text**  <br>*optional*|If this rule cannot be read in this string is filled containing the whole lines of this command.|string|
 
 
+<a name="mailfilterrulesresponse"></a>
 # MailFilterRulesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MailFilterRule array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||< [MailFilterRule](#mailfilterrule) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailfilterscriptresponse"></a>
 # MailFilterScriptResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The mail filter script.|false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The mail filter script.|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailfiltertest"></a>
 # MailFilterTest
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|test||false|MailFilterNotTest||
-|id|The name of the test command, see [Possible tests](#possible-tests).|false|string||
-|comparison|The comparison type, see [Possible comparisons](#possible-comparisons).|false|string||
-|headers|An array containing the header fields (for address-, envelope- and header-test).|false|string array||
-|values|An array containing the value for the header fields or the values for the body. The test will be true if any of the strings matches (for address-, envelope-, header-test and body-test).|false|string array||
-|size|The size in bytes (for size-test).|false|integer (int64)||
-|datepart|Type of the comparison, which can be "date", "weekday" or "time" (available since v7.6.1) (for currentdate-test).|false|string||
-|datevalue|Contains the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 (sunday) to 6 (saturday) reflecting the equivalent weekday (for currentdate-test).|false|integer (int64) array||
-|extensionskey|The [extension key](#possible-extensions) (for body-test).|false|string||
-|extensionsvalue|A value for the given key. If the key has no value the value given here is ignored (for body-test).|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**comparison**  <br>*optional*|The comparison type, see [Possible comparisons](#possible-comparisons).|string|
+|**datepart**  <br>*optional*|Type of the comparison, which can be "date", "weekday" or "time" (available since v7.6.1) (for currentdate-test).|string|
+|**datevalue**  <br>*optional*|Contains the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 (sunday) to 6 (saturday) reflecting the equivalent weekday (for currentdate-test).|< integer(int64) > array|
+|**extensionskey**  <br>*optional*|The [extension key](#possible-extensions) (for body-test).|string|
+|**extensionsvalue**  <br>*optional*|A value for the given key. If the key has no value the value given here is ignored (for body-test).|string|
+|**headers**  <br>*optional*|An array containing the header fields (for address-, envelope- and header-test).|< string > array|
+|**id**  <br>*optional*|The name of the test command, see [Possible tests](#possible-tests).|string|
+|**size**  <br>*optional*|The size in bytes (for size-test).|integer(int64)|
+|**test**  <br>*optional*||[MailFilterNotTest](#mailfilternottest)|
+|**values**  <br>*optional*|An array containing the value for the header fields or the values for the body. The test will be true if any of the strings matches (for address-, envelope-, header-test and body-test).|< string > array|
 
 
+<a name="mailheadersresponse"></a>
 # MailHeadersResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The (formatted) message headers as plain text.|false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The (formatted) message headers as plain text.|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailimportresponse"></a>
 # MailImportResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array of JSON objects each describing the folder ID and object ID of one imported mail.|false|MailDestinationData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array of JSON objects each describing the folder ID and object ID of one imported mail.|< [MailDestinationData](#maildestinationdata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="maillistelement"></a>
 # MailListElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The object ID of the mail.|true|string||
-|folder|The object ID of the related folder.|true|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*required*|The object ID of the related folder.|string|
+|**id**  <br>*required*|The object ID of the mail.|string|
 
 
+<a name="mailreplydata"></a>
 # MailReplyData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|msgref|Indicates the ID of the referenced original mail.|false|string||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).|false|integer||
-|id|Object ID of the mail.|false|string||
-|folder_id|Object ID of the parent folder.|false|string||
-|attachment|Indicates whether this mail has attachments.|false|boolean||
-|from|Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.|false|string array array||
-|to|Each element is a two-element array (see the from field) specifying one receiver.|false|string array array||
-|cc|Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|false|string array array||
-|bcc|Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.|false|string array array||
-|subject|The mail's subject.|false|string||
-|size|The size if the mail in bytes.|false|integer (int64)||
-|sent_date|Date and time as specified in the mail by the sending client.|false|integer (int64)||
-|received_date|Date and time as measured by the receiving server.|false|integer (int64)||
-|flags|Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).|false|integer||
-|level|Zero-based nesting level in a thread.|false|integer||
-|disp_notification_to|Content of message's header "Disposition-Notification-To".|false|string||
-|priority|Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high).|false|integer||
-|msg_ref|Message reference on reply/forward.|false|string||
-|flag_seen|Special field to sort mails by seen status.|false|string||
-|account_name|Message's account name.|false|string||
-|account_id|Message's account identifier. Since v6.20.2.|false|integer||
-|user|An array with user-defined flags as strings.|false|string array||
-|headers|A map with fields for every non-standard header. The header name is the field name. The header value is the value of the field as string.|false|object||
-|attachments|Each element is an attachment. The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|false|MailAttachment array||
-|truncated|true/false if the mail content was trimmed. Since v7.6.1|false|boolean||
-|source|RFC822 source of the mail. Only present for "?action=get&attach_src=true".|false|string||
-|cid|The value of the "Content-ID" header, if the header is present.|false|string||
-|original_id|The original mail identifier (e.g. if fetched from "virtual/all" folder).|false|string||
-|original_folder_id|The original folder identifier (e.g. if fetched from "virtual/all" folder).|false|string||
-|content_type|The MIME type of the mail.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**account_id**  <br>*optional*|Message's account identifier. Since v6.20.2.|integer|
+|**account_name**  <br>*optional*|Message's account name.|string|
+|**attachment**  <br>*optional*|Indicates whether this mail has attachments.|boolean|
+|**attachments**  <br>*optional*|Each element is an attachment. The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|< [MailAttachment](#mailattachment) > array|
+|**bcc**  <br>*optional*|Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.|< < string > array > array|
+|**cc**  <br>*optional*|Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|< < string > array > array|
+|**cid**  <br>*optional*|The value of the "Content-ID" header, if the header is present.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).|integer|
+|**content_type**  <br>*optional*|The MIME type of the mail.|string|
+|**disp_notification_to**  <br>*optional*|Content of message's header "Disposition-Notification-To".|string|
+|**flag_seen**  <br>*optional*|Special field to sort mails by seen status.|string|
+|**flags**  <br>*optional*|Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).|integer|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**from**  <br>*optional*|Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.|< < string > array > array|
+|**headers**  <br>*optional*|A map with fields for every non-standard header. The header name is the field name. The header value is the value of the field as string.|object|
+|**id**  <br>*optional*|Object ID of the mail.|string|
+|**level**  <br>*optional*|Zero-based nesting level in a thread.|integer|
+|**msg_ref**  <br>*optional*|Message reference on reply/forward.|string|
+|**msgref**  <br>*optional*|Indicates the ID of the referenced original mail.|string|
+|**original_folder_id**  <br>*optional*|The original folder identifier (e.g. if fetched from "virtual/all" folder).|string|
+|**original_id**  <br>*optional*|The original mail identifier (e.g. if fetched from "virtual/all" folder).|string|
+|**priority**  <br>*optional*|Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high).|integer|
+|**received_date**  <br>*optional*|Date and time as measured by the receiving server.|integer(int64)|
+|**sent_date**  <br>*optional*|Date and time as specified in the mail by the sending client.|integer(int64)|
+|**size**  <br>*optional*|The size if the mail in bytes.|integer(int64)|
+|**source**  <br>*optional*|RFC822 source of the mail. Only present for "?action=get&attach_src=true".|string|
+|**subject**  <br>*optional*|The mail's subject.|string|
+|**to**  <br>*optional*|Each element is a two-element array (see the from field) specifying one receiver.|< < string > array > array|
+|**truncated**  <br>*optional*|true/false if the mail content was trimmed. Since v7.6.1|boolean|
+|**user**  <br>*optional*|An array with user-defined flags as strings.|< string > array|
 
 
+<a name="mailreplyresponse"></a>
 # MailReplyResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MailReplyData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MailReplyData](#mailreplydata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailresponse"></a>
 # MailResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MailData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MailData](#maildata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailsourceresponse"></a>
 # MailSourceResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The complete message source as plain text.|false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The complete message source as plain text.|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailupdatebody"></a>
 # MailUpdateBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|folder_id|The object ID of the destination folder (if the mail shall be moved).|false|string||
-|color_label|The color number between 0 and 10.|false|integer||
-|flags|A set of flags to add or remove. Note: Flags for "recent" (8) and "user" (64) are ignored.|false|integer||
-|value|Use true to add the flags specified by flags (logical OR) and false to remove them (logical AND with the inverted value).|false|boolean||
-|set_flags|A set of flags to add. Note: Flags for "recent" (8) and "user" (64) are ignored (available since SP5 v6.10).|false|integer (int64)||
-|clear_flags|A set of flags to remove. Note: Flags for "recent" (8) and "user" (64) are ignored (available since SP5 v6.10).|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**clear_flags**  <br>*optional*|A set of flags to remove. Note: Flags for "recent" (8) and "user" (64) are ignored (available since SP5 v6.10).|integer|
+|**color_label**  <br>*optional*|The color number between 0 and 10.|integer|
+|**flags**  <br>*optional*|A set of flags to add or remove. Note: Flags for "recent" (8) and "user" (64) are ignored.|integer|
+|**folder_id**  <br>*optional*|The object ID of the destination folder (if the mail shall be moved).|string|
+|**set_flags**  <br>*optional*|A set of flags to add. Note: Flags for "recent" (8) and "user" (64) are ignored (available since SP5 v6.10).|integer(int64)|
+|**value**  <br>*optional*|Use true to add the flags specified by flags (logical OR) and false to remove them (logical AND with the inverted value).|boolean|
 
 
+<a name="mailupdatesresponse"></a>
 # MailUpdatesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|object array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||< object > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mail_categoriesmovebody"></a>
 # Mail_CategoriesMoveBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The object ID of the mail|false|string||
-|folder_id|The folder ID of the mail|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder_id**  <br>*optional*|The folder ID of the mail|string|
+|**id**  <br>*optional*|The object ID of the mail|string|
 
 
+<a name="mail_categoriestrainbody"></a>
 # Mail_CategoriesTrainBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|from|An array of email addresses|false|string array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**from**  <br>*optional*|An array of email addresses|< string > array|
 
 
+<a name="mail_categoriesunreadresponse"></a>
 # Mail_CategoriesUnreadResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|A JSON object with a field for each active category containing the number of unread messages.|false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|A JSON object with a field for each active category containing the number of unread messages.|object|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailsallseenresponse"></a>
 # MailsAllSeenResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|boolean||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||boolean|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailscleanupresponse"></a>
 # MailsCleanUpResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array with IDs of objects that could not be processed.|false|string array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array with IDs of objects that could not be processed.|< string > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="mailsresponse"></a>
 # MailsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of mails. Each mail is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of mails. Each mail is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="messagingaccountdata"></a>
 # MessagingAccountData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|Identifier of the messaging account.|false|integer||
-|messagingService|The messaging service ID of the messaging service this account belongs to.|false|string||
-|displayName|User chosen string to identify a given account. Will also be translated into the folder name of the folder representing the accounts content.|false|string||
-|configuration|The configuration data according to the `formDescription` of the relevant messaging service.|false|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**configuration**  <br>*optional*|The configuration data according to the `formDescription` of the relevant messaging service.|object|
+|**displayName**  <br>*optional*|User chosen string to identify a given account. Will also be translated into the folder name of the folder representing the accounts content.|string|
+|**id**  <br>*optional*|Identifier of the messaging account.|integer|
+|**messagingService**  <br>*optional*|The messaging service ID of the messaging service this account belongs to.|string|
 
 
+<a name="messagingaccountresponse"></a>
 # MessagingAccountResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MessagingAccountData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MessagingAccountData](#messagingaccountdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="messagingaccountupdateresponse"></a>
 # MessagingAccountUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The response value.|false|integer||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The response value.|integer|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="messagingaccountsresponse"></a>
 # MessagingAccountsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array containing JSON objects representing messaging accounts.|false|MessagingAccountData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array containing JSON objects representing messaging accounts.|< [MessagingAccountData](#messagingaccountdata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="messagingformdescription"></a>
 # MessagingFormDescription
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|widget|The name of the widget.|false|string||
-|name|The name of the field.|false|string||
-|displayName|The display name of the field.|false|string||
-|mandatory|Indicates whether the field is mandatory.|false|boolean||
-|options|A list of available options in the field.|false|object array||
-|defaultValue|Can contain a default value.|false|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**defaultValue**  <br>*optional*|Can contain a default value.|object|
+|**displayName**  <br>*optional*|The display name of the field.|string|
+|**mandatory**  <br>*optional*|Indicates whether the field is mandatory.|boolean|
+|**name**  <br>*optional*|The name of the field.|string|
+|**options**  <br>*optional*|A list of available options in the field.|< object > array|
+|**widget**  <br>*optional*|The name of the widget.|string|
 
 
+<a name="messagingmessagedata"></a>
 # MessagingMessageData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of the message. Only unique in the given folder.|false|string||
-|folder|The folder ID.|false|string||
-|threadLevel|The nesting level of this message according to the conversation it's belonged to. May not be set.|false|integer||
-|flags|Bitmask showing the state of this message. The same as in the module "mail".|false|integer||
-|receivedDate|The time this message was received.|false|integer (int64)||
-|colorLabel|An arbitrary number marking the message in a certain color. The same as the color label common to all groupware objects.|false|integer||
-|user|An array of strings representing user flags.|false|string array||
-|size|The size of the message in bytes.|false|integer (int64)||
-|picture|The URL to a picture for this message.|false|string||
-|url|A link to the messages origin currently used in RSS messages.|false|string||
-|sectionId|The section ID of a certain message part, if the content-type is `multipart/*`.|false|string||
-|headers|A JSON object of header data. Usually the value is either a string or an array (if it has more than one value). Certain headers are rendered as more complex structures.|false|object||
-|body|A JSON object representing the content of the message.|false|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**body**  <br>*optional*|A JSON object representing the content of the message.|object|
+|**colorLabel**  <br>*optional*|An arbitrary number marking the message in a certain color. The same as the color label common to all groupware objects.|integer|
+|**flags**  <br>*optional*|Bitmask showing the state of this message. The same as in the module "mail".|integer|
+|**folder**  <br>*optional*|The folder ID.|string|
+|**headers**  <br>*optional*|A JSON object of header data. Usually the value is either a string or an array (if it has more than one value). Certain headers are rendered as more complex structures.|object|
+|**id**  <br>*optional*|The ID of the message. Only unique in the given folder.|string|
+|**picture**  <br>*optional*|The URL to a picture for this message.|string|
+|**receivedDate**  <br>*optional*|The time this message was received.|integer(int64)|
+|**sectionId**  <br>*optional*|The section ID of a certain message part, if the content-type is `multipart/*`.|string|
+|**size**  <br>*optional*|The size of the message in bytes.|integer(int64)|
+|**threadLevel**  <br>*optional*|The nesting level of this message according to the conversation it's belonged to. May not be set.|integer|
+|**url**  <br>*optional*|A link to the messages origin currently used in RSS messages.|string|
+|**user**  <br>*optional*|An array of strings representing user flags.|< string > array|
 
 
+<a name="messagingmessageresponse"></a>
 # MessagingMessageResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MessagingMessageData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MessagingMessageData](#messagingmessagedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="messagingmessageupdateresponse"></a>
 # MessagingMessageUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The response value.|false|integer||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The response value.|integer|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="messagingmessagesresponse"></a>
 # MessagingMessagesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of messages. Each message is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of messages. Each message is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="messagingservicedata"></a>
 # MessagingServiceData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The identifier of the messaging service. This is usually a string in reverse domain name notation, like "com.openexchange.messaging.twitter".|false|string||
-|displayName|Human-readable display name of the service.|false|string||
-|formDescription|An array of dynamic form fields. Same as in PubSub.|false|MessagingFormDescription array||
-|messagingActions|An array representing a dynamic set of actions that are possible with messages of this service.|false|string array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**displayName**  <br>*optional*|Human-readable display name of the service.|string|
+|**formDescription**  <br>*optional*|An array of dynamic form fields. Same as in PubSub.|< [MessagingFormDescription](#messagingformdescription) > array|
+|**id**  <br>*optional*|The identifier of the messaging service. This is usually a string in reverse domain name notation, like "com.openexchange.messaging.twitter".|string|
+|**messagingActions**  <br>*optional*|An array representing a dynamic set of actions that are possible with messages of this service.|< string > array|
 
 
+<a name="messagingserviceresponse"></a>
 # MessagingServiceResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|MessagingServiceData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[MessagingServiceData](#messagingservicedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="messagingservicesresponse"></a>
 # MessagingServicesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array containing JSON objects representing messaging services.|false|MessagingServiceData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array containing JSON objects representing messaging services.|< [MessagingServiceData](#messagingservicedata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="oauthaccountdata"></a>
 # OAuthAccountData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The numeric identifier of the OAuth account.|false|integer||
-|displayName|The account's display name.|false|string||
-|serviceId|The identifier of the associated service meta data, e.g. "com.openexchange.oauth.twitter".|false|string||
-|token|The token.|false|string||
-|secret|The token secret.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**displayName**  <br>*optional*|The account's display name.|string|
+|**id**  <br>*optional*|The numeric identifier of the OAuth account.|integer|
+|**secret**  <br>*optional*|The token secret.|string|
+|**serviceId**  <br>*optional*|The identifier of the associated service meta data, e.g. "com.openexchange.oauth.twitter".|string|
+|**token**  <br>*optional*|The token.|string|
 
 
+<a name="oauthaccountdeletionresponse"></a>
 # OAuthAccountDeletionResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Indicates whether the the account was deleted successfully.|false|boolean||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Indicates whether the the account was deleted successfully.|boolean|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="oauthaccountinteraction"></a>
 # OAuthAccountInteraction
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|authUrl|The numeric identifier of the OAuth account.|false|string||
-|type|The interaction type name, which can be "outOfBand" or "callback".|false|string||
-|token|The token.|false|string||
-|uuid|The UUID for this OAuth interaction.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**authUrl**  <br>*optional*|The numeric identifier of the OAuth account.|string|
+|**token**  <br>*optional*|The token.|string|
+|**type**  <br>*optional*|The interaction type name, which can be "outOfBand" or "callback".|string|
+|**uuid**  <br>*optional*|The UUID for this OAuth interaction.|string|
 
 
+<a name="oauthaccountinteractionresponse"></a>
 # OAuthAccountInteractionResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|OAuthAccountInteraction||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[OAuthAccountInteraction](#oauthaccountinteraction)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="oauthaccountresponse"></a>
 # OAuthAccountResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|OAuthAccountData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[OAuthAccountData](#oauthaccountdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="oauthaccountupdateresponse"></a>
 # OAuthAccountUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Indicates whether the the account was updated successfully.|false|boolean||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Indicates whether the the account was updated successfully.|boolean|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="oauthaccountsresponse"></a>
 # OAuthAccountsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array of OAuth account objects.|false|OAuthAccountData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array of OAuth account objects.|< [OAuthAccountData](#oauthaccountdata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="oauthclientdata"></a>
 # OAuthClientData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The client's ID.|false|string||
-|name|The client's/service's name.|false|string||
-|description|A description of the client.|false|string||
-|website|A URL to the client's website.|false|string||
-|icon|A URL or path to obtain the client's icon via the image module.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**description**  <br>*optional*|A description of the client.|string|
+|**icon**  <br>*optional*|A URL or path to obtain the client's icon via the image module.|string|
+|**id**  <br>*optional*|The client's ID.|string|
+|**name**  <br>*optional*|The client's/service's name.|string|
+|**website**  <br>*optional*|A URL to the client's website.|string|
 
 
+<a name="oauthgrantdata"></a>
 # OAuthGrantData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|client||false|OAuthClientData||
-|scopes|A mapping from scope tokens to translated, human-readable descriptions for every scope that was granted to the external service (example: {"read_contacts":"See all your contacts"}).|false|object||
-|date|The time when the access was granted.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**client**  <br>*optional*||[OAuthClientData](#oauthclientdata)|
+|**date**  <br>*optional*|The time when the access was granted.|integer(int64)|
+|**scopes**  <br>*optional*|A mapping from scope tokens to translated, human-readable descriptions for every scope that was granted to the external service (example: {"read_contacts":"See all your contacts"}).|object|
 
 
+<a name="oauthgrantsresponse"></a>
 # OAuthGrantsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array containing one object for every granted access.|false|OAuthGrantData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array containing one object for every granted access.|< [OAuthGrantData](#oauthgrantdata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="oauthservicemetadata"></a>
 # OAuthServiceMetaData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The identifier of the service meta data, e.g. "com.openexchange.oauth.twitter".|false|string||
-|displayName|The service's display name.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**displayName**  <br>*optional*|The service's display name.|string|
+|**id**  <br>*optional*|The identifier of the service meta data, e.g. "com.openexchange.oauth.twitter".|string|
 
 
+<a name="oauthserviceresponse"></a>
 # OAuthServiceResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|OAuthServiceMetaData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[OAuthServiceMetaData](#oauthservicemetadata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="oauthservicesresponse"></a>
 # OAuthServicesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array with OAuth service meta data.|false|OAuthServiceMetaData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array with OAuth service meta data.|< [OAuthServiceMetaData](#oauthservicemetadata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="passwordchangebody"></a>
 # PasswordChangeBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|old_password|The user's current password or `null` if the password wasn't set before (especially for guest users).|false|string||
-|new_password|The new password the user wants to set or `null` to remove the password (especially for guest users).|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**new_password**  <br>*optional*|The new password the user wants to set or `null` to remove the password (especially for guest users).|string|
+|**old_password**  <br>*optional*|The user's current password or `null` if the password wasn't set before (especially for guest users).|string|
 
 
+<a name="quotadata"></a>
 # QuotaData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|quota|Represents the maximum storage (-1 represents an unlimited quota).|false|integer (int64)||
-|use|Represents the used storage.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**quota**  <br>*optional*|Represents the maximum storage (-1 represents an unlimited quota).|integer(int64)|
+|**use**  <br>*optional*|Represents the used storage.|integer(int64)|
 
 
+<a name="quotaresponse"></a>
 # QuotaResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|QuotaData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[QuotaData](#quotadata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="quotasresponse"></a>
 # QuotasResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Dependent on the request parameters: the payload may be a JSON object containing the quota modules as
-fields that represent JSON objects itself with the properties "display_name" and "accounts" (array of account data objects)
-or it may be a JSON array of account data objects if the parameter "module" specifies a certain quota module.
-|false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Dependent on the request parameters: the payload may be a JSON object containing the quota modules as<br>fields that represent JSON objects itself with the properties "display_name" and "accounts" (array of account data objects)<br>or it may be a JSON array of account data objects if the parameter "module" specifies a certain quota module.|object|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="reminderdata"></a>
 # ReminderData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of the reminder.|false|integer||
-|target_id|The object ID of the target this reminder is attached to.|false|integer||
-|folder|The ID of the folder through that the object can be read.|false|integer||
-|alarm|The time of the alarm.|false|integer (int64)||
-|module|The module of the reminder's target object: 1 (appointment), 4 (task), 7 (contact), 137 (infostore).|false|integer||
-|server_time|The time on the server.|false|integer (int64)||
-|user_id|The ID of the user.|false|integer||
-|last_modified|The last modification timestamp of the reminder.|false|integer (int64)||
-|recurrence_position|The recurrence position for series appointments or 0 if no series.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**alarm**  <br>*optional*|The time of the alarm.|integer(int64)|
+|**folder**  <br>*optional*|The ID of the folder through that the object can be read.|integer|
+|**id**  <br>*optional*|The ID of the reminder.|integer|
+|**last_modified**  <br>*optional*|The last modification timestamp of the reminder.|integer(int64)|
+|**module**  <br>*optional*|The module of the reminder's target object: 1 (appointment), 4 (task), 7 (contact), 137 (infostore).|integer|
+|**recurrence_position**  <br>*optional*|The recurrence position for series appointments or 0 if no series.|integer|
+|**server_time**  <br>*optional*|The time on the server.|integer(int64)|
+|**target_id**  <br>*optional*|The object ID of the target this reminder is attached to.|integer|
+|**user_id**  <br>*optional*|The ID of the user.|integer|
 
 
+<a name="reminderlistelement"></a>
 # ReminderListElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of the reminder.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|The ID of the reminder.|integer|
 
 
+<a name="reminderresponse"></a>
 # ReminderResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|ReminderData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[ReminderData](#reminderdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="reminderupdatebody"></a>
 # ReminderUpdateBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|alarm|The new time of the alarm.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**alarm**  <br>*optional*|The new time of the alarm.|integer(int64)|
 
 
+<a name="remindersresponse"></a>
 # RemindersResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|ReminderData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[ReminderData](#reminderdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="resolvesharereferenceelement"></a>
 # ResolveShareReferenceElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|reference|The reference string.|true|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**reference**  <br>*required*|The reference string.|string|
 
 
+<a name="resolvesharereferenceresponse"></a>
 # ResolveShareReferenceResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[data](#resolvesharereferenceresponse-data)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
+
+<a name="resolvesharereferenceresponse-data"></a>
+**data**
+
+|Name|Description|Schema|
+|---|---|---|
+|**contextId**  <br>*optional*|The originator's context identifier.|integer|
+|**expiration**  <br>*optional*|The optional expiration date of the share link.|integer(int64)|
+|**files**  <br>*optional*|The file meta data.|< [files](#resolvesharereferenceresponse-files) > array|
+|**password**  <br>*optional*|The optional password that protects the share link.|string|
+|**shareToken**  <br>*optional*|The associated share token.|string|
+|**userId**  <br>*optional*|The originator's user identifier.|integer|
+
+<a name="resolvesharereferenceresponse-files"></a>
+**files**
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**com.openexchange.realtime.resourceID**  <br>*optional*|The resource identifier for the infoitem for usage within the realtime component (read-only). (available since 7.8.0)|string|
+|**com.openexchange.share.extendedObjectPermissions**  <br>*optional*|An array of extended object permissions (read-only). (available since 7.8.0)|< [InfoItemExtendedPermission](#infoitemextendedpermission) > array|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**current_version**  <br>*optional*|"true" if this version is the current version, "false" otherwise. Note: This is not writeable.|boolean|
+|**description**  <br>*optional*|A description if the item.|string|
+|**file_md5sum**  <br>*optional*|MD5Sum of the document.|string|
+|**file_mimetype**  <br>*optional*|MIME type of the document. The client converts known types to more readable names before displaying them.|string|
+|**file_size**  <br>*optional*|The size of the document in bytes.|integer(int64)|
+|**filename**  <br>*optional*|Displayed filename of the document.|string|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**id**  <br>*optional*|Object ID.|string|
+|**lastModifiedOfNewestAttachmentUTC**  <br>*optional*|Timestamp of the newest attachment written with UTC time zone.|integer(int64)|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**locked_until**  <br>*optional*|The time until which this item will presumably be locked. Only set if the docment is currently locked, 0 otherwise.|integer(int64)|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**number_of_attachments**  <br>*optional*|Number of attachments.|integer|
+|**number_of_versions**  <br>*optional*|The number of all versions of the item. Note: This is not writeable.|integer|
+|**object_permissions**  <br>*optional*|An array of object permissions (preliminary, available since v7.8.0).|< [InfoItemPermission](#infoitempermission) > array|
+|**private_flag**  <br>*optional*|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|boolean|
+|**shareable**  <br>*optional*|(read-only) Indicates if the item can be shared (preliminary, available since v7.8.0).|boolean|
+|**title**  <br>*optional*|The title.|string|
+|**url**  <br>*optional*|Link/URL to item.|string|
+|**version**  <br>*optional*|Version of the document. NULL can be used to denote the most recent version and will be set in responses if versions are not supported by the underlying storage.|string|
+|**version_comment**  <br>*optional*|A version comment is used to file a changelog for the file.|string|
 
 
+<a name="resourcedata"></a>
 # ResourceData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The resource ID.|false|integer||
-|display_name|Display name of the resource.|false|string||
-|name|Internal name with character restrictions.|false|string||
-|mailaddress|Email address of the resource.|false|string||
-|availability|Can be false to mark the resource currently unavailable.|false|boolean||
-|description|The description of the resource.|false|string||
-|last_modified|Date and time of the last modification.|false|string||
-|last_modified_utc|Timestamp of the last modification.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**availability**  <br>*optional*|Can be false to mark the resource currently unavailable.|boolean|
+|**description**  <br>*optional*|The description of the resource.|string|
+|**display_name**  <br>*optional*|Display name of the resource.|string|
+|**id**  <br>*optional*|The resource ID.|integer|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|string|
+|**last_modified_utc**  <br>*optional*|Timestamp of the last modification.|string|
+|**mailaddress**  <br>*optional*|Email address of the resource.|string|
+|**name**  <br>*optional*|Internal name with character restrictions.|string|
 
 
+<a name="resourcelistelement"></a>
 # ResourceListElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|ID of a resource.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|ID of a resource.|integer|
 
 
+<a name="resourceresponse"></a>
 # ResourceResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|ResourceData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[ResourceData](#resourcedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="resourcesearchbody"></a>
 # ResourceSearchBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|pattern|Search pattern to find resources. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**pattern**  <br>*optional*|Search pattern to find resources. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|string|
 
 
+<a name="resourceupdatedata"></a>
 # ResourceUpdateData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of a newly created rsource.|false|integer||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|The ID of a newly created rsource.|integer|
 
 
+<a name="resourceupdateresponse"></a>
 # ResourceUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|ResourceUpdateData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[ResourceUpdateData](#resourceupdatedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="resourceupdatesdata"></a>
 # ResourceUpdatesData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|new|Array of new resource objects.|false|ResourceData array||
-|modified|Array of modified resource objects.|false|ResourceData array||
-|deleted|Array of deleted resource objects.|false|ResourceData array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**deleted**  <br>*optional*|Array of deleted resource objects.|< [ResourceData](#resourcedata) > array|
+|**modified**  <br>*optional*|Array of modified resource objects.|< [ResourceData](#resourcedata) > array|
+|**new**  <br>*optional*|Array of new resource objects.|< [ResourceData](#resourcedata) > array|
 
 
+<a name="resourceupdatesresponse"></a>
 # ResourceUpdatesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|ResourceUpdatesData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[ResourceUpdatesData](#resourceupdatesdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="resourcesresponse"></a>
 # ResourcesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of resource objects.|false|ResourceData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of resource objects.|< [ResourceData](#resourcedata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="sendmaildata"></a>
 # SendMailData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|infostore_ids|JSON array of infostore document ID(s) that ought to be appended to the mail as attachments.|false|string array||
-|msgref|Indicates the ID of the referenced original mail.|false|string||
-|sendtype|Indicates the type of the meessage: 0 (normal new mail), 1 (a reply mail, field "msgref" must be present), 2 (a forward mail, field "msgref" must be present), 3 (draft edit operation, field "msgref" must be present in order to delete previous draft message since e.g. IMAP does not support changing/replacing a message but requires a delete-and-insert sequence), 4 (transport of a draft mail, field "msgref" must be present), 6 (signals that user intends to send out a saved draft message and expects the draft message (referenced by "msgref" field) being deleted after successful transport).|false|integer||
-|vcard|The user's VCard.|false|integer||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).|false|integer||
-|id|Object ID of the mail.|false|string||
-|folder_id|Object ID of the parent folder.|false|string||
-|attachment|Indicates whether this mail has attachments.|false|boolean||
-|from|Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.|false|string array array||
-|to|Each element is a two-element array (see the from field) specifying one receiver.|false|string array array||
-|cc|Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|false|string array array||
-|bcc|Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.|false|string array array||
-|subject|The mail's subject.|false|string||
-|size|The size if the mail in bytes.|false|integer (int64)||
-|sent_date|Date and time as specified in the mail by the sending client.|false|integer (int64)||
-|received_date|Date and time as measured by the receiving server.|false|integer (int64)||
-|flags|Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).|false|integer||
-|level|Zero-based nesting level in a thread.|false|integer||
-|disp_notification_to|Content of message's header "Disposition-Notification-To".|false|string||
-|priority|Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high).|false|integer||
-|msg_ref|Message reference on reply/forward.|false|string||
-|flag_seen|Special field to sort mails by seen status.|false|string||
-|account_name|Message's account name.|false|string||
-|account_id|Message's account identifier. Since v6.20.2.|false|integer||
-|user|An array with user-defined flags as strings.|false|string array||
-|headers|A map with fields for every non-standard header. The header name is the field name. The header value is the value of the field as string.|false|object||
-|attachments|Each element is an attachment. The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|false|MailAttachment array||
-|truncated|true/false if the mail content was trimmed. Since v7.6.1|false|boolean||
-|source|RFC822 source of the mail. Only present for "?action=get&attach_src=true".|false|string||
-|cid|The value of the "Content-ID" header, if the header is present.|false|string||
-|original_id|The original mail identifier (e.g. if fetched from "virtual/all" folder).|false|string||
-|original_folder_id|The original folder identifier (e.g. if fetched from "virtual/all" folder).|false|string||
-|content_type|The MIME type of the mail.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**account_id**  <br>*optional*|Message's account identifier. Since v6.20.2.|integer|
+|**account_name**  <br>*optional*|Message's account name.|string|
+|**attachment**  <br>*optional*|Indicates whether this mail has attachments.|boolean|
+|**attachments**  <br>*optional*|Each element is an attachment. The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|< [MailAttachment](#mailattachment) > array|
+|**bcc**  <br>*optional*|Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.|< < string > array > array|
+|**cc**  <br>*optional*|Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|< < string > array > array|
+|**cid**  <br>*optional*|The value of the "Content-ID" header, if the header is present.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).|integer|
+|**content_type**  <br>*optional*|The MIME type of the mail.|string|
+|**disp_notification_to**  <br>*optional*|Content of message's header "Disposition-Notification-To".|string|
+|**flag_seen**  <br>*optional*|Special field to sort mails by seen status.|string|
+|**flags**  <br>*optional*|Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).|integer|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**from**  <br>*optional*|Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.|< < string > array > array|
+|**headers**  <br>*optional*|A map with fields for every non-standard header. The header name is the field name. The header value is the value of the field as string.|object|
+|**id**  <br>*optional*|Object ID of the mail.|string|
+|**infostore_ids**  <br>*optional*|JSON array of infostore document ID(s) that ought to be appended to the mail as attachments.|< string > array|
+|**level**  <br>*optional*|Zero-based nesting level in a thread.|integer|
+|**msg_ref**  <br>*optional*|Message reference on reply/forward.|string|
+|**msgref**  <br>*optional*|Indicates the ID of the referenced original mail.|string|
+|**original_folder_id**  <br>*optional*|The original folder identifier (e.g. if fetched from "virtual/all" folder).|string|
+|**original_id**  <br>*optional*|The original mail identifier (e.g. if fetched from "virtual/all" folder).|string|
+|**priority**  <br>*optional*|Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high).|integer|
+|**received_date**  <br>*optional*|Date and time as measured by the receiving server.|integer(int64)|
+|**sendtype**  <br>*optional*|Indicates the type of the meessage: 0 (normal new mail), 1 (a reply mail, field "msgref" must be present), 2 (a forward mail, field "msgref" must be present), 3 (draft edit operation, field "msgref" must be present in order to delete previous draft message since e.g. IMAP does not support changing/replacing a message but requires a delete-and-insert sequence), 4 (transport of a draft mail, field "msgref" must be present), 6 (signals that user intends to send out a saved draft message and expects the draft message (referenced by "msgref" field) being deleted after successful transport).|integer|
+|**sent_date**  <br>*optional*|Date and time as specified in the mail by the sending client.|integer(int64)|
+|**size**  <br>*optional*|The size if the mail in bytes.|integer(int64)|
+|**source**  <br>*optional*|RFC822 source of the mail. Only present for "?action=get&attach_src=true".|string|
+|**subject**  <br>*optional*|The mail's subject.|string|
+|**to**  <br>*optional*|Each element is a two-element array (see the from field) specifying one receiver.|< < string > array > array|
+|**truncated**  <br>*optional*|true/false if the mail content was trimmed. Since v7.6.1|boolean|
+|**user**  <br>*optional*|An array with user-defined flags as strings.|< string > array|
+|**vcard**  <br>*optional*|The user's VCard.|integer|
 
 
+<a name="sharelinkdata"></a>
 # ShareLinkData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|url|The link to share (read-only).|false|string||
-|entity|The identifier of the anonymous user entity for the share (read-only).|false|integer||
-|is_new|Whether the share link is new, i.e. it has been created by the `/share/management?action=getLink` request, or if it already existed (read-only).|false|boolean||
-|expiry_date|The end date / expiration time after which the share link is no longer accessible.|false|integer (int64)||
-|password|An additional secret / pin number an anonymous user needs to enter when accessing the share.|false|string||
-|meta|Can be used by the client to save arbitrary JSON data along with the share.|false|object||
+
+|Name|Description|Schema|
+|---|---|---|
+|**entity**  <br>*optional*|The identifier of the anonymous user entity for the share (read-only).|integer|
+|**expiry_date**  <br>*optional*|The end date / expiration time after which the share link is no longer accessible.|integer(int64)|
+|**is_new**  <br>*optional*|Whether the share link is new, i.e. it has been created by the `/share/management?action=getLink` request, or if it already existed (read-only).|boolean|
+|**meta**  <br>*optional*|Can be used by the client to save arbitrary JSON data along with the share.|object|
+|**password**  <br>*optional*|An additional secret / pin number an anonymous user needs to enter when accessing the share.|string|
+|**url**  <br>*optional*|The link to share (read-only).|string|
 
 
+<a name="sharelinkresponse"></a>
 # ShareLinkResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|ShareLinkData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[ShareLinkData](#sharelinkdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="sharelinksendbody"></a>
 # ShareLinkSendBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|recipients|An array that lists the recipients. Each element is itself a two-element array specifying one recipient. The first element represents the personal name, the second element is the email address.|false|string array array||
-|message|Can contain an optional custom message.|false|string||
-|module|The folder's module name, i.e. one of "tasks", "calendar", "contacts" or "infostore".|false|string||
-|folder|The folder identifier.|false|string||
-|item|The object identifier, in case the share target is a single item. This must not be present to share a complete folder.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*optional*|The folder identifier.|string|
+|**item**  <br>*optional*|The object identifier, in case the share target is a single item. This must not be present to share a complete folder.|string|
+|**message**  <br>*optional*|Can contain an optional custom message.|string|
+|**module**  <br>*optional*|The folder's module name, i.e. one of "tasks", "calendar", "contacts" or "infostore".|string|
+|**recipients**  <br>*optional*|An array that lists the recipients. Each element is itself a two-element array specifying one recipient. The first element represents the personal name, the second element is the email address.|< < string > array > array|
 
 
+<a name="sharelinksendresponse"></a>
 # ShareLinkSendResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|warnings|Can contain possible warnings during sending of the notifications.|false|object array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
+|**warnings**  <br>*optional*|Can contain possible warnings during sending of the notifications.|< object > array|
 
 
+<a name="sharelinkupdatebody"></a>
 # ShareLinkUpdateBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|url|The link to share (read-only).|false|string||
-|entity|The identifier of the anonymous user entity for the share (read-only).|false|integer||
-|is_new|Whether the share link is new, i.e. it has been created by the `/share/management?action=getLink` request, or if it already existed (read-only).|false|boolean||
-|expiry_date|The end date / expiration time after which the share link is no longer accessible.|false|integer (int64)||
-|password|An additional secret / pin number an anonymous user needs to enter when accessing the share.|false|string||
-|meta|Can be used by the client to save arbitrary JSON data along with the share.|false|object||
-|module|The folder's module name, i.e. one of "tasks", "calendar", "contacts" or "infostore".|false|string||
-|folder|The folder identifier.|false|string||
-|item|The object identifier, in case the share target is a single item. This must not be present to share a complete folder.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**entity**  <br>*optional*|The identifier of the anonymous user entity for the share (read-only).|integer|
+|**expiry_date**  <br>*optional*|The end date / expiration time after which the share link is no longer accessible.|integer(int64)|
+|**folder**  <br>*optional*|The folder identifier.|string|
+|**is_new**  <br>*optional*|Whether the share link is new, i.e. it has been created by the `/share/management?action=getLink` request, or if it already existed (read-only).|boolean|
+|**item**  <br>*optional*|The object identifier, in case the share target is a single item. This must not be present to share a complete folder.|string|
+|**meta**  <br>*optional*|Can be used by the client to save arbitrary JSON data along with the share.|object|
+|**module**  <br>*optional*|The folder's module name, i.e. one of "tasks", "calendar", "contacts" or "infostore".|string|
+|**password**  <br>*optional*|An additional secret / pin number an anonymous user needs to enter when accessing the share.|string|
+|**url**  <br>*optional*|The link to share (read-only).|string|
 
 
+<a name="sharetargetdata"></a>
 # ShareTargetData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|module|The folder's module name, i.e. one of "tasks", "calendar", "contacts" or "infostore".|false|string||
-|folder|The folder identifier.|false|string||
-|item|The object identifier, in case the share target is a single item. This must not be present to share a complete folder.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*optional*|The folder identifier.|string|
+|**item**  <br>*optional*|The object identifier, in case the share target is a single item. This must not be present to share a complete folder.|string|
+|**module**  <br>*optional*|The folder's module name, i.e. one of "tasks", "calendar", "contacts" or "infostore".|string|
 
 
+<a name="singlerequest"></a>
 # SingleRequest
-
 Contains all currently available (resp. possible) parameters that could be specified to perform a request in the multiple module except `action`, `module`, and `data` which are part of the actual request itself.
 
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|module|The name of the request's module like "mail", "folders", etc.|true|string||
-|action|The name of the request's action like "all", "list", etc.|true|string||
-|data|The request's body as a JSON object.|false|object||
-|columns|The "columns" parameter of a request.|false|string||
-|tree|The "tree" parameter of a request.|false|string||
-|allowed_modules|The "allowed_modules" parameter of a request.|false|string||
-|parent|The "parent" parameter of a request.|false|string||
-|all|The "all" parameter of a request.|false|integer||
-|errorOnDuplicateName|The "errorOnDuplicateName" parameter of a request.|false|boolean||
-|id|The "id" parameter of a request.|false|string||
-|timestamp|The "timestamp" parameter of a request.|false|integer (int64)||
-|ignore|The "ignore" parameter of a request.|false|string||
-|cascadePermissions|The "cascadePermissions" parameter of a request.|false|string||
-|hardDelete|The "hardDelete" parameter of a request.|false|boolean||
-|content_type|The "content_type" parameter of a request.|false|string||
-|sort|The "sort" parameter of a request.|false|string||
-|order|The "order" parameter of a request.|false|string||
-|folder|The "folder" parameter of a request.|false|string||
-|start|The "start" parameter of a request.|false|integer (int64)||
-|end|The "end" parameter of a request.|false|integer (int64)||
-|email|The "email" parameter of a request.|false|string||
-|query|The "query" parameter of a request.|false|string||
-|left_hand_limit|The "left_hand_limit" parameter of a request.|false|integer||
-|right_hand_limit|The "right_hand_limit" parameter of a request.|false|integer||
-|recurrence_master|The "recurrence_master" parameter of a request.|false|boolean||
-|showPrivate|The "showPrivate" parameter of a request.|false|boolean||
-|occurrence|The "occurrence" parameter of a request.|false|string||
-|type|The "type" parameter of a request.|false|integer||
-|limit|The "limit" parameter of a request.|false|integer||
-|uid|The "uid" parameter of a request.|false|string||
-|includeSent|The "includeSent" parameter of a request.|false|boolean||
-|headers|The "headers" parameter of a request.|false|string||
-|message_id|The "message_id" parameter of a request.|false|string||
-|edit|The "edit" parameter of a request.|false|integer||
-|hdr|The "hdr" parameter of a request.|false|integer||
-|src|The "src" parameter of a request.|false|integer||
-|save|The "save" parameter of a request.|false|integer||
-|view|The "view" parameter of a request.|false|string||
-|unseen|The "unseen" parameter of a request.|false|boolean||
-|max_size|The "max_size" parameter of a request.|false|integer||
-|attach_src|The "attach_src" parameter of a request.|false|boolean||
-|attachment|The "attachment" parameter of a request.|false|string||
-|cid|The "cid" parameter of a request.|false|string||
-|filter|The "filter" parameter of a request.|false|integer||
-|lineWrapAfter|The "lineWrapAfter" parameter of a request.|false|integer||
-|flags|The "falgs" parameter of a request.|false|integer||
-|force|The "force" parameter of a request.|false|boolean||
-|setFrom|The "setFrom" parameter of a request.|false|boolean||
-|version|The "version" parameter of a request.|false|integer||
-|recursive|The "recursive" parameter of a request.|false|string||
-|diff|The "diff" parameter of a request.|false|integer (int64)||
-|attached|The "attached" parameter of a request.|false|integer||
-|accountId|The "accountId" parameter of a request.|false|integer||
-|password|The "password" parameter of a request.|false|string||
-|force_secure|The "force_secure" parameter of a request.|false|string||
-|name|The "name" parameter of a request.|false|string||
-|setIfAbsent|The "setIfAbsent" parameter of a request.|false|string||
-|serviceId|The "serviceId" parameter of a request.|false|string||
-|oauth_token|The "oauth_token" parameter of a request.|false|string||
-|uuid|The "uuid" parameter of a request.|false|string||
-|oauth_verifier|The "oauth_verifier" parameter of a request.|false|string||
-|displayName|The "displayName" parameter of a request.|false|string||
-|client|The "client" parameter of a request.|false|string||
-|participant|The "participant" parameter of a request.|false|string||
-|from|The "from" parameter of a request.|false|integer (int64)||
-|until|The "until" parameter of a request.|false|integer (int64)||
-|merged|The "merged" parameter of a request.|false|boolean||
-|messagingService|The "messagingService" parameter of a request.|false|string||
-|peek|The "peek" parameter of a request.|false|string||
-|recipients|The "recipients" parameter of a request.|false|string||
-|messageAction|The "messageAction" parameter of a request.|false|string||
-|attachmentid|The "attachmentid" parameter of a request.|false|string||
-|provider|The "provider" parameter of a request.|false|string||
-|timezone|The "timezone" parameter of a request.|false|string||
-|internal_userid|The "internal_userid" parameter of a request.|false|integer||
-|userid|The "userid" parameter of a request.|false|integer||
-|user_id|The "user_id" parameter of a request.|false|integer||
-|email1|The "email1" parameter of a request.|false|string||
-|email2|The "email2" parameter of a request.|false|string||
-|email3|The "email3" parameter of a request.|false|string||
-|system|The "system" parameter of a request.|false|string||
-|filestorageService|The "filestorageService" parameter of a request.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**accountId**  <br>*optional*|The "accountId" parameter of a request.|integer|
+|**action**  <br>*required*|The name of the request's action like "all", "list", etc.|string|
+|**all**  <br>*optional*|The "all" parameter of a request.|integer|
+|**allowed_modules**  <br>*optional*|The "allowed_modules" parameter of a request.|string|
+|**attach_src**  <br>*optional*|The "attach_src" parameter of a request.|boolean|
+|**attached**  <br>*optional*|The "attached" parameter of a request.|integer|
+|**attachment**  <br>*optional*|The "attachment" parameter of a request.|string|
+|**attachmentid**  <br>*optional*|The "attachmentid" parameter of a request.|string|
+|**cascadePermissions**  <br>*optional*|The "cascadePermissions" parameter of a request.|string|
+|**cid**  <br>*optional*|The "cid" parameter of a request.|string|
+|**client**  <br>*optional*|The "client" parameter of a request.|string|
+|**columns**  <br>*optional*|The "columns" parameter of a request.|string|
+|**content_type**  <br>*optional*|The "content_type" parameter of a request.|string|
+|**data**  <br>*optional*|The request's body as a JSON object.|object|
+|**diff**  <br>*optional*|The "diff" parameter of a request.|integer(int64)|
+|**displayName**  <br>*optional*|The "displayName" parameter of a request.|string|
+|**edit**  <br>*optional*|The "edit" parameter of a request.|integer|
+|**email**  <br>*optional*|The "email" parameter of a request.|string|
+|**email1**  <br>*optional*|The "email1" parameter of a request.|string|
+|**email2**  <br>*optional*|The "email2" parameter of a request.|string|
+|**email3**  <br>*optional*|The "email3" parameter of a request.|string|
+|**end**  <br>*optional*|The "end" parameter of a request.|integer(int64)|
+|**errorOnDuplicateName**  <br>*optional*|The "errorOnDuplicateName" parameter of a request.|boolean|
+|**filestorageService**  <br>*optional*|The "filestorageService" parameter of a request.|string|
+|**filter**  <br>*optional*|The "filter" parameter of a request.|integer|
+|**flags**  <br>*optional*|The "falgs" parameter of a request.|integer|
+|**folder**  <br>*optional*|The "folder" parameter of a request.|string|
+|**force**  <br>*optional*|The "force" parameter of a request.|boolean|
+|**force_secure**  <br>*optional*|The "force_secure" parameter of a request.|string|
+|**from**  <br>*optional*|The "from" parameter of a request.|integer(int64)|
+|**hardDelete**  <br>*optional*|The "hardDelete" parameter of a request.|boolean|
+|**hdr**  <br>*optional*|The "hdr" parameter of a request.|integer|
+|**headers**  <br>*optional*|The "headers" parameter of a request.|string|
+|**id**  <br>*optional*|The "id" parameter of a request.|string|
+|**ignore**  <br>*optional*|The "ignore" parameter of a request.|string|
+|**includeSent**  <br>*optional*|The "includeSent" parameter of a request.|boolean|
+|**internal_userid**  <br>*optional*|The "internal_userid" parameter of a request.|integer|
+|**left_hand_limit**  <br>*optional*|The "left_hand_limit" parameter of a request.|integer|
+|**limit**  <br>*optional*|The "limit" parameter of a request.|integer|
+|**lineWrapAfter**  <br>*optional*|The "lineWrapAfter" parameter of a request.|integer|
+|**max_size**  <br>*optional*|The "max_size" parameter of a request.|integer|
+|**merged**  <br>*optional*|The "merged" parameter of a request.|boolean|
+|**messageAction**  <br>*optional*|The "messageAction" parameter of a request.|string|
+|**message_id**  <br>*optional*|The "message_id" parameter of a request.|string|
+|**messagingService**  <br>*optional*|The "messagingService" parameter of a request.|string|
+|**module**  <br>*required*|The name of the request's module like "mail", "folders", etc.|string|
+|**name**  <br>*optional*|The "name" parameter of a request.|string|
+|**oauth_token**  <br>*optional*|The "oauth_token" parameter of a request.|string|
+|**oauth_verifier**  <br>*optional*|The "oauth_verifier" parameter of a request.|string|
+|**occurrence**  <br>*optional*|The "occurrence" parameter of a request.|string|
+|**order**  <br>*optional*|The "order" parameter of a request.|string|
+|**parent**  <br>*optional*|The "parent" parameter of a request.|string|
+|**participant**  <br>*optional*|The "participant" parameter of a request.|string|
+|**password**  <br>*optional*|The "password" parameter of a request.|string|
+|**peek**  <br>*optional*|The "peek" parameter of a request.|string|
+|**provider**  <br>*optional*|The "provider" parameter of a request.|string|
+|**query**  <br>*optional*|The "query" parameter of a request.|string|
+|**recipients**  <br>*optional*|The "recipients" parameter of a request.|string|
+|**recurrence_master**  <br>*optional*|The "recurrence_master" parameter of a request.|boolean|
+|**recursive**  <br>*optional*|The "recursive" parameter of a request.|string|
+|**right_hand_limit**  <br>*optional*|The "right_hand_limit" parameter of a request.|integer|
+|**save**  <br>*optional*|The "save" parameter of a request.|integer|
+|**serviceId**  <br>*optional*|The "serviceId" parameter of a request.|string|
+|**setFrom**  <br>*optional*|The "setFrom" parameter of a request.|boolean|
+|**setIfAbsent**  <br>*optional*|The "setIfAbsent" parameter of a request.|string|
+|**showPrivate**  <br>*optional*|The "showPrivate" parameter of a request.|boolean|
+|**sort**  <br>*optional*|The "sort" parameter of a request.|string|
+|**src**  <br>*optional*|The "src" parameter of a request.|integer|
+|**start**  <br>*optional*|The "start" parameter of a request.|integer(int64)|
+|**system**  <br>*optional*|The "system" parameter of a request.|string|
+|**timestamp**  <br>*optional*|The "timestamp" parameter of a request.|integer(int64)|
+|**timezone**  <br>*optional*|The "timezone" parameter of a request.|string|
+|**tree**  <br>*optional*|The "tree" parameter of a request.|string|
+|**type**  <br>*optional*|The "type" parameter of a request.|integer|
+|**uid**  <br>*optional*|The "uid" parameter of a request.|string|
+|**unseen**  <br>*optional*|The "unseen" parameter of a request.|boolean|
+|**until**  <br>*optional*|The "until" parameter of a request.|integer(int64)|
+|**user_id**  <br>*optional*|The "user_id" parameter of a request.|integer|
+|**userid**  <br>*optional*|The "userid" parameter of a request.|integer|
+|**uuid**  <br>*optional*|The "uuid" parameter of a request.|string|
+|**version**  <br>*optional*|The "version" parameter of a request.|integer|
+|**view**  <br>*optional*|The "view" parameter of a request.|string|
 
 
+<a name="singleresponse"></a>
 # SingleResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The data of a request that was processed with the multiple module.|false|object||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The data of a request that was processed with the multiple module.|object|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="snippetattachment"></a>
 # SnippetAttachment
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of the attachment.|false|string||
-|filename|The file name of the attachment.|false|string||
-|mimetype|The MIME type of the attachment.|false|string||
-|contentid|The content ID of the attachment.|false|string||
-|size|The size of the attachment in bytes.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**contentid**  <br>*optional*|The content ID of the attachment.|string|
+|**filename**  <br>*optional*|The file name of the attachment.|string|
+|**id**  <br>*optional*|The ID of the attachment.|string|
+|**mimetype**  <br>*optional*|The MIME type of the attachment.|string|
+|**size**  <br>*optional*|The size of the attachment in bytes.|integer(int64)|
 
 
+<a name="snippetattachmentlistelement"></a>
 # SnippetAttachmentListElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The identifier of an attachment.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|The identifier of an attachment.|string|
 
 
+<a name="snippetdata"></a>
 # SnippetData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The ID of the snippet.|false|string||
-|accountid|The identifier of the account.|false|integer||
-|createdby|The user ID of the creator.|false|integer||
-|displayname|The display name of the snippet.|false|string||
-|type|The type of the snippet, like "signature".|false|string||
-|content|Contains the snippet's content.|false|string||
-|module|The module identifier, like "com.openexchange.mail".|false|string||
-|shared|The shared flag.|false|boolean||
-|misc|Contains miscellaneous data as JSON object.|false|object||
-|props|Contains custom properties as JSON object.|false|object||
-|files|An array of attachments.|false|SnippetAttachment array||
+
+|Name|Description|Schema|
+|---|---|---|
+|**accountid**  <br>*optional*|The identifier of the account.|integer|
+|**content**  <br>*optional*|Contains the snippet's content.|string|
+|**createdby**  <br>*optional*|The user ID of the creator.|integer|
+|**displayname**  <br>*optional*|The display name of the snippet.|string|
+|**files**  <br>*optional*|An array of attachments.|< [SnippetAttachment](#snippetattachment) > array|
+|**id**  <br>*optional*|The ID of the snippet.|string|
+|**misc**  <br>*optional*|Contains miscellaneous data as JSON object.|object|
+|**module**  <br>*optional*|The module identifier, like "com.openexchange.mail".|string|
+|**props**  <br>*optional*|Contains custom properties as JSON object.|object|
+|**shared**  <br>*optional*|The shared flag.|boolean|
+|**type**  <br>*optional*|The type of the snippet, like "signature".|string|
 
 
+<a name="snippetresponse"></a>
 # SnippetResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|SnippetData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[SnippetData](#snippetdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="snippetupdateresponse"></a>
 # SnippetUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|The ID of the new snippet.|false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|The ID of the new snippet.|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="snippetsresponse"></a>
 # SnippetsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array of snippet objects.|false|SnippetData array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array of snippet objects.|< [SnippetData](#snippetdata) > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="taskconfirmation"></a>
 # TaskConfirmation
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|type|Type of participant: 0 (user), 5 (external user).|false|integer||
-|mail|Email address of external participant.|false|string||
-|display_name|Display name of external participant.|false|string||
-|status|0 (none), 1 (accepted), 2 (declined), 3 (tentative).|false|integer||
-|message|Confirm message of the participant.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**display_name**  <br>*optional*|Display name of external participant.|string|
+|**mail**  <br>*optional*|Email address of external participant.|string|
+|**message**  <br>*optional*|Confirm message of the participant.|string|
+|**status**  <br>*optional*|0 (none), 1 (accepted), 2 (declined), 3 (tentative).|integer|
+|**type**  <br>*optional*|Type of participant: 0 (user), 5 (external user).|integer|
 
 
+<a name="taskconfirmationbody"></a>
 # TaskConfirmationBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|confirmation|0 (none), 1 (accepted), 2 (declined), 3 (tentative).|false|integer||
-|confirmmessage|The confirmation message or comment.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**confirmation**  <br>*optional*|0 (none), 1 (accepted), 2 (declined), 3 (tentative).|integer|
+|**confirmmessage**  <br>*optional*|The confirmation message or comment.|string|
 
 
+<a name="taskdata"></a>
 # TaskData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|status|Status of the task: 1 (not started), 2 (in progress), 3 (done), 4 (waiting), 5 (deferred).|false|integer||
-|percent_completed|How much of the task is completed. An integer number between 0 and 100.|false|integer||
-|actual_costs|A monetary attribute to store actual costs of a task. Allowed values must be in the range -9999999999.99 and 9999999999.99.|false|number (double)||
-|actual_duration|Actual duration of the task, e.g. in minutes.|false|string||
-|after_complete|Deprecated. Only present in AJAX interface. Value will not be stored on OX server.|false|integer (int64)||
-|billing_information|Billing information of the task.|false|string||
-|target_costs|A monetary attribute to store target costs of a task. Allowed values must be in the range -9999999999.99 and 9999999999.99.|false|number (double)||
-|target_duration|Target duration of the task, e.g. in minutes.|false|string||
-|priority|The priority of the task: 1 (low), 2 (medium), 3 (high).|false|integer||
-|currency|The currency, e.g. "EUR".|false|string||
-|trip_meter|The trip meter.|false|string||
-|companies|Companies.|false|string||
-|date_completed||false|integer (int64)||
-|start_time|Inclusive start as Date for whole day tasks and Time for normal tasks.|false|integer (int64)||
-|end_time|Exclusive end as Date for whole day tasks and as Time for normal tasks.|false|integer (int64)||
-|title|Short description.|false|string||
-|start_date|Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).|false|integer (int64)||
-|end_date|Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).|false|integer (int64)||
-|note|Long description.|false|string||
-|alarm|Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|false|integer (int64)||
-|recurrence_type|Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).|false|integer||
-|days|Specifies which days of the week are part of a sequence. The value is a bitfield with bit 0 indicating sunday, bit 1 indicating monday and so on. May be present if recurrence_type > 1. If allowed but not present, the value defaults to 127 (all 7 days).|false|integer||
-|day_in_month|Specifies which day of a month is part of the sequence. Counting starts with 1. If the field "days" is also present, only days selected by that field are counted. If the number is bigger than the number of available days, the last available day is selected. Present if and only if recurrence_type > 2.|false|integer||
-|month|Month of the year in yearly sequencies. 0 represents January, 1 represents February and so on. Present if and only if recurrence_type = 4.|false|integer||
-|interval|Specifies an integer multiplier to the interval specified by recurrence_type. Present if and only if recurrence_type > 0. Must be 1 if recurrence_type = 4.|false|integer||
-|until|Inclusive end date of a sequence. May be present only if recurrence_type > 0. The sequence has no end date if recurrence_type > 0 and this field is not present. Note: since this is a Date, the entire day after the midnight specified by the value is included.|false|integer (int64)||
-|notification|If true, all participants are notified of any changes to this object. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|false|boolean||
-|participants|Each element identifies a participant, user, group or booked resource.|false|TaskParticipant array||
-|users|Each element represents a participant. User groups are resolved and are represented by their members. Any user can occur only once.|false|TaskUser array||
-|occurrences|Specifies how often a recurrence should appear. May be present only if recurrence_type > 0.|false|integer||
-|uid|Can only be written when the object is created. Internal and external globally unique identifier of the appointment or task. Is used to recognize appointments within iCal files. If this attribute is not written it contains an automatic generated UUID.|false|string||
-|organizer|Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.|false|string||
-|sequence|iCal sequence number. Not implemented for tasks. Must be incremented on update. Will be incremented by the server, if not set.|false|integer||
-|confirmations|Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.|false|TaskConfirmation array||
-|organizerId|Contains the userIId of the appointment organizer if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|false|integer||
-|principal|Contains the email address of the appointment principal which is not necessarily an internal user. Not implemented for tasks (introduced with 6.20.1).|false|string||
-|principalId|Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|false|integer||
-|full_time|True if the event is a whole day appointment or task, false otherwise.|false|boolean||
-|id|Object ID.|false|string||
-|created_by|User ID of the user who created this object.|false|string||
-|modified_by|User ID of the user who last modified this object.|false|string||
-|creation_date|Date and time of creation.|false|integer (int64)||
-|last_modified|Date and time of the last modification.|false|integer (int64)||
-|folder_id|Object ID of the parent folder.|false|string||
-|categories|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|false|string||
-|private_flag|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|false|boolean||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|false|integer||
-|number_of_attachments|Number of attachments.|false|integer||
-|lastModifiedOfNewestAttachmentUTC|Timestamp of the newest attachment written with UTC time zone.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**actual_costs**  <br>*optional*|A monetary attribute to store actual costs of a task. Allowed values must be in the range -9999999999.99 and 9999999999.99.|number(double)|
+|**actual_duration**  <br>*optional*|Actual duration of the task, e.g. in minutes.|string|
+|**after_complete**  <br>*optional*|Deprecated. Only present in AJAX interface. Value will not be stored on OX server.|integer(int64)|
+|**alarm**  <br>*optional*|Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|integer(int64)|
+|**billing_information**  <br>*optional*|Billing information of the task.|string|
+|**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**companies**  <br>*optional*|Companies.|string|
+|**confirmations**  <br>*optional*|Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.|< [TaskConfirmation](#taskconfirmation) > array|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**currency**  <br>*optional*|The currency, e.g. "EUR".|string|
+|**date_completed**  <br>*optional*||integer(int64)|
+|**day_in_month**  <br>*optional*|Specifies which day of a month is part of the sequence. Counting starts with 1. If the field "days" is also present, only days selected by that field are counted. If the number is bigger than the number of available days, the last available day is selected. Present if and only if recurrence_type > 2.|integer|
+|**days**  <br>*optional*|Specifies which days of the week are part of a sequence. The value is a bitfield with bit 0 indicating sunday, bit 1 indicating monday and so on. May be present if recurrence_type > 1. If allowed but not present, the value defaults to 127 (all 7 days).|integer|
+|**end_date**  <br>*optional*|Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).|integer(int64)|
+|**end_time**  <br>*optional*|Exclusive end as Date for whole day tasks and as Time for normal tasks.|integer(int64)|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**full_time**  <br>*optional*|True if the event is a whole day appointment or task, false otherwise.|boolean|
+|**id**  <br>*optional*|Object ID.|string|
+|**interval**  <br>*optional*|Specifies an integer multiplier to the interval specified by recurrence_type. Present if and only if recurrence_type > 0. Must be 1 if recurrence_type = 4.|integer|
+|**lastModifiedOfNewestAttachmentUTC**  <br>*optional*|Timestamp of the newest attachment written with UTC time zone.|integer(int64)|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**month**  <br>*optional*|Month of the year in yearly sequencies. 0 represents January, 1 represents February and so on. Present if and only if recurrence_type = 4.|integer|
+|**note**  <br>*optional*|Long description.|string|
+|**notification**  <br>*optional*|If true, all participants are notified of any changes to this object. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|boolean|
+|**number_of_attachments**  <br>*optional*|Number of attachments.|integer|
+|**occurrences**  <br>*optional*|Specifies how often a recurrence should appear. May be present only if recurrence_type > 0.|integer|
+|**organizer**  <br>*optional*|Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.|string|
+|**organizerId**  <br>*optional*|Contains the userIId of the appointment organizer if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|integer|
+|**participants**  <br>*optional*|Each element identifies a participant, user, group or booked resource.|< [TaskParticipant](#taskparticipant) > array|
+|**percent_completed**  <br>*optional*|How much of the task is completed. An integer number between 0 and 100.|integer|
+|**principal**  <br>*optional*|Contains the email address of the appointment principal which is not necessarily an internal user. Not implemented for tasks (introduced with 6.20.1).|string|
+|**principalId**  <br>*optional*|Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks (introduced with 6.20.1).|integer|
+|**priority**  <br>*optional*|The priority of the task: 1 (low), 2 (medium), 3 (high).|integer|
+|**private_flag**  <br>*optional*|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|boolean|
+|**recurrence_type**  <br>*optional*|Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).|integer|
+|**sequence**  <br>*optional*|iCal sequence number. Not implemented for tasks. Must be incremented on update. Will be incremented by the server, if not set.|integer|
+|**start_date**  <br>*optional*|Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).|integer(int64)|
+|**start_time**  <br>*optional*|Inclusive start as Date for whole day tasks and Time for normal tasks.|integer(int64)|
+|**status**  <br>*optional*|Status of the task: 1 (not started), 2 (in progress), 3 (done), 4 (waiting), 5 (deferred).|integer|
+|**target_costs**  <br>*optional*|A monetary attribute to store target costs of a task. Allowed values must be in the range -9999999999.99 and 9999999999.99.|number(double)|
+|**target_duration**  <br>*optional*|Target duration of the task, e.g. in minutes.|string|
+|**title**  <br>*optional*|Short description.|string|
+|**trip_meter**  <br>*optional*|The trip meter.|string|
+|**uid**  <br>*optional*|Can only be written when the object is created. Internal and external globally unique identifier of the appointment or task. Is used to recognize appointments within iCal files. If this attribute is not written it contains an automatic generated UUID.|string|
+|**until**  <br>*optional*|Inclusive end date of a sequence. May be present only if recurrence_type > 0. The sequence has no end date if recurrence_type > 0 and this field is not present. Note: since this is a Date, the entire day after the midnight specified by the value is included.|integer(int64)|
+|**users**  <br>*optional*|Each element represents a participant. User groups are resolved and are represented by their members. Any user can occur only once.|< [TaskUser](#taskuser) > array|
 
 
+<a name="taskdeletionsresponse"></a>
 # TaskDeletionsResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|An array with object IDs of tasks which were modified after the specified timestamp and were therefore not deleted.|false|string array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|An array with object IDs of tasks which were modified after the specified timestamp and were therefore not deleted.|< string > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="tasklistelement"></a>
 # TaskListElement
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|The object ID of the task.|true|string||
-|folder|The object ID of the related folder.|true|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**folder**  <br>*required*|The object ID of the related folder.|string|
+|**id**  <br>*required*|The object ID of the task.|string|
 
 
+<a name="taskparticipant"></a>
 # TaskParticipant
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|User ID.|false|integer||
-|type|Type of participant: 1 (user), 2 (user group), 3 (resource), 4 (resource group), 5 (external user)|false|integer||
-|mail|Mail address of an external participant.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|User ID.|integer|
+|**mail**  <br>*optional*|Mail address of an external participant.|string|
+|**type**  <br>*optional*|Type of participant: 1 (user), 2 (user group), 3 (resource), 4 (resource group), 5 (external user)|integer|
 
 
+<a name="taskresponse"></a>
 # TaskResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|TaskData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[TaskData](#taskdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="tasksearchbody"></a>
 # TaskSearchBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|pattern|Search pattern to find tasks. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|true|string||
-|folder|Defines the folder to search for tasks in. If this is omitted in all task folders will be searched.|false|string||
-|start|Inclusive start date for a time range the tasks should end in. If start is omitted end is ignored.|false|integer (int64)||
-|end|Exclusive end date for a time range the tasks should end in. If this parameter is omitted the time range has an open end.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**end**  <br>*optional*|Exclusive end date for a time range the tasks should end in. If this parameter is omitted the time range has an open end.|integer(int64)|
+|**folder**  <br>*optional*|Defines the folder to search for tasks in. If this is omitted in all task folders will be searched.|string|
+|**pattern**  <br>*required*|Search pattern to find tasks. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|string|
+|**start**  <br>*optional*|Inclusive start date for a time range the tasks should end in. If start is omitted end is ignored.|integer(int64)|
 
 
+<a name="taskupdatedata"></a>
 # TaskUpdateData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|ID of a newly created task.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|ID of a newly created task.|string|
 
 
+<a name="taskupdateresponse"></a>
 # TaskUpdateResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|TaskUpdateData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[TaskUpdateData](#taskupdatedata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="taskupdatesresponse"></a>
 # TaskUpdatesResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of tasks.|false|object array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of tasks.|< object > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="taskuser"></a>
 # TaskUser
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|id|User ID. Confirming for other users only works for appointments and not for tasks.|false|integer||
-|display_name|Displayable name of the participant.|false|string||
-|confirm|0 (none), 1 (accepted), 2 (declined), 3 (tentative)|false|integer||
-|confirmmessage|Confirm message of the participant.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**confirm**  <br>*optional*|0 (none), 1 (accepted), 2 (declined), 3 (tentative)|integer|
+|**confirmmessage**  <br>*optional*|Confirm message of the participant.|string|
+|**display_name**  <br>*optional*|Displayable name of the participant.|string|
+|**id**  <br>*optional*|User ID. Confirming for other users only works for appointments and not for tasks.|integer|
 
 
+<a name="tasksresponse"></a>
 # TasksResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of tasks. Each task is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of tasks. Each task is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="tokenloginresponse"></a>
 # TokenLoginResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|serverToken|The token generated by the server.|false|string||
-|jsessionid||false|string||
-|user|The username.|false|string||
-|user_id|The user ID.|false|integer||
-|url|The URL of the redirect to the web UI.|false|string||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**jsessionid**  <br>*optional*||string|
+|**serverToken**  <br>*optional*|The token generated by the server.|string|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
+|**url**  <br>*optional*|The URL of the redirect to the web UI.|string|
+|**user**  <br>*optional*|The username.|string|
+|**user_id**  <br>*optional*|The user ID.|integer|
 
 
+<a name="tokensdata"></a>
 # TokensData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|session|The session ID.|false|string||
-|user|The username.|false|string||
-|user_id|The user ID.|false|integer||
-|context_id|The context ID.|false|integer||
-|locale|The users locale (e.g. "en_US").|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**context_id**  <br>*optional*|The context ID.|integer|
+|**locale**  <br>*optional*|The users locale (e.g. "en_US").|string|
+|**session**  <br>*optional*|The session ID.|string|
+|**user**  <br>*optional*|The username.|string|
+|**user_id**  <br>*optional*|The user ID.|integer|
 
 
+<a name="tokensresponse"></a>
 # TokensResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|TokensData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[TokensData](#tokensdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="userattribute"></a>
 # UserAttribute
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|name|The name of the attribute.|false|string||
-|value|The value of the attribute.|false|string||
+
+|Name|Description|Schema|
+|---|---|---|
+|**name**  <br>*optional*|The name of the attribute.|string|
+|**value**  <br>*optional*|The value of the attribute.|string|
 
 
+<a name="userattributeresponse"></a>
 # UserAttributeResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|UserAttribute||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[UserAttribute](#userattribute)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="userattributionresponse"></a>
 # UserAttributionResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Indicates whether the attribute could be set.|false|boolean||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Indicates whether the attribute could be set.|boolean|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="userdata"></a>
 # UserData
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|aliases|The user's aliases.|false|string array||
-|timezone|The time zone.|false|string||
-|locale|The name of user's entire locale, with, language, country and variant separated by underbars (e.g. "en", "de_DE").|false|string||
-|groups|The IDs of user's groups.|false|integer array||
-|contact_id|The contact ID of the user.|false|string||
-|login_info|The user's login information.|false|string||
-|guest_created_by|The ID of the user who has created this guest in case this user represents a guest user. 0 represents regular users. (preliminary, available since v7.8.0)|false|integer||
-|uid|Can only be written when the object is created. Internal and external globally unique identifier of the contact. Is used to recognize contacts within vCard files. If this attribute is not written it contains an automatic generated UUID.|false|string||
-|display_name|The display name.|false|string||
-|first_name|The given name.|false|string||
-|last_name|The sur name.|false|string||
-|second_name|The middle name.|false|string||
-|suffix|The suffix.|false|string||
-|title|The title.|false|string||
-|street_home|The street of the home address.|false|string||
-|postal_code_home|The postal code of the home address.|false|string||
-|city_home|The city of the home address.|false|string||
-|state_home|The state of the home address.|false|string||
-|country_home|The country of the home address.|false|string||
-|birthday|The date of birth.|false|integer (int64)||
-|marital_status|The marital status.|false|string||
-|number_of_children|The number of children.|false|string||
-|profession|The profession.|false|string||
-|nickname|The nickname.|false|string||
-|spouse_name|The name of the spouse.|false|string||
-|anniversary|The anniversary.|false|integer (int64)||
-|note|A note.|false|string||
-|department|The department.|false|string||
-|position|The position.|false|string||
-|employee_type|The type of the employee.|false|string||
-|room_number|The room number.|false|string||
-|street_business|The street of the business address.|false|string||
-|postal_code_business|The postal code of the business address.|false|string||
-|city_business|The city of the business address.|false|string||
-|state_business|The state of the business address.|false|string||
-|country_business|The country of the business address.|false|string||
-|user_id|The internal user id.|false|integer||
-|number_of_employees|The number of employees.|false|string||
-|sales_volume|The sales volume.|false|string||
-|tax_id|The tax id.|false|string||
-|commercial_register|The commercial register.|false|string||
-|branches|The branches.|false|string||
-|business_category|The business category.|false|string||
-|info|An information.|false|string||
-|manager_name|The manager's name.|false|string||
-|assistant_name|The assistant's name.|false|string||
-|street_other|The street of another address.|false|string||
-|postal_code_other|The postal code of another address.|false|string||
-|city_other|The city of another address.|false|string||
-|state_other|The state of another address.|false|string||
-|country_other|The country of another address.|false|string||
-|telephone_business1|The business telephone number 1.|false|string||
-|telephone_business2|The business telephone number 2.|false|string||
-|fax_business|The business fax number.|false|string||
-|telephone_callback|The callback telephone number.|false|string||
-|telephone_car|The car telephone number.|false|string||
-|telephone_company|The company telephone number.|false|string||
-|telephone_home1|The home telephone number 1.|false|string||
-|telephone_home2|The home telephone number 2.|false|string||
-|fax_home|The home fax number.|false|string||
-|cellular_telephone1|The cellular telephone number 1.|false|string||
-|cellular_telephone2|The cellular telephone number 2.|false|string||
-|telephone_other|The other telephone number.|false|string||
-|fax_other|The other fax number.|false|string||
-|email1|The email address 1.|false|string||
-|email2|The email address 2.|false|string||
-|email3|The email address 3.|false|string||
-|url|The url address or homepage.|false|string||
-|telephone_isdn|The ISDN telephone number.|false|string||
-|telephone_pager|The pager telephone number.|false|string||
-|telephone_primary|The primary telephone number.|false|string||
-|telephone_radio|The radio telephone number.|false|string||
-|telephone_telex|The telex telephone number.|false|string||
-|telephone_ttytdd|The TTY/TDD telephone number.|false|string||
-|instant_messenger1|The instant messenger address 1.|false|string||
-|instant_messenger2|The instant messenger address 2.|false|string||
-|telephone_ip|The IP telephone number.|false|string||
-|telephone_assistant|The assistant telephone number.|false|string||
-|company|The company name.|false|string||
-|image1||false|string||
-|image1_content_type|The content type of the image (like "image/png").|false|string||
-|image1_url|The url to the image.|false|string||
-|number_of_images|The number of images.|false|integer||
-|image_last_modified|The last modification of the image.|false|integer (int64)||
-|distribution_list|If this contact is a distribution list, then this field is an array of objects. Each object describes a member of the list.|false|DistributionListMember array||
-|number_of_distribution_list|The number of objects in the distribution list.|false|integer||
-|mark_as_distributionlist||false|boolean||
-|file_as|The file name.|false|string||
-|default_address|The default address.|false|integer||
-|useCount|In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.|false|integer||
-|yomiFirstName|Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|false|string||
-|yomiLastName|Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|false|string||
-|yomiCompany|Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|false|string||
-|addressHome|Support for Outlook 'home' address field. (since 6.20.1)|false|string||
-|addressBusiness|Support for Outlook 'business' address field. (since 6.20.1)|false|string||
-|addressOther|Support for Outlook 'other' address field. (since 6.20.1)|false|string||
-|userfield01|Dynamic Field 1.|false|string||
-|userfield02|Dynamic Field 2.|false|string||
-|userfield03|Dynamic Field 3.|false|string||
-|userfield04|Dynamic Field 4.|false|string||
-|userfield05|Dynamic Field 5.|false|string||
-|userfield06|Dynamic Field 6.|false|string||
-|userfield07|Dynamic Field 7.|false|string||
-|userfield08|Dynamic Field 8.|false|string||
-|userfield09|Dynamic Field 9.|false|string||
-|userfield10|Dynamic Field 10.|false|string||
-|userfield11|Dynamic Field 11.|false|string||
-|userfield12|Dynamic Field 12.|false|string||
-|userfield13|Dynamic Field 13.|false|string||
-|userfield14|Dynamic Field 14.|false|string||
-|userfield15|Dynamic Field 15.|false|string||
-|userfield16|Dynamic Field 16.|false|string||
-|userfield17|Dynamic Field 17.|false|string||
-|userfield18|Dynamic Field 18.|false|string||
-|userfield19|Dynamic Field 19.|false|string||
-|userfield20|Dynamic Field 20.|false|string||
-|id|Object ID.|false|string||
-|created_by|User ID of the user who created this object.|false|string||
-|modified_by|User ID of the user who last modified this object.|false|string||
-|creation_date|Date and time of creation.|false|integer (int64)||
-|last_modified|Date and time of the last modification.|false|integer (int64)||
-|folder_id|Object ID of the parent folder.|false|string||
-|categories|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|false|string||
-|private_flag|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|false|boolean||
-|color_label|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|false|integer||
-|number_of_attachments|Number of attachments.|false|integer||
-|lastModifiedOfNewestAttachmentUTC|Timestamp of the newest attachment written with UTC time zone.|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**addressBusiness**  <br>*optional*|Support for Outlook 'business' address field. (since 6.20.1)|string|
+|**addressHome**  <br>*optional*|Support for Outlook 'home' address field. (since 6.20.1)|string|
+|**addressOther**  <br>*optional*|Support for Outlook 'other' address field. (since 6.20.1)|string|
+|**aliases**  <br>*optional*|The user's aliases.|< string > array|
+|**anniversary**  <br>*optional*|The anniversary.|integer(int64)|
+|**assistant_name**  <br>*optional*|The assistant's name.|string|
+|**birthday**  <br>*optional*|The date of birth.|integer(int64)|
+|**branches**  <br>*optional*|The branches.|string|
+|**business_category**  <br>*optional*|The business category.|string|
+|**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
+|**cellular_telephone1**  <br>*optional*|The cellular telephone number 1.|string|
+|**cellular_telephone2**  <br>*optional*|The cellular telephone number 2.|string|
+|**city_business**  <br>*optional*|The city of the business address.|string|
+|**city_home**  <br>*optional*|The city of the home address.|string|
+|**city_other**  <br>*optional*|The city of another address.|string|
+|**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**commercial_register**  <br>*optional*|The commercial register.|string|
+|**company**  <br>*optional*|The company name.|string|
+|**contact_id**  <br>*optional*|The contact ID of the user.|string|
+|**country_business**  <br>*optional*|The country of the business address.|string|
+|**country_home**  <br>*optional*|The country of the home address.|string|
+|**country_other**  <br>*optional*|The country of another address.|string|
+|**created_by**  <br>*optional*|User ID of the user who created this object.|string|
+|**creation_date**  <br>*optional*|Date and time of creation.|integer(int64)|
+|**default_address**  <br>*optional*|The default address.|integer|
+|**department**  <br>*optional*|The department.|string|
+|**display_name**  <br>*optional*|The display name.|string|
+|**distribution_list**  <br>*optional*|If this contact is a distribution list, then this field is an array of objects. Each object describes a member of the list.|< [DistributionListMember](#distributionlistmember) > array|
+|**email1**  <br>*optional*|The email address 1.|string|
+|**email2**  <br>*optional*|The email address 2.|string|
+|**email3**  <br>*optional*|The email address 3.|string|
+|**employee_type**  <br>*optional*|The type of the employee.|string|
+|**fax_business**  <br>*optional*|The business fax number.|string|
+|**fax_home**  <br>*optional*|The home fax number.|string|
+|**fax_other**  <br>*optional*|The other fax number.|string|
+|**file_as**  <br>*optional*|The file name.|string|
+|**first_name**  <br>*optional*|The given name.|string|
+|**folder_id**  <br>*optional*|Object ID of the parent folder.|string|
+|**groups**  <br>*optional*|The IDs of user's groups.|< integer > array|
+|**guest_created_by**  <br>*optional*|The ID of the user who has created this guest in case this user represents a guest user. 0 represents regular users. (preliminary, available since v7.8.0)|integer|
+|**id**  <br>*optional*|Object ID.|string|
+|**image1**  <br>*optional*||string|
+|**image1_content_type**  <br>*optional*|The content type of the image (like "image/png").|string|
+|**image1_url**  <br>*optional*|The url to the image.|string|
+|**image_last_modified**  <br>*optional*|The last modification of the image.|integer(int64)|
+|**info**  <br>*optional*|An information.|string|
+|**instant_messenger1**  <br>*optional*|The instant messenger address 1.|string|
+|**instant_messenger2**  <br>*optional*|The instant messenger address 2.|string|
+|**lastModifiedOfNewestAttachmentUTC**  <br>*optional*|Timestamp of the newest attachment written with UTC time zone.|integer(int64)|
+|**last_modified**  <br>*optional*|Date and time of the last modification.|integer(int64)|
+|**last_name**  <br>*optional*|The sur name.|string|
+|**locale**  <br>*optional*|The name of user's entire locale, with, language, country and variant separated by underbars (e.g. "en", "de_DE").|string|
+|**login_info**  <br>*optional*|The user's login information.|string|
+|**manager_name**  <br>*optional*|The manager's name.|string|
+|**marital_status**  <br>*optional*|The marital status.|string|
+|**mark_as_distributionlist**  <br>*optional*||boolean|
+|**modified_by**  <br>*optional*|User ID of the user who last modified this object.|string|
+|**nickname**  <br>*optional*|The nickname.|string|
+|**note**  <br>*optional*|A note.|string|
+|**number_of_attachments**  <br>*optional*|Number of attachments.|integer|
+|**number_of_children**  <br>*optional*|The number of children.|string|
+|**number_of_distribution_list**  <br>*optional*|The number of objects in the distribution list.|integer|
+|**number_of_employees**  <br>*optional*|The number of employees.|string|
+|**number_of_images**  <br>*optional*|The number of images.|integer|
+|**position**  <br>*optional*|The position.|string|
+|**postal_code_business**  <br>*optional*|The postal code of the business address.|string|
+|**postal_code_home**  <br>*optional*|The postal code of the home address.|string|
+|**postal_code_other**  <br>*optional*|The postal code of another address.|string|
+|**private_flag**  <br>*optional*|Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.|boolean|
+|**profession**  <br>*optional*|The profession.|string|
+|**room_number**  <br>*optional*|The room number.|string|
+|**sales_volume**  <br>*optional*|The sales volume.|string|
+|**second_name**  <br>*optional*|The middle name.|string|
+|**spouse_name**  <br>*optional*|The name of the spouse.|string|
+|**state_business**  <br>*optional*|The state of the business address.|string|
+|**state_home**  <br>*optional*|The state of the home address.|string|
+|**state_other**  <br>*optional*|The state of another address.|string|
+|**street_business**  <br>*optional*|The street of the business address.|string|
+|**street_home**  <br>*optional*|The street of the home address.|string|
+|**street_other**  <br>*optional*|The street of another address.|string|
+|**suffix**  <br>*optional*|The suffix.|string|
+|**tax_id**  <br>*optional*|The tax id.|string|
+|**telephone_assistant**  <br>*optional*|The assistant telephone number.|string|
+|**telephone_business1**  <br>*optional*|The business telephone number 1.|string|
+|**telephone_business2**  <br>*optional*|The business telephone number 2.|string|
+|**telephone_callback**  <br>*optional*|The callback telephone number.|string|
+|**telephone_car**  <br>*optional*|The car telephone number.|string|
+|**telephone_company**  <br>*optional*|The company telephone number.|string|
+|**telephone_home1**  <br>*optional*|The home telephone number 1.|string|
+|**telephone_home2**  <br>*optional*|The home telephone number 2.|string|
+|**telephone_ip**  <br>*optional*|The IP telephone number.|string|
+|**telephone_isdn**  <br>*optional*|The ISDN telephone number.|string|
+|**telephone_other**  <br>*optional*|The other telephone number.|string|
+|**telephone_pager**  <br>*optional*|The pager telephone number.|string|
+|**telephone_primary**  <br>*optional*|The primary telephone number.|string|
+|**telephone_radio**  <br>*optional*|The radio telephone number.|string|
+|**telephone_telex**  <br>*optional*|The telex telephone number.|string|
+|**telephone_ttytdd**  <br>*optional*|The TTY/TDD telephone number.|string|
+|**timezone**  <br>*optional*|The time zone.|string|
+|**title**  <br>*optional*|The title.|string|
+|**uid**  <br>*optional*|Can only be written when the object is created. Internal and external globally unique identifier of the contact. Is used to recognize contacts within vCard files. If this attribute is not written it contains an automatic generated UUID.|string|
+|**url**  <br>*optional*|The url address or homepage.|string|
+|**useCount**  <br>*optional*|In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.|integer|
+|**user_id**  <br>*optional*|The internal user id.|integer|
+|**userfield01**  <br>*optional*|Dynamic Field 1.|string|
+|**userfield02**  <br>*optional*|Dynamic Field 2.|string|
+|**userfield03**  <br>*optional*|Dynamic Field 3.|string|
+|**userfield04**  <br>*optional*|Dynamic Field 4.|string|
+|**userfield05**  <br>*optional*|Dynamic Field 5.|string|
+|**userfield06**  <br>*optional*|Dynamic Field 6.|string|
+|**userfield07**  <br>*optional*|Dynamic Field 7.|string|
+|**userfield08**  <br>*optional*|Dynamic Field 8.|string|
+|**userfield09**  <br>*optional*|Dynamic Field 9.|string|
+|**userfield10**  <br>*optional*|Dynamic Field 10.|string|
+|**userfield11**  <br>*optional*|Dynamic Field 11.|string|
+|**userfield12**  <br>*optional*|Dynamic Field 12.|string|
+|**userfield13**  <br>*optional*|Dynamic Field 13.|string|
+|**userfield14**  <br>*optional*|Dynamic Field 14.|string|
+|**userfield15**  <br>*optional*|Dynamic Field 15.|string|
+|**userfield16**  <br>*optional*|Dynamic Field 16.|string|
+|**userfield17**  <br>*optional*|Dynamic Field 17.|string|
+|**userfield18**  <br>*optional*|Dynamic Field 18.|string|
+|**userfield19**  <br>*optional*|Dynamic Field 19.|string|
+|**userfield20**  <br>*optional*|Dynamic Field 20.|string|
+|**yomiCompany**  <br>*optional*|Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|string|
+|**yomiFirstName**  <br>*optional*|Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|string|
+|**yomiLastName**  <br>*optional*|Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|string|
 
 
+<a name="userresponse"></a>
 # UserResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data||false|UserData||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*||[UserData](#userdata)|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
 
 
+<a name="usersearchbody"></a>
 # UserSearchBody
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|pattern|Search pattern to find tasks. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|false|string||
-|startletter|Search users with the given startletter. If this field is present, the pattern is matched against the user field which is specified by the property "contact_first_letter_field" on the server (default: last name). Otherwise, the pattern is matched against the display name.|false|boolean||
-|last_name|Searches users where the last name matches with the given last name. The character "*" matches zero or more characters and the character "?" matches exactly one character. This field is ignored if `pattern` is specified.|false|string||
-|first_name|Searches users where the first name matches with the given first name. The character "*" matches zero or more characters and the character "?" matches exactly one character. This field is ignored if `pattern` is specified.|false|string||
-|display_name|Searches users where the display name matches with the given display name. The character "*" matches zero or more characters and the character "?" matches exactly one character. This field is ignored if `pattern` is specified.|false|string||
-|orSearch|If set to `true`, the fields `last_name`, `first_name` and `display_name` are connected through an OR search habit. This field is ignored if `pattern` is specified.|false|boolean||
-|emailAutoComplete|If set to `true`, results are guaranteed to contain at least one email adress and the search is performed by connecting the relevant fields through an OR search habit. This field is ignored if `pattern` is specified.|false|boolean||
+
+|Name|Description|Schema|
+|---|---|---|
+|**display_name**  <br>*optional*|Searches users where the display name matches with the given display name. The character "*" matches zero or more characters and the character "?" matches exactly one character. This field is ignored if `pattern` is specified.|string|
+|**emailAutoComplete**  <br>*optional*|If set to `true`, results are guaranteed to contain at least one email adress and the search is performed by connecting the relevant fields through an OR search habit. This field is ignored if `pattern` is specified.|boolean|
+|**first_name**  <br>*optional*|Searches users where the first name matches with the given first name. The character "*" matches zero or more characters and the character "?" matches exactly one character. This field is ignored if `pattern` is specified.|string|
+|**last_name**  <br>*optional*|Searches users where the last name matches with the given last name. The character "*" matches zero or more characters and the character "?" matches exactly one character. This field is ignored if `pattern` is specified.|string|
+|**orSearch**  <br>*optional*|If set to `true`, the fields `last_name`, `first_name` and `display_name` are connected through an OR search habit. This field is ignored if `pattern` is specified.|boolean|
+|**pattern**  <br>*optional*|Search pattern to find tasks. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.|string|
+|**startletter**  <br>*optional*|Search users with the given startletter. If this field is present, the pattern is matched against the user field which is specified by the property "contact_first_letter_field" on the server (default: last name). Otherwise, the pattern is matched against the display name.|boolean|
 
 
+<a name="usersresponse"></a>
 # UsersResponse
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|data|Array of user. Each user is described as an array itself.|false|object array array||
-|error|The translated error message. Present in case of errors.|false|string||
-|error_params|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|false|string array||
-|error_id|Unique error identifier to help finding this error instance in the server logs.|false|string||
-|error_desc|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|false|string||
-|error_stack|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|false|string array||
-|code|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|false|string||
-|categories|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|false|string||
-|category|Maintained for legacy reasons: The numeric representation of the first category.|false|integer||
-|timestamp|The latest timestamp of the returned data (see [Updates](#updates)).|false|integer (int64)||
+
+|Name|Description|Schema|
+|---|---|---|
+|**categories**  <br>*optional*|Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.|string|
+|**category**  <br>*optional*|Maintained for legacy reasons: The numeric representation of the first category.|integer|
+|**code**  <br>*optional*|Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"|string|
+|**data**  <br>*optional*|Array of user. Each user is described as an array itself.|< < object > array > array|
+|**error**  <br>*optional*|The translated error message. Present in case of errors.|string|
+|**error_desc**  <br>*optional*|The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.|string|
+|**error_id**  <br>*optional*|Unique error identifier to help finding this error instance in the server logs.|string|
+|**error_params**  <br>*optional*|As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).|< string > array|
+|**error_stack**  <br>*optional*|If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.|< string > array|
+|**timestamp**  <br>*optional*|The latest timestamp of the returned data (see [Updates](#updates)).|integer(int64)|
+
 
 
