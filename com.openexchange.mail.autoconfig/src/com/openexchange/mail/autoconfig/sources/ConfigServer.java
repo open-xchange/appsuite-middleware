@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -151,6 +152,12 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                     LOG.info("Could not retrieve config XML from main domain. Return code was: {}", statusCode);
                     return null;
                 }
+            }
+            
+            Header contentType = rsp.getFirstHeader("Content-Type");
+            if (!contentType.getValue().equals("text/xml")) {
+                LOG.warn("Could not retrieve config XML from autoconfig server. The response's content type is not of 'text/xml'.");
+                return null;
             }
 
             ClientConfig clientConfig = new AutoconfigParser().getConfig(rsp.getEntity().getContent());
