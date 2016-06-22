@@ -2,12 +2,11 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: \n"
+"POT-Creation-Date: 2016-06-22 10:20+0000\n"
 "PO-Revision-Date: 2016-06-01 12:09+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -15,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.7\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.7.7\n"
 
 # Drive Application
 msgid "Drive Application"
@@ -31,8 +30,13 @@ msgid "Mail + Calendar + Address Book"
 msgstr "E-Mail + Kalender + Adressbuch"
 
 # To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
-msgid "To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application."
-msgstr "Laden Sie zum Synchronisieren Ihrer E-Mail-, Kalender-, Aufgaben- und Adressbuchdaten unsere Desktop-Applikation herunter und installieren Sie diese."
+msgid ""
+"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+"and install our desktop application."
+msgstr ""
+"Laden Sie zum Synchronisieren Ihrer E-Mail-, Kalender-, Aufgaben- und "
+"Adressbuchdaten unsere Desktop-Applikation herunter und installieren Sie "
+"diese."
 
 # Drive App
 msgid "Drive App"
@@ -67,8 +71,12 @@ msgid "Synchronize all your appointments and contacts"
 msgstr "Synchronisieren Sie alle Ihre Termine und Kontakte"
 
 # To manually setup your Calendar and Address Book accounts, please use the following information.
-msgid "To manually setup your Calendar and Address Book accounts, please use the following information."
-msgstr "Zum manuellen Einrichten Ihrer Kalender- und Adressbuch-Accounts verwenden Sie bitte folgende Informationen."
+msgid ""
+"To manually setup your Calendar and Address Book accounts, please use the "
+"following information."
+msgstr ""
+"Zum manuellen Einrichten Ihrer Kalender- und Adressbuch-Accounts verwenden "
+"Sie bitte folgende Informationen."
 
 # Updater
 msgid "Updater"
@@ -76,26 +84,43 @@ msgstr "Updater"
 
 # When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
 msgid ""
-"When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater."
+"When executing the downloaded file, an installation wizard will be launched. "
+"Follow the instructions and install the updater. Installs latest versions of "
+"Windows® client software. The Updater automatically informs about new "
+"updates. You can download the updates from within the Updater."
 msgstr ""
-"Nach dem Ausführen der heruntergeladenen Datei wird ein Installationsassistent gestartet. Folgen Sie den Anweisungen zum Installieren des Updaters. Es werden die neuesten Versionen der Windows® Client-Software installiert. Der Updater informiert Sie automatisch über neue Updates. Sie "
-"können die Updates aus dem Updater heraus herunterladen."
+"Nach dem Ausführen der heruntergeladenen Datei wird ein "
+"Installationsassistent gestartet. Folgen Sie den Anweisungen zum "
+"Installieren des Updaters. Es werden die neuesten Versionen der Windows® "
+"Client-Software installiert. Der Updater informiert Sie automatisch über "
+"neue Updates. Sie können die Updates aus dem Updater heraus herunterladen."
 
 # Connector for Microsoft Outlook®
 msgid "Connector for Microsoft Outlook®"
 msgstr "Konnektor für Microsoft Outlook®"
 
 # Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
-msgid "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients."
-msgstr "Synchronisation von E-Mails, Kalendern, Kontakten und Aufgaben, zusammen mit öffentlichen, freigegebenen und Systemordnern mit Microsoft Outlook®-Clients."
+msgid ""
+"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+"Shared and System Folders to Microsoft Outlook® clients."
+msgstr ""
+"Synchronisation von E-Mails, Kalendern, Kontakten und Aufgaben, zusammen mit "
+"öffentlichen, freigegebenen und Systemordnern mit Microsoft Outlook®-Clients."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
-msgid "Synchronize your Mail, Calendar and Address Book data with your device."
-msgstr "Synchronisieren Sie Ihre E-Mail-, Kalender- und Adressbuchdaten mit Ihrem Gerät."
+msgid ""
+"Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr ""
+"Synchronisieren Sie Ihre E-Mail-, Kalender- und Adressbuchdaten mit Ihrem "
+"Gerät."
 
 # To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
-msgid "To manually setup your Mail, Calendar and Address Book accounts, please use the following information."
-msgstr "Zum manuellen Einrichten Ihrer E-Mail-, Kalender- und Adressbuch-Accounts verwenden Sie bitte folgende Informationen."
+msgid ""
+"To manually setup your Mail, Calendar and Address Book accounts, please use "
+"the following information."
+msgstr ""
+"Zum manuellen Einrichten Ihrer E-Mail-, Kalender- und Adressbuch-Accounts "
+"verwenden Sie bitte folgende Informationen."
 
 # Mail
 msgid "Mail"
@@ -106,8 +131,11 @@ msgid "Synchronize your Mail with Apple Mail App."
 msgstr "Synchronisieren Sie Ihre E-Mails mit Apple Mail App."
 
 # To manually setup your Mail account, please use the following information
-msgid "To manually setup your Mail account, please use the following information"
-msgstr "Zum manuellen Einrichten Ihres E-Mail-Accounts verwenden Sie bitte folgende Informationen."
+msgid ""
+"To manually setup your Mail account, please use the following information"
+msgstr ""
+"Zum manuellen Einrichten Ihres E-Mail-Accounts verwenden Sie bitte folgende "
+"Informationen."
 
 # Email + Calendar + Address Book
 #~ msgid "Email + Calendar + Address Book"
