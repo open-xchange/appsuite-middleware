@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: \n"
+"POT-Creation-Date: 2016-06-22 14:05+0000\n"
 "PO-Revision-Date: 2016-06-10 22:38+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
@@ -14,7 +14,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.8.8\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -51,6 +50,12 @@ msgstr "暫時接受"
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr "暫時接受"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
+msgid ""
+"The server configuration cannot be retrieved due to an internal server "
+"error. Please try again later."
+msgstr ""
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -398,18 +403,14 @@ msgid ""
 "The organizer would like to create an exception for a  recurring appointment "
 "that could not be found. Either ignore this update, or ask the organizer to "
 "again send you the recurrence."
-msgstr ""
-"活動發起人想要在某個找不到的重複發生活動當中建立一個例外。請忽略此更新，或是"
-"請發起者重新傳送重複發生時間給您。"
+msgstr "活動發起人想要在某個找不到的重複發生活動當中建立一個例外。請忽略此更新，或是請發起者重新傳送重複發生時間給您。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:70
 msgid ""
 "The organizer would like to change the occurrence of a recurrence on a day "
 "that already contains such a change. The server can only store one change "
 "for a series per day."
-msgstr ""
-"活動發起人想要在已經修改過重複發生活動時間的一系列日期當中再度修改。伺服器只"
-"能在這系列當中的每一天儲存一個修改。"
+msgstr "活動發起人想要在已經修改過重複發生活動時間的一系列日期當中再度修改。伺服器只能在這系列當中的每一天儲存一個修改。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:71
 msgid ""
@@ -420,8 +421,7 @@ msgstr "活動發起人想要取消某個未知的約會。"
 msgid ""
 "An attendee wanted to change his/her participant state in an appointment "
 "that could not be found. Probably the appointment was already canceled."
-msgstr ""
-"有一位參加者想要修改他在某個未知約會當中的參與狀態。也許該約會已經取消了。"
+msgstr "有一位參加者想要修改他在某個未知約會當中的參與狀態。也許該約會已經取消了。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:73
 msgid ""
@@ -433,9 +433,7 @@ msgstr "有個約會在同時被更新了。您可以直接忽略。"
 msgid ""
 "An attendee wants to change an appointment that could not be found. Probably "
 "the appointment was deleted. Best ignore it."
-msgstr ""
-"有一位參加者想要修改他在某個未知約會當中的參與狀態。也許該約會某個時候已經取"
-"消了，您可以忽略此更新。"
+msgstr "有一位參加者想要修改他在某個未知約會當中的參與狀態。也許該約會某個時候已經取消了，您可以忽略此更新。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:75
 msgid "The organizer declined your counter proposal for the appointment."
@@ -452,9 +450,7 @@ msgid ""
 "An attendee wants to be brought up to date about an appointment that could "
 "not be found. It was probably deleted at some point. Best ignore this "
 "message."
-msgstr ""
-"有一位參加者想要取得一個不存在的約會的即時資訊。可能是某個時候已經刪除該約會"
-"了。您可以忽略此訊息。"
+msgstr "有一位參加者想要取得一個不存在的約會的即時資訊。可能是某個時候已經刪除該約會了。您可以忽略此訊息。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:78
 msgid ""
@@ -471,9 +467,7 @@ msgid ""
 "This invitation was sent to someone else, not you. This appointment would "
 "have to be created in a user's private folder to which you do not have write "
 "permissions."
-msgstr ""
-"此邀請函是寄給其他人而並非給您的。此約會將會建立於使用者的私人資料夾，您對該"
-"資料夾沒有寫入權限。"
+msgstr "此邀請函是寄給其他人而並非給您的。此約會將會建立於使用者的私人資料夾，您對該資料夾沒有寫入權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:82
 msgid "The appointment's attachments have been changed"
@@ -1546,9 +1540,7 @@ msgid ""
 "Object %1$s does not belong to this pool. The object will be removed. If "
 "there was a previous message about this object not having been returned to "
 "the pool, the object was just in use too long."
-msgstr ""
-"物件 %1$s 不屬於此 pool，這個物件將會被移除。如果先前有關於此物件未回到此 "
-"pool 的訊息，該物件被使用太久了。"
+msgstr "物件 %1$s 不屬於此 pool，這個物件將會被移除。如果先前有關於此物件未回到此 pool 的訊息，該物件被使用太久了。"
 
 #. A property defining the server name was not found in the configuration properties files.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
@@ -1625,6 +1617,12 @@ msgstr "全域資料庫設定無效: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:136
 msgid "No global database for context group \"%1$s\" found."
 msgstr "無環境群組「%1$s」的全域資料庫。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.download.limit/src/com/openexchange/download/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
+msgid ""
+"Download denied because download limits have been exceeded. Please try again "
+"later."
+msgstr "因為已達下載限制，拒絕下載。請稍後再試。"
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
@@ -1771,9 +1769,7 @@ msgstr "無法剖析提供的後設資料:「%1$S」"
 msgid ""
 "The maximum number of synchronizable directories (%1$d) is exceeded. Please "
 "remove some directories and try again, or select another root folder."
-msgstr ""
-"已超過最大可同步資料夾的數量（%1$d）。請移除某些資料夾後再試一次，或選擇其他"
-"根目錄。"
+msgstr "已超過最大可同步資料夾的數量（%1$d）。請移除某些資料夾後再試一次，或選擇其他根目錄。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:94
 msgid ""
@@ -1802,23 +1798,13 @@ msgstr "選擇一個已存在的帳號"
 
 #. The name for the virtual folder containing all attachments from all messages
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:67
-msgid "All attachments"
-msgstr "所有附件"
+msgid "My attachments"
+msgstr ""
 
-#. The name for the virtual folder containing all attachments of received messages
+#. The name for the virtual folder containing all attachments of a certain folder/mailbox
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:70
-msgid "Received attachments"
-msgstr "收到的附件"
-
-#. The name for the virtual folder containing all attachments of sent messages
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:73
-msgid "Sent attachments"
-msgstr "寄出的附件"
-
-#. The account display name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:76
-msgid "Mail Drive"
-msgstr "Mail Drive"
+msgid "In %1$s"
+msgstr ""
 
 #. Search in From sender.
 #. Search for mails sent from ...
@@ -1977,33 +1963,28 @@ msgstr "無法將檔案「%1$s」移動至「%2$s」。"
 msgid ""
 "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
 "into the account \"%3$s\"."
-msgstr ""
-"當移動至帳號「%3$s」時，「%2$s」資料夾中的「%1$s」檔案的所有註記皆將遺失。"
+msgstr "當移動至帳號「%3$s」時，「%2$s」資料夾中的「%1$s」檔案的所有註記皆將遺失。"
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
 msgid ""
 "All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when "
 "moving it into the account \"%3$s\"."
-msgstr ""
-"當移動至帳號「%3$s」時，「%2$s」資料夾中的「%1$s」檔案的所有先前版本皆將遺"
-"失。"
+msgstr "當移動至帳號「%3$s」時，「%2$s」資料夾中的「%1$s」檔案的所有先前版本皆將遺失。"
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:107
 msgid ""
 "The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost "
 "when moving it into the account \"%3$s\"."
-msgstr ""
-"當移動至帳號「%3$s」時，「%2$s」資料夾中的「%1$s」檔案指派的分類將會遺失。"
+msgstr "當移動至帳號「%3$s」時，「%2$s」資料夾中的「%1$s」檔案指派的分類將會遺失。"
 
 #. The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:110
 msgid ""
 "The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other "
 "users when moving it into the account \"%3$s\"."
-msgstr ""
-"移動至帳號「%3$s」後，「%2$s」資料夾中的「%1$s」檔案將無法被其他使用者存取。"
+msgstr "移動至帳號「%3$s」後，「%2$s」資料夾中的「%1$s」檔案將無法被其他使用者存取。"
 
 #. The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:113
@@ -2153,9 +2134,7 @@ msgstr "您提供的電子郵件地址與超過一個帳號相關聯"
 msgid ""
 "The requested bucket name is not available. The bucket namespace is shared "
 "by all users of the system. Please select a different name and try again."
-msgstr ""
-"請求的 bucket 名稱無法使用。bucket 命名空間是由系統中的所有使用者共享，請選擇"
-"不同名稱再試一次。"
+msgstr "請求的 bucket 名稱無法使用。bucket 命名空間是由系統中的所有使用者共享，請選擇不同名稱再試一次。"
 
 #. Your previous request to create the named bucket succeeded and you already own it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:77
@@ -2299,8 +2278,8 @@ msgid ""
 "openexchange.filestore.s3.[filestoreID].signerOverride is properly "
 "configured for this filestore."
 msgstr ""
-"S3 儲存空間回覆「請求無效」，請檢查是否已正確為此檔案儲存空間設定 com."
-"openexchange.filestore.s3.[filestoreID].signerOverride。"
+"S3 儲存空間回覆「請求無效」，請檢查是否已正確為此檔案儲存空間設定 "
+"com.openexchange.filestore.s3.[filestoreID].signerOverride。"
 
 #. No such document: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:63
@@ -3095,18 +3074,14 @@ msgstr "資料夾不允許有子資料夾。"
 msgid ""
 "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
 "permission on parent folder %2$s or due to an invalid folder name)"
-msgstr ""
-"無法建立信件匣「%1$s」（可能是父資料夾 %2$s 的權限不足，或是使用了無效的名"
-"稱）"
+msgstr "無法建立信件匣「%1$s」（可能是父資料夾 %2$s 的權限不足，或是使用了無效的名稱）"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
 msgid ""
 "The composed rights could not be applied to new folder due to missing "
 "administer right in its initial rights specified by IMAP server. However, "
 "the folder has been created."
-msgstr ""
-"權限無法套用至新資料夾，因為 IMAP 伺服器上缺少了管理員權限。然而，資料夾已經"
-"建立。"
+msgstr "權限無法套用至新資料夾，因為 IMAP 伺服器上缺少了管理員權限。然而，資料夾已經建立。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
 msgid "No administer permission specified for folder"
@@ -3378,9 +3353,7 @@ msgstr "檔案未包含指定聯絡人名稱時所需的欄位: 姓名、公司�
 msgid ""
 "No field was set that might give the contact in line %s a display name: no "
 "name, company or E-Mail."
-msgstr ""
-"未設置可以向第 %s 行中的聯繫人提供一個顯示名的欄位: 無姓名，無公司，無電子郵"
-"件。"
+msgstr "未設置可以向第 %s 行中的聯繫人提供一個顯示名的欄位: 無姓名，無公司，無電子郵件。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:101
 msgid "Can only handle one file, not %s"
@@ -3670,8 +3643,7 @@ msgstr "#split# 應用程式想要存取您的帳號，並請求下列權限:"
 msgid ""
 "Only allow access for applications you trust. You may revoke access for this "
 "application at any time, by visiting your settings page."
-msgstr ""
-"請僅允許您信任的應用程式存取。您可以到設定頁面隨時撤回對此應用程式的授權。"
+msgstr "請僅允許您信任的應用程式存取。您可以到設定頁面隨時撤回對此應用程式的授權。"
 
 #. label of cancel button
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:75
@@ -3728,8 +3700,7 @@ msgstr "關閉"
 msgid ""
 "You reached the max. number of %3$d possible grants for 3rd party "
 "applications. Please revoke access for the ones you don't longer need."
-msgstr ""
-"您已達對第三方應用程式最大的 %3$d 個授權數。請撤銷您不再需要的應用程式授權。"
+msgstr "您已達對第三方應用程式最大的 %3$d 個授權數。請撤銷您不再需要的應用程式授權。"
 
 #. There is no associated OAuth account for identifier %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
@@ -3747,9 +3718,7 @@ msgid ""
 "Your '%1$s' password changed. You have to authorize the server to use your "
 "account with the new password. To do so, go to Configuration -> My Social "
 "Configuration -> Accounts. Then try again."
-msgstr ""
-"您的「%1$s」密碼已經變更。您必須授權伺服器使用您的新密碼。請到設定 -> 我的社"
-"群網路設定 -> 帳號裡面重新授權，並再室一次。"
+msgstr "您的「%1$s」密碼已經變更。您必須授權伺服器使用您的新密碼。請到設定 -> 我的社群網路設定 -> 帳號裡面重新授權，並再室一次。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:71
 msgid "The address %1$s is not white-listed as for the %2$s OAuth API"
@@ -3806,8 +3775,7 @@ msgid ""
 "your account with a new password. To do so, go to Configuration -> My Social "
 "Configuration -> Accounts. Then try again."
 msgstr ""
-"您的「%1$s」存取權已被拒絕。您必須使用您的新密碼重新授權伺服器使用您的帳號。"
-"請到設定 -> 我的社群網路設定 -> 帳號裡面重新授權，並再試一次。"
+"您的「%1$s」存取權已被拒絕。您必須使用您的新密碼重新授權伺服器使用您的帳號。請到設定 -> 我的社群網路設定 -> 帳號裡面重新授權，並再試一次。"
 
 #. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
@@ -3816,8 +3784,7 @@ msgid ""
 "your account with a new password. To do so, go to Configuration -> My Social "
 "Configuration -> Accounts. Then try again."
 msgstr ""
-"您的「%1$s」存取權已被註銷。您必須使用您的新密碼重新授權伺服器使用您的帳號。"
-"請到設定 -> 我的社群網路設定 -> 帳號裡面重新授權，並再試一次。"
+"您的「%1$s」存取權已被註銷。您必須使用您的新密碼重新授權伺服器使用您的帳號。請到設定 -> 我的社群網路設定 -> 帳號裡面重新授權，並再試一次。"
 
 #. *
 #. * New password too short.
@@ -3929,9 +3896,7 @@ msgid ""
 "The permissions set could not be applied to the new folder %1$s. Its initial "
 "permissions specified by the POP3 server do not include administer "
 "permissions. The folder has been created, though."
-msgstr ""
-"權限無法套用至新資料夾 %1$s，因為 POP3 伺服器上缺少了管理員權限。然而，已經建"
-"立資料夾。"
+msgstr "權限無法套用至新資料夾 %1$s，因為 POP3 伺服器上缺少了管理員權限。然而，已經建立資料夾。"
 
 #. *
 #. * No admin permission specified for folder %1$s
@@ -4030,9 +3995,7 @@ msgid ""
 "This message could not be moved to trash folder, possibly because your "
 "mailbox is nearly full. In that case, please try to empty your deleted items "
 "first, or delete smaller messages first."
-msgstr ""
-"此訊息無法被移動到垃圾桶，可能是因為您的信件匣快滿了。這種情況下，請先清空您"
-"已刪除的項目，或先刪除較小的訊息。"
+msgstr "此訊息無法被移動到垃圾桶，可能是因為您的信件匣快滿了。這種情況下，請先清空您已刪除的項目，或先刪除較小的訊息。"
 
 #. *
 #. * Missing %1$s folder in mail move operation
@@ -4223,9 +4186,7 @@ msgstr "不允許進行您想執行的移動操作。"
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s. Error message "
 "from server: %5$s"
-msgstr ""
-"登入時的延遲造成連線到 %1$s 伺服器上的 %2$s 帳號被拒絕。伺服器的錯誤訊息: "
-"%5$s"
+msgstr "登入時的延遲造成連線到 %1$s 伺服器上的 %2$s 帳號被拒絕。伺服器的錯誤訊息: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -4235,9 +4196,7 @@ msgstr ""
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s. Try again in "
 "%5$s seconds. Error message from server: %6$s"
-msgstr ""
-"登入時的延遲造成連線到 %1$s 伺服器上的 %2$s 帳號被拒絕。請等 %5$s 秒後再重"
-"試。伺服器的錯誤訊息: %6$s"
+msgstr "登入時的延遲造成連線到 %1$s 伺服器上的 %2$s 帳號被拒絕。請等 %5$s 秒後再重試。伺服器的錯誤訊息: %6$s"
 
 #. *
 #. * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
@@ -4258,8 +4217,8 @@ msgid ""
 "Please be advised that while it is safe to ignore this warning, the POP3 "
 "account might not work if the supplied credentials are invalid."
 msgstr ""
-"可能是帳號提供者的限制，POP3 驗證已被停用，否則後續將無法登入。請注意雖然可以"
-"安全地忽略此警告，但若您提供的帳號密碼是錯誤的，將無法使用 POP3 帳號。"
+"可能是帳號提供者的限制，POP3 驗證已被停用，否則後續將無法登入。請注意雖然可以安全地忽略此警告，但若您提供的帳號密碼是錯誤的，將無法使用 POP3 "
+"帳號。"
 
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:298
@@ -4337,13 +4296,10 @@ msgid ""
 "Data published by %s on %s\n"
 msgstr ""
 "隱私：\n"
-"本網頁所包含的資料和任何引用是在資料擁有者經授權能夠讓您使用這些資料和引用的"
-"前提下與您共用的。%s 或其任何子公司與成員對這些資料和引用的發佈或轉發概不負"
-"責。\n"
-"禁止對這些資料進行任何未經授權的使用或傳播。如果您計畫儲存、處理或散佈這些資"
-"料，請確保您有權這樣做。\n"
-"如果您是在此網頁中列出的人之一或者負責在此網頁中列出的資源並且您不同意發佈，"
-"請向 %s 和資料發佈者發送一封包含到此網頁的 URL（鏈結）的電子郵件：\n"
+"本網頁所包含的資料和任何引用是在資料擁有者經授權能夠讓您使用這些資料和引用的前提下與您共用的。%s "
+"或其任何子公司與成員對這些資料和引用的發佈或轉發概不負責。\n"
+"禁止對這些資料進行任何未經授權的使用或傳播。如果您計畫儲存、處理或散佈這些資料，請確保您有權這樣做。\n"
+"如果您是在此網頁中列出的人之一或者負責在此網頁中列出的資源並且您不同意發佈，請向 %s 和資料發佈者發送一封包含到此網頁的 URL（鏈結）的電子郵件：\n"
 "數據由 %s 在 %s 發佈\n"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:73
@@ -4376,9 +4332,7 @@ msgstr "已發布的文件已同時被刪除，所以已不存在。"
 msgid ""
 "Quota exceeded. Please delete some items in order to create new ones. Please "
 "note: The quota refers to all items of all users in this context."
-msgstr ""
-"已達配額。請刪除某些項目以建立新項目。請注意: 該配額指的是此環境中所有使用者"
-"所有項目所占的空間。"
+msgstr "已達配額。請刪除某些項目以建立新項目。請注意: 該配額指的是此環境中所有使用者所有項目所占的空間。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:64
 msgid ""
@@ -4386,8 +4340,7 @@ msgid ""
 "delete some appointments in order to create new ones. Please note: The quota "
 "refers to all appointments of all users in this context."
 msgstr ""
-"行事曆配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些約會再建立新的，請"
-"注意：這裡的配額指的是此環境中所有使用者的所有約會占用的空間。"
+"行事曆配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些約會再建立新的，請注意：這裡的配額指的是此環境中所有使用者的所有約會占用的空間。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 msgid ""
@@ -4395,8 +4348,7 @@ msgid ""
 "delete some contacts in order to create new ones. Please note: The quota "
 "refers to all contacts of all users in this context."
 msgstr ""
-"聯絡人配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些聯絡人再建立新的，"
-"請注意：這裡的配額指的是此環境中所有使用者的所有聯絡人占用的空間。"
+"聯絡人配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些聯絡人再建立新的，請注意：這裡的配額指的是此環境中所有使用者的所有聯絡人占用的空間。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:68
 msgid ""
@@ -4404,8 +4356,7 @@ msgid ""
 "some tasks in order to create new ones. Please note: The quota refers to all "
 "tasks of all users in this context."
 msgstr ""
-"任務配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些任務再建立新的，請注"
-"意：這裡的配額指的是此環境中所有使用者的所有任務占用的空間。"
+"任務配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些任務再建立新的，請注意：這裡的配額指的是此環境中所有使用者的所有任務占用的空間。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
 msgid ""
@@ -4413,8 +4364,7 @@ msgid ""
 "some files in order to create new ones. Please note: The quota refers to all "
 "files of all users in this context."
 msgstr ""
-"檔案配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些檔案再建立新的，請注"
-"意：這裡的配額指的是此環境中所有使用者的所有檔案占用的空間。"
+"檔案配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些檔案再建立新的，請注意：這裡的配額指的是此環境中所有使用者的所有檔案占用的空間。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:72
 msgid ""
@@ -4422,8 +4372,7 @@ msgid ""
 "delete some attachments in order to create new ones. Please note: The quota "
 "refers to all attachments of all users in this context."
 msgstr ""
-"附件配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些附件再建立新的，請注"
-"意：這裡的配額指的是此環境中所有使用者的所有附件占用的空間。"
+"附件配額已滿。配額限制: %2$s。已用配額: %1$s。請刪除一些附件再建立新的，請注意：這裡的配額指的是此環境中所有使用者的所有附件占用的空間。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
 msgid ""
@@ -4431,8 +4380,7 @@ msgid ""
 "delete some shares in order to create new ones. Please note: The quota "
 "refers to all shares of one user in this context."
 msgstr ""
-"已達分享項目配額。配額限制: %2$s。已用配額: %1$s。請刪除一些分享項目再建立新"
-"的。請注意: 配額數量指的是此環境中，一位使用者的所有分享項目。"
+"已達分享項目配額。配額限制: %2$s。已用配額: %1$s。請刪除一些分享項目再建立新的。請注意: 配額數量指的是此環境中，一位使用者的所有分享項目。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:76
 msgid ""
@@ -4440,8 +4388,8 @@ msgid ""
 "delete some shares in order to create new ones. Please note: The quota "
 "refers to all shares of one user in this context."
 msgstr ""
-"已達分享鏈結項目配額。配額限制: %2$s。已用配額: %1$s。請刪除一些分享項目再建"
-"立新的。請注意: 配額數量指的是此環境中，一位使用者的所有分享項目。"
+"已達分享鏈結項目配額。配額限制: %2$s。已用配額: %1$s。請刪除一些分享項目再建立新的。請注意: "
+"配額數量指的是此環境中，一位使用者的所有分享項目。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:78
 msgid ""
@@ -4449,17 +4397,14 @@ msgid ""
 "delete some shares in order to create new ones. Please note: The quota "
 "refers to all shares of one user in this context."
 msgstr ""
-"已達訪客使用者數量配額。配額限制: %2$s。已用配額: %1$s。請刪除一些分享項目再"
-"建立新的。請注意: 配額數量指的是此環境中，一位使用者建立的所有訪客使用者數"
-"量。"
+"已達訪客使用者數量配額。配額限制: %2$s。已用配額: %1$s。請刪除一些分享項目再建立新的。請注意: "
+"配額數量指的是此環境中，一位使用者建立的所有訪客使用者數量。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:80
 msgid ""
 "Quota exceeded for signatures. Quota limit: %2$s. Quota used: %1$s. Please "
 "delete some signatures in order to create new ones."
-msgstr ""
-"已達簽名檔的配額數量。配額限制: %2$s，已用配額: %1$s。請刪除一些簽名檔後才能"
-"建立新的。"
+msgstr "已達簽名檔的配額數量。配額限制: %2$s，已用配額: %1$s。請刪除一些簽名檔後才能建立新的。"
 
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
@@ -4714,9 +4659,7 @@ msgstr "資料夾「%1$s」已被保留。請再挑一個。"
 msgid ""
 "Found two folders named \"%1$s\" located below the parent folder. Please "
 "rename one of the folders. There should be no two folders with the same name."
-msgstr ""
-"在父資料夾下找到兩個名為「%1$s」的資料夾，請改掉其中一個的名字。不應有兩個相"
-"同名字的資料夾。"
+msgstr "在父資料夾下找到兩個名為「%1$s」的資料夾，請改掉其中一個的名字。不應有兩個相同名字的資料夾。"
 
 #. Failed to delete all folders
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:98
@@ -4777,9 +4720,7 @@ msgid ""
 "Edit Conflict. Your change cannot be completed because somebody else has "
 "made a conflicting change to the same item. Please refresh or synchronize "
 "and try again."
-msgstr ""
-"編輯衝突。您的更改無法完成，因為其他人已經對相同的條目進行了有衝突的更改。請"
-"刷新或同步後重試。"
+msgstr "編輯衝突。您的更改無法完成，因為其他人已經對相同的條目進行了有衝突的更改。請刷新或同步後重試。"
 
 #. You are not allowed to change groups.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:95
@@ -4908,9 +4849,7 @@ msgid ""
 "Appointments marked as 'Private' can only be scheduled for the respective "
 "user (or owner of the calendar). Please remove additional participants or "
 "remove the \"Private\" mark."
-msgstr ""
-"標記為「私人」的約會只能安排給相應的用戶（或日曆所有者）。請刪除其他參與者或"
-"刪除「私人」標記。"
+msgstr "標記為「私人」的約會只能安排給相應的用戶（或日曆所有者）。請刪除其他參與者或刪除「私人」標記。"
 
 #. *
 #. * Unsupported \"shown as\" value %d.
@@ -5169,9 +5108,7 @@ msgstr "圖像似乎已損壞。"
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$s, current: %3$s) and try again."
-msgstr ""
-"某些輸入的資料超過欄位限制。請縮短「%1$s」的值〈限制：%2$s，現時：%3$s〉後重"
-"試。"
+msgstr "某些輸入的資料超過欄位限制。請縮短「%1$s」的值〈限制：%2$s，現時：%3$s〉後重試。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:91
 msgid ""
@@ -5278,8 +5215,7 @@ msgstr "至少要有一個 ContactObject 才能取得 %s 的值"
 msgid ""
 "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
 "problematic character and try again."
-msgstr ""
-"無法儲存欄位「%2$s」中的字元「%1$s」。請移除這個有問題的字元後再試一次。"
+msgstr "無法儲存欄位「%2$s」中的字元「%1$s」。請移除這個有問題的字元後再試一次。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:139
 msgid ""
@@ -7299,9 +7235,7 @@ msgid ""
 "Edit conflict. Your change cannot be completed because somebody else has "
 "made a conflicting change to the same item. Please refresh or synchronize "
 "and try again."
-msgstr ""
-"編輯衝突。您的更改無法完成，因為其他人已經對相同的條目進行了有衝突的更改。請"
-"刷新或同步後重試。"
+msgstr "編輯衝突。您的更改無法完成，因為其他人已經對相同的條目進行了有衝突的更改。請刷新或同步後重試。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:71
 msgid "Cannot create private task in public/shared folder."
@@ -7390,9 +7324,7 @@ msgstr "開始日期「%1$s」必須早於結束日期「%2$s」。"
 msgid ""
 "The task could not be saved. Please shorten the \"%1$s\" and try again. "
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
-msgstr ""
-"無法儲存任務。請縮短「%1$s」並重試。目前的長度「%3$s」超過了允許的長度"
-"「%2$s」字元。"
+msgstr "無法儲存任務。請縮短「%1$s」並重試。目前的長度「%3$s」超過了允許的長度「%2$s」字元。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
@@ -7456,17 +7388,13 @@ msgstr "更新任務「%1$s」返回一個未知的併發級別。正在作為�
 msgid ""
 "The version can not be set back if the update tasks handling has been "
 "migrated to the Remember Executed Update Tasks concept on schema \"%1$s\"."
-msgstr ""
-"如果更新任務處理已經遷移到 schema「%1$s」上的「記住已執行的更新任務」概念，則"
-"不能設置回原來的版本。"
+msgstr "如果更新任務處理已經遷移到 schema「%1$s」上的「記住已執行的更新任務」概念，則不能設置回原來的版本。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:72
 msgid ""
 "Unable to determine next update task to execute. Executed: \"%1$s\". "
 "Enqueued: \"%2$s\". Scheduled: \"%3$s\"."
-msgstr ""
-"無法確定要執行的下一個更新任務。已執行:「%1$s」。已排隊:「%2$s」。已安排執行:"
-"「%3$s」。"
+msgstr "無法確定要執行的下一個更新任務。已執行:「%1$s」。已排隊:「%2$s」。已安排執行:「%3$s」。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:74
 msgid ""
@@ -7691,9 +7619,7 @@ msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
 "full. Please try to empty your deleted items first, or delete smaller "
 "messages first."
-msgstr ""
-"此訊息無法被移動到垃圾桶，可能是因為您的信件匣快滿了。這種情況下，請先清空您"
-"已刪除的項目，或先刪除較小的訊息。"
+msgstr "此訊息無法被移動到垃圾桶，可能是因為您的信件匣快滿了。這種情況下，請先清空您已刪除的項目，或先刪除較小的訊息。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:92
 msgid "No content available in mail part."
@@ -7855,9 +7781,7 @@ msgid ""
 "Instead of sending the attachment with the E-Mail, the attachment was "
 "published and the link added to your E-Mail. Whoever receives the E-Mail can "
 "then download the attachment."
-msgstr ""
-"此郵件的附件已超過大小限制，已發布附件，並將下載鏈結插入至郵件中，而不直接作"
-"為附件發出。收件者可以下載附件開啟。"
+msgstr "此郵件的附件已超過大小限制，已發布附件，並將下載鏈結插入至郵件中，而不直接作為附件發出。收件者可以下載附件開啟。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:168
 msgid "Draft message could not be saved."
@@ -7950,9 +7874,7 @@ msgid ""
 "Instead of sending the attachments with the E-Mail, the attachments are "
 "shared and the links are added to your E-Mail. Whoever receives the E-Mail "
 "can then access the attachments."
-msgstr ""
-"這封郵件的附件檔案大小已超過限制，已改將附件分享，並將連結加入郵件中，讓收件"
-"者可下載開啟。"
+msgstr "這封郵件的附件檔案大小已超過限制，已改將附件分享，並將連結加入郵件中，讓收件者可下載開啟。"
 
 #. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:219
@@ -7977,32 +7899,39 @@ msgstr "當案"
 msgid "My shared mail attachments"
 msgstr "我分享的郵件附件"
 
-#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-#. Hints to the available attachments for affected message
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:80
+msgid "%1$s has shared the following file with you:"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
-msgid ""
-"The available attachments for this E-Mail can be accessed via the link %1$s"
-msgstr "可於連結 %1$s 存取此郵件的附件"
+msgid "%1$s has shared the following files with you:"
+msgstr ""
+
+#. * View file
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:218
+msgid "View file"
+msgstr "檢視檔案"
+
+#. * View files
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:221
+msgid "View files"
+msgstr "檢視檔案"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
 #. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:236
 msgid "The link will expire on %1$s"
 msgstr "此鏈結將於 %1$s 失效"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the password for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
-msgid "Please use the following password to access the attachments %1$s"
-msgstr "請使用下列密碼開啟附件: %1$s"
-
-#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-#. Indicates the file names for affected message's attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:94
-msgid "The following attachments are accessible:"
-msgstr "可存取下列附件:"
+msgid "Please use the following password: %1$s"
+msgstr ""
 
 #. Fall-back name if a file has no valid name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
@@ -8018,9 +7947,7 @@ msgid ""
 "There was an issue while authenticating. This may be due to a recent "
 "password change. To continue please log out and log back in with your most "
 "current password."
-msgstr ""
-"驗證時出現問題。這可能是您最近更改密碼造成的。要繼續，請立即登出並使用您最新"
-"的密碼登入。"
+msgstr "驗證時出現問題。這可能是您最近更改密碼造成的。要繼續，請立即登出並使用您最新的密碼登入。"
 
 #. *
 #. * The provided login information seem to be wrong. Please try again.
@@ -8203,17 +8130,14 @@ msgstr "信件匣正在使用中，請稍候再試。"
 msgid ""
 "The mailbox on mail server %1$s for login %2$s is already in use by one of "
 "your other processes or clients. Please try again later."
-msgstr ""
-"郵件伺服器 %1$s 上帳號 %2$s 的信箱已被您的一個其他程序或客戶端占用中，請稍後"
-"再試。"
+msgstr "郵件伺服器 %1$s 上帳號 %2$s 的信箱已被您的一個其他程序或客戶端占用中，請稍後再試。"
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
-msgstr ""
-"缺少存取郵件傳輸伺服器 %1$s 的登入資料，或資料錯誤。請檢查關聯帳號的設定。"
+msgstr "缺少存取郵件傳輸伺服器 %1$s 的登入資料，或資料錯誤。請檢查關聯帳號的設定。"
 
 #. *
 #. * The message could not be sent due to a mail server temporary failure. Please try again later.
@@ -8324,16 +8248,14 @@ msgstr "無法連線到帳號 %2$s 的轉送伺服器「%1$s」，請檢查設�
 msgid ""
 "Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
 "Please review if appropriate."
-msgstr ""
-"郵件通訊協定「%1$s」指定了預設連接埠，但啟用了 SSL。請檢查是否設定正確。"
+msgstr "郵件通訊協定「%1$s」指定了預設連接埠，但啟用了 SSL。請檢查是否設定正確。"
 
 #. Shown when SSL port was set but SSL not enabled
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:113
 msgid ""
 "Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. "
 "Please review if appropriate."
-msgstr ""
-"郵件通訊協定「%1$s」指定了安全連接埠，但未啟用 SSL。請檢查是否設定正確。"
+msgstr "郵件通訊協定「%1$s」指定了安全連接埠，但未啟用 SSL。請檢查是否設定正確。"
 
 #. Shown when no SSL port was set for transport protocol but SSL enabled
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:116
@@ -8582,8 +8504,7 @@ msgid ""
 "can not share two folders with exactly the same name with a user. Please "
 "rename the folder before sharing it with this user."
 msgstr ""
-"您已經與同一用戶共用了一個名為 \"%1$s\" 的個人文件夾。您不能與一名用戶共用兩"
-"個具有完全相同名稱的資料夾。請在與該用戶共用之前重命名該資料夾。"
+"您已經與同一用戶共用了一個名為 \"%1$s\" 的個人文件夾。您不能與一名用戶共用兩個具有完全相同名稱的資料夾。請在與該用戶共用之前重命名該資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
 msgid "Duplicate permission defined. Only one permission per user is allowed."
@@ -8663,9 +8584,7 @@ msgstr "物件同時被更改。請重新載入視圖並再試一次。"
 msgid ""
 "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types "
 "(JPG, GIF, BMP or PNG) are supported."
-msgstr ""
-"檔案「%1$s」(「%2$s」) 無法被匯入為圖片。僅支援圖片檔案 (JPG、GIF、BMP 或 "
-"PNG)。"
+msgstr "檔案「%1$s」(「%2$s」) 無法被匯入為圖片。僅支援圖片檔案 (JPG、GIF、BMP 或 PNG)。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:67
 msgid ""
@@ -8739,406 +8658,6 @@ msgstr "用戶的身份驗證失敗: %1$s"
 msgid "No session found for identifier: %1$s"
 msgstr "找不到指示符為 %1$s 的工作階段"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.limit/src/com/openexchange/share/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
-msgid ""
-"Download denied because download limits have been exceeded. Please try again "
-"later."
-msgstr "因為已達下載限制，拒絕下載。請稍後再試。"
-
-#. subject
-#. * $username has shared file "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:65
-msgid "%1$s has shared the file \"%2$s\" with you."
-msgstr "%1$s 已與您分享檔案「%2$s」。"
-
-#. * $username has shared $number_of_files files with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:68
-msgid "%1$s has shared %2$s files with you."
-msgstr "%1$s 已與您分享 %2$s 個檔案。"
-
-#. * $username has shared image "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:71
-msgid "%1$s has shared the image \"%2$s\" with you."
-msgstr "%1$s 已與您分享圖片「%2$s」。"
-
-#. * $username has shared $number_of_images images with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:74
-msgid "%1$s has shared %2$s images with you."
-msgstr "%1$s 已與您分享 %2$s 張圖片。"
-
-#. * $username has shared item "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:77
-msgid "%1$s has shared the item \"%2$s\" with you."
-msgstr "%1$s 已與您分享項目「%2$s」。"
-
-#. * $username has shared $number items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:80
-msgid "%1$s has shared %2$s items with you."
-msgstr "%1$s 已與您分享 %2$s 個項目。"
-
-#. * $username has shared folder "$folder" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:83
-msgid "%1$s has shared the folder \"%2$s\" with you."
-msgstr "%1$s 已與您分享資料夾「%2$s」。"
-
-#. * $username has shared $number folders with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:86
-msgid "%1$s has shared %2$d folders with you."
-msgstr "%1$s 已與您分享 %2$s 個資料夾。"
-
-#. * $username has shared file "$filename" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:89
-msgid "%1$s has shared the file \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s 與群組「%3$s」分享了檔案「%2$s」。"
-
-#. * $username has shared $number_of_files files with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:92
-msgid "%1$s has shared %2$s files with the group \"%3$s\"."
-msgstr "%1$s 與群組「%3$s」分享了 %2$s 個檔案。"
-
-#. * $username has shared image "$filename" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:95
-msgid "%1$s has shared the image \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s 與群組「%3$s」分享了圖片「%2$s」。"
-
-#. * $username has shared $number_of_images images with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:98
-msgid "%1$s has shared %2$s images with the group \"%3$s\"."
-msgstr "%1$s 與群組「%3$s」分享了 %2$s 張圖片。"
-
-#. * $username has shared item "$filename" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:101
-msgid "%1$s has shared the item \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s 與群組「%3$s」分享了項目「%2$s」。"
-
-#. * $username has shared $number items with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:104
-msgid "%1$s has shared %2$s items with the group \"%3$s\"."
-msgstr "%1$s 與群組「%3$s」分享了 %2$s 個項目。"
-
-#. * $username has shared folder "$folder" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:107
-msgid "%1$s has shared the folder \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s 與群組「%3$s」分享了資料夾「%2$s」。"
-
-#. * $username has shared $number folders with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:110
-msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
-msgstr "%1$s 與群組「%3$s」分享了 %2$s 個資料夾。"
-
-#. detailed body
-#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:114
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr "%1$s（%2$s）與您分享了「%3$s」檔案，請點擊下面的按鈕檢視。"
-
-#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:117
-msgid ""
-"%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
-"view them."
-msgstr "%1$s（%2$s）與您分享了 %3$s 個檔案，請點擊下面的按鈕檢視。"
-
-#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:120
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr "%1$s（%2$s）與您分享了「%3$s」圖片，請點擊下面的按鈕檢視。"
-
-#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:123
-msgid ""
-"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
-"to view them."
-msgstr "%1$s（%2$s）與您分享了 %3$s 張圖片，請點擊下面的按鈕檢視。"
-
-#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:126
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr "%1$s（%2$s）與您分享了「%3$s」物件，請點擊下面的按鈕檢視。"
-
-#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:129
-msgid ""
-"%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
-"view them."
-msgstr "%1$s（%2$s）與您分享了 %3$s 個物件，請點擊下面的按鈕檢視。"
-
-#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:132
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr "%1$s（%2$s）與您分享了「%3$s」資料夾，請點擊下面的按鈕檢視。"
-
-#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:135
-msgid ""
-"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
-"to view them."
-msgstr "%1$s（%2$s）與您分享了 %3$s 個資料夾，請點擊下面的按鈕檢視。"
-
-#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:138
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了檔案「%3$s」。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:141
-msgid ""
-"%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個檔案。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:144
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了圖片「%3$s」。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
-msgid ""
-"%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 張圖片。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了項目「%3$s」。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
-msgid ""
-"%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個項目。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了「%3$s」資料夾。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:159
-msgid ""
-"%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個資料夾。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared file "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:163
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了檔案「%3$s」，並留下以下訊息。"
-
-#. * $username ($user_email) has shared $number_of_files files with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:166
-msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了 %3$s 個檔案，並留下以下訊息:"
-
-#. * $username ($user_email) has shared photo "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:169
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了圖片「%3$s」，並留下以下訊息。"
-
-#. * $username ($user_email) has shared $number_of_images images with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:172
-msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了 %3$s 張圖片，並留下以下訊息:"
-
-#. * $username ($user_email) has shared a folder with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:175
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了資料夾「%3$s」，並留下以下訊息。"
-
-#. * $username ($user_email) has shared item "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了項目「%3$s」，並留下以下訊息:"
-
-#. * $username ($user_email) has shared $number_of_items items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
-msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了 %3$d 個項目，並留下以下訊息:"
-
-#. * $username ($user_email) has shared $number_of_folder items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
-msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
-msgstr "%1$s（%2$s）與您分享了 %3$d 個資料夾，並留下以下訊息:"
-
-#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
-msgstr "%1$s (%2$s) 已與「%4$s」群組分享了檔案「%3$s」，並留了下列訊息："
-
-#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
-msgid ""
-"%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個檔案。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
-msgstr "%1$s (%2$s) 已與「%4$s」群組分享了圖片「%3$s」，並留了下列訊息："
-
-#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:196
-msgid ""
-"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 張圖片。請點擊下面的按鈕來檢視。"
-
-#. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:199
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
-"a message:"
-msgstr "%1$s (%2$s) 已與「%4$s」群組分享了資料夾「%3$s」，並留了下列訊息："
-
-#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:202
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
-msgstr "%1$s (%2$s) 已與「%4$s」群組分享了「%3$s」項目，並留了下列訊息："
-
-#. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:205
-msgid ""
-"%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
-msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個項目，並留了下列訊息："
-
-#. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:208
-msgid ""
-"%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
-"message:"
-msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個資料夾，並留了下列訊息："
-
-#. button with label
-#. * View image
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:212
-msgid "View image"
-msgstr "檢視圖片"
-
-#. * View images
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:215
-msgid "View images"
-msgstr "檢視圖片"
-
-#. * View file
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:218
-msgid "View file"
-msgstr "檢視檔案"
-
-#. * View files
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:221
-msgid "View files"
-msgstr "檢視檔案"
-
-#. * View folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:224
-msgid "View folder"
-msgstr "檢視資料夾"
-
-#. * View folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:227
-msgid "View folders"
-msgstr "檢視資料夾"
-
-#. * View item
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:230
-msgid "View item"
-msgstr "檢視物品"
-
-#. * View items
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:233
-msgid "View items"
-msgstr "檢視物品"
-
-#. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:239
-msgid ""
-"This link is password protected. You need the following password to open it:"
-msgstr "此鏈結已受密碼保護，您需要下列密碼才能開啟:"
-
-#.
-#. * Password reset confirm mails
-#.
-#. *
-#. * OX App Suite - Forgot your password?
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:248
-msgid "%1$s - Forgot your password?"
-msgstr "%1$s - 忘記密碼了嗎？"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:250
-msgid "Hello,"
-msgstr "嗨！"
-
-#. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:253
-msgid ""
-"we got informed that you forgot your password. You can set a new password "
-"here:"
-msgstr "我們收到您忘記密碼的通知，您可以在此設定新密碼:"
-
-#. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:256
-msgid "Set password"
-msgstr "設定密碼"
-
-#. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:259
-msgid ""
-"If you didn't request this, please ignore this email. Your password won't "
-"change until you access the button above and set a new one."
-msgstr ""
-"若您並未要求這麼做，請忽略此郵件。在您按下上面的按鈕並設定新密碼前，您的密碼"
-"將不會變更。"
-
-#. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:262
-msgid "This is an automated message, please do not reply."
-msgstr "這是一封自動發出的訊息，請不要回覆。"
-
-#. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:265
-msgid "unknown"
-msgstr "未知"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:62
 msgid "guest"
 msgstr "訪客"
@@ -9194,8 +8713,7 @@ msgstr "您的訪客帳號目前並未以密碼保護，將中止密碼重設。
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
-msgstr ""
-"您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡檔案擁有者。"
+msgstr "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡檔案擁有者。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
@@ -9209,17 +8727,14 @@ msgstr "您對正要開啟的檔案的存取權限已被移除，若您想要再
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
-msgstr ""
-"您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡資料夾擁有"
-"者。"
+msgstr "您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡資料夾擁有者。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
-msgstr ""
-"您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
+msgstr "您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:97
@@ -9241,9 +8756,7 @@ msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
 "\"Continue\"."
-msgstr ""
-"您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡檔案擁有者。若"
-"要檢視您其他分享的檔案，請點擊「繼續」。"
+msgstr "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡檔案擁有者。若要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:106
@@ -9251,9 +8764,7 @@ msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
 "\"."
-msgstr ""
-"您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視"
-"您其他分享的檔案，請點擊「繼續」。"
+msgstr "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:109
@@ -9261,9 +8772,7 @@ msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
 "\"Continue\"."
-msgstr ""
-"您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡資料夾擁有"
-"者。若要檢視您其他分享的檔案，請點擊「繼續」。"
+msgstr "您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡資料夾擁有者。若要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:112
@@ -9271,9 +8780,7 @@ msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
 "\"Continue\"."
-msgstr ""
-"您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢"
-"視您其他分享的檔案，請點擊「繼續」。"
+msgstr "您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:115
@@ -9281,9 +8788,7 @@ msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
 "\"Continue\"."
-msgstr ""
-"您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡擁有者。若要檢視您其"
-"他分享的檔案，請點擊「繼續」。"
+msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡擁有者。若要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:118
@@ -9291,9 +8796,7 @@ msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
 "\"."
-msgstr ""
-"您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視您其他"
-"分享的檔案，請點擊「繼續」。"
+msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視您其他分享的檔案，請點擊「繼續」。"
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:121
@@ -9301,18 +8804,14 @@ msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
 "in."
-msgstr ""
-"您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡檔案擁有者。若"
-"要檢視您其他分享的檔案，請登入。"
+msgstr "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡檔案擁有者。若要檢視您其他分享的檔案，請登入。"
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:124
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
-msgstr ""
-"您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視"
-"您其他分享的檔案，請登入。"
+msgstr "您對正要開啟的檔案的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視您其他分享的檔案，請登入。"
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:127
@@ -9320,9 +8819,7 @@ msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
 "in."
-msgstr ""
-"您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡資料夾擁有"
-"者。若要檢視您其他分享的檔案，請登入。"
+msgstr "您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡資料夾擁有者。若要檢視您其他分享的檔案，請登入。"
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:130
@@ -9330,9 +8827,7 @@ msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
 "in."
-msgstr ""
-"您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢"
-"視您其他分享的檔案，請登入。"
+msgstr "您對正要開啟的資料夾的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視您其他分享的檔案，請登入。"
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:133
@@ -9340,18 +8835,14 @@ msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
 "in."
-msgstr ""
-"您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡擁有者。若要檢視您其"
-"他分享的檔案，請登入。"
+msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡擁有者。若要檢視您其他分享的檔案，請登入。"
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:136
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
-msgstr ""
-"您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視您其他"
-"分享的檔案，請登入。"
+msgstr "您對共享資料的存取權限已被移除，若您想要再次存取，請聯絡 %1$s。若要檢視您其他分享的檔案，請登入。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:64
 msgid "The requested share does not exist."
@@ -9427,6 +8918,378 @@ msgstr "為該連結設定的權限無效。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
 msgstr "圖片"
+
+#. subject
+#. * $username has shared file "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:65
+msgid "%1$s has shared the file \"%2$s\" with you."
+msgstr "%1$s 已與您分享檔案「%2$s」。"
+
+#. * $username has shared $number_of_files files with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:68
+msgid "%1$s has shared %2$s files with you."
+msgstr "%1$s 已與您分享 %2$s 個檔案。"
+
+#. * $username has shared image "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:71
+msgid "%1$s has shared the image \"%2$s\" with you."
+msgstr "%1$s 已與您分享圖片「%2$s」。"
+
+#. * $username has shared $number_of_images images with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:74
+msgid "%1$s has shared %2$s images with you."
+msgstr "%1$s 已與您分享 %2$s 張圖片。"
+
+#. * $username has shared item "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:77
+msgid "%1$s has shared the item \"%2$s\" with you."
+msgstr "%1$s 已與您分享項目「%2$s」。"
+
+#. * $username has shared $number items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:80
+msgid "%1$s has shared %2$s items with you."
+msgstr "%1$s 已與您分享 %2$s 個項目。"
+
+#. * $username has shared folder "$folder" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:83
+msgid "%1$s has shared the folder \"%2$s\" with you."
+msgstr "%1$s 已與您分享資料夾「%2$s」。"
+
+#. * $username has shared $number folders with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:86
+msgid "%1$s has shared %2$d folders with you."
+msgstr "%1$s 已與您分享 %2$s 個資料夾。"
+
+#. * $username has shared file "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:89
+msgid "%1$s has shared the file \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s 與群組「%3$s」分享了檔案「%2$s」。"
+
+#. * $username has shared $number_of_files files with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:92
+msgid "%1$s has shared %2$s files with the group \"%3$s\"."
+msgstr "%1$s 與群組「%3$s」分享了 %2$s 個檔案。"
+
+#. * $username has shared image "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:95
+msgid "%1$s has shared the image \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s 與群組「%3$s」分享了圖片「%2$s」。"
+
+#. * $username has shared $number_of_images images with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:98
+msgid "%1$s has shared %2$s images with the group \"%3$s\"."
+msgstr "%1$s 與群組「%3$s」分享了 %2$s 張圖片。"
+
+#. * $username has shared item "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:101
+msgid "%1$s has shared the item \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s 與群組「%3$s」分享了項目「%2$s」。"
+
+#. * $username has shared $number items with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:104
+msgid "%1$s has shared %2$s items with the group \"%3$s\"."
+msgstr "%1$s 與群組「%3$s」分享了 %2$s 個項目。"
+
+#. * $username has shared folder "$folder" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:107
+msgid "%1$s has shared the folder \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s 與群組「%3$s」分享了資料夾「%2$s」。"
+
+#. * $username has shared $number folders with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:110
+msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
+msgstr "%1$s 與群組「%3$s」分享了 %2$s 個資料夾。"
+
+#. detailed body
+#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:114
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr "%1$s（%2$s）與您分享了「%3$s」檔案，請點擊下面的按鈕檢視。"
+
+#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:117
+msgid ""
+"%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
+"view them."
+msgstr "%1$s（%2$s）與您分享了 %3$s 個檔案，請點擊下面的按鈕檢視。"
+
+#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:120
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr "%1$s（%2$s）與您分享了「%3$s」圖片，請點擊下面的按鈕檢視。"
+
+#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:123
+msgid ""
+"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
+"to view them."
+msgstr "%1$s（%2$s）與您分享了 %3$s 張圖片，請點擊下面的按鈕檢視。"
+
+#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:126
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr "%1$s（%2$s）與您分享了「%3$s」物件，請點擊下面的按鈕檢視。"
+
+#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
+msgid ""
+"%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
+"view them."
+msgstr "%1$s（%2$s）與您分享了 %3$s 個物件，請點擊下面的按鈕檢視。"
+
+#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:132
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr "%1$s（%2$s）與您分享了「%3$s」資料夾，請點擊下面的按鈕檢視。"
+
+#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
+"to view them."
+msgstr "%1$s（%2$s）與您分享了 %3$s 個資料夾，請點擊下面的按鈕檢視。"
+
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了檔案「%3$s」。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:141
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個檔案。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:144
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了圖片「%3$s」。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:147
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 張圖片。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了項目「%3$s」。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
+msgid ""
+"%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個項目。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了「%3$s」資料夾。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:159
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個資料夾。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared file "$filename" with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:163
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
+msgstr "%1$s（%2$s）與您分享了檔案「%3$s」，並留下以下訊息。"
+
+#. * $username ($user_email) has shared $number_of_files files with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:166
+msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
+msgstr "%1$s（%2$s）與您分享了 %3$s 個檔案，並留下以下訊息:"
+
+#. * $username ($user_email) has shared photo "$filename" with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:169
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
+msgstr "%1$s（%2$s）與您分享了圖片「%3$s」，並留下以下訊息。"
+
+#. * $username ($user_email) has shared $number_of_images images with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:172
+msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
+msgstr "%1$s（%2$s）與您分享了 %3$s 張圖片，並留下以下訊息:"
+
+#. * $username ($user_email) has shared a folder with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:175
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
+msgstr "%1$s（%2$s）與您分享了資料夾「%3$s」，並留下以下訊息。"
+
+#. * $username ($user_email) has shared item "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:178
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
+msgstr "%1$s（%2$s）與您分享了項目「%3$s」，並留下以下訊息:"
+
+#. * $username ($user_email) has shared $number_of_items items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:181
+msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
+msgstr "%1$s（%2$s）與您分享了 %3$d 個項目，並留下以下訊息:"
+
+#. * $username ($user_email) has shared $number_of_folder items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:184
+msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
+msgstr "%1$s（%2$s）與您分享了 %3$d 個資料夾，並留下以下訊息:"
+
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:187
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了檔案「%3$s」，並留了下列訊息："
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:190
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個檔案。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:193
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了圖片「%3$s」，並留了下列訊息："
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:196
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 張圖片。請點擊下面的按鈕來檢視。"
+
+#. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:199
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
+"a message:"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了資料夾「%3$s」，並留了下列訊息："
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:202
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了「%3$s」項目，並留了下列訊息："
+
+#. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:205
+msgid ""
+"%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個項目，並留了下列訊息："
+
+#. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:208
+msgid ""
+"%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) 已與「%4$s」群組分享了 %3$s 個資料夾，並留了下列訊息："
+
+#. button with label
+#. * View image
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:212
+msgid "View image"
+msgstr "檢視圖片"
+
+#. * View images
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:215
+msgid "View images"
+msgstr "檢視圖片"
+
+#. * View folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:224
+msgid "View folder"
+msgstr "檢視資料夾"
+
+#. * View folders
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:227
+msgid "View folders"
+msgstr "檢視資料夾"
+
+#. * View item
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:230
+msgid "View item"
+msgstr "檢視物品"
+
+#. * View items
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:233
+msgid "View items"
+msgstr "檢視物品"
+
+#. * The link is password protected. To see it you must use the following password: kac7Nede *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:239
+msgid ""
+"This link is password protected. You need the following password to open it:"
+msgstr "此鏈結已受密碼保護，您需要下列密碼才能開啟:"
+
+#.
+#. * Password reset confirm mails
+#.
+#. *
+#. * OX App Suite - Forgot your password?
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:248
+msgid "%1$s - Forgot your password?"
+msgstr "%1$s - 忘記密碼了嗎？"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:250
+msgid "Hello,"
+msgstr "嗨！"
+
+#. * we got informed that you forgot your password. You can set a new password here:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:253
+msgid ""
+"we got informed that you forgot your password. You can set a new password "
+"here:"
+msgstr "我們收到您忘記密碼的通知，您可以在此設定新密碼:"
+
+#. * Set password
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:256
+msgid "Set password"
+msgstr "設定密碼"
+
+#. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:259
+msgid ""
+"If you didn't request this, please ignore this email. Your password won't "
+"change until you access the button above and set a new one."
+msgstr "若您並未要求這麼做，請忽略此郵件。在您按下上面的按鈕並設定新密碼前，您的密碼將不會變更。"
+
+#. * This is an automated message, please do not reply.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:262
+msgid "This is an automated message, please do not reply."
+msgstr "這是一封自動發出的訊息，請不要回覆。"
+
+#. An error occurred for user 'unknown'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:265
+msgid "unknown"
+msgstr "未知"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:64
 msgid ""
@@ -9605,9 +9468,7 @@ msgid ""
 "The service provider asked for an identity confirmation. This happens for "
 "some accounts and cannot fixed by us. It is in the provider's "
 "responsibility. For this reason, the subscription cannot be completed."
-msgstr ""
-"服務提供者要求身分確認。這會發生在某些帳號當中，是提供者的問題無法由我們修"
-"復。這種情況下無法訂閱。"
+msgstr "服務提供者要求身分確認。這會發生在某些帳號當中，是提供者的問題無法由我們修復。這種情況下無法訂閱。"
 
 #. You already have such a subscription.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
@@ -9747,9 +9608,7 @@ msgstr "在目標環境 %2$s 當中已經有一個名為 %1$s 的使用者存在
 msgid ""
 "The user's files are owned by user %1$s in source context %2$s. Please set "
 "individual or context-associated file storage first."
-msgstr ""
-"使用者的檔案由來源環境 %2$s 的使用者 %1$s 擁有，請先設定各使用者或環境相關的"
-"檔案儲存空間。"
+msgstr "使用者的檔案由來源環境 %2$s 的使用者 %1$s 擁有，請先設定各使用者或環境相關的檔案儲存空間。"
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
@@ -11966,6 +11825,28 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid "All attachments"
+#~ msgstr "所有附件"
+
+#~ msgid "Received attachments"
+#~ msgstr "收到的附件"
+
+#~ msgid "Sent attachments"
+#~ msgstr "寄出的附件"
+
+#~ msgid "Mail Drive"
+#~ msgstr "Mail Drive"
+
+#~ msgid ""
+#~ "The available attachments for this E-Mail can be accessed via the link %1$s"
+#~ msgstr "可於連結 %1$s 存取此郵件的附件"
+
+#~ msgid "Please use the following password to access the attachments %1$s"
+#~ msgstr "請使用下列密碼開啟附件: %1$s"
+
+#~ msgid "The following attachments are accessible:"
+#~ msgstr "可存取下列附件:"
 
 #~ msgid "Invalid E-Mail address."
 #~ msgstr "郵件地址無效。"
