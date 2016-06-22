@@ -558,6 +558,19 @@ public class ReportClientBaseTest {
         Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
         validatePrint(APPSUITE_REPORT);
     }
+    
+    @Test
+    public void testStart_getAppsuiteReportWithTimeframeAndDisplay_displayReport() throws IOException, JSONException {
+        Builder builder = new Builder();
+        builder.addGetAppsuiteReport().addDisplay();
+        builder.addGetAppsuiteReport().addTimeframeStart("01.01.2016");
+        builder.addGetAppsuiteReport().addTimeframeEnd("01.03.2016");
+        
+        reportClientBase.start(builder.build(), REPORT);
+
+        Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
+        validatePrint(APPSUITE_REPORT);
+    }
 
     @Test
     public void testStart_runAndDeliverOption_getPrintAndSentReportBecauseOfFallThroughToDefault() throws IOException, JSONException {
@@ -704,6 +717,8 @@ public class ReportClientBaseTest {
         private static final String OPT_APPSUITE_INSPECT_REPORTS_LONG = "--inspect-appsuite-reports";
         private static final String OPT_APPSUITE_RUN_AND_DELIVER_REPORT_SHORT = "-x";
         private static final String OPT_RUN_AND_DELIVER_OLD_REPORT_SHORT = "-o";
+        private static final String OPT_TIMEFRAME_START = "-S";
+        private static final String OPT_TIMEFRAME_END = "-E";
 
         public Builder addHelp() {
             params.add(OPT_HELP_SHORT);
@@ -788,6 +803,18 @@ public class ReportClientBaseTest {
 
         public Builder addRunAndDeliverOldReport() {
             params.add(OPT_RUN_AND_DELIVER_OLD_REPORT_SHORT);
+            return this;
+        }
+        
+        public Builder addTimeframeStart(String timeString) {
+            params.add(OPT_TIMEFRAME_START);
+            params.add(timeString);
+            return this;
+        }
+        
+        public Builder addTimeframeEnd(String timeString) {
+            params.add(OPT_TIMEFRAME_END);
+            params.add(timeString);
             return this;
         }
 

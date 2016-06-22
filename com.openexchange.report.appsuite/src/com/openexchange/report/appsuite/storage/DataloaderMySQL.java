@@ -46,74 +46,60 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.report.appsuite.storage;
 
-package com.openexchange.report.appsuite;
-
-import java.io.Serializable;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import javax.annotation.concurrent.NotThreadSafe;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * A {@link ContextReport} holds the information discovered about a certain context. See {@link Report}
+ * The {@link DataloaderMySQL} class is used to load data from the database, that is needed
+ * by the report creation functions.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
-public @NotThreadSafe class ContextReport extends Report {
+public class DataloaderMySQL {
 
-    private static final long serialVersionUID = 3879587797122632468L;
+    DatabaseService dbService;
 
-    private final Context ctx;
-
-    /**
-     * capSToContext - This value is used to store the contexts/users for each capabilitySet
-     * in this ContextReport. Each Context can have n users with different capability sets.
-     */
-    private final LinkedHashMap<String, LinkedHashMap<Integer, ArrayList<Integer>>> capSToContext;
-    
-    
-    /**
-     * userList - This value stores all user ids, that are in this context.
-     */
-    private final ArrayList<Integer> userList;
+    public DataloaderMySQL() {
+        super();
+        this.dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+    }
 
     /**
-     * Initializes a new {@link ContextReport}.
+     * Get all contexts IDs as a list for a given sub-admin id. The sub-admin is a tenant administrator.
      * 
-     * @param uuid The UUID of the report this context report belongs to
-     * @param type The report type. This determines which analyzers and cumulators partake in this report run.
-     * @param ctx The context about which this report is
+     * @param sid, sub-admins ID
+     * @return a list with all contextIDs for the sub-admins brand
+     * @throws SQLException, if the query is incorrect or can not be executed
+     * @throws OXException
      */
-    public ContextReport(String uuid, String type, Context ctx) {
-        super(uuid, type, -1);
-        this.ctx = ctx;
-        this.capSToContext = new LinkedHashMap<>();
-        this.userList = new ArrayList<>();
+    public ArrayList<Integer> getAllContextsForSid(Long sid) throws SQLException, OXException {
+        ArrayList<Integer> result = new ArrayList<>();
+        PreparedStatement stmt = null;
+        ResultSet sqlResult = null;
+        Connection currentConnection = this.dbService.getReadOnly();
+        try {
+            stmt = currentConnection.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=" + sid);
+            sqlResult = stmt.executeQuery();
+            while (sqlResult.next()) {
+                result.add(sqlResult.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(sqlResult, stmt);
+            dbService.backReadOnly(currentConnection);
+        }
+        return result;
     }
 
-    /**
-     * @see Report#set(String, String, Serializable)
-     */
-    @Override
-    public ContextReport set(String ns, String key, Serializable value) {
-        super.set(ns, key, value);
-        return this;
-    }
-
-    public Context getContext() {
-        return ctx;
-    }
-
-    public LinkedHashMap<String, LinkedHashMap<Integer, ArrayList<Integer>>> getCapSToContext() {
-        return capSToContext;
-    }
-
-    public ArrayList<Integer> getUserList() {
-        return userList;
-    }
-
-    
 }

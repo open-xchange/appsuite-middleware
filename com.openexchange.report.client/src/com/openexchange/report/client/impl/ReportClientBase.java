@@ -64,11 +64,13 @@ import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mockito.Mockito;
 import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.MacDetail;
@@ -79,6 +81,12 @@ import com.openexchange.tools.console.TableWriter;
 import com.openexchange.tools.console.TableWriter.ColumnFormat;
 import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
+/**
+ * {@link ReportClientBase}
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.8.0
+ */
 public class ReportClientBase extends AbstractJMXTools {
 
     protected static final String CSV_NOT_SUPPORTED_MSG = "CSV support for appsuite report style not available. Please execute again with additional parameter '-o'.";
@@ -90,6 +98,8 @@ public class ReportClientBase extends AbstractJMXTools {
     protected static final String NO_OPTION_SELECTED_USING_THE_DEFAULT_DISPLAY_AND_SEND = "No option selected. Using the default (display and send)";
 
     protected static final String NO_REPORT_FOUND_MSG = "No report found. Please generate a report first by using parameter -e or -x or having a look into the CLT help (-h)!";
+
+    protected static final String NO_START_DATE_SET = "You can not run a report with an end date and no start date set!";
 
     private static final char OPT_SEND_ONLY_SHORT = 's';
 
@@ -125,8 +135,6 @@ public class ReportClientBase extends AbstractJMXTools {
 
     private static final String OPT_APPSUITE_CANCEL_REPORTS_LONG = "cancel-appsuite-reports";
 
-    private static final String OPT_APPSUITE_RUN_LOCAL_LONG = "run-local-reports";
-
     private static final char OPT_APPSUITE_GET_REPORT_SHORT = 'g';
 
     private static final String OPT_APPSUITE_GET_REPORT_LONG = "get-appsuite-report";
@@ -142,6 +150,30 @@ public class ReportClientBase extends AbstractJMXTools {
     private static final char OPT_RUN_AND_DELIVER_OLD_REPORT_SHORT = 'o';
 
     private static final String OPT_RUN_AND_DELIVER_OLD_REPORT_LONG = "run-and-deliver-old-report";
+
+    private static final char OPT_APPSUITE_SET_TIMEFRAME_START_SHORT = 'S';
+
+    private static final String OPT_APPSUITE_SET_TIMEFRAME_START_LONG = "timeframe-start";
+
+    private static final char OPT_APPSUITE_SET_TIMEFRAME_END_SHORT = 'E';
+
+    private static final String OPT_APPSUITE_SET_TIMEFRAME_END_LONG = "timeframe-end";
+
+    private static final char OPT_OXCS_SET_SINGLE_BRAND_SHORT = 'R';
+
+    private static final String OPT_OXCS_SET_SINGLE_BRAND_LONG = "single-tenant";
+
+    private static final char OPT_OXCS_SET_IGNORE_ADMINS_SHORT = 'A';
+
+    private static final String OPT_OXCS_SET_IGNORE_ADMINS_LONG = "ignore-admins";
+
+    private static final char OPT_OXCS_SET_DRIVE_METRICS_SHORT = 'D';
+
+    private static final String OPT_OXCS_SET_DRIVE_METRICS_LONG = "drive-metrics";
+
+    private static final char OPT_OXCS_SET_MAIL_METRICS_SHORT = 'M';
+
+    private static final String OPT_OXCS_SET_MAIL_METRICS_LONG = "mail-metrics";
 
     private CLIOption displayonly = null;
 
@@ -165,12 +197,25 @@ public class ReportClientBase extends AbstractJMXTools {
 
     private CLIOption getAsReport = null;
 
+    private CLIOption timeframeStart = null;
+
+    private CLIOption timeframeEnd = null;
+
     // After changing to appsuite report as default -x does nothing. To be backward compatible -x will still be accepted.
     private CLIOption runAndDeliverAsReport = null;
 
     private CLIOption runAndDeliverOldReport = null;
 
     private CLIOption asReportType = null;
+
+    // OXCS options
+    private CLIOption singleTenant = null;
+
+    private CLIOption ignoreAdmins = null;
+
+    private CLIOption driveMetrics = null;
+
+    private CLIOption mailMetrics = null;
 
     public enum ReportMode {
         SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE
@@ -185,6 +230,7 @@ public class ReportClientBase extends AbstractJMXTools {
                 return;
             }
 
+            //determine the report mode
             ReportMode mode = ReportMode.NONE;
             boolean savereport = false;
 
@@ -212,12 +258,54 @@ public class ReportClientBase extends AbstractJMXTools {
                 }
             }
 
+            // Does this report have a custom timeframe, if not, start- and end-date will be the same
+            SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+            boolean isCustomTimeframe = false;
+            Date timeframeStart = new Date();
+            Date timeframeEnd = new Date();
+            if (parser.getOptionValue(this.timeframeStart) != null && mode != ReportMode.MULTIPLE) {
+                timeframeStart = formatter.parse((String) parser.getOptionValue(this.timeframeStart));
+                isCustomTimeframe = true;
+                if (parser.getOptionValue(this.timeframeEnd) != null) {
+                    timeframeEnd = formatter.parse((String) parser.getOptionValue(this.timeframeEnd));
+                }
+            }
+
+            // If report-type is oxcs-extended, look for other report specific options
+            String reportType = (String) parser.getOptionValue(this.asReportType);
+            if (reportType == null) {
+                reportType = "default";
+            }
+            boolean isSingleTenant = false;
+            Long singeTenantId = 0l;
+            boolean isIgnoreAdmin = false;
+            boolean isShowDriveMetrics = false;
+            boolean isShowMailMetrics = false;
+            if (reportType.equals("oxaas-extended")) {
+                if (parser.getOptionValue(singleTenant) != null) {
+                    isSingleTenant = true;
+                    singeTenantId = Long.parseLong(((String) parser.getOptionValue(singleTenant)));
+                }
+                if (parser.getOptionValue(ignoreAdmins) != null) {
+                    isIgnoreAdmin = true;
+                }
+                if (parser.getOptionValue(driveMetrics) != null) {
+                    isShowDriveMetrics = true;
+                }
+                if (parser.getOptionValue(mailMetrics) != null) {
+                    isShowMailMetrics = true;
+                }
+            }
+            
+            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
+
+            //Start the report generation
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
             final MBeanServerConnection initConnection = initConnection(env);
 
-            // Is one of the appsuite report options set? In that case do something completely different.
-
+            // Run the new report style
             if (null == parser.getOptionValue(this.runAndDeliverOldReport)) {
+                // the new report style does not support csv or advanced report option
                 if (null != parser.getOptionValue(this.csv)) {
                     System.out.println(CSV_NOT_SUPPORTED_MSG);
                 }
@@ -225,21 +313,21 @@ public class ReportClientBase extends AbstractJMXTools {
                     System.out.println(ADVANCED_NOT_SUPPORTED_MSG);
                 }
                 if (null != parser.getOptionValue(this.runAsReport)) {
-                    runASReport(parser.getOptionValue(this.asReportType), initConnection);
-                    inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                    runASReport(reportType, initConnection, reportConfigs);
+                    inspectASReports(reportType, initConnection);
                     return;
                 } else if (null != parser.getOptionValue(this.inspectAsReports)) {
-                    inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                    inspectASReports(reportType, initConnection);
                     return;
                 } else if (null != parser.getOptionValue(this.cancelAsReports)) {
-                    cancelASReports(parser.getOptionValue(this.asReportType), initConnection);
+                    cancelASReports(reportType, initConnection);
                     return;
                 } else if (null != parser.getOptionValue(this.getAsReport)) {
-                    getASReport(parser.getOptionValue(this.asReportType), mode, savereport, initConnection);
+                    getASReport(reportType, mode, savereport, initConnection);
                     return;
                 } else {
                     // run and deliver AS report is no default
-                    runAndDeliverASReport(parser.getOptionValue(this.asReportType), mode, null != parser.getOptionValue(this.asReportType), savereport, initConnection);
+                    runAndDeliverASReport(mode, false, savereport, initConnection, reportConfigs);
                     return;
                 }
             }
@@ -299,21 +387,29 @@ public class ReportClientBase extends AbstractJMXTools {
     }
 
     protected TransportHandler createTransportHandler() {
-        return new TransportHandler();
+        return Mockito.mock(TransportHandler.class);
+        // TODO QS-VS uncomment and remove mock, when done, this will try to send out a report
+        //              return new TransportHandler();
+
     }
 
     @Override
     public void setFurtherOptions(final AdminParser parser) {
         this.sendonly = setShortLongOpt(parser, OPT_SEND_ONLY_SHORT, OPT_SEND_ONLY_LONG, "Send report without displaying it (Disables default)", false, NeededQuadState.notneeded);
+
         this.displayonly = setShortLongOpt(parser, OPT_DISPLAY_ONLY_SHORT, OPT_DISPLAY_ONLY_LONG, "Display report without sending it (Disables default)", false, NeededQuadState.notneeded);
+
         this.csv = setShortLongOpt(parser, OPT_CSV_SHORT, OPT_CSV_LONG, "Show output as CSV", false, NeededQuadState.notneeded);
+
         this.advancedreport = setShortLongOpt(parser, OPT_ADVANCEDREPORT_SHORT, OPT_ADVANCEDREPORT_LONG, "Run an advanced report (could take some time with a lot of contexts)", false, NeededQuadState.notneeded);
+
         this.savereport = setShortLongOpt(parser, OPT_SAVEREPORT_SHORT, OPT_SAVEREPORT_LONG, "Save the report as JSON String instead of sending it", false, NeededQuadState.notneeded);
+
         this.showcombi = setShortLongOpt(parser, OPT_SHOWCOMBINATION_SHORT, OPT_SHOWCOMBINATION_LONG, "Show access combination for bitmask", true, NeededQuadState.notneeded);
 
         this.runAsReport = setShortLongOpt(parser, OPT_APPSUITE_RUN_REPORT_SHORT, OPT_APPSUITE_RUN_REPORT_LONG, "Schedule an appsuite style report. Will print out the reports UUID or, if a report is being generated, the UUID of the pending report", false, NeededQuadState.notneeded);
 
-        this.asReportType = setShortLongOpt(parser, OPT_APPSUITE_REPORT_TYPE_SHORT, OPT_APPSUITE_REPORT_TYPE_LONG, "The type of the report to run. Leave this off for the 'default' report.", true, NeededQuadState.notneeded);
+        this.asReportType = setShortLongOpt(parser, OPT_APPSUITE_REPORT_TYPE_SHORT, OPT_APPSUITE_REPORT_TYPE_LONG, "The type of the report to run. Leave this off for the 'default' report. 'Known reports next to 'default': 'extended', 'oscs-extended' Enables additional options, as listed below (provisioning-bundels needed)", true, NeededQuadState.notneeded);
 
         this.inspectAsReports = setLongOpt(parser, OPT_APPSUITE_INSPECT_REPORTS_LONG, "Prints information about currently running reports", false, false);
 
@@ -324,6 +420,18 @@ public class ReportClientBase extends AbstractJMXTools {
         this.runAndDeliverAsReport = setShortLongOpt(parser, OPT_APPSUITE_RUN_AND_DELIVER_REPORT_SHORT, OPT_APPSUITE_RUN_AND_DELIVER_REPORT_LONG, "Create a new report and send it immediately. Note: This command will run until the report is finished, and that could take a while. Can (and should) be combined with the options for sending, displaying or saving the report ", false, NeededQuadState.notneeded);
 
         this.runAndDeliverOldReport = setShortLongOpt(parser, OPT_RUN_AND_DELIVER_OLD_REPORT_SHORT, OPT_RUN_AND_DELIVER_OLD_REPORT_LONG, "Run old report type. Used to have a backward compatibility.", false, NeededQuadState.notneeded);
+
+        this.timeframeStart = setShortLongOpt(parser, OPT_APPSUITE_SET_TIMEFRAME_START_SHORT, OPT_APPSUITE_SET_TIMEFRAME_START_LONG, "Set the starting date of the timeframe in format: dd.mm.yyyy", true, NeededQuadState.notneeded);
+
+        this.timeframeEnd = setShortLongOpt(parser, OPT_APPSUITE_SET_TIMEFRAME_END_SHORT, OPT_APPSUITE_SET_TIMEFRAME_END_LONG, "Set the ending date of the timeframe in format: dd.mm.yyyy. If start date is set and this parameter not, the current Date is taken as timeframe end.", true, NeededQuadState.notneeded);
+
+        this.singleTenant = setShortLongOpt(parser, OPT_OXCS_SET_SINGLE_BRAND_SHORT, OPT_OXCS_SET_SINGLE_BRAND_LONG, "OXCS only: Run the report for a single brand, identified by the sid of the brands admin. oxcs-extended report-type only", true, NeededQuadState.notneeded);
+
+        this.ignoreAdmins = setShortLongOpt(parser, OPT_OXCS_SET_IGNORE_ADMINS_SHORT, OPT_OXCS_SET_IGNORE_ADMINS_LONG, "OXCS only: Ignore admins and dont show users of that category. oxcs-extended report-type only", false, NeededQuadState.notneeded);
+
+        this.driveMetrics = setShortLongOpt(parser, OPT_OXCS_SET_DRIVE_METRICS_SHORT, OPT_OXCS_SET_DRIVE_METRICS_LONG, "OXCS only: Get drive metrics for each user. oxcs-extended report-type only", false, NeededQuadState.notneeded);
+
+        this.mailMetrics = setShortLongOpt(parser, OPT_OXCS_SET_MAIL_METRICS_SHORT, OPT_OXCS_SET_MAIL_METRICS_LONG, "OXCS only: Get mail metrics for each user. oxcs-extended report-type only", false, NeededQuadState.notneeded);
     }
 
     protected void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, Map<String, String> serverConfiguration, final String[] versions, final AdminParser parser, final ClientLoginCount clc, final ClientLoginCount clcYear) {
@@ -468,6 +576,15 @@ public class ReportClientBase extends AbstractJMXTools {
         return null;
     }
 
+    /**
+     * Retrieve a last report of the given type and determine further actions depending on the given {@link ReportMode}
+     * what should be done with the report.
+     * 
+     * @param reportType, the report type to retrieve
+     * @param mode, the report mode
+     * @param savereport, save this report
+     * @param server, server connection used to invoke report getting methods
+     */
     protected void getASReport(Object reportType, ReportMode mode, boolean savereport, MBeanServerConnection server) {
         if (reportType == null) {
             reportType = "default";
@@ -521,7 +638,9 @@ public class ReportClientBase extends AbstractJMXTools {
                 case DISPLAYANDSEND:
                 default:
                     savereport = false;
+                    // send via TransportHandler 
                     createTransportHandler().sendASReport(report, savereport);
+                    // print to console
                     printASReport(report);
                     break;
             }
@@ -531,19 +650,48 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
-    private void runAndDeliverASReport(Object reportType, ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server) {
-        if (reportType == null) {
-            reportType = "default";
-        }
+    /**
+     * Generate a report with the given parameters and wait until its finished.
+     * 
+     * @param reportType, the report type
+     * @param mode, the mode of report generation
+     * @param silent, should the current status of the report be displayed on the console
+     * @param savereport, save the report to disc or not
+     * @param server, the server connection
+     * @param isCustomTimerange, does this report have a custom timerange
+     * @param start, starting date of the report
+     * @param end, end date of the report
+     * @param isShowSingleTenant, should a report be generated for only one tenant
+     * @param singleTenantId, the id of the tenants admin
+     * @param isIgnoreAdmin, should admin users be ignored
+     * @param isShowDriveMetrics, calculate drive metrics
+     * @param isShowMailMetrics, calculate mail metrics
+     */
+    private void runAndDeliverASReport(ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, ReportConfigs reportConfig) {
+        
         try {
-            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
-
+            String uuid = "";
+//            if (reportType.equals("oxaas-extended")) {
+//                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName() });
+//                if (uuid == null && isShowSingleTenant) {
+//                    System.out.println("No contexts for this brand or the sid is invalid. Report generation aborted.");
+//                    return;
+//                }
+//            } else {
+//                if (isCustomTimerange) {
+//                    uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName() });
+//                } else {
+//                    
+//                }
+//            }
+            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
+            
             // Start polling
             boolean done = false;
             int charNum = 0;
 
             while (!done) {
-                CompositeData[] reports = (CompositeData[]) server.invoke(getAppSuiteReportingName(), "retrievePendingReports", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
+                CompositeData[] reports = (CompositeData[]) server.invoke(getAppSuiteReportingName(), "retrievePendingReports", new Object[] { reportConfig.getType() }, new String[] { String.class.getCanonicalName() });
                 //                if ((reports == null) || (reports.length == 0)) {
                 //                    Object o = server.invoke(getAppSuiteReportingName(), "retrieveLastErrorReport", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
                 //                }
@@ -561,6 +709,7 @@ public class ReportClientBase extends AbstractJMXTools {
 
                 done = !found;
 
+                // wait until the report is done
                 if (!done) {
                     Thread.sleep(silent ? 60000 : 10000);
                 }
@@ -570,9 +719,20 @@ public class ReportClientBase extends AbstractJMXTools {
             System.exit(-1);
         }
 
-        getASReport(reportType, mode, savereport, server);
+        // retrieve the latest report of this type and do what the mode tells to do
+        getASReport(reportConfig.getType(), mode, savereport, server);
     }
 
+    /**
+     * Print the status of the current report:
+     * 
+     * Example:
+     * Time | uuid | context/totalContexts | percent | how long the report has been running
+     * 13:58:43, 058b5dafb1ec4911917c24290b04b97b: 1/1 (100,00 %) ETA: 0 milliseconds
+     * 
+     * @param report
+     * @return
+     */
     private int printStatusLine(CompositeData report) {
         Long start = (Long) report.get("startTime");
         Long now = System.currentTimeMillis();
@@ -618,6 +778,12 @@ public class ReportClientBase extends AbstractJMXTools {
         System.out.print(b);
     }
 
+    /**
+     * Cancel a report of the given type.
+     * 
+     * @param reportType, the type of the report
+     * @param server, the server connection
+     */
     private void cancelASReports(Object reportType, MBeanServerConnection server) {
         if (reportType == null) {
             reportType = "default";
@@ -640,6 +806,12 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
+    /**
+     * Get the status of the current running report of the given type.
+     * 
+     * @param reportType, the type of the report
+     * @param server, the server connection
+     */
     private void inspectASReports(Object reportType, MBeanServerConnection server) {
         if (reportType == null) {
             reportType = "default";
@@ -659,18 +831,34 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
-    private void runASReport(Object reportType, MBeanServerConnection server) {
+    /**
+     * Run a report with the given report type and print out the uuid only. Additionally a custom timerange can be set
+     * 
+     * @param reportType, the type of the report
+     * @param server, the server connection
+     * @param isCustomTimerange, should this report have a custom timerange
+     * @param start, starting date of the timerange
+     * @param end, ending time of the timerange
+     */
+    private void runASReport(Object reportType, MBeanServerConnection server, ReportConfigs reportConfig) {
         if (reportType == null) {
             reportType = "default";
         }
         try {
-            System.out.println("\nRunning report with uuid: " + server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType }, new String[] { String.class.getCanonicalName() }));
+            String uuid = "";
+            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
+            System.out.println("\nRunning report with uuid: " + uuid);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
         }
     }
 
+    /**
+     * Print a given reports header with probable time left.
+     * 
+     * @param compositeData
+     */
     private void printASDiagnostics(CompositeData compositeData) {
         Long start = (Long) compositeData.get("startTime");
         Long now = System.currentTimeMillis();
@@ -698,6 +886,11 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
+    /**
+     * Print the given report to console.
+     * 
+     * @param report
+     */
     private void printASReport(CompositeData report) {
         try {
             Long start = (Long) report.get("startTime");
@@ -726,6 +919,15 @@ public class ReportClientBase extends AbstractJMXTools {
         }
     }
 
+    /**
+     * Convert milliseconds to a pretty time output String.
+     * 
+     * Example:
+     * 0 hours, 28 minutes, 3 seconds
+     * 
+     * @param interval, the time in milliseconds
+     *            @return, a pretty time String
+     */
     private String prettyPrintTimeInterval(long interval) {
         // FROM: http://stackoverflow.com/questions/635935/how-can-i-calculate-a-time-span-in-java-and-format-the-output
 

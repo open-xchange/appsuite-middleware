@@ -75,14 +75,6 @@ public abstract class AbstractReportService implements ReportService {
      * {@inheritDoc}
      */
     @Override
-    public String run() throws OXException {
-        return run(REPORT_TYPE_DEFAULT);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Report getLastReport() {
         return getLastReport(REPORT_TYPE_DEFAULT);
     }
