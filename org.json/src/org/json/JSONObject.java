@@ -415,6 +415,20 @@ public class JSONObject extends AbstractJSONValue {
         return true;
     }
 
+    @Override
+    public boolean equals(final Object object) {
+        if (object instanceof JSONObject) {
+            return isEqualTo((JSONObject) object);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return myHashMap.hashCode();
+    }
+
     /**
      * Gets the {@link Map map} view for this JSON object.
      *
