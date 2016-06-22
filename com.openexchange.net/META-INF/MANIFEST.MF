@@ -20,3 +20,5 @@ Import-Package: com.sun.net,
 Export-Package: com.googlecode.ipv6,
  com.openexchange.tools.ssl,
  edazdarevic.commons.net
+Bundle-ClassPath: lib/java-ipv6-0.17-SNAPSHOT.jar,
+ .
