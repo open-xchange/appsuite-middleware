@@ -50,6 +50,7 @@
 package com.openexchange.webdav;
 
 import java.util.Properties;
+import javax.xml.parsers.SAXParserFactory;
 import junit.framework.TestCase;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
@@ -128,7 +129,7 @@ public abstract class AbstractWebdavTest extends TestCase {
         hostName = AbstractConfigWrapper.parseProperty(webdavProps, "hostname", "localhost");
 
         try {
-            new SAXBuilder();
+            SAXParserFactory fac = SAXParserFactory.newInstance();
         } catch (Throwable t) {
             throw new Exception(t);
         }
