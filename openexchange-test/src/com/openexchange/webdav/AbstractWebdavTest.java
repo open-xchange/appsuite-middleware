@@ -131,6 +131,8 @@ public abstract class AbstractWebdavTest extends TestCase {
 
         try {
             SAXParserFactory fac = SAXParserFactory.newInstance();
+            fac.setNamespaceAware(true);
+            fac.setValidating(false);
             XMLReaders nonvalidating = XMLReaders.NONVALIDATING;
             new SAXBuilder();
         } catch (Throwable t) {
