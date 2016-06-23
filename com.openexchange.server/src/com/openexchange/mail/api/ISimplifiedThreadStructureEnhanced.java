@@ -59,11 +59,11 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 
 /**
- * {@link ISimplifiedThreadStructure}
+ * {@link ISimplifiedThreadStructureEnhanced}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ISimplifiedThreadStructure {
+public interface ISimplifiedThreadStructureEnhanced extends ISimplifiedThreadStructure {
 
     /**
      * An <b>optional</b> convenience method that gets the messages located in given folder sorted by message thread reference. By default
@@ -85,6 +85,6 @@ public interface ISimplifiedThreadStructure {
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
      * @throws OXException If messages cannot be returned
      */
-    public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields) throws OXException;
+    public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields, String[] headerNames) throws OXException;
 
 }
