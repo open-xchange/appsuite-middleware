@@ -49,33 +49,37 @@
 
 package com.openexchange.report.appsuite.management;
 
+import java.util.Date;
 import com.openexchange.report.appsuite.ReportService;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link ReportMXBean} defines the JMX operations for running reports according to the MXBean conventions. These
  * methods are the equivalents of the methods in the {@link ReportService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public interface ReportMXBean {
 
-    /**
-     * Same as calling {@link #run(String)} with the 'default' reportType
-     */
-    public abstract String run() throws Exception;
-    
-    /**
-     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is 
-     * triggered and the uuid of the running report is returned instead
-     * @return The uuid of triggered or the already running report
-     */
-    public abstract String run(String reportType) throws Exception;
+//    /**
+//     * Same as calling {@link #run(String)} with the 'default' reportType
+//     */
+//    public abstract String run() throws Exception;
+//
+//    /**
+//     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is
+//     * triggered and the uuid of the running report is returned instead
+//     * 
+//     * @return The uuid of triggered or the already running report
+//     */
+//    public abstract String run(String reportType) throws Exception;
 
     /**
      * Same as calling {@link #getLastReport(String)} with the 'default' reportType
      */
     public abstract JMXReport retrieveLastReport(String reportType) throws Exception;
-    
+
     /**
      * Get the last finished report of the given reportType or null if during the uptime of this cluster, no report has been produced.
      */
@@ -85,12 +89,12 @@ public interface ReportMXBean {
      * Get a list of currently running reports. You can check the progress of these reports by examining the startTime, pendingTasks and numberOfTasks of the running reports
      */
     public abstract JMXReport[] retrievePendingReports(String reportType) throws Exception;
-    
+
     /**
      * Same as calling {@link #getPendingReports(String)} with the 'default' reportType
      */
     public abstract JMXReport[] retrievePendingReports() throws Exception;
-    
+
     /**
      * Remove the hazelcast markers for the pending report with the given uuid, to make way to start a new report. Useful to cancel crashed reports.
      */
@@ -101,7 +105,39 @@ public interface ReportMXBean {
      */
     public abstract void flushPending(String uuid) throws Exception;
 
-
     public abstract JMXReport retrieveLastErrorReport(String reportType) throws Exception;
 
+//    /**
+//     * Run a report of the given reportType. Consider the given dates as timerange.
+//     * Note that when a report of this type is already running, no new report is
+//     * triggered and the uuid of the running report is returned instead.
+//     * 
+//     * @param reportType
+//     * @param startDate, start of the timerange
+//     * @param endDate, end of the timerange
+//     *            @return, uuid of the report
+//     * @throws Exception
+//     */
+//    public abstract String run(String reportType, Date startDate, Date endDate) throws Exception;
+//
+//    /**
+//     * Run a report of the given report-type. The given parameters will be used to set the created
+//     * reports parameters. Note that when a report of this type is already running, no new report is
+//     * triggered and the uuid of the running report is returned instead.
+//     * 
+//     * @param reportType, the report-type to be run
+//     * @param startDate, start of the timerange
+//     * @param endDate, end of the timerange
+//     * @param isCustomTimerange, is the timerange relevant
+//     * @param isShowSingleTenant, is only one tenant relevant
+//     * @param singleTenantId, the tenants id
+//     * @param isIgnoreAdmin, should admins be ignored in the calculation
+//     * @param isShowDriveMetrics, are drive metrics relevant
+//     * @param isShowMailMetrics, are mail metrics relevant
+//     *            @return, uuid of the report
+//     * @throws Exception
+//     */
+//    String run(String reportType, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) throws Exception;
+
+    String run(ReportConfigs reportConfig) throws Exception;
 }

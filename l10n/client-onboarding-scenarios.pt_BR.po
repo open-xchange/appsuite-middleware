@@ -2,20 +2,19 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-22 13:23+0000\n"
 "PO-Revision-Date: 2016-02-23 18:24-0300\n"
+"Last-Translator: Luiz Fernando Ranghetti <elchevive@opensuse.org>\n"
+"Language-Team: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"POT-Creation-Date: \n"
-"Last-Translator: Luiz Fernando Ranghetti <elchevive@opensuse.org>\n"
-"Language-Team: \n"
-"Language: pt_BR\n"
 "X-Generator: Poedit 1.8.7\n"
 
 # Drive Application
@@ -108,7 +107,8 @@ msgstr ""
 "públicas, compartilhadas e do sistema para clientes Microsoft Outlook®."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
-msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgid ""
+"Synchronize your Mail, Calendar and Address Book data with your device."
 msgstr ""
 "Sincronize seus dados de e-mail, calendário e livro de endereços com seu "
 "dispositivo."

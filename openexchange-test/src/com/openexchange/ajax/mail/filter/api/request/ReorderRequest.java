@@ -67,7 +67,6 @@ import com.openexchange.ajax.mail.filter.api.response.ReorderResponse;
 public class ReorderRequest extends AbstractMailFilterRequest<ReorderResponse> {
 
     private int[] ids;
-    private boolean failOnError = true;
     private String username;
 
     /**
@@ -77,7 +76,7 @@ public class ReorderRequest extends AbstractMailFilterRequest<ReorderResponse> {
         super();
         this.ids = ids;
     }
-
+    
     /*
      * (non-Javadoc)
      * 

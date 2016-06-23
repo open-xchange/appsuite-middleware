@@ -49,12 +49,16 @@
 
 package com.openexchange.ajax.mail.filter.api;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.mail.filter.api.dao.MailFilterConfiguration;
 import com.openexchange.ajax.mail.filter.api.dao.Rule;
+import com.openexchange.ajax.mail.filter.api.request.AbstractMailFilterRequest;
 import com.openexchange.ajax.mail.filter.api.request.AllRequest;
 import com.openexchange.ajax.mail.filter.api.request.ConfigRequest;
 import com.openexchange.ajax.mail.filter.api.request.DeleteRequest;
@@ -67,6 +71,8 @@ import com.openexchange.ajax.mail.filter.api.response.AllResponse;
 import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
 import com.openexchange.ajax.mail.filter.api.response.GetScriptResponse;
 import com.openexchange.ajax.mail.filter.api.response.InsertResponse;
+import com.openexchange.ajax.mail.filter.api.response.ReorderResponse;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MailFilterAPI}
@@ -114,7 +120,7 @@ public class MailFilterAPI {
      */
     public MailFilterConfiguration getConfiguration() throws Exception {
         ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
+        ConfigResponse response = execute(request);
         return response.getMailFilterConfiguration();
     }
 
@@ -127,10 +133,7 @@ public class MailFilterAPI {
      */
     public int createRule(Rule rule) throws Exception {
         InsertRequest request = new InsertRequest(rule, failOnError);
-        InsertResponse response = client.execute(request);
-        if (response.hasError()) {
-            throw response.getException();
-        }
+        InsertResponse response = execute(request);
         return response.getId();
     }
 
@@ -142,7 +145,7 @@ public class MailFilterAPI {
      */
     public void updateRule(Rule rule) throws Exception {
         UpdateRequest request = new UpdateRequest(rule);
-        client.execute(request);
+        execute(request);
     }
 
     /**
@@ -153,7 +156,11 @@ public class MailFilterAPI {
      */
     public void reorder(int[] ids) throws Exception {
         ReorderRequest request = new ReorderRequest(ids);
-        client.execute(request);
+        request.setFailOnError(failOnError);
+        ReorderResponse response = client.execute(request);
+        if (response.getException() != null) {
+            throw response.getException();
+        }
     }
 
     /**
@@ -185,7 +192,7 @@ public class MailFilterAPI {
      */
     public void deleteRule(int id) throws Exception {
         DeleteRequest request = new DeleteRequest(id);
-        client.execute(request);
+        execute(request);
     }
 
     /**
@@ -207,7 +214,7 @@ public class MailFilterAPI {
      */
     public void deleteScript() throws Exception {
         DeleteScriptRequest request = new DeleteScriptRequest();
-        client.execute(request);
+        execute(request);
     }
 
     /**
@@ -225,6 +232,26 @@ public class MailFilterAPI {
     ///////////////////////////////// HELPERS ///////////////////////////////////
 
     /**
+     * Execute the specified {@link AbstractMailFilterRequest} while considering the 'failOnError' flag. If an {@link OXException} is thrown from the
+     * server and the 'failOnError' flag is set to false, then that exception is also thrown from this method.
+     * 
+     * @param request The {@link AbstractMailFilterRequest} to execute
+     * @return The {@link T} response
+     * @throws OXException if a server error occurs
+     * @throws IOException if an I/O error occurs
+     * @throws JSONException if a JSON parsing error occurs
+     */
+    private <T extends AbstractAJAXResponse> T execute(AbstractMailFilterRequest<T> request) throws OXException, IOException, JSONException {
+        request.setFailOnError(failOnError);
+        T response = client.execute(request);
+        OXException oxe = response.getException();
+        if (oxe != null) {
+            throw oxe;
+        }
+        return response;
+    }
+
+    /**
      * Executes the specified {@link AllRequest} and returns the list with rules
      * 
      * @param request The {@link AllRequest} to execute
@@ -232,7 +259,7 @@ public class MailFilterAPI {
      * @throws Exception if execution fails
      */
     private List<Rule> listRules(AllRequest request) throws Exception {
-        AllResponse response = client.execute(request);
+        AllResponse response = execute(request);
 
         Rule[] ruleArray = response.getRules();
         List<Rule> rules = new ArrayList<>(ruleArray.length);

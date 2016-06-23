@@ -49,29 +49,19 @@
 
 package com.openexchange.report.appsuite;
 
+import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link ReportService} runs reports and manages pending and finished reports. This service is available via OSGi
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public interface ReportService {
-
-    /**
-     * Same as calling {@link #run(String)} with the 'default' reportType
-     */
-    String run() throws OXException;
-
-    /**
-     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is triggered and the
-     * uuid of the running report is returned instead
-     * 
-     * @return The uuid of triggered or the already running report
-     */
-    String run(String reportType) throws OXException;
 
     /**
      * Same as calling {@link #getLastReport(String)} with the 'default' reportType
@@ -135,4 +125,6 @@ public interface ReportService {
      * @return {@link Report} that contains the status while abortion and the detailed error description.
      */
     Report getLastErrorReport(String reportType);
+
+    String run(ReportConfigs reportConfig) throws OXException;
 }

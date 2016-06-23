@@ -17,4 +17,8 @@ Import-Package: com.sun.net,
  javax.security.auth.x500,
  javax.security.sasl,
  sun.misc
-Export-Package: com.openexchange.tools.ssl
+Export-Package: com.googlecode.ipv6,
+ com.openexchange.tools.ssl,
+ edazdarevic.commons.net
+Bundle-ClassPath: lib/java-ipv6-0.17-SNAPSHOT.jar,
+ .

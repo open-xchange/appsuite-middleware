@@ -59,7 +59,9 @@ import com.openexchange.context.ContextService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.DependentServiceRegisterer;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.report.LoginCounterService;
+import com.openexchange.report.internal.InfostoreInformationImpl;
 import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.report.internal.LastLoginUpdater;
 import com.openexchange.report.internal.LoginCounterImpl;
@@ -102,6 +104,7 @@ public final class ReportActivator extends HousekeepingActivator {
             ContextService.class,
             UserService.class));
         registerService(LoginCounterService.class, new LoginCounterImpl());
+        registerService(InfostoreInformationService.class, new InfostoreInformationImpl());
     }
 
     private final void track(DependentServiceRegisterer<?> registerer) throws InvalidSyntaxException {

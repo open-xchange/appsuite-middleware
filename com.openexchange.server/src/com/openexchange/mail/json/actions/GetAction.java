@@ -136,11 +136,14 @@ public final class GetAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
-        final JSONArray paths = (JSONArray) req.getRequest().getData();
-        if (null == paths) {
+        Object data = req.getRequest().getData();
+        if (null == data) {
             return performGet(req);
         }
-        return performPut(req, paths);
+        if (!(data instanceof JSONArray)) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
+        return performPut(req, (JSONArray) data);
     }
 
     private AJAXRequestResult performPut(final MailRequest req, final JSONArray paths) throws OXException {

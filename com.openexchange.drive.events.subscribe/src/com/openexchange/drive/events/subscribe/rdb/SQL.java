@@ -67,29 +67,17 @@ public class SQL {
 
     public static String getCreateDriveEventSubscriptionsTableStmt() {
         return "CREATE TABLE driveEventSubscriptions (" +
-            "uuid BINARY(16) DEFAULT NULL," +
+            "uuid BINARY(16) NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
             "service VARCHAR(64) NOT NULL," +
             "token VARCHAR(255) NOT NULL," +
             "user INT4 UNSIGNED NOT NULL," +
             "folder VARCHAR(512)," +
             "timestamp BIGINT(20) NOT NULL," +
-            "PRIMARY KEY (cid,service,token)," +
-            "INDEX (cid,service,folder)" +
+            "PRIMARY KEY (cid,uuid)," +
+            "INDEX (cid,service,folder)," +
+            "INDEX (cid,service,token)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
-        //TODO: change to the following for next release
-//        return "CREATE TABLE driveEventSubscriptions (" +
-//            "uuid BINARY(16) NOT NULL," +
-//            "cid INT4 UNSIGNED NOT NULL," +
-//            "service VARCHAR(64) NOT NULL," +
-//            "token VARCHAR(255) NOT NULL," +
-//            "user INT4 UNSIGNED NOT NULL," +
-//            "folder VARCHAR(512)," +
-//            "timestamp BIGINT(20) NOT NULL," +
-//            "PRIMARY KEY (cid,uuid)," +
-//            "INDEX (cid,service,folder)," +
-//            "INDEX (cid,service,token)" +
-//        ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
     }
 
     public static final String REPLACE_SUBSCRIPTION_STMT =

@@ -83,7 +83,7 @@ public class TransportAccountImpl implements TransportAccount {
     private String name;
     private String personal;
     private String replyTo;
-    private String sentAddress;
+    private String sendAddress;
     private TransportAuth transportAuth;
     private String transportLogin;
     private String transportPassword;
@@ -140,7 +140,7 @@ public class TransportAccountImpl implements TransportAccount {
 
     @Override
     public String getPrimaryAddress() {
-        return this.sentAddress;
+        return this.sendAddress;
     }
 
 
@@ -361,6 +361,10 @@ public class TransportAccountImpl implements TransportAccount {
      */
     public void setTransportStartTls(boolean startTLS) {
         this.transportStartTls = startTLS;
+    }
+
+    public void setSendAddress(String sendAddress) {
+        this.sendAddress = sendAddress;
     }
 
 }

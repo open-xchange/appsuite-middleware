@@ -13,6 +13,7 @@ Import-Package: com.hazelcast.core,
  com.openexchange.hazelcast.serialization,
  com.openexchange.osgi,
  com.openexchange.tools.strings,
+ javax.management.openmbean,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.report.appsuite.serialization
