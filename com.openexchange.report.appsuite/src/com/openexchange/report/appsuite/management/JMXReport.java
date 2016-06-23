@@ -81,7 +81,6 @@ public class JMXReport {
      * Creates a JMX friendly version of the given report
      */
     public JMXReport(Report report) throws Exception {
-        //TODO: QS-VS erweitern um die neuen Parameter des Reports? Ja/Nein/Vielleicht
         this.uuid = report.getUUID();
         this.pendingTasks = report.getNumberOfPendingTasks();
         this.tasks = report.getNumberOfTasks();

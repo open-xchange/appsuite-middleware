@@ -64,7 +64,6 @@ import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mockito.Mockito;
 import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -296,7 +295,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     isShowMailMetrics = true;
                 }
             }
-            
+
             ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
 
             //Start the report generation
@@ -387,10 +386,7 @@ public class ReportClientBase extends AbstractJMXTools {
     }
 
     protected TransportHandler createTransportHandler() {
-        return Mockito.mock(TransportHandler.class);
-        // TODO QS-VS uncomment and remove mock, when done, this will try to send out a report
-        //              return new TransportHandler();
-
+        return new TransportHandler();
     }
 
     @Override
@@ -668,24 +664,24 @@ public class ReportClientBase extends AbstractJMXTools {
      * @param isShowMailMetrics, calculate mail metrics
      */
     private void runAndDeliverASReport(ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, ReportConfigs reportConfig) {
-        
+
         try {
             String uuid = "";
-//            if (reportType.equals("oxaas-extended")) {
-//                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName() });
-//                if (uuid == null && isShowSingleTenant) {
-//                    System.out.println("No contexts for this brand or the sid is invalid. Report generation aborted.");
-//                    return;
-//                }
-//            } else {
-//                if (isCustomTimerange) {
-//                    uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName() });
-//                } else {
-//                    
-//                }
-//            }
+            //            if (reportType.equals("oxaas-extended")) {
+            //                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName() });
+            //                if (uuid == null && isShowSingleTenant) {
+            //                    System.out.println("No contexts for this brand or the sid is invalid. Report generation aborted.");
+            //                    return;
+            //                }
+            //            } else {
+            //                if (isCustomTimerange) {
+            //                    uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName() });
+            //                } else {
+            //                    
+            //                }
+            //            }
             uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
-            
+
             // Start polling
             boolean done = false;
             int charNum = 0;
