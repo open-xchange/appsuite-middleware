@@ -71,10 +71,10 @@ public class Bug22304Test extends AbstractSanitizing {
             // "\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><!-- [if gte mso 9]> --><xml>\n" +
+            "</head><body><!-- [if gte mso 9]><xml>\n" +
             "<o:shapelayout v:ext=\"edit\">\n" +
-            "<o:idmap v:ext=\"edit\" data=\"1\"/>\n" +
-            "</o:shapelayout></xml><!-- <![endif] --></body></html>\n ";
+            "<o:idmap v:ext=\"edit\" data=\"1\" />\n" +
+            "</o:shapelayout></xml><![endif] --></body></html>\n ";
 
         String ret = getHtmlService().getConformHTML(content, "UTF-8");
         assertEquals("Unexpected return value", expected, ret);
