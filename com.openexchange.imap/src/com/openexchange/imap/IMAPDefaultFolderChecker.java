@@ -519,48 +519,49 @@ public class IMAPDefaultFolderChecker {
         SpamHandler spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
 
         boolean checkSpecialUseFolder = false;
-        final ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
-        if (viewFactory != null) {
-            ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-            ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
-            if (prop.isDefined()) {
-                checkSpecialUseFolder = prop.get();
-                prop.set(null);
-            }
-        }
-
         TIntObjectMap<String> indexes = null;
 
-        if (checkSpecialUseFolder) {
-            // Check for marked default folders
-            indexes = new TIntObjectHashMap<String>(6);
-            try {
-                IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
+        if (MailAccount.DEFAULT_ID == accountId) {
+            final ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+            if (viewFactory != null) {
+                ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+                ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                if (prop.isDefined()) {
+                    checkSpecialUseFolder = prop.get();
+                    prop.set(null);
+                }
+            }
 
-                // Entries with "\Drafts" marker
-                Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session, ignoreSubscription);
-                ListLsubEntry entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_DRAFTS], entries) : getByFullName(fullNames[StorageUtility.INDEX_DRAFTS], entries));
-                indexes.put(StorageUtility.INDEX_DRAFTS, entry.getFullName());
+            if (checkSpecialUseFolder) {
+                // Check for marked default folders
+                indexes = new TIntObjectHashMap<String>(6);
+                try {
+                    IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
 
-                // Entries with "\Junk" marker
-                entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session, ignoreSubscription);
-                entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_SPAM], entries) : getByFullName(fullNames[StorageUtility.INDEX_SPAM], entries));
-                indexes.put(StorageUtility.INDEX_SPAM, entry.getFullName());
+                    // Entries with "\Drafts" marker
+                    Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session, ignoreSubscription);
+                    ListLsubEntry entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_DRAFTS], entries) : getByFullName(fullNames[StorageUtility.INDEX_DRAFTS], entries));
+                    indexes.put(StorageUtility.INDEX_DRAFTS, entry.getFullName());
 
-                // Entries with "\Send" marker
-                entries = ListLsubCache.getSentEntry(accountId, imapFolder, session, ignoreSubscription);
-                entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_SENT], entries) : getByFullName(fullNames[StorageUtility.INDEX_SENT], entries));
-                indexes.put(StorageUtility.INDEX_SENT, entry.getFullName());
+                    // Entries with "\Junk" marker
+                    entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session, ignoreSubscription);
+                    entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_SPAM], entries) : getByFullName(fullNames[StorageUtility.INDEX_SPAM], entries));
+                    indexes.put(StorageUtility.INDEX_SPAM, entry.getFullName());
 
-                // Entries with "\Trash" marker
-                entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session, ignoreSubscription);
-                entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_TRASH], entries) : getByFullName(fullNames[StorageUtility.INDEX_TRASH], entries));
-                indexes.put(StorageUtility.INDEX_TRASH, entry.getFullName());
-            } catch (MessagingException e) {
-                throw MimeMailException.handleMessagingException(e, imapConfig, session);
+                    // Entries with "\Send" marker
+                    entries = ListLsubCache.getSentEntry(accountId, imapFolder, session, ignoreSubscription);
+                    entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_SENT], entries) : getByFullName(fullNames[StorageUtility.INDEX_SENT], entries));
+                    indexes.put(StorageUtility.INDEX_SENT, entry.getFullName());
+
+                    // Entries with "\Trash" marker
+                    entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session, ignoreSubscription);
+                    entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_TRASH], entries) : getByFullName(fullNames[StorageUtility.INDEX_TRASH], entries));
+                    indexes.put(StorageUtility.INDEX_TRASH, entry.getFullName());
+                } catch (MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, imapConfig, session);
+                }
             }
         }
-
         // Sanitize given names and full-names against mail account settings
         sanitizeAgainstMailAccount(names, fullNames, namespace, sep, indexes, accountChanged);
 
