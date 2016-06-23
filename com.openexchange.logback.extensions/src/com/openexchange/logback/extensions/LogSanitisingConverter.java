@@ -49,10 +49,9 @@
 
 package com.openexchange.logback.extensions;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.helpers.MessageFormatter;
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
@@ -83,27 +82,19 @@ public class LogSanitisingConverter extends ClassicConverter {
         }
 
         // Go through the arguments list and sanitise each argument
-        List<String> arguments = new ArrayList<String>(event.getArgumentArray().length);
+        String[] sanitisedArguments = new String[event.getArgumentArray().length];
+        int index = 0;
         for (Object o : event.getArgumentArray()) {
-            String string;
-            if (!(o instanceof String)) {
-                string = o.toString();
-            } else {
-                string = (String) o;
-            }
-            arguments.add(sanitise(string));
+            String string = !(o instanceof String) ? o.toString() : (String) o;
+            sanitisedArguments[index++] = sanitise(string);
         }
 
         // Re-compile the formatted message
         String message = event.getMessage();
-        for (String argument : arguments) {
-            message = message.replaceFirst("\\{\\}", argument);
-        }
-
-        return message;
+        return MessageFormatter.arrayFormat(message, sanitisedArguments).getMessage();
     }
 
-    private static final Pattern ANSI_ESCAPE_PATTERN = Pattern.compile("(\\]|\\[)([0-9]*(;|[a-z]*))*");
+    private static final Pattern ANSI_ESCAPE_PATTERN = Pattern.compile("([\\x00-\\x1F])|(\\]|\\[)([0-9]*(;|[a-z]*))*");
 
     /**
      * Sanitises the specified string from any ANSI escape sequences
