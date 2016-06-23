@@ -102,7 +102,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthSe
 
     @Override
     public String getScope() {
-        return "r_fullprofile,r_emailaddress,r_network,r_contactinfo";
+        return "r_basicprofile,r_emailaddress";
     }
 
     @Override
