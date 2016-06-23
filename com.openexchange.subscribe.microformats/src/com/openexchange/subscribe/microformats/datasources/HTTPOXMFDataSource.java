@@ -79,6 +79,9 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
         } catch (IOException e) {
             LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, site);
+        } catch (IllegalArgumentException e) {
+            LOG.error("", e);
+            throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, site);
         }
 
     }
