@@ -272,6 +272,6 @@ public class HtmlServiceImplTest {
     @Test
     public void testBug46608() {
         HtmlSanitizeResult test = htmlServiceImpl.sanitize(htmlDownlevelRevealed, null, false, null, "ox-36f8df7e2a", 102400);
-        Assert.assertTrue(test.getContent().contains("<!-- [if !IE]> --><p>You should see this</p><!-- <![endif] --><!--[if IE 6]><p>Not this</p><![endif]-->"));
+        Assert.assertTrue(test.getContent().contains("<!-- [if !IE]> --><p>You should see this</p><!-- <![endif] --><!-- [if IE 6]><p>Not this</p><![endif] -->"));
     }
 }
