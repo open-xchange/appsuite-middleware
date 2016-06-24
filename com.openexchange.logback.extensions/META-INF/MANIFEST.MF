@@ -74,6 +74,7 @@ Import-Package: ch.qos.logback.classic,
  org.apache.commons.lang.time,
  org.json,
  org.slf4j,
+ org.slf4j.helpers;version="1.7.5",
  org.xml.sax
 Export-Package: com.openexchange.logback.extensions,
  com.openexchange.logback.extensions.logstash

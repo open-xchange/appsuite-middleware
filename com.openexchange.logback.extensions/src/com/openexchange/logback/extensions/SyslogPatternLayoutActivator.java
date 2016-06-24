@@ -87,7 +87,7 @@ public class SyslogPatternLayoutActivator extends ContextAwareBase implements Pr
             PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.TID, ThreadIdConverter.class.getName());
         }
         if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.SAN)) {
-            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.SAN, ThreadIdConverter.class.getName());
+            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.SAN, LogSanitisingConverter.class.getName());
         }
     }
 
