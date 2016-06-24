@@ -60,7 +60,7 @@ import com.openexchange.report.appsuite.jobs.AnalyzeContextBatchTest;
  * Unit tests for the project com.openexchange.report.client
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.1
+ * @since 7.8.2
  */
 @RunWith(Suite.class)
 @SuiteClasses({
