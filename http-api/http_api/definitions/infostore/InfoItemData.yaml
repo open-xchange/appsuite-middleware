@@ -55,4 +55,6 @@ properties:
   com.openexchange.realtime.resourceID:
     type: string
     description: The resource identifier for the infoitem for usage within the realtime component (read-only). (available since 7.8.0)
-  
+  com.openexchange.file.storage.mail.mailMetadata:
+    type: object
+    description: Contains additional metadata for items in the "maildrive" file storage (read-only). (available since 7.8.2)
