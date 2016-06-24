@@ -47,43 +47,44 @@
  *
  */
 
-package com.openexchange.subscribe.microformats.datasources;
+package com.openexchange.mail.api;
 
-import java.io.IOException;
-import java.io.Reader;
-import org.apache.commons.httpclient.HttpException;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.dataobjects.MailMessage;
+
 
 /**
- * {@link HTTPOXMFDataSource}
+ * {@link ISimplifiedThreadStructureEnhanced}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HTTPOXMFDataSource implements OXMFDataSource {
+public interface ISimplifiedThreadStructureEnhanced extends ISimplifiedThreadStructure {
 
-    private static final String URL = "url";
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTTPOXMFDataSource.class);
-
-    @Override
-    public Reader getData(Subscription subscription) throws OXException {
-        String site = (String) subscription.getConfiguration().get(URL);
-
-        try {
-            return HTTPToolkit.grab(site);
-        } catch (HttpException e) {
-            LOG.error("", e);
-            throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, site);
-        } catch (IOException e) {
-            LOG.error("", e);
-            throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, site);
-        } catch (IllegalArgumentException e) {
-            LOG.error("", e);
-            throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, site);
-        }
-
-    }
+    /**
+     * An <b>optional</b> convenience method that gets the messages located in given folder sorted by message thread reference. By default
+     * <code>null</code> is returned assuming that mailing system does not support message thread reference, but may be overridden if it
+     * does.
+     * <p>
+     * If underlying mailing system is IMAP, this method requires the IMAPv4 SORT extension or in detail the IMAP <code>CAPABILITY</code>
+     * command should contain "SORT THREAD=ORDEREDSUBJECT THREAD=REFERENCES".
+     *
+     * @param folder The folder full name
+     * @param includeSent <code>true</code> to include sent mails in thread; otherwise <code>false</code>
+     * @param cache Whether caller allows to serve this call with possibly cached content
+     * @param indexRange The optional index range
+     * @param max The max. number of messages to consider
+     * @param sortField The sort field applied to thread root elements
+     * @param order Whether ascending or descending sort order
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @param headerNames The header names to pre-fill in returned instances of {@link MailMessage}
+     * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
+     * @throws OXException If messages cannot be returned
+     */
+    public List<List<MailMessage>> getThreadSortedMessages(String folder, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] fields, String[] headerNames) throws OXException;
 
 }

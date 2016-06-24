@@ -191,6 +191,9 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         } catch (final IOException e) {
             LOG.error("Could not grab external service: {} Got Error", externalAddress, e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), externalAddress, e);
+        } catch (IllegalArgumentException e) {
+            LOG.error("Could not grab external service: {} Got error: ", externalAddress, e);
+            throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, externalAddress);
         }
     }
 
@@ -252,9 +255,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         } catch (final IOException e) {
             LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            LOG.error("", e);
+            throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, sourceURL);
         }
     }
-
-
 
 }

@@ -95,7 +95,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
     public void reload() throws OXException {
         List<Assignment> readPools = readPools();
         if (readPools.size() == 0) {
-            LOG.error("Cannot find any database assignment. Services that make use of the AssignmentFactory won't work!");
+            LOG.info("Cannot find any database assignment. Services that make use of the AssignmentFactory won't work!");
         }
         assignments.clear();
         assignments.addAll(readPools);

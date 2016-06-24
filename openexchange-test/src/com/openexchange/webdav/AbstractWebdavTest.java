@@ -54,6 +54,7 @@ import javax.xml.parsers.SAXParserFactory;
 import junit.framework.TestCase;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.input.sax.XMLReaders;
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -130,6 +131,10 @@ public abstract class AbstractWebdavTest extends TestCase {
 
         try {
             SAXParserFactory fac = SAXParserFactory.newInstance();
+            fac.setNamespaceAware(true);
+            fac.setValidating(false);
+            XMLReaders nonvalidating = XMLReaders.NONVALIDATING;
+            new SAXBuilder();
         } catch (Throwable t) {
             throw new Exception(t);
         }

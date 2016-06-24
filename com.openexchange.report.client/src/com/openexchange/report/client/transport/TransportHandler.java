@@ -84,10 +84,8 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class TransportHandler {
 
-    // TODO QS-VS: replace when done
-    //    private static final String REPORT_SERVER_URL = "activation.open-xchange.com";
-    private static final String REPORT_SERVER_URL = "localhost";
-
+    private static final String REPORT_SERVER_URL = "activation.open-xchange.com";
+    
     private static final String REPORT_SERVER_CLIENT_AUTHENTICATION_STRING = "rhadsIsAgTicOpyodNainPacloykAuWyribZydkarbEncherc4";
 
     private static final String POST_CLIENT_AUTHENTICATION_STRING_KEY = "clientauthenticationstring";

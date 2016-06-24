@@ -81,6 +81,7 @@ public interface ISimplifiedThreadStructure {
      * @param sortField The sort field applied to thread root elements
      * @param order Whether ascending or descending sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @param headerNames The header names to pre-fill in returned instances of {@link MailMessage}
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
      * @throws OXException If messages cannot be returned
      */

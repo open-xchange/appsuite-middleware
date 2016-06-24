@@ -134,6 +134,7 @@ import com.openexchange.mail.api.IMailMessageStorageBatchCopyMove;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
+import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.unified.UnifiedFullName;
@@ -1019,7 +1020,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final MailMessageComparator COMPARATOR_DESC = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, int[] fromToIndices, final long lookAhead) throws OXException {
+    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, String[] headerFields, int[] fromToIndices, final long lookAhead) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1028,14 +1029,35 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final MailFields mailFields = new MailFields(MailField.getFields(fields));
         mailFields.add(MailField.FOLDER_ID);
         mailFields.add(MailField.toField(MailListField.getField(sortCol)));
+
         // Check message storage
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        if (messageStorage instanceof ISimplifiedThreadStructure) {
-            ISimplifiedThreadStructure simplifiedThreadStructure = (ISimplifiedThreadStructure) messageStorage;
-            // Effective fields
-            // Perform operation
+
+        if (messageStorage instanceof ISimplifiedThreadStructureEnhanced) {
+            ISimplifiedThreadStructureEnhanced stse = (ISimplifiedThreadStructureEnhanced) messageStorage;
             try {
-                return simplifiedThreadStructure.getThreadSortedMessages(
+                return stse.getThreadSortedMessages(
+                    fullName,
+                    mergeWithSent,
+                    cache,
+                    null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
+                    lookAhead,
+                    MailSortField.getField(sortCol),
+                    OrderDirection.getOrderDirection(order),
+                    mailFields.toArray(),
+                    headerFields);
+            } catch (OXException e) {
+                // Check for missing "THREAD=REFERENCES" capability
+                if ((2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) && !MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
+                    throw e;
+                }
+            }
+        }
+
+        if (messageStorage instanceof ISimplifiedThreadStructure) {
+            ISimplifiedThreadStructure sts = (ISimplifiedThreadStructure) messageStorage;
+            try {
+                List<List<MailMessage>> mails = sts.getThreadSortedMessages(
                     fullName,
                     mergeWithSent,
                     cache,
@@ -1044,6 +1066,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     MailSortField.getField(sortCol),
                     OrderDirection.getOrderDirection(order),
                     mailFields.toArray());
+
+                if (null != headerFields && headerFields.length > 0) {
+                    MessageUtility.enrichWithHeaders(mails, headerFields, messageStorage);
+                }
+
+                return mails;
             } catch (OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
                 if ((2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) && !MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
@@ -1051,9 +1079,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
         }
-        /*
-         * Sort by references
-         */
+
+        // Sort by references
         Future<List<MailMessage>> messagesFromSentFolder;
         if (mergeWithSent) {
             final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
@@ -1116,6 +1143,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Apply account identifier
          */
         setAccountInfo2(list);
+
+        if (null != headerFields && headerFields.length > 0) {
+            MessageUtility.enrichWithHeaders(list, headerFields, messageStorage);
+        }
+
         // Return list
         return list;
     }

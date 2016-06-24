@@ -514,7 +514,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                     List<Rule> clientrules = clientrulesandrequire.getRules();
 
-                    if (clientrules.size() != uids.length) {
+                    if (uids.length > clientrules.size()) {
                         LOGGER.debug("The contents of the reorder array are: {}", uids);
                         throw MailFilterExceptionCode.INVALID_REORDER_ARRAY.create(uids.length, clientrules.size(), credentials.getUserid(), credentials.getContextid());
                     }
