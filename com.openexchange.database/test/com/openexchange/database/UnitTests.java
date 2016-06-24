@@ -47,11 +47,13 @@
  *
  */
 
-package com.openexchange.database.internal;
+package com.openexchange.database;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.database.internal.GlobalDatabaseServiceImplTest;
+import com.openexchange.database.internal.ReplicationMonitorTest;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest;
 import com.openexchange.database.internal.wrapping.UpdateFlagTest;
 
@@ -65,7 +67,8 @@ import com.openexchange.database.internal.wrapping.UpdateFlagTest;
     JDBC4ConnectionReturnerTest.class,
     UpdateFlagTest.class,
     ReplicationMonitorTest.class,
-    GlobalDatabaseServiceImplTest.class
+    GlobalDatabaseServiceImplTest.class,
+    DatabasesTest.class
 })
 public class UnitTests {
 
