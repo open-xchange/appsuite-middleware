@@ -93,12 +93,12 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
 
             if (x < 2) {
                 // Expecting an sipgate authorization exception
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 3, response.getException().getCode());
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMS", response.getException().getPrefix());
+                assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), 3, response.getException().getCode());
+                assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), "SMS", response.getException().getPrefix());
             } else {
                 // SMS should run into user limit
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 1, response.getException().getCode());
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMSLIMIT", response.getException().getPrefix());
+                assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), 1, response.getException().getCode());
+                assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), "SMSLIMIT", response.getException().getPrefix());
             }
         }
     }
@@ -133,8 +133,8 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
         // Expecting an sipgate authorization exception
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 3, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMS", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), 3, response.getException().getCode());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), "SMS", response.getException().getPrefix());
     }
 
     @Override

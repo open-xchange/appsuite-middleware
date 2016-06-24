@@ -94,7 +94,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
                 continue;
             }
 
-            assertEquals("Unexpected response from the server! Response does contain a wrong exception.", SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
+            assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
         }
     }
 
@@ -108,7 +108,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
     }
 
     public void testExecute_invalidNumber() throws Exception {
@@ -121,7 +121,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
 
         jsonString = "{\"sms\":\"abcde\"}";
         body = new JSONObject(jsonString);
