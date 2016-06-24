@@ -95,6 +95,7 @@ public class SyslogPatternLayoutActivatorTest {
         Assert.assertTrue(defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.EREPLACE));
         Assert.assertTrue(defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.TID));
         Assert.assertTrue(defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.LMDC));
+        Assert.assertTrue(defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.SAN));
     }
 
     @Test
@@ -108,6 +109,7 @@ public class SyslogPatternLayoutActivatorTest {
         Assert.assertEquals("com.openexchange.logback.extensions.ExtendedReplacingCompositeConverter", defaultConverterMap.get(ExtendedPatternLayoutEncoder.EREPLACE));
         Assert.assertEquals("com.openexchange.logback.extensions.ThreadIdConverter", defaultConverterMap.get(ExtendedPatternLayoutEncoder.TID));
         Assert.assertEquals("com.openexchange.logback.extensions.LineMDCConverter", defaultConverterMap.get(ExtendedPatternLayoutEncoder.LMDC));
+        Assert.assertEquals("com.openexchange.logback.extensions.LogSanitisingConverter", defaultConverterMap.get(ExtendedPatternLayoutEncoder.SAN));
     }
 
     @Test
@@ -116,6 +118,7 @@ public class SyslogPatternLayoutActivatorTest {
         defaultConverterMap.put(ExtendedPatternLayoutEncoder.LMDC, LineMDCConverter.class.getName());
         defaultConverterMap.put(ExtendedPatternLayoutEncoder.EREPLACE, ExtendedReplacingCompositeConverter.class.getName());
         defaultConverterMap.put(ExtendedPatternLayoutEncoder.TID, ThreadIdConverter.class.getName());
+        defaultConverterMap.put(ExtendedPatternLayoutEncoder.SAN, LogSanitisingConverter.class.getName());
         Map<String, String> spy = PowerMockito.spy(defaultConverterMap);
 
         MockUtils.injectValueIntoPrivateField(PatternLayout.class, "defaultConverterMap", spy);
