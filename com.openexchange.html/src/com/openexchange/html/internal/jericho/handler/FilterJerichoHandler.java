@@ -976,8 +976,9 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public void handleComment(final String comment) {
         if (isCss) {
             if (false == maxContentSizeExceeded) {
-                checkCSS(cssBuffer.append(comment), styleMap, cssPrefix);
-                String checkedCSS = cssBuffer.toString();
+                String cleanCss = removeSurroundingHTMLComments(comment);
+                checkCSS(cssBuffer.append(cleanCss), styleMap, cssPrefix);
+                String checkedCSS = "\n<!--\n" + cssBuffer.toString() + "\n-->\n";
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
                     imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
@@ -998,7 +999,14 @@ public final class FilterJerichoHandler implements JerichoHandler {
     /*-
      * ########################## HELPERS #######################################
      */
-
+    private String removeSurroundingHTMLComments(String css) {
+        String retval = css;
+        if (css.startsWith("<!--") && css.endsWith("-->")) {
+            retval = css.substring(4,css.lastIndexOf("-->"));
+        }
+        return retval;
+    }
+    
     private static final byte[] DEFAULT_WHITELIST = String
         .valueOf(
             "# HTML tags and attributes\n"
