@@ -49,17 +49,11 @@
 
 package com.openexchange.file.storage.mail;
 
-import static com.openexchange.mail.json.writer.MessageWriter.getAddressesAsArray;
-import static com.openexchange.mail.mime.converters.MimeMessageConverter.getAddressHeader;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -71,7 +65,6 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mime.MimeTypeMap;
 import com.sun.mail.imap.IMAPMessage;
 
@@ -162,18 +155,6 @@ public final class MailDriveFile extends DefaultFile {
      * Parses specified Mail Drive file.
      *
      * @param message The backing IMAP message representing the attachment
-     * @return This Mail Drive file <b>or <code>null</code> if specified IMAP message represents an invalid attachment</b>
-     * @throws MessagingException If a messaging error occurs
-     * @throws OXException If parsing message fails
-     */
-    private MailDriveFile parseMessage(IMAPMessage message) throws MessagingException, OXException {
-        return parseMessage(message, null);
-    }
-
-    /**
-     * Parses specified Mail Drive file.
-     *
-     * @param message The backing IMAP message representing the attachment
      * @param fields The fields to consider
      * @return This Mail Drive file with property set applied <b>or <code>null</code> if specified IMAP message represents an invalid attachment</b>
      * @throws MessagingException If a messaging error occurs
@@ -248,56 +229,13 @@ public final class MailDriveFile extends DefaultFile {
                     setVersionComment(null);
                 }
 
-                // Compose "meta" field
-                setMeta(mapFor("virtual", mapFor("mail", mailMetadata(message))));
+                // Prepare additional metadata
                 this.metadata = new MailMetadata(message);
             } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;
-    }
-
-    private Map<String, Object> mailMetadata(IMAPMessage message) throws MessagingException {
-        Map<String, Object> map = new LinkedHashMap<String, Object>(6);
-        {
-            String originalSubject = MimeMessageUtility.getHeader("X-Original-Subject", null, message);
-            map.put("subject", null == originalSubject ? JSONObject.NULL : MimeMessageUtility.decodeMultiEncodedHeader(originalSubject));
-        }
-        {
-            Long origUid = (Long) message.getItem("X-REAL-UID");
-            map.put("id", null == origUid ? JSONObject.NULL : origUid.toString());
-        }
-        {
-            String origFolder = (String) message.getItem("X-MAILBOX");
-            map.put("folder", null == origFolder ? JSONObject.NULL : MailFolderUtility.prepareFullname(0, origFolder));
-        }
-        {
-            InternetAddress[] fromHeaders = getAddressHeader("From", message);
-            map.put("from", fromHeaders == null || fromHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(fromHeaders).asList());
-        }
-        {
-            InternetAddress[] toHeaders = getAddressHeader("To", message);
-            map.put("to", toHeaders == null || toHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(toHeaders).asList());
-        }
-        return map;
-    }
-
-    private static Map<String, Object> mapFor(Object... args) {
-        if (null == args) {
-            return null;
-        }
-
-        int length = args.length;
-        if (0 == length || (length % 2) != 0) {
-            return null;
-        }
-
-        Map<String, Object> map = new LinkedHashMap<String, Object>(length >> 1);
-        for (int i = 0; i < length; i+=2) {
-            map.put(args[i].toString(), args[i+1]);
-        }
-        return map;
     }
 
 }
