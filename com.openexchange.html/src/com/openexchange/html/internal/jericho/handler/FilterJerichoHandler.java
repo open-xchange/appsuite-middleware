@@ -999,14 +999,15 @@ public final class FilterJerichoHandler implements JerichoHandler {
     /*-
      * ########################## HELPERS #######################################
      */
+
     private String removeSurroundingHTMLComments(String css) {
         String retval = css;
         if (css.startsWith("<!--") && css.endsWith("-->")) {
-            retval = css.substring(4,css.lastIndexOf("-->"));
+            retval = css.substring(4, css.length() - 3);
         }
         return retval;
     }
-    
+
     private static final byte[] DEFAULT_WHITELIST = String
         .valueOf(
             "# HTML tags and attributes\n"
