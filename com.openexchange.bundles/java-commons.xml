@@ -5,7 +5,7 @@
     </description>
 
     <property name="tmp_dir" value="commons_tmp" />
-    <property name="logback.jar.url" value="https://artifactory.open-xchange.com/artifactory/simple/libs-release/com/openexchange/java-commons/logback-extensions/1.1.0/logback-extensions-1.1.0.jar"/>
+    <property name="logback.jar.url" value="https://artifactory.open-xchange.com/artifactory/libs-release-local/com/openexchange/java-commons/logback-extensions/1.3.0/logback-extensions-1.3.0.jar"/>
 
     <target name="download_check_and_add_jars">
         <antcall target="download_check_and_add_jar">
