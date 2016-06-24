@@ -71,6 +71,7 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
@@ -108,6 +109,11 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
      */
     private EventMapper() {
         super();
+    }
+
+    public CalendarField[] getMappedFields() {
+        Set<CalendarField> fields = getMappings().keySet();
+        return fields.toArray(new CalendarField[fields.size()]);
     }
 
     public CalendarField[] getAssignedFields(UserizedEvent event, CalendarField... mandatoryFields) {
@@ -374,7 +380,7 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
 
             @Override
             public void set(UserizedEvent object, Integer value) throws OXException {
-                throw new UnsupportedOperationException();
+                // throw new UnsupportedOperationException();
             }
 
             @Override
@@ -384,7 +390,7 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
 
             @Override
             public void remove(UserizedEvent object) {
-                throw new UnsupportedOperationException();
+                // throw new UnsupportedOperationException();
             }
         });
         mappings.put(CalendarField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new TimeMapping<UserizedEvent>(CalendarField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.getJsonName(), CalendarField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT.getColumnNumber()) {
@@ -589,22 +595,32 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
 
             @Override
             public boolean isSet(UserizedEvent object) {
-                return false;
+                return null != object.getRecurrenceRule();
             }
 
             @Override
             public void set(UserizedEvent object, Integer value) throws OXException {
-                //
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null == pattern) {
+                    pattern = new SeriesPattern();
+                }
+                pattern.setType(null == value ? 0 : value.intValue());
+                object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
             }
 
             @Override
             public Integer get(UserizedEvent object) {
-                return Integer.valueOf(0);
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                return Integer.valueOf(null == pattern ? 0 : pattern.getType());
             }
 
             @Override
             public void remove(UserizedEvent object) {
-                //
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null != pattern) {
+                    pattern.setType(0);
+                    object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
+                }
             }
         });
         mappings.put(CalendarField.RECURRENCE_START, new DateMapping<UserizedEvent>(CalendarField.RECURRENCE_START.getJsonName(), CalendarField.RECURRENCE_START.getColumnNumber()) {
@@ -693,7 +709,7 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
                 return null;
             }
         });
-        mappings.put(CalendarField.DAYS, new DateMapping<UserizedEvent>(CalendarField.DAYS.getJsonName(), CalendarField.DAYS.getColumnNumber()) {
+        mappings.put(CalendarField.DAYS, new IntegerMapping<UserizedEvent>(CalendarField.DAYS.getJsonName(), CalendarField.DAYS.getColumnNumber()) {
 
             @Override
             public boolean isSet(UserizedEvent object) {
@@ -701,12 +717,12 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
             }
 
             @Override
-            public void set(UserizedEvent object, Date value) throws OXException {
+            public void set(UserizedEvent object, Integer value) throws OXException {
                 //
             }
 
             @Override
-            public Date get(UserizedEvent object) {
+            public Integer get(UserizedEvent object) {
                 return null;
             }
 
@@ -715,7 +731,7 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
                 //
             }
         });
-        mappings.put(CalendarField.DAY_IN_MONTH, new DateMapping<UserizedEvent>(CalendarField.DAY_IN_MONTH.getJsonName(), CalendarField.DAY_IN_MONTH.getColumnNumber()) {
+        mappings.put(CalendarField.DAY_IN_MONTH, new IntegerMapping<UserizedEvent>(CalendarField.DAY_IN_MONTH.getJsonName(), CalendarField.DAY_IN_MONTH.getColumnNumber()) {
 
             @Override
             public boolean isSet(UserizedEvent object) {
@@ -723,12 +739,12 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
             }
 
             @Override
-            public void set(UserizedEvent object, Date value) throws OXException {
+            public void set(UserizedEvent object, Integer value) throws OXException {
                 //
             }
 
             @Override
-            public Date get(UserizedEvent object) {
+            public Integer get(UserizedEvent object) {
                 return null;
             }
 
@@ -737,92 +753,133 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
                 //
             }
         });
-        mappings.put(CalendarField.MONTH, new DateMapping<UserizedEvent>(CalendarField.MONTH.getJsonName(), CalendarField.MONTH.getColumnNumber()) {
+        mappings.put(CalendarField.MONTH, new IntegerMapping<UserizedEvent>(CalendarField.MONTH.getJsonName(), CalendarField.MONTH.getColumnNumber()) {
 
             @Override
             public boolean isSet(UserizedEvent object) {
-                return false;
+                return null != object.getRecurrenceRule();
             }
 
             @Override
-            public void set(UserizedEvent object, Date value) throws OXException {
-                //
+            public void set(UserizedEvent object, Integer value) throws OXException {
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null == pattern) {
+                    pattern = new SeriesPattern();
+                }
+                pattern.setMonth(null == value ? 0 : value.intValue());
+                object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
             }
 
             @Override
-            public Date get(UserizedEvent object) {
-                return null;
+            public Integer get(UserizedEvent object) {
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                return Integer.valueOf(null == pattern ? 0 : pattern.getMonth());
             }
 
             @Override
             public void remove(UserizedEvent object) {
-                //
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null != pattern) {
+                    pattern.setMonth(0);
+                    object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
+                }
             }
         });
-        mappings.put(CalendarField.INTERVAL, new DateMapping<UserizedEvent>(CalendarField.INTERVAL.getJsonName(), CalendarField.INTERVAL.getColumnNumber()) {
+        mappings.put(CalendarField.INTERVAL, new IntegerMapping<UserizedEvent>(CalendarField.INTERVAL.getJsonName(), CalendarField.INTERVAL.getColumnNumber()) {
 
             @Override
             public boolean isSet(UserizedEvent object) {
-                return false;
+                return null != object.getRecurrenceRule();
             }
 
             @Override
-            public void set(UserizedEvent object, Date value) throws OXException {
-                //
+            public void set(UserizedEvent object, Integer value) throws OXException {
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null == pattern) {
+                    pattern = new SeriesPattern();
+                }
+                pattern.setInterval(null == value ? 0 : value.intValue());
+                object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
             }
 
             @Override
-            public Date get(UserizedEvent object) {
-                return null;
+            public Integer get(UserizedEvent object) {
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                return Integer.valueOf(null == pattern ? 0 : pattern.getInterval());
             }
 
             @Override
             public void remove(UserizedEvent object) {
-                //
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null != pattern) {
+                    pattern.setInterval(0);
+                    object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
+                }
             }
         });
         mappings.put(CalendarField.UNTIL, new DateMapping<UserizedEvent>(CalendarField.UNTIL.getJsonName(), CalendarField.UNTIL.getColumnNumber()) {
 
             @Override
             public boolean isSet(UserizedEvent object) {
-                return false;
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                return null != pattern && 0 < pattern.getSeriesEnd();
             }
 
             @Override
             public void set(UserizedEvent object, Date value) throws OXException {
-                //
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null == pattern) {
+                    pattern = new SeriesPattern();
+                }
+                pattern.setSeriesEnd(null == value ? 0L : value.getTime());
+                object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
             }
 
             @Override
             public Date get(UserizedEvent object) {
-                return null;
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                return null == pattern || 0 == pattern.getSeriesEnd() ? null : new Date(pattern.getSeriesEnd());
             }
 
             @Override
             public void remove(UserizedEvent object) {
-                //
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null != pattern) {
+                    pattern.setSeriesEnd(0L);
+                    object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
+                }
             }
         });
-        mappings.put(CalendarField.RECURRENCE_COUNT, new DateMapping<UserizedEvent>(CalendarField.RECURRENCE_COUNT.getJsonName(), CalendarField.RECURRENCE_COUNT.getColumnNumber()) {
+        mappings.put(CalendarField.RECURRENCE_COUNT, new IntegerMapping<UserizedEvent>(CalendarField.RECURRENCE_COUNT.getJsonName(), CalendarField.RECURRENCE_COUNT.getColumnNumber()) {
 
             @Override
             public boolean isSet(UserizedEvent object) {
-                return false;
+                return null != object.getRecurrenceRule();
             }
 
             @Override
-            public void set(UserizedEvent object, Date value) throws OXException {
-                //
+            public void set(UserizedEvent object, Integer value) throws OXException {
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null == pattern) {
+                    pattern = new SeriesPattern();
+                }
+                pattern.setOccurrences(null == value ? 0 : value.intValue());
+                object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
             }
 
             @Override
-            public Date get(UserizedEvent object) {
-                return null;
+            public Integer get(UserizedEvent object) {
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                return Integer.valueOf(null == pattern ? 0 : pattern.getOccurrences());
             }
 
             @Override
             public void remove(UserizedEvent object) {
-                //
+                SeriesPattern pattern = Event2Appointment.getSeriesPattern(object.getRecurrenceRule());
+                if (null != pattern) {
+                    pattern.setOccurrences(0);
+                    object.setRecurrenceRule(Appointment2Event.getRecurrenceRule(pattern));
+                }
             }
         });
         //        mappings.put(CalendarField.NOTIFICATION, new BooleanMapping<UserizedEvent>(CalendarField.NOTIFICATION.getJsonName(), CalendarField.NOTIFICATION.getColumnNumber()) {
@@ -881,7 +938,16 @@ public class EventMapper extends DefaultJsonMapper<UserizedEvent, CalendarField>
                 }
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-
+                    Attendee attendee = new Attendee();
+                    attendee.setEntity(jsonObject.optInt(ParticipantsFields.ID));
+                    attendee.setCuType(Appointment2Event.getCalendarUserType(jsonObject.getInt(ParticipantsFields.TYPE)));
+                    if (jsonObject.has(ParticipantsFields.MAIL)) {
+                        attendee.setUri("mailto:" + jsonObject.getString(ParticipantsFields.MAIL));
+                    }
+                    attendee.setCommonName(jsonObject.optString(ParticipantsFields.DISPLAY_NAME));
+                    attendee.setPartStat(Appointment2Event.getParticipationStatus(jsonObject.optInt(ParticipantsFields.CONFIRMATION)));
+                    attendee.setComment(jsonObject.optString(ParticipantsFields.MESSAGE));
+                    value.add(attendee);
                 }
             }
 

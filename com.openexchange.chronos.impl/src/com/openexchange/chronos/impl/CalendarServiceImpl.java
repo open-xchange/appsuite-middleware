@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,47 +68,36 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public UserizedEvent getEvent(ServerSession session, int folderID, int objectID) throws OXException {
-        try (CalendarReader reader = new CalendarReader(session)) {
-            return reader.readEvent(folderID, objectID);
-        } catch (IOException e) {
-            throw new OXException(e);
-        }
+        CalendarReader reader = new CalendarReader(session);
+        return reader.readEvent(folderID, objectID);
     }
 
     @Override
     public List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs) throws OXException {
         List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
-        try (CalendarReader reader = new CalendarReader(session)) {
-            for (EventID eventID : eventIDs) {
-                events.add(reader.readEvent(eventID));
-            }
-        } catch (IOException e) {
-            throw new OXException(e);
+        CalendarReader reader = new CalendarReader(session);
+        for (EventID eventID : eventIDs) {
+            events.add(reader.readEvent(eventID));
         }
         return events;
     }
 
     @Override
     public List<UserizedEvent> getEventsInFolder(ServerSession session, int folderID, Date from, Date until) throws OXException {
-        try (CalendarReader reader = new CalendarReader(session)) {
-            return reader.readEventsInFolder(folderID, from, until);
-        } catch (IOException e) {
-            throw new OXException(e);
-        }
+        CalendarReader reader = new CalendarReader(session);
+        return reader.readEventsInFolder(folderID, from, until);
     }
 
     @Override
     public List<UserizedEvent> getEventsOfUser(ServerSession session, Date from, Date until) throws OXException {
-        try (CalendarReader reader = new CalendarReader(session)) {
-            return reader.readEventsOfUser(from, until);
-        } catch (IOException e) {
-            throw new OXException(e);
-        }
+        CalendarReader reader = new CalendarReader(session);
+        return reader.readEventsOfUser(from, until);
     }
 
+    @Override
     public UserizedEvent createEvent(ServerSession session, UserizedEvent event) throws OXException {
-
-        return null;
+        CalendarWriter writer = new CalendarWriter(session);
+        return writer.insertEvent(event);
     }
 
 }

@@ -50,13 +50,15 @@
 package com.openexchange.chronos.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.resource.Resource;
 
 /**
  * {@link CalendarService}
@@ -64,46 +66,49 @@ import com.openexchange.resource.Resource;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarUtils {
+public class Consistency {
 
-    public static List<Attendee> filterAttendees(List<Attendee> attendees, CalendarUserType type) {
-        List<Attendee> filteredAttendees = new ArrayList<Attendee>();
-        for (Attendee attendee : attendees) {
-            if (type.equals(attendee.getCuType())) {
-                filteredAttendees.add(attendee);
-            }
+    public static Attendee addUserAttendeeIfMissing(UserizedEvent event, int userID, int folderID) {
+        List<Attendee> attendees = event.getAttendees();
+        if (null == attendees) {
+            attendees = new ArrayList<Attendee>();
+            event.setAttendees(attendees);
         }
-        return filteredAttendees;
-    }
-	
-	public static Attendee findAttendee(List<Attendee> attendees, int entity) {
-		if (null != attendees && 0 < attendees.size()) {
-			for (Attendee attendee : attendees) {
-				if (entity == attendee.getEntity()) {
-					return attendee;
-				}				
-			}
-		}
-		return null;
-	}
-	
-	public static boolean containsAttendee(List<Attendee> attendees, int entity) {
-		return null != findAttendee(attendees, entity);
-	}
-	
-    public static String getCalAddress(User user) {
-        return "mailto:" + user.getMail();
+        Attendee attendee = CalendarUtils.findAttendee(attendees, userID);
+        if (null == attendee) {
+            attendee = new Attendee();
+            attendee.setEntity(userID);
+            attendees.add(attendee);
+        }
+        attendee.setCuType(CalendarUserType.INDIVIDUAL);
+        attendee.setFolderID(folderID);
+        if (null == attendee.getPartStat()) {
+            attendee.setPartStat(ParticipationStatus.ACCEPTED);
+        }
+        return attendee;
     }
 
-    public static String getCalAddress(int contextID, Resource resource) {
-        return "urn:uuid:" + resource.getIdentifier(); //TODO encode into uid
+    public static Organizer setOrganizer(UserizedEvent event, User user) {
+        Organizer organizer = event.getOrganizer();
+        if (null == organizer) {
+            organizer = new Organizer();
+            event.setOrganizer(organizer);
+        }
+        return CalendarUtils.applyProperties(organizer, user);
     }
 
-    public static <T extends CalendarUser> T applyProperties(T calendarUser, User user) {
-        calendarUser.setEntity(user.getId());
-        calendarUser.setCommonName(user.getDisplayName());
-        calendarUser.setUri(getCalAddress(user));
-        return calendarUser;
+    public static void setModifiedNow(UserizedEvent event, int modifiedBy) {
+        event.setLastModified(new Date());
+        event.setModifiedBy(modifiedBy);
+    }
+
+    public static void setCreatedNow(UserizedEvent event, int createdBy) {
+        event.setCreated(new Date());
+        event.setCreatedBy(createdBy);
+    }
+
+    private Consistency() {
+        super();
     }
 
 }

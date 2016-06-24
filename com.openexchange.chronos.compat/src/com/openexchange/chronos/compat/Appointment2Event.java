@@ -50,6 +50,9 @@
 package com.openexchange.chronos.compat;
 
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.Freq;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
@@ -194,6 +197,42 @@ public class Appointment2Event {
         trigger.setDuration("-PT" + reminder + 'M');
         alarm.setTrigger(trigger);
         return alarm;
+    }
+
+    /**
+     * Gets the recurrence rule
+     * 
+     * @param pattern
+     * @return
+     */
+    public static String getRecurrenceRule(SeriesPattern pattern) {
+        if (null == pattern) {
+            return null;
+        }
+        RecurrenceRule rule;
+        switch (pattern.getType()) {
+            case 1: // com.openexchange.groupware.container.CalendarObject.DAILY
+                rule = new RecurrenceRule(Freq.DAILY);
+                if (0 < pattern.getInterval()) {
+                    rule.setInterval(pattern.getInterval());
+                }
+                if (0 < pattern.getOccurrences()) {
+                    rule.setCount(pattern.getOccurrences());
+                } else if (0 < pattern.getSeriesEnd()) {
+                    rule.setUntil(new DateTime(pattern.getSeriesEnd()));
+                }
+                return rule.toString();
+            case 2: // com.openexchange.groupware.container.CalendarObject.WEEKLY
+                break;
+            case 3: // com.openexchange.groupware.container.CalendarObject.MONTHLY
+                break;
+            case 4: // com.openexchange.groupware.container.CalendarObject.YEARLY
+                break;
+            default:
+                return null;
+        }
+
+        return null;
     }
 
     /**

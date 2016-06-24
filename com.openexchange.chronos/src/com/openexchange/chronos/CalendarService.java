@@ -70,4 +70,6 @@ public interface CalendarService {
 
     List<UserizedEvent> getEventsOfUser(ServerSession session, Date from, Date until) throws OXException;
 
+    UserizedEvent createEvent(ServerSession session, UserizedEvent event) throws OXException;
+
 }

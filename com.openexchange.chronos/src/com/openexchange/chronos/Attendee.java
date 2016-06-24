@@ -58,11 +58,31 @@ package com.openexchange.chronos;
  */
 public class Attendee extends CalendarUser {
 
+    CalendarUserType cuType;
     ParticipantRole role;
     ParticipationStatus partStat;
     String comment;
     Boolean rsvp;
     int folderID;
+    String member;
+
+    /**
+     * Gets the cuType
+     *
+     * @return The cuType
+     */
+    public CalendarUserType getCuType() {
+        return cuType;
+    }
+
+    /**
+     * Sets the cuType
+     *
+     * @param cuType The cuType to set
+     */
+    public void setCuType(CalendarUserType cuType) {
+        this.cuType = cuType;
+    }
 
     /**
      * Gets the role
@@ -152,6 +172,20 @@ public class Attendee extends CalendarUser {
      */
     public void setFolderID(int folderID) {
         this.folderID = folderID;
+    }
+
+    /**
+     * @return the member
+     */
+    public String getMember() {
+        return member;
+    }
+
+    /**
+     * @param member the member to set
+     */
+    public void setMember(String member) {
+        this.member = member;
     }
 
 }

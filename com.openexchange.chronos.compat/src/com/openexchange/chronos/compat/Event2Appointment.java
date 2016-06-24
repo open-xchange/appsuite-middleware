@@ -50,6 +50,8 @@
 package com.openexchange.chronos.compat;
 
 import java.util.List;
+import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
@@ -255,6 +257,35 @@ public class Event2Appointment {
                         }
                     }
                 }
+            }
+        }
+        return null;
+    }
+
+    public static SeriesPattern getSeriesPattern(String recurrenceRule) {
+        if (Strings.isNotEmpty(recurrenceRule)) {
+            RecurrenceRule rule;
+            try {
+                rule = new RecurrenceRule(recurrenceRule);
+            } catch (InvalidRecurrenceRuleException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return null;
+            }
+            SeriesPattern pattern = new SeriesPattern();
+            switch (rule.getFreq()) {
+                case DAILY:
+                    pattern.setType(1);
+                    pattern.setInterval(rule.getInterval());
+                    if (null != rule.getCount()) {
+                        pattern.setOccurrences(rule.getCount());
+                    }
+                    if (null != rule.getUntil()) {
+                        pattern.setSeriesEnd(rule.getUntil().getTimestamp());
+                    }
+                    return pattern;
+                default:
+                    break;
             }
         }
         return null;

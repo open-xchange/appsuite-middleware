@@ -71,4 +71,6 @@ public interface CalendarStorage {
 
     List<Event> loadEventsOfUser(int userID, Date from, Date until) throws OXException;
 
+    int insertEvent(Event event) throws OXException;
+
 }

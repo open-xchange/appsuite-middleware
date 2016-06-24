@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -63,6 +64,8 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -70,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -149,6 +153,25 @@ public final class NewAction extends AppointmentAction {
 
         return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
 
+    }
+
+    protected AJAXRequestResult performNew(AppointmentAJAXRequest req) throws OXException, JSONException {
+        ServerSession session = req.getSession();
+        String timeZoneID = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        if (Strings.isEmpty(timeZoneID)) {
+            timeZoneID = session.getUser().getTimeZone();
+        }
+        JSONObject jsonObject = req.getData();
+        UserizedEvent event = getMapper().deserialize(jsonObject, getMapper().getMappedFields(), timeZoneID);
+        boolean ignoreConflicts = jsonObject.optBoolean(AppointmentFields.IGNORE_CONFLICTS, false);
+        boolean notification = jsonObject.optBoolean(AppointmentFields.NOTIFICATION, false);
+
+        CalendarService calendarService = getService(CalendarService.class);
+        UserizedEvent createdEvent = calendarService.createEvent(session, event);
+
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, createdEvent.getId()), createdEvent.getLastModified(), "json");
+
+        //        return perform(req);
     }
 
 }

@@ -128,7 +128,11 @@ public class EventResultConverter implements ResultConverter {
 
     private JSONObject convertEvent(UserizedEvent event, String timeZoneID, Session session) throws OXException {
         try {
-            return mapper.serialize(event, mapper.getAssignedFields(event), timeZoneID, session);
+            JSONObject json = mapper.serialize(event, mapper.getAssignedFields(event), timeZoneID, session);
+            UserizedEvent event2 = mapper.deserialize(json, mapper.getMappedFields());
+            json = mapper.serialize(event2, mapper.getAssignedFields(event2), timeZoneID, session);
+
+            return json;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }

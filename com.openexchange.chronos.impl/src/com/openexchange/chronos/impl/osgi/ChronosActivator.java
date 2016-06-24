@@ -56,7 +56,10 @@ import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.group.GroupService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ChronosActivator}
@@ -77,7 +80,8 @@ public class ChronosActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CalendarStorageFactory.class, FolderService.class };
+        return new Class<?>[] { ConfigurationService.class, CalendarStorageFactory.class, FolderService.class, UserService.class,
+            GroupService.class, ResourceService.class };
     }
 
     @Override

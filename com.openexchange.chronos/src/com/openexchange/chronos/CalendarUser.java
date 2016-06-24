@@ -62,7 +62,6 @@ public class CalendarUser {
     String commonName;
     int entity;
     String sentBy;
-    CalendarUserType cuType;
     String email;
 
     /**
@@ -135,24 +134,6 @@ public class CalendarUser {
      */
     public void setSentBy(String sentBy) {
         this.sentBy = sentBy;
-    }
-
-    /**
-     * Gets the cuType
-     *
-     * @return The cuType
-     */
-    public CalendarUserType getCuType() {
-        return cuType;
-    }
-
-    /**
-     * Sets the cuType
-     *
-     * @param cuType The cuType to set
-     */
-    public void setCuType(CalendarUserType cuType) {
-        this.cuType = cuType;
     }
 
     /**

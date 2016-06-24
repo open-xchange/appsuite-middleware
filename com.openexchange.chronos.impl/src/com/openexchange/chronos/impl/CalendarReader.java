@@ -53,8 +53,6 @@ import static com.openexchange.chronos.impl.CalendarUtils.containsAttendee;
 import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
 import static com.openexchange.chronos.impl.Check.requireFolderPermission;
 import static com.openexchange.chronos.impl.Check.requireReadPermission;
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -83,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarReader implements Closeable {
+public class CalendarReader {
 
     private final ServerSession session;
     private final CalendarStorage storage;
@@ -201,12 +199,6 @@ public class CalendarReader implements Closeable {
 
     private UserizedFolder getFolder(int folderID) throws OXException {
         return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session, null);
-    }
-
-    @Override
-    public void close() throws IOException {
-        // TODO Auto-generated method stub
-
     }
 
 }
