@@ -1716,6 +1716,7 @@ Responsible for sending out notifications for changed object permissions of an i
 |---|---|---|
 |**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
 |**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**com.openexchange.file.storage.mail.mailMetadata**  <br>*optional*|Contains additional metadata for items in the "maildrive" file storage (read-only). (available since 7.8.2)|object|
 |**com.openexchange.realtime.resourceID**  <br>*optional*|The resource identifier for the infoitem for usage within the realtime component (read-only). (available since 7.8.0)|string|
 |**com.openexchange.share.extendedObjectPermissions**  <br>*optional*|An array of extended object permissions (read-only). (available since 7.8.0)|< [InfoItemExtendedPermission](#infoitemextendedpermission) > array|
 |**created_by**  <br>*optional*|User ID of the user who created this object.|string|
@@ -3284,6 +3285,7 @@ A test object which result will be negated.
 |---|---|---|
 |**categories**  <br>*optional*|String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.|string|
 |**color_label**  <br>*optional*|Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive). Not present in folder objects.|integer|
+|**com.openexchange.file.storage.mail.mailMetadata**  <br>*optional*|Contains additional metadata for items in the "maildrive" file storage (read-only). (available since 7.8.2)|object|
 |**com.openexchange.realtime.resourceID**  <br>*optional*|The resource identifier for the infoitem for usage within the realtime component (read-only). (available since 7.8.0)|string|
 |**com.openexchange.share.extendedObjectPermissions**  <br>*optional*|An array of extended object permissions (read-only). (available since 7.8.0)|< [InfoItemExtendedPermission](#infoitemextendedpermission) > array|
 |**created_by**  <br>*optional*|User ID of the user who created this object.|string|

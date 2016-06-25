@@ -284,6 +284,7 @@ specific field data of single or multiple objects.
 | 711 | number_of_versions |
 | 7010 | com.openexchange.share.extendedObjectPermissions |
 | 7020 | com.openexchange.realtime.resourceID |
+| 7030 | com.openexchange.file.storage.mail.mailMetadata |
 
 # Attachment data
 
