@@ -393,6 +393,7 @@ public final class Databases {
     }
 
     private static final Pattern DUPLICATE_KEY = Pattern.compile("Duplicate entry '([^']+)' for key '([^']+)'");
+    private static final Pattern DUPLICATE_KEY_MYSQL_PRE51 = Pattern.compile("Duplicate entry '([^']+)' for key 1");
 
     /**
      * Checks if given {@link SQLException} instance denotes an integrity constraint violation due to a PRIMARY KEY conflict.
@@ -401,7 +402,28 @@ public final class Databases {
      * @return <code>true</code> if given {@link SQLException} instance denotes a PRIMARY KEY conflict; otherwise <code>false</code>
      */
     public static boolean isPrimaryKeyConflictInMySQL(SQLException e) {
-        return isKeyConflictInMySQL(e, "PRIMARY");
+        return isKeyConflictInMySQL(e, "PRIMARY") || isPrimaryKeyConflictInMySQL50(e);
+    }
+
+    private static boolean isPrimaryKeyConflictInMySQL50(SQLException e) {
+        if (null == e) {
+            return false;
+        }
+        /*
+         * SQLState 23000: Integrity Constraint Violation
+         * Error: 1586 SQLSTATE: 23000 (ER_DUP_ENTRY_WITH_KEY_NAME)
+         * Error: 1062 SQLSTATE: 23000 (ER_DUP_ENTRY)
+         * com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException: Duplicate entry 'some-data' for key 1
+         * Message: Duplicate entry '%s' for key 1
+         */
+        if ("23000".equals(e.getSQLState())) {
+            int errorCode = e.getErrorCode();
+            if (1062 == errorCode || 1586 == errorCode) {
+                Matcher matcher = DUPLICATE_KEY_MYSQL_PRE51.matcher(e.getMessage());
+                return matcher.matches();
+            }
+        }
+        return false;
     }
 
     /**
