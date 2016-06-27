@@ -80,6 +80,7 @@ public final class ACLPermission extends MailPermission {
     private transient ACL acl;
 
     private int canRename;
+    private int canStoreSeenFlag;
 
     /**
      * Initializes a new {@link ACLPermission}.
@@ -87,6 +88,7 @@ public final class ACLPermission extends MailPermission {
     public ACLPermission() {
         super();
         canRename = -1;
+        canStoreSeenFlag = -1;
     }
 
     @Override
@@ -166,7 +168,7 @@ public final class ACLPermission extends MailPermission {
     public int canRename() {
         return canRename;
     }
-
+    
     /**
      * Sets the rename flag.
      *
@@ -174,6 +176,20 @@ public final class ACLPermission extends MailPermission {
      */
     public void setCanRename(final int canRename) {
         this.canRename = canRename;
+    }
+
+    @Override
+    public int canStoreSeenFlag() {
+        return canStoreSeenFlag;
+    }
+    
+    /**
+     * Sets the canStoreSeenFlag
+     *
+     * @param canStoreSeenFlag The store <code>"seen"</code> flag permission to set
+     */
+    public void setCanStoreSeenFlag(int canStoreSeenFlag) {
+        this.canStoreSeenFlag = canStoreSeenFlag;
     }
 
     /*-
@@ -235,6 +251,7 @@ public final class ACLPermission extends MailPermission {
     public void parseRights(final Rights rights, final IMAPConfig imapConfig) throws IMAPException {
         rights2Permission(rights, this, imapConfig);
         canRename = imapConfig.getACLExtension().canCreate(rights) ? 1 : 0;
+        canStoreSeenFlag = imapConfig.getACLExtension().canKeepSeen(rights) ? 1 : 0;
     }
 
     /**

@@ -290,6 +290,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             // Cannot contain messages; therefore deny read access. Folder is not selectable.
             mp.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
         }
+        final int canStoreSeenFlag = mp.canStoreSeenFlag();
+        if (canStoreSeenFlag == 0) {
+            addSupportedCapabilities("NO_KEEP_SEEN");
+        }
         // Permission bits
         int permissionBits = createPermissionBits(mp.getFolderPermission(), mp.getReadPermission(), mp.getWritePermission(), mp.getDeletePermission(), mp.isFolderAdmin());
         if (mailFolder.isSupportsUserFlags()) {
