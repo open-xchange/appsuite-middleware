@@ -101,7 +101,9 @@ public abstract class SimpleMapping<T extends VCardProperty> extends AbstractMap
     @Override
     public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         T existingProperty = getFirstProperty(vCard);
-        if (null != existingProperty) {
+        if (null == existingProperty) {
+            contact.set(field, null);
+        } else {
             importProperty(existingProperty, contact, warnings);
         }
     }
