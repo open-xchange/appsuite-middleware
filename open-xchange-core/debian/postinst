@@ -1233,13 +1233,6 @@ if [ -e $TMPFILE ]; then
     rm -f $TMPFILE
 fi
 
-# SoftwareChange_Request-3412
-oldval=$(ox_read_property com.openexchange.log.audit.slf4j.file.pattern /opt/open-xchange/etc/slf4j-auditlog.properties)
-if [[ ${oldval} == '"%message%n"' ]]
-then
-  ox_set_property com.openexchange.log.audit.slf4j.file.pattern '"%sanitisedMessage%n"' /opt/open-xchange/etc/slf4j-auditlog.properties
-fi
-
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
     for FILE in "${PROTECT[@]}"
