@@ -1227,6 +1227,47 @@ if [ "" = "$VALUE" ]; then
 fi
 ox_add_property com.openexchange.mail.account.whitelist.ports "143,993, 25,465,587, 110,995" /opt/open-xchange/etc/mail.properties
 
+# SoftwareChange_Request-3406
+TMPFILE=$(mktemp)
+rm -f $TMPFILE
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'FILE\']/encoder/pattern -r -
+<configuration>
+    <appender name="FILE">
+        <encoder>
+            <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%sanitisedMessage%n%lmdc%exception{full}</pattern>
+        </encoder>
+    </appender>
+</configuration>
+EOF
+if [ -e $TMPFILE ]; then
+    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    rm -f $TMPFILE
+fi
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'FILE_COMPAT\']/encoder/pattern -r -
+<configuration>
+    <appender name="FILE_COMPAT">
+        <encoder>
+            <pattern>%d{"MMM dd, yyyy H:mm:ss a"} %class.%method\(%class{0}.java:%line\)%n%level: %sanitisedMessage%n%lmdc%exception{full}</pattern>
+        </encoder>
+    </appender>
+</configuration>
+EOF
+if [ -e $TMPFILE ]; then
+    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    rm -f $TMPFILE
+fi
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'SYSLOG\']/suffixPattern -r -
+<configuration>
+    <appender name="SYSLOG">
+        <suffixPattern>%date open-xchange %-5level [%logger][%thread]: %class.%method\(%class{0}.java:%line\)%n%lmdc %n %sanitisedMessage%n</suffixPattern>
+    </appender>
+</configuration>
+EOF
+if [ -e $TMPFILE ]; then
+    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    rm -f $TMPFILE
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
