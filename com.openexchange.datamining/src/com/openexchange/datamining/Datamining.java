@@ -514,7 +514,7 @@ public class Datamining {
         } catch (SQLException e) {
             System.out.println("Error : No SQL-connection possible to this URL: " + url + " with this user and password : (" + user + " / " + password + ")");
             System.out.println(e.getMessage());
-            System.exit(0);
+            System.exit(1);
         }
         return null;
     }
