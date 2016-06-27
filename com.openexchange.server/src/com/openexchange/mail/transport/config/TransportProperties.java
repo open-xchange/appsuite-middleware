@@ -250,12 +250,6 @@ public final class TransportProperties implements ITransportProperties {
             logBuilder.append("\tRemove \"MIME-Version\" header in sub-parts: ").append(removeMimeVersionInSubParts).append('\n');
         }
 
-        {
-            final String tmp = configuration.getProperty("com.openexchange.mail.enforceSecureConnection", "false").trim();
-            enforceSecureConnection = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tEnforced secure connections to external accounts: ").append(enforceSecureConnection).append('\n');
-        }
-
         logBuilder.append("Global transport properties successfully loaded!");
         LOG.info(logBuilder.toString());
     }

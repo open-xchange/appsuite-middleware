@@ -233,13 +233,7 @@ public class MailAccountProperties implements IMailProperties {
         if (null != b) {
             return b.booleanValue();
         }
-
-        String tmp = properties.get("com.openexchange.mail.enforceSecureConnection");
-        if (null == tmp) {
-            return MailProperties.getInstance().isEnforceSecureConnection();
-        }
-
-        return Boolean.parseBoolean(tmp.trim());
+        return MailProperties.getInstance().isEnforceSecureConnection();
     }
 
     @Override
