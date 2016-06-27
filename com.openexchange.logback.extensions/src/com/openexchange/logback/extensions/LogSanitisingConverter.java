@@ -98,7 +98,7 @@ public class LogSanitisingConverter extends ClassicConverter {
         return MessageFormatter.arrayFormat(message, sanitisedArguments).getMessage();
     }
 
-    private static final Pattern ANSI_ESCAPE_PATTERN = Pattern.compile("([\\x00-\\x1F])|(\\]|\\[)([0-9]*(;|[a-z]*))*");
+    private static final Pattern ANSI_ESCAPE_PATTERN = Pattern.compile("([\\x00-\\x1F]|(?:\\u001B|\\e))|\\[[\\d;]*[^\\d;]");
 
     /**
      * Sanitises the specified string from any ANSI escape sequences
