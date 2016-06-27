@@ -58,14 +58,14 @@
             <maxFileSize>2MB</maxFileSize>
         </triggeringPolicy>
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
-            <pattern>%d{"MMM dd, yyyy H:mm:ss a"} %class.%method\(%class{0}.java:%line\)%n%level: %message%n%lmdc%exception{full}</pattern>
+            <pattern>%d{"MMM dd, yyyy H:mm:ss a"} %class.%method\(%class{0}.java:%line\)%n%level: %sanitisedMessage%n%lmdc%exception{full}</pattern>
         </encoder>
     </appender>
 
     <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
         <syslogHost>localhost</syslogHost>
         <facility>local2</facility>
-        <suffixPattern>%date open-xchange %-5level [%logger][%thread]: %class.%method\(%class{0}.java:%line\)%n%lmdc %n %message%n</suffixPattern>
+        <suffixPattern>%date open-xchange %-5level [%logger][%thread]: %class.%method\(%class{0}.java:%line\)%n%lmdc %n %sanitisedMessage%n</suffixPattern>
     </appender>
 
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
