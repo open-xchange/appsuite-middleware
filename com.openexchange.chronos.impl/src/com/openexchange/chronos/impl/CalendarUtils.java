@@ -55,6 +55,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 
@@ -97,6 +98,10 @@ public class CalendarUtils {
 
     public static String getCalAddress(int contextID, Resource resource) {
         return "urn:uuid:" + resource.getIdentifier(); //TODO encode into uid
+    }
+
+    public static String getCalAddress(int contextID, Group group) {
+        return "urn:uuid:" + group.getIdentifier(); //TODO encode into uid
     }
 
     public static <T extends CalendarUser> T applyProperties(T calendarUser, User user) {

@@ -86,7 +86,7 @@ import com.openexchange.user.UserService;
  */
 public class CalendarWriter {
 
-    private static final int ATTENDEE_FOLDER_ID_PUBLIC = 2;
+    private static final int ATTENDEE_PUBLIC_FOLDER_ID = -2;
 
     private final ServerSession session;
     private final CalendarStorage storage;
@@ -149,7 +149,7 @@ public class CalendarWriter {
         return false;
     }
 
-    private List<Attendee> prepateAttendees(UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
+    private List<Attendee> prepareAttendees(UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
         List<Attendee> preparedAttendees = new ArrayList<Attendee>();
         /*
          * always add at least folder owner / current user as attendee
@@ -159,7 +159,7 @@ public class CalendarWriter {
             Attendee attendee = CalendarUtils.applyProperties(new Attendee(), user);
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
             attendee.setPartStat(ParticipationStatus.ACCEPTED);
-            attendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? -2 : Integer.valueOf(folder.getID()));
+            attendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? ATTENDEE_PUBLIC_FOLDER_ID : Integer.parseInt(folder.getID()));
             preparedAttendees.add(attendee);
             if (null == requestedAttendees || 0 == requestedAttendees.size()) {
                 return preparedAttendees;
@@ -177,7 +177,9 @@ public class CalendarWriter {
                         Attendee memberAttendee = CalendarUtils.applyProperties(new Attendee(), user);
                         if (false == contains(preparedAttendees, memberAttendee)) {
                             memberAttendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
-                            memberAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? -2 : getDefaultFolderID(user));
+                            memberAttendee.setCuType(CalendarUserType.INDIVIDUAL);
+                            memberAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? ATTENDEE_PUBLIC_FOLDER_ID : getDefaultFolderID(user));
+                            memberAttendee.setMember(CalendarUtils.getCalAddress(session.getContextId(), group));
                             preparedAttendees.add(memberAttendee);
                         }
                     }
@@ -187,6 +189,7 @@ public class CalendarWriter {
                      */
                     Resource resource = getResource(attendee.getEntity());
                     Attendee resourceAttendee = new Attendee();
+                    resourceAttendee.setCuType(attendee.getCuType());
                     resourceAttendee.setPartStat(ParticipationStatus.ACCEPTED);
                     resourceAttendee.setUri(CalendarUtils.getCalAddress(session.getContextId(), resource));
                     resourceAttendee.setCommonName(resource.getDisplayName());
@@ -201,6 +204,7 @@ public class CalendarWriter {
                     User user = getUser(attendee.getEntity());
                     Attendee userAttendee = CalendarUtils.applyProperties(new Attendee(), user);
                     if (false == contains(preparedAttendees, userAttendee)) {
+                        userAttendee.setCuType(CalendarUserType.INDIVIDUAL);
                         userAttendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
                         userAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? -2 : getDefaultFolderID(user));
                         preparedAttendees.add(userAttendee);
@@ -210,8 +214,10 @@ public class CalendarWriter {
                 /*
                  * take over external attendee
                  */
-                //TODO checks
-                preparedAttendees.add(attendee);
+                //TODO checks? resolve to internal? generate synthetic id?
+                if (false == contains(preparedAttendees, attendee)) {
+                    preparedAttendees.add(attendee);
+                }
             }
         }
         return preparedAttendees;
@@ -232,14 +238,13 @@ public class CalendarWriter {
          * use current user as organizer & take over attendees
          */
         Consistency.setOrganizer(event, session.getUser());
-        event.setAttendees(prepateAttendees(folder, event.getAttendees()));
+        event.setAttendees(prepareAttendees(folder, event.getAttendees()));
         /*
          * insert event
          */
         int objectID = storage.insertEvent(event);
         return new CalendarReader(session).readEvent(folder, objectID);
     }
-
 
     private UserizedFolder getFolder(int folderID) throws OXException {
         return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session, null);

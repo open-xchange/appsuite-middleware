@@ -213,6 +213,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
 
     private static int insertAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
         int updated = 0;
+        Set<Integer> usedEntities = new HashSet<Integer>();
         Map<Integer, Set<Integer>> groups = loadGroups(contextID, attendees);
         for (Attendee attendee : attendees) {
             if (0 >= attendee.getEntity()) {
@@ -256,23 +257,33 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
                     int parameterIndex = 1;
                     stmt.setInt(parameterIndex++, objectID);
                     stmt.setInt(parameterIndex++, contextID);
-                    stmt.setInt(parameterIndex++, attendee.getEntity());
                     if (0 < attendee.getEntity()) {
+                        usedEntities.add(Integer.valueOf(attendee.getEntity()));
+                        stmt.setInt(parameterIndex++, attendee.getEntity());
                         stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), true));
                         stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
                         stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
                     } else {
+                        int syntheticEntity = generateSyntheticEntity(attendee);
+                        while (usedEntities.contains(Integer.valueOf(syntheticEntity))) {
+                            syntheticEntity--;
+                        }
+                        usedEntities.add(Integer.valueOf(syntheticEntity));
+                        stmt.setInt(parameterIndex++, syntheticEntity);
                         stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), false));
                         stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
                         stmt.setString(parameterIndex++, attendee.getCommonName());
-                        stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
-                        stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
                     }
                     updated += stmt.executeUpdate();
                 }
             }
         }
         return updated;
+    }
+
+    private static int generateSyntheticEntity(Attendee externalAttendee) {
+        String uri = externalAttendee.getUri();
+        return -1 * Math.abs(null != uri ? uri.hashCode() : 1);
     }
 
     private static boolean isGroupMember(Attendee attendee, Map<Integer, Set<Integer>> groups) {
