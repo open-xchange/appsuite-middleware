@@ -114,6 +114,5 @@
     <!-- Set this to DEBUG to log spreadsheet operations more in detail -->
     <!-- <logger name="com.openexchange.office.calcengine.client.impl.CalcEngineJob" level="DEBUG"/> -->
     <!--<logger name="com.openexchange" level="DEBUG"/>-->
-    <logger name="com.openexchange.in8.spamhandler" level="DEBUG"/>
 
 </configuration>
