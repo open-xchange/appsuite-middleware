@@ -514,6 +514,12 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
+            final String tmp = configuration.getProperty("com.openexchange.mail.enforceSecureConnection", "false").trim();
+            enforceSecureConnection = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tEnforced secure connections to external accounts: ").append(enforceSecureConnection).append('\n');
+        }
+
+        {
             final char defaultSep = configuration.getProperty("com.openexchange.mail.defaultSeparator", "/").trim().charAt(0);
             if (defaultSep <= 32) {
                 defaultSeparator = '/';

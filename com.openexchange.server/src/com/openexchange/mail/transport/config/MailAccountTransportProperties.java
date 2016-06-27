@@ -133,7 +133,13 @@ public class MailAccountTransportProperties implements ITransportProperties {
         if (null != b) {
             return b.booleanValue();
         }
-        return TransportProperties.getInstance().isEnforceSecureConnection();
+
+        String tmp = properties.get("com.openexchange.mail.enforceSecureConnection");
+        if (null == tmp) {
+            return TransportProperties.getInstance().isEnforceSecureConnection();
+        }
+
+        return Boolean.parseBoolean(tmp.trim());
     }
 
     @Override
