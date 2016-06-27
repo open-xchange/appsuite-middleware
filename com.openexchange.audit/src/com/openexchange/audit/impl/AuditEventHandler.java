@@ -105,7 +105,7 @@ public class AuditEventHandler implements EventHandler {
 
         ExtendedPatternLayoutEncoder encoder = new ExtendedPatternLayoutEncoder();
         encoder.setContext(context);
-        encoder.setPattern("%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"} %-5level [%thread] %class.%method\\(%class{0}.java:%line\\)%n%message%n%lmdc%exception{full}");
+        encoder.setPattern("%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"} %-5level [%thread] %class.%method\\(%class{0}.java:%line\\)%n%sanitisedMessage%n%lmdc%exception{full}");
 
         SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
         triggeringPolicy.setContext(context);
