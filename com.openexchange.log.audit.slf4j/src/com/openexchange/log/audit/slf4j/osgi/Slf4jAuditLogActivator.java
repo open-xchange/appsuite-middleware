@@ -181,7 +181,7 @@ public class Slf4jAuditLogActivator extends HousekeepingActivator {
         if (Strings.isNotEmpty(fileLocation)) {
             int fileSize = Integer.parseInt(configService.getProperty("com.openexchange.log.audit.slf4j.file.size", "2097152").trim());
             int fileCount = Integer.parseInt(configService.getProperty("com.openexchange.log.audit.slf4j.file.count", "99").trim());
-            String layoutPattern = Strings.unquote(configService.getProperty("com.openexchange.log.audit.slf4j.file.pattern", "%message%n").trim());
+            String layoutPattern = Strings.unquote(configService.getProperty("com.openexchange.log.audit.slf4j.file.pattern", "%sanitisedMessage%n").trim());
             builder.fileLocation(fileLocation).fileCount(fileCount).fileLimit(fileSize).fileLayoutPattern(layoutPattern);
         }
 

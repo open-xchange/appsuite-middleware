@@ -75,4 +75,4 @@ These properties defines how many files are created, what its max. size is and w
 
  - ``com.openexchange.log.audit.slf4j.file.size`` specifies the max. file size in bytes (default is ``2097152``). If exeeced, the files are rotated.
  - ``com.openexchange.log.audit.slf4j.file.count`` sets how many files are created when rotating files (default is ``99``).
- - ``com.openexchange.log.audit.slf4j.file.pattern`` specifies the layout for a log line. Default is ``"%message%n"``, which simply outputs the log message and a line-break. However, the layout string may contain extended information according to [logback pattern layout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout)
+ - ``com.openexchange.log.audit.slf4j.file.pattern`` specifies the layout for a log line. Default is ``"%sanitisedMessage%n"``, which simply outputs the log message (sanitised from all ESC sequences) and a line-break. However, the layout string may contain extended information according to [logback pattern layout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout)
