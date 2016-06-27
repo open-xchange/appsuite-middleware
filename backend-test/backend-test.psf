@@ -75,6 +75,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.sms.tools"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.sessiond"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.spamhandler.cloudmark"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe.crawler"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe.json"/>
