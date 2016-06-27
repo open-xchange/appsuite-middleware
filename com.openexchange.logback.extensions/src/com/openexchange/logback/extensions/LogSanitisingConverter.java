@@ -85,8 +85,12 @@ public class LogSanitisingConverter extends ClassicConverter {
         String[] sanitisedArguments = new String[event.getArgumentArray().length];
         int index = 0;
         for (Object o : event.getArgumentArray()) {
-            String string = !(o instanceof String) ? o.toString() : (String) o;
-            sanitisedArguments[index++] = sanitise(string);
+            String sanitisedString = null;
+            if (o != null) {
+                String string = !(o instanceof String) ? o.toString() : (String) o;
+                sanitisedString = sanitise(string);
+            }
+            sanitisedArguments[index++] = sanitisedString;
         }
 
         // Re-compile the formatted message
