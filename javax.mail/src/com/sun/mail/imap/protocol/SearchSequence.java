@@ -125,6 +125,8 @@ public class SearchSequence {
 	    return messageid((MessageIDTerm)term, charset);
 	else if (term instanceof ModifiedSinceTerm)	// RFC 4551 MODSEQ
 	    return modifiedSince((ModifiedSinceTerm)term);
+   else if (term instanceof javax.mail.search.FileNameTerm) // SEARCH=MIMEPART Extension
+        return fileName((javax.mail.search.FileNameTerm)term, charset);
 	else
 	    throw new SearchException("Search too complex");
     }
@@ -521,5 +523,16 @@ public class SearchSequence {
 	result.writeAtom("MODSEQ");
 	result.writeNumber(term.getModSeq());
 	return result;
+    }
+
+    protected Argument fileName(javax.mail.search.FileNameTerm term, String charset) 
+        throws SearchException, IOException {
+    Argument result = new Argument();
+    
+    result.writeAtom("MIMEPART");
+    result.writeAtom("FILENAME");
+    result.writeAtom("CONTAINS");
+    result.writeString(term.getPattern(), charset);
+    return result;
     }
 }
