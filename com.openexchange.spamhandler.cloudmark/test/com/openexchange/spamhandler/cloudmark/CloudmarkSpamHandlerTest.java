@@ -51,8 +51,8 @@ package com.openexchange.spamhandler.cloudmark;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.idn.IDNA;
 import org.junit.Test;
 
 /**
@@ -64,15 +64,14 @@ import org.junit.Test;
 public class CloudmarkSpamHandlerTest {
 
 
-    private static final String UMLAUT_ADDRESS = "mschneider@tästing.de";
+    private static final String UMLAUT_ADDRESS = "mschneider@xn--tsting-bua.de";
 
     @Test
-    public void testGetAddress_isUmlautAdress_returnAddress() {
+    public void testGetAddress_isUmlautAdress_returnAddress() throws AddressException {
         InternetAddress senderAddress = CloudmarkSpamHandler.getAddress(UMLAUT_ADDRESS);
 
         assertNotNull(senderAddress);
-        String returnedAsIDN = IDNA.toIDN(senderAddress.getAddress());
-        assertEquals(UMLAUT_ADDRESS, returnedAsIDN);
+        assertEquals(UMLAUT_ADDRESS, senderAddress.getAddress());
     }
 
 }
