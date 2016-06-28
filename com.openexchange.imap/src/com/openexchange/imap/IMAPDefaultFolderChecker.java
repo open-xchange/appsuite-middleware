@@ -423,6 +423,10 @@ public class IMAPDefaultFolderChecker {
         }
     }
 
+    private static ListLsubEntry getByNameOrFullName(boolean isPrimary, int index, String[] names, String[] fullNames, Collection<ListLsubEntry> entries) {
+        return isPrimary ? getByName(names[index], entries) : getByFullName(fullNames[index], entries);
+    }
+
     private static ListLsubEntry getByName(String name, Collection<ListLsubEntry> entries) {
         if (entries.isEmpty()) {
             return null;
@@ -475,7 +479,7 @@ public class IMAPDefaultFolderChecker {
             int size = entries.size();
             if (size > 0) {
                 // Determine the SPECIAL-USE entry to use
-                ListLsubEntry entry = size == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[index], entries) : getByFullName(fullNames[index], entries));
+                ListLsubEntry entry = size == 1 ? entries.iterator().next() : getByNameOrFullName(MailAccount.DEFAULT_ID == accountId, index, names, fullNames, entries);
 
                 // Check entry
                 ListLsubEntry cached = ListLsubCache.getCachedLISTEntry(entry.getFullName(), accountId, imapStore, session, ignoreSubscription);
@@ -509,33 +513,50 @@ public class IMAPDefaultFolderChecker {
         try {
             TIntObjectMap<String> indexes = new TIntObjectHashMap<String>(6);
             IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
+            boolean isPrimary = MailAccount.DEFAULT_ID == accountId;
 
             // Entries with "\Drafts" marker
             Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session, ignoreSubscription);
-            ListLsubEntry entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_DRAFTS], entries) : getByFullName(fullNames[StorageUtility.INDEX_DRAFTS], entries));
-            if (null != entry) {
-                indexes.put(StorageUtility.INDEX_DRAFTS, entry.getFullName());
+            int size = entries.size();
+            if (size > 0) {
+                int index = StorageUtility.INDEX_DRAFTS;
+                ListLsubEntry entry = size == 1 ? entries.iterator().next() : getByNameOrFullName(isPrimary, index, names, fullNames, entries);
+                if (null != entry) {
+                    indexes.put(index, entry.getFullName());
+                }
             }
 
             // Entries with "\Junk" marker
             entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session, ignoreSubscription);
-            entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_SPAM], entries) : getByFullName(fullNames[StorageUtility.INDEX_SPAM], entries));
-            if (null != entry) {
-                indexes.put(StorageUtility.INDEX_SPAM, entry.getFullName());
+            size = entries.size();
+            if (size > 0) {
+                int index = StorageUtility.INDEX_SPAM;
+                ListLsubEntry entry = size == 1 ? entries.iterator().next() : getByNameOrFullName(isPrimary, index, names, fullNames, entries);
+                if (null != entry) {
+                    indexes.put(index, entry.getFullName());
+                }
             }
 
             // Entries with "\Send" marker
             entries = ListLsubCache.getSentEntry(accountId, imapFolder, session, ignoreSubscription);
-            entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_SENT], entries) : getByFullName(fullNames[StorageUtility.INDEX_SENT], entries));
-            if (null != entry) {
-                indexes.put(StorageUtility.INDEX_SENT, entry.getFullName());
+            size = entries.size();
+            if (size > 0) {
+                int index = StorageUtility.INDEX_SENT;
+                ListLsubEntry entry = size == 1 ? entries.iterator().next() : getByNameOrFullName(isPrimary, index, names, fullNames, entries);
+                if (null != entry) {
+                    indexes.put(index, entry.getFullName());
+                }
             }
 
             // Entries with "\Trash" marker
             entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session, ignoreSubscription);
-            entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_TRASH], entries) : getByFullName(fullNames[StorageUtility.INDEX_TRASH], entries));
-            if (null != entry) {
-                indexes.put(StorageUtility.INDEX_TRASH, entry.getFullName());
+            size = entries.size();
+            if (size > 0) {
+                int index = StorageUtility.INDEX_TRASH;
+                ListLsubEntry entry = size == 1 ? entries.iterator().next() : getByNameOrFullName(isPrimary, index, names, fullNames, entries);
+                if (null != entry) {
+                    indexes.put(index, entry.getFullName());
+                }
             }
 
             return indexes;
