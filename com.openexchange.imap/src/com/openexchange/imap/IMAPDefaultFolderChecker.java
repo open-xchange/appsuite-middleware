@@ -889,7 +889,7 @@ public class IMAPDefaultFolderChecker {
                     }
                     checkSpecialUseForExisting = true;
                 }
-                if (checkSpecialUseForExisting && hasMetadata && index <= StorageUtility.INDEX_TRASH && true /*setSpecialUseForExisting()*/) {
+                if (checkSpecialUseForExisting && hasMetadata && index <= StorageUtility.INDEX_TRASH && setSpecialUseForExisting()) {
                     String specialUseFullName = specialUseInfo.get(index);
                     if (false == desiredFullName.equals(specialUseFullName)) {
                         // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
