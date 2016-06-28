@@ -117,7 +117,7 @@ public class POSTAction extends DAVAction {
                 return handleAction(request, response);
             }
             String contentType = getContentType(request);
-            if (("application/davshare+xml".equals(contentType) || "application/davsharing+xml".equals(contentType)) && CommonFolderCollection.class.isInstance(resource)) {
+            if (("application/davsharing+xml".equals(contentType)) && CommonFolderCollection.class.isInstance(resource)) {
                 request = new ReplayWebdavRequest(request);
                 Element rootElement = optRootElement(request, DAVProtocol.DAV_NS, "share-resource");
                 if (null != rootElement) {
