@@ -56,6 +56,7 @@ import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonSearchResponse;
+import com.openexchange.ajax.jslob.actions.SetRequest;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.groupware.container.Contact;
@@ -103,9 +104,13 @@ public class UseCountTest extends ContactTest {
         Contact c2 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
         c2.setEmail1("useCount2@ox.invalid");
         c2 = ctm.newAction(c2);
+
+        AJAXClient client = new AJAXClient(User.User1);
+        SetRequest req = new SetRequest("io.ox/mail", "{\"contactCollectOnMailTransport\": true}", true);
+        client.execute(req);
+
         mtm = new MailTestManager(client);
-        Random rnd = new Random(System.currentTimeMillis());
-        address = rnd.nextInt() % 2 == 0 ? c1.getEmail1() : c2.getEmail1();
+        address = c2.getEmail1();
         mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test"));
     }
 
