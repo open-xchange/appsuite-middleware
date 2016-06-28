@@ -424,6 +424,9 @@ public class IMAPDefaultFolderChecker {
     }
 
     private static ListLsubEntry getByName(String name, Collection<ListLsubEntry> entries) {
+        if (entries.isEmpty()) {
+            return null;
+        }
         if (null == name) {
             // First one
             return entries.iterator().next();
@@ -438,6 +441,9 @@ public class IMAPDefaultFolderChecker {
     }
 
     private static ListLsubEntry getByFullName(String fullName, Collection<ListLsubEntry> entries) {
+        if (entries.isEmpty()) {
+            return null;
+        }
         if (null == fullName) {
             // First one
             return entries.iterator().next();
@@ -507,22 +513,30 @@ public class IMAPDefaultFolderChecker {
             // Entries with "\Drafts" marker
             Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session, ignoreSubscription);
             ListLsubEntry entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_DRAFTS], entries) : getByFullName(fullNames[StorageUtility.INDEX_DRAFTS], entries));
-            indexes.put(StorageUtility.INDEX_DRAFTS, entry.getFullName());
+            if (null != entry) {
+                indexes.put(StorageUtility.INDEX_DRAFTS, entry.getFullName());
+            }
 
             // Entries with "\Junk" marker
             entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session, ignoreSubscription);
             entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_SPAM], entries) : getByFullName(fullNames[StorageUtility.INDEX_SPAM], entries));
-            indexes.put(StorageUtility.INDEX_SPAM, entry.getFullName());
+            if (null != entry) {
+                indexes.put(StorageUtility.INDEX_SPAM, entry.getFullName());
+            }
 
             // Entries with "\Send" marker
             entries = ListLsubCache.getSentEntry(accountId, imapFolder, session, ignoreSubscription);
             entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_SENT], entries) : getByFullName(fullNames[StorageUtility.INDEX_SENT], entries));
-            indexes.put(StorageUtility.INDEX_SENT, entry.getFullName());
+            if (null != entry) {
+                indexes.put(StorageUtility.INDEX_SENT, entry.getFullName());
+            }
 
             // Entries with "\Trash" marker
             entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session, ignoreSubscription);
             entry = entries.size() == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[StorageUtility.INDEX_TRASH], entries) : getByFullName(fullNames[StorageUtility.INDEX_TRASH], entries));
-            indexes.put(StorageUtility.INDEX_TRASH, entry.getFullName());
+            if (null != entry) {
+                indexes.put(StorageUtility.INDEX_TRASH, entry.getFullName());
+            }
 
             return indexes;
         } catch (MessagingException e) {
