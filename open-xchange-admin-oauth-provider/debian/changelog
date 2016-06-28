@@ -1,3 +1,9 @@
+open-xchange-admin-oauth-provider (7.8.0-34) stable; urgency=medium
+
+  * Build for patch 2016-07-04 (3399)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 28 Jun 2016 11:09:12 +0200
+
 open-xchange-admin-oauth-provider (7.8.0-33) stable; urgency=medium
 
   * Build for patch 2016-06-20 (3346)
