@@ -100,6 +100,9 @@ if [ ${1:-0} -eq 2 ]; then
     
     # SoftwareChange_Request-3345
     ox_add_property com.openexchange.imap.auditLog.enabled false $PFILE
+
+    # SoftwareChange_Request-3413
+    ox_add_property com.openexchange.imap.initWithSpecialUse false $PFILE
 fi
 
 %clean
