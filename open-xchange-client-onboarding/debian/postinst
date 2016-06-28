@@ -54,6 +54,9 @@ postFix() {
       ox_set_property ${key} "${oldValue}" ${pfile}
     fi
 
+    # SoftwareChange_Request-3414
+    sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' /opt/open-xchange/etc/client-onboarding-scenarios.yml
+
 }
 
 case "$1" in
