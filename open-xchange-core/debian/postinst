@@ -1192,6 +1192,9 @@ fi
 # SoftwareChange_Request-3356
 ox_add_property com.openexchange.ajax.login.checkPunyCodeLoginString false /opt/open-xchange/etc/login.properties
 
+# SoftwareChange_Request-3405
+ox_add_property com.openexchange.ical.updateTimezones /opt/open-xchange/etc/server.properties
+
 # SoftwareChange_Request-3406
 TMPFILE=$(mktemp)
 rm -f $TMPFILE
