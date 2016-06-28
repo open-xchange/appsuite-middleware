@@ -72,6 +72,9 @@ postFix() {
 
     # SoftwareChange_Request-3343
     ox_add_property com.openexchange.imap.rootSubfoldersAllowed "" $PFILE
+
+    # SoftwareChange_Request-3413
+    ox_add_property com.openexchange.imap.initWithSpecialUse false $PFILE
 }
 
 case "$1" in
