@@ -1,3 +1,9 @@
+open-xchange-hostname-config-cascade (7.6.2-57) stable; urgency=medium
+
+  * Build for patch 2016-07-07 (3398)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 28 Jun 2016 11:07:47 +0200
+
 open-xchange-hostname-config-cascade (7.6.2-56) stable; urgency=medium
 
   * Build for patch 2016-06-24 (3362)

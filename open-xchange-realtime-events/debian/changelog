@@ -1,3 +1,9 @@
+open-xchange-realtime-events (7.6.2-57) stable; urgency=medium
+
+  * Build for patch 2016-07-07 (3398)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 28 Jun 2016 11:08:14 +0200
+
 open-xchange-realtime-events (7.6.2-56) stable; urgency=medium
 
   * Build for patch 2016-06-24 (3362)
