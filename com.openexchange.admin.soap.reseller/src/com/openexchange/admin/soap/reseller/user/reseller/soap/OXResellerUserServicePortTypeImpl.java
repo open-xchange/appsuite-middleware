@@ -368,7 +368,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     public void delete(final Delete parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.StorageException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException_Exception , InvalidDataException_Exception    {
         final OXUserInterface iface = getUserInterface();
         try {
-            iface.delete(soap2Context(parameters.ctx), soap2User(parameters.user), null, soap2Credentials(parameters.auth));
+            iface.delete(soap2Context(parameters.ctx), soap2User(parameters.user), parameters.getReassign(), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException();
             com.openexchange.admin.soap.reseller.user.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.user.rmi.RemoteException();
@@ -856,7 +856,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             for (final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user2 : users) {
                 param[pos++] = soap2User(user2);
             }
-            iface.delete(soap2Context(parameters.ctx), param, null, soap2Credentials(parameters.auth));
+            iface.delete(soap2Context(parameters.ctx), param, parameters.getReassign(), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException();
             com.openexchange.admin.soap.reseller.user.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.user.rmi.RemoteException();

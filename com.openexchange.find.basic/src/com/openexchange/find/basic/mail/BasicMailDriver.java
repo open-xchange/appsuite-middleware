@@ -143,7 +143,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
-import com.openexchange.mail.search.AttachmentTerm;
+import com.openexchange.mail.search.FileNameTerm;
 import com.openexchange.mail.search.BccTerm;
 import com.openexchange.mail.search.BodyTerm;
 import com.openexchange.mail.search.CatenatingTerm;
@@ -722,7 +722,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             Long timestamp = parsed.getSecond();
             return buildDateTerm(comparison, timestamp.longValue(), isOutgoingFolder);
         } else if (FIELD_FILENAME_NAME.equals(field)) {
-            return new AttachmentTerm(query);
+            return new FileNameTerm(query);
         }
 
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);

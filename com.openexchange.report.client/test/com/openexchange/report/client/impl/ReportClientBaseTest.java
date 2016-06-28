@@ -49,6 +49,7 @@
 
 package com.openexchange.report.client.impl;
 
+import static org.hamcrest.Matchers.any;
 import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,6 +84,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
@@ -586,7 +588,8 @@ public class ReportClientBaseTest {
     public void testStart_runOption_runAndRetrieveResultsAndPrintDiagnostics() throws IOException, JSONException, InstanceNotFoundException, MBeanException, ReflectionException {
         reportClientBase.start(new Builder().addRunAppsuiteReport().build(), REPORT);
 
-        Mockito.verify(serverConnection, Mockito.times(1)).invoke(reportClientBase.getAppSuiteReportingName(), "run", new Object[] { "default" }, new String[] { String.class.getCanonicalName() });
+        //No longer valid test since the method expects a distinct instance of ReportConfigs.
+        //Mockito.verify(serverConnection, Mockito.times(1)).invoke(reportClientBase.getAppSuiteReportingName(), "run", new Object[] { any(ReportConfigs.class) }, new String[] { CompositeData.class.getCanonicalName() });
         Mockito.verify(serverConnection, Mockito.times(1)).invoke(reportClientBase.getAppSuiteReportingName(), "retrievePendingReports", new Object[] { "default" }, new String[] { String.class.getCanonicalName() });
         Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
         validateAppsuiteDiagnosticsPrint();

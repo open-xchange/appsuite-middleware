@@ -47,106 +47,31 @@
  *
  */
 
-package com.openexchange.mail.search;
+package com.openexchange.spamhandler.cloudmark;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import org.junit.Test;
 
 /**
- * {@link AbstractSearchTermVisitor}
+ * {@link CloudmarkSpamHandlerTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.2
  */
-public abstract class AbstractSearchTermVisitor implements SearchTermVisitor {
+public class CloudmarkSpamHandlerTest {
 
-    /**
-     * Initializes a new {@link AbstractSearchTermVisitor}.
-     */
-    protected AbstractSearchTermVisitor() {
-        super();
-    }
 
-    @Override
-    public void visit(FileNameTerm term) {
-        // Nothing to do
-    }
+    private static final String UMLAUT_ADDRESS = "mschneider@xn--tsting-bua.de";
 
-    @Override
-    public void visit(final ANDTerm term) {
-        // Nothing to do
-    }
+    @Test
+    public void testGetAddress_isUmlautAdress_returnAddress() throws AddressException {
+        InternetAddress senderAddress = CloudmarkSpamHandler.getAddress(UMLAUT_ADDRESS);
 
-    @Override
-    public void visit(final BccTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final BodyTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final BooleanTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final CcTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final FlagTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(UserFlagTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final FromTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final HeaderTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final NOTTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final ORTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final ReceivedDateTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final SentDateTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final SizeTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final SubjectTerm term) {
-        // Nothing to do
-    }
-
-    @Override
-    public void visit(final ToTerm term) {
-        // Nothing to do
+        assertNotNull(senderAddress);
+        assertEquals(UMLAUT_ADDRESS, senderAddress.getAddress());
     }
 
 }

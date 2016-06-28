@@ -1,6 +1,6 @@
 /*
- *
  *    OPEN-XCHANGE legal information
+ *
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -47,76 +47,28 @@
  *
  */
 
-package com.openexchange.report.appsuite.jobs;
+package com.openexchange.spamhandler.cloudmark;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.report.appsuite.ContextReportCumulator;
-import com.openexchange.report.appsuite.ReportContextHandler;
-import com.openexchange.report.appsuite.ReportFinishingTouches;
-import com.openexchange.report.appsuite.ReportUserHandler;
-import com.openexchange.report.appsuite.UserReportCumulator;
-import com.openexchange.report.appsuite.defaultHandlers.CapabilityHandler;
-import com.openexchange.report.appsuite.defaultHandlers.ClientLoginCount;
-import com.openexchange.report.appsuite.defaultHandlers.Total;
-import com.openexchange.report.appsuite.internal.Services;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link AnalyzeContextBatchTest}
+ * Unit tests for the project com.openexchange.spamhandler.cloudmark
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @since 7.8.2
  */
-public class AnalyzeContextBatchTest {
-
-    private AnalyzeContextBatch analyzeContextBatch;
+@RunWith(Suite.class)
+@SuiteClasses({
+    CloudmarkSpamHandlerTest.class
+})
+public class UnitTests {
 
     /**
-     * @throws java.lang.Exception
+     * Initializes a new {@link UnitTests}.
      */
-    @Before
-    public void setUp() throws Exception {
-
-        // Register the implementations for the default report
-        CapabilityHandler capabilityHandler = new CapabilityHandler();
-
-        Services.add((ReportUserHandler) capabilityHandler);
-        Services.add((ReportContextHandler) capabilityHandler);
-        Services.add((UserReportCumulator) capabilityHandler);
-        Services.add((ContextReportCumulator) capabilityHandler);
-        Services.add((ReportFinishingTouches) capabilityHandler);
-
-        Total total = new Total();
-        Services.add(total);
-
-        ClientLoginCount clc = new ClientLoginCount();
-        Services.add(clc);
-
+    public UnitTests() {
+        super();
     }
-
-    @Test
-    public void testRun() throws Exception {
-        List<Integer> contexts = new ArrayList<>();
-        contexts.add(1);
-        analyzeContextBatch = new AnalyzeContextBatch(UUID.randomUUID().toString(), "default", contexts) {
-            @Override
-            protected User[] loadUsers(Context ctx) throws OXException {
-                UserImpl user = new UserImpl();
-                User[] users = new User[]{user};
-
-                return users;
-            }
-        };
-
-        analyzeContextBatch.call();
-    }
-
 }

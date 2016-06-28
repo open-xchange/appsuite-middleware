@@ -122,7 +122,7 @@ public class IMAPCapabilities extends MailCapabilities {
     /**
      * SEARCH BY ATTACHMENT FILE NAME
      */
-    public static final String CAP_SEARCH_FILENAME = "SEARCH_FILENAME"; //TODO replace with correct cap name
+    public static final String CAP_SEARCH_FILENAME = "SEARCH=MIMEPART";
 
     /*-
      * IMAP bit constants

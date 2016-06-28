@@ -307,10 +307,10 @@ lists all available options:
     -o,--run-and-deliver-old-report                   Run old report type. Used to have a backward compatibility.
     -S,--timeframe-start <timeframe-start>            Set the starting date of the timeframe in format: dd.mm.yyyy
     -E,--timeframe-end <timeframe-end>                Set the ending date of the timeframe in format: dd.mm.yyyy. If start date is set and this parameter not, the current Date is taken as timeframe end.
-    -R,--single-tenant <single-tenant>                OXCS only: Run the report for a single brand, identified by the sid of the brands admin. oxcs-extended report-type only
-    -A,--ignore-admins                                OXCS only: Ignore admins and dont show users of that category. oxcs-extended report-type only
-    -D,--drive-metrics                                OXCS only: Get drive metrics for each user. oxcs-extended report-type only
-    -M,--mail-metrics                                 OXCS only: Get mail metrics for each user. oxcs-extended report-type only
+    -R,--single-tenant <single-tenant>                OXAAS only: Run the report for a single brand, identified by the sid of the brands admin. oxaas-extended report-type only
+    -A,--ignore-admins                                OXAAS only: Ignore admins and dont show users of that category. oxaas-extended report-type only
+    -D,--drive-metrics                                OXAAS only: Get drive metrics for each user. oxaas-extended report-type only
+    -M,--mail-metrics                                 OXAAS only: Get mail metrics for each user. oxaas-extended report-type only
 
 ## Known report types in 7.8.2
 
@@ -322,7 +322,7 @@ lists all available options:
 
 - The extended output adds drive metrics, client logins, quota and context metrics for each capability-set and the whole deployment.
 
-**oxcs-extended**
+**oxaas-extended**
 
 - This report type is only available, if the provisioning bundle is installed and active. This type adds an extended set of options and metrics to the report, which are explained later.
 
@@ -331,7 +331,7 @@ lists all available options:
 
 ### Report-type: default
 
-This report type will be generated even without a selected type. Attention, with installed provisioning bundles the default OXCS report will be appended.
+This report type will be generated even without a selected type. Attention, with installed provisioning bundles the default OXAAS report will be appended.
 
 <pre>
  $ /opt/open-xchange/sbin/report -d
@@ -701,7 +701,7 @@ Because this report simply enhances the default reports information, only the ad
 * **drive-overall**: All file mime-types and their amount.
 
 
-### Report-type: oxcs-extended
+### Report-type: oxaas-extended
 
 This report type will only generate the follwing outcome, if the provisioning bundles are installed and configured correctly. This type of report adds additional mail storage informationion gathered from dovecot services. It also has a slightly different structure. The report consists of metrics calculated for every user in a context per brand on a deployment. Therefore only the differences to the default report will be described.
 
@@ -709,7 +709,7 @@ This report type will only generate the follwing outcome, if the provisioning bu
 Starting the Open-Xchange report client. Note that the report generation may take a little while.
 
 UUID: d213c6bc55f449b290710a3db2d9e631
-Type: oxcs-extended
+Type: oxaas-extended
 Total time: 486 milliseconds
 Avg. time per context: 486 milliseconds
 Report was finished: Tue May 24 14:41:22 CEST 2016
@@ -726,7 +726,7 @@ Report was finished: Tue May 24 14:41:22 CEST 2016
     },
     "com.openexchange.report.appsuite.ReportService" : "LocalReportService"
   },
-  "oxcs" : {
+  "oxaas" : {
     "capabilitySets" : {
       "193583909" : "active_sync,autologin,boxcom,caldav,calendar,carddav,client-onboarding,collect_email_addresses,conflict_handling,contacts,delegate_tasks,dev,document_preview,drive,edit_group,edit_public_folders,edit_resource,emclient,filestore,freebusy,gab,google,groupware,guard,guard-drive,guard-mail,ical,infostore,invite_guests,messenger,messenger-group,mobility,msliveconnect,multiple_mail_accounts,oauth,olox20,participants_dialog,pim,pop3,portal,presenter,publication,read_create_shared_folders,remote_presenter,rt,search,share_links,share_mail_attachments,spreadsheet,subscription,tasks,testoauthservice,text,twitter,unified-mailbox,usm,vcard,webdav,webdav_xml",
       "-1894931580" : "active_sync,autologin,boxcom,caldav,calendar,carddav,client-onboarding,collect_email_addresses,conflict_handling,contacts,delegate_tasks,dev,document_preview,drive,edit_group,edit_public_folders,edit_resource,emclient,filestore,freebusy,gab,google,groupware,guard,guard-drive,guard-mail,ical,infostore,invite_guests,messenger,messenger-group,mobility,msliveconnect,multiple_mail_accounts,oauth,olox20,participants_dialog,pim,pop3,portal,presenter,publication,read_create_shared_folders,remote_presenter,rt,search,share_links,share_mail_attachments,spreadsheet,subscription,tasks,testoauthservice,text,twitter,unified-mailbox,usm,vcard,webdav,webdav_xml,webmail"
@@ -908,7 +908,7 @@ Report was finished: Tue May 24 14:41:22 CEST 2016
     }
   },
   "uuid" : "d213c6bc55f449b290710a3db2d9e631",
-  "reportType" : "oxcs-extended",
+  "reportType" : "oxaas-extended",
   "timestamps" : {
     "start" : 1464093682283,
     "stop" : 1464093682769
@@ -931,7 +931,7 @@ Report was finished: Tue May 24 14:41:22 CEST 2016
    	*  **single-brand**: If only one brand is considered
    	*  **ignore-admin**: Are admin users ignored
 
-**oxcs**
+**oxaas**
 
 - Contains all brands and capability sets, relevant for this report
 

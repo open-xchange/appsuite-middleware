@@ -24,7 +24,7 @@
         name: body
         description: |
           A JSON object describing the search term as introducted in [Advanced search](#advanced-search). Example:
-          `{"filter":["and",["=", {"field":"to"},"test1@example.com"],["not",["=",{"field":"from"},"test2@example.com"]]]}`
+          `{"filter":["and",["=", {"field":"to"},"test1@example.com"],["not",["=",{"attachment":"name"},"document.pdf"]]]}`
           which represents 'to = "test1@example.com" AND NOT from = "test2@example.com"'. Available field names are
           `from`, `to`, `cc`, `bcc`, `subject`, `received_date`, `sent_date`, `size`, `flags`, `content`, `content_type`, `disp`, and `priority`.
         required: true

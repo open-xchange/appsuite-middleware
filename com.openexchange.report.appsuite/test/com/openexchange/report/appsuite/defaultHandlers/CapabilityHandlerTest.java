@@ -121,7 +121,7 @@ public class CapabilityHandlerTest {
         UserReport userReport = initUserReport(7, false, false, false, contextReport, CAPS2);
         capabilityHandlerTest.merge(userReport, contextReport);
         // A logins ArrayList exists and has a size of 2
-        assertEquals(2, userReport.get(Report.MACDETAIL, Report.USER_LOGINS, ArrayList.class).size());
+        assertEquals(2, userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class).size());
     }
 
     @Test
@@ -393,9 +393,9 @@ public class CapabilityHandlerTest {
         }
         userReport.set(Report.MACDETAIL, Report.MAILADMIN, isAdmin);
         userReport.set(Report.MACDETAIL, Report.DISABLED, isDisabled);
-        ArrayList<String> userLogins = new ArrayList<>();
-        userLogins.add("open-xchange-appsuite");
-        userLogins.add("com.openexchange.mobileapp");
+        HashMap<String, Long> userLogins = new HashMap<>();
+        userLogins.put("open-xchange-appsuite", 1453879860000L);
+        userLogins.put("com.openexchange.mobileapp", 1453879860000L);
         userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
         ArrayList<String> capSList = new ArrayList<>();
         capSList.add("boxcom");

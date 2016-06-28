@@ -79,7 +79,7 @@ public class Configuration {
             level = Slf4jLogLevel.INFO;
             fileLimit = 2097152;
             fileCount = 99;
-            fileLayoutPattern = "%message%n";
+            fileLayoutPattern = "%sanitisedMessage%n";
             dateFormatter = ISO8601DateFormatter.getInstance();
             includeAttributeNames = true;
         }

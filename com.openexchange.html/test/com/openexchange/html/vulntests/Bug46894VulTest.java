@@ -47,44 +47,30 @@
  *
  */
 
-package com.openexchange.imap.sort;
+package com.openexchange.html.vulntests;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import javax.mail.search.SearchException;
-import javax.mail.search.SearchTerm;
-import com.openexchange.mail.search.AttachmentTerm.AttachmentSearchTerm;
-import com.sun.mail.iap.Argument;
-import com.sun.mail.imap.protocol.SearchSequence;
-
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.AssertionHelper;
 
 /**
- * {@link ExtendedSearchSequence}
+ * {@link Bug46894VulTest}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.2
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ExtendedSearchSequence extends SearchSequence {
+public class Bug46894VulTest extends AbstractSanitizing {
 
-    @Override
-    public Argument generateSequence(SearchTerm term, String charset) throws SearchException, IOException {
-        if (term instanceof AttachmentSearchTerm) {
-            return attachmentTerm((AttachmentSearchTerm) term, charset);
-        }
-
-        return super.generateSequence(term, charset);
+    public Bug46894VulTest() {
+        super();
     }
 
-    /**
-     * @param term
-     * @return
-     * @throws UnsupportedEncodingException
-     */
-    private Argument attachmentTerm(AttachmentSearchTerm term, String charset) throws UnsupportedEncodingException {
-        Argument result = new Argument();
-        result.writeAtom("BODYSTRUCTURE DISPOSITION PARAM \"filename\"");
-        result.writeString(term.getPattern(), charset);
-        return result;
-    }
+    @Test
+    public void testScriptTagSanitizing() {
+        String content = "<!DOCTYPE html>\n" + 
+            "<html><body>\n" + 
+            "<a href=\"data:text/html,<script>alert(document.domain);</script>\">click me</a>\n" + 
+            "<a href=\"data:text/html,<script>alert(document.cookie);</script>\">click me</a>";
 
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "<script", "alert");
+    }
 }
