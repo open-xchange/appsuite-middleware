@@ -1241,6 +1241,7 @@ public final class HtmlServiceImpl implements HtmlService {
          * Convert to absolute URIs
          */
         String html = htmlContent.substring(0, m.start()) + htmlContent.substring(m.end());
+        html = sanitizeAttributes(html);
         m = ImageProcessor.getInstance().getImgPattern().matcher(html);
         MatcherReplacer mr = new MatcherReplacer(m, html);
         final Stringer sb = new StringBuilderStringer(new StringBuilder(html.length()));
@@ -1350,6 +1351,29 @@ public final class HtmlServiceImpl implements HtmlService {
         mr.appendTail(sb);
         html = sb.toString();
         return html;
+    }
+    
+    private final static Pattern SRC_ATTRIBUTE_PATTERN = Pattern.compile("(src= *\"[^\"]*\")|(src= *'[^']*')", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static String sanitizeAttributes(String html) {
+        Matcher m = SRC_ATTRIBUTE_PATTERN.matcher(html);
+        String retval = html;
+        if (m.find()) {
+            /*
+             * Replace < > with &lt; &gt;
+             */
+            do {
+                final String attribute = m.group();
+                if(attribute.contains("<") && attribute.contains(">")) {
+                    String replace = attribute;
+                    replace = replace.replace("<", "&lt;");
+                    replace = replace.replace(">", "&gt;");
+                    retval = html.replace(attribute, replace);
+                }
+                    
+            } while (m.find()); 
+        }
+        return retval;
     }
 
     private static String trimHref(final String href) {
