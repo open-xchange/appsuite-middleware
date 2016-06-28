@@ -49,7 +49,9 @@
 
 package com.openexchange.mail.search;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Message;
@@ -151,20 +153,47 @@ public final class UserFlagTerm extends SearchTerm<String[]> {
 
     @Override
     public boolean matches(final Message msg) throws OXException {
-        Flags flagsObj = new Flags();
-        String[] thisUserFlags = this.userFlags;
-        for (int i = thisUserFlags.length, k = 0; i-- > 0;) {
-            flagsObj.add(thisUserFlags[k++]);
-        }
+        if (set) {
+            Flags flagsObj = new Flags();
+            String[] thisUserFlags = this.userFlags;
+            for (int i = thisUserFlags.length, k = 0; i-- > 0;) {
+                flagsObj.add(thisUserFlags[k++]);
+            }
 
-        Flags msgFlags;
-        try {
-            msgFlags = msg.getFlags();
-        } catch (final MessagingException e) {
-            org.slf4j.LoggerFactory.getLogger(UserFlagTerm.class).warn("Error during search.", e);
-            return false;
+            Flags msgFlags;
+            try {
+                msgFlags = msg.getFlags();
+            } catch (final MessagingException e) {
+                org.slf4j.LoggerFactory.getLogger(UserFlagTerm.class).warn("Error during search.", e);
+                return false;
+            }
+            return msgFlags.contains(flagsObj);
+        } else {
+            List<Flags> flagsList = new ArrayList<>(this.userFlags.length);
+            String[] thisUserFlags = this.userFlags;
+            for (int i = thisUserFlags.length, k = 0; i-- > 0;) {
+                Flags f = new Flags();
+                f.add(thisUserFlags[k++]);
+                flagsList.add(f);
+            }
+
+            Flags msgFlags;
+            try {
+                msgFlags = msg.getFlags();
+            } catch (final MessagingException e) {
+                org.slf4j.LoggerFactory.getLogger(UserFlagTerm.class).warn("Error during search.", e);
+                return false;
+            }
+
+            for (Flags f : flagsList) {
+                if (msgFlags.contains(f)) {
+                    return false;
+                }
+            }
+
+            return true;
+
         }
-        return set ? msgFlags.contains(flagsObj) : !msgFlags.contains(flagsObj);
     }
 
     @Override
