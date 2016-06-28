@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 57
+%define        ox_release 56
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,8 +63,6 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 %doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
-* Mon Jun 27 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2016-07-07 (3398)
 * Thu Jun 16 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2016-06-24 (3362)
 * Wed Jun 01 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
