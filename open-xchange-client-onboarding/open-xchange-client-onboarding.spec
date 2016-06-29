@@ -57,7 +57,7 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     if [ -n "${oldValue}" ]; then
       ox_set_property ${key} "${oldValue}" ${pfile}
     fi
-    
+
     key=com.openexchange.client.onboarding.carddav.url
     pfile=/opt/open-xchange/etc/client-onboarding-carddav.properties
     oldValue=$(ox_read_property ${key} ${pfile}) 
@@ -71,6 +71,17 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     if [ -n "${oldValue}" ]; then
       ox_set_property ${key} "${oldValue}" ${pfile}
     fi
+
+    # SoftwareChange_Request-3409
+    key=com.openexchange.client.onboarding.syncapp.store.google.playstore
+    pfile=/opt/open-xchange/etc/client-onboarding-syncapp.properties
+    oldValue=$(ox_read_property ${key} ${pfile})
+    if [ 'https://play.google.com/store/apps/details?id=org.dmfs.caldav.icloud'  == "${oldValue}" ]; then
+      ox_set_property ${key} "" ${pfile}
+    fi
+
+    # SoftwareChange_Request-3414
+    sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' /opt/open-xchange/etc/client-onboarding-scenarios.yml
 
 fi
 

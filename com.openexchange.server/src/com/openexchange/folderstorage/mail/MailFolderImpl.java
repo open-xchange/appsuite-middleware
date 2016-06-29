@@ -291,8 +291,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             mp.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
         }
         final int canStoreSeenFlag = mp.canStoreSeenFlag();
-        if (canStoreSeenFlag == 0) {
-            addSupportedCapabilities("NO_KEEP_SEEN");
+        if (canStoreSeenFlag > 0 || ((canStoreSeenFlag < 0) && (mp.getReadPermission() > MailPermission.NO_PERMISSIONS))) {
+            addSupportedCapabilities("STORE_SEEN");
         }
         // Permission bits
         int permissionBits = createPermissionBits(mp.getFolderPermission(), mp.getReadPermission(), mp.getWritePermission(), mp.getDeletePermission(), mp.isFolderAdmin());

@@ -54,12 +54,12 @@ import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link SharerResourceURI}
+ * {@link ShareResourceURI}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.2
  */
-public class SharerResourceURI extends SingleXMLPropertyMixin {
+public class ShareResourceURI extends SingleXMLPropertyMixin {
 
     private final CommonFolderCollection<?> collection;
 
@@ -68,8 +68,8 @@ public class SharerResourceURI extends SingleXMLPropertyMixin {
      *
      * @param collection The collection
      */
-    public SharerResourceURI(CommonFolderCollection<?> collection) {
-        super(DAVProtocol.DAV_NS.getURI(), "sharer-resource-uri");
+    public ShareResourceURI(CommonFolderCollection<?> collection) {
+        super(DAVProtocol.DAV_NS.getURI(), "share-resource-uri");
         this.collection = collection;
     }
 

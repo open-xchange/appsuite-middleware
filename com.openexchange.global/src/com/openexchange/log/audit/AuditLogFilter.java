@@ -51,16 +51,16 @@ package com.openexchange.log.audit;
 
 
 /**
- * {@link AuditLogFilter}
+ * {@link AuditLogFilter} - Checks whether a certain event identifier and/or its attributes are accepted. If not, event is not logged.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.8.2
  */
 public interface AuditLogFilter {
 
     /**
      * Checks whether specified event identifier and/or attributes are accepted by this filter.
-     * 
+     *
      * @param eventId The event identifier
      * @param attributes The associated attributes
      * @return <code>true</code> if accepted; otherwise <code>false</code>

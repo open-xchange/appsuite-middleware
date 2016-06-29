@@ -67,7 +67,7 @@ import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.mixins.Invite;
 import com.openexchange.dav.mixins.Principal;
 import com.openexchange.dav.mixins.ShareAccess;
-import com.openexchange.dav.mixins.SharerResourceURI;
+import com.openexchange.dav.mixins.ShareResourceURI;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.reports.SyncStatus;
@@ -120,7 +120,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
         if (null != folder) {
             includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this));
             includeProperties(new ACL(folder.getPermissions()), new ACLRestrictions(), new SupportedPrivilegeSet());
-            includeProperties(new ShareAccess(this), new Invite(this), new SharerResourceURI(this), new Principal(getOwner()));
+            includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this), new Principal(getOwner()));
         }
     }
 
