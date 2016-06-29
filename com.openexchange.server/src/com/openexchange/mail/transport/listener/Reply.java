@@ -59,9 +59,13 @@ package com.openexchange.mail.transport.listener;
 public enum Reply {
 
     /**
-     * Denies further processing
+     * Denies further processing. Transport attempt is aborted <i>with</i> an error.
      */
     DENY,
+    /**
+     * Denies further processing. Transport attempt is aborted <i>without</i> an error.
+     */
+    PROCESSED,
     /**
      * Don't care
      */

@@ -117,7 +117,7 @@ public class ListenerChain implements MailTransportListener {
         for (MailTransportListener listener : listeners) {
             Result result = listener.onBeforeMessageTransport(message, session);
             Reply reply = result.getReply();
-            if (Reply.DENY == reply || Reply.ACCEPT == reply) {
+            if (Reply.NEUTRAL != reply) {
                 return result;
             }
         }
