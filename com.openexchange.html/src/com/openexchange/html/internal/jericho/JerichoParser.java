@@ -67,6 +67,7 @@ import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.css.CSSMatcher;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.threadpool.AbstractTask;
@@ -280,7 +281,7 @@ public final class JerichoParser {
             }
 
             // Start regular parsing
-            streamedSource = new StreamedSource(html);
+            streamedSource = new StreamedSource(InterruptibleCharSequence.valueOf(html));
             streamedSource.setLogger(null);
             Thread thread = Thread.currentThread();
             int lastSegmentEnd = 0;
