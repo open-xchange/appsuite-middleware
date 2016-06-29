@@ -72,4 +72,6 @@ public interface CalendarService {
 
     UserizedEvent createEvent(ServerSession session, UserizedEvent event) throws OXException;
 
+    void deleteEvents(ServerSession session, List<EventID> eventIDs) throws OXException;
+
 }

@@ -64,6 +64,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.converters.Compat;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -110,7 +111,7 @@ public final class AllAction extends AppointmentAction {
 
     /**
      * Initializes a new {@link AllAction}.
-     * 
+     *
      * @param services
      */
     public AllAction(final ServiceLookup services) {
@@ -343,6 +344,7 @@ public final class AllAction extends AppointmentAction {
         }
     }
 
+    @Override
     protected AJAXRequestResult performNew(AppointmentAJAXRequest request) throws OXException, JSONException {
         Date startUTC = request.checkDate(AJAXServlet.PARAMETER_START);
         Date endUTC = request.checkDate(AJAXServlet.PARAMETER_END);
@@ -356,13 +358,17 @@ public final class AllAction extends AppointmentAction {
         } else {
             events = calendarService.getEventsOfUser(request.getSession(), from, until);
         }
-        Date lastModified = new Date(0L);
+        Date timestamp = new Date(0L);
+        List<Appointment> appointments = new ArrayList<Appointment>(events.size());
         for (UserizedEvent event : events) {
-            if (null != event.getLastModified() && lastModified.before(event.getLastModified())) {
-                lastModified = event.getLastModified();
+            appointments.add(Compat.getAppointment(event));
+            Date lastModified = event.getEvent().getLastModified();
+            if (null != lastModified && timestamp.before(lastModified)) {
+                timestamp = lastModified;
             }
         }
-        return new AJAXRequestResult(events, lastModified, "event");
+        return new AJAXRequestResult(appointments, timestamp, "appointment");
+//        return new AJAXRequestResult(events, lastModified, "event");
     }
 
 }

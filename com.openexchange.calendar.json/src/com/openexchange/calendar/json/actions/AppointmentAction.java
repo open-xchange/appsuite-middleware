@@ -61,7 +61,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
-import com.openexchange.calendar.json.converters.EventMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -122,10 +121,6 @@ public abstract class AppointmentAction implements AJAXActionService {
     protected AppointmentAction(final ServiceLookup services) {
         super();
         this.services = services;
-    }
-
-    protected EventMapper getMapper() {
-        return EventMapper.getInstance();
     }
 
     /**

@@ -54,8 +54,6 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.converters.AppointmentIcalResultConverter;
 import com.openexchange.calendar.json.converters.AppointmentResultConverter;
-import com.openexchange.calendar.json.converters.EventMapper;
-import com.openexchange.calendar.json.converters.EventResultConverter;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -102,7 +100,6 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
                 return capabilities.contains(Permission.CALENDAR.getCapabilityName());
             }
         });
-        registerService(ResultConverter.class, new EventResultConverter(EventMapper.getInstance()));
     }
 
 }

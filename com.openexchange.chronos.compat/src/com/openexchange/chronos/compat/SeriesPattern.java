@@ -59,14 +59,14 @@ import com.openexchange.java.Strings;
  */
 public class SeriesPattern {
 
-    private int type;
-    private int interval;
-    private int daysOfWeek;
-    private int dayOfMonth;
-    private int month;
-    private int occurrences;
-    private long seriesStart;
-    private long seriesEnd;
+    private Integer type;
+    private Integer interval;
+    private Integer daysOfWeek;
+    private Integer dayOfMonth;
+    private Integer month;
+    private Integer occurrences;
+    private Long seriesStart;
+    private Long seriesEnd;
 
     public static SeriesPattern parse(String databasePattern) {
         if (Strings.isEmpty(databasePattern)) {
@@ -112,113 +112,140 @@ public class SeriesPattern {
     /**
      * @return the type
      */
-    public int getType() {
+    public Integer getType() {
         return type;
     }
 
     /**
      * @param type the type to set
      */
-    public void setType(int type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 
     /**
      * @return the interval
      */
-    public int getInterval() {
+    public Integer getInterval() {
         return interval;
     }
 
     /**
      * @param interval the interval to set
      */
-    public void setInterval(int interval) {
+    public void setInterval(Integer interval) {
         this.interval = interval;
     }
 
     /**
      * @return the daysOfWeek
      */
-    public int getDaysOfWeek() {
+    public Integer getDaysOfWeek() {
         return daysOfWeek;
     }
 
     /**
      * @param daysOfWeek the daysOfWeek to set
      */
-    public void setDaysOfWeek(int daysOfWeek) {
+    public void setDaysOfWeek(Integer daysOfWeek) {
         this.daysOfWeek = daysOfWeek;
     }
 
     /**
      * @return the dayOfMonth
      */
-    public int getDayOfMonth() {
+    public Integer getDayOfMonth() {
         return dayOfMonth;
     }
 
     /**
      * @param dayOfMonth the dayOfMonth to set
      */
-    public void setDayOfMonth(int dayOfMonth) {
+    public void setDayOfMonth(Integer dayOfMonth) {
         this.dayOfMonth = dayOfMonth;
     }
 
     /**
      * @return the month
      */
-    public int getMonth() {
+    public Integer getMonth() {
         return month;
     }
 
     /**
      * @param month the month to set
      */
-    public void setMonth(int month) {
+    public void setMonth(Integer month) {
         this.month = month;
     }
 
     /**
      * @return the occurrences
      */
-    public int getOccurrences() {
+    public Integer getOccurrences() {
         return occurrences;
     }
 
     /**
      * @param occurrences the occurrences to set
      */
-    public void setOccurrences(int occurrences) {
+    public void setOccurrences(Integer occurrences) {
         this.occurrences = occurrences;
     }
 
     /**
      * @return the seriesStart
      */
-    public long getSeriesStart() {
+    public Long getSeriesStart() {
         return seriesStart;
     }
 
     /**
      * @param seriesStart the seriesStart to set
      */
-    public void setSeriesStart(long seriesStart) {
+    public void setSeriesStart(Long seriesStart) {
         this.seriesStart = seriesStart;
     }
 
     /**
      * @return the seriesEnd
      */
-    public long getSeriesEnd() {
+    public Long getSeriesEnd() {
         return seriesEnd;
     }
 
     /**
      * @param seriesEnd the seriesEnd to set
      */
-    public void setSeriesEnd(long seriesEnd) {
+    public void setSeriesEnd(Long seriesEnd) {
         this.seriesEnd = seriesEnd;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder().append("t|").append(type);
+        if (null != interval) {
+            stringBuilder.append("|i|").append(interval);
+        }
+        if (null != daysOfWeek) {
+            stringBuilder.append("|a|").append(daysOfWeek);
+        }
+        if (null != dayOfMonth) {
+            stringBuilder.append("|b|").append(dayOfMonth);
+        }
+        if (null != month) {
+            stringBuilder.append("|c|").append(month);
+        }
+        if (null != occurrences) {
+            stringBuilder.append("|o|").append(occurrences);
+        }
+        if (null != seriesStart) {
+            stringBuilder.append("|s|").append(seriesStart);
+        }
+        if (null != seriesEnd) {
+            stringBuilder.append("|e|").append(seriesEnd);
+        }
+        return stringBuilder.toString();
     }
 
 }

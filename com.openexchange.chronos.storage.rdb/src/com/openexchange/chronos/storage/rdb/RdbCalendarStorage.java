@@ -112,13 +112,13 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         this.databaseService = Services.getService(DatabaseService.class, true);
     }
 
-    public Event loadEvent(int objectID) throws OXException {
+    @Override
+    public List<Alarm> loadAlarms(int objectID, int userID) throws OXException {
         Connection connection = null;
         try {
             connection = databaseService.getReadOnly(contextID);
-            Event event = selectEvent(connection, contextID, objectID);
-            event.setAttendees(selectAttendees(connection, contextID, objectID));
-            return event;
+            Alarm alarm = selectReminder(connection, contextID, userID, objectID);
+            return null != alarm ? Collections.singletonList(alarm) : null;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
@@ -126,11 +126,53 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         }
     }
 
-    public List<Alarm> loadAlarms(int objectID, int userID) throws OXException {
+    @Override
+    public void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException {
+        Connection connection = null;
+        try {
+            connection = databaseService.getWritable(contextID);
+            DBUtils.startTransaction(connection);
+            updateReminder(connection, contextID, objectID, userID, Event2Appointment.getReminder(alarms));
+            connection.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            DBUtils.autocommit(connection);
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    @Override
+    public void deleteAlarms(int objectID, int userID) throws OXException {
+        insertAlarms(objectID, userID, null);
+    }
+
+    @Override
+    public void deleteAlarms(int objectID) throws OXException {
+        Connection connection = null;
+        try {
+            connection = databaseService.getWritable(contextID);
+            DBUtils.startTransaction(connection);
+            updateReminders(connection, contextID, objectID, null);
+            connection.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            DBUtils.autocommit(connection);
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    @Override
+    public Event loadEvent(int objectID) throws OXException {
         Connection connection = null;
         try {
             connection = databaseService.getReadOnly(contextID);
-            return selectAlarms(connection, contextID, userID, objectID);
+            Event event = selectEvent(connection, contextID, objectID);
+            event.setAttendees(selectAttendees(connection, contextID, objectID));
+            return event;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
@@ -196,7 +238,8 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             connection = databaseService.getWritable(contextID);
             DBUtils.startTransaction(connection);
             int objectID = IDGenerator.getId(contextID, Types.APPOINTMENT, connection);
-            insertEvent(connection, contextID, objectID, event);
+            event.setId(objectID);
+            insertEvent(connection, contextID, event);
             if (null != event.getAttendees()) {
                 insertAttendees(connection, contextID, objectID, event.getAttendees());
             }
@@ -211,80 +254,192 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         }
     }
 
+    @Override
+    public void insertTombstoneEvent(Event event) throws OXException {
+        Connection connection = null;
+        try {
+            connection = databaseService.getWritable(contextID);
+            DBUtils.startTransaction(connection);
+            insertTombstoneEvent(connection, contextID, event);
+            if (null != event.getAttendees()) {
+                insertTombstoneAttendees(connection, contextID, event.getId(), event.getAttendees());
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            DBUtils.autocommit(connection);
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    @Override
+    public void deleteEvent(int objectID) throws OXException {
+        Connection connection = null;
+        try {
+            connection = databaseService.getWritable(contextID);
+            DBUtils.startTransaction(connection);
+            deleteEvent(connection, contextID, objectID);
+            deleteAttendees(connection, contextID, objectID);
+            connection.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            DBUtils.autocommit(connection);
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    private static int deleteEvent(Connection connection, int contextID, int objectID) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_dates WHERE cid=? AND intfield01=?;")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, objectID);
+            return SQL.logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int deleteAttendees(Connection connection, int contextID, int objectID) throws SQLException {
+        int updated = 0;
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM dateexternal WHERE cid=? AND objectId=?;")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, objectID);
+            updated += SQL.logExecuteUpdate(stmt);
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_dates_members WHERE cid=? AND object_id=?;")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, objectID);
+            updated += SQL.logExecuteUpdate(stmt);
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_date_rights WHERE cid=? AND object_id=?;")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, objectID);
+            updated += SQL.logExecuteUpdate(stmt);
+        }
+        return updated;
+    }
+
+    private static int insertOrReplaceDateExternal(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder().append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(" (cid,objectId,mailAddress,displayName,confirm,reason) VALUES (?,?,?,?,?,?);");
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, objectID);
+            stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
+            stmt.setString(parameterIndex++, attendee.getCommonName());
+            stmt.setInt(parameterIndex++, Event2Appointment.getConfirm(attendee.getPartStat()));
+            stmt.setString(parameterIndex++, attendee.getComment());
+            return SQL.logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int insertOrReplaceDatesMembers(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder().append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(" (object_id,member_uid,confirm,reason,pfid,reminder,cid) VALUES (?,?,?,?,?,?,?);");
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, objectID);
+            stmt.setInt(parameterIndex++, attendee.getEntity());
+            stmt.setInt(parameterIndex++, Event2Appointment.getConfirm(attendee.getPartStat()));
+            stmt.setString(parameterIndex++, attendee.getComment());
+            stmt.setInt(parameterIndex++, attendee.getFolderID());
+            stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
+            stmt.setInt(parameterIndex++, contextID);
+            return SQL.logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int insertOrReplaceDateRights(Connection connection, String tableName, boolean replace, int contextID, int objectID, int entity, Attendee attendee) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder().append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(" (object_id,cid,id,type,ma,dn) VALUES (?,?,?,?,?,?);");
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, objectID);
+            stmt.setInt(parameterIndex++, contextID);
+            if (0 < attendee.getEntity()) {
+                stmt.setInt(parameterIndex++, entity);
+                stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), true));
+                stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
+                stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
+            } else {
+                stmt.setInt(parameterIndex++, entity);
+                stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), false));
+                stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
+                stmt.setString(parameterIndex++, attendee.getCommonName());
+            }
+            return SQL.logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int insertTombstoneAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
+        int updated = 0;
+        Set<Integer> usedEntities = new HashSet<>();
+        Map<Integer, Set<Integer>> groups = loadGroups(contextID, attendees);
+        for (Attendee attendee : attendees) {
+            if (0 >= attendee.getEntity()) {
+                /*
+                 * insert additional record into deldateexternal for external users
+                 */
+                updated += insertOrReplaceDateExternal(connection, "deldateexternal", true, contextID, objectID, attendee);
+            } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+                /*
+                 * insert additional record into del_dates_members for each internal user
+                 */
+                updated += insertOrReplaceDatesMembers(connection, "del_dates_members", true, contextID, objectID, attendee);
+            }
+            if (false == isGroupMember(attendee, groups)) {
+                /*
+                 * insert record into del_date_rights for each attendee, skipping group members
+                 */
+                int entity = determineEntity(attendee, usedEntities);
+                updated += insertOrReplaceDateRights(connection, "del_date_rights", true, contextID, objectID, entity, attendee);
+                usedEntities.add(Integer.valueOf(entity));
+            }
+        }
+        return updated;
+    }
+
     private static int insertAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
         int updated = 0;
-        Set<Integer> usedEntities = new HashSet<Integer>();
+        Set<Integer> usedEntities = new HashSet<>();
         Map<Integer, Set<Integer>> groups = loadGroups(contextID, attendees);
         for (Attendee attendee : attendees) {
             if (0 >= attendee.getEntity()) {
                 /*
                  * insert additional record into dateExternal for external users
                  */
-                try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO dateexternal " +
-                    "(cid,objectId,mailAddress,displayName,confirm,reason) VALUES (?,?,?,?,?,?);")) {
-                    int parameterIndex = 1;
-                    stmt.setInt(parameterIndex++, contextID);
-                    stmt.setInt(parameterIndex++, objectID);
-                    stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
-                    stmt.setString(parameterIndex++, attendee.getCommonName());
-                    stmt.setInt(parameterIndex++, Event2Appointment.getConfirm(attendee.getPartStat()));
-                    stmt.setString(parameterIndex++, attendee.getComment());
-                    updated += stmt.executeUpdate();
-                }
+                updated += insertOrReplaceDateExternal(connection, "dateexternal", false, contextID, objectID, attendee);
             } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
                 /*
                  * insert additional record into prg_dates_members for each internal user
                  */
-                try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO prg_dates_members " +
-                    "(object_id,member_uid,confirm,reason,pfid,reminder,cid) VALUES (?,?,?,?,?,?,?);")) {
-                    int parameterIndex = 1;
-                    stmt.setInt(parameterIndex++, objectID);
-                    stmt.setInt(parameterIndex++, attendee.getEntity());
-                    stmt.setInt(parameterIndex++, Event2Appointment.getConfirm(attendee.getPartStat()));
-                    stmt.setString(parameterIndex++, attendee.getComment());
-                    stmt.setInt(parameterIndex++, attendee.getFolderID());
-                    stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
-                    stmt.setInt(parameterIndex++, contextID);
-                    updated += stmt.executeUpdate();
-                }
+                updated += insertOrReplaceDatesMembers(connection, "prg_dates_members", false, contextID, objectID, attendee);
             }
             if (false == isGroupMember(attendee, groups)) {
                 /*
                  * insert record into prg_date_rights for each attendee, skipping group members
                  */
-                try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO prg_date_rights " +
-                    "(object_id,cid,id,type,ma,dn) VALUES (?,?,?,?,?,?);")) {
-                    int parameterIndex = 1;
-                    stmt.setInt(parameterIndex++, objectID);
-                    stmt.setInt(parameterIndex++, contextID);
-                    if (0 < attendee.getEntity()) {
-                        usedEntities.add(Integer.valueOf(attendee.getEntity()));
-                        stmt.setInt(parameterIndex++, attendee.getEntity());
-                        stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), true));
-                        stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
-                        stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
-                    } else {
-                        int syntheticEntity = generateSyntheticEntity(attendee);
-                        while (usedEntities.contains(Integer.valueOf(syntheticEntity))) {
-                            syntheticEntity--;
-                        }
-                        usedEntities.add(Integer.valueOf(syntheticEntity));
-                        stmt.setInt(parameterIndex++, syntheticEntity);
-                        stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), false));
-                        stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
-                        stmt.setString(parameterIndex++, attendee.getCommonName());
-                    }
-                    updated += stmt.executeUpdate();
-                }
+                int entity = determineEntity(attendee, usedEntities);
+                updated += insertOrReplaceDateRights(connection, "prg_date_rights", false, contextID, objectID, entity, attendee);
+                usedEntities.add(Integer.valueOf(entity));
             }
         }
         return updated;
     }
 
-    private static int generateSyntheticEntity(Attendee externalAttendee) {
-        String uri = externalAttendee.getUri();
-        return -1 * Math.abs(null != uri ? uri.hashCode() : 1);
+    private static int determineEntity(Attendee attendee, Set<Integer> usedEntities) {
+        if (0 < attendee.getEntity()) {
+            usedEntities.add(Integer.valueOf(attendee.getEntity()));
+            return attendee.getEntity();
+        } else {
+            String uri = attendee.getUri();
+            int entity = -1 * Math.abs(null != uri ? uri.hashCode() : 1);
+            while (false == usedEntities.add(Integer.valueOf(entity))) {
+                entity--;
+            }
+            return entity;
+        }
     }
+
 
     private static boolean isGroupMember(Attendee attendee, Map<Integer, Set<Integer>> groups) {
         if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity() && null != groups && 0 < groups.size()) {
@@ -299,28 +454,37 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     }
 
     private static Map<Integer, Set<Integer>> loadGroups(int contextID, List<Attendee> attendees) throws OXException {
-        Map<Integer, Set<Integer>> groups = new HashMap<Integer, Set<Integer>>();
+        Map<Integer, Set<Integer>> groups = new HashMap<>();
         for (Attendee attendee : attendees) {
             if (CalendarUserType.GROUP.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
                 Context context = Services.getService(ContextService.class).getContext(contextID);
                 Group group = Services.getService(GroupService.class).getGroup(context, attendee.getEntity());
-                HashSet<Integer> members = new HashSet<Integer>(Arrays.asList(Autoboxing.i2I(group.getMember())));
+                HashSet<Integer> members = new HashSet<>(Arrays.asList(Autoboxing.i2I(group.getMember())));
                 groups.put(Autoboxing.I(group.getIdentifier()), members);
             }
         }
         return groups;
     }
 
-    private static int insertEvent(Connection connection, int contextID, int objectID, Event event) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO prg_dates " +
+    private static int insertTombstoneEvent(Connection connection, int contextID, Event event) throws SQLException {
+        return insertOrReplaceEvent(connection, "del_dates", true, contextID, event);
+    }
+
+    private static int insertEvent(Connection connection, int contextID, Event event) throws SQLException {
+        return insertOrReplaceEvent(connection, "prg_dates", false, contextID, event);
+    }
+
+    private static int insertOrReplaceEvent(Connection connection, String tableName, boolean replace, int contextID, Event event) throws SQLException {
+        String sql = (replace ? "REPLACE" : "INSERT") + " INTO " + tableName + ' ' +
             "(creating_date,created_from,changing_date,changed_from,fid,pflag,cid,timestampfield01,timestampfield02,timezone,intfield01," +
             "intfield02,intfield03,intfield04,intfield05,intfield06,intfield07,intfield08,field01,field02,field04,field06,field07,field08," +
             "field09,uid,organizer,sequence,organizerId,principal,principalId,filename) " +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);")) {
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            stmt.setTimestamp(parameterIndex++, new Timestamp(event.getCreated().getTime()));
+            stmt.setTimestamp(parameterIndex++, null != event.getCreated() ? new Timestamp(event.getCreated().getTime()) : null);
             stmt.setInt(parameterIndex++, event.getCreatedBy());
-            stmt.setLong(parameterIndex++, event.getLastModified().getTime());
+            stmt.setLong(parameterIndex++, null != event.getLastModified() ? event.getLastModified().getTime() : null);
             stmt.setInt(parameterIndex++, event.getModifiedBy());
             stmt.setInt(parameterIndex++, event.getPublicFolderId());
             if (null != event.getClassification() && Event2Appointment.getPrivateFlag(event.getClassification())) {
@@ -329,10 +493,10 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
                 stmt.setInt(parameterIndex++, 0);
             }
             stmt.setInt(parameterIndex++, contextID);
-            stmt.setTimestamp(parameterIndex++, new Timestamp(event.getStartDate().getTime()));
-            stmt.setTimestamp(parameterIndex++, new Timestamp(event.getEndDate().getTime()));
+            stmt.setTimestamp(parameterIndex++, null != event.getStartDate() ? new Timestamp(event.getStartDate().getTime()) : null);
+            stmt.setTimestamp(parameterIndex++, null != event.getEndDate() ? new Timestamp(event.getEndDate().getTime()) : null);
             stmt.setString(parameterIndex++, event.getStartTimezone());
-            stmt.setInt(parameterIndex++, objectID);
+            stmt.setInt(parameterIndex++, event.getId());
             stmt.setInt(parameterIndex++, event.getRecurrenceId());
             stmt.setInt(parameterIndex++, Event2Appointment.getColorLabel(event.getColor()));
             stmt.setInt(parameterIndex++, 0); // intfield04
@@ -343,11 +507,8 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             stmt.setString(parameterIndex++, event.getSummary());
             stmt.setString(parameterIndex++, event.getLocation());
             stmt.setString(parameterIndex++, event.getDescription());
-            if (null != event.getRecurrenceRule()) {
-                stmt.setString(parameterIndex++, Event2Appointment.getSeriesPattern(event.getRecurrenceRule()).toString());
-            } else {
-                stmt.setString(parameterIndex++, null);
-            }
+            SeriesPattern pattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule());
+            stmt.setString(parameterIndex++, null != pattern ? pattern.toString() : null);
             if (null != event.getDeleteExceptionDates()) {
                 stmt.setString(parameterIndex++, null); //todo
             } else {
@@ -361,30 +522,14 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             stmt.setString(parameterIndex++, Event2Appointment.getCategories(event.getCategories()));
             stmt.setString(parameterIndex++, event.getUid());
             stmt.setString(parameterIndex++, null != event.getOrganizer() ? Event2Appointment.getEMailAddress(event.getOrganizer().getUri()) : null);
-            stmt.setInt(parameterIndex++, null != event.getSequence() ? event.getSequence().intValue() : 0);
+            stmt.setInt(parameterIndex++, event.getSequence());
             stmt.setInt(parameterIndex++, null != event.getOrganizer() ? event.getOrganizer().getEntity() : 0);
             stmt.setString(parameterIndex++, null); // principal
-            stmt.setInt(parameterIndex++, 1); // principalId
-            stmt.setString(parameterIndex++, event.getFilename());
-            return stmt.executeUpdate();
+            stmt.setNull(parameterIndex++, java.sql.Types.INTEGER); // principalId
+            stmt.setString(parameterIndex++, null); // filename
+            //            stmt.setString(parameterIndex++, event.getFilename());
+            return SQL.logExecuteUpdate(stmt);
         }
-    }
-
-    private static List<Alarm> selectAlarms(Connection connection, int contextID, int objectID, int userID) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("SELECT reminder FROM prg_dates_members WHERE cid=? AND object_id=? AND member_uid=?;")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
-            stmt.setInt(3, userID);
-            try (ResultSet resultSet = SQL.logExecuteQuery(stmt)) {
-                if (resultSet.next()) {
-                    int reminder = resultSet.getInt("reminder");
-                    if (false == resultSet.wasNull()) {
-                        return Collections.singletonList(Appointment2Event.getAlarm(reminder));
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     private static Event selectEvent(Connection connection, int contextID, int objectID) throws SQLException {
@@ -404,7 +549,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     }
 
     private static List<Event> selectEventsInFolder(Connection connection, int contextID, int folderID, Date from, Date until) throws SQLException {
-        List<Event> events = new ArrayList<Event>();
+        List<Event> events = new ArrayList<>();
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.SELECT_EVENTS_IN_FOLDER_STMT);
@@ -429,7 +574,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     }
 
     private static List<Event> selectEventsOfUser(Connection connection, int contextID, int userID, Date from, Date until) throws SQLException {
-        List<Event> events = new ArrayList<Event>();
+        List<Event> events = new ArrayList<>();
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.SELECT_EVENTS_OF_USER_STMT);
@@ -446,9 +591,9 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         }
         return events;
     }
-    
+
     private static List<Attendee> selectInternalUserAttendees(Connection connection, int contextID, int objectID) throws SQLException {
-        List<Attendee> attendees = new ArrayList<Attendee>();
+        List<Attendee> attendees = new ArrayList<>();
         try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM prg_dates_members WHERE cid=? AND object_id=?;")) {
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
@@ -462,7 +607,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     }
 
     private static List<Attendee> selectInternalNonUserAttendees(Connection connection, int contextID, int objectID) throws SQLException {
-        List<Attendee> attendees = new ArrayList<Attendee>();
+        List<Attendee> attendees = new ArrayList<>();
         try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM prg_date_rights WHERE cid=? AND object_id=? AND type in (2,3);")) {
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
@@ -476,7 +621,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     }
 
     private static List<Attendee> selectAttendees(Connection connection, int contextID, int objectID) throws SQLException {
-        List<Attendee> attendees = new ArrayList<Attendee>();
+        List<Attendee> attendees = new ArrayList<>();
         attendees.addAll(selectExternalAttendees(connection, contextID, objectID));
         attendees.addAll(selectInternalUserAttendees(connection, contextID, objectID));
         attendees.addAll(selectInternalNonUserAttendees(connection, contextID, objectID));
@@ -484,7 +629,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     }
 
     private static List<Attendee> selectExternalAttendees(Connection connection, int contextID, int objectID) throws SQLException {
-        List<Attendee> attendees = new ArrayList<Attendee>();
+        List<Attendee> attendees = new ArrayList<>();
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.SELECT_EXTERNAL_ATTENDEES_STMT);
@@ -590,7 +735,8 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         }
         // principal
         // principalId
-        event.setFilename(resultSet.getString("filename"));
+        // filename
+        //        event.setFilename(resultSet.getString("filename"));
 
         //oo
         if (Strings.isNotEmpty(resultSet.getString("field06"))) {
@@ -612,6 +758,50 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         //oo
 
         return event;
+    }
+
+    private static Alarm selectReminder(Connection connection, int contextID, int objectID, int userID) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT reminder FROM prg_dates_members WHERE cid=? AND object_id=? AND member_uid=?;")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, objectID);
+            stmt.setInt(3, userID);
+            try (ResultSet resultSet = SQL.logExecuteQuery(stmt)) {
+                if (resultSet.next()) {
+                    int reminder = resultSet.getInt("reminder");
+                    if (false == resultSet.wasNull()) {
+                        return Appointment2Event.getAlarm(reminder);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static int updateReminder(Connection connection, int contextID, int objectID, int userID, Integer reminder) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=? AND member_uid=?;")) {
+            if (null == reminder) {
+                stmt.setNull(1, java.sql.Types.INTEGER);
+            } else {
+                stmt.setInt(1, reminder.intValue());
+            }
+            stmt.setInt(2, contextID);
+            stmt.setInt(3, objectID);
+            stmt.setInt(4, userID);
+            return SQL.logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int updateReminders(Connection connection, int contextID, int objectID, Integer reminder) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=?;")) {
+            if (null == reminder) {
+                stmt.setNull(1, java.sql.Types.INTEGER);
+            } else {
+                stmt.setInt(1, reminder.intValue());
+            }
+            stmt.setInt(2, contextID);
+            stmt.setInt(3, objectID);
+            return SQL.logExecuteUpdate(stmt);
+        }
     }
 
 }

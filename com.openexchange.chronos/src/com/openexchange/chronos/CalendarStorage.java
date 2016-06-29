@@ -63,8 +63,6 @@ public interface CalendarStorage {
 
     Event loadEvent(int objectID) throws OXException;
 
-    List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
-
     List<Event> loadEventsInFolder(int folderID, Date from, Date until) throws OXException;
 
     List<Event> loadEventsInFolderCreatedBy(int folderID, int createdBy, Date from, Date until) throws OXException;
@@ -72,5 +70,17 @@ public interface CalendarStorage {
     List<Event> loadEventsOfUser(int userID, Date from, Date until) throws OXException;
 
     int insertEvent(Event event) throws OXException;
+
+    void deleteEvent(int objectID) throws OXException;
+
+    void insertTombstoneEvent(Event event) throws OXException;
+
+    void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
+
+    List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
+
+    void deleteAlarms(int objectID, int userID) throws OXException;
+
+    void deleteAlarms(int objectID) throws OXException;
 
 }

@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.converters.Compat;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -87,7 +88,7 @@ public final class GetAction extends AppointmentAction {
 
     /**
      * Initializes a new {@link GetAction}.
-     * 
+     *
      * @param services
      */
     public GetAction(final ServiceLookup services) {
@@ -121,15 +122,17 @@ public final class GetAction extends AppointmentAction {
         }
     }
 
+    @Override
     protected AJAXRequestResult performNew(AppointmentAJAXRequest req) throws OXException, JSONException {
         int objectID = req.checkInt(AJAXServlet.PARAMETER_ID);
         int folderID = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        ServerSession session = req.getSession();
 
         CalendarService calendarService = getService(CalendarService.class);
         UserizedEvent event = calendarService.getEvent(req.getSession(), folderID, objectID);
 
-        return new AJAXRequestResult(event, event.getLastModified(), "event");
+        Appointment appointment = Compat.getAppointment(event);
+        return new AJAXRequestResult(appointment, event.getEvent().getLastModified(), "appointment");
+        //        return new AJAXRequestResult(event, event.getLastModified(), "event");
     }
 
 }

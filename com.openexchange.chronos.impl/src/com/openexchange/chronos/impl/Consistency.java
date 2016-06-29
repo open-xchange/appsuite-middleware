@@ -55,9 +55,9 @@ import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.groupware.ldap.User;
 
 /**
@@ -68,7 +68,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public class Consistency {
 
-    public static Attendee addUserAttendeeIfMissing(UserizedEvent event, int userID, int folderID) {
+    public static Attendee addUserAttendeeIfMissing(Event event, int userID, int folderID) {
         List<Attendee> attendees = event.getAttendees();
         if (null == attendees) {
             attendees = new ArrayList<Attendee>();
@@ -88,7 +88,7 @@ public class Consistency {
         return attendee;
     }
 
-    public static Organizer setOrganizer(UserizedEvent event, User user) {
+    public static Organizer setOrganizer(Event event, User user) {
         Organizer organizer = event.getOrganizer();
         if (null == organizer) {
             organizer = new Organizer();
@@ -97,12 +97,12 @@ public class Consistency {
         return CalendarUtils.applyProperties(organizer, user);
     }
 
-    public static void setModifiedNow(UserizedEvent event, int modifiedBy) {
+    public static void setModifiedNow(Event event, int modifiedBy) {
         event.setLastModified(new Date());
         event.setModifiedBy(modifiedBy);
     }
 
-    public static void setCreatedNow(UserizedEvent event, int createdBy) {
+    public static void setCreatedNow(Event event, int createdBy) {
         event.setCreated(new Date());
         event.setCreatedBy(createdBy);
     }

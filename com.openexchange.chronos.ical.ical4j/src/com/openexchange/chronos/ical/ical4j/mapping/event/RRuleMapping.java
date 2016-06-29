@@ -47,75 +47,42 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.util.List;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.RRule;
 
 /**
- * {@link UserizedEvent}
+ * {@link RRuleMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UserizedEvent {
-
-    private final int folderId;
-    private final List<Alarm> alarms;
-    private final Event event;
-    private final ServerSession session;
-    private final int onBehalfOf;
+public class RRuleMapping extends ICalTextMapping<VEvent, Event> {
 
     /**
-     * Initializes a new {@link UserizedEvent}.
-     *
-     * @param session The current user's session
-     * @param event The underlying event data
-     * @param folderId The folder identifier representing the view on the event
-     * @param alarms The alarms for the event
+     * Initializes a new {@link RRuleMapping}.
      */
-    public UserizedEvent(ServerSession session, int onBehalfOf, int folderId, Event event, List<Alarm> alarms) {
-        super();
-        this.session = session;
-        this.event = event;
-        this.onBehalfOf = onBehalfOf;
-        this.folderId = folderId;
-        this.alarms = alarms;
-    }
+	public RRuleMapping() {
+        super(Property.RRULE);
+	}
 
-    /**
-     * @return the folderId
-     */
-    public int getFolderId() {
-        return folderId;
-    }
+	@Override
+	protected String getValue(Event object) {
+        return object.getRecurrenceRule();
+	}
 
-    /**
-     * @return the alarms
-     */
-    public List<Alarm> getAlarms() {
-        return alarms;
-    }
+	@Override
+	protected void setValue(Event object, String value) {
+        object.setRecurrenceRule(value);
+	}
 
-    /**
-     * @return the event
-     */
-    public Event getEvent() {
-        return event;
-    }
-
-    /**
-     * @return the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-
-    /**
-     * @return the onBehalfOf
-     */
-    public int getOnBehalfOf() {
-        return onBehalfOf;
-    }
+	@Override
+	protected Property createProperty() {
+        return new RRule();
+	}
 
 }

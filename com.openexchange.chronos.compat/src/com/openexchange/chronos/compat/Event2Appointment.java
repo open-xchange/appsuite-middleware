@@ -49,9 +49,13 @@
 
 package com.openexchange.chronos.compat;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
+import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
+import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
@@ -272,23 +276,140 @@ public class Event2Appointment {
                 e.printStackTrace();
                 return null;
             }
-            SeriesPattern pattern = new SeriesPattern();
             switch (rule.getFreq()) {
                 case DAILY:
-                    pattern.setType(1);
-                    pattern.setInterval(rule.getInterval());
-                    if (null != rule.getCount()) {
-                        pattern.setOccurrences(rule.getCount());
-                    }
-                    if (null != rule.getUntil()) {
-                        pattern.setSeriesEnd(rule.getUntil().getTimestamp());
-                    }
-                    return pattern;
+                    return getDailyPattern(rule);
+                case WEEKLY:
+                    return getWeeklyPattern(rule);
+                case MONTHLY:
+                    return getMonthlyPattern(rule);
+                case YEARLY:
+                    return getYearlyPattern(rule);
                 default:
                     break;
             }
         }
         return null;
+    }
+
+    private static SeriesPattern getDailyPattern(RecurrenceRule rule) {
+        SeriesPattern pattern = new SeriesPattern();
+        pattern.setType(I(1)); // com.openexchange.groupware.container.CalendarObject.DAILY
+        pattern.setInterval(I(rule.getInterval()));
+        if (null != rule.getCount()) {
+            pattern.setOccurrences(I(rule.getCount()));
+        }
+        if (null != rule.getUntil()) {
+            pattern.setSeriesEnd(L(rule.getUntil().getTimestamp()));
+        }
+        return pattern;
+    }
+
+    private static SeriesPattern getWeeklyPattern(RecurrenceRule rule) {
+        SeriesPattern pattern = new SeriesPattern();
+        pattern.setType(I(2)); // com.openexchange.groupware.container.CalendarObject.WEEKLY
+        pattern.setInterval(I(rule.getInterval()));
+        pattern.setDaysOfWeek(I(getDaysOfWeek(rule.getByDayPart())));
+        if (null != rule.getCount()) {
+            pattern.setOccurrences(I(rule.getCount()));
+        }
+        if (null != rule.getUntil()) {
+            pattern.setSeriesEnd(L(rule.getUntil().getTimestamp()));
+        }
+        return pattern;
+    }
+
+    private static int getDayOfWeek(WeekdayNum weekday) {
+        switch (weekday.weekday) {
+            case SU:
+                return 1;
+            case MO:
+                return 2;
+            case TU:
+                return 4;
+            case WE:
+                return 8;
+            case TH:
+                return 16;
+            case FR:
+                return 32;
+            case SA:
+                return 64;
+            default:
+                return 0;
+        }
+    }
+
+    private static int getDaysOfWeek(List<WeekdayNum> weekdays) {
+        int daysOfWeek = 0;
+        if (null != weekdays && 0 < weekdays.size()) {
+            for (WeekdayNum weekday : weekdays) {
+                daysOfWeek |= getDayOfWeek(weekday);
+            }
+        }
+        return daysOfWeek;
+    }
+
+    private static SeriesPattern getMonthlyPattern(RecurrenceRule rule) {
+        SeriesPattern pattern = new SeriesPattern();
+        pattern.setType(I(3)); // com.openexchange.groupware.container.CalendarObject.MONTHLY
+        pattern.setInterval(I(rule.getInterval()));
+        List<Integer> byMonthDayParts = rule.getByPart(Part.BYMONTHDAY);
+        if (null != byMonthDayParts && 0 < byMonthDayParts.size()) {
+            pattern.setDayOfMonth(byMonthDayParts.get(0));
+        } else {
+            List<Integer> byWeekNoParts = rule.getByPart(Part.BYWEEKNO);
+            if (null != byWeekNoParts && 0 < byWeekNoParts.size()) {
+                int weekNo = byWeekNoParts.get(0).intValue();
+                pattern.setDayOfMonth(I(-1 == weekNo ? 5 : weekNo));
+                pattern.setDaysOfWeek(I(getDaysOfWeek(rule.getByDayPart())));
+            } else if (null != rule.getByDayPart() && 0 < rule.getByDayPart().size()) {
+                WeekdayNum weekday = rule.getByDayPart().get(0);
+                pattern.setDaysOfWeek(I(getDayOfWeek(weekday)));
+                int weekNo = weekday.pos;
+                pattern.setDayOfMonth(I(-1 == weekNo ? 5 : weekNo));
+            }
+        }
+        if (null != rule.getCount()) {
+            pattern.setOccurrences(I(rule.getCount()));
+        }
+        if (null != rule.getUntil()) {
+            pattern.setSeriesEnd(L(rule.getUntil().getTimestamp()));
+        }
+        return pattern;
+    }
+
+    private static SeriesPattern getYearlyPattern(RecurrenceRule rule) {
+        SeriesPattern pattern = new SeriesPattern();
+        pattern.setType(I(4)); // com.openexchange.groupware.container.CalendarObject.YEARLY        
+        pattern.setInterval(I(rule.getInterval()));
+        List<Integer> byMonthParts = rule.getByPart(Part.BYMONTH);
+        if (null != byMonthParts && 0 < byMonthParts.size()) {
+            pattern.setMonth(I(byMonthParts.get(0).intValue() - 1));
+            List<Integer> byMonthDayParts = rule.getByPart(Part.BYMONTHDAY);
+            if (null != byMonthDayParts && 0 < byMonthDayParts.size()) {
+                pattern.setDayOfMonth(byMonthDayParts.get(0));
+            } else {
+                List<Integer> byWeekNoParts = rule.getByPart(Part.BYWEEKNO);
+                if (null != byWeekNoParts && 0 < byWeekNoParts.size()) {
+                    int weekNo = byWeekNoParts.get(0).intValue();
+                    pattern.setDayOfMonth(I(-1 == weekNo ? 5 : weekNo));
+                    pattern.setDaysOfWeek(I(getDaysOfWeek(rule.getByDayPart())));
+                } else if (null != rule.getByDayPart() && 0 < rule.getByDayPart().size()) {
+                    WeekdayNum weekday = rule.getByDayPart().get(0);
+                    pattern.setDaysOfWeek(I(getDayOfWeek(weekday)));
+                    int weekNo = weekday.pos;
+                    pattern.setDayOfMonth(I(-1 == weekNo ? 5 : weekNo));
+                }
+            }
+        }
+        if (null != rule.getCount()) {
+            pattern.setOccurrences(I(rule.getCount()));
+        }
+        if (null != rule.getUntil()) {
+            pattern.setSeriesEnd(L(rule.getUntil().getTimestamp()));
+        }
+        return pattern;
     }
 
     private static Integer parseTriggerDuration(String duration) {

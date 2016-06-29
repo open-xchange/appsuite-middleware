@@ -49,12 +49,6 @@
 
 package com.openexchange.calendar.json.actions;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -68,6 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.converters.Compat;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
@@ -88,6 +83,12 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link ListAction}
@@ -108,7 +109,7 @@ public final class ListAction extends AppointmentAction {
 
     /**
      * Initializes a new {@link ListAction}.
-     * 
+     *
      * @param services
      */
     public ListAction(final ServiceLookup services) {
@@ -291,17 +292,23 @@ public final class ListAction extends AppointmentAction {
         }
     }
 
+    @Override
     protected AJAXRequestResult performNew(AppointmentAJAXRequest request) throws OXException, JSONException {
         List<EventID> requestedIDs = parseRequestedIDs(request);
         CalendarService calendarService = getService(CalendarService.class);
         List<UserizedEvent> events = calendarService.getEvents(request.getSession(), requestedIDs);
-        Date lastModified = new Date(0L);
+
+        Date timestamp = new Date(0L);
+        List<Appointment> appointments = new ArrayList<Appointment>(events.size());
         for (UserizedEvent event : events) {
-            if (null != event.getLastModified() && lastModified.before(event.getLastModified())) {
-                lastModified = event.getLastModified();
+            appointments.add(Compat.getAppointment(event));
+            Date lastModified = event.getEvent().getLastModified();
+            if (null != lastModified && timestamp.before(lastModified)) {
+                timestamp = lastModified;
             }
         }
-        return new AJAXRequestResult(events, lastModified, "event");
+        return new AJAXRequestResult(appointments, timestamp, "appointment");
+        //        return new AJAXRequestResult(events, lastModified, "event");
     }
 
     private static List<EventID> parseRequestedIDs(AppointmentAJAXRequest request) throws OXException, JSONException {

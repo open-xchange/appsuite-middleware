@@ -50,7 +50,10 @@
 package com.openexchange.calendar.json.actions;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +65,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.EventID;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -72,6 +77,7 @@ import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -156,6 +162,34 @@ public final class DeleteAction extends AppointmentAction {
             }
         }
         return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
+    }
+
+    protected AJAXRequestResult performNew(AppointmentAJAXRequest request) throws OXException, JSONException {
+        List<EventID> requestedIDs = parseRequestedIDs(request);
+        CalendarService calendarService = getService(CalendarService.class);
+        calendarService.deleteEvents(request.getSession(), requestedIDs);
+        return new AJAXRequestResult(new JSONArray(0), new Date(), "event");
+    }
+
+    private static List<EventID> parseRequestedIDs(AppointmentAJAXRequest request) throws OXException, JSONException {
+        List<EventID> eventIDs;
+        if (JSONObject.class.isInstance(request.getData())) {
+            JSONObject jsonObject = request.getData();
+            eventIDs = Collections.singletonList(parseEventID(jsonObject));
+        } else if (JSONArray.class.isInstance(request.getData())) {
+            JSONArray jsonArray = request.getData();
+            eventIDs = new ArrayList<EventID>(jsonArray.length());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                eventIDs.add(parseEventID(jsonArray.getJSONObject(i)));
+            }
+        } else {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
+        return eventIDs;
+    }
+
+    private static EventID parseEventID(JSONObject jsonObject) throws OXException {
+        return new EventID(DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_FOLDERID), DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID));
     }
 
 }

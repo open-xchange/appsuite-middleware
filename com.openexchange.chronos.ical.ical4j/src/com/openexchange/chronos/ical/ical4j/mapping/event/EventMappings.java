@@ -52,11 +52,9 @@ package com.openexchange.chronos.ical.ical4j.mapping.event;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import net.fortuna.ical4j.model.component.VEvent;
-
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import net.fortuna.ical4j.model.component.VEvent;
 
 /**
  * {@link EventMappings}
@@ -70,7 +68,7 @@ public class EventMappings {
 	 * Holds a collection of all known event mappings.
 	 */
 	public static List<ICalMapping<VEvent, Event>> ALL = Collections.<ICalMapping<VEvent, Event>>unmodifiableList(Arrays.asList(
-		new AttachmentMapping(),
+        //		new AttachmentMapping(),
 		new AttendeeMapping(),
         new CategoriesMapping(),
         new ClassMapping(),
@@ -82,6 +80,7 @@ public class EventMappings {
 		new LastModifiedMapping(),
 		new LocationMapping(),
 		new OrganizerMapping(),
+        new RRuleMapping(),
 		new SequenceMapping(),
 		new StatusMapping(),
 		new SummaryMapping(),

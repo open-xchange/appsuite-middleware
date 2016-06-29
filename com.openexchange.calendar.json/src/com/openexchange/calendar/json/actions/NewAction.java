@@ -64,6 +64,7 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.converters.Compat;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -155,6 +156,7 @@ public final class NewAction extends AppointmentAction {
 
     }
 
+    @Override
     protected AJAXRequestResult performNew(AppointmentAJAXRequest req) throws OXException, JSONException {
         ServerSession session = req.getSession();
         String timeZoneID = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
@@ -162,14 +164,24 @@ public final class NewAction extends AppointmentAction {
             timeZoneID = session.getUser().getTimeZone();
         }
         JSONObject jsonObject = req.getData();
-        UserizedEvent event = getMapper().deserialize(jsonObject, getMapper().getMappedFields(), timeZoneID);
+
+        CalendarDataObject appointment = new CalendarDataObject();
+        appointment.setContext(session.getContext());
+        new AppointmentParser(getTimeZone(timeZoneID)).parse(appointment, jsonObject);
+        if (false == appointment.containsParentFolderID()) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
+        }
+        convertExternalToInternalUsersIfPossible(appointment, session.getContext(), LOG);
+
+        UserizedEvent event = Compat.getEvent(appointment, session, appointment.getParentFolderID());
+        //        UserizedEvent event = getMapper().deserialize(jsonObject, getMapper().getMappedFields(), timeZoneID);
         boolean ignoreConflicts = jsonObject.optBoolean(AppointmentFields.IGNORE_CONFLICTS, false);
         boolean notification = jsonObject.optBoolean(AppointmentFields.NOTIFICATION, false);
 
         CalendarService calendarService = getService(CalendarService.class);
         UserizedEvent createdEvent = calendarService.createEvent(session, event);
 
-        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, createdEvent.getId()), createdEvent.getLastModified(), "json");
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, createdEvent.getEvent().getId()), createdEvent.getEvent().getLastModified(), "json");
 
         //        return perform(req);
     }

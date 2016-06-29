@@ -85,10 +85,10 @@ public class CalendarReader {
 
     private final ServerSession session;
     private final CalendarStorage storage;
-	
+
     /**
      * Initializes a new {@link CalendarReader}.
-     * 
+     *
      * @param session The session
      */
     public CalendarReader(ServerSession session) throws OXException {
@@ -166,23 +166,20 @@ public class CalendarReader {
         /*
          * build userized event & return
          */
-        UserizedEvent userizedEvent = new UserizedEvent(event);
-        userizedEvent.setFolderId(Integer.valueOf(inFolder.getID()));
-        userizedEvent.setAlarms(alarms);
-        return userizedEvent;
+        return new UserizedEvent(session, targetAttendee, Integer.parseInt(inFolder.getID()), event, alarms);
     }
 
     private UserizedEvent userize(Event event, int forUser) throws OXException {
-        UserizedEvent userizedEvent = new UserizedEvent(event);
-        userizedEvent.setFolderId(event.getPublicFolderId());
+        int folderId = event.getPublicFolderId();
+        List<Alarm> alarms = null;
         Attendee userAttendee = CalendarUtils.findAttendee(event.getAttendees(), forUser);
         if (null != userAttendee) {
-            userizedEvent.setAlarms(storage.loadAlarms(event.getId(), userAttendee.getEntity()));
+            alarms = storage.loadAlarms(event.getId(), userAttendee.getEntity());
             if (0 < userAttendee.getFolderID()) {
-                userizedEvent.setFolderId(userAttendee.getFolderID());
+                folderId = userAttendee.getFolderID();
             }
         }
-        return userizedEvent;
+        return new UserizedEvent(session, forUser, folderId, event, alarms);
     }
 
     private static int getTargetAttendee(UserizedFolder folder, List<Attendee> attendees) {

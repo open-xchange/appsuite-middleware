@@ -86,6 +86,12 @@ public class Check {
         }
     }
 
+    public static void requireDeletePermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getDeletePermission() < requiredPermission) {
+            throw new OXException();
+        }
+    }
+
     private Check() {
         super();
     }

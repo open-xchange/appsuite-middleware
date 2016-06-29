@@ -100,4 +100,12 @@ public class CalendarServiceImpl implements CalendarService {
         return writer.insertEvent(event);
     }
 
+    @Override
+    public void deleteEvents(ServerSession session, List<EventID> eventIDs) throws OXException {
+        CalendarWriter writer = new CalendarWriter(session);
+        for (EventID eventID : eventIDs) {
+            writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID());
+        }
+    }
+
 }
