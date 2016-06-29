@@ -49,10 +49,11 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
 import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -64,6 +65,7 @@ import com.openexchange.mail.mime.MessageHeaders;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Ignore ("Causes OOM on client")
 public final class MailAppendTest extends MessageStorageTest {
 
     private static final String INBOX = "INBOX";
