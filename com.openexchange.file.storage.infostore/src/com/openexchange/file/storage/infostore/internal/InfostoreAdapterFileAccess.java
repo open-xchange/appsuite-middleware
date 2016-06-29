@@ -78,6 +78,7 @@ import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
+import com.openexchange.file.storage.FileStorageZippableFolderFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.infostore.FileMetadata;
@@ -103,7 +104,7 @@ import gnu.trove.list.array.TIntArrayList;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider, FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess, FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess, FileStorageExtendedMetadata, FileStorageMultiMove {
+public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider, FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess, FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess, FileStorageExtendedMetadata, FileStorageMultiMove, FileStorageZippableFolderFileAccess {
 
     private final InfostoreSearchEngine search;
     private final Context ctx;
