@@ -51,12 +51,14 @@ package com.openexchange.ajax.share.tests;
 
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -94,8 +96,15 @@ public class ParallelGuestSessionsTest extends ShareTest {
          * update folder, add permission for guest
          */
         folder.addPermission(guestPermission);
-        folder = updateFolder(api, folder);
+        folder = updateFolder(api, folder, new RequestCustomizer<UpdateRequest>() {
+            @Override
+            public void customize(UpdateRequest request) {
+                request.setCascadePermissions(false);
+                request.setNotifyPermissionEntities(Transport.MAIL);
+            }
+        });
         /*
+         * /*
          * check permissions
          */
         OCLPermission matchingPermission = null;
