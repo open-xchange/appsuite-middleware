@@ -13,7 +13,7 @@ node {
     def workspace = pwd()
     sh 'rm -rvf ' + workspace + '/deb'
     sh 'ls -lhaR ' + ant
-    withEnv(['PATH+ANT=${ant}/bin']) {
+    withEnv(['PATH+ANT=' + ant + '/bin']) {
         dir('backend/build') {
             sh 'ant -f obs.xml -Dbranch=' + env.BRANCH_NAME + ' -DprojectSets=backend-packages -DfullProductName=backend -DshortProductName=backend determineProject createProject deleteObsoletePackages'
             sh 'ant -f buildAll.xml -Dbranch=' + env.BRANCH_NAME + ' -DprojectSets=backend-packages -DfullProductName=backend -DshortProductName=backend determineProject upload'
