@@ -746,6 +746,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
                 throw oxe;
             } catch (NoSuchProviderException e) {
+                exception = e;
                 throw MimeMailException.handleMessagingException(e);
             } catch (MessagingException e) {
                 exception = e;
