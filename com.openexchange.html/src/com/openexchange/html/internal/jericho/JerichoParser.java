@@ -221,7 +221,8 @@ public final class JerichoParser {
      */
     public void parse(final String html, final JerichoHandler handler, final boolean checkSize) {
         ThreadPoolService threadPool = ThreadPools.getThreadPool();
-        if (threadPool == null) {
+        int timeout = htmlParseTimeoutSec();
+        if (threadPool == null || timeout <= 0) {
             doParse(html, handler, checkSize);
             return;
         }
@@ -243,8 +244,8 @@ public final class JerichoParser {
 
         // Submit to thread pool ...
         Future<Void> f = threadPool.submit(task);
+
         // ... and await response
-        int timeout = htmlParseTimeoutSec();
         TimeUnit timeUnit = TimeUnit.SECONDS;
         try {
             f.get(timeout, timeUnit);
