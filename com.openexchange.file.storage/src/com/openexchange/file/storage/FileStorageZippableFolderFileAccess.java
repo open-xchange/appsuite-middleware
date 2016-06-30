@@ -50,106 +50,13 @@
 package com.openexchange.file.storage;
 
 /**
- * {@link FileStorageCapability}
+ * {@link FileStorageZippableFolderFileAccess}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public enum FileStorageCapability {
+public interface FileStorageZippableFolderFileAccess {
 
-    /**
-     * Support for sequence numbers of files and folders.
-     */
-    SEQUENCE_NUMBERS,
+    // Just a marker interface
 
-    /**
-     * Support for saving files without creating a new version.
-     */
-    IGNORABLE_VERSION,
-
-    /**
-     * Support for storing multiple versions of a document.
-     */
-    FILE_VERSIONS,
-
-    /**
-     * Support for reading and writing files at specific offsets.
-     */
-    RANDOM_FILE_ACCESS,
-
-    /**
-     * Support for searching files by advanced search terms.
-     */
-    SEARCH_BY_TERM,
-
-    /**
-     * Support for E-Tags of folders.
-     */
-    FOLDER_ETAGS,
-
-    /**
-     * Support for recursive E-Tags of folders.
-     */
-    RECURSIVE_FOLDER_ETAGS,
-
-    /**
-     * Support for thumbnail images of files.
-     */
-    THUMBNAIL_IMAGES,
-
-    /**
-     * Support for persistent folder- and file-IDs, i.e. identifiers don't change during rename operations.
-     */
-    PERSISTENT_IDS,
-
-    /**
-     * Support for efficient retrieval of file metadata and contents considering a client-supplied E-Tag.
-     */
-    EFFICIENT_RETRIEVAL,
-
-    /**
-     * Support for locking/unlocking files.
-     */
-    LOCKS,
-
-    /**
-     * Support for individual permissions per file.
-     */
-    OBJECT_PERMISSIONS,
-
-    /**
-     * Support for pagination/ranges.
-     */
-    RANGES,
-
-    /**
-     * Support for storing extended metadata attributes like notes or categories for files.
-     */
-    EXTENDED_METADATA,
-
-    /**
-     * Support for moving multiple files at once.
-     */
-    MULTI_MOVE,
-
-    /**
-     * File storage only supports read-only access
-     */
-    READ_ONLY,
-
-    /**
-     * File storage contains mail attachments
-     */
-    MAIL_ATTACHMENTS,
-
-    /**
-     * Automatic add new file version if file already exists
-     */
-    AUTO_NEW_VERSION,
-
-    /**
-     * A folder's content can be downloaded as a ZIP archive
-     */
-    ZIPPABLE_FOLDER,
-
-    ;
 }

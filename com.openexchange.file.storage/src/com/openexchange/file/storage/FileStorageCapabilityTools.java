@@ -109,6 +109,10 @@ public class FileStorageCapabilityTools {
             return Boolean.valueOf(FileStorageReadOnly.class.isAssignableFrom(fileAccessClass));
         case MAIL_ATTACHMENTS:
             return Boolean.valueOf(FileStorageMailAttachments.class.isAssignableFrom(fileAccessClass));
+        case AUTO_NEW_VERSION:
+            return Boolean.valueOf(FileStorageIgnorableVersionFileAccess.class.isAssignableFrom(fileAccessClass));
+        case ZIPPABLE_FOLDER:
+            return Boolean.valueOf(FileStorageZippableFolderFileAccess.class.isAssignableFrom(fileAccessClass));
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return Boolean.FALSE;
@@ -158,8 +162,10 @@ public class FileStorageCapabilityTools {
             return FileStorageReadOnly.class.isInstance(fileAccess);
         case MAIL_ATTACHMENTS:
             return FileStorageMailAttachments.class.isInstance(fileAccess);
-            case AUTO_NEW_VERSION:
-                return FileStorageIgnorableVersionFileAccess.class.isInstance(fileAccess);
+        case AUTO_NEW_VERSION:
+            return FileStorageIgnorableVersionFileAccess.class.isInstance(fileAccess);
+        case ZIPPABLE_FOLDER:
+            return FileStorageZippableFolderFileAccess.class.isInstance(fileAccess);
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return false;

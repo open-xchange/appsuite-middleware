@@ -185,6 +185,16 @@ public class AllAction extends AbstractFileStorageAccountAction {
             caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
         }
 
+        supported = capabilityAware.supports(FileStorageCapability.AUTO_NEW_VERSION);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.AUTO_NEW_VERSION.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.ZIPPABLE_FOLDER);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.ZIPPABLE_FOLDER.name());
+        }
+
         return caps;
     }
 

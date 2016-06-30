@@ -688,9 +688,22 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             try {
                 // Check listener chain
                 Result result = listenerChain.onBeforeMessageTransport(messageToSend, session);
-                if (Reply.DENY == result.getReply()) {
-                    throw MailExceptionCode.SEND_DENIED.create();
+
+                // Examine reply of the listener chain
+                {
+                    Reply reply = result.getReply();
+                    if (Reply.PROCESSED.ordinal() >= reply.ordinal()) {
+                        // Check if denied
+                        if (Reply.DENY == reply) {
+                            throw MailExceptionCode.SEND_DENIED.create();
+                        }
+
+                        // Just return the processed message
+                        return result.getMimeMessage();
+                    }
                 }
+
+                // Grab possibly new MIME message
                 MimeMessage resultingMimeMessage = result.getMimeMessage();
                 if (null != resultingMimeMessage) {
                     messageToSend = resultingMimeMessage;
@@ -733,6 +746,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
                 throw oxe;
             } catch (NoSuchProviderException e) {
+                exception = e;
                 throw MimeMailException.handleMessagingException(e);
             } catch (MessagingException e) {
                 exception = e;
@@ -759,12 +773,16 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             }
             return messageToSend;
         } finally {
-            if (null != transport) {
-                try {
-                    transport.close();
-                } catch (final MessagingException e) {
-                    LOG.error("Closing SMTP transport failed.", e);
-                }
+            closeSafe(transport);
+        }
+    }
+
+    private void closeSafe(Transport transport) {
+        if (null != transport) {
+            try {
+                transport.close();
+            } catch (final MessagingException e) {
+                LOG.error("Closing SMTP transport failed.", e);
             }
         }
     }

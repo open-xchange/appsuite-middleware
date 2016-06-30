@@ -1,3 +1,9 @@
+open-xchange-publish (7.8.2-2) stable; urgency=medium
+
+  * Second candidate for 7.8.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 29 Jun 2016 16:28:38 +0200
+
 open-xchange-publish (7.8.2-1) stable; urgency=medium
 
   * First candidate for 7.8.2 release

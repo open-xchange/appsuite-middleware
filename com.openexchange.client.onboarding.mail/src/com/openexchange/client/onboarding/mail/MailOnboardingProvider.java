@@ -83,6 +83,7 @@ import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
@@ -251,6 +252,29 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
         if (null == session) {
             throw OXException.general("No active session for user " + userId + " in context " + contextId);
+        }
+
+        if (session.getPassword() == null) {
+            // Try to find a session with password!=null
+            SessionMatcher matcher = new SessionMatcher() {
+
+                @Override
+                public Set<Flag> flags() {
+                    return null;
+                }
+
+                @Override
+                public boolean accepts(Session session) {
+                    if (session.getPassword() != null) {
+                        return true;
+                    }
+                    return false;
+                }
+            };
+            session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, matcher);
+            if (null == session) {
+                throw OXException.general("No active session for user " + userId + " in context " + contextId);
+            }
         }
 
         return getEffectiveConfigurations(session);
