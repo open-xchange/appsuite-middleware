@@ -260,7 +260,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
 
                 @Override
                 public Set<Flag> flags() {
-                    return null;
+                    return SessionMatcher.NO_FLAGS;
                 }
 
                 @Override
