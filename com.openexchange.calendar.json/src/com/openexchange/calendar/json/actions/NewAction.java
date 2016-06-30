@@ -56,7 +56,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -64,7 +63,9 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.converters.Compat;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.calendar.json.actions.chronos.EventMapper;
+import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -74,7 +75,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -92,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
 }, requestBody = "Appointment object as described in Common object data, Detailed task and appointment data and Detailed appointment data. The field id is not present.",
 responseDescription = "If the appointment was created successfully, an object with the attribute id of the newly created appointment. If the appointment could not be created due to conflicts, the response body is an object with the field conflicts, which is an array of appointment objects which caused the conflict. Each appointment object which represents a resource conflict contains an additional field hard_conflict with the Boolean value true. If the user does not have read access to a conflicting appointment, only the fields id, start_date, end_date, shown_as and participants are present and the field participants contains only the participants which caused the conflict.")
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class NewAction extends AppointmentAction {
+public final class NewAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(NewAction.class);
@@ -157,33 +157,26 @@ public final class NewAction extends AppointmentAction {
     }
 
     @Override
-    protected AJAXRequestResult performNew(AppointmentAJAXRequest req) throws OXException, JSONException {
-        ServerSession session = req.getSession();
-        String timeZoneID = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        if (Strings.isEmpty(timeZoneID)) {
-            timeZoneID = session.getUser().getTimeZone();
-        }
-        JSONObject jsonObject = req.getData();
-
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        JSONObject jsonObject = request.getData();
         CalendarDataObject appointment = new CalendarDataObject();
-        appointment.setContext(session.getContext());
-        new AppointmentParser(getTimeZone(timeZoneID)).parse(appointment, jsonObject);
+        appointment.setContext(request.getSession().getContext());
+        new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
         if (false == appointment.containsParentFolderID()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
         }
-        convertExternalToInternalUsersIfPossible(appointment, session.getContext(), LOG);
+        convertExternalToInternalUsersIfPossible(appointment, request.getSession().getContext(), LOG);
 
-        UserizedEvent event = Compat.getEvent(appointment, session, appointment.getParentFolderID());
-        //        UserizedEvent event = getMapper().deserialize(jsonObject, getMapper().getMappedFields(), timeZoneID);
-        boolean ignoreConflicts = jsonObject.optBoolean(AppointmentFields.IGNORE_CONFLICTS, false);
-        boolean notification = jsonObject.optBoolean(AppointmentFields.NOTIFICATION, false);
+        CalendarParameters parameters = parseParameters(request);
+        if (appointment.containsNotification()) {
+            parameters.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
+        }
+        parameters.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
 
-        CalendarService calendarService = getService(CalendarService.class);
-        UserizedEvent createdEvent = calendarService.createEvent(session, event);
+        UserizedEvent event = EventMapper.getEvent(appointment, request.getSession(), 0, appointment.getParentFolderID());
+        UserizedEvent createdEvent = calendarService.createEvent(request.getSession(), event);
 
         return new AJAXRequestResult(new JSONObject().put(DataFields.ID, createdEvent.getEvent().getId()), createdEvent.getEvent().getLastModified(), "json");
-
-        //        return perform(req);
     }
 
 }

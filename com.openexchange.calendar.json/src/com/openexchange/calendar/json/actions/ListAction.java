@@ -62,7 +62,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.converters.Compat;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
@@ -102,7 +103,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 }, requestBody = "An array with full object IDs (folder, id and optionally either recurrence_position or recurrence_date_position) of requested appointments.",
     responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class ListAction extends AppointmentAction {
+public final class ListAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(ListAction.class);
@@ -292,39 +293,16 @@ public final class ListAction extends AppointmentAction {
         }
     }
 
+    private static final String[] REQUIRED_PARAMETERS = {
+        CalendarParameters.PARAMETER_FIELDS
+    };
+
     @Override
-    protected AJAXRequestResult performNew(AppointmentAJAXRequest request) throws OXException, JSONException {
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarParameters parameters = parseParameters(request, REQUIRED_PARAMETERS);
         List<EventID> requestedIDs = parseRequestedIDs(request);
-        CalendarService calendarService = getService(CalendarService.class);
-        List<UserizedEvent> events = calendarService.getEvents(request.getSession(), requestedIDs);
-
-        Date timestamp = new Date(0L);
-        List<Appointment> appointments = new ArrayList<Appointment>(events.size());
-        for (UserizedEvent event : events) {
-            appointments.add(Compat.getAppointment(event));
-            Date lastModified = event.getEvent().getLastModified();
-            if (null != lastModified && timestamp.before(lastModified)) {
-                timestamp = lastModified;
-            }
-        }
-        return new AJAXRequestResult(appointments, timestamp, "appointment");
-        //        return new AJAXRequestResult(events, lastModified, "event");
-    }
-
-    private static List<EventID> parseRequestedIDs(AppointmentAJAXRequest request) throws OXException, JSONException {
-        JSONArray jsonArray = request.getData();
-        if (null == jsonArray) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-        }
-        List<EventID> eventIDs = new ArrayList<EventID>(jsonArray.length());
-        for (int i = 0; i < jsonArray.length(); i++) {
-            eventIDs.add(parseEventID(jsonArray.getJSONObject(i)));
-        }
-        return eventIDs;
-    }
-
-    private static EventID parseEventID(JSONObject jsonObject) throws OXException {
-        return new EventID(DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_FOLDERID), DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID));
+        List<UserizedEvent> events = calendarService.getEvents(request.getSession(), requestedIDs, parameters);
+        return getAppointmentResultWithTimestamp(events);
     }
 
 }

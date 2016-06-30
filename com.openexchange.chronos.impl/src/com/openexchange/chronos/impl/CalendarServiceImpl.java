@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
@@ -73,7 +74,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs) throws OXException {
+    public List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException {
         List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
         CalendarReader reader = new CalendarReader(session);
         for (EventID eventID : eventIDs) {
@@ -83,15 +84,19 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<UserizedEvent> getEventsInFolder(ServerSession session, int folderID, Date from, Date until) throws OXException {
+    public List<UserizedEvent> getEventsInFolder(ServerSession session, int folderID, CalendarParameters parameters) throws OXException {
         CalendarReader reader = new CalendarReader(session);
-        return reader.readEventsInFolder(folderID, from, until);
+        Date rangeStart = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date rangeEnd = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        return reader.readEventsInFolder(folderID, rangeStart, rangeEnd);
     }
 
     @Override
-    public List<UserizedEvent> getEventsOfUser(ServerSession session, Date from, Date until) throws OXException {
+    public List<UserizedEvent> getEventsOfUser(ServerSession session, CalendarParameters parameters) throws OXException {
         CalendarReader reader = new CalendarReader(session);
-        return reader.readEventsOfUser(from, until);
+        Date rangeStart = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date rangeEnd = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        return reader.readEventsOfUser(rangeStart, rangeEnd);
     }
 
     @Override

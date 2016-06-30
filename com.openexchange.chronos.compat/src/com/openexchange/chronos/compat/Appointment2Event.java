@@ -249,9 +249,8 @@ public class Appointment2Event {
             return null;
         }
     }
-
-    private static RecurrenceRule getDailyRule(SeriesPattern pattern) {
-        RecurrenceRule rule = new RecurrenceRule(Freq.DAILY);
+    
+    private static RecurrenceRule applyCommons(RecurrenceRule rule, SeriesPattern pattern) {
         if (null != pattern.getOccurrences()) {
             rule.setCount(i(pattern.getOccurrences()));
         } else if (null != pattern.getSeriesEnd()) {
@@ -263,16 +262,12 @@ public class Appointment2Event {
         return rule;
     }
 
+    private static RecurrenceRule getDailyRule(SeriesPattern pattern) {
+        return applyCommons(new RecurrenceRule(Freq.DAILY), pattern);
+    }
+
     private static RecurrenceRule getWeeklyRule(SeriesPattern pattern) {
-        RecurrenceRule rule = new RecurrenceRule(Freq.WEEKLY);
-        if (null != pattern.getOccurrences()) {
-            rule.setCount(i(pattern.getOccurrences()));
-        } else if (null != pattern.getSeriesEnd()) {
-            rule.setUntil(new DateTime(l(pattern.getSeriesEnd())));
-        }
-        if (null != pattern.getInterval()) {
-            rule.setInterval(i(pattern.getInterval()));
-        }
+        RecurrenceRule rule = applyCommons(new RecurrenceRule(Freq.WEEKLY), pattern);
         if (null != pattern.getDaysOfWeek()) {
             rule.setByDayPart(getWeekdays(pattern.getDaysOfWeek()));
         }
@@ -280,15 +275,7 @@ public class Appointment2Event {
     }
 
     private static RecurrenceRule getMonthlyRule(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
-        RecurrenceRule rule = new RecurrenceRule(Freq.MONTHLY);
-        if (null != pattern.getOccurrences()) {
-            rule.setCount(i(pattern.getOccurrences()));
-        } else if (null != pattern.getSeriesEnd()) {
-            rule.setUntil(new DateTime(l(pattern.getSeriesEnd())));
-        }
-        if (null != pattern.getInterval()) {
-            rule.setInterval(i(pattern.getInterval()));
-        }
+        RecurrenceRule rule = applyCommons(new RecurrenceRule(Freq.MONTHLY), pattern);
         if (null != pattern.getDaysOfWeek()) {
             rule.setByDayPart(getWeekdays(pattern.getDaysOfWeek()));
             int weekNo = pattern.getDayOfMonth();
@@ -300,15 +287,7 @@ public class Appointment2Event {
     }
 
     private static RecurrenceRule getYearlyRule(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
-        RecurrenceRule rule = new RecurrenceRule(Freq.YEARLY);
-        if (null != pattern.getOccurrences()) {
-            rule.setCount(i(pattern.getOccurrences()));
-        } else if (null != pattern.getSeriesEnd()) {
-            rule.setUntil(new DateTime(l(pattern.getSeriesEnd())));
-        }
-        if (null != pattern.getInterval()) {
-            rule.setInterval(i(pattern.getInterval()));
-        }
+        RecurrenceRule rule = applyCommons(new RecurrenceRule(Freq.YEARLY), pattern);
         if (null != pattern.getDaysOfWeek() && 0 < pattern.getDaysOfWeek().intValue()) {
             rule.setByDayPart(getWeekdays(pattern.getDaysOfWeek()));
             rule.setByPart(Part.BYMONTH, pattern.getMonth());

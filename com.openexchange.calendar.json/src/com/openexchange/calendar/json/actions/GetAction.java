@@ -57,7 +57,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.converters.Compat;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.calendar.json.actions.chronos.EventMapper;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -84,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "recurrence_position", optional = true, description = "Recurrence Position requested appointment.")
 }, responseDescription = "Response with timestamp: An object containing all data of the requested appointment. The fields of the object are listed in Common object data, Detailed task and appointment data and Detailed appointment data. The field id is not included.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class GetAction extends AppointmentAction {
+public final class GetAction extends ChronosAction {
 
     /**
      * Initializes a new {@link GetAction}.
@@ -123,16 +124,12 @@ public final class GetAction extends AppointmentAction {
     }
 
     @Override
-    protected AJAXRequestResult performNew(AppointmentAJAXRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest req) throws OXException, JSONException {
         int objectID = req.checkInt(AJAXServlet.PARAMETER_ID);
         int folderID = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-
-        CalendarService calendarService = getService(CalendarService.class);
         UserizedEvent event = calendarService.getEvent(req.getSession(), folderID, objectID);
-
-        Appointment appointment = Compat.getAppointment(event);
+        Appointment appointment = EventMapper.getAppointment(event);
         return new AJAXRequestResult(appointment, event.getEvent().getLastModified(), "appointment");
-        //        return new AJAXRequestResult(event, event.getLastModified(), "event");
     }
 
 }

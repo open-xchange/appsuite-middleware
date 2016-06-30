@@ -64,7 +64,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.converters.Compat;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -105,7 +106,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "showPrivate", optional = true, description = "only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information (since 6.18)")
 }, responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Appointment sequencies are broken up into individual appointments and each occurrence of a sequence in the requested range is returned separately. The appointments are sorted in ascending order by the field start_date.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class AllAction extends AppointmentAction {
+public final class AllAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
@@ -344,31 +345,21 @@ public final class AllAction extends AppointmentAction {
         }
     }
 
+    private static final String[] REQUIRED_PARAMETERS = {
+        CalendarParameters.PARAMETER_FIELDS, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END
+    };
+
     @Override
-    protected AJAXRequestResult performNew(AppointmentAJAXRequest request) throws OXException, JSONException {
-        Date startUTC = request.checkDate(AJAXServlet.PARAMETER_START);
-        Date endUTC = request.checkDate(AJAXServlet.PARAMETER_END);
-        Date from = request.applyTimeZone2Date(startUTC.getTime());
-        Date until = request.applyTimeZone2Date(endUTC.getTime());
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarParameters parameters = parseParameters(request, REQUIRED_PARAMETERS);
         int folderID = request.getFolderId();
-        CalendarService calendarService = getService(CalendarService.class);
         List<UserizedEvent> events;
         if (0 < folderID) {
-            events = calendarService.getEventsInFolder(request.getSession(), folderID, from, until);
+            events = calendarService.getEventsInFolder(request.getSession(), folderID, parameters);
         } else {
-            events = calendarService.getEventsOfUser(request.getSession(), from, until);
+            events = calendarService.getEventsOfUser(request.getSession(), parameters);
         }
-        Date timestamp = new Date(0L);
-        List<Appointment> appointments = new ArrayList<Appointment>(events.size());
-        for (UserizedEvent event : events) {
-            appointments.add(Compat.getAppointment(event));
-            Date lastModified = event.getEvent().getLastModified();
-            if (null != lastModified && timestamp.before(lastModified)) {
-                timestamp = lastModified;
-            }
-        }
-        return new AJAXRequestResult(appointments, timestamp, "appointment");
-//        return new AJAXRequestResult(events, lastModified, "event");
+        return getAppointmentResultWithTimestamp(events);
     }
 
 }

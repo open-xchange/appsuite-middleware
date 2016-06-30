@@ -70,9 +70,10 @@ public class UserizedEvent {
      * Initializes a new {@link UserizedEvent}.
      *
      * @param session The current user's session
-     * @param event The underlying event data
+     * @param onBehalfOf The identifier of the attendee the session's user is acting on behalf of, or <code>0</code> if not specified
      * @param folderId The folder identifier representing the view on the event
-     * @param alarms The alarms for the event
+     * @param event The underlying event data
+     * @param alarms The attendee's alarms for the event
      */
     public UserizedEvent(ServerSession session, int onBehalfOf, int folderId, Event event, List<Alarm> alarms) {
         super();
@@ -84,35 +85,45 @@ public class UserizedEvent {
     }
 
     /**
-     * @return the folderId
+     * Gets the folder identifier representing the view on the event
+     *
+     * @return The folder identifier
      */
     public int getFolderId() {
         return folderId;
     }
 
     /**
-     * @return the alarms
+     * Gets the attendee's alarms for the event
+     *
+     * @return The alarms
      */
     public List<Alarm> getAlarms() {
         return alarms;
     }
 
     /**
-     * @return the event
+     * Gets the underlying event data
+     *
+     * @return The event data
      */
     public Event getEvent() {
         return event;
     }
 
     /**
-     * @return the session
+     * Gets the current user's session
+     *
+     * @return The session
      */
     public ServerSession getSession() {
         return session;
     }
 
     /**
-     * @return the onBehalfOf
+     * Gets the identifier of the attendee the session's user is acting on behalf of.
+     *
+     * @return The identifier of the attendee the session's user is acting on behalf of, or <code>0</code> if not specified
      */
     public int getOnBehalfOf() {
         return onBehalfOf;
