@@ -102,6 +102,10 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     public String getLoginType() {
         return parameters.get("login_type");
     }
+    
+    public String getToken() {
+        return parameters.get("token");
+    }
 
     public String getLoginName() {
         String name = parameters.get("login_name");
