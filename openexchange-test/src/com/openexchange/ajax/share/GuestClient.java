@@ -91,8 +91,6 @@ import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginRequest.GuestCredentials;
 import com.openexchange.ajax.session.actions.LoginResponse;
-import com.openexchange.ajax.share.actions.RedeemRequest;
-import com.openexchange.ajax.share.actions.RedeemResponse;
 import com.openexchange.ajax.share.actions.ResolveShareRequest;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
@@ -113,7 +111,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -344,19 +341,6 @@ public class GuestClient extends AJAXClient {
             loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, false);
         } else if ("anonymous_password".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);
-        } else if ("message".equals(shareResponse.getLoginType())) {
-            String token = shareResponse.getToken();
-            if (null == token || Strings.isEmpty(token)) {
-                Assert.fail("unknown login type: " + shareResponse.getLoginType());
-            }
-            RedeemRequest req = new RedeemRequest(token);
-            RedeemResponse resp = execute(req);
-            String messageType = resp.getMessageType();
-            if ("ERROR".equals(messageType)) {
-                Assert.fail(resp.getMessage());
-            }
-            shareResponse = Executor.execute(this, new ResolveShareRequest(config.url, config.failOnNonRedirect), getProtocol(), getHostname());
-            return login(shareResponse, config);
         } else {
             Assert.fail("unknown login type: " + shareResponse.getLoginType());
         }
