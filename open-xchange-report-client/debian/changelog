@@ -1,3 +1,9 @@
+open-xchange-report-client (7.6.3-13) stable; urgency=medium
+
+  * Build for patch 2016-07-04 (3358)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 30 Jun 2016 19:33:16 +0200
+
 open-xchange-report-client (7.6.3-12) stable; urgency=medium
 
   * Build for patch 2016-06-06 (3315)
