@@ -7,6 +7,14 @@ Starting with v7.8.2 the Open-Xchange Server supports to send one or more non-in
 
 Whenever such a mail is sent, an according folder is created in Drive module located under a special folder named according to selected [display name](#display-name). The name of the new folder is aligned to the mail's subject. All file attachments that are supposed to be available via the mail are put into that folder and a share link is created for that folder. That share link (along-side with other information) is prepended to the mail's text content.
 
+# Replaces the "publish on exceeded quota" feature
+
+"Drive Mail" is a replacement for the former "publish on exceeded quota" feature. Setups which use the "publish on exceeded quota" feature need to be aware of
+
+ * The ``uploadquota`` and ``uploadquotaperfile`` now do no more act as threshold, which controls when auto-publishing kicks-in. Those quota limitations do specify the user's upload limits. Regardless if a "Drive Mail" is composed or not. Hence, those settings need to be set to reasonable values
+ * Existing Drive folders and Drive documents are not removed
+ * Auto-deleting of expired published Drive documents does no more happen
+
 # Installation
 This feature is included in ``open-xchange-core`` package. Thus, no additional packages are required being installed.
 
