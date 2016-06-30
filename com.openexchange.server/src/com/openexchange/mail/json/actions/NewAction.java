@@ -427,6 +427,9 @@ public final class NewAction extends AbstractMailAction {
                     cm.setMailSettings(usm);
                 }
             }
+            if (null != sentMessage) {
+                sentMessage.setMailSettings(usm);
+            }
             userSettingMail = usm;
 
             // ------------------------------------ Send the messages --------------------------------------
