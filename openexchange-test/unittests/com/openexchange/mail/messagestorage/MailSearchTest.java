@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
@@ -269,7 +270,7 @@ public final class MailSearchTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 
-			final String name = "TemporaryFolder" + System.currentTimeMillis();
+			final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
 			String fullname = null;
 			{
 				final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
@@ -435,7 +436,7 @@ public final class MailSearchTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 
-			final String name = "TemporaryFolder" + System.currentTimeMillis();
+			final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
 			String fullname = null;
 			{
 				final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
@@ -612,7 +613,7 @@ public final class MailSearchTest extends AbstractMailTest {
         final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
         mailAccess.connect();
 
-        final String name = "TemporaryFolder" + System.currentTimeMillis();
+        final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
         String fullname = null;
         {
             final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");

@@ -52,6 +52,7 @@ package com.openexchange.mail.folderstorage;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
@@ -82,10 +83,6 @@ import com.openexchange.sessiond.impl.SessionObject;
  *
  */
 public final class MailFolderTest extends AbstractMailTest {
-
-	private static final String SESSION_NAME = "mail-test-session";
-
-	private static final String TEMPORARY_FOLDER = "TemporaryFolder";
 
 	private static final String INBOX = "INBOX";
 
@@ -256,12 +253,12 @@ public final class MailFolderTest extends AbstractMailTest {
 				String parentFullname = null;
 				{
 					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
-					if (inbox.isHoldsFolders()) {
-						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								TEMPORARY_FOLDER).toString();
+					String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
+                    if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name).toString();
 						parentFullname = INBOX;
 					} else {
-						fullname = TEMPORARY_FOLDER;
+						fullname = name;
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
 					}
 
@@ -270,7 +267,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setParentFullname(parentFullname);
 					mfd.setSeparator(inbox.getSeparator());
 					mfd.setSubscribed(false);
-					mfd.setName(TEMPORARY_FOLDER);
+					mfd.setName(name);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
 							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
@@ -397,12 +394,12 @@ public final class MailFolderTest extends AbstractMailTest {
 				String parentFullname = null;
 				{
 					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
-					if (inbox.isHoldsFolders()) {
-						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								TEMPORARY_FOLDER).toString();
+					String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
+                    if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name).toString();
 						parentFullname = INBOX;
 					} else {
-						fullname = TEMPORARY_FOLDER;
+						fullname = name;
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
 					}
 
@@ -411,7 +408,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setParentFullname(parentFullname);
 					mfd.setSeparator(inbox.getSeparator());
 					mfd.setSubscribed(false);
-					mfd.setName(TEMPORARY_FOLDER);
+					mfd.setName(name);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
 							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
@@ -504,13 +501,13 @@ public final class MailFolderTest extends AbstractMailTest {
 				final boolean parentIsDefault;
 				{
 					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
-					if (inbox.isHoldsFolders()) {
-						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								TEMPORARY_FOLDER).toString();
+					String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
+                    if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name).toString();
 						parentFullname = INBOX;
 						parentIsDefault = false;
 					} else {
-						fullname = TEMPORARY_FOLDER;
+						fullname = name;
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
 						parentIsDefault = true;
 					}
@@ -520,7 +517,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setParentFullname(parentFullname);
 					mfd.setSeparator((separator = inbox.getSeparator()));
 					mfd.setSubscribed(false);
-					mfd.setName(TEMPORARY_FOLDER);
+					mfd.setName(name);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
 							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
@@ -622,13 +619,13 @@ public final class MailFolderTest extends AbstractMailTest {
 				final boolean isParentDefault;
 				{
 					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
-					if (inbox.isHoldsFolders()) {
-						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								TEMPORARY_FOLDER).toString();
+					String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
+                    if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name).toString();
 						parentFullname = INBOX;
 						isParentDefault = false;
 					} else {
-						fullname = TEMPORARY_FOLDER;
+						fullname = name;
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
 						isParentDefault = true;
 					}
@@ -638,7 +635,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setParentFullname(parentFullname);
 					mfd.setSeparator((separator = inbox.getSeparator()));
 					mfd.setSubscribed(false);
-					mfd.setName(TEMPORARY_FOLDER);
+					mfd.setName(name);
 
 					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID)
 							.createNewMailPermission(session, MailAccount.DEFAULT_ID);
@@ -688,7 +685,7 @@ public final class MailFolderTest extends AbstractMailTest {
 
 			String fullname = null;
 			try {
-				final String name = TEMPORARY_FOLDER;
+				final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
 
 				String parentFullname = null;
 				{
@@ -808,7 +805,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			String[] trashedIDs = null;
 			String trashFullname = null;
 			try {
-				final String name = TEMPORARY_FOLDER;
+				final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
 
 				{
 					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
@@ -926,7 +923,7 @@ public final class MailFolderTest extends AbstractMailTest {
 
 			String fullname = null;
 			try {
-				final String name = TEMPORARY_FOLDER;
+				final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
 
 				{
 					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
@@ -987,7 +984,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			String fullname = null;
 			String anotherFullname = null;
 			try {
-				final String name = TEMPORARY_FOLDER;
+				final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
 
 				final boolean isParentDefault;
 				{
