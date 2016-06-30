@@ -347,10 +347,12 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                 if (category_filter.equals("general")) {
                                     // Special case with unkeyword
                                     String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
-                                    if (searchTerm != null) {
-                                        searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(categoryNames, false));
-                                    } else {
-                                        searchTerm = new UserFlagTerm(categoryNames, false);
+                                    if (categoryNames.length != 0) {
+                                        if (searchTerm != null) {
+                                            searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(categoryNames, false));
+                                        } else {
+                                            searchTerm = new UserFlagTerm(categoryNames, false);
+                                        }
                                     }
                                 } else {
                                     // Normal case with keyword
