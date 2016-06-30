@@ -47,83 +47,44 @@
  *
  */
 
-package com.openexchange.java;
+package com.openexchange.html.internal.jericho.control;
+
+import java.util.List;
 
 /**
- * {@link InterruptibleCharSequence} - A <code>CharSequence</code> that can notice thread interrupts.
- * <p>
- * Originally developed by <a href="http://gojomo.blogspot.de/">Gordon Mohr (@gojomo)</a> in Heritrix project (<a
- * href="crawler.archive.org">crawler.archive.org</a>).
+ * {@link JerichoParseControlTask} - Responsible for interrupting expired threads currently performing HTML parsing.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public final class InterruptibleCharSequence implements CharSequence {
-
-    /** The special runtime exception signaling that reading from char sequence has been interrupted */
-    public static final class InterruptedRuntimeException extends RuntimeException {
-
-        private static final long serialVersionUID = 6627208506308108226L;
-
-        /**
-         * Initializes a new {@link InterruptedRuntimeException}.
-         */
-        InterruptedRuntimeException() {
-            super("Interrupted while reading char sequence", new InterruptedException());
-        }
-    }
+public class JerichoParseControlTask implements Runnable {
 
     /**
-     * Gets an {@link InterruptibleCharSequence} instance for given {@link CharSequence} instance.
-     *
-     * @param charSequence The char sequence
-     * @return An {@link InterruptibleCharSequence} instance for given {@link CharSequence} instance
+     * Initializes a new {@link JerichoParseControlTask}.
      */
-    public static InterruptibleCharSequence valueOf(final CharSequence charSequence) {
-        if (null == charSequence) {
-            return null;
-        }
-        if (charSequence instanceof InterruptibleCharSequence) {
-            return (InterruptibleCharSequence) charSequence;
-        }
-        return new InterruptibleCharSequence(charSequence);
-    }
-
-    // ------------------------------------------------------------------------------------------------------------- //
-
-    private final CharSequence inner;
-
-    /**
-     * Initializes a new {@link InterruptibleCharSequence}.
-     *
-     * @param cs The char sequence to delegate to
-     */
-    private InterruptibleCharSequence(final CharSequence cs) {
+    public JerichoParseControlTask() {
         super();
-        this.inner = cs;
     }
 
     @Override
-    public char charAt(final int index) {
-        if (Thread.interrupted()) { // clears flag if set
-            throw new InterruptedRuntimeException();
+    public void run() {
+        try {
+            Thread runner = Thread.currentThread();
+            JerichoParseControl control = JerichoParseControl.getInstance();
+            while (!runner.isInterrupted()) {
+                List<JerichoParseTask> expired = control.awaitExpired();
+                boolean poisoned = expired.remove(JerichoParseTask.POISON);
+                for (JerichoParseTask task : expired) {
+                    // Parsing for too long
+                    task.interrupt();
+                }
+                if (poisoned) {
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
         }
-        // counter++;
-        return inner.charAt(index);
-    }
-
-    @Override
-    public int length() {
-        return inner.length();
-    }
-
-    @Override
-    public CharSequence subSequence(final int start, final int end) {
-        return new InterruptibleCharSequence(inner.subSequence(start, end));
-    }
-
-    @Override
-    public String toString() {
-        return inner.toString();
     }
 
 }
