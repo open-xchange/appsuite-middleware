@@ -58,6 +58,8 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
+import com.openexchange.ajax.share.actions.RedeemRequest;
+import com.openexchange.ajax.share.actions.RedeemResponse;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.ajax.share.actions.ShareLink;
 import com.openexchange.ajax.share.actions.UpdateLinkRequest;
@@ -153,9 +155,13 @@ public class LoginScreenTest extends ShareTest {
         GuestClient guestClient = resolveShare(shareLink.getShareURL(), null, newPW);
         guestClient.checkSessionAlive(false);
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
-        assertEquals("anonymous_password", resolveResponse.getLoginType());
-        assertEquals("INFO", resolveResponse.getMessageType());
-        assertNotNull(resolveResponse.getMessage());
+        String token = resolveResponse.getToken();
+        assertNotNull(token);
+        RedeemRequest req = new RedeemRequest(token);
+        RedeemResponse resp = guestClient.execute(req);
+        assertEquals("anonymous_password", resp.getLoginType());
+        assertEquals("INFO", resp.getMessageType());
+        assertNotNull(resp.getMessage());
     }
 
 }
