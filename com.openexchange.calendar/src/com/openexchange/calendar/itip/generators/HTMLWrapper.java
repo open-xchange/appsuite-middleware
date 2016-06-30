@@ -49,6 +49,8 @@
 
 package com.openexchange.calendar.itip.generators;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
@@ -95,7 +97,7 @@ public class HTMLWrapper extends PassthroughWrapper {
         if (argument == null) {
             return "";
         }
-        return "<em>"+argument.toString()+"</em>";
+        return "<em>"+escapeHtml(argument.toString())+"</em>";
     }
 
     @Override
@@ -117,7 +119,7 @@ public class HTMLWrapper extends PassthroughWrapper {
         if (argument == null) {
             return "";
         }
-        return "<span class='"+string+"'>"+argument.toString()+"</span>";
+        return "<span class='"+string+"'>"+escapeHtml(argument.toString())+"</span>";
     }
 
     @Override
@@ -125,8 +127,12 @@ public class HTMLWrapper extends PassthroughWrapper {
         if (argument == null) {
             return "";
         }
-        String string = argument.toString();
+        String string = escapeHtml(argument.toString());
     	return "<a href=\""+string+"\">"+string+"</a>";
+    }
+
+    private String escapeHtml(String string) {
+        return StringEscapeUtils.escapeHtml(string);
     }
 
 
