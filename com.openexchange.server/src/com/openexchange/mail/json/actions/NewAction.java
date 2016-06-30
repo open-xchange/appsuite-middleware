@@ -110,7 +110,6 @@ import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MtaStatusInfo;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -158,12 +157,7 @@ public final class NewAction extends AbstractMailAction {
         try {
             long maxSize;
             long maxFileSize;
-            if (TransportProperties.getInstance().isPublishOnExceededQuota() && req.getSession().getUserPermissionBits().hasInfostore()) {
-                // No chance to check account prior to parsing multipart upload
-                // Thus w/o: (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))
-                maxSize = -1L;
-                maxFileSize = -1L;
-            } else {
+            {
                 UserSettingMail usm = req.getSession().getUserSettingMail();
                 maxFileSize = usm.getUploadQuotaPerFile();
                 if (maxFileSize <= 0) {
