@@ -62,7 +62,7 @@ import com.openexchange.i18n.tools.TemplateToken;
  */
 public final class ModuleReplacement implements TemplateReplacement {
 
-    private final static String[] MODULES = { "calendar", "task" };
+    private final static String[] MODULES = { "calendar", "tasks" };
 
     public static final int MODULE_UNKNOWN = -1;
 
