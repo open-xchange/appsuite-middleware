@@ -161,7 +161,7 @@ public final class JerichoParser {
         super();
         ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
         int defaultValue = 10;
-        htmlParseTimeoutSec = service.getIntProperty("com.openexchange.html.parse.timeout", defaultValue);
+        htmlParseTimeoutSec = null == service ? defaultValue : service.getIntProperty("com.openexchange.html.parse.timeout", defaultValue);
         if (htmlParseTimeoutSec > 0) {
             controlRunner = new Thread(new JerichoParseControlTask(), "JerichoControl");
             controlRunner.start();
