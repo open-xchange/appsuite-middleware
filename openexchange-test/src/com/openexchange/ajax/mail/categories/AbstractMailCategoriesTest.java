@@ -53,6 +53,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
+import org.junit.Assume;
+import com.openexchange.ajax.capabilities.actions.AllRequest;
+import com.openexchange.ajax.capabilities.actions.AllResponse;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.AbstractMailTest;
 import com.openexchange.exception.OXException;
@@ -93,6 +96,8 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
     protected void setUp() throws Exception {
         super.setUp();
         reconnect();
+        AllResponse response = getClient().execute(new AllRequest());
+        Assume.assumeTrue("User does not have the mail_categories capability. Probably the mailserver does not support imap4flags.", response.getCapabilities().contains("mail_categories"));
         values = getClient().getValues();
         clearFolder(values.getInboxFolder()); // always start with an empty inbox
         EML = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 

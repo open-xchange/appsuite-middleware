@@ -47,51 +47,46 @@
  *
  */
 
-package com.openexchange.mail.json.parser;
+package com.openexchange.ajax.share.actions;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
+import java.util.Map;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+
 
 /**
- * {@link AbstractAttachmentHandler} - An abstract {@link IAttachmentHandler attachment handler}.
+ * {@link RedeemResponse}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.2
  */
-public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
+public class RedeemResponse extends AbstractAJAXResponse {
+    
+    private final Map<String, String> properties;
 
-    protected final List<MailPart> attachments;
-    protected final boolean doAction;
-    protected final long uploadQuota;
-    protected final long uploadQuotaPerFile;
-
-    /**
-     * Initializes a new {@link AbstractAttachmentHandler}.
-     *
-     * @param session The session providing needed user information
-     * @throws OXException If initialization fails
-     */
-    public AbstractAttachmentHandler(final Session session) throws OXException {
-        super();
-        attachments = new ArrayList<MailPart>(4);
-
-        final UserSettingMail usm;
-        if (session instanceof ServerSession) {
-            usm = ((ServerSession) session).getUserSettingMail();
-        } else {
-            usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
-        }
-
-        final MailUploadQuotaChecker checker = new MailUploadQuotaChecker(usm);
-        this.uploadQuota = checker.getQuotaMax();
-        this.uploadQuotaPerFile = checker.getFileQuotaMax();
-
-        doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
+    protected RedeemResponse(Response response, Map<String, String> properties) {
+        super(response);
+        this.properties = properties;
     }
+    
+    public String getShare() {
+        return properties.get("share");
+    }
+    
+    public String getLoginType() {
+        return properties.get("login_type");
+    }
+
+    public String getMessageType() {
+        return properties.get("message_type");
+    }
+    
+    public String getMessage() {
+        return properties.get("message");
+    }
+    
+    public String getTarget() {
+        return properties.get("target");
+    }
+
 }

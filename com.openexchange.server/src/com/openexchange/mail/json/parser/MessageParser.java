@@ -120,9 +120,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -217,12 +215,7 @@ public final class MessageParser {
             composedMail.setAccountId(accountId);
 
             // Select appropriate handler
-            IAttachmentHandler attachmentHandler;
-            if (prepare4Transport && TransportProperties.getInstance().isPublishOnExceededQuota() && (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))) {
-                attachmentHandler = new PublishAttachmentHandler(session, provider, protocol, hostName);
-            } else {
-                attachmentHandler = new AbortAttachmentHandler(session);
-            }
+            IAttachmentHandler attachmentHandler = new AbortAttachmentHandler(session);
 
             // Parse transport message plus its text body
             parse(composedMail, jMail, session, accountId, provider, attachmentHandler, ctx, prepare4Transport);

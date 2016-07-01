@@ -103,7 +103,6 @@ import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
@@ -115,7 +114,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link MailJSONActivator} - The activator for mail module.
@@ -175,11 +173,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                     @Override
                     public boolean isEnabled(final String capability, final Session ses) throws OXException {
                         if (sCapability.equals(capability)) {
-                            final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                            if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
-                                return false;
-                            }
-                            return TransportProperties.getInstance().isPublishOnExceededQuota();
+                            return false;
                         }
 
                         return true;

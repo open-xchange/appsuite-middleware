@@ -180,7 +180,6 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -1440,24 +1439,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 1; sameAccount && i < length; i++) {
             sameAccount = accountId == arguments[i].getAccountId();
         }
-        TransportProperties transportProperties = TransportProperties.getInstance();
         MailUploadQuotaChecker checker = new MailUploadQuotaChecker(usm);
         long maxPerMsg = checker.getFileQuotaMax();
         long max = checker.getQuotaMax();
         if (sameAccount) {
             initConnection(accountId);
             MailMessage[] originalMails = new MailMessage[folders.length];
-            if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
-                for (int i = 0; i < length; i++) {
-                    String fullName = arguments[i].getFullname();
-                    MailMessage origMail = mailAccess.getMessageStorage().getMessage(fullName, fowardMsgUIDs[i], false);
-                    if (null == origMail) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], fullName);
-                    }
-                    origMail.loadContent();
-                    originalMails[i] = origMail;
-                }
-            } else {
+            {
                 long total = 0;
                 for (int i = 0; i < length; i++) {
                     String fullName = arguments[i].getFullname();
@@ -1484,21 +1472,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return mailAccess.getLogicTools().getFowardMessage(originalMails, usm, setFrom);
         }
         MailMessage[] originalMails = new MailMessage[folders.length];
-        if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
-            for (int i = 0; i < length; i++) {
-                MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
-                try {
-                    MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
-                    if (null == origMail) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
-                    }
-                    origMail.loadContent();
-                    originalMails[i] = origMail;
-                } finally {
-                    ma.close(true);
-                }
-            }
-        } else {
+        {
             long total = 0;
             for (int i = 0; i < length; i++) {
                 MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());

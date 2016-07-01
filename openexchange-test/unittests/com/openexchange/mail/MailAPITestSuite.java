@@ -79,7 +79,7 @@ public final class MailAPITestSuite extends TestSuite {
 		/*
 		 * Message storage
 		 */
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAppendTest.class);
+//		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAppendTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAttachmentTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailColorLabelTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailCopyTest.class);

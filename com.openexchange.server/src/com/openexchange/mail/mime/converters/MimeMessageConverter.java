@@ -493,7 +493,8 @@ public final class MimeMessageConverter {
             if (composedMail.getSession() == null) {
                 compositionParameters = new ContextCompositionParameters(composedMail.getContext());
             } else {
-                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()));
+                UserSettingMail usm = null == composedMail.getMailSettings() ? UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()) : composedMail.getMailSettings();
+                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), usm);
             }
             final MimeMessageFiller filler = new MimeMessageFiller(compositionParameters);
             filler.setAccountId(composedMail.getAccountId());

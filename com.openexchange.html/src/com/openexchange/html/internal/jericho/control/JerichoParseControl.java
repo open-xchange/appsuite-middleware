@@ -47,51 +47,86 @@
  *
  */
 
-package com.openexchange.mail.json.parser;
+package com.openexchange.html.internal.jericho.control;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.DelayQueue;
 
 /**
- * {@link AbstractAttachmentHandler} - An abstract {@link IAttachmentHandler attachment handler}.
+ * {@link JerichoParseControl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
+public class JerichoParseControl {
 
-    protected final List<MailPart> attachments;
-    protected final boolean doAction;
-    protected final long uploadQuota;
-    protected final long uploadQuotaPerFile;
+    private static final JerichoParseControl INSTANCE = new JerichoParseControl();
 
     /**
-     * Initializes a new {@link AbstractAttachmentHandler}.
+     * Gets the instance
      *
-     * @param session The session providing needed user information
-     * @throws OXException If initialization fails
+     * @return The instance
      */
-    public AbstractAttachmentHandler(final Session session) throws OXException {
-        super();
-        attachments = new ArrayList<MailPart>(4);
-
-        final UserSettingMail usm;
-        if (session instanceof ServerSession) {
-            usm = ((ServerSession) session).getUserSettingMail();
-        } else {
-            usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
-        }
-
-        final MailUploadQuotaChecker checker = new MailUploadQuotaChecker(usm);
-        this.uploadQuota = checker.getQuotaMax();
-        this.uploadQuotaPerFile = checker.getFileQuotaMax();
-
-        doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
+    public static JerichoParseControl getInstance() {
+        return INSTANCE;
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------
+
+    private final DelayQueue<JerichoParseTask> queue;
+
+    /**
+     * Initializes a new {@link JerichoParseControl}.
+     */
+    private JerichoParseControl() {
+        super();
+        queue = new DelayQueue<JerichoParseTask>();
+    }
+
+    /**
+     * Adds the specified task.
+     *
+     * @param task The task
+     * @return <tt>true</tt>
+     */
+    public boolean add(JerichoParseTask task) {
+        return queue.offer(task);
+    }
+
+    /**
+     * Removes the specified task.
+     *
+     * @param task The task to remove
+     * @return <code>true</code> if such a task was removed; otherwise <code>false</code>
+     */
+    public boolean remove(JerichoParseTask task) {
+        return queue.remove(task);
+    }
+
+    /**
+     * Await expired push listeners from this control.
+     *
+     * @return The expired push listeners
+     * @throws InterruptedException If interrupted while waiting
+     */
+    List<JerichoParseTask> awaitExpired() throws InterruptedException {
+        JerichoParseTask expired = queue.take();
+        List<JerichoParseTask> expirees = new LinkedList<JerichoParseTask>();
+        expirees.add(expired);
+        queue.drainTo(expirees);
+        return expirees;
+    }
+
+    /**
+     * Removes expired push listeners from this control.
+     *
+     * @return The expired push listeners
+     */
+    List<JerichoParseTask> removeExpired() {
+        List<JerichoParseTask> expirees = new LinkedList<JerichoParseTask>();
+        queue.drainTo(expirees);
+        return expirees;
+    }
+
 }

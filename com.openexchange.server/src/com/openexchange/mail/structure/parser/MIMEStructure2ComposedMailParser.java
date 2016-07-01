@@ -83,7 +83,6 @@ import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.json.parser.AbortAttachmentHandler;
 import com.openexchange.mail.json.parser.IAttachmentHandler;
-import com.openexchange.mail.json.parser.PublishAttachmentHandler;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -142,14 +141,7 @@ public final class MIMEStructure2ComposedMailParser {
         managedFiles = new ArrayList<ManagedFile>(4);
         transportProvider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
         composedMail = transportProvider.getNewComposedMailMessage(session, session.getContext());
-        /*
-         * Select appropriate handler
-         */
-        if (TransportProperties.getInstance().isPublishOnExceededQuota() && (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))) {
-            attachmentHandler = new PublishAttachmentHandler(session, transportProvider, protocol, hostName);
-        } else {
-            attachmentHandler = new AbortAttachmentHandler(session);
-        }
+        attachmentHandler = new AbortAttachmentHandler(session);
     }
 
     /**

@@ -47,51 +47,44 @@
  *
  */
 
-package com.openexchange.mail.json.parser;
+package com.openexchange.html.internal.jericho.control;
 
-import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractAttachmentHandler} - An abstract {@link IAttachmentHandler attachment handler}.
+ * {@link JerichoParseControlTask} - Responsible for interrupting expired threads currently performing HTML parsing.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
-
-    protected final List<MailPart> attachments;
-    protected final boolean doAction;
-    protected final long uploadQuota;
-    protected final long uploadQuotaPerFile;
+public class JerichoParseControlTask implements Runnable {
 
     /**
-     * Initializes a new {@link AbstractAttachmentHandler}.
-     *
-     * @param session The session providing needed user information
-     * @throws OXException If initialization fails
+     * Initializes a new {@link JerichoParseControlTask}.
      */
-    public AbstractAttachmentHandler(final Session session) throws OXException {
+    public JerichoParseControlTask() {
         super();
-        attachments = new ArrayList<MailPart>(4);
-
-        final UserSettingMail usm;
-        if (session instanceof ServerSession) {
-            usm = ((ServerSession) session).getUserSettingMail();
-        } else {
-            usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
-        }
-
-        final MailUploadQuotaChecker checker = new MailUploadQuotaChecker(usm);
-        this.uploadQuota = checker.getQuotaMax();
-        this.uploadQuotaPerFile = checker.getFileQuotaMax();
-
-        doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
     }
+
+    @Override
+    public void run() {
+        try {
+            Thread runner = Thread.currentThread();
+            JerichoParseControl control = JerichoParseControl.getInstance();
+            while (!runner.isInterrupted()) {
+                List<JerichoParseTask> expired = control.awaitExpired();
+                boolean poisoned = expired.remove(JerichoParseTask.POISON);
+                for (JerichoParseTask task : expired) {
+                    // Parsing for too long
+                    task.interrupt();
+                }
+                if (poisoned) {
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
 }

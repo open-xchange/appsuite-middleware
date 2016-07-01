@@ -67,6 +67,34 @@ public class HostListTest extends TestCase {
         super();
     }
 
+    public void testValueOf_hostlistEmpty_returnEmpty() {
+        HostList hl = HostList.valueOf("");
+
+        assertTrue(hl.equals(HostList.EMPTY));
+    }
+
+    public void testValueOf_hostlistNull_returnEmpty() {
+        HostList hl = HostList.valueOf(null);
+
+        assertTrue(hl.equals(HostList.EMPTY));
+    }
+
+    public void testContains_containsEmpty_returnFalse() {
+        HostList hl = HostList.valueOf("");
+
+        boolean contains = hl.contains("");
+
+        assertFalse(contains);
+    }
+
+    public void testContains_containsNull_returnEmpty() {
+        HostList hl = HostList.valueOf(null);
+
+        boolean contains = hl.contains(null);
+
+        assertFalse(contains);
+    }
+
     public void testHostListv4() {
         try {
             HostList hl = HostList.valueOf("192.168.0.1, localhost, *.open-xchange.com");
@@ -84,6 +112,30 @@ public class HostListTest extends TestCase {
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
+        }
+    }
+
+    public void testHostListv4_throwsException() {
+        try {
+            HostList.valueOf("**.open-xchange.com");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+
+    public void testHostListv4_throwsException2() {
+        try {
+            HostList.valueOf("*");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+    
+    public void testHostListv4_throwsException3() {
+        try {
+            HostList.valueOf("test.*.com");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
         }
     }
 
@@ -177,7 +229,7 @@ public class HostListTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     public void testHostListv6Ranges() {
         try {
             HostList hl = HostList.valueOf("2001:DB8::64-2001:DB8::C8");
@@ -187,7 +239,7 @@ public class HostListTest extends TestCase {
 
             assertTrue(hl.contains("2001:db8:0:0:0:0:0:70"));
             assertTrue(hl.contains("2001:db8:0:0:0:0:0:7f"));
-            
+
             assertFalse(hl.contains("::1"));
         } catch (Exception e) {
             e.printStackTrace();
@@ -204,7 +256,7 @@ public class HostListTest extends TestCase {
 
             assertTrue(hl.contains("2001:db1:0:0:0:0:0:0"));
             assertTrue(hl.contains("2001:db1:0:0:0:0:0:ff"));
-            
+
             assertFalse(hl.contains("::1"));
         } catch (Exception e) {
             e.printStackTrace();

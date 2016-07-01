@@ -85,7 +85,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.idn.IDNA;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItemIterator;
@@ -129,9 +128,6 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadEvent;
-import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadListener;
-import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.CharsetDetector;
@@ -200,7 +196,6 @@ import com.openexchange.tools.encoding.URLCoder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -210,7 +205,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Mail extends PermissionServlet implements UploadListener {
+public class Mail extends PermissionServlet {
 
     private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Mail.class);
 
@@ -365,6 +360,14 @@ public class Mail extends PermissionServlet implements UploadListener {
     private static final String VIEW_HTML = "html";
 
     private static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
+
+
+    /**
+     * Initializes a new {@link Mail}.
+     */
+    public Mail() {
+        super();
+    }
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -4775,392 +4778,12 @@ public class Mail extends PermissionServlet implements UploadListener {
         return SPLIT.split(tmp, 0);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest , javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        final ServerSession session = getSessionObject(req);
-        /*
-         * The magic spell to disable caching
-         */
-        Tools.disableCaching(resp);
-        final String groupId = req.getParameter("groupId");
-        final String actionStr = req.getParameter(PARAMETER_ACTION);
-        if (ACTION_IMPORT.equals(actionStr)) {
-            // Bypass normal standard upload process to be able to parse the request body as stream.
-            actionPostImportMail(req, resp);
-            return;
-        }
-        try {
-            final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
-            boolean cleanUp = true;
-            UploadEvent uploadEvent = null;
-            try {
-                /*
-                 * Set response headers according to html spec
-                 */
-                resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
-                /*
-                 * Append UploadListener instances
-                 */
-                final Collection<UploadListener> listeners = new ArrayList<UploadListener>(1);
-                listeners.add(this);
-                /*
-                 * Create and fire upload event
-                 */
-                UserSettingMail usm = session.getUserSettingMail();
-                long maxFileSize = usm.getUploadQuotaPerFile();
-                long maxSize = usm.getUploadQuota();
-                uploadEvent = processUpload(req, maxFileSize > 0 ? maxFileSize : -1L, maxSize > 0 ? maxSize : -1L);
-                uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
-                uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
-                uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
-                uploadEvent.setParameter(UPLOAD_PARAM_HOSTNAME, req.getServerName());
-                uploadEvent.setParameter(UPLOAD_PARAM_PROTOCOL, Tools.getProtocol(req));
-                uploadEvent.setParameter(UPLOAD_PARAM_GID, groupId);
-                uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
-                fireUploadEvent(uploadEvent, listeners);
-                cleanUp = false;
-            } finally {
-                if (cleanUp && null != uploadEvent) {
-                    uploadEvent.cleanUp();
-                }
-                if (mailInterface != null) {
-                    try {
-                        mailInterface.close(true);
-                    } catch (final Exception e) {
-                        LOG.error("", e);
-                    }
-                }
-            }
-        } catch (final UploadException e) {
-            LOG.error("", e);
-            JSONObject responseObj = null;
-            try {
-                final Response response = new Response(session);
-                response.setException(e);
-                responseObj = ResponseWriter.getJSON(response);
-            } catch (final JSONException e1) {
-                LOG.error("", e1);
-            }
-            throw new UploadServletException(resp, substituteJS(
-                responseObj == null ? STR_NULL : responseObj.toString(),
-                    e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
-        } catch (final OXException e) {
-            LOG.error("", e);
-            JSONObject responseObj = null;
-            try {
-                final Response response = new Response(session);
-                response.setException(e);
-                responseObj = ResponseWriter.getJSON(response);
-            } catch (final JSONException e1) {
-                LOG.error("", e1);
-            }
-            throw new UploadServletException(resp, substituteJS(
-                responseObj == null ? STR_NULL : responseObj.toString(),
-                    actionStr == null ? STR_NULL : actionStr), e.getMessage(), e);
-        } catch (final Exception e) {
-            final OXException wrapper = getWrappingOXException(e);
-            LOG.error("", wrapper);
-            JSONObject responseObj = null;
-            try {
-                final Response response = new Response(session);
-                response.setException(wrapper);
-                responseObj = ResponseWriter.getJSON(response);
-            } catch (final JSONException e1) {
-                LOG.error("", e1);
-            }
-            throw new UploadServletException(resp, substituteJS(
-                responseObj == null ? STR_NULL : responseObj.toString(),
-                    actionStr == null ? STR_NULL : actionStr), wrapper.getMessage(), wrapper);
-        }
-    }
-
     protected boolean sendMessage(final HttpServletRequest req) {
         return req.getParameter(PARAMETER_ACTION) != null && req.getParameter(PARAMETER_ACTION).equalsIgnoreCase(ACTION_SEND);
     }
 
     protected boolean appendMessage(final HttpServletRequest req) {
         return req.getParameter(PARAMETER_ACTION) != null && req.getParameter(PARAMETER_ACTION).equalsIgnoreCase(ACTION_APPEND);
-    }
-
-    @Override
-    public boolean action(final UploadEvent uploadEvent) throws OXException {
-        if (uploadEvent.getAffiliationId() != UploadEvent.MAIL_UPLOAD) {
-            return false;
-        }
-        final List<OXException> warnings = new ArrayList<OXException>();
-        try {
-            final String protocol = (String) uploadEvent.getParameter(UPLOAD_PARAM_PROTOCOL);
-            final String serverName = (String) uploadEvent.getParameter(UPLOAD_PARAM_HOSTNAME);
-            final PrintWriter writer = (PrintWriter) uploadEvent.getParameter(UPLOAD_PARAM_WRITER);
-            final String actionStr = (String) uploadEvent.getParameter(PARAMETER_ACTION);
-            final String groupId = (String) uploadEvent.getParameter(UPLOAD_PARAM_GID);
-            final ServerSession session = (ServerSession) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
-            try {
-                final MailServletInterface mailServletInterface = (MailServletInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE);
-                final String action = uploadEvent.getAction();
-                if (ACTION_NEW.equals(action)) {
-                    String msgIdentifier = null;
-                    {
-                        final JSONObject jsonMailObj;
-                        {
-                            final String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
-                            if (json0 == null || json0.trim().length() == 0) {
-                                throw MailExceptionCode.MISSING_PARAM.create(UPLOAD_FORMFIELD_MAIL);
-                            }
-                            jsonMailObj = new JSONObject(json0);
-                        }
-                        /*-
-                         * Parse
-                         *
-                         * Resolve "From" to proper mail account to select right transport server
-                         */
-                        final InternetAddress from;
-                        try {
-                            from = MessageParser.getFromField(jsonMailObj)[0];
-                        } catch (final AddressException e) {
-                            throw MimeMailException.handleMessagingException(e);
-                        }
-                        int accountId;
-                        try {
-                            accountId = resolveFrom2Account(session, from, true, true);
-                        } catch (final OXException e) {
-                            if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
-                                // Re-throw
-                                throw e;
-                            }
-                            LOG.warn("{}. Using default account's transport.", e.getMessage());
-                            // Send with default account's transport provider
-                            accountId = MailAccount.DEFAULT_ID;
-                        }
-                        if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
-                            /*
-                             * ... and save draft
-                             */
-                            final ComposedMailMessage composedMail = MessageParser.parse4Draft(
-                                jsonMailObj,
-                                uploadEvent,
-                                session,
-                                accountId,
-                                warnings);
-                            msgIdentifier = mailServletInterface.saveDraft(composedMail, false, accountId).toString();
-                        } else {
-                            /*
-                             * ... and send message
-                             */
-                            final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(
-                                jsonMailObj,
-                                uploadEvent,
-                                session,
-                                accountId,
-                                protocol,
-                                serverName,
-                                warnings);
-                            final ComposeType sendType = jsonMailObj.hasAndNotNull(PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(PARAMETER_SEND_TYPE)) : ComposeType.NEW;
-                            msgIdentifier = mailServletInterface.sendMessage(composedMails[0], sendType, accountId);
-                            for (int i = 1; i < composedMails.length; i++) {
-                                mailServletInterface.sendMessage(composedMails[i], sendType, accountId);
-                            }
-                            /*
-                             * Trigger contact collector
-                             */
-                            try {
-                                final ServerUserSetting setting = ServerUserSetting.getInstance();
-                                final int contextId = session.getContextId();
-                                final int userId = session.getUserId();
-                                if (setting.isContactCollectOnMailTransport(
-                                    contextId,
-                                    userId).booleanValue()) {
-                                    triggerContactCollector(session, composedMails[0], true);
-                                }
-                            } catch (final OXException e) {
-                                LOG.warn("Contact collector could not be triggered.", e);
-                            }
-                        }
-                    }
-                    if (msgIdentifier == null) {
-                        warnings.addAll(mailServletInterface.getWarnings());
-                        if (warnings.isEmpty()) {
-                            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
-                        }
-                        final Response response = new Response(session);
-                        response.setData(JSONObject.NULL);
-                        response.addWarnings(warnings);
-                        final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), actionStr);
-                        writer.write(jsResponse);
-                        writer.flush();
-                        return true;
-                    }
-                    /*
-                     * Create JSON response object
-                     */
-                    final Response response = new Response(session);
-                    response.setData(msgIdentifier);
-                    final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), actionStr);
-                    writer.write(jsResponse);
-                    writer.flush();
-                    return true;
-                } else if (ACTION_EDIT.equals(action)) {
-                    /*
-                     * Edit draft
-                     */
-                    String msgIdentifier = null;
-                    {
-                        final JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL));
-                        // final ServerSession session = (ServerSession) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
-                        /*
-                         * Resolve "From" to proper mail account
-                         */
-                        final InternetAddress from;
-                        try {
-                            from = MessageParser.getFromField(jsonMailObj)[0];
-                        } catch (final AddressException e) {
-                            throw MimeMailException.handleMessagingException(e);
-                        }
-                        int accountId = resolveFrom2Account(session, from, false, true);
-                        /*
-                         * Check if detected account has drafts
-                         */
-                        final MailServletInterface msi = mailServletInterface;
-                        if (msi.getDraftsFolder(accountId) == null) {
-                            if (MailAccount.DEFAULT_ID == accountId) {
-                                // Huh... No drafts folder in default account
-                                throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
-                            }
-                            LOG.warn(
-                                "Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.",
-                                accountId,
-                                session.getUserId(),
-                                session.getContextId());
-                            // No drafts folder in detected mail account; auto-save to default account
-                            accountId = MailAccount.DEFAULT_ID;
-                        }
-                        /*
-                         * Parse with default account's transport provider
-                         */
-                        if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
-                            final ComposedMailMessage composedMail = MessageParser.parse4Draft(
-                                jsonMailObj,
-                                uploadEvent,
-                                session,
-                                MailAccount.DEFAULT_ID,
-                                warnings);
-                            /*
-                             * ... and edit draft
-                             */
-                            msgIdentifier = msi.saveDraft(composedMail, false, accountId).toString();
-                        } else {
-                            throw MailExceptionCode.UNEXPECTED_ERROR.create("No new message on action=edit");
-                        }
-                    }
-                    if (msgIdentifier == null) {
-                        throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
-                    }
-                    /*
-                     * Create JSON response object
-                     */
-                    final Response response = new Response(session);
-                    response.setData(msgIdentifier);
-                    final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), actionStr);
-                    writer.write(jsResponse);
-                    writer.flush();
-                    return true;
-                } else if ("formMail".equals(action)) {
-                    /*
-                     * Check group identifier
-                     */
-                    if (null == groupId) {
-                        throw MailExceptionCode.MISSING_PARAM.create(UPLOAD_PARAM_GID);
-                    }
-                    /*
-                     * Parse JSON data
-                     */
-                    final JSONObject jsonMailObj;
-                    {
-                        final String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
-                        if (json0 == null || json0.trim().length() == 0) {
-                            throw MailExceptionCode.MISSING_PARAM.create(UPLOAD_FORMFIELD_MAIL);
-                        }
-                        jsonMailObj = new JSONObject(json0);
-                    }
-                    /*
-                     * Parse
-                     */
-                    // final ServerSession session = (ServerSession) uploadEvent.getParameter(UPLOAD_PARAM_SESSION);
-                    /*
-                     * Resolve "From" to proper mail account to select right transport server
-                     */
-                    final InternetAddress from;
-                    try {
-                        from = MessageParser.getFromField(jsonMailObj)[0];
-                    } catch (final AddressException e) {
-                        throw MimeMailException.handleMessagingException(e);
-                    }
-                    int accountId;
-                    try {
-                        accountId = resolveFrom2Account(session, from, true, true);
-                    } catch (final OXException e) {
-                        if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
-                            // Re-throw
-                            throw e;
-                        }
-                        LOG.warn("{}. Using default account's transport.", e.getMessage());
-                        // Send with default account's transport provider
-                        accountId = MailAccount.DEFAULT_ID;
-                    }
-                    /*
-                     * ... and send message
-                     */
-                    final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(
-                        jsonMailObj,
-                        uploadEvent,
-                        session,
-                        accountId,
-                        protocol,
-                        serverName,
-                        warnings);
-                    mailServletInterface.sendFormMail(composedMails[0], Integer.parseInt(groupId), accountId);
-                    for (int i = 1; i < composedMails.length; i++) {
-                        mailServletInterface.sendFormMail(composedMails[i], Integer.parseInt(groupId), accountId);
-                    }
-                    /*
-                     * Create JSON response object
-                     */
-                    final Response response = new Response(session);
-                    response.setData(Boolean.TRUE);
-                    response.addWarnings(warnings);
-                    final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), actionStr);
-                    writer.write(jsResponse);
-                    writer.flush();
-                    return true;
-                } else if (ACTION_APPEND.equals(action)) {
-                    // TODO: Editing mail
-                    throw new UnsupportedOperationException("APPEND NOT SUPPORTED, YET!");
-                }
-            } catch (final OXException e) {
-                /*
-                 * Message could not be sent
-                 */
-                LOG.error("", e);
-                final Response response = new Response(session);
-                response.setException(e);
-                final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), actionStr);
-                writer.write(jsResponse);
-                writer.flush();
-                return true;
-            }
-            return false;
-        } catch (final JSONException e) {
-            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public UploadRegistry getRegistry() {
-        return this;
     }
 
     @Override
