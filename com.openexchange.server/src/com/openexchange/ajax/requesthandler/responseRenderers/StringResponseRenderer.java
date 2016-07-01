@@ -85,7 +85,7 @@ public class StringResponseRenderer implements ResponseRenderer {
     }
 
     @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         /*
          * Write headers
          */
@@ -99,8 +99,6 @@ public class StringResponseRenderer implements ResponseRenderer {
         try {
             final Object resultObject = result.getResultObject();
             resp.getWriter().write(resultObject == null ? "" : resultObject.toString());
-        } catch (final IOException e) {
-            LOG.error("", e);
         } catch (final RuntimeException e) {
             LOG.error("", e);
         }
