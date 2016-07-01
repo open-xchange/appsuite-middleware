@@ -62,6 +62,7 @@ import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -116,20 +117,16 @@ public class CalendarReader {
         return userize(event, folder);
     }
 
-    public List<UserizedEvent> readEventsInFolder(int folderID, Date from, Date until) throws OXException {
-        return readEventsInFolder(getFolder(folderID), from, until);
+    List<UserizedEvent> readEventsInFolder(int folderID, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException {
+        return readEventsInFolder(getFolder(folderID), from, until, updatedSince, fields);
     }
 
-    public List<UserizedEvent> readEventsInFolder(UserizedFolder folder, Date from, Date until) throws OXException {
+    List<UserizedEvent> readEventsInFolder(UserizedFolder folder, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
-        List<Event> events;
-        if (Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission()) {
-            events = storage.loadEventsInFolderCreatedBy(Integer.parseInt(folder.getID()), session.getUserId(), from, until);
-        } else {
-            events = storage.loadEventsInFolder(Integer.parseInt(folder.getID()), from, until);
-        }
+        int createdBy = Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission() ? session.getUserId() : -1;
+        List<Event> events = storage.loadEventsInFolder(Integer.parseInt(folder.getID()), from, until, createdBy, updatedSince, fields);
         return userize(events, folder);
     }
 

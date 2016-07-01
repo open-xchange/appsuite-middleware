@@ -70,6 +70,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.Appointment2Event;
@@ -181,54 +182,18 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     }
 
     @Override
-    public List<Event> loadEventsInFolder(int folderID, Date from, Date until) throws OXException {
-        Connection connection = null;
-        try {
-            connection = databaseService.getReadOnly(contextID);
-            List<Event> events = selectEventsInFolder(connection, contextID, folderID, from, until);
-            for (Event event : events) {
-                event.setAttendees(selectAttendees(connection, contextID, event.getId()));
-            }
-            return events;
-        } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
-        } finally {
-            databaseService.backReadOnly(contextID, connection);
-        }
-    }
-
-    @Override
-    public List<Event> loadEventsInFolderCreatedBy(int folderID, int createdBy, Date from, Date until) throws OXException {
-        Connection connection = null;
-        try {
-            connection = databaseService.getReadOnly(contextID);
-            List<Event> events = selectEventsInFolderCreatedBy(connection, contextID, folderID, createdBy, from, until);
-            for (Event event : events) {
-                event.setAttendees(selectAttendees(connection, contextID, event.getId()));
-            }
-            return events;
-        } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
-        } finally {
-            databaseService.backReadOnly(contextID, connection);
-        }
-    }
-
-    @Override
     public List<Event> loadEventsOfUser(int userID, Date from, Date until) throws OXException {
-        Connection connection = null;
-        try {
-            connection = databaseService.getReadOnly(contextID);
-            List<Event> events = selectEventsOfUser(connection, contextID, userID, from, until);
-            for (Event event : events) {
-                event.setAttendees(selectAttendees(connection, contextID, event.getId()));
-            }
-            return events;
-        } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
-        } finally {
-            databaseService.backReadOnly(contextID, connection);
-        }
+        return loadEventsOfUser(userID, from, until, -1, null);
+    }
+
+    @Override
+    public List<Event> loadUpdatedEventsOfUser(int userID, Date updatedSince) throws OXException {
+        return loadEventsOfUser(userID, null, null, -1, updatedSince);
+    }
+
+    @Override
+    public List<Event> loadUpdatedEventsOfUser(int userID, int createdBy, Date updatedSince) throws OXException {
+        return loadEventsOfUser(userID, null, null, createdBy, updatedSince);
     }
 
     @Override
@@ -288,6 +253,50 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
             DBUtils.autocommit(connection);
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    @Override
+    public List<Event> loadEventsInFolder(int folderID, Date from, Date until, int createdBy, Date updatedSince, EventField[] fields) throws OXException {
+        return loadEventsInFolder(folderID, false, from, until, createdBy, updatedSince, fields);
+    }
+
+    @Override
+    public List<Event> loadDeletedEventsInFolder(int folderID, Date from, Date until, int createdBy, Date deletedSince) throws OXException {
+        return loadEventsInFolder(folderID, true, from, until, createdBy, deletedSince, null);
+    }
+
+    private List<Event> loadEventsInFolder(int folderID, boolean deleted, Date from, Date until, int createdBy, Date updatedSince, EventField[] fields) throws OXException {
+        Connection connection = null;
+        try {
+            connection = databaseService.getReadOnly(contextID);
+            List<Event> events = selectEventsInFolder(connection, deleted, contextID, folderID, from, until, createdBy, updatedSince);
+            if (false == deleted) {
+                for (Event event : events) {
+                    event.setAttendees(selectAttendees(connection, contextID, event.getId()));
+                }
+            }
+            return events;
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    private List<Event> loadEventsOfUser(int userID, Date from, Date until, int createdBy, Date updatedSince) throws OXException {
+        Connection connection = null;
+        try {
+            connection = databaseService.getReadOnly(contextID);
+            List<Event> events = selectEventsOfUser(connection, contextID, userID, from, until, -1, updatedSince);
+            for (Event event : events) {
+                event.setAttendees(selectAttendees(connection, contextID, event.getId()));
+            }
+            return events;
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
             databaseService.backReadOnly(contextID, connection);
         }
     }
@@ -548,50 +557,6 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         return null;
     }
 
-    private static List<Event> selectEventsInFolder(Connection connection, int contextID, int folderID, Date from, Date until) throws SQLException {
-        List<Event> events = new ArrayList<>();
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(SQL.SELECT_EVENTS_IN_FOLDER_STMT);
-            stmt.setInt(1, contextID);
-            stmt.setTimestamp(2, new Timestamp(until.getTime()));
-            stmt.setTimestamp(3, new Timestamp(from.getTime()));
-            stmt.setInt(4, folderID);
-            stmt.setInt(5, folderID);
-            ResultSet resultSet = SQL.logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                events.add(readEvent(resultSet));
-            }
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-        return events;
-    }
-
-    private static List<Event> selectEventsInFolderCreatedBy(Connection connection, int contextID, int folderID, int createdBy, Date from, Date until) throws SQLException {
-        //TODO
-        return null;
-    }
-
-    private static List<Event> selectEventsOfUser(Connection connection, int contextID, int userID, Date from, Date until) throws SQLException {
-        List<Event> events = new ArrayList<>();
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(SQL.SELECT_EVENTS_OF_USER_STMT);
-            stmt.setInt(1, contextID);
-            stmt.setTimestamp(2, new Timestamp(until.getTime()));
-            stmt.setTimestamp(3, new Timestamp(from.getTime()));
-            stmt.setInt(4, userID);
-            ResultSet resultSet = SQL.logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                events.add(readEvent(resultSet));
-            }
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-        return events;
-    }
-
     private static List<Attendee> selectInternalUserAttendees(Connection connection, int contextID, int objectID) throws SQLException {
         List<Attendee> attendees = new ArrayList<>();
         try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM prg_dates_members WHERE cid=? AND object_id=?;")) {
@@ -804,4 +769,95 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         }
     }
 
+    private static List<Event> selectEventsInFolder(Connection connection, boolean deleted, int contextID, int folderID, Date from, Date until, int createdBy, Date updatedSince) throws SQLException {
+        String tableDates = deleted ? "del_dates" : "prg_dates";
+        String tableDatesMembers = deleted ? "del_dates_members" : "prg_dates_members";
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT creating_date,created_from,changing_date,changed_from,fid,pflag,timestampfield01,timestampfield02,timezone," +
+                "intfield01,intfield02,intfield03,intfield04,intfield05,intfield06,intfield07,intfield08,field01,field02,field04,field06," +
+                "field07,field08,field09,uid,organizer,sequence,organizerId,principal,principalId,filename ")
+            .append("FROM ").append(tableDates).append(" AS d LEFT JOIN ").append(tableDatesMembers)
+            .append(" AS m ON d.cid=m.cid AND d.intfield01=m.object_id ")
+            .append("WHERE d.cid=? AND (d.fid=? OR m.pfid=?) ");
+        if (null != from) {
+            stringBuilder.append("AND d.timestampfield02>=? ");
+        }
+        if (null != until) {
+            stringBuilder.append("AND d.timestampfield01<=? ");
+        }
+        if (null != updatedSince) {
+            stringBuilder.append("AND d.changing_date>? ");
+        }
+        if (0 < createdBy) {
+            stringBuilder.append("AND d.created_from=? ");
+        }
+        List<Event> events = new ArrayList<Event>();
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.append(';').toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, folderID);
+            stmt.setInt(parameterIndex++, folderID);
+            if (null != from) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
+            }
+            if (null != until) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
+            }
+            if (null != updatedSince) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(updatedSince.getTime()));
+            }
+            if (0 < createdBy) {
+                stmt.setInt(parameterIndex++, createdBy);
+            }
+            ResultSet resultSet = SQL.logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                events.add(readEvent(resultSet));
+            }
+        }
+        return events;
+    }
+
+    private static List<Event> selectEventsOfUser(Connection connection, int contextID, int userID, Date from, Date until, int createdBy, Date updatedSince) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT creating_date,created_from,changing_date,changed_from,fid,pflag,timestampfield01,timestampfield02,timezone," +
+                "intfield01,intfield02,intfield03,intfield04,intfield05,intfield06,intfield07,intfield08,field01,field02,field04,field06," +
+                "field07,field08,field09,uid,organizer,sequence,organizerId,principal,principalId,filename ")
+            .append("FROM prg_dates AS d LEFT JOIN prg_dates_members AS m ON d.cid=m.cid AND d.intfield01=m.object_id ")
+            .append("WHERE d.cid=? AND m.member_uid=? ");
+        if (null != from) {
+            stringBuilder.append("AND d.timestampfield02>=? ");
+        }
+        if (null != until) {
+            stringBuilder.append("AND d.timestampfield01<=? ");
+        }
+        if (null != updatedSince) {
+            stringBuilder.append("AND d.changing_date>? ");
+        }
+        if (0 < createdBy) {
+            stringBuilder.append("AND d.created_from=? ");
+        }
+        List<Event> events = new ArrayList<Event>();
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, userID);
+            if (null != from) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
+            }
+            if (null != until) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
+            }
+            if (null != updatedSince) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(updatedSince.getTime()));
+            }
+            if (0 < createdBy) {
+                stmt.setInt(parameterIndex++, createdBy);
+            }
+            ResultSet resultSet = SQL.logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                events.add(readEvent(resultSet));
+            }
+        }
+        return events;
+    }
 }

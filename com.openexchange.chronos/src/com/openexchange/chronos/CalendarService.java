@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
@@ -72,5 +73,13 @@ public interface CalendarService {
     UserizedEvent createEvent(ServerSession session, UserizedEvent event) throws OXException;
 
     void deleteEvents(ServerSession session, List<EventID> eventIDs) throws OXException;
+
+    List<UserizedEvent> getUpdatedEventsInFolder(ServerSession session, int folderID, Date updatedSince, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getDeletedEventsInFolder(ServerSession session, int folderID, Date updatedSince, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getUpdatedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getDeletedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException;
 
 }

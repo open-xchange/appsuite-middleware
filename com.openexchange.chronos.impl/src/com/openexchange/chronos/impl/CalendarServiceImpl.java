@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.exception.OXException;
@@ -84,11 +85,37 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    public List<UserizedEvent> getUpdatedEventsInFolder(ServerSession session, int folderID, Date since, CalendarParameters parameters) throws OXException {
+        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        return new CalendarReader(session).readEventsInFolder(folderID, from, until, since, fields);
+    }
+
+    @Override
+    public List<UserizedEvent> getUpdatedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<UserizedEvent> getDeletedEventsInFolder(ServerSession session, int folderID, Date since, CalendarParameters parameters) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<UserizedEvent> getDeletedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public List<UserizedEvent> getEventsInFolder(ServerSession session, int folderID, CalendarParameters parameters) throws OXException {
-        CalendarReader reader = new CalendarReader(session);
-        Date rangeStart = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date rangeEnd = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return reader.readEventsInFolder(folderID, rangeStart, rangeEnd);
+        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        return new CalendarReader(session).readEventsInFolder(folderID, from, until, null, fields);
     }
 
     @Override
@@ -112,5 +139,4 @@ public class CalendarServiceImpl implements CalendarService {
             writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID());
         }
     }
-
 }

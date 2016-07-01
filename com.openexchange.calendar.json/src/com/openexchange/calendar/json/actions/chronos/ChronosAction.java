@@ -58,8 +58,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
@@ -68,9 +70,12 @@ import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CommonObject.Marker;
+import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ChronosAction}
@@ -80,14 +85,27 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public abstract class ChronosAction extends AppointmentAction {
 
+    /**
+     * Initializes a new {@link ChronosAction}.
+     *
+     * @param services A service lookup reference
+     */
     protected ChronosAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(AppointmentAJAXRequest req) throws OXException, JSONException {
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        if (false == session.getUserPermissionBits().hasCalendar()) {
+            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
+        }
+        AppointmentAJAXRequest request = AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(requestData, session);
         boolean performNew = true;
-        return performNew ? perform(getService(CalendarService.class), req) : perform(req);
+        try {
+            return performNew ? perform(getService(CalendarService.class), request) : perform(request);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
     protected abstract AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException;
@@ -97,12 +115,34 @@ public abstract class ChronosAction extends AppointmentAction {
         List<Appointment> appointments = new ArrayList<Appointment>(events.size());
         for (UserizedEvent event : events) {
             appointments.add(EventMapper.getAppointment(event));
-            Date lastModified = event.getEvent().getLastModified();
-            if (null != lastModified && timestamp.before(lastModified)) {
-                timestamp = lastModified;
-            }
+            timestamp = getLatestModified(timestamp, event);
         }
         return new AJAXRequestResult(appointments, timestamp, "appointment");
+    }
+
+    private static Date getLatestModified(Date lastModified, UserizedEvent event) {
+        Date eventLastModified = event.getEvent().getLastModified();
+        return null != eventLastModified && eventLastModified.after(lastModified) ? eventLastModified : lastModified;
+    }
+
+    protected static AJAXRequestResult getAppointmentDeltaResultWithTimestamp(List<UserizedEvent> newAndModifiedEvents, List<UserizedEvent> deletedEvents) {
+        Date timestamp = new Date(0L);
+        CollectionDelta<Appointment> delta = new CollectionDelta<Appointment>();
+        if (null != newAndModifiedEvents) {
+            for (UserizedEvent event : newAndModifiedEvents) {
+                delta.addNewOrModified(EventMapper.getAppointment(event));
+                timestamp = getLatestModified(timestamp, event);
+            }
+        }
+        if (null != deletedEvents) {
+            for (UserizedEvent event : deletedEvents) {
+                Appointment appointment = EventMapper.getAppointment(event);
+                appointment.setMarker(Marker.ID_ONLY);
+                delta.addDeleted(appointment);
+                timestamp = getLatestModified(timestamp, event);
+            }
+        }
+        return new AJAXRequestResult(delta, timestamp, "appointment");
     }
 
     protected static List<EventID> parseRequestedIDs(AppointmentAJAXRequest request) throws OXException, JSONException {
@@ -170,7 +210,7 @@ public abstract class ChronosAction extends AppointmentAction {
             for (int i = 0; i < splitted.length; i++) {
                 try {
                     columnIDs[i] = Integer.parseInt(splitted[i].trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_COLUMNS, columns);
                 }
             }
