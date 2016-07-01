@@ -76,6 +76,8 @@ public class OAuthProviderRMIActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
+        org.slf4j.LoggerFactory.getLogger(OAuthProviderRMIActivator.class).info("starting bundle: \"com.openexchange.oauth.provider.rmi.impl\"");
+
         tracker = new ServiceTracker<ClientManagement, ClientManagement>(context, ClientManagement.class, null) {
             @Override
             public ClientManagement addingService(ServiceReference<ClientManagement> reference) {
@@ -99,6 +101,8 @@ public class OAuthProviderRMIActivator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        org.slf4j.LoggerFactory.getLogger(OAuthProviderRMIActivator.class).info("stopping bundle: \"com.openexchange.oauth.provider.rmi.impl\"");
+
         unregister();
         tracker.close();
         tracker = null;
