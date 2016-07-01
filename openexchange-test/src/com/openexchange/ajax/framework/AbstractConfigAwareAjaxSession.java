@@ -53,13 +53,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
- * {@link AbstractConfigAwareAjaxSession} extends the AbstractAjaxSession to preconfigure reloadable configurations before executing the tests.
+ * {@link AbstractConfigAwareAjaxSession} extends the AbstractAjaxSession with methods to preconfigure reloadable configurations before executing the tests.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
@@ -68,7 +67,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
 
     /**
      * Initializes a new {@link AbstractConfigAwareAjaxSession}.
-     * 
+     *
      * @param name
      */
     protected AbstractConfigAwareAjaxSession(String name) {
@@ -77,16 +76,25 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
 
     JSONObject oldData;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    /**
+     * Changes the configurations given by {@link #getNeededConfigurations()}.
+     *
+     * @param client The client to use.
+     * @param logout Indicating whether the used client should be logged out afterwards.
+     * @throws Exception if changing the configuration fails
+     */
+    protected void setUpConfiguration(AJAXClient client, boolean logout) throws Exception {
 
+        assertNotNull("The client must not be null!", client);
         Map<String, String> map = getNeededConfigurations();
         if (!map.isEmpty()) {
             // change configuration to new values
             ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<ChangePropertiesResponse>(map, getScope());
             ChangePropertiesResponse response = client.execute(req);
             oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
+        }
+        if (logout) {
+            client.logout();
         }
     }
 
@@ -115,11 +123,11 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
     }
 
     /**
-     * 
+     *
      * Retrieves all needed configurations.
-     * 
+     *
      * Should be overwritten by child implementations to define necessary configurations.
-     * 
+     *
      * @return Needed configurations.
      */
     protected Map<String, String> getNeededConfigurations() {
@@ -128,25 +136,12 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
 
     /**
      * Retrieves the scope to use for the configurations.
-     * 
+     *
      * Can be overwritten by child implementations to change the scope of the configurations. Defaults to "server".
-     * 
+     *
      * @return The scope for the configuration.
      */
     protected String getScope() {
         return "server";
     }
-
-    /**
-     * Reconnects the client
-     * 
-     * @throws Exception
-     */
-    protected void reconnect() throws Exception {
-        if (client != null) {
-            client.logout();
-        }
-        client = new AJAXClient(User.User1);
-    }
-
 }

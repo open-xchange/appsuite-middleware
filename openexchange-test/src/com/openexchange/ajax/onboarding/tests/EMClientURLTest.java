@@ -82,6 +82,12 @@ public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
         return confs;
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        setUpConfiguration(client, false);
+    }
+
     public void testEMClientURL() throws Exception {
         ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);
         OnboardingTestResponse response = client.execute(req);

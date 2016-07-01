@@ -68,7 +68,7 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAjaxSession {
 
     /**
      * Initializes a new {@link AbstractPlistSMSTest}.
-     * 
+     *
      * @param name
      */
     protected AbstractPlistSMSTest(String name) {
@@ -78,6 +78,7 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAjaxSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        setUpConfiguration(client, false);
         SetAttributeRequest req = new SetAttributeRequest(client.getValues().getUserId(), "user_sms_link_secret", UID, false);
         SetAttributeResponse response = client.execute(req);
         assertNotNull(response);
