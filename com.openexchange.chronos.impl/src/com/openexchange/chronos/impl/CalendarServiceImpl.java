@@ -85,29 +85,34 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<UserizedEvent> getUpdatedEventsInFolder(ServerSession session, int folderID, Date since, CalendarParameters parameters) throws OXException {
+    public List<UserizedEvent> getUpdatedEventsInFolder(ServerSession session, int folderID, Date updatedSince, CalendarParameters parameters) throws OXException {
         Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
         EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        return new CalendarReader(session).readEventsInFolder(folderID, from, until, since, fields);
+        return new CalendarReader(session).readEventsInFolder(folderID, from, until, updatedSince, fields);
     }
 
     @Override
     public List<UserizedEvent> getUpdatedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        return new CalendarReader(session).readEventsOfUser(session.getUserId(), from, until, updatedSince, fields);
     }
 
     @Override
-    public List<UserizedEvent> getDeletedEventsInFolder(ServerSession session, int folderID, Date since, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public List<UserizedEvent> getDeletedEventsInFolder(ServerSession session, int folderID, Date deletedSince, CalendarParameters parameters) throws OXException {
+        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        return new CalendarReader(session).readEventsInFolder(folderID, from, until, deletedSince, fields);
     }
 
     @Override
-    public List<UserizedEvent> getDeletedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public List<UserizedEvent> getDeletedEventsOfUser(ServerSession session, Date deletedSince, CalendarParameters parameters) throws OXException {
+        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        return new CalendarReader(session).readDeletedEventsOfUser(session.getUserId(), from, until, deletedSince);
     }
 
     @Override
@@ -120,10 +125,10 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<UserizedEvent> getEventsOfUser(ServerSession session, CalendarParameters parameters) throws OXException {
-        CalendarReader reader = new CalendarReader(session);
-        Date rangeStart = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date rangeEnd = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return reader.readEventsOfUser(rangeStart, rangeEnd);
+        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        return new CalendarReader(session).readEventsOfUser(session.getUserId(), from, until, null, fields);
     }
 
     @Override

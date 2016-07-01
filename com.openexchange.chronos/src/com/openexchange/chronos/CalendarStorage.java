@@ -88,11 +88,11 @@ public interface CalendarStorage {
      */
     List<Event> loadDeletedEventsInFolder(int folderID, Date from, Date until, int createdBy, Date deletedSince) throws OXException;
 
-    List<Event> loadEventsOfUser(int userID, Date from, Date until) throws OXException;
+    List<Event> loadEventsOfUser(int userID, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException;
 
-    List<Event> loadUpdatedEventsOfUser(int userID, int createdBy, Date updatedSince) throws OXException;
+    List<Event> loadDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince) throws OXException;
 
-    List<Event> loadUpdatedEventsOfUser(int userID, Date updatedSince) throws OXException;
+
 
     int insertEvent(Event event) throws OXException;
 

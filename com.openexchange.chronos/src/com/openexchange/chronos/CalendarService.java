@@ -76,10 +76,10 @@ public interface CalendarService {
 
     List<UserizedEvent> getUpdatedEventsInFolder(ServerSession session, int folderID, Date updatedSince, CalendarParameters parameters) throws OXException;
 
-    List<UserizedEvent> getDeletedEventsInFolder(ServerSession session, int folderID, Date updatedSince, CalendarParameters parameters) throws OXException;
+    List<UserizedEvent> getDeletedEventsInFolder(ServerSession session, int folderID, Date deletedSince, CalendarParameters parameters) throws OXException;
 
     List<UserizedEvent> getUpdatedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException;
 
-    List<UserizedEvent> getDeletedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException;
+    List<UserizedEvent> getDeletedEventsOfUser(ServerSession session, Date deletedSince, CalendarParameters parameters) throws OXException;
 
 }

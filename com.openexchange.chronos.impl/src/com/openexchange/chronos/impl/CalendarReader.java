@@ -130,8 +130,26 @@ public class CalendarReader {
         return userize(events, folder);
     }
 
-    public List<UserizedEvent> readEventsOfUser(Date from, Date until) throws OXException {
-        List<Event> events = storage.loadEventsOfUser(session.getUserId(), from, until);
+    List<UserizedEvent> readDeletedEventsInFolder(int folderID, Date from, Date until, Date deletedSince) throws OXException {
+        return readDeletedEventsInFolder(getFolder(folderID), from, until, deletedSince);
+    }
+
+    List<UserizedEvent> readDeletedEventsInFolder(UserizedFolder folder, Date from, Date until, Date deletedSince) throws OXException {
+        requireCalendarContentType(folder);
+        requireFolderPermission(folder, Permission.READ_FOLDER);
+        requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
+        int createdBy = Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission() ? session.getUserId() : -1;
+        List<Event> events = storage.loadDeletedEventsInFolder(Integer.parseInt(folder.getID()), from, until, createdBy, deletedSince);
+        return userize(events, folder);
+    }
+
+    List<UserizedEvent> readEventsOfUser(int userID, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException {
+        List<Event> events = storage.loadEventsOfUser(userID, from, until, updatedSince, fields);
+        return userize(events, session.getUserId());
+    }
+
+    List<UserizedEvent> readDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince) throws OXException {
+        List<Event> events = storage.loadDeletedEventsOfUser(userID, from, until, deletedSince);
         return userize(events, session.getUserId());
     }
 
