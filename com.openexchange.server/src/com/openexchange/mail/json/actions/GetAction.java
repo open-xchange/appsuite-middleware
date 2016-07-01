@@ -250,9 +250,9 @@ public final class GetAction extends AbstractMailAction {
 
                 // Direct response if possible
                 if (null == mimeFilter) {
-                    final AJAXRequestData requestData = req.getRequest();
-                    final OutputStream directOutputStream = requestData.optOutputStream();
-                    if (null != directOutputStream) {
+                    AJAXRequestData requestData = req.getRequest();
+                    HttpServletResponse resp = requestData.optHttpServletResponse();
+                    if (null != resp) {
                         if (saveToDisk) {
                             if (requestData.setResponseHeader("Content-Type", "application/octet-stream")) {
                                 final StringBuilder sb = new StringBuilder(64).append("attachment");
@@ -263,12 +263,14 @@ public final class GetAction extends AbstractMailAction {
                                 }
                                 requestData.setResponseHeader("Content-Disposition",  sb.toString());
                                 requestData.removeCachingHeader();
+                                OutputStream directOutputStream = resp.getOutputStream();
                                 mail.writeTo(directOutputStream);
                                 directOutputStream.flush();
                                 return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                             }
                         } else {
                             // As JSON response: {"data":"..."}
+                            OutputStream directOutputStream = resp.getOutputStream();
                             directOutputStream.write(CHUNK1); // {"data":"...
                             {
                                 final JSONStringOutputStream jsonStringOutputStream = new JSONStringOutputStream(directOutputStream);
