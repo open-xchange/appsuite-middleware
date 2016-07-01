@@ -50,6 +50,7 @@
 package com.openexchange.tools.servlet;
 
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE_DENIED;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -178,11 +179,19 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid request body. Expect to be of type "%1$s", but is "%2$s".
      */
-    INVALID_REQUEST_BODY("Invalid request body. Expect to be of type \"%1$s\", but is \"%2$s\".", MESSAGE, Category.CATEGORY_ERROR, 28),
+    INVALID_REQUEST_BODY("Invalid request body. Expect to be of type \"%1$s\", but is \"%2$s\".", MESSAGE_DENIED, Category.CATEGORY_ERROR, 28),
     /**
      * Client sent invalid JSON data in request body.
      */
     INVALID_JSON_REQUEST_BODY("Client sent invalid JSON data in request body.", AjaxExceptionMessages.INVALID_JSON_REQUEST_BODY, Category.CATEGORY_ERROR, 29),
+    /**
+     * Client sent not allowed request parameter \"%1$s\".
+     */
+    NOT_ALLOWED_URI_PARAM("Client sent not allowed request parameter \"%1$s\" within the URI.", AjaxExceptionMessages.NOT_ALLOWED_URI_PARAM_MSG, Category.CATEGORY_ERROR, 30),
+    /**
+     * Client sent illegal data in request body.
+     */
+    ILLEGAL_REQUEST_BODY("Client sent illegal data in request body.", MESSAGE_DENIED, Category.CATEGORY_ERROR, 31),
 
     ;
 

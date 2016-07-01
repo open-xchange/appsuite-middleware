@@ -59,7 +59,6 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -81,22 +80,17 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
 
     private final ManagedFileManagementImpl management;
     private final String id;
-
     private final File file;
-
-    private volatile long lastAccessed;
+    private final int optTtl;
 
     private final BlockingQueue<FileRemovedListener> listeners;
 
+    private volatile long lastAccessed;
     private volatile String contentType;
-
     private volatile String fileName;
-
     private volatile long size;
-
-    private String contentDisposition;
-
-    private final int optTtl;
+    private volatile String contentDisposition;
+    private volatile String affiliation;
 
     /**
      * Initializes a new {@link ManagedFileImpl}.
@@ -324,6 +318,16 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
     @Override
     public void setSize(final long size) {
         this.size = size;
+    }
+
+    @Override
+    public String getAffiliation() {
+        return affiliation;
+    }
+
+    @Override
+    public void setAffiliation(String affiliation) {
+        this.affiliation = affiliation;
     }
 
     @Override
