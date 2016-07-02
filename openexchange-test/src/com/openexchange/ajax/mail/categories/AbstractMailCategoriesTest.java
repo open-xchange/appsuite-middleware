@@ -56,6 +56,8 @@ import org.json.JSONException;
 import org.junit.Assume;
 import com.openexchange.ajax.capabilities.actions.AllRequest;
 import com.openexchange.ajax.capabilities.actions.AllResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.AbstractMailTest;
 import com.openexchange.exception.OXException;
@@ -77,16 +79,16 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
     protected static final String CAT_2_FLAG = "$promotion";
 
     protected UserValues values;
-    
+
     protected String EML;
-    
+
     /**
      * Initializes a new {@link AbstractMailCategoriesTest}.
-     * 
+     *
      * @param name
-     * @throws JSONException 
-     * @throws IOException 
-     * @throws OXException 
+     * @throws JSONException
+     * @throws IOException
+     * @throws OXException
      */
     public AbstractMailCategoriesTest(String name) throws OXException, IOException, JSONException {
         super(name);
@@ -94,42 +96,43 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
 
     @Override
     protected void setUp() throws Exception {
+        AJAXClient configClient = new AJAXClient(User.User1);
+        setUpConfiguration(configClient, true);
         super.setUp();
-        reconnect();
         AllResponse response = getClient().execute(new AllRequest());
         Assume.assumeTrue("User does not have the mail_categories capability. Probably the mailserver does not support imap4flags.", response.getCapabilities().contains("mail_categories"));
         values = getClient().getValues();
         clearFolder(values.getInboxFolder()); // always start with an empty inbox
-        EML = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 
+        EML = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" +
             "From: " + getSendAddress() + "\n" +
             "To: " + getSendAddress() + "\n" +
-            "Message-ID: <1508703313.17483.1353357411049>\n" + 
-            "Subject: Test mail\n" + 
-            "MIME-Version: 1.0\n" + 
-            "Content-Type: multipart/alternative; \n" + 
-            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + 
-            "\n" + 
-            "------=_Part_17482_1388684087.1353357411002\n" + 
-            "MIME-Version: 1.0\n" + 
-            "Content-Type: text/plain; charset=UTF-8\n" + 
-            "Content-Transfer-Encoding: 7bit\n" + 
-            "\n" + 
-            "Test\n" + 
-            "------=_Part_17482_1388684087.1353357411002\n" + 
-            "MIME-Version: 1.0\n" + 
-            "Content-Type: text/html; charset=UTF-8\n" + 
-            "Content-Transfer-Encoding: 7bit\n" + 
-            "\n" + 
+            "Message-ID: <1508703313.17483.1353357411049>\n" +
+            "Subject: Test mail\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: multipart/alternative; \n" +
+            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" +
+            "\n" +
+            "------=_Part_17482_1388684087.1353357411002\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=UTF-8\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
+            "Test\n" +
+            "------=_Part_17482_1388684087.1353357411002\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: text/html; charset=UTF-8\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
             "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" +
-            " <head>\n" + 
-            "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + 
-            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + 
-            " \n" + 
-            "  <div>\n" + 
-            "   Test\n" + 
-            "  </div>\n" + 
-            " \n" + 
-            "</body></html>\n" + 
+            " <head>\n" +
+            "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" +
+            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" +
+            " \n" +
+            "  <div>\n" +
+            "   Test\n" +
+            "  </div>\n" +
+            " \n" +
+            "</body></html>\n" +
             "------=_Part_17482_1388684087.1353357411002--\n";
     }
 

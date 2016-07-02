@@ -274,7 +274,7 @@ public final class SessionUtility {
     public static boolean findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
 
-        Cookie cookie = null == session ? null : cookies.get(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }));
+        Cookie cookie = null == session ? null : cookies.get(getPublicSessionCookieName(req, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }));
         if (null != cookie) {
             return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
         }
@@ -663,7 +663,7 @@ public final class SessionUtility {
         // Check for public session cookie
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
-            final String cookieName = getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) });
+            final String cookieName = getPublicSessionCookieName(req, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) });
             if (null == cookies.get(cookieName)) {
                 final boolean restored = LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName());
                 if (restored) {
@@ -701,7 +701,7 @@ public final class SessionUtility {
             /*
              * inject context- and user-id to allow parallel guest sessions
              */
-            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+            additionalsForHash = new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) };
         } else {
             additionalsForHash = null;
         }
@@ -758,7 +758,7 @@ public final class SessionUtility {
         String originalUserAgent = (String) session.getParameter("user-agent");
         String[] additionalsForHash;
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+            additionalsForHash = new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) };
         } else {
             additionalsForHash = null;
         }
@@ -901,12 +901,60 @@ public final class SessionUtility {
     /**
      * Removes the Open-Xchange cookies belonging to specified hash string.
      *
-     * @param hash The hash string identifying appropriate cookie
+     * @param hash The hash string identifying appropriate session and secret cookie
      * @param req The HTTP request
      * @param resp The HTTP response
      */
-    public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeOXCookies(req, resp, Arrays.asList(SESSION_PREFIX + hash, SECRET_PREFIX + hash, LoginServlet.getShareCookieName(req), PUBLIC_SESSION_PREFIX + hash));
+    public static void removeOXCookies(String hash, HttpServletRequest req, HttpServletResponse resp) {
+        removeOXCookies(hash, req, resp, null);
+    }
+
+    /**
+     * Removes the Open-Xchange cookies belonging to specified hash string.
+     *
+     * @param hash The hash string identifying appropriate session and secret cookie
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @param optSession The associated session if available/known (needed to reliably remove public session cookie); otherwise <code>null</code> (public session cookie not removed then)
+     */
+    public static void removeOXCookies(String hash, HttpServletRequest req, HttpServletResponse resp, Session optSession) {
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
+        if (cookies == null) {
+            return;
+        }
+
+        // Drop "open-xchange-session" cookie
+        {
+            Cookie cookie = cookies.get(SESSION_PREFIX + hash);
+            if (null != cookie) {
+                removeCookie(cookie, resp);
+            }
+        }
+
+        // Drop "open-xchange-secret" cookie
+        {
+            Cookie cookie = cookies.get(SECRET_PREFIX + hash);
+            if (null != cookie) {
+                removeCookie(cookie, resp);
+            }
+        }
+
+        // Drop "open-xchange-share" cookie
+        {
+            Cookie cookie = cookies.get(LoginServlet.getShareCookieName(req));
+            if (null != cookie) {
+                removeCookie(cookie, resp);
+            }
+        }
+
+        // Only possible to drop accompanying "open-xchange-public-session" cookie if a session is given
+        if (null != optSession) {
+            String cookieName = getPublicSessionCookieName(req, new String[] { Integer.toString(optSession.getContextId()), Integer.toString(optSession.getUserId()) });
+            Cookie cookie = cookies.get(cookieName);
+            if (null != cookie) {
+                removeCookie(cookie, resp);
+            }
+        }
     }
 
     /**
@@ -927,7 +975,7 @@ public final class SessionUtility {
         String sessionHash = session.getHash();
         removeCookie(cookies, response, SESSION_PREFIX + sessionHash);
         removeCookie(cookies, response, SECRET_PREFIX + sessionHash);
-        removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID));
+        removeCookie(cookies, response, getPublicSessionCookieName(request, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) }), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID));
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
             removeCookie(cookies, response, LoginServlet.getShareCookieName(request));
         }
@@ -1082,7 +1130,7 @@ public final class SessionUtility {
                 Session session = sessiondService.getSessionByAlternativeId(cookieEntry.getValue().getValue());
                 if (null != session) {
                     // There is such a session for alternative session ID; check the expected cookie name in order to verify the session belongs to current cookie
-                    String expectedName = getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) });
+                    String expectedName = getPublicSessionCookieName(req, new String[] { Integer.toString(session.getContextId()), Integer.toString(session.getUserId()) });
                     if (name.equals(expectedName)) {
                         // Check secret
                         return ServerSessionAdapter.valueOf(session);
@@ -1098,27 +1146,27 @@ public final class SessionUtility {
     /**
      * Removes a cookie matching a specific name by setting appropriate headers in the response.
      *
-     * @param setCookies The currently set cookies in the client as carried with the corresponding request
+     * @param existingCookies The currently existing cookies in the client as carried with the corresponding request
      * @param response The response for instructing the client to remove the cookie
      * @param name The name of the cookie to remove
      * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
      */
-    private static boolean removeCookie(Map<String, Cookie> setCookies, HttpServletResponse response, String name) {
-        return removeCookie(setCookies, response, name, null);
+    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name) {
+        return removeCookie(existingCookies, response, name, null);
     }
 
     /**
      * Removes a cookie matching a specific name (and optional value) by setting appropriate headers in the response.
      *
-     * @param setCookies The currently set cookies in the client as carried with the corresponding request
+     * @param existingCookies The currently existing cookies in the client as carried with the corresponding request
      * @param response The response for instructing the client to remove the cookie
      * @param name The name of the cookie to remove
      * @param value The value of the cookie to remove, or <code>null</code> to only match by name
      * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
      */
-    private static boolean removeCookie(Map<String, Cookie> setCookies, HttpServletResponse response, String name, String value) {
-        if (null != setCookies && 0 < setCookies.size()) {
-            Cookie cookie = setCookies.get(name);
+    private static boolean removeCookie(Map<String, Cookie> existingCookies, HttpServletResponse response, String name, String value) {
+        if (null != existingCookies) {
+            Cookie cookie = existingCookies.get(name);
             if (null != cookie && (null == value || value.equals(cookie.getValue()))) {
                 removeCookie(cookie, response);
                 return true;

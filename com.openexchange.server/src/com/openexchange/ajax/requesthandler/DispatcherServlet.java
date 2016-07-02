@@ -722,8 +722,9 @@ public class DispatcherServlet extends SessionServlet {
      * @param result The AJAX request result
      * @param httpRequest The associated HTTP Servlet request
      * @param httpResponse The associated HTTP Servlet response
+     * @throws IOException If an I/O error occurs
      */
-    protected static void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    protected static void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
         Iterator<ResponseRenderer> iter = responseRenderers.iterator();
         for (int i = responseRenderers.size(); i-- > 0;) {

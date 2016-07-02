@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.tools.servlet.http.Tools.getWriterFrom;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -259,19 +261,22 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void writeErrorAsJsCallback(OXException e, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         if (httpResponse.isCommitted()) {
             // Cannot do anything about it as response is already committed. Just log that OXException...
-            LOG.error("", e);
             return;
         }
 
-        try {
-            // As API response
-            APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), httpRequest, httpResponse);
-        } catch (JSONException je) {
-            LOG.error("", e);
+        // First, try to obtain the writer
+        PrintWriter writer = getWriterFrom(httpResponse);
+        if (null != writer) {
             try {
-                httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
-            } catch (IOException ioe) {
-                LOG.error("", ioe);
+                // As API response
+                APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), writer, httpRequest, httpResponse);
+            } catch (JSONException je) {
+                LOG.error("", je);
+                try {
+                    httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + je.getMessage());
+                } catch (IOException ioe) {
+                    LOG.error("", ioe);
+                }
             }
         }
     }
@@ -359,18 +364,29 @@ public abstract class SessionServlet extends AJAXServlet {
     private void outputOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // Check expected output format
         if (isJsonResponseExpected(req, true) || Dispatchers.isApiOutputExpectedFor(req)) {
+            // First, try to obtain the writer
+            PrintWriter writer = getWriterFrom(resp);
+
             // API response
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            resp.setHeader("Content-Disposition", "inline");
-            APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
+            if (null != writer) {
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                resp.setHeader("Content-Disposition", "inline");
+                APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), writer, req, resp);
+            }
         } else {
             // No JSON response; either JavaScript call-back or regular HTML error (page)
             if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
                 writeErrorAsJsCallback(e, req, resp);
             } else {
-                String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
-                resp.setStatus(statusCode);
-                writeErrorPage(statusCode, desc, resp);
+                // First, try to obtain the writer
+                PrintWriter writer = getWriterFrom(resp);
+
+                // Write error page
+                if (null != writer) {
+                    String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
+                    resp.setStatus(statusCode);
+                    writeErrorPage(statusCode, desc, resp);
+                }
             }
         }
     }

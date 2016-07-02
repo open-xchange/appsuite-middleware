@@ -800,6 +800,30 @@ public final class Tools {
         writer.flush();
     }
 
+    /**
+     * Attempts to obtain the <code>PrintWriter</code> from specified <code>HttpServletResponse</code> instance.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Catches a possible <code>IllegalStateException</code>, that occurs in case <code>getOutputStream()</code> has already been called
+     * before.
+     * </div>
+     * <p>
+     *
+     * @param resp The instance to get the <code>PrintWriter</code> from
+     * @return The writer or <code>null</code>
+     * @throws IOException If an I/O error occurs
+     */
+    public static PrintWriter getWriterFrom(HttpServletResponse resp) throws IOException {
+        try {
+            return null == resp ? null : resp.getWriter();
+        } catch (IllegalStateException e) {
+            // Apparently getOutputStream() has already been called before.
+            // There is nothing we can do about it here.
+            LOG.error("", e);
+            return null;
+        }
+    }
+
     private static final List<String> JSON_TYPES = Arrays.asList("application/json", "text/javascript");
 
     /**

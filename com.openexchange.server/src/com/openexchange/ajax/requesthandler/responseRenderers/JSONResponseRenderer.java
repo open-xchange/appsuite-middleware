@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import java.io.IOException;
 import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,7 +86,7 @@ public class JSONResponseRenderer implements ResponseRenderer {
     }
 
     @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response response = new Response(request.getSession());
         response.setData(result.getResultObject());
         response.setTimestamp(result.getTimestamp());
