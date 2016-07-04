@@ -246,7 +246,7 @@ public class TransactionManager {
             if (ownsConnection && connection != null) {
                 Databases.rollback(connection);
                 Databases.autocommit(connection);
-                dbService.backWritable(storageParameters.getContext(), connection);
+                dbService.backWritableAfterReading(storageParameters.getContext(), connection);
             }
 
             for (FolderStorage fs : openedStorages) {
