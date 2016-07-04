@@ -57,16 +57,16 @@ import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 
 /**
- * {@link CurrenttDateParserImpl}
+ * {@link CurrentDateParserImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CurrenttDateParserImpl implements TestParser {
+public class CurrentDateParserImpl implements TestParser {
 
     /**
-     * Initialises a new {@link CurrenttDateParserImpl}.
+     * Initialises a new {@link CurrentDateParserImpl}.
      */
-    public CurrenttDateParserImpl() {
+    public CurrentDateParserImpl() {
         super();
     }
 

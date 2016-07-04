@@ -74,7 +74,7 @@ import com.openexchange.ajax.mail.filter.api.conversion.parser.comparison.UserJS
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AddressParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AllOfParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.AnyOfParserImpl;
-import com.openexchange.ajax.mail.filter.api.conversion.parser.test.CurrenttDateParserImpl;
+import com.openexchange.ajax.mail.filter.api.conversion.parser.test.CurrentDateParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.EnvelopeParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.HeaderParserImpl;
 import com.openexchange.ajax.mail.filter.api.conversion.parser.test.NotParserImpl;
@@ -165,7 +165,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         TestParserFactory.addParser(TestCommand.NOT, new NotParserImpl());
         TestParserFactory.addParser(TestCommand.TRUE, new TrueParserImpl());
         TestParserFactory.addParser(TestCommand.SIZE, new SizeTestParserImpl());
-        TestParserFactory.addParser(TestCommand.CURRENTDATE, new CurrenttDateParserImpl());
+        TestParserFactory.addParser(TestCommand.CURRENTDATE, new CurrentDateParserImpl());
 
         ComparisonParserRegistry.addParser(MatchType.is, new IsJSONParserImpl());
         ComparisonParserRegistry.addParser(MatchType.matches, new MatchesJSONParserImpl());
