@@ -139,9 +139,11 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public void deleteEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException {
+        Long clientTimestampValue = parameters.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
+        long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
         CalendarWriter writer = new CalendarWriter(session);
         for (EventID eventID : eventIDs) {
-            writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID());
+            writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID(), clientTimestamp);
         }
     }
 }

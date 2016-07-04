@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
 import static com.openexchange.chronos.impl.Check.requireDeletePermission;
 import static com.openexchange.chronos.impl.Check.requireFolderPermission;
+import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Check.requireWritePermission;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,8 +109,8 @@ public class CalendarWriter {
         this.storage = Services.getService(CalendarStorageFactory.class).create(session);
 	}
 
-    public void deleteEvent(int folderID, int objectID) throws OXException {
-        deleteEvent(getFolder(folderID), objectID);
+    public void deleteEvent(int folderID, int objectID, long clientTimestamp) throws OXException {
+        deleteEvent(getFolder(folderID), objectID, clientTimestamp);
     }
 
     private static Event getTombstone(Event event) {
@@ -146,10 +147,11 @@ public class CalendarWriter {
         return tombstoneAttendee;
     }
 
-    public void deleteEvent(UserizedFolder folder, int objectID) throws OXException {
+    public void deleteEvent(UserizedFolder folder, int objectID, long clientTimestamp) throws OXException {
         requireCalendarContentType(folder);
         requireDeletePermission(folder, Permission.DELETE_OWN_OBJECTS);
         Event event = storage.loadEvent(objectID);
+        requireUpToDateTimestamp(event, clientTimestamp);
         if (session.getUserId() != event.getCreatedBy()) {
             requireDeletePermission(folder, Permission.DELETE_ALL_OBJECTS);
         }
@@ -176,8 +178,8 @@ public class CalendarWriter {
             } else {
                 Attendee attendee = CalendarUtils.findAttendee(event.getAttendees(), user.getId());
                 Event tombstoneEvent = getTombstone(event);
-                tombstoneEvent.setAttendees(Collections.singletonList(getTombstone(attendee)));
                 Consistency.setModifiedNow(tombstoneEvent, user.getId());
+                tombstoneEvent.setAttendees(Collections.singletonList(getTombstone(attendee)));
                 storage.insertTombstoneEvent(tombstoneEvent);
                 storage.deleteAlarms(objectID, session.getUserId());
                 //TODO: remove attendee & update event

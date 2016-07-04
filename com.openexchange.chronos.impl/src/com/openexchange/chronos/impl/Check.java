@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -88,6 +89,19 @@ public class Check {
 
     public static void requireDeletePermission(UserizedFolder folder, int requiredPermission) throws OXException {
         if (folder.getOwnPermission().getDeletePermission() < requiredPermission) {
+            throw new OXException();
+        }
+    }
+
+    /**
+     * Checks that the supplied client timestamp is equal to or greater than the last modification time of the event.
+     *
+     * @param event The event to check the timestamp against
+     * @param clientTimestampp The client timestamp
+     * @throws OXException If the check fails
+     */
+    public static void requireUpToDateTimestamp(Event event, long clientTimestampp) throws OXException {
+        if (event.getLastModified().getTime() > clientTimestampp) {
             throw new OXException();
         }
     }

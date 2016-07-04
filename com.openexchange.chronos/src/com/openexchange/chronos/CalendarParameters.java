@@ -152,7 +152,7 @@ public class CalendarParameters {
     /**
      * {@link Long}
      * <p/>
-     * The client timestamp / sequence number, i.e. the latest modification time known by the client.
+     * The client timestamp / sequence number to catch concurrent updates, i.e. the latest modification time known by the client.
      */
     public static final String PARAMETER_TIMESTAMP = "timestamp";
 

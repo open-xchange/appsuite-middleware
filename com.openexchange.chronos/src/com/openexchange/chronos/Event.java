@@ -1100,4 +1100,9 @@ public class Event {
         return setFields.contains(EventField.ATTENDEES);
     }
 
+    @Override
+    public String toString() {
+        return "Event [id=" + id + ", summary=" + summary + ", startDate=" + startDate + ", endDate=" + endDate + "]";
+    }
+
 }
