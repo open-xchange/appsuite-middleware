@@ -81,6 +81,7 @@ import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.internal.css.CSSMatcher;
 import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
@@ -663,7 +664,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             if (null != width) {
                 String height = attrMap.get("height");
                 if (null != height) {
-                    prependToStyle("width: " + width + "px; height: " + height + "px;", attrMap);
+                    prependToStyle(mapFor("width", width + "px", "height", height + "px"), attrMap);
                 }
             }
         } else if (HTMLElementName.TABLE == tagName) {
@@ -845,10 +846,61 @@ public final class FilterJerichoHandler implements JerichoHandler {
         attrMap.put("style", style);
     }
 
+    private void prependToStyle(Map<String, String> styleNvps, Map<String, String> attrMap) {
+        String style = attrMap.get("style");
+        if (null == style) {
+            style = generateStyleString(styleNvps);
+        } else {
+            // Filter out existing entries
+            Map<String, Set<String>> styleMap = new HashMap<String, Set<String>>(this.styleMap);
+            styleMap.keySet().removeAll(styleNvps.keySet());
+            CSSMatcher.checkCSSElements(cssBuffer.append(style), styleMap, true);
+            style = cssBuffer.toString();
+            cssBuffer.setLength(0);
+            style = generateStyleString(styleNvps) + " " + style;
+        }
+        attrMap.put("style", style);
+    }
+
+    private String generateStyleString(Map<String, String> styleNvps) {
+        if (null == styleNvps || styleNvps.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder(styleNvps.size() << 2);
+        boolean first = true;
+        for (Map.Entry<String, String> nvp : styleNvps.entrySet()) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(' ');
+            }
+            sb.append(nvp.getKey()).append(": ").append(nvp.getValue()).append(';');
+        }
+        return sb.toString();
+    }
+
     private Map<String, String> createMapFrom(List<Attribute> attributes) {
         Map<String, String> map = new LinkedHashMap<String, String>(attributes.size());
         for (Attribute attribute : attributes) {
             map.put(attribute.getKey(), attribute.getValue());
+        }
+        return map;
+    }
+
+    private Map<String, String> mapFor(String... args) {
+        if (null == args) {
+            return null;
+        }
+
+        int length = args.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+
+        Map<String, String> map = new LinkedHashMap<String, String>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(args[i], args[i+1]);
         }
         return map;
     }
