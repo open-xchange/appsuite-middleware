@@ -68,6 +68,12 @@ public class SeriesPattern {
     private Long seriesStart;
     private Long seriesEnd;
 
+    /**
+     * Parses a series pattern from its database representation.
+     *
+     * @param databasePattern The database pattern string
+     * @return The parsed series pattern, or <code>null</code> if the supplied pattern is empty
+     */
     public static SeriesPattern parse(String databasePattern) {
         if (Strings.isEmpty(databasePattern)) {
             return null;
@@ -107,6 +113,13 @@ public class SeriesPattern {
             }
         }
         return pattern;
+    }
+
+    /**
+     * Initializes a new, empty {@link SeriesPattern}.
+     */
+    public SeriesPattern() {
+        super();
     }
 
     /**
@@ -221,8 +234,12 @@ public class SeriesPattern {
         this.seriesEnd = seriesEnd;
     }
 
-    @Override
-    public String toString() {
+    /**
+     * Gets the database string representation of this pattern.
+     *
+     * @return The database pattern string
+     */
+    public String getDatabasePattern() {
         StringBuilder stringBuilder = new StringBuilder().append("t|").append(type);
         if (null != interval) {
             stringBuilder.append("|i|").append(interval);
@@ -246,6 +263,11 @@ public class SeriesPattern {
             stringBuilder.append("|e|").append(seriesEnd);
         }
         return stringBuilder.toString();
+    }
+
+    @Override
+    public String toString() {
+        return getDatabasePattern();
     }
 
 }
