@@ -89,7 +89,7 @@ public class CurrenttDateParserImpl implements TestParser {
         //        final ComparisonParser compParser = ComparisonParserRegistry.getParser(matchType);
         //        final Comparison<? extends ComparisonArgument> comparison = compParser.parse(jsonObject);
         
-        return new CurrentDateTest(time, dateTag, comparisonName);
+        return new CurrentDateTest(comparisonName, dateTag, time);
     }
 
 }
