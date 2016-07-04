@@ -106,11 +106,11 @@ Add following properties:
     com.openexchange.mail.categories.uc2.name.de_DE=Arbeit
 
 
-#### 5. Setup the initiale system category rules (optional)
+#### 5. Setup the initial system category rules (optional)
 
 Since the mails are currently not flagged at all, all categories except the general category will be empty. In order to prevent such a bad user experience you have the possibility to define predefined rules, which will be added to each user individually. But in order to improve the imap performance it is strongly recommended to use system wide rules instead! This also makes changes/improvements of the rules much easier.
 
-For example if you use dovecot with pigeonhole you can configure sieve scripts which will be run before the user scripts (see 'sieve_before' parameter: [Pigeonhole Configuration](http://wiki2.dovecot.org/Pigeonhole/Sieve/Configuration)). The sieve script for users in germany could look like this:
+For example if you use dovecot with pigeonhole you can configure sieve scripts which will be run before the user scripts (see 'sieve_before' parameter: [Pigeonhole Configuration](http://wiki2.dovecot.org/Pigeonhole/Sieve/Configuration)). The sieve script for users in Germany could look like this:
 
     require "imap4flags";
 
@@ -129,7 +129,7 @@ For example if you use dovecot with pigeonhole you can configure sieve scripts w
       addflag "$promotion";
     }
 
-In case you use a different imap server or dont want to use system wide rules you can define user rules by doing the following:
+In case you use a different imap server or don't want to use system wide rules you can define user rules by doing the following:
 
 Set com.openexchange.mail.categories.apply.ox.rules to true
 
@@ -139,7 +139,7 @@ and uncomment or add the example mail address lists:
     com.openexchange.mail.categories.rules.purchases=amazon.de,paypal.de,ebay.de,ebay-kleinanzeigen.de,zalando.de,immobilienscout24.de,autoscout24.de,notebooksbilliger.de,otto.de,tchibo.de,lidl.de,aldi.de,aliexpress.com,bonprix.de,conrad.de,reichelt.de,orders.apple.com,euro.apple.com,cyberport.de,alternate.de,audible.de,steampowered.com,mytoys.de,ikea.com,hm.com,mediamarkt.de,saturn.de
     com.openexchange.mail.categories.rules.promotion=netflix.com,dhl.de,unitymedia.de,finanztip.de
 
-The used lists in both variants are not complete and are only applicable for users in germany. Therefore you should always adapt this lists to you individual needs.
+The used lists in both variants are not complete and are only applicable for users in Germany. Therefore you should always adapt this lists to you individual needs.
 
 
 #### 6. Check properties and restart the server
@@ -320,7 +320,7 @@ All configurations are config cascade aware and can therefore be overwritten on 
 
 This property defines whether the user capability is granted to use the mail categories feature. This is the main switch for an administrator to enable/disable that feature.
 
-**Note** The current mail categories implementatiuon also requires that the associated Sieve service advertises the `"imap4flags"` capability. Only if both conditions are met
+**Note** The current mail categories implementation also requires that the associated Sieve service advertises the `"imap4flags"` capability. Only if both conditions are met
 
 1.  `com.openexchange.mail.categories` is set to `true`
 2.  `"imap4flags"` capability announced by Sieve service
@@ -330,7 +330,7 @@ the mail categories feature becomes effectively available for a user.
 #### com.openexchange.mail.categories.enabled
 
 This property defines whether the mail categories feature should be enabled or not. This property only influence the starting value.
-For example set this property to 'true' if you want your users to see the mail features after their first login. If you rather want the same ui experience like before set this value to 'false' instead.
+For example set this property to 'true' if you want your users to see the mail features after their first login. If you rather want the same UI experience like before set this value to 'false' instead.
 Anyway users are able to show or hide the feature via configuration.
 
 #### com.openexchange.mail.categories.forced

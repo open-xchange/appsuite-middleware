@@ -3,7 +3,7 @@ title: Drive Mail
 ---
 
 # How it works
-Starting with v7.8.2 the Open-Xchange Server supports to send one or more non-inline file attachments not as physically attached files, but as a mail containing a share link acutally providing access to the files.
+Starting with v7.8.2 the Open-Xchange Server supports to send one or more non-inline file attachments not as physically attached files, but as a mail containing a share link actually providing access to the files.
 
 Whenever such a mail is sent, an according folder is created in Drive module located under a special folder named according to selected [display name](#display-name). The name of the new folder is aligned to the mail's subject. All file attachments that are supposed to be available via the mail are put into that folder and a share link is created for that folder. That share link (along-side with other information) is prepended to the mail's text content.
 
@@ -48,14 +48,14 @@ It is possible to change the display name of that feature according to customer 
 Since file attachments are not physically attached, but stored in Drive of sending user, a user can be forced to send a share link through specifying property ``com.openexchange.mail.compose.share.threshold``. That option accepts a threshold, which is the total number of bytes of all file attachments that are allowed to be sent physically attached. Once exceeded the file attachments are made accessible via a share link.
 
 ## External recipient locale
-The option ``com.openexchange.mail.compose.share.externalRecipientsLocale`` specifies what locale to use when composing a mail containing share information for ane xternal recipient.
+The option ``com.openexchange.mail.compose.share.externalRecipientsLocale`` specifies what locale to use when composing a mail containing share information for an external recipient.
 
 This option either accepts special value ``user-defined`` (that is to choose sending user's locale) or a locale identifier according to RFC 2798 and 2068; such as ``en_US``.
 
 ## Share attributes
-By default a user can optionally specify whether a share link has an expiry date and if (provded a expiry date is set) the associated folder is automatically deleted from Drive module if share link is expired.
+By default a user can optionally specify whether a share link has an expiry date and if (provided a expiry date is set) the associated folder is automatically deleted from Drive module if share link is expired.
 
 An administrator can enforce, whether an expiry date and an accompanying auto-delete flag is required.
 
- - ``com.openexchange.mail.compose.share.requiredExpiration`` (default id ``false``). If set to ``true``, the user is required to specifiy an expiry date for the created share link. Otherwise sending the mail is rejected.
+ - ``com.openexchange.mail.compose.share.requiredExpiration`` (default id ``false``). If set to ``true``, the user is required to specify an expiry date for the created share link. Otherwise sending the mail is rejected.
  - ``com.openexchange.mail.compose.share.forceAutoDelete`` (default id ``false``). If set to ``true``, the files/folder associated with the share will be automatically deletes once the share link expires.

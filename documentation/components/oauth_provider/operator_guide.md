@@ -69,7 +69,7 @@ The registration data consists of the following parameters:
 | description     | A description of the client application. Will be visible to your users. Translations of the description are currently not supported, you must decide for one language.                                                                                                                                                                                                     | Yes      |
 | contact address | E-Mail address to contact the application vendor.                                                                                                                                                                                                                                                                                                                          | Yes      |
 | website         | An URL to the client applications website.                                                                                                                                                                                                                                                                                                                                 | Yes      |
-| default scope   | A default scope that will be applied if the client application asks a user for access without providing a certain scope during the request. See the developer guide for available scope tokens. The scope is always a space-delimited string cosisting of one or more scope tokens, e.g. "read\_contacts write\_contacts".                                             | Yes      |
+| default scope   | A default scope that will be applied if the client application asks a user for access without providing a certain scope during the request. See the developer guide for available scope tokens. The scope is always a space-delimited string consisting of one or more scope tokens, e.g. "read\_contacts write\_contacts".                                             | Yes      |
 | icon            | An icon of the client application. Supported image types are `image/png`, `image/jpg` and `image/jpeg`. Icons SHOULD be of size 128x128 px, otherwise they might not get displayed correctly. The max. image size is 256kb.                                                                                                                                                | Yes      |
 | redirect URIs   | One or more URIs that will be used as redirect locations to deliver authorization codes or error messages back to the client application. Every URI must be absolute and not contain a fragment. The scheme must always be `https`, however for development purposes redirect URIs pointing to `localhost`, `127.0.0.1` or `[::1]` are also allowed with `http` as scheme. | Yes      |
 
@@ -314,7 +314,7 @@ On failure:
 | -n, --name <string>              | The name of the oauth client                                                                                       |
 | -d, --description <string>       | The description of the oauth client                                                                                |
 | -w, --website <string>           | The client website                                                                                                 |
-| -o, --contact-address <string>   | The contact adress of the oauth client                                                                             |
+| -o, --contact-address <string>   | The contact address of the oauth client                                                                             |
 | -i, --icon-path <string>         | Path to a image file which acts as a icon for the oauth client                                                     |
 | -s, --default-scope <string>     | The default scope of the oauth client                                                                              |
 | --urls <string>                  | The redirect urls of the oauth client as a comma separated list                                                    |
@@ -533,7 +533,7 @@ An empty list.
 
 On success:
 
-`The revocation of the client's current secret was successfull!<br>
+`The revocation of the client's current secret was successful!<br>
 Generated a new secret for following client: <br>
 Client_ID = id <br>
 Name = name <br>

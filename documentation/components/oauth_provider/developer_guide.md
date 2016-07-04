@@ -25,7 +25,7 @@ All calls towards the authorization or token endpoint enforce HTTPS. Plain HTTP 
 | scope | The scope according to the API requests you are going to make after access was granted. Can be omitted, in which case the default scope is applied that has been submitted during client registration. A scope is a space-separated string of scope tokens, e.g. `read_contacts write_contacts`. | No |
 | language | An optional locale (e.g. `de_DE`) that is used to translate the user-visible parts of the authorization flow if possible. If omitted `en_US` is used. | No |
 
-The response is a login screen. You propably want to display it within a popup window:
+The response is a login screen. You probably want to display it within a popup window:
 ![OAuth Login Screen](login_screen.png "fig:OAuth Login Screen")
 
 After signing in the user gets display a screen where he can choose to grant or deny access to the requesting application:
