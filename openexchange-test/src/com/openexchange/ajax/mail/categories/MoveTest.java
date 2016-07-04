@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.categories;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
@@ -69,6 +70,7 @@ public class MoveTest extends AbstractMailCategoriesTest {
         super(name);
     }
 
+    @Test
     public void testShouldMoveToAnotherCategory() throws OXException, IOException, SAXException, JSONException {
         MailTestManager manager = new MailTestManager(client, false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
@@ -82,6 +84,7 @@ public class MoveTest extends AbstractMailCategoriesTest {
         assertTrue("Move operation failed. Mail does not contain the correct user flag.", testMail.getUserFlags().contains(CAT_1_FLAG));
     }
 
+    @Test
     public void testShouldNotMoveToNonExistentCategory() throws OXException, IOException, SAXException, JSONException {
         MailTestManager manager = new MailTestManager(client, false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));

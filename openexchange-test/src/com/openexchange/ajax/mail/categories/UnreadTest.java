@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.categories;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.exception.OXException;
@@ -75,6 +76,7 @@ public class UnreadTest extends AbstractMailCategoriesTest {
         super(name);
     }
 
+    @Test
     public void testUnreadCount() throws Exception {
         MailTestManager manager = new MailTestManager(client, false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
