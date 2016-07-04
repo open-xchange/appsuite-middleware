@@ -1351,8 +1351,10 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create(clone.getRecurrencePosition());
         }
         final RecurringResultInterface rs = rss.getRecurringResult(0);
-        if (!cdao.containsStartDate() || !cdao.containsEndDate()) {
-            clone.setStartDate(new Date(rs.getStart()));
+        if (!cdao.containsStartDate()) {
+            clone.setStartDate(new Date(rs.getStart()));   
+        }
+        if (!cdao.containsEndDate()) {
             clone.setEndDate(new Date(rs.getEnd()));
         }
 
