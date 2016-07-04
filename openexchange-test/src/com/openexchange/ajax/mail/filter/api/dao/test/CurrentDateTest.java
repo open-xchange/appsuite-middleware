@@ -68,7 +68,7 @@ public class CurrentDateTest extends AbstractTest implements Test<CurrentDateTes
      */
     public CurrentDateTest(long dateValue, String datePart, String comparison) {
         super(TestCommand.CURRENTDATE);
-        setTestArgument(CurrentDateTestArgument.datevalue, dateValue);
+        setTestArgument(CurrentDateTestArgument.datevalue, new Object[] { dateValue });
         setTestArgument(CurrentDateTestArgument.datepart, datePart);
         setTestArgument(CurrentDateTestArgument.comparison, comparison);
     }
