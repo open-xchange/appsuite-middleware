@@ -163,6 +163,14 @@ public abstract class ChronosAction extends AppointmentAction {
 
     protected static CalendarParameters parseParameters(AppointmentAJAXRequest request, String... requiredParameters) throws OXException {
         CalendarParameters parameters = new CalendarParameters();
+        String timestampParameter = request.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
+        if (null != timestampParameter) {
+            try {
+                parameters.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(timestampParameter));
+            } catch (NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TIMESTAMP, timestampParameter);
+            }
+        }
         Date start = request.optDate(AJAXServlet.PARAMETER_START);
         if (null != start) {
             parameters.set(CalendarParameters.PARAMETER_RANGE_START, request.applyTimeZone2Date(start.getTime()));

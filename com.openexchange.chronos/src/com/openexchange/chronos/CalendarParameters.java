@@ -149,6 +149,13 @@ public class CalendarParameters {
      */
     public static final String PARAMETER_RIGHT_HAND_LIMIT = "right_hand_limit";
 
+    /**
+     * {@link Long}
+     * <p/>
+     * The client timestamp / sequence number, i.e. the latest modification time known by the client.
+     */
+    public static final String PARAMETER_TIMESTAMP = "timestamp";
+
     private final Map<String, Object> parameters;
 
     /**

@@ -70,9 +70,9 @@ public interface CalendarService {
 
     List<UserizedEvent> getEventsOfUser(ServerSession session, CalendarParameters parameters) throws OXException;
 
-    UserizedEvent createEvent(ServerSession session, UserizedEvent event) throws OXException;
+    UserizedEvent createEvent(ServerSession session, UserizedEvent event, CalendarParameters parameters) throws OXException;
 
-    void deleteEvents(ServerSession session, List<EventID> eventIDs) throws OXException;
+    void deleteEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException;
 
     List<UserizedEvent> getUpdatedEventsInFolder(ServerSession session, int folderID, Date updatedSince, CalendarParameters parameters) throws OXException;
 
