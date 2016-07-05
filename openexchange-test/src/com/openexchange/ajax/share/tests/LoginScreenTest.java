@@ -68,6 +68,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * {@link LoginScreenTest}
@@ -102,7 +103,7 @@ public class LoginScreenTest extends ShareTest {
         long now = System.currentTimeMillis();
         OCLGuestPermission perm = createNamedGuestPermission("testGuestPasswordInit" + now + "@example.org", "Test " + now);
         folder.getPermissions().add(perm);
-        folder = updateFolder(EnumAPI.OX_NEW, folder);
+        folder = updateFolder(EnumAPI.OX_NEW, folder, Transport.MAIL);
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
             if (permission.getEntity() != client.getValues().getUserId()) {
@@ -133,9 +134,13 @@ public class LoginScreenTest extends ShareTest {
          */
         guestClient = resolveShare(shareURL, ShareTest.getUsername(perm.getRecipient()), newPW);
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
-        assertEquals("guest_password", resolveResponse.getLoginType());
-        assertEquals("INFO", resolveResponse.getMessageType());
-        assertNotNull(resolveResponse.getMessage());
+        String token = resolveResponse.getToken();
+        assertNotNull(token);
+        RedeemRequest req = new RedeemRequest(token);
+        RedeemResponse resp = guestClient.execute(req);
+        assertEquals("guest_password", resp.getLoginType());
+        assertEquals("INFO", resp.getMessageType());
+        assertNotNull(resp.getMessage());
     }
 
     public void testLinkWithPassword() throws Exception {
