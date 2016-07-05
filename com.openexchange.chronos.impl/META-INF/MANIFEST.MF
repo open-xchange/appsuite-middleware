@@ -7,6 +7,8 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.chronos,
  com.openexchange.config,
+ com.openexchange.database,
+ com.openexchange.database.provider,
  com.openexchange.exception,
  com.openexchange.folder,
  com.openexchange.folderstorage,

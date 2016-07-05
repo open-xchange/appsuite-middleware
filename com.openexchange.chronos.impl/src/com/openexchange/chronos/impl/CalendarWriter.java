@@ -106,7 +106,7 @@ public class CalendarWriter {
     public CalendarWriter(ServerSession session) throws OXException {
 		super();
         this.session = session;
-        this.storage = Services.getService(CalendarStorageFactory.class).create(session);
+        this.storage = Services.getService(CalendarStorageFactory.class).create(session.getContext());
 	}
 
     public void deleteEvent(int folderID, int objectID, long clientTimestamp) throws OXException {

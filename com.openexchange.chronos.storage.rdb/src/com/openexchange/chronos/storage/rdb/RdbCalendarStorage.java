@@ -80,7 +80,8 @@ import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
@@ -98,33 +99,37 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarStorage {
+public class RdbCalendarStorage implements CalendarStorage {
 
-    private final int contextID;
-    private final DatabaseService databaseService;
+    private final Context context;
+    private final DBProvider dbProvider;
+    private final DBTransactionPolicy txPolicy;
 
     /**
-     * Initializes a new {@link RdbChecksumStore}.
+     * Initializes a new {@link RdbCalendarStorage}.
      *
-     * @param contextID The context ID
+     * @param context The context
+     * @param dbProvider The database provider to use
+     * @param The transaction policy
      */
-    public RdbCalendarStorage(int contextID) throws OXException {
-        super(contextID);
-        this.contextID = contextID;
-        this.databaseService = Services.getService(DatabaseService.class, true);
+    public RdbCalendarStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+        super();
+        this.context = context;
+        this.dbProvider = dbProvider;
+        this.txPolicy = txPolicy;
     }
 
     @Override
     public List<Alarm> loadAlarms(int objectID, int userID) throws OXException {
         Connection connection = null;
         try {
-            connection = databaseService.getReadOnly(contextID);
-            Alarm alarm = selectReminder(connection, contextID, userID, objectID);
+            connection = dbProvider.getReadConnection(context);
+            Alarm alarm = selectReminder(connection, context.getContextId(), userID, objectID);
             return null != alarm ? Collections.singletonList(alarm) : null;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            dbProvider.releaseReadConnection(context, connection);
         }
     }
 
@@ -132,16 +137,14 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     public void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException {
         Connection connection = null;
         try {
-            connection = databaseService.getWritable(contextID);
-            DBUtils.startTransaction(connection);
-            updateReminder(connection, contextID, objectID, userID, Event2Appointment.getReminder(alarms));
-            connection.commit();
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updateReminder(connection, context.getContextId(), objectID, userID, Event2Appointment.getReminder(alarms));
+            txPolicy.commit(connection);
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            DBUtils.autocommit(connection);
-            databaseService.backReadOnly(contextID, connection);
+            release(connection);
         }
     }
 
@@ -154,16 +157,14 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     public void deleteAlarms(int objectID) throws OXException {
         Connection connection = null;
         try {
-            connection = databaseService.getWritable(contextID);
-            DBUtils.startTransaction(connection);
-            updateReminders(connection, contextID, objectID, null);
-            connection.commit();
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updateReminders(connection, context.getContextId(), objectID, null);
+            txPolicy.commit(connection);
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            DBUtils.autocommit(connection);
-            databaseService.backReadOnly(contextID, connection);
+            release(connection);
         }
     }
 
@@ -171,15 +172,15 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     public Event loadEvent(int objectID) throws OXException {
         Connection connection = null;
         try {
-            connection = databaseService.getReadOnly(contextID);
-            Event event = selectEvent(connection, contextID, objectID);
-            event.setAttendees(selectAttendees(connection, contextID, objectID));
-            event.setAttachments(selectAttachments(connection, contextID, objectID));
+            connection = dbProvider.getReadConnection(context);
+            Event event = selectEvent(connection, context.getContextId(), objectID);
+            event.setAttendees(selectAttendees(connection, context.getContextId(), objectID));
+            event.setAttachments(selectAttachments(connection, context.getContextId(), objectID));
             return event;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            dbProvider.releaseReadConnection(context, connection);
         }
     }
 
@@ -187,22 +188,20 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     public int insertEvent(Event event) throws OXException {
         Connection connection = null;
         try {
-            connection = databaseService.getWritable(contextID);
-            DBUtils.startTransaction(connection);
-            int objectID = IDGenerator.getId(contextID, Types.APPOINTMENT, connection);
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            int objectID = IDGenerator.getId(context, Types.APPOINTMENT, connection);
             event.setId(objectID);
-            insertEvent(connection, contextID, event);
+            insertEvent(connection, context.getContextId(), event);
             if (null != event.getAttendees()) {
-                insertAttendees(connection, contextID, objectID, event.getAttendees());
+                insertAttendees(connection, context.getContextId(), objectID, event.getAttendees());
             }
-            connection.commit();
+            txPolicy.commit(connection);
             return objectID;
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            DBUtils.autocommit(connection);
-            databaseService.backReadOnly(contextID, connection);
+            release(connection);
         }
     }
 
@@ -210,19 +209,17 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     public void insertTombstoneEvent(Event event) throws OXException {
         Connection connection = null;
         try {
-            connection = databaseService.getWritable(contextID);
-            DBUtils.startTransaction(connection);
-            insertTombstoneEvent(connection, contextID, event);
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            insertTombstoneEvent(connection, context.getContextId(), event);
             if (null != event.getAttendees()) {
-                insertTombstoneAttendees(connection, contextID, event.getId(), event.getAttendees());
+                insertTombstoneAttendees(connection, context.getContextId(), event.getId(), event.getAttendees());
             }
-            connection.commit();
+            txPolicy.commit(connection);
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            DBUtils.autocommit(connection);
-            databaseService.backReadOnly(contextID, connection);
+            release(connection);
         }
     }
 
@@ -230,17 +227,15 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     public void deleteEvent(int objectID) throws OXException {
         Connection connection = null;
         try {
-            connection = databaseService.getWritable(contextID);
-            DBUtils.startTransaction(connection);
-            deleteEvent(connection, contextID, objectID);
-            deleteAttendees(connection, contextID, objectID);
-            connection.commit();
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            deleteEvent(connection, context.getContextId(), objectID);
+            deleteAttendees(connection, context.getContextId(), objectID);
+            txPolicy.commit(connection);
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            DBUtils.autocommit(connection);
-            databaseService.backReadOnly(contextID, connection);
+            release(connection);
         }
     }
 
@@ -267,38 +262,38 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
     private List<Event> loadEventsInFolder(int folderID, boolean deleted, Date from, Date until, int createdBy, Date updatedSince, EventField[] fields) throws OXException {
         Connection connection = null;
         try {
-            connection = databaseService.getReadOnly(contextID);
-            List<Event> events = selectEventsInFolder(connection, deleted, contextID, folderID, from, until, createdBy, updatedSince, fields);
+            connection = dbProvider.getReadConnection(context);
+            List<Event> events = selectEventsInFolder(connection, deleted, context.getContextId(), folderID, from, until, createdBy, updatedSince, fields);
             if (false == deleted) {
                 for (Event event : events) {
-                    event.setAttendees(selectAttendees(connection, contextID, event.getId()));
-                    event.setAttachments(selectAttachments(connection, contextID, event.getId()));
+                    event.setAttendees(selectAttendees(connection, context.getContextId(), event.getId()));
+                    event.setAttachments(selectAttachments(connection, context.getContextId(), event.getId()));
                 }
             }
             return events;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            dbProvider.releaseReadConnection(context, connection);
         }
     }
 
     private List<Event> loadEventsOfUser(int userID, boolean deleted, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException {
         Connection connection = null;
         try {
-            connection = databaseService.getReadOnly(contextID);
-            List<Event> events = selectEventsOfUser(connection, deleted, contextID, userID, from, until, updatedSince, fields);
+            connection = dbProvider.getReadConnection(context);
+            List<Event> events = selectEventsOfUser(connection, deleted, context.getContextId(), userID, from, until, updatedSince, fields);
             if (false == deleted) {
                 for (Event event : events) {
-                    event.setAttendees(selectAttendees(connection, contextID, event.getId()));
-                    event.setAttachments(selectAttachments(connection, contextID, event.getId()));
+                    event.setAttendees(selectAttendees(connection, context.getContextId(), event.getId()));
+                    event.setAttachments(selectAttachments(connection, context.getContextId(), event.getId()));
                 }
             }
             return events;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            databaseService.backReadOnly(contextID, connection);
+            dbProvider.releaseReadConnection(context, connection);
         }
     }
 
@@ -875,6 +870,26 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             }
         }
         return events;
+    }
+
+    /**
+     * Safely releases a write connection obeying the configured transaction policy, rolling back automatically if not committed before.
+     *
+     * @param connection The write connection to release
+     */
+    private void release(Connection connection) throws OXException {
+        if (null != connection) {
+            try {
+                if (false == connection.getAutoCommit()) {
+                    txPolicy.rollback(connection);
+                }
+                txPolicy.setAutoCommit(connection, true);
+            } catch (SQLException e) {
+                throw EventExceptionCode.MYSQL.create(e);
+            } finally {
+                dbProvider.releaseWriteConnection(context, connection);
+            }
+        }
     }
 
 }

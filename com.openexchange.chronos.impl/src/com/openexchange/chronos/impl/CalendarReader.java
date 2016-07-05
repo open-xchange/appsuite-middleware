@@ -95,7 +95,7 @@ public class CalendarReader {
     public CalendarReader(ServerSession session) throws OXException {
 		super();
         this.session = session;
-        this.storage = Services.getService(CalendarStorageFactory.class).create(session);
+        this.storage = Services.getService(CalendarStorageFactory.class).create(session.getContext());
 	}
 
     public UserizedEvent readEvent(EventID eventID) throws OXException {

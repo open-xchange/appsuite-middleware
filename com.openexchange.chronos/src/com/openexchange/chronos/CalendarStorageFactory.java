@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos;
 
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link CalendarStorageFactory}
@@ -60,8 +62,20 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface CalendarStorageFactory {
 
-	CalendarStorage create(ServerSession session) throws OXException;
+    /**
+     * Initializes a new {@link CalendarStorage}.
+     *
+     * @param context The context
+     */
+    CalendarStorage create(Context context) throws OXException;
 
-	CalendarStorage create(int contextID) throws OXException;
-	
+    /**
+     * Initializes a new {@link CalendarStorage}.
+     *
+     * @param context The context
+     * @param dbProvider The database provider to use
+     * @param The transaction policy
+     */
+    CalendarStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
+
 }

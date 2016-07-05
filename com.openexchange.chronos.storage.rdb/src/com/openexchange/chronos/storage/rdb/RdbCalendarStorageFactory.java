@@ -51,8 +51,13 @@ package com.openexchange.chronos.storage.rdb;
 
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarStorageFactory;
+import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link CalendarStorage}
@@ -62,21 +67,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RdbCalendarStorageFactory implements CalendarStorageFactory {
 
-    /**
-     * Initializes a new {@link RdbCalendarStorageFactory}.
-     */
-    public RdbCalendarStorageFactory() throws OXException {
-        super();
+    @Override
+    public CalendarStorage create(Context context) throws OXException {
+        return create(context, new DatabaseServiceDBProvider(Services.getService(DatabaseService.class)), DBTransactionPolicy.NORMAL_TRANSACTIONS);
     }
 
     @Override
-    public CalendarStorage create(ServerSession session) throws OXException {
-        return new RdbCalendarStorage(session.getContextId());
-    }
-
-    @Override
-    public CalendarStorage create(int contextID) throws OXException {
-        return new RdbCalendarStorage(contextID);
+    public CalendarStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
+        return new RdbCalendarStorage(context, dbProvider, txPolicy);
     }
 
 }
