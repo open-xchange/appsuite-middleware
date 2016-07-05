@@ -111,6 +111,8 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -2148,18 +2150,51 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
         account.setPrimaryAddress(user.getPrimaryEmail());
         {
-            // Drafts
-            account.setDrafts(user.getMail_folder_drafts_name());
-            // Sent
-            account.setSent(user.getMail_folder_sent_name());
-            // Spam/Junk
-            account.setSpam(user.getMail_folder_spam_name());
-            // Trash
-            account.setTrash(user.getMail_folder_trash_name());
-            // Confirmed-ham
-            account.setConfirmedHam(user.getMail_folder_confirmed_ham_name());
-            // Confirmed-spam
-            account.setConfirmedSpam(user.getMail_folder_confirmed_spam_name());
+            Boolean check = Boolean.FALSE;
+            final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+            if (viewFactory != null) {
+                try {
+                    ConfigView view = viewFactory.getView(user.getId(), ctx.getId());
+                    check = view.get("com.openexchange.mail.useStaticDefaultFolders", Boolean.class);
+                } catch (OXException e) {
+                    log.warn("Unable to load com.openexchange.mail.useStaticDefaultFolders property.");
+                }
+            }
+
+            if (check != null && check) {
+                String lang = user.getLanguage().toUpperCase();
+                // Drafts
+                String defaultName = prop.getUserProp("DRAFTS_MAILFOLDER_" + lang, "Drafts");
+                account.setDrafts(null == user.getMail_folder_drafts_name() ? defaultName : user.getMail_folder_drafts_name());
+                // Sent
+                defaultName = prop.getUserProp("SENT_MAILFOLDER_" + lang, "Sent");
+                account.setSent(null == user.getMail_folder_sent_name() ? defaultName : user.getMail_folder_sent_name());
+                // Spam/Junk
+                defaultName = prop.getUserProp("SPAM_MAILFOLDER_" + lang, "Spam");
+                account.setSpam(null == user.getMail_folder_spam_name() ? defaultName : user.getMail_folder_spam_name());
+                // Trash
+                defaultName = prop.getUserProp("TRASH_MAILFOLDER_" + lang, "Trash");
+                account.setTrash(null == user.getMail_folder_trash_name() ? defaultName : user.getMail_folder_trash_name());
+                // Confirmed-ham
+                defaultName = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang, "confirmed-ham");
+                account.setConfirmedHam(null == user.getMail_folder_confirmed_ham_name() ? defaultName : user.getMail_folder_confirmed_ham_name());
+                // Confirmed-spam
+                defaultName = prop.getUserProp("CONFIRMED_SPAM_MAILFOLDER_" + lang, "confirmed-spam");
+                account.setConfirmedSpam(null == user.getMail_folder_confirmed_spam_name() ? defaultName : user.getMail_folder_confirmed_spam_name());
+            } else {
+                // Drafts
+                account.setDrafts(user.getMail_folder_drafts_name());
+                // Sent
+                account.setSent(user.getMail_folder_sent_name());
+                // Spam/Junk
+                account.setSpam(user.getMail_folder_spam_name());
+                // Trash
+                account.setTrash(user.getMail_folder_trash_name());
+                // Confirmed-ham
+                account.setConfirmedHam(user.getMail_folder_confirmed_ham_name());
+                // Confirmed-spam
+                account.setConfirmedSpam(user.getMail_folder_confirmed_spam_name());
+            }
         }
         {
             String archiveFullname = user.getMail_folder_archive_full_name();

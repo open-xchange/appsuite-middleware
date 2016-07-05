@@ -605,7 +605,7 @@ public class IMAPDefaultFolderChecker {
             ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
             if (viewFactory != null) {
                 ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-                ComposedConfigProperty<Boolean> prop = view.property("com.openexchange.mail.specialuse.check", Boolean.class);
+                ComposedConfigProperty<Boolean> prop = view.property("com.openexchange.imap.initWithSpecialUse", Boolean.class);
                 if (prop.isDefined()) {
                     Boolean b = prop.get();
                     checkSpecialUseFolder = null != b && b.booleanValue();
