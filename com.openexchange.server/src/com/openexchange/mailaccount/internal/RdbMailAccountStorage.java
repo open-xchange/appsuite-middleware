@@ -2569,12 +2569,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
                 // Default folder names: trash, sent, drafts, spam, confirmed_spam, confirmed_ham
                 {
-                    setOptionalString(stmt, pos++, mailAccount.getTrash());
-                    setOptionalString(stmt, pos++, mailAccount.getSent());
-                    setOptionalString(stmt, pos++, mailAccount.getDrafts());
-                    setOptionalString(stmt, pos++, mailAccount.getSpam());
-                    setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
-                    setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
+                    stmt.setString(pos++, mailAccount.getTrash());
+                    stmt.setString(pos++, mailAccount.getSent());
+                    stmt.setString(pos++, mailAccount.getDrafts());
+                    stmt.setString(pos++, mailAccount.getSpam());
+                    stmt.setString(pos++, mailAccount.getConfirmedSpam());
+                    stmt.setString(pos++, mailAccount.getConfirmedHam());
                 }
 
                 // Spam handler
@@ -2588,12 +2588,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
                 // Default folder full names
                 {
-                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getTrashFullname()));
-                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getSentFullname()));
-                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getDraftsFullname()));
-                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getSpamFullname()));
-                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getConfirmedSpamFullname()));
-                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getConfirmedHamFullname()));
+                    stmt.setString(pos++, extractFullname(mailAccount.getTrashFullname()));
+                    stmt.setString(pos++, extractFullname(mailAccount.getSentFullname()));
+                    stmt.setString(pos++, extractFullname(mailAccount.getDraftsFullname()));
+                    stmt.setString(pos++, extractFullname(mailAccount.getSpamFullname()));
+                    stmt.setString(pos++, extractFullname(mailAccount.getConfirmedSpamFullname()));
+                    stmt.setString(pos++, extractFullname(mailAccount.getConfirmedHamFullname()));
                 }
 
                 // Personal
