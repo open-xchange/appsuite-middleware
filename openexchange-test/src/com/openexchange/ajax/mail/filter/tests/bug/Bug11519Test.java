@@ -85,9 +85,9 @@ public class Bug11519Test extends AbstractMailFilterTest {
 
         // Create tests
         Test<?>[] tests = new Test<?>[3];
-        tests[0] = new CurrentDateTest(1183759200000L, "ge", "date");
-        tests[1] = new CurrentDateTest(1183759200000L, "le", "date");
-        tests[2] = new CurrentDateTest(1183759200000L, "is", "date");
+        tests[0] = new CurrentDateTest("date", "ge", 1183759200000L);
+        tests[1] = new CurrentDateTest("date", "le", 1183759200000L);
+        tests[2] = new CurrentDateTest("date", "is", 1183759200000L);
 
         // Add test
         AllOfTest allOf = new AllOfTest(tests);

@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.categories;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.exception.OXException;
@@ -79,6 +80,7 @@ public class TrainTest extends AbstractMailCategoriesTest {
 
     private static final int[] COLUMNS = new int[] { 102, 600, 601, 602, 603, 604, 605, 606, 607, 608, 610, 611, 614, 652 };
 
+    @Test
     public void testTrain() throws Exception {
         MailTestManager manager = new MailTestManager(client, false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
@@ -95,6 +97,7 @@ public class TrainTest extends AbstractMailCategoriesTest {
         assertTrue("Category 1 should now contain the new mail!", messages.length == 1);
     }
 
+    @Test
     public void testReorganize() throws Exception {
         MailTestManager manager = new MailTestManager(client, false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
@@ -106,6 +109,7 @@ public class TrainTest extends AbstractMailCategoriesTest {
         assertTrue("Category 1 should contain the mail now!", messages.length == 1);
     }
 
+    @Test
     public void testDuplicateTrain() throws Exception {
         MailTestManager manager = new MailTestManager(client, false);
         getClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));

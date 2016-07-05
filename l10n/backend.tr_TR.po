@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.tr_TR\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-22 14:49+0000\n"
+"POT-Creation-Date: 2016-07-04 10:40+0000\n"
 "PO-Revision-Date: 2015-05-29 13:25+0000\n"
 "Last-Translator: resellerclub <ameya.d@directi.com>\n"
 "Language-Team: <de@li.org>\n"
@@ -3025,43 +3025,48 @@ msgstr ""
 "Sunucu içinde oluşan geçici bir hata dolayısıyla istek yerine getirilemedi. "
 "Lütfen daha sonra tekrar deneyiniz."
 
-#. The general message for a conflicting update operation.
+#. The default message displayed to user when processing was intentionally denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:72
+msgid "The server is refusing to process the request."
+msgstr ""
+
+#. The general message for a conflicting update operation.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
 msgid "The object has been changed in the meantime."
 msgstr "Bu arada nesne değiştirildi."
 
 #. The general message for a missing object.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
 msgid "Object not found. %1$s"
 msgstr "%1$s nesnesi bulunamadı."
 
 #. The general message if a user has no access to a certain module (e.g. calendar)
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:81
 msgid "No permission for module: %1$s."
 msgstr "%1$s modülüne izin verilmiyor."
 
 #. The general message if a user has no permission to access a certain folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:84
 msgid "No folder permission."
 msgstr "Klasör izni bulunamadı. "
 
 #. The general message for a missing field.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
 msgid "Missing field: %s"
 msgstr "Eksik alan: %s"
 
 #. The general message if an error occurred while reading or writing to the database
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
 msgid "Error while reading/writing data from/to the database."
 msgstr "Veritabanından veri okunurken/yazarken hata oluştu."
 
 #. General message if a setting cannot be put into database because it exceeds a column's capacity constraints
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
 msgid "Data cannot be stored into the database because it is too big"
 msgstr ""
 
 #. The request sent by the client was syntactically incorrect
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:96
 msgid "The request sent by the client was syntactically incorrect"
 msgstr ""
 
@@ -7903,8 +7908,14 @@ msgstr ""
 "Yüklenen dosyanın \"%1$s\" içerik tipi \"%2$s\" olarak verilen dosya "
 "filtresi ile uyuşmamaktadır. "
 
+#. Upload file is invalid or illegal
+#. Thrown to indicate that currently uploaded file is not accepted for being saved due to illegal and/or harmful content
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:105
+msgid "Upload file is invalid or illegal."
+msgstr ""
+
 #. Request rejected because its size exceeds the maximum configured size of %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:108
 msgid ""
 "Request rejected because its size exceeds the maximum configured size of "
 "%1$s."
@@ -7913,12 +7924,12 @@ msgstr ""
 "i aşmaktadır."
 
 #. Connection has been closed unexpectedly. Please try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:111
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "Bağlantı beklenmeyen bir şekilde kapandı. Lütfen yeniden deneyin."
 
 #. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:114
 msgid ""
 "Request rejected because file size (%1$s) exceeds the maximum configured "
 "file size of %2$s."
@@ -7927,7 +7938,7 @@ msgstr ""
 "olan %2$ i aşmaktadır."
 
 #. Request rejected because file size exceeds the maximum configured file size of %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:117
 msgid ""
 "Request rejected because file size exceeds the maximum configured file size "
 "of %1$s."
@@ -7936,7 +7947,7 @@ msgstr ""
 "aşmaktadır."
 
 #. Read timed out. Waited too long for incoming data from client.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:120
 msgid "Read timed out. Waited too long for incoming data from client."
 msgstr ""
 

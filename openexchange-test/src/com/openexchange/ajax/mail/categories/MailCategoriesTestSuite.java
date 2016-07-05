@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.categories;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -66,10 +67,10 @@ public class MailCategoriesTestSuite extends TestSuite {
     
     public static Test suite() {
         final TestSuite mailSuite = new TestSuite("com.openexchange.ajax.mail.categories.MailCategoriesTestSuite");
-        mailSuite.addTestSuite(AllRequestCategoryParameterTest.class);
-        mailSuite.addTestSuite(TrainTest.class);
-        mailSuite.addTestSuite(MoveTest.class);
-        mailSuite.addTestSuite(UnreadTest.class);
+        mailSuite.addTest(new JUnit4TestAdapter(AllRequestCategoryParameterTest.class));
+        mailSuite.addTest(new JUnit4TestAdapter(TrainTest.class));
+        mailSuite.addTest(new JUnit4TestAdapter(MoveTest.class));
+        mailSuite.addTest(new JUnit4TestAdapter(UnreadTest.class));
         return mailSuite;
     }
 
