@@ -95,7 +95,7 @@ public class Event {
     private Organizer organizer;
     private List<Attendee> attendees;
 
-    //    private List<Attachment> attachments;
+    private List<Attachment> attachments;
     //    private String filename;
     //    private String iCalId;
 
@@ -1098,6 +1098,42 @@ public class Event {
      */
     public boolean containsAttendees() {
         return setFields.contains(EventField.ATTENDEES);
+    }
+
+    /**
+     * Gets the attachments of the event.
+     *
+     * @return The attachments
+     */
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    /**
+     * Sets the attachments of the event.
+     *
+     * @param value The attachments to set
+     */
+    public void setAttachments(List<Attachment> value) {
+        attachments = value;
+        setFields.add(EventField.ATTACHMENTS);
+    }
+
+    /**
+     * Removes the attachments of the event.
+     */
+    public void removeAttachments() {
+        attachments = null;
+        setFields.remove(EventField.ATTACHMENTS);
+    }
+
+    /**
+     * Gets a value indicating whether the attachments of the event has been set or not.
+     *
+     * @return <code>true</code> if the attachments is set, <code>false</code>, otherwise
+     */
+    public boolean containsAttachments() {
+        return setFields.contains(EventField.ATTACHMENTS);
     }
 
     @Override

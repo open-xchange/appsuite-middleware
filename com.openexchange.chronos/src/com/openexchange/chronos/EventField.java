@@ -165,5 +165,9 @@ public enum EventField {
      * The attendees of the event.
      */
     ATTENDEES,
+    /**
+     * The attachments of the event.
+     */
+    ATTACHMENTS,
 
 }

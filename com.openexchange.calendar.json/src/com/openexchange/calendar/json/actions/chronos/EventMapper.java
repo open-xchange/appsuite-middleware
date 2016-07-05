@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -170,6 +171,9 @@ public class EventMapper {
                 return EventField.UID;
             case CalendarObject.SEQUENCE:
                 return EventField.SEQUENCE;
+            case CalendarObject.NUMBER_OF_ATTACHMENTS:
+            case CalendarObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+                return EventField.ATTACHMENTS;
             case CalendarObject.RECURRENCE_POSITION:
             case CalendarObject.RECURRENCE_DATE_POSITION:
             case CalendarObject.NOTIFICATION:
@@ -314,7 +318,14 @@ public class EventMapper {
         if (event.containsColor()) {
             appointment.setLabel(Event2Appointment.getColorLabel(event.getColor()));
         }
-        //appointment.setNumberOfAttachments(0);
+        if (event.containsAttachments()) {
+            List<Attachment> attachments = event.getAttachments();
+            if (null != attachments) {
+                appointment.setNumberOfAttachments(attachments.size());
+            } else {
+                appointment.setNumberOfAttachments(0);
+            }
+        }
         //appointment.setLastModifiedOfNewestAttachment(null);
         if (event.containsSummary()) {
             appointment.setTitle(event.getSummary());

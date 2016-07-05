@@ -66,6 +66,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarUserType;
@@ -173,6 +174,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             connection = databaseService.getReadOnly(contextID);
             Event event = selectEvent(connection, contextID, objectID);
             event.setAttendees(selectAttendees(connection, contextID, objectID));
+            event.setAttachments(selectAttachments(connection, contextID, objectID));
             return event;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
@@ -270,6 +272,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             if (false == deleted) {
                 for (Event event : events) {
                     event.setAttendees(selectAttendees(connection, contextID, event.getId()));
+                    event.setAttachments(selectAttachments(connection, contextID, event.getId()));
                 }
             }
             return events;
@@ -288,6 +291,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
             if (false == deleted) {
                 for (Event event : events) {
                     event.setAttendees(selectAttendees(connection, contextID, event.getId()));
+                    event.setAttachments(selectAttachments(connection, contextID, event.getId()));
                 }
             }
             return events;
@@ -582,6 +586,22 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         return attendees;
     }
 
+    private static List<Attachment> selectAttachments(Connection connection, int contextID, int objectID) throws SQLException {
+        List<Attachment> attachments = new ArrayList<Attachment>();
+        try (PreparedStatement stmt = connection.prepareStatement(
+            "SELECT id,file_mimetype,file_size,filename,file_id FROM prg_attachment WHERE cid=? AND attached=? AND module=?;")) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, objectID);
+            stmt.setInt(3, com.openexchange.groupware.Types.APPOINTMENT);
+            try (ResultSet resultSet = SQL.logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    attachments.add(readAttachment(resultSet));
+                }
+            }
+        }
+        return attachments;
+    }
+
     private static List<Attendee> selectAttendees(Connection connection, int contextID, int objectID) throws SQLException {
         List<Attendee> attendees = new ArrayList<>();
         attendees.addAll(selectExternalAttendees(connection, contextID, objectID));
@@ -619,10 +639,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
 
     private static Attendee readExternalAttendee(ResultSet resultSet) throws SQLException {
         Attendee attendee = new Attendee();
-        String mailAddress = resultSet.getString("mailAddress");
-        if (null != mailAddress) {
-            attendee.setUri("mailto:" + mailAddress);
-        }
+        attendee.setUri(Appointment2Event.getURI(resultSet.getString("mailAddress")));
         attendee.setCommonName(resultSet.getString("displayName"));
         attendee.setPartStat(Appointment2Event.getParticipationStatus(resultSet.getInt("confirm")));
         attendee.setComment(resultSet.getString("reason"));
@@ -644,12 +661,19 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         Attendee attendee = new Attendee();
         attendee.setEntity(resultSet.getInt("id"));
         attendee.setCuType(Appointment2Event.getCalendarUserType(resultSet.getInt("type")));
-        String mailAddress = resultSet.getString("ma");
-        if (null != mailAddress) {
-            attendee.setUri("mailto:" + mailAddress);
-        }
+        attendee.setUri(Appointment2Event.getURI(resultSet.getString("ma")));
         attendee.setCommonName(resultSet.getString("dn"));
         return attendee;
+    }
+
+    private static Attachment readAttachment(ResultSet resultSet) throws SQLException {
+        Attachment attachment = new Attachment();
+        attachment.setManagedId(String.valueOf(resultSet.getInt("id")));
+        attachment.setFormatType(resultSet.getString("file_mimetype"));
+        attachment.setSize(Long.valueOf(resultSet.getString("file_size")));
+        attachment.setManagedId(resultSet.getString("filename"));
+        attachment.setContentId(resultSet.getString("file_id"));
+        return attachment;
     }
 
     private static Event readEvent(ResultSet resultSet, EventField[] fields) throws SQLException {
@@ -683,9 +707,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
         int organizerId = resultSet.getInt("organizerId");
         if (Strings.isNotEmpty(organizerMail) || 0 < organizerId) {
             Organizer organizer = new Organizer();
-            if (Strings.isNotEmpty(organizerMail)) {
-                organizer.setUri("mailto:" + organizerMail);
-            }
+            organizer.setUri(Appointment2Event.getURI(organizerMail));
             if (0 < organizerId) {
                 organizer.setEntity(organizerId);
             }
