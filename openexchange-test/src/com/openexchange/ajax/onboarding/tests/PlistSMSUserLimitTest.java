@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 
@@ -68,8 +72,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
      * 
      * @param name
      */
-    public PlistSMSUserLimitTest(String name) {
-        super(name);
+    public PlistSMSUserLimitTest() {
     }
 
     @Override
@@ -79,6 +82,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
         Thread.sleep(61000);
     }
 
+    @Test
     public void testExceedUserLimitTest() throws Exception {
         // Expecting user limit 2 and refresh interval 1min
 
@@ -103,6 +107,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
         }
     }
 
+    @Test
     public void testRefreshTest() throws Exception {
         // Expecting user limit 2 and refresh interval 1min
 
