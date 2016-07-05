@@ -63,6 +63,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.activation.MimetypesFileTypeMap;
+import com.google.common.net.PercentEscaper;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.ByteArrayRandomAccess;
@@ -588,13 +589,9 @@ public final class DownloadUtility {
                 foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
             }
         } else {
-            try {
-                String encoded = URLEncoder.encode(fn, "UTF-8");
-                appendTo.append("; filename*=UTF-8''").append(encoded);
-            } catch (UnsupportedEncodingException e) {
-                LOG.error("JRE does not support UTF-8 encoding!");
-                // skip using filename*=UTF-8
-            }
+            PercentEscaper encoder = new PercentEscaper("", false);
+            String encoded = encoder.escape(fn);
+            appendTo.append("; filename*=UTF-8''").append(encoded);
         }
         appendTo.append("; filename=\"").append(foo).append('"');
     }
