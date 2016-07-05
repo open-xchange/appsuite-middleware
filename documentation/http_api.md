@@ -1,5 +1,5 @@
 ---
 title: HTTP-API
-description: The Open-Xchange HTTP-API
+description:
 icon: fa-exchange
 ---

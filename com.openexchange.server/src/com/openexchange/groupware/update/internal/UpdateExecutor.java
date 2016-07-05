@@ -100,7 +100,7 @@ public final class UpdateExecutor {
      * @throws OXException If update fails
      */
     public void execute() throws OXException {
-        execute(null);
+        execute(null, false);
     }
 
     /**
@@ -109,27 +109,27 @@ public final class UpdateExecutor {
      * @param failures The optional failure queue for tracing
      * @throws OXException If update fails
      */
-    public void execute(final Queue<TaskInfo> failures) throws OXException {
+    public void execute(final Queue<TaskInfo> failures, boolean throwExceptionOnFailure) throws OXException {
         if (null != tasks) {
             separatedTasks = UpdateTaskCollection.getInstance().separateTasks(tasks);
             if (separatedTasks.getBlocking().size() > 0) {
-                runUpdates(true, failures);
+                runUpdates(true, failures, throwExceptionOnFailure);
             }
             if (separatedTasks.getBackground().size() > 0) {
-                runUpdates(false, failures);
+                runUpdates(false, failures, throwExceptionOnFailure);
             }
         } else {
             final SeparatedTasks forCheck = UpdateTaskCollection.getInstance().getFilteredAndSeparatedTasks(state);
             if (forCheck.getBlocking().size() > 0) {
-                runUpdates(true, failures);
+                runUpdates(true, failures, throwExceptionOnFailure);
             }
             if (forCheck.getBackground().size() > 0) {
-                runUpdates(false, failures);
+                runUpdates(false, failures, throwExceptionOnFailure);
             }
         }
     }
 
-    private void runUpdates(final boolean blocking, final Queue<TaskInfo> failures) throws OXException {
+    private void runUpdates(final boolean blocking, final Queue<TaskInfo> failures, boolean throwExceptionOnFailure) throws OXException {
         LOG.info("Starting {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
         try {
             lockSchema(blocking);
@@ -176,6 +176,9 @@ public final class UpdateExecutor {
                 if (success) {
                     LOG.info("Update task {} on schema {} done.", taskName, state.getSchema());
                 } else {
+                    if (throwExceptionOnFailure) {
+                        throw SchemaExceptionCodes.TASK_FAILED.create(taskName, state.getSchema());
+                    }
                     if (null != failures) {
                         failures.offer(new TaskInfo(taskName, state.getSchema()));
                     }

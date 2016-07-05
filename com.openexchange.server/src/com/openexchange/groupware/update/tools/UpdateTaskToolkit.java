@@ -60,6 +60,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
@@ -69,6 +72,9 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -78,7 +84,9 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class UpdateTaskToolkit {
 
-    private static final Object LOCK = new Object();
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskToolkit.class);
+
+    static final Object LOCK = new Object();
 
     /**
      * Initializes a new {@link UpdateTaskToolkit}.
@@ -147,20 +155,78 @@ public final class UpdateTaskToolkit {
         }
     }
 
-    public static void runUpdateOnAllSchemas() throws OXException {
-        synchronized (LOCK) {
-            // Get all available schemas
-            final Map<String, Set<Integer>> map = getSchemasAndContexts();
-            // ... and iterate them
-            final Iterator<Set<Integer>> iter = map.values().iterator();
-            while (iter.hasNext()) {
-                final Set<Integer> set = iter.next();
-                if (!set.isEmpty()) {
-                    final int contextId = set.iterator().next().intValue();
-                    new UpdateProcess(contextId).run();
+    /**
+     * Runs the update process on all available schemas
+     *
+     * @param jobId The job identifier to use
+     * @param throwExceptionOnFailure Whether a possible exception is supposed to abort process
+     * @return A status text reference
+     * @throws OXException If update process fails
+     */
+    public static JobInfo<Void, AtomicReference<String>> runUpdateOnAllSchemas(final String jobId, final boolean throwExceptionOnFailure, final StatusRemover remover) throws OXException {
+        // Get all available schemas
+        final Map<String, Set<Integer>> map = getSchemasAndContexts();
+        final int total = map.size();
+
+        // Status text
+        final AtomicReference<String> statusText = new AtomicReference<String>("Processed 0 of " + total + " schemas.");
+
+        // Task...
+        final CountDownLatch latch = new CountDownLatch(1);
+        AbstractTask<Void> task = new AbstractTask<Void>() {
+
+            @Override
+            public void setThreadName(ThreadRenamer threadRenamer) {
+                threadRenamer.renamePrefix("RunAllUpdate");
+            }
+
+            @Override
+            public Void call() throws Exception {
+                try {
+                    // Await permit
+                    latch.await();
+
+                    // Go ahead...
+                    synchronized (LOCK) {
+                        // Iterate schemas
+                        int count = 0;
+                        StringBuilder sb = new StringBuilder(32);
+                        for (Iterator<Set<Integer>> iter = map.values().iterator(); iter.hasNext();) {
+                            Set<Integer> set = iter.next();
+                            if (!set.isEmpty()) {
+                                int contextId = set.iterator().next().intValue();
+                                UpdateProcess updateProcess = new UpdateProcess(contextId, true, throwExceptionOnFailure);
+                                if (throwExceptionOnFailure) {
+                                    try {
+                                        updateProcess.runUpdate();
+                                    } catch (OXException e) {
+                                        LOG.error("", e);
+                                        statusText.set(e.getPlainLogMessage());
+                                        return null;
+                                    } catch (Exception e) {
+                                        LOG.error("", e);
+                                        statusText.set(e.getMessage());
+                                        return null;
+                                    }
+                                } else {
+                                    updateProcess.run();
+                                }
+                            }
+                            count++;
+                            sb.setLength(0);
+                            sb.append("Processed ").append(count).append(" of ").append(total).append(" schemas.");
+                            statusText.set(sb.toString());
+                        }
+                    }
+                    return null;
+                } finally {
+                    remover.removeStatusFor(jobId);
                 }
             }
-        }
+        };
+
+        // Submit & return
+        return new JobInfo<Void, AtomicReference<String>>(jobId, ThreadPools.getThreadPool().submit(task), statusText, latch);
     }
 
     private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema,cid FROM context_server2db_pool";

@@ -55,6 +55,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -78,6 +82,7 @@ import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * MBean for update task toolkit.
@@ -85,19 +90,28 @@ import com.openexchange.groupware.update.internal.UpdateProcess;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class UpdateTaskMBean implements DynamicMBean {
+public final class UpdateTaskMBean implements DynamicMBean, StatusRemover {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskMBean.class);
 
     private final MBeanInfo mbeanInfo;
 
     private final String[] taskTypeNames = { "taskName", "successful", "lastModified" };
+    private final ConcurrentMap<String, AtomicReference<String>> statuses;
     private CompositeType taskType;
     private TabularType taskListType;
 
     public UpdateTaskMBean() {
         super();
         mbeanInfo = buildMBeanInfo();
+        statuses = new ConcurrentHashMap<String, AtomicReference<String>>(10, 0.9F, 1);
+    }
+
+    @Override
+    public void removeStatusFor(String id) {
+        if (null != id) {
+            statuses.remove(id);
+        }
     }
 
     private MBeanInfo buildMBeanInfo() {
@@ -156,6 +170,12 @@ public final class UpdateTaskMBean implements DynamicMBean {
         } catch (final OpenDataException e) {
             LOG.error("", e);
         }
+        // Get status text
+        final MBeanParameterInfo[] sparams = { new MBeanParameterInfo(
+            "id",
+            "java.lang.String",
+            "A valid job identifier") };
+        operations.add(new MBeanOperationInfo("getStatus", "Gets the status text for a given job identifier.", tparams, "void", MBeanOperationInfo.ACTION));
         // MBean info
         return new MBeanInfo(UpdateTaskMBean.class.getName(), "Update task toolkit", null, null, operations.toArray(new MBeanOperationInfo[operations.size()]), null);
     }
@@ -189,7 +209,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                         final String sParam = param.toString();
                         final int parsed = parsePositiveInt(sParam);
 
-                        updateProcess = parsed >= 0 ? new UpdateProcess(parsed, true) : new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString()), true);
+                        updateProcess = parsed >= 0 ? new UpdateProcess(parsed, true, false) : new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString()), true, false);
                     }
                 }
 
@@ -213,7 +233,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 }
             } catch (final OXException e) {
                 LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
+                final Exception wrapMe = new Exception(e.getPlainLogMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
@@ -226,10 +246,24 @@ public final class UpdateTaskMBean implements DynamicMBean {
             return null;
         } else if (actionName.equals("runAllUpdate")) {
             try {
-                UpdateTaskToolkit.runUpdateOnAllSchemas();
+                boolean throwExceptionOnFailure;
+                {
+                    Object param = params[0];
+                    if (param instanceof Boolean) {
+                        throwExceptionOnFailure = ((Boolean) param).booleanValue();
+                    } else {
+                        throwExceptionOnFailure = Boolean.parseBoolean(param.toString());
+                    }
+                }
+
+                String jobId = UUIDs.getUnformattedString(UUID.randomUUID());
+                JobInfo<Void, AtomicReference<String>> jobInfo = UpdateTaskToolkit.runUpdateOnAllSchemas(jobId, throwExceptionOnFailure, this);
+                statuses.put(jobId, jobInfo.getInfo());
+                jobInfo.start();
+                return jobId;
             } catch (final OXException e) {
                 LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
+                final Exception wrapMe = new Exception(e.getPlainLogMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
@@ -238,8 +272,6 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error("", e);
                 throw e;
             }
-            // Void
-            return null;
         } else if (actionName.equals("force")) {
             try {
                 final Object secParam = params[1];
@@ -256,7 +288,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 }
             } catch (final OXException e) {
                 LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
+                final Exception wrapMe = new Exception(e.getPlainLogMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
@@ -272,7 +304,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 UpdateTaskToolkit.forceUpdateTaskOnAllSchemas(((String) params[0]));
             } catch (final OXException e) {
                 LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
+                final Exception wrapMe = new Exception(e.getPlainLogMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
@@ -288,7 +320,19 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 return getExecutedTasksList(params[0].toString());
             } catch (final OXException e) {
                 LOG.error("", e);
-                throw new MBeanException(new Exception(e.getMessage()), e.getMessage());
+                String message = e.getPlainLogMessage();
+                throw new MBeanException(new Exception(message), message);
+            } catch (final RuntimeException e) {
+                LOG.error("", e);
+                throw e;
+            } catch (final Error e) {
+                LOG.error("", e);
+                throw e;
+            }
+        } else if (actionName.equals("getStatus")) {
+            try {
+                AtomicReference<String> stText = statuses.get(params[0].toString());
+                return null == stText ? null : stText.get();
             } catch (final RuntimeException e) {
                 LOG.error("", e);
                 throw e;

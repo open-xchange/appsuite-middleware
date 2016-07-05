@@ -19,7 +19,7 @@ That special SLF4J logger can be operated in two different modes:
 
 ## Standard mode
 
-In standard mode the logger uses the regular Open-Xchange Server logback configuration. Then the logger outputs its log messages in the same way and to the same localtion as configured for Open-Xchange Server through ``logback.xml`` configuration file.
+In standard mode the logger uses the regular Open-Xchange Server logback configuration. Then the logger outputs its log messages in the same way and to the same location as configured for Open-Xchange Server through ``logback.xml`` configuration file.
 
 ## Dedicated mode
 
@@ -73,6 +73,6 @@ If set to a non-empty file location/pattern, dedicated log files are created. Ex
 
 These properties defines how many files are created, what its max. size is and what layout pattern is used for a log line:
 
- - ``com.openexchange.log.audit.slf4j.file.size`` specifies the max. file size in bytes (default is ``2097152``). If exeeced, the files are rotated.
+ - ``com.openexchange.log.audit.slf4j.file.size`` specifies the max. file size in bytes (default is ``2097152``). If exceeded, the files are rotated.
  - ``com.openexchange.log.audit.slf4j.file.count`` sets how many files are created when rotating files (default is ``99``).
- - ``com.openexchange.log.audit.slf4j.file.pattern`` specifies the layout for a log line. Default is ``"%sanitisedMessage%n"``, which simply outputs the log message (sanitised from all ESC sequences) and a line-break. However, the layout string may contain extended information according to [logback pattern layout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout)
+ - ``com.openexchange.log.audit.slf4j.file.pattern`` specifies the layout for a log line. Default is ``"%sanitisedMessage%n"``, which simply outputs the log message (sanitized from all ESC sequences) and a line-break. However, the layout string may contain extended information according to [logback pattern layout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout)

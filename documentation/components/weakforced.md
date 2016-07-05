@@ -52,7 +52,7 @@ A successful authentication attempt is `report`ed back to Weakforced service by 
 A failed authentication attempt is `report`ed back to Weakforced service by providing login, password-hash, remote address (either host name or IP address) and client identifier in order to be tracked for subsequent validations of login attempts from the same client/user.
 
 # Installation
-Deploying the OXWF simply requires to install the `open-xchange-weakforced` package. Once istalled the associated login listener gets registered and receives the mentioned call-backs during login requests.
+Deploying the OXWF simply requires to install the `open-xchange-weakforced` package. Once installed the associated login listener gets registered and receives the mentioned call-backs during login requests.
 
 # Configuration
 After the package is deployed, an administrator is able to configure the OXWF through `/opt/open-xchange/etc/weakforced.properties` file.
