@@ -68,7 +68,8 @@ import com.openexchange.file.storage.FileStorageCapability;
  */
 public final class FilestorageAccountTest extends AbstractAJAXSession {
 
-    private static final String[] POSSIBLE_CAPABILITIES = new String[] { FileStorageCapability.FILE_VERSIONS.name(), FileStorageCapability.EXTENDED_METADATA.name(), FileStorageCapability.RANDOM_FILE_ACCESS.name(), FileStorageCapability.LOCKS.name() };
+    private static final String[] POSSIBLE_CAPABILITIES = new String[] { FileStorageCapability.FILE_VERSIONS.name(), FileStorageCapability.EXTENDED_METADATA.name(), FileStorageCapability.RANDOM_FILE_ACCESS.name(),
+        FileStorageCapability.LOCKS.name(), FileStorageCapability.AUTO_NEW_VERSION.name(), FileStorageCapability.ZIPPABLE_FOLDER.name() };
 
     /**
      * Initializes a new {@link FilestorageAccountTest}.
