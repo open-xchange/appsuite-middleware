@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-04 10:34+0000\n"
-"PO-Revision-Date: 2016-07-04 09:35+0000\n"
+"PO-Revision-Date: 2016-07-04 18:36+0000\n"
 "Last-Translator: hv@webhuset.no <hv@webhuset.no>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nb_NO\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1467624932.000000\n"
+"X-POOTLE-MTIME: 1467657418.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -2980,7 +2980,7 @@ msgstr ""
 #. The default message displayed to user when processing was intentionally denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:72
 msgid "The server is refusing to process the request."
-msgstr ""
+msgstr "Tjeneren nektet å prosessere forespørselen."
 
 #. The general message for a conflicting update operation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
@@ -7826,7 +7826,7 @@ msgstr ""
 #. Thrown to indicate that currently uploaded file is not accepted for being saved due to illegal and/or harmful content
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:105
 msgid "Upload file is invalid or illegal."
-msgstr ""
+msgstr "Den opplastede filen er ugyldig eller ulovlig."
 
 #. Request rejected because its size exceeds the maximum configured size of %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:108
