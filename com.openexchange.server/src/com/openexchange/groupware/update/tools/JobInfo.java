@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,50 +47,86 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.tools;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
- * {@link TaskInfo} - Task information.
+ * {@link JobInfo}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.0
+ * @since v7.8.2
  */
-public final class TaskInfo implements Comparable<TaskInfo> {
+public class JobInfo<V, I> implements Future<V> {
 
-    private final String taskName;
-    private final String schema;
+    private final String jobId;
+    private final CountDownLatch latch;
+    private final Future<V> future;
+    private final I info;
 
     /**
-     * Initializes a new {@link TaskInfo}.
+     * Initializes a new {@link JobInfo}.
      */
-    public TaskInfo(final String taskName, final String schema) {
+    public JobInfo(String jobId, Future<V> future, I info, CountDownLatch latch) {
         super();
-        this.taskName = taskName;
-        this.schema = schema;
+        this.jobId = jobId;
+        this.future = future;
+        this.info = info;
+        this.latch = latch;
     }
 
     /**
-     * Gets the task name
+     * Gets the job identifier
      *
-     * @return The task name
+     * @return The identifier
      */
-    public String getTaskName() {
-        return taskName;
+    public String getJobId() {
+        return jobId;
     }
 
     /**
-     * Gets the schema
+     * Gets the info
      *
-     * @return The schema
+     * @return The info
      */
-    public String getSchema() {
-        return schema;
+    public I getInfo() {
+        return info;
     }
 
     @Override
-    public int compareTo(TaskInfo o) {
-        int res = schema.compareTo(o.schema);
-        return 0 == res ? taskName.compareTo(o.taskName) : res;
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return future.cancel(mayInterruptIfRunning);
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return future.isCancelled();
+    }
+
+    @Override
+    public boolean isDone() {
+        return future.isDone();
+    }
+
+    @Override
+    public V get() throws InterruptedException, ExecutionException {
+        return future.get();
+    }
+
+    @Override
+    public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        return future.get(timeout, unit);
+    }
+
+    /**
+     * Signals to start processing for the associated job
+     */
+    public void start() {
+        latch.countDown();
     }
 
 }

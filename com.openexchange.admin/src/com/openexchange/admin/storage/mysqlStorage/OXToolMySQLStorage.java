@@ -58,9 +58,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1726,6 +1728,86 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException {
         return condCheckAndUpdateSchemaIfRequired(writePoolId, schema, false, null);
+    }
+
+    @Override
+    public List<Database> listSchemasNeedingUpdate() throws StorageException {
+        List<Database> databases;
+        {
+            Connection con = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                con = cache.getReadConnectionForConfigDB();
+
+                // Get server identifier
+                int serverId = cache.getServerId();
+
+                // Perform SQL query
+                stmt = con.prepareStatement("SELECT DISTINCT c2db.write_db_pool_id,c2db.db_schema,db.url,db.driver,db.login,db.password,db.name,dbc.read_db_pool_id,dbc.weight,dbc.max_units FROM context_server2db_pool c2db JOIN db_pool db ON db.db_pool_id=c2db.write_db_pool_id JOIN db_cluster dbc ON dbc.write_db_pool_id=c2db.write_db_pool_id WHERE server_id=?");
+                stmt.setInt(1, serverId);
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return Collections.emptyList();
+                }
+
+                databases = new LinkedList<Database>();
+                int pos;
+                do {
+                    pos = 1;
+                    Database db = new Database();
+                    db.setId(I(rs.getInt(pos++)));
+                    String schema = rs.getString(pos++);
+                    db.setUrl(rs.getString(pos++));
+                    db.setDriver(rs.getString(pos++));
+                    db.setLogin(rs.getString(pos++));
+                    db.setPassword(rs.getString(pos++));
+                    db.setName(rs.getString(pos++));
+                    final int slaveId = rs.getInt(pos++);
+                    if (slaveId > 0) {
+                        db.setRead_id(I(slaveId));
+                    }
+                    db.setClusterWeight(I(rs.getInt(pos++)));
+                    db.setMaxUnits(I(rs.getInt(pos++)));
+                    db.setScheme(schema);
+                    databases.add(db);
+                } while (rs.next());
+            } catch (PoolException e) {
+                throw new StorageException(e.getMessage(), e);
+            } catch (SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            } finally {
+                closeSQLStuff(rs, stmt);
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
+
+        try {
+            Updater updater = Updater.getInstance();
+            for (Iterator<Database> it = databases.iterator(); it.hasNext();) {
+                Database database = it.next();
+
+                UpdateStatus status = updater.getStatus(database.getScheme(), database.getId().intValue());
+                if (status.blockingUpdatesRunning() || !status.needsBlockingUpdates()) {
+                    // Either currently updating or already up-to-date
+                    it.remove();
+                }
+            }
+        } catch (OXException e) {
+            if (e.getCode() == 102) {
+                // NOTE: this situation should not happen!
+                // it can only happen, when a schema has not been initialized correctly!
+                log.debug("FATAL: this error must not happen", e);
+            }
+            log.error("Error in checking/updating schema", e);
+            throw new StorageException(e.toString(), e);
+        }
+
+        return databases;
     }
 
     /**

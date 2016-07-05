@@ -92,7 +92,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Creates a new instance implementing the group storage interface.
-     * 
+     *
      * @return an instance implementing the group storage interface.
      */
     public static OXToolStorageInterface getInstance() {
@@ -111,7 +111,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks if given domain is used as mail address of any group in given context.
-     * 
+     *
      * @param domain
      * @return Groups which use this domain.null if no group uses this domain.
      * @throws StorageException
@@ -120,7 +120,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks if given domain is used as mail address of any resource in given context.
-     * 
+     *
      * @param domain
      * @return Resources which use this domain. null if no resource uses this domain.
      * @throws StorageException
@@ -129,7 +129,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks if given domain is used as alias or primary mail address of any user in given context.
-     * 
+     *
      * @param domain
      * @return Users which use this domain. null if no user uses this domain.
      * @throws StorageException
@@ -160,7 +160,7 @@ public abstract class OXToolStorageInterface {
     /**
      * This method can be used to check if some group exists in a context. The connection is given to be able to check for groups that are
      * not committed yet.
-     * 
+     *
      * @param ctx Context.
      * @param con readable database connection.
      * @param id unique identifier of the group.
@@ -316,7 +316,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks via resource id and resource name if it already exists. Should be used in change method!
-     * 
+     *
      * @param ctx The context
      * @param res
      * @return
@@ -326,7 +326,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks if given name is already used for resource in given context!Should be used in create method!
-     * 
+     *
      * @param ctx The context
      * @param resourceName
      * @return
@@ -386,7 +386,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Load database information with the given identifier.
-     * 
+     *
      * @param id the identifier of the database. It must be the identifier of the master.
      * @return the database information with the given identifier.
      * @throws StorageException if the database with the given identifier does not exist or a problem occurs when loading it.
@@ -468,6 +468,14 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException;
 
+    /**
+     * Lists all schemas in databases that need an update.
+     *
+     * @return All schema that need an update
+     * @throws StorageException If such schemas cannot be returned
+     */
+    public abstract List<Database> listSchemasNeedingUpdate() throws StorageException;
+
     public abstract boolean serverInUse(final int server_id) throws StorageException;
 
     public abstract void setUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
@@ -494,7 +502,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Verifies whether the specified user is the owner of a master filestore and other users are using this filestore
-     * 
+     *
      * @param context The context
      * @param userId The user identifier
      * @return true if the user is a master filestore owner AND other users are using this filestore; false otherwise
@@ -504,7 +512,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Fetches the slave users of the master filestore
-     * 
+     *
      * @param context
      * @param userId
      * @return
@@ -514,7 +522,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Determines whether the specified context is the last one on the database schema
-     * 
+     *
      * @param context The context
      * @return true if the specified context is the last one on the database schema; false otherwise
      * @throws StorageException if a problem occurs on the storage layer.
