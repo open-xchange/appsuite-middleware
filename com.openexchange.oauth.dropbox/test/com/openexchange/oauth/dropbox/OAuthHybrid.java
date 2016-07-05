@@ -51,23 +51,19 @@ package com.openexchange.oauth.dropbox;
 
 import java.io.IOException;
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.DropboxAPI.Account;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.RequestTokenPair;
-import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.WebAuthSession;
+import com.dropbox.client2.session.Session.AccessType;
 
 /**
- * {@link OAuth} tests the OAuth 1.0 authorisation workflow
+ * {@link OAuthHybrid}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuth {
+public class OAuthHybrid {
 
-    /**
-     * Simple OAuth 1.0 test
-     */
     public static void main(String[] args) throws DropboxException, IOException {
         if (args.length == 0) {
             System.err.println("You must specify the API key and API secret");
@@ -77,60 +73,15 @@ public class OAuth {
         String apiSecret = args[1];
 
         OAuth oauth = new OAuth(apiKey, apiSecret);
-        oauth.authorise();
-    }
-
-    private String apiKey;
-    private String apiSecret;
-
-    /**
-     * Initialises a new {@link OAuth}.
-     * 
-     * @param apiKey
-     * @param apiSecret
-     */
-    public OAuth(String apiKey, String apiSecret) {
-        this.apiKey = apiKey;
-        this.apiSecret = apiSecret;
-    }
-
-    /**
-     * Perform OAuth 1.0
-     * 
-     * @throws DropboxException if a Dropbox error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    public OAuthToken authorise() throws DropboxException, IOException {
-        // Use the API key and secret to get an authorisation URL
-        DropboxAPI<WebAuthSession> dropboxAPI = getAPI(apiKey, apiSecret, AccessType.DROPBOX);
-        String authURL = dropboxAPI.getSession().getAuthInfo().url;
-        System.err.println("\n ** EXECUTE in browser and ACCEPT, then press any key to continue... ** \n\n" + authURL);
-
-        // Waiting for user input
-        System.in.read();
-
-        // Once accepted, complete OAuth inititialisation by retrieving the user specific key/secret token pair
-        AccessTokenPair tokenPair = dropboxAPI.getSession().getAccessTokenPair();
-        RequestTokenPair tokens = new RequestTokenPair(tokenPair.key, tokenPair.secret);
-        dropboxAPI.getSession().retrieveWebAccessToken(tokens);
+        OAuthToken oauthToken = oauth.authorise();
         
-        String tokenKey = dropboxAPI.getSession().getAccessTokenPair().key;
-        String tokenSecret = dropboxAPI.getSession().getAccessTokenPair().secret;
+        // Re-authorise with the user specific token pair to gain access
+        DropboxAPI<WebAuthSession> newDropboxAPI = oauth.getAPI(apiKey, apiSecret, AccessType.APP_FOLDER);
+        AccessTokenPair accessTokenPair = new AccessTokenPair(oauthToken.getKey(), oauthToken.getSecret());
+        newDropboxAPI.getSession().setAccessTokenPair(accessTokenPair);
 
-        return new OAuthToken(tokenKey, tokenSecret);
-    }
-
-    /**
-     * Create a {@link DropboxAPI} instance with the specified API key/secret and {@link AccessType}
-     * 
-     * @param key The API key
-     * @param secret The API secret
-     * @param accessType The {@link AccessType}
-     * @return The {@link DropboxAPI}
-     */
-    public DropboxAPI<WebAuthSession> getAPI(String key, String secret, AccessType accessType) {
-        AppKeyPair keyPair = new AppKeyPair(key, secret);
-        WebAuthSession session = new TrustAllWebAuthSession(keyPair, accessType);
-        return new DropboxAPI<WebAuthSession>(session);
+        // Retrieve the account information
+        Account accountInfo = newDropboxAPI.accountInfo();
+        System.out.println("Account initialised successfully: '" + accountInfo.displayName + "'");
     }
 }
