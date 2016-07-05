@@ -322,4 +322,9 @@ public class IMAPCapabilities extends MailCapabilities {
         return hasFileNameSearch;
     }
 
+    @Override
+    public boolean hasFolderValidity() {
+        return true;
+    }
+
 }
