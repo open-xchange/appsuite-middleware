@@ -53,12 +53,13 @@ import static com.openexchange.groupware.update.tools.Utility.parsePositiveInt;
 import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.TimeUnit;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -83,6 +84,10 @@ import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.CanceledTimerTaskException;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * MBean for update task toolkit.
@@ -90,28 +95,102 @@ import com.openexchange.java.util.UUIDs;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class UpdateTaskMBean implements DynamicMBean, StatusRemover {
+public final class UpdateTaskMBean implements DynamicMBean {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskMBean.class);
 
     private final MBeanInfo mbeanInfo;
 
     private final String[] taskTypeNames = { "taskName", "successful", "lastModified" };
-    private final ConcurrentMap<String, AtomicReference<String>> statuses;
+    private final ConcurrentMap<String, JobInfo<?>> jobs;
     private CompositeType taskType;
     private TabularType taskListType;
+    private ScheduledTimerTask timerTask; // Guarded by synchronized
 
+    /**
+     * Initializes a new {@link UpdateTaskMBean}.
+     */
     public UpdateTaskMBean() {
         super();
         mbeanInfo = buildMBeanInfo();
-        statuses = new ConcurrentHashMap<String, AtomicReference<String>>(10, 0.9F, 1);
+        jobs = new ConcurrentHashMap<String, JobInfo<?>>(10, 0.9F, 1);
     }
 
-    @Override
-    public void removeStatusFor(String id) {
-        if (null != id) {
-            statuses.remove(id);
+    private void addJobInfo(String jobId, JobInfo<Void> jobInfo) {
+        synchronized (this) {
+            jobs.put(jobId, jobInfo);
+
+            if (null == timerTask) {
+                TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                if (null != timerService) {
+                    Runnable task = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            cleanUp();
+                        }
+                    };
+                    timerTask = timerService.scheduleWithFixedDelay(task, 5L, 5L, TimeUnit.MINUTES);
+                }
+            }
+
+            jobInfo.start();
         }
+    }
+
+    private String getJobStatusText(final Object[] params) {
+        String key = params[0].toString();
+        JobInfo<?> jobInfo = jobs.get(key);
+        if (null == jobInfo) {
+            return null;
+        }
+
+        String stText = jobInfo.getStatusText();
+        if (jobInfo.isDone()) {
+            if (null != jobs.remove(key)) {
+                synchronized (this) {
+                    dropTimerTaskIfEmpty();
+                }
+            }
+            return "NOK:" + stText;
+        }
+
+        return "OK:" + stText;
+    }
+
+    /**
+     * Cleans-up the job collection.
+     *
+     * @throws CanceledTimerTaskException If timer task is supposed to be terminated
+     */
+    void cleanUp() {
+        synchronized (this) {
+            boolean somethingRemoved = false;
+            for (Iterator<JobInfo<?>> it = jobs.values().iterator(); it.hasNext();) {
+                JobInfo<?> jobInfo = it.next();
+                if (null == jobInfo || jobInfo.isDone()) {
+                    it.remove();
+                    somethingRemoved = true;
+                }
+            }
+            if (somethingRemoved && dropTimerTaskIfEmpty()) {
+                throw new CanceledTimerTaskException();
+            }
+        }
+    }
+
+    private boolean dropTimerTaskIfEmpty() {
+        if (null == timerTask || !jobs.isEmpty()) {
+            return false;
+        }
+
+        timerTask.cancel();
+        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+        if (null != timerService) {
+            timerService.purge();
+        }
+        timerTask = null;
+        return true;
     }
 
     private MBeanInfo buildMBeanInfo() {
@@ -257,9 +336,8 @@ public final class UpdateTaskMBean implements DynamicMBean, StatusRemover {
                 }
 
                 String jobId = UUIDs.getUnformattedString(UUID.randomUUID());
-                JobInfo<Void, AtomicReference<String>> jobInfo = UpdateTaskToolkit.runUpdateOnAllSchemas(jobId, throwExceptionOnFailure, this);
-                statuses.put(jobId, jobInfo.getInfo());
-                jobInfo.start();
+                JobInfo<Void> jobInfo = UpdateTaskToolkit.runUpdateOnAllSchemas(jobId, throwExceptionOnFailure);
+                addJobInfo(jobId, jobInfo);
                 return jobId;
             } catch (final OXException e) {
                 LOG.error("", e);
@@ -331,8 +409,7 @@ public final class UpdateTaskMBean implements DynamicMBean, StatusRemover {
             }
         } else if (actionName.equals("getStatus")) {
             try {
-                AtomicReference<String> stText = statuses.get(params[0].toString());
-                return null == stText ? null : stText.get();
+                return getJobStatusText(params);
             } catch (final RuntimeException e) {
                 LOG.error("", e);
                 throw e;

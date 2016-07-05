@@ -47,21 +47,52 @@
  *
  */
 
-package com.openexchange.groupware.update.tools;
-
+package com.openexchange.timer;
 
 /**
- * {@link StatusRemover}
+ * {@link CanceledTimerTaskException} - A special runtime exception suitable to be thrown from within execution of a timer service to let
+ * it terminate itself.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface StatusRemover {
+public class CanceledTimerTaskException extends RuntimeException {
+
+    private static final long serialVersionUID = -7214265124137166983L;
 
     /**
-     * Removes the status for specified identifier
-     *
-     * @param id The identifier
+     * Initializes a new {@link CanceledTimerTaskException}.
      */
-    void removeStatusFor(String id);
+    public CanceledTimerTaskException() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link CanceledTimerTaskException}.
+     *
+     * @param message The detail message
+     */
+    public CanceledTimerTaskException(String message) {
+        super(message);
+    }
+
+    /**
+     * Initializes a new {@link CanceledTimerTaskException}.
+     *
+     * @param cause The cause
+     */
+    public CanceledTimerTaskException(Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Initializes a new {@link CanceledTimerTaskException}.
+     *
+     * @param message The detail message
+     * @param cause The cause
+     */
+    public CanceledTimerTaskException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

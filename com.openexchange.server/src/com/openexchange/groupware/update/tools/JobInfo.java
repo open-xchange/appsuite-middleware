@@ -54,6 +54,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.groupware.tasks.mapping.Status;
 
 /**
  * {@link JobInfo}
@@ -61,17 +63,17 @@ import java.util.concurrent.TimeoutException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class JobInfo<V, I> implements Future<V> {
+public class JobInfo<V> implements Future<V> {
 
     private final String jobId;
     private final CountDownLatch latch;
     private final Future<V> future;
-    private final I info;
+    private final AtomicReference<String> info;
 
     /**
      * Initializes a new {@link JobInfo}.
      */
-    public JobInfo(String jobId, Future<V> future, I info, CountDownLatch latch) {
+    public JobInfo(String jobId, Future<V> future, AtomicReference<String> info, CountDownLatch latch) {
         super();
         this.jobId = jobId;
         this.future = future;
@@ -89,12 +91,12 @@ public class JobInfo<V, I> implements Future<V> {
     }
 
     /**
-     * Gets the info
+     * Gets the status text
      *
-     * @return The info
+     * @return The {@link Status} text
      */
-    public I getInfo() {
-        return info;
+    public String getStatusText() {
+        return info.get();
     }
 
     @Override
