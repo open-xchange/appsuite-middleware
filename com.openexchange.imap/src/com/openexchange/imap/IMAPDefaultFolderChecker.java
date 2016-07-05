@@ -591,7 +591,8 @@ public class IMAPDefaultFolderChecker {
         DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
         String[] fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(imapConfig, isSpamOptionEnabled);
         String[] names = Arrays.copyOfRange(imapConfig.getStandardNames(), 0, isSpamOptionEnabled ? 6 : 4);
-        String[] defaultNames = defaultFolderNamesProvider.getDefaultFolderNames(imapConfig, isSpamOptionEnabled);
+        UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
+        String[] defaultNames = defaultFolderNamesProvider.getDefaultFolderNames(usm.getStdTrashName(), usm.getStdSentName(), usm.getStdDraftsName(), usm.getStdSpamName(), usm.getConfirmedSpam(), usm.getConfirmedHam(), isSpamOptionEnabled);
         SpamHandler spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
 
         // Collect SPECIAL-USE information
