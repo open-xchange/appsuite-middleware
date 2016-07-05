@@ -154,6 +154,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_UPDATES = "updates";
 
     public static final String ACTION_DELETE = "delete";
+    
+    public static final String ACTION_EXAMINE = "examine";
 
     public static final String ACTION_CONFIRM = "confirm";
 
