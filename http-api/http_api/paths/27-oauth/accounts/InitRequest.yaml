@@ -20,6 +20,6 @@
       200:
         description: |
           A JSON object containing the resulting interaction providing information to complete account creation.
-          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/OAuthAccountInteractionResponse"

@@ -34,6 +34,6 @@
           by arrays. The elements of each array contain the information specified by the corresponding
           identifiers in the `columns` parameter. Deleted folders (should the ignore parameter be ever implemented)
           would be identified by their object IDs as plain strings, without being part of a nested array. In case
-          of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/FolderUpdatesResponse"

@@ -34,6 +34,6 @@
       200:
         description: |
           A JSON object containing the message headers as plain text. In case of errors the responsible fields in the
-          response are filled (see [Error handling](#error-handling)).
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MailHeadersResponse"
