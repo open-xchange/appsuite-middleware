@@ -47,39 +47,76 @@
  *
  */
 
-package com.openexchange.oauth.dropbox.osgi;
+package com.openexchange.oauth.dropbox;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.dropbox.DropboxOAuth2ServiceMetaData;
-import com.openexchange.oauth.dropbox.DropboxOAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import java.util.Collection;
+import java.util.Collections;
+import org.scribe.builder.api.Api;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link DropboxOAuthActivator}
+ * {@link DropboxOAuth2ServiceMetaData}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DropboxOAuthActivator extends HousekeepingActivator {
+public class DropboxOAuth2ServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
-    public DropboxOAuthActivator() {
-        super();
+    /**
+     * Initialises a new {@link DropboxOAuth2ServiceMetaData}.
+     */
+    public DropboxOAuth2ServiceMetaData(ServiceLookup serviceLookup) {
+        super(serviceLookup, "com.openexchange.oauth.dropbox", "Dropbox");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.ScribeAware#getScribeService()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class };
+    public Class<? extends Api> getScribeService() {
+        return DropboxApi2.class;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthServiceMetaData#getAPI()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        //DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(this);
-        DropboxOAuth2ServiceMetaData service = new DropboxOAuth2ServiceMetaData(this);
-        registerService(OAuthServiceMetaData.class, service);
-        registerService(Reloadable.class, service);
+    public API getAPI() {
+        return API.DROPBOX;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getPropertyId()
+     */
+    @Override
+    protected String getPropertyId() {
+        return "dropbox";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#needsRequestToken()
+     */
+    @Override
+    public boolean needsRequestToken() {
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getExtraPropertyNames()
+     */
+    @Override
+    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
+        return Collections.singletonList(OAuthPropertyID.redirectUrl);
+    }
 }

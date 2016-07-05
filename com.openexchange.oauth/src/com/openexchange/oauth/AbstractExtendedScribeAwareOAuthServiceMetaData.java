@@ -58,6 +58,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
@@ -126,7 +127,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         }
 
         // Request a refresh token, too
-        authUrlBuilder.append("&access_type=offline");
+        authUrlBuilder.append("&access_type=offline"); //TODO: parametrise via OAuthConfig
 
         // Append state parameter used for later look-up in "CallbackRegistry" class
         return authUrlBuilder.append("&state=").append("__ox").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
@@ -204,7 +205,11 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
     }
 
     protected String trimRedirectUri(String redirectUri) {
-        String actual = getOAuthProperty(OAuthPropertyID.redirectUrl).getValue();
+        OAuthConfigurationProperty oAuthProperty = getOAuthProperty(OAuthPropertyID.redirectUrl);
+        if (oAuthProperty == null) {
+            return redirectUri;
+        }
+        String actual = oAuthProperty.getValue();
         if (!stripProtocol(redirectUri).startsWith(stripProtocol(actual))) {
             return redirectUri;
         }

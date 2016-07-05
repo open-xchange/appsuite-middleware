@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.oauth.dropbox
 Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
+Import-Package: com.fasterxml.jackson.core;version="2.6.2",
+ com.openexchange.config,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.log,
@@ -13,6 +15,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.sessiond.impl,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
