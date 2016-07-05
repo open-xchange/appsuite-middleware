@@ -1339,7 +1339,7 @@ ox_add_property com.openexchange.mail.mailStartTls false /opt/open-xchange/etc/m
 ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/etc/mail.properties
 
 # SoftwareChange_Request-3350
-sed -ie '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
 
 # SoftwareChange_Request-3355
 oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
