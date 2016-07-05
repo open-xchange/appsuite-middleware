@@ -24,6 +24,6 @@
         description: |
           A JSON object with the fields `tests` (containing an array of available test-objects, see [Possible tests](#possible-tests) too) and `actioncommands`
           (containing an array of [valid actions](#possible-action-commands)). In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MailFilterConfigResponse"
