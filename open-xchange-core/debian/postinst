@@ -1181,11 +1181,11 @@ ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/
 # SoftwareChange_Request-3350
 sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
 
-# SoftwareChange_Request-3355
+# SoftwareChange_Request-3355,3417
 oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
 if [[ ${oldlink} == *"[uiwebpath]#m=[module]&i=[object]&f=[folder]" ]]
 then
-  newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/tasks\&id=[object]\&folder=[folder];')
+  newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/[module]\&id=[object]\&folder=[folder];')
   ox_set_property object_link ${newlink} /opt/open-xchange/etc/notification.properties
 fi
 
