@@ -110,6 +110,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
     public String processAuthorizationURL(String authUrl) {
         StringBuilder authUrlBuilder = new StringBuilder();
         authUrlBuilder.append(super.processAuthorizationURL(authUrl));
-        return authUrlBuilder.append("&approval_prompt=force").toString();
+        // Request a refresh token, too
+        return authUrlBuilder.append("&approval_prompt=force").append("&access_type=offline").toString();
     }
 }
