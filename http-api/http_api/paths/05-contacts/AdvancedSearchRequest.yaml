@@ -35,7 +35,7 @@
       - in: body
         name: body
         description: |
-          A JSON object describing the search term as introducted in [Advanced search](#advanced-search). Example:
+          A JSON object describing the search term as introducted in [Advanced search](https://documentation.open-xchange.com/latest/middleware/http_api/5_advanced_search.html). Example:
           `{"filter":["and",["=", {"field":"last_name"},"Mustermann"],["=",{"field":"first_name"},"Max"]]}`
           which represents 'last_name = "Mustermann" AND first_name = "Max"'. Valid fields are the ones specified in [Contact data](#/definitions/ContactData) model.
         required: true

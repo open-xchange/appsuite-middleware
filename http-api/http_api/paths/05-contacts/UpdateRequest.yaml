@@ -44,7 +44,7 @@
     description: |
       Updates a contact's data and images. The normal request body must be placed as form-data using the
       content-type `multipart/form-data`. The form field `json` contains the contact's data while the image file
-      must be placed in a file field named `file` (see also [File uploads](#file-uploads)).
+      must be placed in a file field named `file` (see also [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)).
     consumes:
       - multipart/form-data
     produces:
@@ -77,6 +77,6 @@
     responses:
       200:
         description: |
-          A HTML page as described in [File uploads](#file-uploads) containing the object ID of the contact or errors if some occurred.
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing the object ID of the contact or errors if some occurred.
         schema:
           type: string

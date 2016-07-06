@@ -43,7 +43,7 @@
     responses:
       200:
         description: |
-          A HTML page containing the object ID of the newly created mail or in case of errors an error object (see [File uploads](#file-uploads) as an example).
+          A HTML page containing the object ID of the newly created mail or in case of errors an error object (see [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) as an example).
         schema:
           type: string
   put:
