@@ -93,7 +93,7 @@ public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implem
 	}
 
 	@Override
-	public void set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
+    public int set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
 		if (this.isSet(object)) {
 			final T value = this.get(object);
 			if (null != value) {
@@ -104,6 +104,7 @@ public abstract class DefaultDbMapping<T, O> extends DefaultMapping<T, O> implem
 		} else {
 			statement.setNull(parameterIndex, this.getSqlType());
 		}
+        return 1;
 	}
 
     @Override
