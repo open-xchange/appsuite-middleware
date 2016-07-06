@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.dropbox;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
@@ -117,6 +118,8 @@ public class DropboxOAuth2ServiceMetaData extends AbstractExtendedScribeAwareOAu
      */
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.singletonList(OAuthPropertyID.redirectUrl);
+        Collection<OAuthPropertyID> propertyNames = new ArrayList<OAuthPropertyID>(2);
+        Collections.addAll(propertyNames, OAuthPropertyID.redirectUrl, OAuthPropertyID.productName);
+        return propertyNames;
     }
 }
