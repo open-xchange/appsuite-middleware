@@ -54,6 +54,7 @@ import java.net.URLEncoder;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxServerException;
 import com.dropbox.client2.session.WebAuthSession;
+import com.dropbox.core.v2.DbxClientV2;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -74,7 +75,11 @@ public abstract class AbstractDropboxAccess {
     protected final DropboxOAuthAccess dropboxOAuthAccess;
     protected final Session session;
     protected final FileStorageAccount account;
+    /**
+     * @deprecated Use {@link #client} instead
+     */
     protected final DropboxAPI<WebAuthSession> dropboxAPI;
+    protected final DbxClientV2 client;
 
     /**
      * Initializes a new {@link AbstractDropboxAccess}.
@@ -86,6 +91,7 @@ public abstract class AbstractDropboxAccess {
         this.session = session;
         // Other fields
         this.dropboxAPI = dropboxOAuthAccess.getDropboxAPI();
+        this.client = dropboxOAuthAccess.getDropboxClient();
     }
 
     /**
