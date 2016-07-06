@@ -21,7 +21,7 @@
         required: true
       - in: body
         name: body
-        description: A JSON object containing the user's data. Only modified fields are present. From [Detailed user data](#detailed-user-data) only the fields `timezone` and `locale` are allowed to be updated.
+        description: A JSON object containing the user's data. Only modified fields are present. From [Detailed user data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-user-data) only the fields `timezone` and `locale` are allowed to be updated.
         required: true
         schema:
           $ref: "#/definitions/UserData"
