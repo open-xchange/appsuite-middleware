@@ -238,9 +238,11 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
         System.out.println(builder.toString());
         Object resultObject = mbsc.invoke(MBeanNamer.getName(), operationName, params.toArray(new Object[params.size()]), getSignatureOf(ConsistencyMBean.class, operationName));
 
-        if (action.equals(Action.check_configdb)) {
+        if (action.equals(Action.check_configdb) || action.equals(Action.repair_configdb)) {
             printList((List<String>) resultObject);
-            System.out.println("Now run 'checkconsistency' tool again with the 'repair_configdb' option to remove these inconsistent contexts from the 'configdb'.");
+            if (action.equals(Action.check_configdb)) {
+                System.out.println("Now run 'checkconsistency' tool again with the 'repair_configdb' option to remove these inconsistent contexts from the 'configdb'.");
+            }
         } else {
             printResult(resultObject);
         }
