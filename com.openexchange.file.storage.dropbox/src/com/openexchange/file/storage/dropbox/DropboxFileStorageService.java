@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.v1;
+package com.openexchange.file.storage.dropbox;
 
 import static com.openexchange.file.storage.SecretAwareFileStorageAccountManager.newInstanceFor;
 import java.io.Serializable;
@@ -72,10 +72,8 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.dropbox.DropboxConstants;
-import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.file.storage.dropbox.FormStrings;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
+import com.openexchange.file.storage.dropbox.v2.DropboxAccountAccess;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.session.Session;
 
