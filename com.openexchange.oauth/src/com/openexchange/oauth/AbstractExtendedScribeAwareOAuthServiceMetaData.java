@@ -144,9 +144,6 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
             }
         }
 
-        // Request a refresh token, too
-        authUrlBuilder.append("&access_type=offline"); //TODO: parametrise via OAuthConfig
-
         // Append state parameter used for later look-up in "CallbackRegistry" class
         return authUrlBuilder.append("&state=").append("__ox").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
     }
