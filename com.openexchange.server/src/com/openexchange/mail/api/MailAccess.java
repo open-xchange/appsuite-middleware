@@ -331,6 +331,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
+     * (Optionally) Gets the appropriate {@link IMailAccessCache mail access cache} instance.
+     *
+     * @return The mail access cache instance or <code>null</code> if not yet initialized
+     */
+    public static IMailAccessCache optMailAccessCache() {
+        return 1 == MAX_PER_USER ? SingletonMailAccessCache.optInstance() : EnqueueingMailAccessCache.optInstance();
+    }
+
+    /**
      * Gets the proper instance of <tt>MailAccess</tt> for session user's default mail account.
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.

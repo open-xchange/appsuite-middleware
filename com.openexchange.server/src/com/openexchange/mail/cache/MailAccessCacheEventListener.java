@@ -86,20 +86,16 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         final String topic = event.getTopic();
         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
             final @SuppressWarnings("unchecked") Map<String, Session> sessions = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-            IMailAccessCache mac;
-            try {
-                mac = MailAccess.getMailAccessCache();
-            } catch (final OXException e) {
-                LOG.error("Managed mail access cache could not be obtained.", e);
-                return;
-            }
-            for (final Session session : sessions.values()) {
-                if (!session.isTransient()) {
-                    try {
-                        mac.clearUserEntries(session);
-                        // AttachmentTokenRegistry.getInstance().dropFor(session);
-                    } catch (final OXException e) {
-                        LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
+            IMailAccessCache mac = MailAccess.optMailAccessCache();
+            if (null != mac) {
+                for (final Session session : sessions.values()) {
+                    if (!session.isTransient()) {
+                        try {
+                            mac.clearUserEntries(session);
+                            // AttachmentTokenRegistry.getInstance().dropFor(session);
+                        } catch (final OXException e) {
+                            LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
+                        }
                     }
                 }
             }
@@ -108,18 +104,14 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             if (session.isTransient()) {
                 return;
             }
-            IMailAccessCache mac;
-            try {
-                mac = MailAccess.getMailAccessCache();
-            } catch (final OXException e) {
-                LOG.error("Managed mail access cache could not be obtained.", e);
-                return;
-            }
-            try {
-                mac.clearUserEntries(session);
-                // AttachmentTokenRegistry.getInstance().dropFor(session);
-            } catch (final OXException e) {
-                LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
+            IMailAccessCache mac = MailAccess.optMailAccessCache();
+            if (null != mac) {
+                try {
+                    mac.clearUserEntries(session);
+                    // AttachmentTokenRegistry.getInstance().dropFor(session);
+                } catch (final OXException e) {
+                    LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
+                }
             }
         }
     }
