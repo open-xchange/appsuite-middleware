@@ -58,7 +58,6 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.ajax.AJAXUtility;
-import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
@@ -77,22 +76,36 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractExtendedScribeAwareOAuthServiceMetaData.class);
 
     /**
-     * Initializes a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
+     * Initialises a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
      * 
-     * @param services
-     * @param id
-     * @param displayName
+     * @param services The {@link ServiceLookup} instance
+     * @param id The service identifier
+     * @param displayName The display name
      */
     public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, String id, String displayName) {
         this(services, id, displayName, false, true);
     }
-    
+
+    /**
+     * Initialises a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
+     * 
+     * @param services The {@link ServiceLookup} instance
+     * @param id The service identifier
+     * @param displayName The display name
+     * @param needsRequestToken Whether it needs a request token
+     * @param registerTokenBasedDeferrer Whether to register the token based deferrer
+     */
     public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, String id, String displayName, boolean needsRequestToken, boolean registerTokenBasedDeferrer) {
         super(services, id, displayName);
         this.needsRequestToken = needsRequestToken;
         this.registerTokenBasedDeferrer = registerTokenBasedDeferrer;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#getRegisterToken(java.lang.String)
+     */
     @Override
     public String getRegisterToken(String authUrl) {
         int pos = authUrl.indexOf("&state=");
@@ -104,6 +117,11 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         return nextPos < 0 ? authUrl.substring(pos + 7) : authUrl.substring(pos + 7, nextPos);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#processAuthorizationURL(java.lang.String)
+     */
     @Override
     public String processAuthorizationURL(String authUrl) {
         int pos = authUrl.indexOf("&redirect_uri=");
@@ -112,7 +130,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         }
 
         // Trim redirect URI to have an exact match to deferrer servlet path,
-        // which should be the one defined as "Redirect URL" in Box.com app account
+        // which should be the one defined as "Redirect URL" in the relevant app account
         StringBuilder authUrlBuilder;
         {
             int nextPos = authUrl.indexOf('&', pos + 1);
@@ -133,6 +151,11 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         return authUrlBuilder.append("&state=").append("__ox").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#processArguments(java.util.Map, java.util.Map, java.util.Map)
+     */
     @Override
     public void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) throws OXException {
         String pCode = org.scribe.model.OAuthConstants.CODE;
@@ -150,6 +173,11 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         arguments.put(pAuthUrl, authUrl);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#getOAuthToken(java.util.Map)
+     */
     @Override
     public OAuthToken getOAuthToken(Map<String, Object> arguments) throws OXException {
         Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
@@ -186,6 +214,11 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         return new DefaultOAuthToken(accessToken.getToken(), accessToken.getSecret());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#modifyCallbackURL(java.lang.String, java.lang.String, com.openexchange.session.Session)
+     */
     @Override
     public String modifyCallbackURL(final String callbackUrl, final String currentHost, final Session session) {
         if (null == callbackUrl) {
@@ -204,7 +237,13 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         return retval;
     }
 
-    protected String trimRedirectUri(String redirectUri) {
+    /**
+     * Trims the specified redirect URI (strips the protocol)
+     * 
+     * @param redirectUri The redirect URI to trim
+     * @return The trimmed redirect URI
+     */
+    private String trimRedirectUri(String redirectUri) {
         OAuthConfigurationProperty oAuthProperty = getOAuthProperty(OAuthPropertyID.redirectUrl);
         if (oAuthProperty == null) {
             return redirectUri;
@@ -216,7 +255,13 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         return actual;
     }
 
-    protected String stripProtocol(String encodedUrl) {
+    /**
+     * Strips the protocol from the specified URL
+     * 
+     * @param encodedUrl The encoded URL
+     * @return the encoded URL without the protocol
+     */
+    private String stripProtocol(String encodedUrl) {
         if (encodedUrl.startsWith("https")) {
             return encodedUrl.substring(5);
         } else if (encodedUrl.startsWith("http")) {
@@ -231,11 +276,18 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      * @param url The URL
      * @return The extracted protocol (either http or https)
      */
-    protected String extractProtocol(final String url) {
+    private String extractProtocol(final String url) {
         return Strings.toLowerCase(url).startsWith("https") ? "https" : "http";
     }
 
-    protected String deferredURLUsing(final String url, final String domain) {
+    /**
+     * Defers the specified URL
+     * 
+     * @param url The URL to defer
+     * @param domain The domain
+     * @return The deferred URL
+     */
+    private String deferredURLUsing(final String url, final String domain) {
         if (url == null) {
             return null;
         }
@@ -256,7 +308,15 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtility.encodeUrl(url, false, false)).toString();
     }
 
-    protected boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {
+    /**
+     * Checks whether the specified URL is already deferred
+     * 
+     * @param url The URL to check
+     * @param deferrerURL The deferred URL
+     * @param path The path
+     * @return true if the URL is already deferred; false otherwise
+     */
+    private boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {
         final String str = "://";
         final int pos1 = url.indexOf(str);
         final int pos2 = deferrerURL.indexOf(str);
