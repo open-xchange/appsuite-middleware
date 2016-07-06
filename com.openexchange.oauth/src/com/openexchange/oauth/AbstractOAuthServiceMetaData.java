@@ -71,7 +71,7 @@ import com.openexchange.user.UserService;
 public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaData {
 
     protected enum OAuthPropertyID {
-        apiKey, apiSecret, consumerKey, consumerSecret, redirectUrl
+        apiKey, apiSecret, consumerKey, consumerSecret, redirectUrl, productName;
     };
 
     private final Map<OAuthPropertyID, OAuthConfigurationProperty> properties;
@@ -210,6 +210,16 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     @Override
     public String getConsumerSecret() {
         return getOAuthProperty(OAuthPropertyID.consumerKey).getValue();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthServiceMetaData#getProductName()
+     */
+    @Override
+    public String getProductName() {
+        return getOAuthProperty(OAuthPropertyID.productName).getValue();
     }
 
     /**

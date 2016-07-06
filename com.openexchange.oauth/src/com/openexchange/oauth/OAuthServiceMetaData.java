@@ -53,13 +53,13 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link OAuthServiceMetaData} - Represents the OAuth service meta data.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface OAuthServiceMetaData {
 
@@ -96,6 +96,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets the API key that belongs to a given session
+     * 
      * @param session
      * @return The API key
      * @throws OXException
@@ -104,6 +105,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Use {@link #getAPISecret(Session)} and also implement {@link #getAPISecret(Session)}
+     * 
      * @return The API secret
      */
     @Deprecated
@@ -111,6 +113,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets the API secret that belongs to a given session
+     * 
      * @param session
      * @return The API key
      * @throws OXException
@@ -119,15 +122,24 @@ public interface OAuthServiceMetaData {
 
     /**
      * Get the consumer key (upsell)
+     * 
      * @return the consumer key
      */
     String getConsumerKey();
 
     /**
      * Get the consumer secret (upsell)
+     * 
      * @return the consumer secret
      */
     String getConsumerSecret();
+
+    /**
+     * Returns the product name of the registered OAuth application
+     * 
+     * @return the product name of the registered OAuth application
+     */
+    String getProductName();
 
     /**
      * Indicates if this meta data needs a request token to obtain authorization URL.
@@ -208,15 +220,15 @@ public interface OAuthServiceMetaData {
      *
      * @return The API reference
      */
-	API getAPI();
+    API getAPI();
 
-	/**
-	 * Whether to register a token based deferrer.
-	 * <p>
-	 * Note: This method is only considered if {@link #doCustomRegistration(String, CallbackRegistry)} did not return <code>null</code>
-	 *
-	 * @return <code>true</code> to register a token based deferrer; otherwise <code>false</code>
-	 */
+    /**
+     * Whether to register a token based deferrer.
+     * <p>
+     * Note: This method is only considered if {@link #doCustomRegistration(String, CallbackRegistry)} did not return <code>null</code>
+     *
+     * @return <code>true</code> to register a token based deferrer; otherwise <code>false</code>
+     */
     boolean registerTokenBasedDeferrer();
 
     /**
