@@ -36,6 +36,16 @@
         maximum: 1
         description:  1 to apply HTML white-list filter rules if and only if requested attachment is of MIME type `text/htm*` **AND** parameter `save` is set to 0.
         required: false
+      - in: query
+        name: allow_nested_messages
+        type: boolean
+        description:  A value of "false" leads to light-weight JSON objects for nested messages containing only the "id" field
+        required: false
+      - in: query
+        name: as_json
+        type: boolean
+        description:  Nested messages are parsed into full JSON objects. Can lead to longer loading times, for multiple nested messages.
+        required: false    
     responses:
       200:
         description: The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.
