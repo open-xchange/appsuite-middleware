@@ -57,7 +57,7 @@ import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
-import com.openexchange.file.storage.dropbox.v1.DropboxFileStorageService;
+import com.openexchange.file.storage.dropbox.DropboxFileStorageService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 
 /**
