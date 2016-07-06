@@ -57,6 +57,8 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.WebAuthSession;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -148,7 +150,12 @@ public final class DropboxOAuthAccess {
     private DropboxAPI<WebAuthSession> dropboxApi;
 
     /**
-     * Initializes a new {@link DropboxOAuthAccess}.
+     * The Dropbox v2 API reference.
+     */
+    private DbxClientV2 client;
+
+    /**
+     * Initialises a new {@link DropboxOAuthAccess}.
      *
      * @param fsAccount The Dropbox account providing credentials and settings
      * @throws OXException
@@ -184,14 +191,19 @@ public final class DropboxOAuthAccess {
             /*-
              * Retrieve information about the user's Dropbox account.
              *
-             * See: https://www.dropbox.com/developers/reference/api#account-info
+             * See: https://www.dropbox.com/developers/documentation/http/documentation#users-get_current_account
              */
+            //////////////// OAuth 1.0 /////////////////
             final AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
             webAuthSession = new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX);
             dropboxApi = new DropboxAPI<WebAuthSession>(webAuthSession);
             // Re-auth specific stuff
             final AccessTokenPair reAuthTokens = new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret());
             dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
+
+            /////////////// OAuth 2.0 /////////////////
+            DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());
+            client = new DbxClientV2(config, oauthAccount.getToken());
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -201,9 +213,19 @@ public final class DropboxOAuthAccess {
      * Gets the DropboxAPI reference
      *
      * @return The DropboxAPI reference
+     * @deprecated Use {@link #getDropboxClient()} instead
      */
     public DropboxAPI<WebAuthSession> getDropboxAPI() {
         return dropboxApi;
+    }
+
+    /**
+     * Returns the Dropbox v2 API client
+     * 
+     * @return the Dropbox v2 API client
+     */
+    public DbxClientV2 getDropboxClient() {
+        return client;
     }
 
     /**
