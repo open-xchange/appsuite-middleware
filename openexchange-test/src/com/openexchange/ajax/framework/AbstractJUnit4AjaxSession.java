@@ -47,66 +47,48 @@
  *
  */
 
-package com.openexchange.ajax.onboarding.tests;
+package com.openexchange.ajax.framework;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.commons.validator.routines.UrlValidator;
-import org.json.JSONObject;
-import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
-import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
-import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
-
+import org.junit.After;
+import org.junit.Before;
+import com.openexchange.ajax.framework.AJAXClient.User;
 
 /**
- * {@link EMClientURLTest}
+ * {@link AbstractJUnit4AjaxSession}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.1
+ * @since v7.8.2
  */
-public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
+public abstract class AbstractJUnit4AjaxSession {
 
-    public EMClientURLTest() {
-    }
+    protected AJAXClient client;
 
-    private static Map<String, String> confs;
+    /**
+     * Default constructor.
+     * 
+     * @param name name of the test.
+     */
+    protected AbstractJUnit4AjaxSession() {}
 
-    static {
-        confs = new HashMap<String, String>();
-        confs.put("com.openexchange.client.onboarding.emclient.url", "http://www.open-xchange.com");
-    }
-
-    @Override
-    protected Map<String, String> getNeededConfigurations() {
-        return confs;
-    }
-
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-        setUpConfiguration(client, false);
+        client = new AJAXClient(User.User1);
     }
 
-    @Test
-    public void testEMClientURL() throws Exception {
-        ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);
-        OnboardingTestResponse response = client.execute(req);
-        assertNotNull("Response is empty!", response);
-        if (response.hasError()) {
-            fail("The response has an unexpected error: " + response.getException().getMessage());
+    @After
+    public void tearDown() throws Exception {
+        if (client != null) {
+            // Client can be null if setUp() fails
+            client.logout();
         }
-        Object data = response.getData();
-        assertNotNull("Response has no data!", data);
-        assertTrue("Unexpected response data type", data instanceof JSONObject);
-        JSONObject jobj = ((JSONObject) data);
-        Object linkObj = jobj.get("link");
-        assertNotNull("Data object doesn't contain a link field", linkObj);
-        assertTrue("Unexpected link field data type", linkObj instanceof String);
-        String link = ((String) linkObj);
-        assertTrue("The url " + link + " isn't valid!", UrlValidator.getInstance().isValid(link));
     }
+
+    public AJAXSession getSession() {
+        return client.getSession();
+    }
+
+    protected AJAXClient getClient() {
+        return client;
+    }
+
 }

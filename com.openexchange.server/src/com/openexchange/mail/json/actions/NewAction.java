@@ -282,7 +282,7 @@ public final class NewAction extends AbstractMailAction {
                         }
                     }
 
-                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), isDraftAction(sendType));
+                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), false);
                     CompositionSpaces.destroy(csid, session);
                 }
 
@@ -336,7 +336,7 @@ public final class NewAction extends AbstractMailAction {
                 MailServletInterface mailInterface = getMailInterface(req);
                 mailInterface.openFor(folder);
                 if (null != csid) {
-                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), isDraftAction(sendType));
+                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), false);
                     CompositionSpaces.destroy(csid, session);
                 }
 
@@ -436,7 +436,7 @@ public final class NewAction extends AbstractMailAction {
 
             // Apply composition space state(s)
             if (null != csid) {
-                CompositionSpaces.applyCompositionSpace(csid, session, null, isDraftAction(sendType));
+                CompositionSpaces.applyCompositionSpace(csid, session, null, true);
                 CompositionSpaces.destroy(csid, session);
             }
 
@@ -488,10 +488,6 @@ public final class NewAction extends AbstractMailAction {
                 }
             }
         }
-    }
-
-    private boolean isDraftAction(ComposeType sendType) {
-        return ComposeType.DRAFT_EDIT.equals(sendType);
     }
 
     private AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {

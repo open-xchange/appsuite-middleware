@@ -1339,13 +1339,13 @@ ox_add_property com.openexchange.mail.mailStartTls false /opt/open-xchange/etc/m
 ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/etc/mail.properties
 
 # SoftwareChange_Request-3350
-sed -ie '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
 
-# SoftwareChange_Request-3355
+# SoftwareChange_Request-3355,3417
 oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
 if [[ ${oldlink} == *"[uiwebpath]#m=[module]&i=[object]&f=[folder]" ]]
 then
-  newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/tasks\&id=[object]\&folder=[folder];')
+  newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/[module]\&id=[object]\&folder=[folder];')
   ox_set_property object_link ${newlink} /opt/open-xchange/etc/notification.properties
 fi
 
@@ -1395,6 +1395,14 @@ if [ -e $TMPFILE ]; then
     cat $TMPFILE > /opt/open-xchange/etc/logback.xml
     rm -f $TMPFILE
 fi
+
+# SoftwareChange_Request-3421
+ox_remove_property com.openexchange.mail.transport.enablePublishOnExceededQuota /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.publishPrimaryAccountOnly /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.sendAttachmentToExternalRecipients /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.provideLinksInAttachment /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.publishedDocumentTimeToLive /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt/open-xchange/etc/transport.properties
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"

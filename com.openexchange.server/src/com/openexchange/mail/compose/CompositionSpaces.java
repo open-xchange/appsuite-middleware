@@ -230,7 +230,7 @@ public final class CompositionSpaces {
      * @throws OXException If operation fails
      */
     public static void applyCompositionSpace(String csid, Session session) throws OXException {
-        applyCompositionSpace(csid, session, null, true);
+        applyCompositionSpace(csid, session, null, false);
     }
 
     /**
@@ -239,7 +239,7 @@ public final class CompositionSpaces {
      * @param csid The composition space identifier
      * @param session The associated session
      * @param optMailAccess The optional pre-initialized mail access
-     * @param updateMailFlags Boolean value <code>true</code> if the messages flags should be updated; otherwise <code>false</code>
+     * @param updateMailFlags <code>true</code> if the messages flags should be updated; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
     public static void applyCompositionSpace(String csid, Session session, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> optMailAccess, boolean updateMailFlags) throws OXException {
@@ -263,7 +263,7 @@ public final class CompositionSpaces {
         try {
             {
                 final MailPath replyFor = space.getReplyFor();
-                if (null != replyFor && !updateMailFlags) {
+                if (null != replyFor && updateMailFlags) {
                     if (null != optMailAccess && replyFor.getAccountId() == optMailAccess.getAccountId()) {
                         new SafeAction<Void>() {
 
@@ -294,7 +294,7 @@ public final class CompositionSpaces {
 
             {
                 Queue<MailPath> forwardsFor = space.getForwardsFor();
-                if ((null != forwardsFor && !forwardsFor.isEmpty()) && !updateMailFlags) {
+                if ((null != forwardsFor && !forwardsFor.isEmpty()) && updateMailFlags) {
                     for (final MailPath mailPath : forwardsFor) {
                         if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
                             new SafeAction<Void>() {
