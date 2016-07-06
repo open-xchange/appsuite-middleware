@@ -69,19 +69,19 @@ Each end-point listing also supports specifying the total number of connections 
 
 ### Example
 
-     com.openexchange.weakforced.endpoints=http://weakforced1.host.invalid:8081, http://weakforced2.host.invalid:8081
+     com.openexchange.weakforced.endpoints=http://weakforced1.host.invalid:8084, http://weakforced2.host.invalid:8084
      com.openexchange.weakforced.endpoints.totalConnections=100
      com.openexchange.weakforced.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)
      com.openexchange.weakforced.endpoints.readTimeout=2500
      com.openexchange.weakforced.endpoints.connectTimeout=1500
      ------------- For "report" call
-     com.openexchange.weakforced.endpoints.report=http://weakforced1.reporthost.invalid:8081, http://weakforced2.reporthost.invalid:8081
+     com.openexchange.weakforced.endpoints.report=http://weakforced1.reporthost.invalid:8084, http://weakforced2.reporthost.invalid:8084
      com.openexchange.weakforced.endpoints.report.totalConnections=100
      com.openexchange.weakforced.endpoints.report.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)
      com.openexchange.weakforced.endpoints.report.readTimeout=2500
      com.openexchange.weakforced.endpoints.report.connectTimeout=1500
 
-This examples specifies two generic end-points and two end-points to use for `report` calls exclusively. Hence, the OXWF routes all `report` calls to either `http://weakforced1.reporthost.invalid:8081` or `http://weakforced2.reporthost.invalid:8081`. Remaining calls (only `allow` left) will use `http://weakforced1.host.invalid:8081` or`http://weakforced2.host.invalid:8081`.
+This examples specifies two generic end-points and two end-points to use for `report` calls exclusively. Hence, the OXWF routes all `report` calls to either `http://weakforced1.reporthost.invalid:8084` or `http://weakforced2.reporthost.invalid:8084`. Remaining calls (only `allow` left) will use `http://weakforced1.host.invalid:8084` or`http://weakforced2.host.invalid:8084`.
 
 ## Password hash
 This section describes available properties that specify how the hash for login and password tuple is generated.
