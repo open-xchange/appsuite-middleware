@@ -82,6 +82,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @deprecated Use {@link DropboxOAuth2ServiceMetaData} instead
  */
 public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthServiceMetaData {
 
