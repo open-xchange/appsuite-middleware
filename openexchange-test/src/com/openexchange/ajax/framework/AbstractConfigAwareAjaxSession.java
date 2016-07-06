@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,15 +64,14 @@ import com.openexchange.ajax.writer.ResponseWriter;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession {
+public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxSession {
 
     /**
      * Initializes a new {@link AbstractConfigAwareAjaxSession}.
      *
      * @param name
      */
-    protected AbstractConfigAwareAjaxSession(String name) {
-        super(name);
+    protected AbstractConfigAwareAjaxSession() {
     }
 
     JSONObject oldData;
@@ -99,7 +99,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         super.setUp();
 
         if (oldData != null) {

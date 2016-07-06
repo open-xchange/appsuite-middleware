@@ -40,6 +40,6 @@
           for a not deleted folder: A folder has been modified in the mean time, the user does not have the
           permission to delete it or those permissions have just been removed, the folder does not exist, etc.
           You receive an empty JSON array if everything worked well. In case of errors the responsible fields
-          in the response are filled (see [Error handling](#error-handling)).
+          in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/FoldersCleanUpResponse"

@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -73,10 +76,10 @@ public class PlistSMSRateLimitTest extends AbstractPlistSMSTest {
      * 
      * @param name
      */
-    public PlistSMSRateLimitTest(String name) {
-        super(name);
+    public PlistSMSRateLimitTest() {
     }
 
+    @Test
     public void testRateLimit() throws OXException, IOException, JSONException, InterruptedException {
         String jsonString = "{\"sms\":\"+49276183850\"}";
         JSONObject body = new JSONObject(jsonString);

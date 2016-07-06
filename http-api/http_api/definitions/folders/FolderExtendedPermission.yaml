@@ -5,7 +5,7 @@ properties:
     description: Identifier of the permission entity (i.e. user-, group- or guest-ID).
   bits:
     type: integer
-    description: A number as described in [Permission flags](#permission-flags).
+    description: A number as described in [Permission flags](https://documentation.open-xchange.com/latest/middleware/http_api/3_flags_bitmasks.html#permission-flags).
   type:
     type: string
     description: Set "user" for an internal user, "group" for a group, "guest" for a guest, or "anonymous" for an anonymous permission entity.
@@ -14,7 +14,7 @@ properties:
     description: A display name for the permission entity.
   contact:
     type: object
-    description: A (reduced) set of [Detailed contact data](#detailed-contact-data) for "user" and "guest" entities.
+    description: A (reduced) set of [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data) for "user" and "guest" entities.
   share_url:
     type: string
     description: The share link for "anonymous" entities.

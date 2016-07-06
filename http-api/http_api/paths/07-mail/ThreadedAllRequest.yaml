@@ -46,6 +46,6 @@
           and is enhanced by a special `thread` field representing the full message thread (including the root
           message itself). `thread` is a JSON array of objects each representing a message in the conversation
           sorted by time-line and filled with the specified `columns`. Not IMAP: with timestamp. In case of
-          errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MailConversationsResponse"

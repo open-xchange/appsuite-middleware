@@ -52,14 +52,21 @@ package com.openexchange.ajax.mail.categories;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assume;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.capabilities.actions.AllRequest;
 import com.openexchange.ajax.capabilities.actions.AllResponse;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.mail.AbstractMailTest;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConstants;
 
@@ -69,7 +76,7 @@ import com.openexchange.mail.categories.MailCategoriesConstants;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
+public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjaxSession {
 
 
     protected static final String CAT_GENERAL = "general";
@@ -86,16 +93,12 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
      * Initializes a new {@link AbstractMailCategoriesTest}.
      *
      * @param name
-     * @throws JSONException
-     * @throws IOException
-     * @throws OXException
      */
-    public AbstractMailCategoriesTest(String name) throws OXException, IOException, JSONException {
-        super(name);
+    public AbstractMailCategoriesTest() {
     }
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         AJAXClient configClient = new AJAXClient(User.User1);
         setUpConfiguration(configClient, true);
         super.setUp();
@@ -137,10 +140,12 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
     }
 
     @Override
-    protected void tearDown() throws Exception {
-        clearFolder(values.getSentFolder());
-        clearFolder(values.getInboxFolder());
-        clearFolder(values.getDraftsFolder());
+    public void tearDown() throws Exception {
+        if (values != null) {
+            clearFolder(values.getSentFolder());
+            clearFolder(values.getInboxFolder());
+            clearFolder(values.getDraftsFolder());
+        }
         super.tearDown();
     }
 
@@ -169,5 +174,39 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
     @Override
     protected String getScope() {
         return "user";
+    }
+
+    /**
+     * Performs a hard delete on specified folder
+     *
+     * @param folder
+     *            The folder
+     */
+    protected final void clearFolder(final String folder) throws OXException, IOException, SAXException, JSONException {
+        Executor.execute(getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
+    }
+
+    /**
+     * @return User's default send address
+     */
+    protected String getSendAddress() throws OXException, IOException, JSONException {
+        return getSendAddress(getClient());
+    }
+
+    protected static String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
+        return client.getValues().getSendAddress();
+    }
+
+    protected String getInboxFolder() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getInboxFolder();
+    }
+
+    protected JSONObject getFirstMailInFolder(final String inboxFolder) throws OXException, IOException, SAXException, JSONException {
+        final CommonAllResponse response = getClient().execute(new com.openexchange.ajax.mail.actions.AllRequest(inboxFolder, new int[] { 600 }, -1, null, true));
+        final JSONArray arr = (JSONArray) response.getData();
+        final JSONArray mailFields = arr.getJSONArray(0);
+        final String id = mailFields.getString(0);
+        final AbstractAJAXResponse response2 = getClient().execute(new GetRequest(inboxFolder, id));
+        return (JSONObject) response2.getData();
     }
 }

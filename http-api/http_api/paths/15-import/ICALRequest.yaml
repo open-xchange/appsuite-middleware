@@ -33,9 +33,9 @@
     responses:
       200:
         description: |
-          A HTML page as described in [File uploads](#file-uploads) containing a JSON object with the field `data` that represents
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON object with the field `data` that represents
           an array of objects each consisting of the fields `id`, `folder_id` and `last_modified` of the newly created appointments/tasks.
-          In case of errors the JSON object contains the well known [error fields](#error-handling). Beside a field `warnings` may contain an array
+          In case of errors the JSON object contains the well known [error fields](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling). Beside a field `warnings` may contain an array
           of objects with warning data containing customary error fields.
         schema:
           type: string

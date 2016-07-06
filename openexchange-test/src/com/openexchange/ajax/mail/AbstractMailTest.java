@@ -58,7 +58,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -79,7 +79,7 @@ import com.openexchange.mail.MailListField;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public abstract class AbstractMailTest extends AbstractConfigAwareAjaxSession {
+public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     /**
      * Default constructor.

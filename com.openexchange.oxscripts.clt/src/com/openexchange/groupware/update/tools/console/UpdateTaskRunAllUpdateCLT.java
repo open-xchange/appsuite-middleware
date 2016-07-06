@@ -83,7 +83,7 @@ public final class UpdateTaskRunAllUpdateCLT {
     static {
         toolkitOptions = new Options();
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
-        toolkitOptions.addOption("e", "error", false, "The flag inidicating whether process is supposed to be stopped if an error occurs when trying to update a schema.");
+        toolkitOptions.addOption("e", "error", false, "The flag indicating whether process is supposed to be stopped if an error occurs when trying to update a schema.");
         toolkitOptions.addOption("H", "host", true, "The optional JMX host (default:localhost)");
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
@@ -195,11 +195,19 @@ public final class UpdateTaskRunAllUpdateCLT {
                 if (null != jobId) {
                     Object status = mbsc.invoke(Constants.OBJECT_NAME, "getStatus",  new Object[] { jobId.toString() }, null);
                     while (null != status) {
-                        System.out.println(status.toString().replaceAll("\\\\R", System.getProperty("line.separator")));
-                        LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(10L));
-                        status = mbsc.invoke(Constants.OBJECT_NAME, "getStatus",  new Object[] { jobId.toString() }, null);
+                        String statusText = status.toString();
+                        if (statusText.startsWith("NOK:")) {
+                            System.out.println(statusText.substring(4).replaceAll("\\\\R", System.getProperty("line.separator")));
+                            status = null;
+                        } else {
+                            if (statusText.startsWith("OK:")) {
+                                statusText = statusText.substring(3);
+                            }
+                            System.out.println(statusText.replaceAll("\\\\R", System.getProperty("line.separator")));
+                            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(8L));
+                            status = mbsc.invoke(Constants.OBJECT_NAME, "getStatus",  new Object[] { jobId.toString() }, null);
+                        }
                     }
-                    System.out.println("Finished");
                 }
             } finally {
                 if (null != jmxConnector) {

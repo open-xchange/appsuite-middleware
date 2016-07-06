@@ -1,9 +1,9 @@
 id:
   type: string
-  description: The name of the test command, see [Possible tests](#possible-tests).
+  description: The name of the test command, see [Possible tests](https://documentation.open-xchange.com/latest/middleware/http_api/4_mail_filter.html#possible-tests).
 comparison:
   type: string
-  description: The comparison type, see [Possible comparisons](#possible-comparisons).
+  description: The comparison type, see [Possible comparisons](https://documentation.open-xchange.com/latest/middleware/http_api/4_mail_filter.html#possible-comparisons).
 headers:
   type: array
   description: An array containing the header fields (for address-, envelope- and header-test).
@@ -29,7 +29,7 @@ datevalue:
     format: int64
 extensionskey:
   type: string
-  description: The [extension key](#possible-extensions) (for body-test).
+  description: The [extension key](https://documentation.open-xchange.com/latest/middleware/http_api/4_mail_filter.html#possible-extensions) (for body-test).
 extensionsvalue:
   type: string
   description: A value for the given key. If the key has no value the value given here is ignored (for body-test).

@@ -39,7 +39,7 @@
     responses:
       200:
         description: |
-          A HTML page as described in [File uploads](#file-uploads) containing a JSON object with the ID of
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON object with the ID of
           the updated snippet or errors if some occurred.
         schema:
           type: string

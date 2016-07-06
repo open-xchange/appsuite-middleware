@@ -524,6 +524,15 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder) throws Exception {
         return updateFolder(api, folder, false);
     }
+    
+    protected FolderObject updateFolder(EnumAPI api, FolderObject folder, final Transport transport) throws Exception {
+        return updateFolder(api, folder, new RequestCustomizer<UpdateRequest>() {
+            @Override
+            public void customize(UpdateRequest request) {
+                request.setNotifyPermissionEntities(transport);
+            }
+        });
+    }
 
     /**
      * Updates and remembers a folder.

@@ -57,8 +57,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,6 +69,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.internal.DynamicList;
@@ -163,7 +166,7 @@ public final class UpdateTaskToolkit {
      * @return A status text reference
      * @throws OXException If update process fails
      */
-    public static JobInfo<Void, AtomicReference<String>> runUpdateOnAllSchemas(final String jobId, final boolean throwExceptionOnFailure, final StatusRemover remover) throws OXException {
+    public static JobInfo<Void> runUpdateOnAllSchemas(final String jobId, final boolean throwExceptionOnFailure) throws OXException {
         // Get all available schemas
         final Map<String, Set<Integer>> map = getSchemasAndContexts();
         final int total = map.size();
@@ -182,51 +185,93 @@ public final class UpdateTaskToolkit {
 
             @Override
             public Void call() throws Exception {
-                try {
-                    // Await permit
-                    latch.await();
+                // Await permit
+                latch.await();
 
-                    // Go ahead...
-                    synchronized (LOCK) {
-                        // Iterate schemas
-                        int count = 0;
-                        StringBuilder sb = new StringBuilder(32);
-                        for (Iterator<Set<Integer>> iter = map.values().iterator(); iter.hasNext();) {
-                            Set<Integer> set = iter.next();
-                            if (!set.isEmpty()) {
-                                int contextId = set.iterator().next().intValue();
-                                UpdateProcess updateProcess = new UpdateProcess(contextId, true, throwExceptionOnFailure);
-                                if (throwExceptionOnFailure) {
-                                    try {
-                                        updateProcess.runUpdate();
-                                    } catch (OXException e) {
-                                        LOG.error("", e);
-                                        statusText.set(e.getPlainLogMessage());
-                                        return null;
-                                    } catch (Exception e) {
-                                        LOG.error("", e);
-                                        statusText.set(e.getMessage());
-                                        return null;
+                // Go ahead...
+                synchronized (LOCK) {
+                    // Iterate schemas
+                    int count = 0;
+                    StringBuilder sb = new StringBuilder(32);
+                    Map<String, Queue<TaskInfo>> totalFailures = new HashMap<String, Queue<TaskInfo>>(32);
+                    for (Iterator<Set<Integer>> iter = map.values().iterator(); iter.hasNext();) {
+                        Set<Integer> set = iter.next();
+                        if (!set.isEmpty()) {
+                            int contextId = set.iterator().next().intValue();
+                            UpdateProcess updateProcess = new UpdateProcess(contextId, true, throwExceptionOnFailure);
+                            if (throwExceptionOnFailure) {
+                                try {
+                                    updateProcess.runUpdate();
+                                } catch (OXException e) {
+                                    LOG.error("", e);
+                                    statusText.set(e.getPlainLogMessage());
+                                    throw e;
+                                } catch (Exception e) {
+                                    LOG.error("", e);
+                                    statusText.set(e.getMessage());
+                                    throw e;
+                                }
+                            } else {
+                                updateProcess.run();
+
+                                // Check possible failures
+                                Queue<TaskInfo> failures = updateProcess.getFailures();
+                                if (null != failures && !failures.isEmpty()) {
+                                    for (TaskInfo taskInfo : failures) {
+                                        Queue<TaskInfo> schemaFailures = totalFailures.get(taskInfo.getSchema());
+                                        if (null == schemaFailures) {
+                                            schemaFailures = new LinkedList<TaskInfo>();
+                                            totalFailures.put(taskInfo.getSchema(), schemaFailures);
+                                        }
+                                        schemaFailures.offer(taskInfo);
                                     }
-                                } else {
-                                    updateProcess.run();
                                 }
                             }
-                            count++;
+                        }
+                        count++;
+                        if (count < total) {
                             sb.setLength(0);
                             sb.append("Processed ").append(count).append(" of ").append(total).append(" schemas.");
                             statusText.set(sb.toString());
                         }
                     }
-                    return null;
-                } finally {
-                    remover.removeStatusFor(jobId);
+
+                    // Completed...
+                    sb.setLength(0);
+                    sb.append("Processed ").append(total).append(" of ").append(total).append(" schemas.");
+
+                    // Append failure information (if any)
+                    if (!totalFailures.isEmpty()) {
+                        sb.append("\\R\\R");
+                        boolean first = true;
+                        for (Map.Entry<String, Queue<TaskInfo>> failureEntry : totalFailures.entrySet()) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                sb.append("\\R\\R");
+                            }
+                            sb.append("The following update task(s) failed on schema \"").append(failureEntry.getKey()).append("\": \\R");
+                            boolean firstTaskInfo = true;
+                            for (TaskInfo taskInfo : failureEntry.getValue()) {
+                                if (firstTaskInfo) {
+                                    firstTaskInfo = false;
+                                } else {
+                                    sb.append("\\R");
+                                }
+                                sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
+                            }
+                        }
+                    }
+
+                    // Set new status text
+                    statusText.set(sb.toString());
                 }
+                return null;
             }
         };
 
         // Submit & return
-        return new JobInfo<Void, AtomicReference<String>>(jobId, ThreadPools.getThreadPool().submit(task), statusText, latch);
+        return new JobInfo<Void>(jobId, ThreadPools.getThreadPool().submit(task), statusText, latch);
     }
 
     private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema,cid FROM context_server2db_pool";

@@ -138,7 +138,7 @@ Example: shows a request with a `session` paramater, an `id` parameter and a res
       200:
         description: |
           A JSON object containing the resource data. In case of errors the responsible fields in the
-          response are filled (see [Error handling](http://oxpedia.org/wiki/index.php?title=HTTP_API#Error_handling)).
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/ResourceResponse"
 ```
@@ -273,7 +273,7 @@ key-value assignments. Before we go into detail it follows an example of a reque
           A JSON object containing an array with data for the requested tasks. Each array element describes one task and
           is itself an array. The elements of each array contain the information specified by the corresponding
           identifiers in the `columns` parameter. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/TasksResponse"
 ```

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.categories;
 
+import static org.junit.Assert.*;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
@@ -66,8 +67,7 @@ import com.openexchange.exception.OXException;
  */
 public class MoveTest extends AbstractMailCategoriesTest {
 
-    public MoveTest(String name) throws OXException, IOException, JSONException {
-        super(name);
+    public MoveTest() {
     }
 
     @Test

@@ -73,6 +73,7 @@ import com.openexchange.mail.json.actions.ClearAction;
 import com.openexchange.mail.json.actions.CopyAction;
 import com.openexchange.mail.json.actions.DeleteAction;
 import com.openexchange.mail.json.actions.EditAction;
+import com.openexchange.mail.json.actions.ExamineAction;
 import com.openexchange.mail.json.actions.ExpungeAction;
 import com.openexchange.mail.json.actions.GetAction;
 import com.openexchange.mail.json.actions.GetAttachmentAction;
@@ -185,6 +186,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
 
         actions.put("all_seen", new AllSeenAction(services));
         actions.put("resolve_share_reference", new ResolveShareReference(services));
+        actions.put("examine", new ExamineAction(services));
     }
 
     @Override

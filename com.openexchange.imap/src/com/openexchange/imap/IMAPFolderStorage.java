@@ -121,6 +121,7 @@ import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
+import com.openexchange.mail.api.IMailFolderStorageValiditySupport;
 import com.openexchange.mail.api.IMailSharedFolderPathResolver;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
@@ -152,7 +153,7 @@ import com.sun.mail.imap.protocol.ListInfo;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver, IMailFolderStorageValiditySupport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderStorage.class);
 
@@ -336,6 +337,55 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             separator = Character.valueOf(sep);
         }
         return separator.charValue();
+    }
+    
+    @Override
+    public boolean isValiditySupported() throws OXException {
+    	return true;
+    }
+    
+    @Override
+    public String getFolderValidity(String fullName) throws OXException {
+    	try {
+            final String fn = (DEFAULT_FOLDER_ID.equals(fullName) ? "" : fullName);
+            // Retrieve folder...
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
+            IMAPFolder f;
+            if (0 == fn.length()) {
+                f = (IMAPFolder) imapStore.getDefaultFolder();
+            } else {
+                f = (IMAPFolder) imapStore.getFolder(fullName);
+            }
+
+            // ... and check existence
+            boolean exists = f.exists();
+            if (!exists) {
+
+                try {
+                    f.open(IMAPFolder.READ_ONLY);
+                    exists = true;
+                } catch (javax.mail.FolderNotFoundException e) {
+                    exists = false;
+                } finally {
+                    if (exists) {
+                        f.close(false);
+                    }
+                }
+
+                if (!exists) {
+                    f = checkForNamespaceFolder(fn);
+                    if (null == f) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                }
+            }
+
+            return Long.toString(f.getUIDValidity());
+        } catch (final MessagingException e) {
+            throw handleMessagingException(fullName, e);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
     }
 
     @Override

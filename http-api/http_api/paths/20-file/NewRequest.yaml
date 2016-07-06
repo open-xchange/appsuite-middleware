@@ -39,7 +39,7 @@
     responses:
       200:
         description: |
-          A HTML page as described in [File uploads](#file-uploads) containing a JSON array with the IDs of
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON array with the IDs of
           the uploaded files or errors if some occurred. The files are accessible through the returned IDs
           for future use.
         schema:
