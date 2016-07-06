@@ -51,6 +51,7 @@ package com.openexchange.file.storage.dropbox.v2;
 
 import com.dropbox.core.v2.DbxClientV2;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 
@@ -76,6 +77,10 @@ abstract class AbstractDropboxAccess {
         this.session = session;
         this.account = account;
         this.client = dropboxOAuthAccess.getDropboxClient();
+    }
+    
+    protected boolean isRoot(String folderId) {
+        return FileStorageFolder.ROOT_FULLNAME.equals(folderId) || "/".equals(folderId);
     }
 
 }

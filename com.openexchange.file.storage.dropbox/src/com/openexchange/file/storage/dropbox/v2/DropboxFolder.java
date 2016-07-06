@@ -75,9 +75,11 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
      * @param userId the user identifier
      * @param accountDisplayName The display name of the Dropbox account
      */
-    public DropboxFolder(FolderMetadata metadata, int userId, String accountDisplayName) {
+    public DropboxFolder(FolderMetadata metadata, int userId, String accountDisplayName, boolean hasSubFolders) {
         this(userId);
         parseMetadata(metadata, accountDisplayName);
+        setSubfolders(hasSubFolders);
+        setSubscribedSubfolders(hasSubFolders);
     }
 
     /**

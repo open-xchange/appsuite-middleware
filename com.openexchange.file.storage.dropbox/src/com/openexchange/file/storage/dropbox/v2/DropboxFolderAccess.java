@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.dropbox.v2;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import com.dropbox.core.DbxException;
@@ -96,16 +97,17 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public boolean exists(String folderId) throws OXException {
         try {
-            if ("/".equals(folderId)) {
+            if (isRoot(folderId)) {
                 return true;
             }
             Metadata metadata = client.files().getMetadata(folderId);
             return metadata instanceof FolderMetadata;
+        } catch (GetMetadataErrorException e) {
+            // TODO: Maybe introduce new exception codes?
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (DbxException e) {
-            // TODO: handle exception
-            e.printStackTrace();
+            throw DropboxExceptionHandler.handle(e);
         }
-        return false;
     }
 
     /*
@@ -121,22 +123,21 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
                 throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
             }
 
-            ListFolderResult listFolder = client.files().listFolder(folderId);
-            List<Metadata> entries = listFolder.getEntries();
+            // Check for sub folders
+            boolean hasSubFolders = hasSubFolders(folderId);
 
+            // Parse metadata
             Metadata metadata = client.files().getMetadata(folderId);
-            return new DropboxFolder((FolderMetadata) metadata, userId, accountDisplayName);
+            return new DropboxFolder((FolderMetadata) metadata, userId, accountDisplayName, hasSubFolders);
         } catch (ListFolderErrorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // TODO: Maybe introduce new exception codes?
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (GetMetadataErrorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // TODO: Maybe introduce new exception codes?
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (DbxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw DropboxExceptionHandler.handle(e);
         }
-        return null;
     }
 
     /*
@@ -186,7 +187,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
             for (Metadata entry : entries) {
                 if (entry instanceof FolderMetadata) {
-                    folders.add(new DropboxFolder((FolderMetadata) entry, userId, accountDisplayName));
+                    folders.add(new DropboxFolder((FolderMetadata) entry, userId, accountDisplayName, hasSubFolders(parentIdentifier)));
                 }
             }
             return folders.toArray(new FileStorageFolder[0]);
@@ -365,6 +366,20 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     public Quota[] getQuotas(String folder, Type[] types) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    private boolean hasSubFolders(String folderId) throws ListFolderErrorException, DbxException {
+        // Check for sub folders
+        ListFolderResult listFolder = client.files().listFolder(folderId);
+        List<Metadata> entries = listFolder.getEntries();
+        Iterator<Metadata> iter = entries.iterator();
+        boolean hasSubFolders = false;
+        do {
+            Metadata metadata = iter.next();
+            hasSubFolders = metadata instanceof FolderMetadata;
+        } while (iter.hasNext() && !hasSubFolders);
+
+        return hasSubFolders;
     }
 
 }
