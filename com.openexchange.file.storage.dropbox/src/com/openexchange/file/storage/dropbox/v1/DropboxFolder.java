@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage.dropbox.v1;
 
 import java.util.Collections;
 import java.util.Date;

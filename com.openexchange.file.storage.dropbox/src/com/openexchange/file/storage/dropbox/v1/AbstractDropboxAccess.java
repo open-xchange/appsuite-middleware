@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage.dropbox.v1;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 

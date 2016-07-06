@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage.dropbox.v1;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;

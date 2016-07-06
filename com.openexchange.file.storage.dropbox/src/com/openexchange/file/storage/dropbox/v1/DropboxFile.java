@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage.dropbox.v1;
 
 import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
 import java.util.Date;
@@ -56,6 +56,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.file.storage.dropbox.DropboxConstants;
+import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.file.storage.dropbox.Utils;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.mime.MimeTypeMap;

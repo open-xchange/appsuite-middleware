@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage.dropbox.v1;
 
 import static com.openexchange.file.storage.dropbox.Utils.handle;
 import java.io.InputStream;
@@ -78,6 +78,8 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
+import com.openexchange.file.storage.dropbox.DropboxConstants;
+import com.openexchange.file.storage.dropbox.Utils;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
