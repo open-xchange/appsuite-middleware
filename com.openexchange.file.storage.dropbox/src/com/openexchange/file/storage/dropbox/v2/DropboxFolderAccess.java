@@ -96,6 +96,8 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public boolean exists(String folderId) throws OXException {
         try {
+            // The Dropbox V2 API does not allow to fetch metadata for the root folder,
+            // thus we assume that it always exists
             if (isRoot(folderId)) {
                 return true;
             }
@@ -117,8 +119,8 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
         try {
-            boolean exists = exists(folderId);
-            if (!exists) {
+            Metadata metadata = client.files().getMetadata(folderId);
+            if (!(metadata instanceof FolderMetadata)) {
                 throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
             }
 
@@ -126,7 +128,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             boolean hasSubFolders = hasSubFolders(folderId);
 
             // Parse metadata
-            Metadata metadata = client.files().getMetadata(folderId);
             return new DropboxFolder((FolderMetadata) metadata, userId, accountDisplayName, hasSubFolders);
         } catch (ListFolderErrorException e) {
             // TODO: Maybe introduce new exception codes?
@@ -177,24 +178,37 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
         try {
-            boolean exists = exists(parentIdentifier);
-            if (!exists) {
-                throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, parentIdentifier);
-            }
-            ListFolderResult listFolder = client.files().listFolder(parentIdentifier);
-            List<Metadata> entries = listFolder.getEntries();
-            List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
-            for (Metadata entry : entries) {
-                if (entry instanceof FolderMetadata) {
-                    folders.add(new DropboxFolder((FolderMetadata) entry, userId, accountDisplayName, hasSubFolders(parentIdentifier)));
+            if (!isRoot(parentIdentifier)) {
+                Metadata metadata = client.files().getMetadata(parentIdentifier);
+                if (!(metadata instanceof FolderMetadata)) {
+                    throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, parentIdentifier);
                 }
             }
+
+            List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
+            ListFolderResult listFolder;
+            String cursor = null;
+            do {
+                listFolder = (cursor != null) ? client.files().listFolderContinue(cursor) : client.files().listFolder(parentIdentifier);
+                listFolder = client.files().listFolder(parentIdentifier);
+                List<Metadata> entries = listFolder.getEntries();
+
+                for (Metadata entry : entries) {
+                    if (entry instanceof FolderMetadata) {
+                        FolderMetadata folderMetadata = (FolderMetadata) entry;
+                        folders.add(new DropboxFolder(folderMetadata, userId, accountDisplayName, hasSubFolders(folderMetadata.getPathDisplay())));
+                    }
+                }
+                cursor = listFolder.getCursor();
+            } while (listFolder.getHasMore());
+
             return folders.toArray(new FileStorageFolder[0]);
+        } catch (ListFolderErrorException e) {
+            // TODO: Maybe introduce new exception codes?
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (DbxException e) {
-            // TODO: handle exception
-            e.printStackTrace();
+            throw DropboxExceptionHandler.handle(e);
         }
-        return null;
     }
 
     /*
@@ -369,6 +383,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /**
      * Check for sub folders
+     * 
      * @param folderId
      * @return
      * @throws ListFolderErrorException
