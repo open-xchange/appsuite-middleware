@@ -59,6 +59,7 @@ import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.RelocationErrorException;
 import com.dropbox.core.v2.users.SpaceUsage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -282,8 +283,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return moveFolder(folderId, newParentId, null);
     }
 
     /*
@@ -293,8 +293,19 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            if (newName == null) {
+                int lastIndex = folderId.lastIndexOf('/');
+                newName = folderId.substring(lastIndex);
+                newParentId += newName;
+            }
+            Metadata metadata = client.files().move(folderId, newParentId);
+            return metadata.getPathDisplay();
+        } catch (RelocationErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
