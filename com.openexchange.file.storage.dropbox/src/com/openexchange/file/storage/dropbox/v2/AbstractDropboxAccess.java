@@ -78,9 +78,14 @@ abstract class AbstractDropboxAccess {
         this.account = account;
         this.client = dropboxOAuthAccess.getDropboxClient();
     }
-    
+
+    /**
+     * Determines whether the specified folder identifier denotes the root folder
+     * 
+     * @param folderId The folder identifier
+     * @return true if the specified folder identifier denotes a root folder; false otherwise
+     */
     protected boolean isRoot(String folderId) {
         return FileStorageFolder.ROOT_FULLNAME.equals(folderId) || "/".equals(folderId);
     }
-
 }
