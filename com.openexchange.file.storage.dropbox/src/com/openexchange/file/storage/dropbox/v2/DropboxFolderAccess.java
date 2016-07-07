@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.dropbox.v2;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import com.dropbox.core.DbxException;
@@ -368,18 +367,23 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         return null;
     }
 
+    /**
+     * Check for sub folders
+     * @param folderId
+     * @return
+     * @throws ListFolderErrorException
+     * @throws DbxException
+     */
     private boolean hasSubFolders(String folderId) throws ListFolderErrorException, DbxException {
-        // Check for sub folders
         ListFolderResult listFolder = client.files().listFolder(folderId);
         List<Metadata> entries = listFolder.getEntries();
-        Iterator<Metadata> iter = entries.iterator();
         boolean hasSubFolders = false;
-        do {
-            Metadata metadata = iter.next();
-            hasSubFolders = metadata instanceof FolderMetadata;
-        } while (iter.hasNext() && !hasSubFolders);
-
+        for (Metadata entry : entries) {
+            hasSubFolders = entry instanceof FolderMetadata;
+            if (hasSubFolders) {
+                break;
+            }
+        }
         return hasSubFolders;
     }
-
 }
