@@ -69,6 +69,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -123,10 +124,10 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     public FileStorageFolder getFolder(String folderId) throws OXException {
         try {
             //if (!isRoot(folderId)) {
-                Metadata metadata = client.files().getMetadata(folderId);
-                if (!(metadata instanceof FolderMetadata)) {
-                    throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
-                }
+            Metadata metadata = client.files().getMetadata(folderId);
+            if (!(metadata instanceof FolderMetadata)) {
+                throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
+            }
             //}
 
             // Check for sub folders
@@ -251,11 +252,8 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
         try {
-            String parent = toCreate.getParentId();
-            if (toCreate.getParentId().equals("")) {
-                parent = "/";
-            }
-            FolderMetadata folderMetadata = client.files().createFolder(parent + toCreate.getName());
+            String fullpath = constructPath(toCreate.getParentId(), toCreate.getName());
+            FolderMetadata folderMetadata = client.files().createFolder(fullpath);
             return folderMetadata.getPathDisplay();
         } catch (CreateFolderErrorException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -356,7 +354,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
-        
+
     }
 
     /*
@@ -450,5 +448,26 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             }
         }
         return hasSubFolders;
+    }
+
+    /**
+     * Construct a full path from the specified parent and folder name. 
+     * It simply concatenates both strings by using the '/' path separator.
+     * 
+     * @param parent The parent folder
+     * @param folder The folder name
+     * @return The full path
+     */
+    private String constructPath(String parent, String folder) {
+        if (Strings.isEmpty(parent)) {
+            parent = "/";
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(parent);
+        if (!parent.endsWith("/") || !folder.startsWith("/")) {
+            builder.append("/");
+        }
+        builder.append(folder);
+        return builder.toString();
     }
 }
