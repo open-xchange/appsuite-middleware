@@ -69,7 +69,6 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
-import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -123,12 +122,12 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
         try {
-            //if (!isRoot(folderId)) {
+            // FIXME: How to handle the '/' folderId? 
+            //        The Dropbox V2 API does not allow to fetch metadata for the root folder
             Metadata metadata = client.files().getMetadata(folderId);
             if (!(metadata instanceof FolderMetadata)) {
                 throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
             }
-            //}
 
             // Check for sub folders
             boolean hasSubFolders = hasSubFolders(folderId);
@@ -269,8 +268,11 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO: Dropbox V2 API supports permissions for shared folders. Consider updating?
+        //       More info: 
+        //         - https://www.dropbox.com/developers/documentation/http/documentation#sharing-update_folder_member
+        //         - https://www.dropbox.com/developers/documentation/http/documentation#sharing-update_folder_policy
+        return identifier;
     }
 
     /*
@@ -451,7 +453,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     }
 
     /**
-     * Construct a full path from the specified parent and folder name. 
+     * Construct a full path from the specified parent and folder name.
      * It simply concatenates both strings by using the '/' path separator.
      * 
      * @param parent The parent folder
