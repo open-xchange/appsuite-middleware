@@ -108,8 +108,6 @@ abstract class AbstractDropboxAccess {
      * @throws DbxException if a generic Dropbox error is occurred
      */
     protected Metadata getMetadata(String id) throws OXException, GetMetadataErrorException, DbxException {
-        // FIXME: How to handle the '/' folderId? 
-        //        The Dropbox V2 API does not allow to fetch metadata for the root folder
         Metadata metadata = client.files().getMetadata(id);
         if (metadata instanceof DeletedMetadata) {
             throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, id);

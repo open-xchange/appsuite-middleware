@@ -111,7 +111,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             Metadata metadata = getMetadata(folderId);
             return metadata instanceof FolderMetadata;
         } catch (GetMetadataErrorException e) {
-            // TODO: Maybe introduce new exception codes?
             if (LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
                 return false;
             }
@@ -129,13 +128,15 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
         try {
+            if (isRoot(folderId)) {
+                return getRootFolder();
+            }
             FolderMetadata metadata = getFolderMetadata(folderId);
             // Check for sub folders
             boolean hasSubFolders = hasSubFolders(folderId);
             // Parse metadata
             return new DropboxFolder(metadata, userId, accountDisplayName, hasSubFolders);
         } catch (ListFolderErrorException e) {
-            // TODO: Maybe introduce new exception codes?
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (GetMetadataErrorException e) {
             if (LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
@@ -208,7 +209,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
             return folders.toArray(new FileStorageFolder[0]);
         } catch (ListFolderErrorException e) {
-            // TODO: Maybe introduce new exception codes?
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
@@ -394,23 +394,15 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
-        try {
-            FolderMetadata metadata = getFolderMetadata(folderId);
-            List<FileStorageFolder> folders = new ArrayList<>();
-
-            FileStorageFolder folder = new DropboxFolder(metadata, userId, accountDisplayName, hasSubFolders(folderId));
+        String parentId = folderId;
+        FileStorageFolder folder;
+        List<FileStorageFolder> folders = new ArrayList<>();
+        do {
+            folder = getFolder(parentId);
             folders.add(folder);
-            String parentId;
-            while ((parentId = folder.getParentId()) != null) {
-                folder = getFolder(parentId);
-                folders.add(folder);
-            }
-            return folders.toArray(new FileStorageFolder[folders.size()]);
-        } catch (GetMetadataErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
-        }
+        } while ((parentId = folder.getParentId()) != null);
+
+        return folders.toArray(new FileStorageFolder[folders.size()]);
     }
 
     /*
@@ -497,9 +489,15 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         if (isRoot(parent)) {
             parent = "/";
         }
+        
+        //Strip leading '/'
+        if (folder.startsWith("/")) {
+            folder = folder.substring(1);
+        }
+        
         StringBuilder builder = new StringBuilder();
         builder.append(parent);
-        if (!parent.endsWith("/") || !folder.startsWith("/")) {
+        if (!parent.endsWith("/")) {
             builder.append("/");
         }
         builder.append(folder);
