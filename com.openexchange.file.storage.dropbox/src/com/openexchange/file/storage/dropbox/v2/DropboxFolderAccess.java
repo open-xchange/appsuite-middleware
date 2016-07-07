@@ -58,6 +58,7 @@ import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
 import com.dropbox.core.v2.users.SpaceUsage;
@@ -109,6 +110,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             return metadata instanceof FolderMetadata;
         } catch (GetMetadataErrorException e) {
             // TODO: Maybe introduce new exception codes?
+            if (LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
+                return false;
+            }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
