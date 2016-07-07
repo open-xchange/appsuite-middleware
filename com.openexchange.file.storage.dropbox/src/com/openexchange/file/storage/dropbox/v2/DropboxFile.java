@@ -75,7 +75,7 @@ public class DropboxFile extends DefaultFile {
      */
     public DropboxFile(FileMetadata metadata, int userid) {
         super();
-        setId(metadata.getId());
+        setId(metadata.getName());
         setFolderId(metadata.getPathDisplay());
         setCreatedBy(userid);
         setModifiedBy(userid);

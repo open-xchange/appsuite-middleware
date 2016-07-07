@@ -127,7 +127,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
         try {
             //TODO: Use a method for creating the full path of 'folderId' and 'id' 
-            Metadata metadata = client.files().getMetadata(folderId);
+            Metadata metadata = client.files().getMetadata(folderId + id);
             if (!(metadata instanceof FileMetadata)) {
                 throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, folderId);
             }
@@ -376,8 +376,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public FileStorageAccountAccess getAccountAccess() {
-        // TODO Auto-generated method stub
-        return null;
+        return accountAccess;
     }
 
     /*
@@ -530,7 +529,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @param sort The sort order, or <code>null</code> if not specified
      * @param order The sort direction
      */
-    private static void sort(List<File> files, Field sort, SortDirection order) {
+    private void sort(List<File> files, Field sort, SortDirection order) {
         if (null != sort && 1 < files.size()) {
             Collections.sort(files, order.comparatorBy(sort));
         }
