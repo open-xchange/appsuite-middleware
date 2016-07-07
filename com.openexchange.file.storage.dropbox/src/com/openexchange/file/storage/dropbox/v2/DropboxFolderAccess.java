@@ -62,7 +62,9 @@ import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
+import com.dropbox.core.v2.users.IndividualSpaceAllocation;
 import com.dropbox.core.v2.users.SpaceUsage;
+import com.dropbox.core.v2.users.TeamSpaceAllocation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -414,7 +416,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     public Quota getStorageQuota(String folderId) throws OXException {
         try {
             SpaceUsage spaceUsage = client.users().getSpaceUsage();
-            return new Quota(spaceUsage.getUsed(), spaceUsage.getAllocation().getIndividualValue().getAllocated() + spaceUsage.getAllocation().getTeamValue().getAllocated(), Type.STORAGE);
+            IndividualSpaceAllocation individualValue = spaceUsage.getAllocation().getIndividualValue();
+            TeamSpaceAllocation teamValue = spaceUsage.getAllocation().getTeamValue();
+            return new Quota(spaceUsage.getUsed(), individualValue.getAllocated() + teamValue.getAllocated(), Type.STORAGE);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -489,12 +493,12 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         if (isRoot(parent)) {
             parent = "/";
         }
-        
+
         //Strip leading '/'
         if (folder.startsWith("/")) {
             folder = folder.substring(1);
         }
-        
+
         StringBuilder builder = new StringBuilder();
         builder.append(parent);
         if (!parent.endsWith("/")) {
