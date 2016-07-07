@@ -519,9 +519,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         // FIXME: How to handle the '/' folderId? 
         //        The Dropbox V2 API does not allow to fetch metadata for the root folder
         Metadata metadata = getMetadata(folderId);
-        if (!(metadata instanceof FolderMetadata)) {
-            throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
+        if (metadata instanceof FolderMetadata) {
+            return (FolderMetadata) metadata;
         }
-        return (FolderMetadata) metadata;
+        throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
     }
 }
