@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.CreateFolderErrorException;
+import com.dropbox.core.v2.files.DeleteErrorException;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
@@ -314,8 +315,14 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String deleteFolder(String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            Metadata metadata = client.files().delete(folderId);
+            return metadata.getName();
+        } catch (DeleteErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
@@ -325,8 +332,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return deleteFolder(folderId);
     }
 
     /*
@@ -336,8 +342,21 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public void clearFolder(String folderId) throws OXException {
-        // TODO Auto-generated method stub
-
+        try {
+            ListFolderResult listFolder = client.files().listFolder(folderId);
+            for (Metadata entry : listFolder.getEntries()) {
+                if (entry instanceof FolderMetadata) {
+                    client.files().delete(entry.getPathDisplay());
+                }
+            }
+        } catch (DeleteErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (ListFolderErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
+        
     }
 
     /*
@@ -347,8 +366,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
-
+        clearFolder(folderId);
     }
 
     /*
