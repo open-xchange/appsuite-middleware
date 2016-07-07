@@ -80,7 +80,6 @@ public abstract class AbstractDropboxAccess {
      * @deprecated Use {@link #client} instead
      */
     protected final DropboxAPI<WebAuthSession> dropboxAPI;
-    protected final DbxClientV2 client;
 
     /**
      * Initializes a new {@link AbstractDropboxAccess}.
@@ -92,7 +91,6 @@ public abstract class AbstractDropboxAccess {
         this.session = session;
         // Other fields
         this.dropboxAPI = dropboxOAuthAccess.getDropboxAPI();
-        this.client = dropboxOAuthAccess.getDropboxClient();
     }
 
     /**
