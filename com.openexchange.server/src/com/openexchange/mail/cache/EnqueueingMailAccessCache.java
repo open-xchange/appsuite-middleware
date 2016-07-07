@@ -124,6 +124,15 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     }
 
     /**
+     * (Optionally) Gets the singleton instance.
+     *
+     * @return The singleton instance
+     */
+    public static EnqueueingMailAccessCache optInstance() {
+        return singleton;
+    }
+
+    /**
      * Releases the singleton instance.
      */
     public static void releaseInstance() {
@@ -137,14 +146,10 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         }
     }
 
-    /*
-     * Field members
-     */
+    // ------------------------------------------------------------------------------------------------------------------------------
 
     private final ConcurrentMap<Key, MailAccessQueue> map;
-
     private final int defaultIdleSeconds;
-
     private final ScheduledTimerTask timerTask;
 
     /**
