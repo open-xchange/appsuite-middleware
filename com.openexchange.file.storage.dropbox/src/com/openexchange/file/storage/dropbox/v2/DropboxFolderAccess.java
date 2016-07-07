@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.dropbox.v2;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import com.dropbox.core.DbxException;
@@ -79,6 +80,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+//TODO: Better exception handling
 public class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess {
 
     private final int userId;
@@ -143,7 +145,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             // TODO: Maybe introduce new exception codes?
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (GetMetadataErrorException e) {
-            // TODO: Maybe introduce new exception codes?
+            if (LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
+                throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
+            }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
@@ -400,8 +404,29 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            // FIXME: How to handle the '/' folderId? 
+            //        The Dropbox V2 API does not allow to fetch metadata for the root folder
+            Metadata metadata = client.files().getMetadata(folderId);
+            if (!(metadata instanceof FolderMetadata)) {
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
+            }
+            List<FileStorageFolder> folders = new ArrayList<>();
+
+            FolderMetadata folderMetadata = (FolderMetadata) metadata;
+            FileStorageFolder folder = new DropboxFolder(folderMetadata, userId, accountDisplayName, hasSubFolders(folderId));
+            folders.add(folder);
+            String parentId;
+            while ((parentId = folder.getParentId()) != null) {
+                folder = getFolder(parentId);
+                folders.add(folder);
+            }
+            return folders.toArray(new FileStorageFolder[folders.size()]);
+        } catch (GetMetadataErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
