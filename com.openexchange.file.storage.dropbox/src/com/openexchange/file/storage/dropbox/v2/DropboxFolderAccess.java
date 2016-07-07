@@ -459,7 +459,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      * @return The full path
      */
     private String constructPath(String parent, String folder) {
-        if (Strings.isEmpty(parent)) {
+        if (isRoot(parent)) {
             parent = "/";
         }
         StringBuilder builder = new StringBuilder();
