@@ -134,7 +134,10 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
                 return getRootFolder();
             }
             FolderMetadata metadata = getFolderMetadata(folderId);
-            // Check for sub folders
+            // TODO: Find a better way to determine whether a folder has sub folders?
+            //       The Dropbox V2 API does not return a hint to indicate if a folder
+            //       has subfolders, thus we have to initiate an extra 'listFolder' call 
+            //       and check for sub folders :-/
             boolean hasSubFolders = hasSubFolders(folderId);
             // Parse metadata
             return new DropboxFolder(metadata, userId, accountDisplayName, hasSubFolders);
