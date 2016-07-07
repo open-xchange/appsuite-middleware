@@ -516,8 +516,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      * @throws OXException if the specified identifier does not denote a folder
      */
     private FolderMetadata getFolderMetadata(String folderId) throws GetMetadataErrorException, DbxException, OXException {
-        // FIXME: How to handle the '/' folderId? 
-        //        The Dropbox V2 API does not allow to fetch metadata for the root folder
         Metadata metadata = getMetadata(folderId);
         if (metadata instanceof FolderMetadata) {
             return (FolderMetadata) metadata;
