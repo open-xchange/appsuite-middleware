@@ -52,6 +52,7 @@ package com.openexchange.file.storage.dropbox.v2;
 import java.util.LinkedList;
 import java.util.List;
 import com.dropbox.core.DbxException;
+import com.dropbox.core.v2.files.CreateFolderErrorException;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
@@ -120,10 +121,12 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
         try {
-            Metadata metadata = client.files().getMetadata(folderId);
-            if (!(metadata instanceof FolderMetadata)) {
-                throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
-            }
+            //if (!isRoot(folderId)) {
+                Metadata metadata = client.files().getMetadata(folderId);
+                if (!(metadata instanceof FolderMetadata)) {
+                    throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
+                }
+            //}
 
             // Check for sub folders
             boolean hasSubFolders = hasSubFolders(folderId);
@@ -246,8 +249,18 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            String parent = toCreate.getParentId();
+            if (toCreate.getParentId().equals("")) {
+                parent = "/";
+            }
+            FolderMetadata folderMetadata = client.files().createFolder(parent + toCreate.getName());
+            return folderMetadata.getPathDisplay();
+        } catch (CreateFolderErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
