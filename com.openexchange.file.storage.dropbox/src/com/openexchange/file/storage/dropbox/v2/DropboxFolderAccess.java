@@ -315,8 +315,17 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            int lastIndex = folderId.lastIndexOf('/');
+            String newPath = folderId.substring(0, lastIndex + 1);
+            newPath += newName;
+            Metadata metadata = client.files().move(folderId, newPath);
+            return metadata.getPathDisplay();
+        } catch (RelocationErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
