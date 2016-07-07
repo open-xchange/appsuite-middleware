@@ -57,6 +57,7 @@ import com.dropbox.core.v2.files.CreateFolderErrorException;
 import com.dropbox.core.v2.files.DeleteErrorException;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
+import com.dropbox.core.v2.files.ListFolderContinueErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.LookupError;
@@ -213,6 +214,8 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             } while (listFolder.getHasMore());
 
             return folders.toArray(new FileStorageFolder[0]);
+        } catch (ListFolderContinueErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (ListFolderErrorException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (DbxException e) {
@@ -463,6 +466,8 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         return quotas;
     }
 
+    ///////////////////////////////////////////// HELPERS //////////////////////////////////////////////
+    
     /**
      * Check for sub folders
      * 
