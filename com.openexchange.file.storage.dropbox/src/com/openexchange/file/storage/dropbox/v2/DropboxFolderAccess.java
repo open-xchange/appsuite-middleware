@@ -108,7 +108,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             if (isRoot(folderId)) {
                 return true;
             }
-            Metadata metadata = client.files().getMetadata(folderId);
+            Metadata metadata = getMetadata(folderId);
             return metadata instanceof FolderMetadata;
         } catch (GetMetadataErrorException e) {
             // TODO: Maybe introduce new exception codes?
@@ -129,18 +129,11 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
         try {
-            // FIXME: How to handle the '/' folderId? 
-            //        The Dropbox V2 API does not allow to fetch metadata for the root folder
-            Metadata metadata = client.files().getMetadata(folderId);
-            if (!(metadata instanceof FolderMetadata)) {
-                throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
-            }
-
+            FolderMetadata metadata = getFolderMetadata(folderId);
             // Check for sub folders
             boolean hasSubFolders = hasSubFolders(folderId);
-
             // Parse metadata
-            return new DropboxFolder((FolderMetadata) metadata, userId, accountDisplayName, hasSubFolders);
+            return new DropboxFolder(metadata, userId, accountDisplayName, hasSubFolders);
         } catch (ListFolderErrorException e) {
             // TODO: Maybe introduce new exception codes?
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -192,11 +185,8 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
         try {
-            if (!isRoot(parentIdentifier)) {
-                Metadata metadata = client.files().getMetadata(parentIdentifier);
-                if (!(metadata instanceof FolderMetadata)) {
-                    throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, parentIdentifier);
-                }
+            if (!exists(parentIdentifier)) {
+                throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, parentIdentifier);
             }
 
             List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
@@ -405,16 +395,10 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
         try {
-            // FIXME: How to handle the '/' folderId? 
-            //        The Dropbox V2 API does not allow to fetch metadata for the root folder
-            Metadata metadata = client.files().getMetadata(folderId);
-            if (!(metadata instanceof FolderMetadata)) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
-            }
+            FolderMetadata metadata = getFolderMetadata(folderId);
             List<FileStorageFolder> folders = new ArrayList<>();
 
-            FolderMetadata folderMetadata = (FolderMetadata) metadata;
-            FileStorageFolder folder = new DropboxFolder(folderMetadata, userId, accountDisplayName, hasSubFolders(folderId));
+            FileStorageFolder folder = new DropboxFolder(metadata, userId, accountDisplayName, hasSubFolders(folderId));
             folders.add(folder);
             String parentId;
             while ((parentId = folder.getParentId()) != null) {
@@ -520,5 +504,24 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
         builder.append(folder);
         return builder.toString();
+    }
+
+    /**
+     * Gets the {@link FolderMetadata} of the specified folder.
+     * 
+     * @param folderId The folder identifier
+     * @return The {@link FolderMetadata}
+     * @throws GetMetadataErrorException If a metadata error is occurred
+     * @throws DbxException If a generic Dropbox error is occurred
+     * @throws OXException if the specified identifier does not denote a folder
+     */
+    private FolderMetadata getFolderMetadata(String folderId) throws GetMetadataErrorException, DbxException, OXException {
+        // FIXME: How to handle the '/' folderId? 
+        //        The Dropbox V2 API does not allow to fetch metadata for the root folder
+        Metadata metadata = getMetadata(folderId);
+        if (!(metadata instanceof FolderMetadata)) {
+            throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
+        }
+        return (FolderMetadata) metadata;
     }
 }

@@ -49,9 +49,18 @@
 
 package com.openexchange.file.storage.dropbox.v2;
 
+import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.DeletedMetadata;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
+import com.dropbox.core.v2.files.GetMetadataErrorException;
+import com.dropbox.core.v2.files.Metadata;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.session.Session;
 
@@ -87,5 +96,22 @@ abstract class AbstractDropboxAccess {
      */
     protected boolean isRoot(String folderId) {
         return FileStorageFolder.ROOT_FULLNAME.equals(folderId) || "/".equals(folderId);
+    }
+
+    /**
+     * Returns the metadata for a file ({@link FileMetadata}) or a folder ({@link FolderMetadata})
+     * 
+     * @param id The resource identifier
+     * @return The metadata of the file or folder
+     * @throws OXException If the resource is not found
+     * @throws GetMetadataErrorException If a metadata error is occurred
+     * @throws DbxException if a generic Dropbox error is occurred
+     */
+    protected Metadata getMetadata(String id) throws OXException, GetMetadataErrorException, DbxException {
+        Metadata metadata = client.files().getMetadata(id);
+        if (metadata instanceof DeletedMetadata) {
+            throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, id);
+        }
+        return metadata;
     }
 }
