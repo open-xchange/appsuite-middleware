@@ -50,16 +50,27 @@
 package com.openexchange.file.storage.dropbox.v2;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.Metadata;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
+import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
+import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -104,8 +115,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            Metadata metadata = client.files().getMetadata(folderId + id);
+            if (!(metadata instanceof FileMetadata)) {
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, folderId + id);
+            }
+            return new DropboxFile((FileMetadata) metadata, userId);
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
@@ -258,8 +276,21 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            ListFolderResult listFolder = client.files().listFolder(folderId);
+            Iterator<Metadata> iterator = listFolder.getEntries().iterator();
+            final List<File> files = new ArrayList<File>(listFolder.getEntries().size());
+            while(iterator.hasNext()) {
+                Metadata next = iterator.next();
+                if (next instanceof FileMetadata) {
+                    files.add(new DropboxFile((FileMetadata) next, userId));
+                }
+            }
+            sort(files, sort, order);
+            return new FileTimedResult(files);
+        } catch (Exception e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
@@ -469,6 +500,19 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    /**
+     * Sorts the supplied list of files if needed.
+     *
+     * @param files The files to sort
+     * @param sort The sort order, or <code>null</code> if not specified
+     * @param order The sort direction
+     */
+    private static void sort(List<File> files, Field sort, SortDirection order) {
+        if (null != sort && 1 < files.size()) {
+            Collections.sort(files, order.comparatorBy(sort));
+        }
     }
 
 }
