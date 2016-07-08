@@ -65,10 +65,10 @@ Now we need to create the virtual folders configuration. Create a new file `/etc
 
 ```
 *
--Trash
--Trash/*
--Spam
--Spam/*
+-INBOX/Trash
+-INBOX/Trash/*
+-INBOX/Spam
+-INBOX/Spam/*
   all
 ```
 
