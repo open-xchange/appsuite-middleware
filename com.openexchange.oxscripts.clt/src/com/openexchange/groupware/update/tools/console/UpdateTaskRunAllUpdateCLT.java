@@ -93,7 +93,7 @@ public final class UpdateTaskRunAllUpdateCLT {
 
     private static void printHelp() {
         final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("runUpdate", toolkitOptions);
+        helpFormatter.printHelp("runallupdate", toolkitOptions);
     }
 
     /**
