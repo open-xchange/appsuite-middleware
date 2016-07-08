@@ -177,7 +177,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
             appendAssignments(stringBuilder, get(fields[0]));
 			for (int i = 1; i < fields.length; i++) {
                 stringBuilder.append(',');
-                appendAssignments(stringBuilder, get(fields[0]));
+                appendAssignments(stringBuilder, get(fields[i]));
 			}
 		}
         return stringBuilder.toString();

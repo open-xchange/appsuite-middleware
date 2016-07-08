@@ -136,36 +136,43 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     @Override
     public void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException {
+        updateAlarms(objectID, userID, alarms);
+    }
+
+    @Override
+    public void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException {
+        int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updateReminder(connection, context.getContextId(), objectID, userID, Event2Appointment.getReminder(alarms));
+            updated = updateReminder(connection, context.getContextId(), objectID, userID, Event2Appointment.getReminder(alarms));
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            release(connection);
+            release(connection, updated);
         }
     }
 
     @Override
     public void deleteAlarms(int objectID, int userID) throws OXException {
-        insertAlarms(objectID, userID, null);
+        updateAlarms(objectID, userID, null);
     }
 
     @Override
     public void deleteAlarms(int objectID) throws OXException {
+        int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updateReminders(connection, context.getContextId(), objectID, null);
+            updated = updateReminders(connection, context.getContextId(), objectID, null);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            release(connection);
+            release(connection, updated);
         }
     }
 
@@ -187,56 +194,84 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     @Override
     public int insertEvent(Event event) throws OXException {
+        int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             int objectID = IDGenerator.getId(context, Types.APPOINTMENT, connection);
             event.setId(objectID);
-            insertEvent(connection, context.getContextId(), event);
+            updated = insertEvent(connection, context.getContextId(), event);
             if (null != event.getAttendees()) {
-                insertAttendees(connection, context.getContextId(), objectID, event.getAttendees());
+                updated += insertAttendees(connection, context.getContextId(), objectID, event.getAttendees());
             }
             txPolicy.commit(connection);
             return objectID;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            release(connection);
+            release(connection, updated);
         }
     }
 
     @Override
-    public void insertTombstoneEvent(Event event) throws OXException {
+    public void updateEvent(Event event) throws OXException {
+        int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            insertTombstoneEvent(connection, context.getContextId(), event);
-            if (null != event.getAttendees()) {
-                insertTombstoneAttendees(connection, context.getContextId(), event.getId(), event.getAttendees());
+            updated = updateEvent(connection, context.getContextId(), event.getId(), event);
+            if (event.containsAttachments()) {
+                //TODO
+            }
+            if (event.containsAttendees()) {
+                updated += deleteAttendees(connection, context.getContextId(), event.getId());
+                if (null != event.getAttendees()) {
+                    updated += insertAttendees(connection, context.getContextId(), event.getId(), event.getAttendees());
+                }
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            release(connection);
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void insertTombstoneEvent(Event event) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = insertTombstoneEvent(connection, context.getContextId(), event);
+            if (null != event.getAttendees()) {
+                updated += insertTombstoneAttendees(connection, context.getContextId(), event.getId(), event.getAttendees());
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
         }
     }
 
     @Override
     public void deleteEvent(int objectID) throws OXException {
+        int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            deleteEvent(connection, context.getContextId(), objectID);
-            deleteAttendees(connection, context.getContextId(), objectID);
+            updated = deleteEvent(connection, context.getContextId(), objectID);
+            updated += deleteAttendees(connection, context.getContextId(), objectID);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            release(connection);
+            release(connection, updated);
         }
     }
 
@@ -506,7 +541,22 @@ public class RdbCalendarStorage implements CalendarStorage {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustDatesPriorSave(event), mappedFields);
+            MAPPER.setParameters(stmt, parameterIndex, adjustDatesPriorSave(event), mappedFields);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int updateEvent(Connection connection, int contextID, int objectID, Event event) throws SQLException, OXException {
+        EventField[] assignedfields = MAPPER.getAssignedFields(event);
+        String sql = new StringBuilder()
+            .append("UPDATE prg_dates SET ").append(MAPPER.getAssignments(assignedfields)).append(' ')
+            .append("WHERE cid=? AND intfield01=?;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustDatesPriorSave(event), assignedfields);
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, objectID);
             return logExecuteUpdate(stmt);
         }
     }
@@ -771,8 +821,9 @@ public class RdbCalendarStorage implements CalendarStorage {
      * Safely releases a write connection obeying the configured transaction policy, rolling back automatically if not committed before.
      *
      * @param connection The write connection to release
+     * @param updated The number of actually updated rows to
      */
-    private void release(Connection connection) throws OXException {
+    private void release(Connection connection, int updated) throws OXException {
         if (null != connection) {
             try {
                 if (false == connection.getAutoCommit()) {
@@ -782,7 +833,11 @@ public class RdbCalendarStorage implements CalendarStorage {
             } catch (SQLException e) {
                 throw EventExceptionCode.MYSQL.create(e);
             } finally {
-                dbProvider.releaseWriteConnection(context, connection);
+                if (0 < updated) {
+                    dbProvider.releaseWriteConnection(context, connection);
+                } else {
+                    dbProvider.releaseWriteConnectionAfterReading(context, connection);
+                }
             }
         }
     }

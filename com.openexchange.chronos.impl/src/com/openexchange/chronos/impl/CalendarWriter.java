@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarStorage;
@@ -191,6 +192,10 @@ public class CalendarWriter {
 
     public UserizedEvent insertEvent(UserizedEvent event) throws OXException {
         return insertEvent(getFolder(event.getFolderId()), event);
+    }
+
+    public UserizedEvent updateEvent(int folderID, UserizedEvent event, long clientTimestamp) throws OXException {
+        return updateEvent(getFolder(folderID), event, clientTimestamp);
     }
 
     private User getUser(int userID) throws OXException {
@@ -334,6 +339,44 @@ public class CalendarWriter {
         int objectID = storage.insertEvent(event);
         storage.insertAlarms(objectID, user.getId(), userizedEvent.getAlarms());
         return new CalendarReader(session).readEvent(folder, objectID, null);
+    }
+
+    private UserizedEvent updateEvent(UserizedFolder folder, UserizedEvent userizedEvent, long clientTimestamp) throws OXException {
+        requireCalendarContentType(folder);
+        requireWritePermission(folder, Permission.WRITE_OWN_OBJECTS);
+        Event event = userizedEvent.getEvent();
+        Event originalEvent = storage.loadEvent(event.getId(), null);
+        requireUpToDateTimestamp(originalEvent, clientTimestamp);
+        if (session.getUserId() != originalEvent.getCreatedBy()) {
+            requireWritePermission(folder, Permission.WRITE_ALL_OBJECTS);
+        }
+        if (0 < userizedEvent.getFolderId() && Integer.parseInt(folder.getID()) != userizedEvent.getFolderId()) {
+            /*
+             * move ...
+             */
+            //TODO
+        }
+        User user = SharedType.getInstance().equals(folder.getType()) ? getUser(folder.getCreatedBy()) : session.getUser();
+        if (null == originalEvent.getOrganizer() || originalEvent.getOrganizer().getEntity() == user.getId()) {
+            /*
+             * no organizer or update by (or on behalf of) organizer
+             */
+            Consistency.setModifiedNow(event, user.getId());
+            storage.updateEvent(event);
+            List<Alarm> alarms = userizedEvent.getAlarms();
+            if (null == alarms) {
+                storage.deleteAlarms(originalEvent.getId(), user.getId());
+            } else {
+                storage.updateAlarms(originalEvent.getId(), user.getId(), alarms);
+            }
+        } else if (CalendarUtils.containsAttendee(originalEvent.getAttendees(), user.getId())) {
+            /*
+             * update by attendee
+             */
+            //TODO: allowed attendee changes
+            throw new OXException();
+        }
+        return new CalendarReader(session).readEvent(folder, originalEvent.getId(), null);
     }
 
     private UserizedFolder getFolder(int folderID) throws OXException {

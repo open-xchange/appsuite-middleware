@@ -51,6 +51,7 @@ package com.openexchange.calendar.json.actions.chronos;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
@@ -146,10 +147,16 @@ public abstract class ChronosAction extends AppointmentAction {
     }
 
     protected static List<EventID> parseRequestedIDs(AppointmentAJAXRequest request) throws OXException, JSONException {
-        JSONArray jsonArray = request.getData();
-        if (null == jsonArray) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        Object data = request.getData();
+        if (JSONArray.class.isInstance(data)) {
+            return parseEventIDs((JSONArray) data);
+        } else if (JSONObject.class.isInstance(data)) {
+            return Collections.singletonList(parseEventID((JSONObject) data));
         }
+        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+    }
+
+    protected static List<EventID> parseEventIDs(JSONArray jsonArray) throws OXException, JSONException {
         List<EventID> eventIDs = new ArrayList<EventID>(jsonArray.length());
         for (int i = 0; i < jsonArray.length(); i++) {
             eventIDs.add(parseEventID(jsonArray.getJSONObject(i)));

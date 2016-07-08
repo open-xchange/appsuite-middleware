@@ -472,8 +472,8 @@ public class Event2Appointment {
             }
             previousToken = token;
         }
-        long totalSeconds = TimeUnit.DAYS.toSeconds(7 * weeks + days) + TimeUnit.HOURS.toSeconds(hours) + TimeUnit.MINUTES.toSeconds(minutes) + seconds;
-        return I(negative ? -1 * (int) totalSeconds : (int) totalSeconds);
+        long totalMinutes = TimeUnit.DAYS.toMinutes(7 * weeks + days) + TimeUnit.HOURS.toMinutes(hours) + minutes + TimeUnit.SECONDS.toMinutes(seconds);
+        return I(negative ? (int) totalMinutes : -1 * (int) totalMinutes);
     }
 
     /**

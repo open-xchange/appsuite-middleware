@@ -100,6 +100,7 @@ public interface CalendarStorage {
     List<Event> loadDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince) throws OXException;
 
 
+    void updateEvent(Event event) throws OXException;
 
     int insertEvent(Event event) throws OXException;
 
@@ -112,6 +113,8 @@ public interface CalendarStorage {
     List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
 
     void deleteAlarms(int objectID, int userID) throws OXException;
+
+    void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
 
     void deleteAlarms(int objectID) throws OXException;
 
