@@ -63,6 +63,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
@@ -498,7 +499,9 @@ public final class LogProperties {
             logger.warn("Unexpected MDC adapter: {}", mdcAdapter.getClass().getName());
             return Collections.unmodifiableMap(getPropertiesMap(mdcAdapter).get());
         } catch (Exception e) {
-            return null;
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(LogProperties.class);
+            logger.warn("Failed to retrieve MDC map.", e);
+            return Collections.emptyMap();
         }
     }
 
