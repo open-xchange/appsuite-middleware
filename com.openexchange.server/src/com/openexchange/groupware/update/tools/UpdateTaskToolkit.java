@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
@@ -75,9 +75,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
-import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -161,34 +159,23 @@ public final class UpdateTaskToolkit {
     /**
      * Runs the update process on all available schemas
      *
-     * @param jobId The job identifier to use
      * @param throwExceptionOnFailure Whether a possible exception is supposed to abort process
      * @return A status text reference
      * @throws OXException If update process fails
      */
-    public static JobInfo<Void> runUpdateOnAllSchemas(final String jobId, final boolean throwExceptionOnFailure) throws OXException {
+    public static UpdateTaskToolkitJob<Void> runUpdateOnAllSchemas(final boolean throwExceptionOnFailure) throws OXException {
         // Get all available schemas
         final Map<String, Set<Integer>> map = getSchemasAndContexts();
         final int total = map.size();
 
         // Status text
-        final AtomicReference<String> statusText = new AtomicReference<String>("Processed 0 of " + total + " schemas.");
+        final AtomicReference<String> statusText = new AtomicReference<String>("Attempting to update " + total + " schemas in total...");
 
         // Task...
-        final CountDownLatch latch = new CountDownLatch(1);
-        AbstractTask<Void> task = new AbstractTask<Void>() {
-
-            @Override
-            public void setThreadName(ThreadRenamer threadRenamer) {
-                threadRenamer.renamePrefix("RunAllUpdate");
-            }
+        Callable<Void> task = new Callable<Void>() {
 
             @Override
             public Void call() throws Exception {
-                // Await permit
-                latch.await();
-
-                // Go ahead...
                 synchronized (LOCK) {
                     // Iterate schemas
                     int count = 0;
@@ -271,7 +258,9 @@ public final class UpdateTaskToolkit {
         };
 
         // Submit & return
-        return new JobInfo<Void>(jobId, ThreadPools.getThreadPool().submit(task), statusText, latch);
+        UpdateTaskToolkitJob<Void> job = new UpdateTaskToolkitJob<>(task, statusText);
+        ThreadPools.getThreadPool().submit(ThreadPools.task(job, "RunAllUpdate"));
+        return job;
     }
 
     private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema,cid FROM context_server2db_pool";

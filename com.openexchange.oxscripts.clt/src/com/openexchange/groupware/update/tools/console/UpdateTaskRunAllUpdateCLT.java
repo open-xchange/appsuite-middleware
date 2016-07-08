@@ -204,7 +204,7 @@ public final class UpdateTaskRunAllUpdateCLT {
                                 statusText = statusText.substring(3);
                             }
                             System.out.println(statusText.replaceAll("\\\\R", System.getProperty("line.separator")));
-                            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(8L));
+                            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(4L));
                             status = mbsc.invoke(Constants.OBJECT_NAME, "getStatus",  new Object[] { jobId.toString() }, null);
                         }
                     }
