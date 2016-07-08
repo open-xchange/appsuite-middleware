@@ -66,6 +66,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -90,6 +91,10 @@ public final class ListAction extends AbstractGroupAction {
     @Override
     protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
         JSONArray jBody = req.getData();
+        if (null == jBody) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
         Date timestamp = new Date(0);
         Date lastModified = null;
 
