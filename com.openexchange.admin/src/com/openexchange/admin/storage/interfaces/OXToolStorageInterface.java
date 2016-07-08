@@ -469,12 +469,12 @@ public abstract class OXToolStorageInterface {
     public abstract boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException;
 
     /**
-     * Lists all schemas in databases that need an update.
+     * Lists all schemas in databases that are either locked (currently marked as being updated) or needing an update.
      *
-     * @return All schema that need an update
+     * @return All such schemas as a list with length of 2; first element contains schemas needing an update, the second those schemas currently marked for being updated
      * @throws StorageException If such schemas cannot be returned
      */
-    public abstract List<Database> listSchemasNeedingUpdate() throws StorageException;
+    public abstract List<List<Database>> listSchemasBeingLockedOrNeedsUpdate() throws StorageException;
 
     public abstract boolean serverInUse(final int server_id) throws StorageException;
 

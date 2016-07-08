@@ -58,7 +58,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -85,6 +85,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
+import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.caching.Cache;
@@ -1731,60 +1732,28 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public List<Database> listSchemasNeedingUpdate() throws StorageException {
+    public List<List<Database>> listSchemasBeingLockedOrNeedsUpdate() throws StorageException {
         List<Database> databases;
         {
             Connection con = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
             try {
                 con = cache.getReadConnectionForConfigDB();
-
-                // Get server identifier
-                int serverId = cache.getServerId();
-
-                // Perform SQL query
-                stmt = con.prepareStatement("SELECT DISTINCT c2db.write_db_pool_id,c2db.db_schema,db.url,db.driver,db.login,db.password,db.name,dbc.read_db_pool_id,dbc.weight,dbc.max_units FROM context_server2db_pool c2db JOIN db_pool db ON db.db_pool_id=c2db.write_db_pool_id JOIN db_cluster dbc ON dbc.write_db_pool_id=c2db.write_db_pool_id WHERE server_id=?");
-                stmt.setInt(1, serverId);
-                rs = stmt.executeQuery();
-                if (false == rs.next()) {
-                    return Collections.emptyList();
-                }
-
-                databases = new LinkedList<Database>();
-                int pos;
-                do {
-                    pos = 1;
-                    Database db = new Database();
-                    db.setId(I(rs.getInt(pos++)));
-                    String schema = rs.getString(pos++);
-                    db.setUrl(rs.getString(pos++));
-                    db.setDriver(rs.getString(pos++));
-                    db.setLogin(rs.getString(pos++));
-                    db.setPassword(rs.getString(pos++));
-                    db.setName(rs.getString(pos++));
-                    final int slaveId = rs.getInt(pos++);
-                    if (slaveId > 0) {
-                        db.setRead_id(I(slaveId));
-                    }
-                    db.setClusterWeight(I(rs.getInt(pos++)));
-                    db.setMaxUnits(I(rs.getInt(pos++)));
-                    db.setScheme(schema);
-                    databases.add(db);
-                } while (rs.next());
+                databases = PoolAndSchema.listAllSchemas(cache.getServerId(), con);
             } catch (PoolException e) {
                 throw new StorageException(e.getMessage(), e);
-            } catch (SQLException e) {
-                throw new StorageException(e.getMessage(), e);
             } finally {
-                closeSQLStuff(rs, stmt);
-                try {
-                    cache.pushReadConnectionForConfigDB(con);
-                } catch (PoolException e) {
-                    log.error("Error pushing connection to pool!", e);
+                if (null != con) {
+                    try {
+                        cache.pushReadConnectionForConfigDB(con);
+                    } catch (PoolException e) {
+                        log.error("Error pushing connection to pool!", e);
+                    }
                 }
             }
         }
+
+        List<Database> needingUpdate = new LinkedList<Database>();
+        List<Database> currentlyUpdating = new LinkedList<Database>();
 
         try {
             Updater updater = Updater.getInstance();
@@ -1792,9 +1761,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 Database database = it.next();
 
                 UpdateStatus status = updater.getStatus(database.getScheme(), database.getId().intValue());
-                if (status.blockingUpdatesRunning() || !status.needsBlockingUpdates()) {
-                    // Either currently updating or already up-to-date
-                    it.remove();
+                if (status.blockingUpdatesRunning()) {
+                    // Currently updating
+                    currentlyUpdating.add(database);
+                } else if (status.needsBlockingUpdates()) {
+                    // Needs update
+                    needingUpdate.add(database);
                 }
             }
         } catch (OXException e) {
@@ -1807,7 +1779,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         }
 
-        return databases;
+        return Arrays.asList(needingUpdate, currentlyUpdating);
     }
 
     /**

@@ -346,9 +346,9 @@ public class SchemaStoreImpl extends SchemaStore {
      */
     private static SchemaUpdateState loadSchemaStatus(final Connection con) throws OXException, SQLException {
         final SchemaUpdateStateImpl retval = new SchemaUpdateStateImpl();
-        loadUpdateTasks(con, retval);
         retval.setBlockingUpdatesRunning(false);
         retval.setBackgroundUpdatesRunning(false);
+        loadUpdateTasks(con, retval);
         retval.setGroupwareCompatible(true);
         retval.setAdminCompatible(true);
         retval.setServer(Database.getServerName());

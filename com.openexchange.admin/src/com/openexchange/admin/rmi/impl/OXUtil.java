@@ -55,6 +55,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
+import java.util.List;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -66,6 +67,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 
 /**
@@ -494,6 +496,37 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     @Override
     public Database[] listAllDatabase(final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         return listDatabase("*", credentials);
+    }
+
+    @Override
+    public Database[][] checkDatabase(Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        basicauth.doAuthentication(auth);
+
+        OXToolStorageInterface oxtools = OXToolStorageInterface.getInstance();
+        List<List<Database>> databases = oxtools.listSchemasBeingLockedOrNeedsUpdate();
+
+        Database[] needingUpdate;
+        {
+            List<Database> list = databases.get(0);
+            needingUpdate = new Database[list.size()];
+            int i = 0;
+            for (Database database : list) {
+                needingUpdate[i++] = database;
+            }
+        }
+
+        Database[] currentlyUpdating;
+        {
+            List<Database> list = databases.get(1);
+            currentlyUpdating = new Database[list.size()];
+            int i = 0;
+            for (Database database : list) {
+                currentlyUpdating[i++] = database;
+            }
+        }
+
+        return new Database[][] { needingUpdate, currentlyUpdating};
     }
 
     @Override
