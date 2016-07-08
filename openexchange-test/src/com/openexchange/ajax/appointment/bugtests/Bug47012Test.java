@@ -89,6 +89,7 @@ public class Bug47012Test extends AbstractAJAXSession {
         Appointment changeException = ctm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setStartDate(TimeTools.D("07.07.2016 08:30"));
+        changeException.setIgnoreConflicts(true);
         ctm.update(changeException);
         
         Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
@@ -100,6 +101,7 @@ public class Bug47012Test extends AbstractAJAXSession {
         Appointment changeException = ctm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setEndDate(TimeTools.D("07.07.2016 09:30"));
+        changeException.setIgnoreConflicts(true);
         ctm.update(changeException);
         
         Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
@@ -112,6 +114,7 @@ public class Bug47012Test extends AbstractAJAXSession {
         changeException.setRecurrencePosition(1);
         changeException.setStartDate(TimeTools.D("07.07.2016 08:30"));
         changeException.setEndDate(TimeTools.D("07.07.2016 09:30"));
+        changeException.setIgnoreConflicts(true);
         ctm.update(changeException);
         
         Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());
@@ -123,6 +126,7 @@ public class Bug47012Test extends AbstractAJAXSession {
         Appointment changeException = ctm.createIdentifyingCopy(app);
         changeException.setRecurrencePosition(1);
         changeException.setFullTime(true);
+        changeException.setIgnoreConflicts(true);
         ctm.update(changeException);
         
         Appointment loadedException = ctm.get(changeException.getParentFolderID(), changeException.getObjectID());

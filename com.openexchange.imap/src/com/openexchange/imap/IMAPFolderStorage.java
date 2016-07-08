@@ -477,30 +477,20 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             // ... and check existence
-            boolean exists = f.exists();
-            if (!exists) {
+            ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+            if (null != listEntry && listEntry.exists()) {
+                return toFolderInfo(listEntry);
+            }
 
-                try {
-                    f.open(IMAPFolder.READ_ONLY);
-                    exists = true;
-                } catch (javax.mail.FolderNotFoundException e) {
-                    exists = false;
-                } finally {
-                    if (exists) {
-                        f.close(false);
-                    }
-                }
-
-                if (!exists) {
-                    f = checkForNamespaceFolder(fn);
-                    if (null == f) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
-                    }
+            ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, f);
+            if (null == listInfo) {
+                f = checkForNamespaceFolder(fn);
+                if (null == f) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
             }
 
-            ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, f, session, ignoreSubscription);
-            return null == listEntry ? IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId) : toFolderInfo(listEntry);
+            return IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId);
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
@@ -657,23 +647,29 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions);
-            {
-                if (!doesExist(entry)) {
-                    final IMAPFolder f = checkForNamespaceFolder(fullName);
-                    if (null == f) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
-                    }
-                    return new int[] { 0, 0 };
-                }
-                if (!entry.canOpen()) {
-                    return new int[] { 0, 0 };
-                }
+
+            ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+            if (null != listEntry && listEntry.exists()) {
                 try {
-                    return IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName);
-                } catch (final MessagingException e) {
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName) : new int[] { 0, 0 };
+                } catch (MessagingException e) {
                     return new int[] { 0, 0 };
                 }
+            }
+
+            ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, (IMAPFolder) imapStore.getDefaultFolder());
+            if (null == listInfo) {
+                IMAPFolder f = checkForNamespaceFolder(fullName);
+                if (null == f) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                }
+                return new int[] { 0, 0 };
+            }
+
+            try {
+                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName) : new int[] { 0, 0 };
+            } catch (MessagingException e) {
+                return new int[] { 0, 0 };
             }
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
@@ -689,23 +685,29 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions);
-            {
-                if (!doesExist(entry)) {
-                    final IMAPFolder f = checkForNamespaceFolder(fullName);
-                    if (null == f) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
-                    }
-                    return 0;
-                }
-                if (!entry.canOpen()) {
-                    return 0;
-                }
+
+            ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+            if (null != listEntry && listEntry.exists()) {
                 try {
-                    return IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[1];
-                } catch (final MessagingException e) {
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[1] : 0;
+                } catch (MessagingException e) {
                     return 0;
                 }
+            }
+
+            ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, (IMAPFolder) imapStore.getDefaultFolder());
+            if (null == listInfo) {
+                IMAPFolder f = checkForNamespaceFolder(fullName);
+                if (null == f) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                }
+                return 0;
+            }
+
+            try {
+                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[1] : 0;
+            } catch (MessagingException e) {
+                return 0;
             }
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
@@ -721,23 +723,29 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions);
-            {
-                if (!doesExist(entry)) {
-                    final IMAPFolder f = checkForNamespaceFolder(fullName);
-                    if (null == f) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
-                    }
-                    return 0;
-                }
-                if (!entry.canOpen()) {
-                    return 0;
-                }
+
+            ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+            if (null != listEntry && listEntry.exists()) {
                 try {
-                    return IMAPCommandsCollection.getRecent(imapStore, fullName);
-                } catch (final MessagingException e) {
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getRecent(imapStore, fullName) : 0;
+                } catch (MessagingException e) {
                     return 0;
                 }
+            }
+
+            ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, (IMAPFolder) imapStore.getDefaultFolder());
+            if (null == listInfo) {
+                IMAPFolder f = checkForNamespaceFolder(fullName);
+                if (null == f) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                }
+                return 0;
+            }
+
+            try {
+                return listInfo.canOpen ? IMAPCommandsCollection.getRecent(imapStore, fullName) : 0;
+            } catch (MessagingException e) {
+                return 0;
             }
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
@@ -753,23 +761,29 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions);
-            {
-                if (!doesExist(entry)) {
-                    final IMAPFolder f = checkForNamespaceFolder(fullName);
-                    if (null == f) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
-                    }
-                    return 0;
-                }
-                if (!entry.canOpen()) {
-                    return 0;
-                }
+
+            ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+            if (null != listEntry && listEntry.exists()) {
                 try {
-                    return IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[0];
-                } catch (final MessagingException e) {
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[0] : 0;
+                } catch (MessagingException e) {
                     return 0;
                 }
+            }
+
+            ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, (IMAPFolder) imapStore.getDefaultFolder());
+            if (null == listInfo) {
+                IMAPFolder f = checkForNamespaceFolder(fullName);
+                if (null == f) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                }
+                return 0;
+            }
+
+            try {
+                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[0] : 0;
+            } catch (MessagingException e) {
+                return 0;
             }
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
@@ -784,12 +798,20 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (DEFAULT_FOLDER_ID.equals(fullName) || STR_INBOX.equals(fullName)) {
                 return true;
             }
-            if (ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session, this.ignoreSubscriptions).exists()) {
+
+            ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+            if (null != listEntry && listEntry.exists()) {
                 return true;
             }
+
+            if (null != IMAPCommandsCollection.getListInfo(fullName, (IMAPFolder) imapStore.getDefaultFolder())) {
+                return true;
+            }
+
             if (checkForNamespaceFolder(fullName) != null) {
                 return true;
             }
+
             return false;
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
@@ -1224,17 +1246,25 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
              */
             synchronized (parent) {
                 ListLsubEntry parentEntry = ListLsubCache.getCachedLISTEntry(parentFullname, accountId, parent, session, ignoreSubscriptions);
-                if (!parentEntry.exists()) {
-                    parent = checkForNamespaceFolder(parentFullname);
-                    if (null == parent) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
+                if (parentEntry.exists()) {
+                    /*
+                     * Check if parent holds folders
+                     */
+                    if (false == parentEntry.hasInferiors()) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, imapConfig, session, isParentDefault ? DEFAULT_FOLDER_ID : parentFullname);
                     }
-                }
-                /*
-                 * Check if parent holds folders
-                 */
-                if (!parentEntry.hasInferiors()) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, imapConfig, session, isParentDefault ? DEFAULT_FOLDER_ID : parentFullname);
+                } else {
+                    if (!doesExist(parent, true)) {
+                        ListInfo listInfo = IMAPCommandsCollection.getListInfo(parentFullname, parent);
+                        if (null == listInfo) {
+                            parent = checkForNamespaceFolder(parentFullname);
+                            if (null == parent) {
+                                throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
+                            }
+                        } else if (false == listInfo.hasInferiors) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, imapConfig, session, isParentDefault ? DEFAULT_FOLDER_ID : parentFullname);
+                        }
+                    }
                 }
                 /*
                  * Check ACLs if enabled
@@ -1476,18 +1506,29 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolder renameMe = getIMAPFolder(fullName);
-            ListLsubEntry renameEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, renameMe, session, ignoreSubscriptions);
-            if (!renameEntry.exists()) {
-                renameMe = checkForNamespaceFolder(fullName);
-                if (null == renameMe) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+            char separator;
+            boolean canOpen;
+            ListLsubEntry renameEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+            if (null == renameEntry || !renameEntry.exists()) {
+                ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, renameMe);
+                if (null == listInfo) {
+                    renameMe = checkForNamespaceFolder(fullName);
+                    if (null == renameMe) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                    throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, fullName);
                 }
+                separator = listInfo.separator;
+                canOpen = listInfo.canOpen;
+            } else {
+                separator = renameEntry.getSeparator();
+                canOpen = renameEntry.canOpen();
             }
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
             synchronized (renameMe) {
-                if (imapConfig.isSupportsACLs() && renameEntry.canOpen()) {
+                if (imapConfig.isSupportsACLs() && canOpen) {
                     try {
                         if (!imapConfig.getACLExtension().canCreate(RightsCache.getCachedRights(renameMe, true, session, accountId))) {
                             throw IMAPException.create(IMAPException.Code.NO_RENAME_ACCESS, imapConfig, session, fullName);
@@ -1506,7 +1547,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  * Notify message storage about outstanding rename
                  */
                 imapAccess.getMessageStorage().notifyIMAPFolderModification(fullName);
-                final char separator = renameEntry.getSeparator();
                 if (isEmpty(newName)) {
                     throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
                 } else if (newName.indexOf(separator) != -1) {
@@ -1525,7 +1565,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 final boolean mboxEnabled;
                 final IMAPFolder renameFolder;
                 {
-                    ListLsubEntry parentEntry = renameEntry.getParent();
+                    ListLsubEntry parentEntry = null == renameEntry ? null : renameEntry.getParent();
                     final String parentFullName = null == parentEntry ? renameMe.getParent().getFullName() : parentEntry.getFullName();
                     final StringBuilder tmp = new StringBuilder();
                     if (parentFullName.length() > 0) {
@@ -1642,15 +1682,22 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder moveMe = getIMAPFolder(fullName);
-            ListLsubEntry moveMeEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, moveMe, session, ignoreSubscriptions);
-            if (!moveMeEntry.exists()) {
-                moveMe = checkForNamespaceFolder(fullName);
-                if (null == moveMe) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+            char separator;
+            ListLsubEntry moveMeEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
+            if (null == moveMeEntry || !moveMeEntry.exists()) {
+                ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, moveMe);
+                if (null == listInfo) {
+                    moveMe = checkForNamespaceFolder(fullName);
+                    if (null == moveMe) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
+                    throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, fullName);
                 }
+                separator = listInfo.separator;
+            } else {
+                separator = moveMeEntry.getSeparator();
             }
             ListLsubCache.clearCache(accountId, session);
-            char separator = moveMeEntry.getSeparator();
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
@@ -1901,9 +1948,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             IMAPFolder updateMe = getIMAPFolder(fullName);
             ListLsubEntry updateMeEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, updateMe, session, ignoreSubscriptions);
             if (!updateMeEntry.exists()) {
-                updateMe = checkForNamespaceFolder(fullName);
-                if (null == updateMe) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                ListInfo listInfo = IMAPCommandsCollection.getListInfo(fullName, updateMe);
+                if (null == listInfo) {
+                    updateMe = checkForNamespaceFolder(fullName);
+                    if (null == updateMe) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
                 }
             }
             /*
@@ -3483,13 +3533,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return ret;
     }
 
-    private boolean doesExist(IMAPFolder imapFolder, boolean readOnly) throws OXException, MessagingException {
+    private boolean doesExist(IMAPFolder imapFolder, boolean mayCheckCache) throws OXException, MessagingException {
         String fullName = imapFolder.getFullName();
         if (STR_INBOX.equals(fullName)) {
             return true;
         }
 
-        if (!readOnly) {
+        if (!mayCheckCache) {
             return imapFolder.exists();
         }
 

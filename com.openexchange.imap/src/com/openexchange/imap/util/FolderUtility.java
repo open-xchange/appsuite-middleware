@@ -51,6 +51,7 @@ package com.openexchange.imap.util;
 
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPFolderWorker;
@@ -61,6 +62,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.protocol.ListInfo;
 
 /**
  * {@link FolderUtility} - A session-bound cache for IMAP folders converted to a {@link MailFolder} instance.
@@ -120,13 +122,17 @@ public final class FolderUtility {
             } else {
                 f = (IMAPFolder) imapStore.getFolder(fullName);
                 imapFullName = fullName;
-            }
-            boolean ignoreSubscription = folderStorage.getImapConfig().getIMAPProperties().isIgnoreSubscription();
-            boolean exists = "INBOX".equals(imapFullName) || ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session, ignoreSubscription).exists();
-            if (!exists) {
-                f = folderStorage.checkForNamespaceFolder(imapFullName, f);
-                if (null == f) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                boolean ignoreSubscription = folderStorage.getImapConfig().getIMAPProperties().isIgnoreSubscription();
+                boolean exists = "INBOX".equals(imapFullName) || ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session, ignoreSubscription).exists();
+                if (!exists) {
+                    // Do explicit LIST for "hidden" folders not appearing in LIST "" "*", but dedicatedly LISTable
+                    ListInfo listInfo = IMAPCommandsCollection.getListInfo(imapFullName, f);
+                    if (null == listInfo) {
+                        f = folderStorage.checkForNamespaceFolder(imapFullName, f);
+                        if (null == f) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                        }
+                    }
                 }
             }
             return IMAPFolderConverter.convertFolder(f, session, folderStorage.getImapAccess(), folderStorage.getContext());
