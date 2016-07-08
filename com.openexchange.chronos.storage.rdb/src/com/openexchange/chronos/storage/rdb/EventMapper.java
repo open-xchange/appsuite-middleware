@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -77,6 +78,7 @@ import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
+import com.openexchange.java.Strings;
 
 /**
  * {@link EventMapper}
@@ -88,16 +90,26 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
     /**
      * Initializes a new {@link EventMapper}.
-     *
      */
 	public EventMapper() {
 		super();
 	}
 
+    /**
+     * Gets all mapped fields.
+     * 
+     * @return The mapped fields
+     */
     public EventField[] getMappedFields() {
         return getMappedFields(null);
     }
 
+    /**
+     * Gets the mapped fields out of the supplied requested fields, ignoring unmapped fields.
+     *
+     * @param requestedFields The requested fields, or <code>null</code> to get all mapped fields
+     * @return The mapped fields
+     */
     public EventField[] getMappedFields(EventField[] requestedFields) {
         Set<EventField> knownFields = getMappings().keySet();
         Set<EventField> mappedFields;
@@ -709,14 +721,30 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         return mappings;
 	}
 
-    private static List<Date> deserializeExceptionDates(String timestamps) {
-        //TODO
-        return null;
+    private static List<Date> deserializeExceptionDates(String timestamps) throws NumberFormatException {
+        if (null == timestamps) {
+            return null;
+        }
+        List<String> splitted = Strings.splitAndTrim(timestamps, ",");
+        List<Date> dates = new ArrayList<Date>();
+        for (String timestamp : splitted) {
+            dates.add(new Date(Long.parseLong(timestamp)));
+        }
+        return dates;
     }
 
     private static String serializeExceptionDates(List<Date> dates) {
-        //TODO
-        return null;
+        if (null == dates) {
+            return null;
+        }
+        StringBuilder stringBuilder = new StringBuilder(15 * dates.size());
+        if (0 < dates.size()) {
+            stringBuilder.append(dates.get(0).getTime());
+        }
+        for (int i = 1; i < dates.size(); i++) {
+            stringBuilder.append(',').append(dates.get(i).getTime());
+        }
+        return stringBuilder.toString();
     }
 
 }

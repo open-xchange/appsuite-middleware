@@ -52,6 +52,8 @@ package com.openexchange.chronos.compat;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
+import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
@@ -76,7 +78,7 @@ public class Event2Appointment {
 
     /**
      * Gets the "private flag" value based on the supplied event classification.
-     * 
+     *
      * @param classification The event classification
      * @return The legacy "private flag"
      */
@@ -157,7 +159,7 @@ public class Event2Appointment {
 
     /**
      * Gets an e-mail address string based on the supplied URI.
-     * 
+     *
      * @param uri The URI string, e.g. <code>mailto:horst@example.org</code>
      * @return The e-mail address string, or the passed URI as-is in case of no <code>mailto</code>-protocol
      */
@@ -170,7 +172,7 @@ public class Event2Appointment {
 
     /**
      * Gets the "color label" value based on the supplied event color.
-     * 
+     *
      * @param color The CSS3 event color
      * @return The legacy color label, or <code>0</code> if not mappable
      */
@@ -226,7 +228,7 @@ public class Event2Appointment {
 
     /**
      * Gets the comma-separated "categories" string based on the supplied categories list.
-     * 
+     *
      * @param categories The list of categories
      * @return The legacy categories value
      */
@@ -245,7 +247,7 @@ public class Event2Appointment {
 
     /**
      * Gets the "reminder" value based on the supplied alarm list.
-     * 
+     *
      * @param alarms The alarms
      * @return The legacy reminder value, or <code>null</code> if no suitable reminder found
      */
@@ -266,6 +268,12 @@ public class Event2Appointment {
         return null;
     }
 
+    /**
+     * Gets the series pattern for the supplied recurrence rule.
+     *
+     * @param recurrenceRule The recurrence rule
+     * @return The series pattern, or <code>null</code> if not mappaple
+     */
     public static SeriesPattern getSeriesPattern(String recurrenceRule) {
         if (Strings.isNotEmpty(recurrenceRule)) {
             RecurrenceRule rule;
@@ -381,7 +389,7 @@ public class Event2Appointment {
 
     private static SeriesPattern getYearlyPattern(RecurrenceRule rule) {
         SeriesPattern pattern = new SeriesPattern();
-        pattern.setType(I(4)); // com.openexchange.groupware.container.CalendarObject.YEARLY        
+        pattern.setType(I(4)); // com.openexchange.groupware.container.CalendarObject.YEARLY
         pattern.setInterval(I(rule.getInterval()));
         List<Integer> byMonthParts = rule.getByPart(Part.BYMONTH);
         if (null != byMonthParts && 0 < byMonthParts.size()) {
@@ -412,18 +420,60 @@ public class Event2Appointment {
         return pattern;
     }
 
+    /**
+     * Parses a trigger duration string.
+     *
+     * @param duration The duration to parse
+     * @return The total seconds of the parsed duration, or <code>null</code> if not parsable
+     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, section 3.3.6</a>
+     */
     private static Integer parseTriggerDuration(String duration) {
-        //TODO: richtig
-        if (Strings.isNotEmpty(duration)) {
-            if (duration.startsWith("-PT") && duration.endsWith("M")) {
-                try {
-                    return Integer.valueOf(duration.substring(3, duration.length() - 1));
-                } catch (NumberFormatException e) {
-                    //
-                }
-            }
+        if (Strings.isEmpty(duration)) {
+            return null;
         }
-        return null;
+        boolean negative = false;
+        int weeks = 0;
+        int days = 0;
+        int hours = 0;
+        int minutes = 0;
+        int seconds = 0;
+        String token = null;
+        String previousToken = null;
+        StringTokenizer tokenizer = new StringTokenizer(duration.toUpperCase(), "+-PWDTHMS", true);
+        while (tokenizer.hasMoreTokens()) {
+            token = tokenizer.nextToken();
+            switch (token) {
+                case "+":
+                    negative = false;
+                    break;
+                case "-":
+                    negative = true;
+                    break;
+                case "W":
+                    weeks = Integer.parseInt(previousToken);
+                    break;
+                case "D":
+                    days = Integer.parseInt(previousToken);
+                    break;
+                case "H":
+                    hours = Integer.parseInt(previousToken);
+                    break;
+                case "M":
+                    minutes = Integer.parseInt(previousToken);
+                    break;
+                case "S":
+                    seconds = Integer.parseInt(previousToken);
+                    break;
+                case "T":
+                case "P":
+                default:
+                    // skip
+                    break;
+            }
+            previousToken = token;
+        }
+        long totalSeconds = TimeUnit.DAYS.toSeconds(7 * weeks + days) + TimeUnit.HOURS.toSeconds(hours) + TimeUnit.MINUTES.toSeconds(minutes) + seconds;
+        return I(negative ? -1 * (int) totalSeconds : (int) totalSeconds);
     }
 
     /**

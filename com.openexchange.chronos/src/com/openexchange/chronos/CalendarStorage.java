@@ -61,7 +61,14 @@ import com.openexchange.exception.OXException;
  */
 public interface CalendarStorage {
 
-    Event loadEvent(int objectID) throws OXException;
+    /**
+     * Loads a specific event.
+     *
+     * @param objectID The object identifier of the event to load
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The event
+     */
+    Event loadEvent(int objectID, EventField[] fields) throws OXException;
 
     /**
      * Loads events located in a specific folder.

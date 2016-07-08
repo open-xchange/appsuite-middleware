@@ -98,19 +98,19 @@ public class CalendarReader {
         this.storage = Services.getService(CalendarStorageFactory.class).create(session.getContext());
 	}
 
-    public UserizedEvent readEvent(EventID eventID) throws OXException {
-        return readEvent(eventID.getFolderID(), eventID.getObjectID());
+    public UserizedEvent readEvent(EventID eventID, EventField[] fields) throws OXException {
+        return readEvent(eventID.getFolderID(), eventID.getObjectID(), fields);
     }
 
-    public UserizedEvent readEvent(int folderID, int objectID) throws OXException {
-        return readEvent(getFolder(folderID), objectID);
+    public UserizedEvent readEvent(int folderID, int objectID, EventField[] fields) throws OXException {
+        return readEvent(getFolder(folderID), objectID, fields);
     }
 
-    public UserizedEvent readEvent(UserizedFolder folder, int objectID) throws OXException {
+    public UserizedEvent readEvent(UserizedFolder folder, int objectID, EventField[] fields) throws OXException {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
-        Event event = storage.loadEvent(objectID);
+        Event event = storage.loadEvent(objectID, fields);
         if (session.getUserId() != event.getCreatedBy()) {
             requireReadPermission(folder, Permission.READ_ALL_OBJECTS);
         }

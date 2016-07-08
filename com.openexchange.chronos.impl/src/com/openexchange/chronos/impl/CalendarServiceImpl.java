@@ -69,17 +69,18 @@ import com.openexchange.tools.session.ServerSession;
 public class CalendarServiceImpl implements CalendarService {
 
     @Override
-    public UserizedEvent getEvent(ServerSession session, int folderID, int objectID) throws OXException {
-        CalendarReader reader = new CalendarReader(session);
-        return reader.readEvent(folderID, objectID);
+    public UserizedEvent getEvent(ServerSession session, int folderID, int objectID, CalendarParameters parameters) throws OXException {
+        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        return new CalendarReader(session).readEvent(folderID, objectID, fields);
     }
 
     @Override
     public List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException {
+        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
         CalendarReader reader = new CalendarReader(session);
         for (EventID eventID : eventIDs) {
-            events.add(reader.readEvent(eventID));
+            events.add(reader.readEvent(eventID, fields));
         }
         return events;
     }

@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface CalendarService {
 
-    UserizedEvent getEvent(ServerSession session, int folderID, int objectID) throws OXException;
+    UserizedEvent getEvent(ServerSession session, int folderID, int objectID, CalendarParameters parameters) throws OXException;
 
     List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException;
 

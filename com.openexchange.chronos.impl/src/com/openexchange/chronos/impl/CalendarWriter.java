@@ -150,7 +150,7 @@ public class CalendarWriter {
     public void deleteEvent(UserizedFolder folder, int objectID, long clientTimestamp) throws OXException {
         requireCalendarContentType(folder);
         requireDeletePermission(folder, Permission.DELETE_OWN_OBJECTS);
-        Event event = storage.loadEvent(objectID);
+        Event event = storage.loadEvent(objectID, null);
         requireUpToDateTimestamp(event, clientTimestamp);
         if (session.getUserId() != event.getCreatedBy()) {
             requireDeletePermission(folder, Permission.DELETE_ALL_OBJECTS);
@@ -333,7 +333,7 @@ public class CalendarWriter {
          */
         int objectID = storage.insertEvent(event);
         storage.insertAlarms(objectID, user.getId(), userizedEvent.getAlarms());
-        return new CalendarReader(session).readEvent(folder, objectID);
+        return new CalendarReader(session).readEvent(folder, objectID, null);
     }
 
     private UserizedFolder getFolder(int folderID) throws OXException {
