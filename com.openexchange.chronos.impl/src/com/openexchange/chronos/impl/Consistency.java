@@ -74,7 +74,7 @@ public class Consistency {
             attendees = new ArrayList<Attendee>();
             event.setAttendees(attendees);
         }
-        Attendee attendee = CalendarUtils.findAttendee(attendees, userID);
+        Attendee attendee = CalendarUtils.find(attendees, userID);
         if (null == attendee) {
             attendee = new Attendee();
             attendee.setEntity(userID);

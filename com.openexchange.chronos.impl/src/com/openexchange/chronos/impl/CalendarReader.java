@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.CalendarUtils.containsAttendee;
+import static com.openexchange.chronos.impl.CalendarUtils.contains;
 import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
 import static com.openexchange.chronos.impl.Check.requireFolderPermission;
 import static com.openexchange.chronos.impl.Check.requireReadPermission;
@@ -187,7 +187,7 @@ public class CalendarReader {
     private UserizedEvent userize(Event event, int forUser) throws OXException {
         int folderId = event.getPublicFolderId();
         List<Alarm> alarms = null;
-        Attendee userAttendee = CalendarUtils.findAttendee(event.getAttendees(), forUser);
+        Attendee userAttendee = CalendarUtils.find(event.getAttendees(), forUser);
         if (null != userAttendee) {
             alarms = storage.loadAlarms(event.getId(), userAttendee.getEntity());
             if (0 < userAttendee.getFolderID()) {
@@ -199,11 +199,11 @@ public class CalendarReader {
 
     private static int getTargetAttendee(UserizedFolder folder, List<Attendee> attendees) {
         int userId = folder.getSession().getUserId();
-        if (PrivateType.getInstance().equals(folder.getType()) && containsAttendee(attendees, userId)) {
+        if (PrivateType.getInstance().equals(folder.getType()) && contains(attendees, userId)) {
             return userId;
-        } else if (SharedType.getInstance().equals(folder.getType()) && containsAttendee(attendees, folder.getCreatedBy())) {
+        } else if (SharedType.getInstance().equals(folder.getType()) && contains(attendees, folder.getCreatedBy())) {
             return folder.getCreatedBy();
-        } else if (PublicType.getInstance().equals(folder.getType()) && containsAttendee(attendees, userId)) {
+        } else if (PublicType.getInstance().equals(folder.getType()) && contains(attendees, userId)) {
             return userId;
         }
         return -1;

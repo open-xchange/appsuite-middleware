@@ -49,49 +49,93 @@
 
 package com.openexchange.chronos.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 
 /**
- * {@link CalendarService}
+ * {@link CalendarUtils}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
 public class CalendarUtils {
 
-    public static List<Attendee> filterAttendees(List<Attendee> attendees, CalendarUserType type) {
-        List<Attendee> filteredAttendees = new ArrayList<Attendee>();
-        for (Attendee attendee : attendees) {
-            if (type.equals(attendee.getCuType())) {
-                filteredAttendees.add(attendee);
+    /**
+     * Gets a value indicating whether a specific attendee is present in a collection of attendees, utilizing the
+     * {@link CalendarUtils#matches(Attendee, Attendee)} routine.
+     *
+     * @param attendees The attendees to search
+     * @param attendee The attendee to lookup
+     * @return <code>true</code> if the attendee is contained in the collection of attendees, <code>false</code>, otherwise
+     * @see CalendarUtils#matches(Attendee, Attendee)
+     */
+    static boolean contains(List<Attendee> attendees, Attendee attendee) {
+        if (null != attendees) {
+            for (Attendee candidateAttendee : attendees) {
+                if (matches(attendee, candidateAttendee)) {
+                    return true;
+                }
             }
         }
-        return filteredAttendees;
+        return false;
     }
-	
-	public static Attendee findAttendee(List<Attendee> attendees, int entity) {
-		if (null != attendees && 0 < attendees.size()) {
-			for (Attendee attendee : attendees) {
-				if (entity == attendee.getEntity()) {
-					return attendee;
-				}				
-			}
-		}
-		return null;
-	}
-	
-	public static boolean containsAttendee(List<Attendee> attendees, int entity) {
-		return null != findAttendee(attendees, entity);
-	}
-	
+
+    /**
+     * Gets a value indicating whether one attendee matches another, by comparing the entity identifier for internal attendees,
+     * or trying to match the attendee's URI for external ones.
+     *
+     * @param attendee1 The first attendee to check
+     * @param attendee2 The second attendee to check
+     * @return <code>true</code> if the attendees match, i.e. are targeting the same calendar user, <code>false</code>, otherwise
+     */
+    static boolean matches(Attendee attendee1, Attendee attendee2) {
+        if (null == attendee1) {
+            return null == attendee2;
+        } else if (null != attendee2) {
+            if (0 < attendee1.getEntity() && attendee1.getEntity() == attendee2.getEntity()) {
+                return true;
+            }
+            if (null != attendee1.getUri() && attendee1.getUri().equals(attendee2.getUri())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Looks up a specific internal attendee in a collection of attendees based on its entity identifier.
+     *
+     * @param attendees The attendees to search
+     * @param entity The entity identifier to lookup
+     * @return The matching attendee, or <code>null</code> if not found
+     */
+    static Attendee find(List<Attendee> attendees, int entity) {
+        if (null != attendees && 0 < attendees.size()) {
+            for (Attendee attendee : attendees) {
+                if (entity == attendee.getEntity()) {
+                    return attendee;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a value indicating whether a collection of attendees contains a specific internal attendee based on its entity identifier or
+     * not.
+     *
+     * @param attendees The attendees to search
+     * @param entity The entity identifier to lookup
+     * @return <code>true</code> if the attendee was found, <code>false</code>, otherwise
+     */
+    static boolean contains(List<Attendee> attendees, int entity) {
+        return null != find(attendees, entity);
+    }
+
     public static String getCalAddress(User user) {
         return "mailto:" + user.getMail();
     }

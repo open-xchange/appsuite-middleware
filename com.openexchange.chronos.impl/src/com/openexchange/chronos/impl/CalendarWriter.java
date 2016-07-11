@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.impl.CalendarUtils.contains;
 import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
 import static com.openexchange.chronos.impl.Check.requireDeletePermission;
 import static com.openexchange.chronos.impl.Check.requireFolderPermission;
@@ -60,7 +61,6 @@ import java.util.List;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.CalendarUserType;
@@ -87,7 +87,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
- * {@link CalendarService}
+ * {@link CalendarWriter}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
@@ -166,7 +166,7 @@ public class CalendarWriter {
             storage.insertTombstoneEvent(tombstoneEvent);
             storage.deleteAlarms(objectID);
             storage.deleteEvent(objectID);
-        } else if (CalendarUtils.containsAttendee(event.getAttendees(), user.getId())) {
+        } else if (CalendarUtils.contains(event.getAttendees(), user.getId())) {
             /*
              * deletion as attendee
              */
@@ -177,7 +177,7 @@ public class CalendarWriter {
                 storage.deleteAlarms(objectID);
                 storage.deleteEvent(objectID);
             } else {
-                Attendee attendee = CalendarUtils.findAttendee(event.getAttendees(), user.getId());
+                Attendee attendee = CalendarUtils.find(event.getAttendees(), user.getId());
                 Event tombstoneEvent = getTombstone(event);
                 Consistency.setModifiedNow(tombstoneEvent, user.getId());
                 tombstoneEvent.setAttendees(Collections.singletonList(getTombstone(attendee)));
@@ -214,31 +214,6 @@ public class CalendarWriter {
     private int getDefaultFolderID(User user) throws OXException {
         return new OXFolderAccess(session.getContext()).getDefaultFolderID(user.getId(), FolderObject.CALENDAR);
         //TODO: via higher level service?
-    }
-
-    private static boolean contains(List<Attendee> attendees, Attendee attendee) {
-        if (null != attendees) {
-            for (Attendee candidateAttendee : attendees) {
-                if (matches(attendee, candidateAttendee)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static boolean matches(Attendee attendee1, Attendee attendee2) {
-        if (null == attendee1) {
-            return null == attendee2;
-        } else if (null != attendee2) {
-            if (0 < attendee1.getEntity() && attendee1.getEntity() == attendee2.getEntity()) {
-                return true;
-            }
-            if (null != attendee1.getUri() && attendee1.getUri().equals(attendee2.getUri())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private List<Attendee> prepareAttendees(UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
@@ -362,6 +337,9 @@ public class CalendarWriter {
              * no organizer or update by (or on behalf of) organizer
              */
             Consistency.setModifiedNow(event, user.getId());
+            if (event.containsAttendees()) {
+                event.setAttendees(prepareAttendees(folder, event.getAttendees()));
+            }
             storage.updateEvent(event);
             List<Alarm> alarms = userizedEvent.getAlarms();
             if (null == alarms) {
@@ -369,7 +347,7 @@ public class CalendarWriter {
             } else {
                 storage.updateAlarms(originalEvent.getId(), user.getId(), alarms);
             }
-        } else if (CalendarUtils.containsAttendee(originalEvent.getAttendees(), user.getId())) {
+        } else if (CalendarUtils.contains(originalEvent.getAttendees(), user.getId())) {
             /*
              * update by attendee
              */
