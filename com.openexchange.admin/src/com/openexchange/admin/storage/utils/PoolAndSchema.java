@@ -152,6 +152,56 @@ public class PoolAndSchema {
         }
     }
 
+    /**
+     * Lists all available schemas for specified database.
+     *
+     * @param databaseId The database identifier
+     * @param serverId The server identifier
+     * @param configDbCon The connection to configDb
+     * @return The available schemas
+     * @throws StorageException If schemas cannot be returned
+     */
+    public static List<Database> listDatabaseSchemas(int databaseId, int serverId, Connection configDbCon) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = configDbCon.prepareStatement("SELECT DISTINCT c2db.db_schema,db.url,db.driver,db.login,db.password,db.name,dbc.read_db_pool_id,dbc.weight,dbc.max_units FROM context_server2db_pool c2db JOIN db_pool db ON db.db_pool_id=c2db.write_db_pool_id JOIN db_cluster dbc ON dbc.write_db_pool_id=c2db.write_db_pool_id WHERE c2db.write_db_pool_id=? AND server_id=?");
+            stmt.setInt(1, databaseId);
+            stmt.setInt(2, serverId);
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptyList();
+            }
+
+            List<Database> databases = new LinkedList<Database>();
+            int pos;
+            do {
+                pos = 1;
+                Database db = new Database();
+                db.setId(I(databaseId));
+                String schema = rs.getString(pos++);
+                db.setUrl(rs.getString(pos++));
+                db.setDriver(rs.getString(pos++));
+                db.setLogin(rs.getString(pos++));
+                db.setPassword(rs.getString(pos++));
+                db.setName(rs.getString(pos++));
+                final int slaveId = rs.getInt(pos++);
+                if (slaveId > 0) {
+                    db.setRead_id(I(slaveId));
+                }
+                db.setClusterWeight(I(rs.getInt(pos++)));
+                db.setMaxUnits(I(rs.getInt(pos++)));
+                db.setScheme(schema);
+                databases.add(db);
+            } while (rs.next());
+            return databases;
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------
 
     private final int poolId;

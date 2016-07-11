@@ -61,6 +61,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,6 +70,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -1833,6 +1836,113 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public List<Database> unblockDatabaseSchema(Database db) throws StorageException {
+        try {
+            int poolId = db.getId().intValue();
+            if (Strings.isNotEmpty(db.getScheme())) {
+                // Only check specified schema
+                Database ldb = loadDatabaseById(poolId);
+                Updater updater = Updater.getInstance();
+                try {
+                    updater.unblock(db.getScheme(), poolId, getAnyContextFromSchema(poolId, db.getScheme()));
+                    ldb.setScheme(db.getScheme());
+                    return Collections.singletonList(ldb);
+                } catch (OXException e) {
+                    // UPD-0005
+                    if (!e.equalsCode(5, "UPD")) {
+                        throw e;
+                    }
+                    return Collections.emptyList();
+                }
+            }
+
+            // Query all schemas from denoted database
+            List<Database> databases;
+            {
+                Connection con = null;
+                try {
+                    con = cache.getReadConnectionForConfigDB();
+                    databases = PoolAndSchema.listDatabaseSchemas(poolId, cache.getServerId(), con);
+                } catch (PoolException e) {
+                    throw new StorageException(e.getMessage(), e);
+                } finally {
+                    if (null != con) {
+                        try {
+                            cache.pushReadConnectionForConfigDB(con);
+                        } catch (PoolException e) {
+                            log.error("Error pushing connection to pool!", e);
+                        }
+                    }
+                }
+            }
+
+            // Determine outdated threshold
+            long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
+            List<Database> outdatedUpdating = new LinkedList<Database>();
+
+            // Unblock outdated schemas
+            Updater updater = Updater.getInstance();
+            for (Database database : databases) {
+                UpdateStatus status = updater.getStatus(database.getScheme(), poolId);
+                if (status.blockingUpdatesRunning()) {
+                    // Currently updating
+                    Date runningSince = status.blockingUpdatesRunningSince();
+                    if (null != runningSince && runningSince.getTime() < outdatedThreshold) {
+                        int contextId = getAnyContextFromSchema(poolId, database.getScheme());
+                        try {
+                            updater.unblock(database.getScheme(), poolId, contextId);
+                            outdatedUpdating.add(database);
+                        } catch (OXException e) {
+                            if (!e.equalsCode(5, "UPD")) {
+                                throw e;
+                            }
+                            // Ignore
+                        }
+                    }
+                }
+            }
+            return outdatedUpdating;
+        } catch (OXException e) {
+            if (e.getCode() == 102) {
+                // NOTE: this situation should not happen!
+                // it can only happen, when a schema has not been initialized correctly!
+                log.debug("FATAL: this error must not happen", e);
+            }
+            log.error("Error in checking/updating schema", e);
+            throw new StorageException(e.toString(), e);
+        }
+    }
+
+    private int getAnyContextFromSchema(int writePoolId, String schema) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=? LIMIT 1");
+            stmt.setInt(1, cache.getServerId());
+            stmt.setInt(2, writePoolId);
+            stmt.setString(3, schema);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : -1;
+        } catch (PoolException e) {
+            throw new StorageException(e.getMessage(), e);
+        } catch (SQLException e) {
+            throw new StorageException(e.toString(), e);
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(stmt);
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    @Override
     public List<List<Database>> listSchemasBeingLockedOrNeedsUpdate() throws StorageException {
         List<Database> databases;
         {
@@ -1855,6 +1965,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
         List<Database> needingUpdate = new LinkedList<Database>();
         List<Database> currentlyUpdating = new LinkedList<Database>();
+        List<Database> outdatedUpdating = new LinkedList<Database>();
+
+        long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
 
         try {
             Updater updater = Updater.getInstance();
@@ -1862,7 +1975,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 UpdateStatus status = updater.getStatus(database.getScheme(), database.getId().intValue());
                 if (status.blockingUpdatesRunning()) {
                     // Currently updating
-                    currentlyUpdating.add(database);
+                    Date runningSince = status.blockingUpdatesRunningSince();
+                    if (null != runningSince && runningSince.getTime() < outdatedThreshold) {
+                        outdatedUpdating.add(database);
+                    } else {
+                        currentlyUpdating.add(database);
+                    }
                 } else if (status.needsBlockingUpdates()) {
                     // Needs update
                     needingUpdate.add(database);
@@ -1878,7 +1996,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         }
 
-        return Arrays.asList(needingUpdate, currentlyUpdating);
+        return Arrays.asList(needingUpdate, currentlyUpdating, outdatedUpdating);
     }
 
     /**

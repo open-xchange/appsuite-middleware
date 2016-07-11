@@ -65,6 +65,7 @@ import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -526,7 +527,50 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
         }
 
-        return new Database[][] { needingUpdate, currentlyUpdating};
+        Database[] outdatedUpdating;
+        {
+            List<Database> list = databases.get(2);
+            outdatedUpdating = new Database[list.size()];
+            int i = 0;
+            for (Database database : list) {
+                outdatedUpdating[i++] = database;
+            }
+        }
+
+        return new Database[][] { needingUpdate, currentlyUpdating, outdatedUpdating };
+    }
+
+    @Override
+    public Database[] unblockDatabase(Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        try {
+            doNullCheck(db);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+
+        basicauth.doAuthentication(auth);
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, db);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchDatabaseException(e);
+        }
+        final Integer id = db.getId();
+        if (!tool.existsDatabase(id)) {
+            throw new NoSuchDatabaseException("No such database with id " + id);
+        }
+
+        OXToolStorageInterface oxtools = OXToolStorageInterface.getInstance();
+        List<Database> unblockedDatabaseSchema = oxtools.unblockDatabaseSchema(db);
+
+        Database[] outdatedUpdating = new Database[unblockedDatabaseSchema.size()];
+        int i = 0;
+        for (Database database : unblockedDatabaseSchema) {
+            outdatedUpdating[i++] = database;
+        }
+        return outdatedUpdating;
     }
 
     @Override

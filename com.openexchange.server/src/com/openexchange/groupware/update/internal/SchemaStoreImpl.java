@@ -408,8 +408,10 @@ public class SchemaStoreImpl extends SchemaStore {
         for (final ExecutedTask task : readUpdateTasks(con)) {
             if (LOCKED.equals(task.getTaskName())) {
                 state.setBlockingUpdatesRunning(true);
+                state.setBlockingUpdatesRunningSince(task.getLastModified());
             } else if (BACKGROUND.equals(task.getTaskName())) {
                 state.setBackgroundUpdatesRunning(true);
+                state.setBackgroundUpdatesRunningSince(task.getLastModified());
             } else {
                 state.addExecutedTask(task.getTaskName());
             }

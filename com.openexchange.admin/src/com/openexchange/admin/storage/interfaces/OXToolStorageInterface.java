@@ -490,10 +490,18 @@ public abstract class OXToolStorageInterface {
     /**
      * Lists all schemas in databases that are either locked (currently marked as being updated) or needing an update.
      *
-     * @return All such schemas as a list with length of 2; first element contains schemas needing an update, the second those schemas currently marked for being updated
+     * @return All such schemas as a list with length of 3; first element contains schemas needing an update, the second those schemas currently marked for being updated, and the third providing outdated updating schemas
      * @throws StorageException If such schemas cannot be returned
      */
     public abstract List<List<Database>> listSchemasBeingLockedOrNeedsUpdate() throws StorageException;
+
+    /**
+     * Unblocks specified database schema or all schemas associated with specified database inc ase no schema name is given.
+     *
+     * @return The list of unblocked database schemas
+     * @throws StorageException If unblocking fails
+     */
+    public abstract List<Database> unblockDatabaseSchema(Database db) throws StorageException;
 
     public abstract boolean serverInUse(final int server_id) throws StorageException;
 

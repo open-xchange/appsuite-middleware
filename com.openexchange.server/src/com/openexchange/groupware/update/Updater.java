@@ -88,6 +88,16 @@ public abstract class Updater {
     public abstract UpdateStatus getStatus(String schema, int writePoolId) throws OXException;
 
     /**
+     * Unblocks specified schema (if updating for too long)
+     *
+     * @param schemaName The schema name
+     * @param poolId The pool identifier
+     * @param contextId The context identifier
+     * @throws OXException If unblocking fails
+     */
+    public abstract void unblock(String schemaName, int poolId, int contextId) throws OXException;
+
+    /**
      * Starts the update process on a schema.
      * @param contextId Context inside the schema.
      * @throws OXException if an exception occurs.

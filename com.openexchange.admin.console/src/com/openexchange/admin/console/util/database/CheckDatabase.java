@@ -96,13 +96,17 @@ public class CheckDatabase extends DatabaseAbstraction {
     private void sysoutOutput(Database[][] databases) throws InvalidDataException, URISyntaxException {
         Database[] needingUpdate = databases[0];
         Database[] currentlyUpdating = databases[1];
+        Database[] outdatedUpdating = databases[2];
 
-        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(needingUpdate.length + currentlyUpdating.length);
+        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(needingUpdate.length + currentlyUpdating.length + outdatedUpdating.length);
         for (Database database : needingUpdate) {
             data.add(makeStandardData(database, false, "Needs update"));
         }
         for (Database database : currentlyUpdating) {
             data.add(makeStandardData(database, false, "Blocking updates running"));
+        }
+        for (Database database : outdatedUpdating) {
+            data.add(makeStandardData(database, false, "Blocking updates running for too long"));
         }
 
         doOutput(new String[] { "r", "l", "l", "l", "l" },
@@ -120,13 +124,17 @@ public class CheckDatabase extends DatabaseAbstraction {
 
         Database[] needingUpdate = databases[0];
         Database[] currentlyUpdating = databases[1];
+        Database[] outdatedUpdating = databases[2];
 
-        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(needingUpdate.length + currentlyUpdating.length);
+        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(needingUpdate.length + currentlyUpdating.length + outdatedUpdating.length);
         for (final Database database : needingUpdate) {
             data.add(makeCSVData(database, "Needs update"));
         }
         for (final Database database : currentlyUpdating) {
-            data.add(makeCSVData(database, "Marked as being updated"));
+            data.add(makeCSVData(database, "Blocking updates running"));
+        }
+        for (final Database database : outdatedUpdating) {
+            data.add(makeCSVData(database, "Blocking updates running for too long"));
         }
 
         doCSVOutput(columns, data);
