@@ -95,7 +95,7 @@ public abstract class SchemaStore {
     public abstract void lockSchema(Schema schema, int contextId, boolean background) throws OXException;
 
     /**
-     * Marks given schem as unlocked to release this schema from an update process.
+     * Marks given schema as unlocked to release this schema from an update process.
      *
      * @param schema the schema
      * @param contextId the unique context identifier
@@ -103,6 +103,17 @@ public abstract class SchemaStore {
      * @throws OXException
      */
     public abstract void unlockSchema(Schema schema, int contextId, boolean background) throws OXException;
+
+    /**
+     * Tries to refresh the schema lock (resetting time stamp to current time).
+     *
+     * @param schema The schema whose lock is supposed to be refreshed
+     * @param contextId The context identifier
+     * @param background <code>false</code> if blocking tasks are in progress; otherwise <code>true</code>.
+     * @return <code>true</code> if the lock was successfully refreshed; otherwise <code>false</code>
+     * @throws OXException If refresh fails
+     */
+    public abstract boolean tryRefreshSchemaLock(Schema schema, int contextId, boolean background) throws OXException;
 
     public final Schema getSchema(final Context ctx) throws OXException {
         return getSchema(ctx.getContextId());

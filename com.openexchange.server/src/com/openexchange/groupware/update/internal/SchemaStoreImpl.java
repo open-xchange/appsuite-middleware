@@ -268,6 +268,54 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
+    public boolean tryRefreshSchemaLock(Schema schema, int contextId, boolean background) throws OXException {
+        int poolId = Database.resolvePool(contextId, true);
+        CacheKey key = null;
+        if (null != cache) {
+            key = cache.newCacheKey(poolId, schema.getSchema());
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error("", e);
+            }
+        }
+        boolean refreshed = tryRefreshLock(contextId, background);
+        if (null != cache && null != key) {
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error("", e);
+            }
+        }
+        return refreshed;
+    }
+
+    private static boolean tryRefreshLock(int contextId, boolean background) throws OXException {
+        Connection con = Database.get(contextId, true);
+        try {
+            // Refresh lock
+            return tryRefreshLock(con, background ? BACKGROUND : LOCKED);
+        } finally {
+            Database.back(contextId, true, con);
+        }
+    }
+
+    private static boolean tryRefreshLock(Connection con, String idiom) throws OXException {
+        // Refresh lock
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE updateTask SET lastModified = ? WHERE cid=? AND taskName=?");
+            stmt.setLong(1, System.currentTimeMillis());
+            stmt.setString(2, idiom);
+            return stmt.executeUpdate() > 0;
+        } catch (final SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
     public void unlockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
         final int poolId = Database.resolvePool(contextId, true);
         CacheKey key = null;
