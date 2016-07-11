@@ -476,7 +476,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             try {
                 if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
-                    throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+                    throw tool.generateDatabaseUpdateException(ctx.getId().intValue());
                 }
             } catch (final StorageException e) {
                 // Context deletion should be a robust process. Therefore not failing if the schema is not up
@@ -1031,7 +1031,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
             if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
-                throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+                throw tool.generateDatabaseUpdateException(ctx.getId().intValue());
             }
             if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException(OXContextException.CONTEXT_DISABLED);

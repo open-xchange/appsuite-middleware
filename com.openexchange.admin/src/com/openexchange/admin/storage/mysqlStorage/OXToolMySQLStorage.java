@@ -53,6 +53,8 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -74,6 +76,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
@@ -950,6 +953,98 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public Database getSchemaByContextId(int contextId) throws StorageException, NoSuchObjectException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT c2db.write_db_pool_id,c2db.db_schema,db.url,db.driver,db.login,db.password,db.name,dbc.read_db_pool_id,dbc.weight,dbc.max_units FROM context_server2db_pool c2db JOIN db_pool db ON db.db_pool_id=c2db.write_db_pool_id JOIN db_cluster dbc ON dbc.write_db_pool_id=c2db.write_db_pool_id WHERE c2db.cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw new NoSuchObjectException("No database for context " + contextId);
+            }
+
+            Database retval = new Database();
+            int pos = 1;
+            retval.setId(I(rs.getInt(pos++)));
+            retval.setScheme(rs.getString(pos++));
+            retval.setUrl(rs.getString(pos++));
+            retval.setDriver(rs.getString(pos++));
+            retval.setLogin(rs.getString(pos++));
+            retval.setPassword(rs.getString(pos++));
+            retval.setName(rs.getString(pos++));
+            int slaveId = rs.getInt(pos++);
+            if (slaveId > 0) {
+                retval.setRead_id(I(slaveId));
+            }
+            retval.setClusterWeight(I(rs.getInt(pos++)));
+            retval.setMaxUnits(I(rs.getInt(pos++)));
+            return retval;
+        } catch (PoolException e) {
+            log.error("", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox db read connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public DatabaseUpdateException generateDatabaseUpdateException(int contextId) {
+        DatabaseUpdateException e;
+        if (contextId > 0) {
+            try {
+                // Schema "db1_1273" from database 1996 on host "db-master.host.invalid" is locked or is now being updated, please try again later
+                Database db = getSchemaByContextId(contextId);
+                StringBuilder sb = new StringBuilder(256);
+                sb.append("Schema \"").append(db.getScheme()).append("\" from database ").append(db.getId());
+                String host = extractHostFrom(db);
+                if (null != host) {
+                    sb.append(" on host \"").append(host).append("\"");
+                }
+                sb.append(" is locked or is now being updated, please try again later");
+                e = new DatabaseUpdateException(sb.toString());
+            } catch (NoSuchObjectException x) {
+                e = new DatabaseUpdateException("Database is locked or is now being updated, please try again later");
+            } catch (StorageException x) {
+                e = new DatabaseUpdateException("Database is locked or is now being updated, please try again later");
+            }
+        } else {
+            e = new DatabaseUpdateException("Database is locked or is now being updated, please try again later");
+        }
+        return e;
+    }
+
+    private static String extractHostFrom(Database db) {
+        if (null == db) {
+            return null;
+        }
+
+        String url = db.getUrl();
+        if (Strings.isEmpty(url)) {
+            return null;
+        }
+
+        try {
+            return new URI(url.substring("jdbc:".length())).getHost();
+        } catch (URISyntaxException e) {
+            log.error("Failed to extract host name from URL {}", url, e);
+            return null;
+        }
+    }
+
+    @Override
     public boolean isDistinctWritePoolIDForSchema(String schema) throws StorageException, NoSuchObjectException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -1673,28 +1768,39 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean checkAndUpdateSchemaIfRequired(int contextId) throws StorageException {
-        try {
-            final Updater updater = Updater.getInstance();
-            UpdateStatus status = updater.getStatus(contextId);
-            if (status.blockingUpdatesRunning()) {
-                return true;
+    public boolean checkAndUpdateSchemaIfRequired(final int contextId) throws StorageException {
+        UpdateStatusProvider provider = new UpdateStatusProvider() {
+
+            @Override
+            public UpdateStatus generateUpdateStatus() throws OXException {
+                Updater updater = Updater.getInstance();
+                return updater.getStatus(contextId);
             }
-            if (status.needsBlockingUpdates()) {
-                updater.startUpdate(contextId);
-                return true;
-            }
-        } catch (OXException e) {
-            throw new StorageException(e.getMessage(), e);
-        }
-        return false;
+        };
+        return condCheckAndUpdateSchemaIfRequired(provider, true, contextId);
     }
 
-    private boolean condCheckAndUpdateSchemaIfRequired(final int writePoolId, final String schema, final boolean doUpdate, final Context ctx) throws StorageException {
-        Updater updater;
+    @Override
+    public boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException {
+        UpdateStatusProvider provider = new UpdateStatusProvider() {
+
+            @Override
+            public UpdateStatus generateUpdateStatus() throws OXException {
+                Updater updater = Updater.getInstance();
+                return updater.getStatus(schema, writePoolId);
+            }
+        };
+        return condCheckAndUpdateSchemaIfRequired(provider, false, 0);
+    }
+
+    private static interface UpdateStatusProvider {
+
+        UpdateStatus generateUpdateStatus() throws OXException;
+    }
+
+    private boolean condCheckAndUpdateSchemaIfRequired(UpdateStatusProvider statusProvider, boolean doUpdate, int contextId) throws StorageException {
         try {
-            updater = Updater.getInstance();
-            UpdateStatus status = updater.getStatus(schema, writePoolId);
+            UpdateStatus status = statusProvider.generateUpdateStatus();
             if (status.blockingUpdatesRunning()) {
                 log.info("Another database update process is already running");
                 return true;
@@ -1705,12 +1811,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             // we only reach this point, if we need an update
             if (doUpdate) {
-                if (ctx == null) {
-                    final StorageException e = new StorageException("context must not be null when schema update should be done");
+                if (contextId <= 0) {
+                    final StorageException e = new StorageException("A valid context identifier is required in case schema update should be done");
                     log.error("", e);
                     throw e;
                 }
-                updater.startUpdate(ctx.getId().intValue());
+                Updater.getInstance().startUpdate(contextId);
             }
             // either with or without starting an update task, when we reach this point, we
             // must return true
@@ -1724,11 +1830,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("Error in checking/updating schema", e);
             throw new StorageException(e.toString(), e);
         }
-    }
-
-    @Override
-    public boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException {
-        return condCheckAndUpdateSchemaIfRequired(writePoolId, schema, false, null);
     }
 
     @Override
@@ -1757,9 +1858,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
         try {
             Updater updater = Updater.getInstance();
-            for (Iterator<Database> it = databases.iterator(); it.hasNext();) {
-                Database database = it.next();
-
+            for (Database database : databases) {
                 UpdateStatus status = updater.getStatus(database.getScheme(), database.getId().intValue());
                 if (status.blockingUpdatesRunning()) {
                     // Currently updating

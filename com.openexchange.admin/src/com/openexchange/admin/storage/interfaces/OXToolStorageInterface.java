@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
@@ -373,6 +374,24 @@ public abstract class OXToolStorageInterface {
      * @throws NoSuchObjectException If there is no such database schema
      */
     public abstract int getDatabaseIDByDatabaseSchema(String schemaName) throws StorageException, NoSuchObjectException;
+
+    /**
+     * Gets the database schema for specified context.
+     *
+     * @param contextId The context identifier
+     * @return The database schema
+     * @throws StorageException If database cannot be loaded
+     * @throws NoSuchObjectException If there is no such database schema
+     */
+    public abstract Database getSchemaByContextId(int contextId) throws StorageException, NoSuchObjectException;
+
+    /**
+     * Generates an appropriate {@link DatabaseUpdateException} for specified context.
+     *
+     * @param contextId The context identifier
+     * @return The <code>DatabaseUpdateException</code> instance
+     */
+    public abstract DatabaseUpdateException generateDatabaseUpdateException(int contextId);
 
     /**
      * Checks whether all contexts of the given db share the same write pool ID or not.

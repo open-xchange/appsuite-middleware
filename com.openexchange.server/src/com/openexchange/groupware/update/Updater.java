@@ -61,19 +61,22 @@ import com.openexchange.groupware.update.internal.UpdaterImpl;
 public abstract class Updater {
 
     /**
-     * Default constructor.
-     */
-    protected Updater() {
-        super();
-    }
-
-    /**
      * Factory method to get an updater.
+     *
      * @return the updater.
      * @throws OXException if instantiating the implementation fails.
      */
     public static Updater getInstance() {
-        return new UpdaterImpl();
+        return UpdaterImpl.getInstance();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Default constructor.
+     */
+    protected Updater() {
+        super();
     }
 
     public final UpdateStatus getStatus(final Context ctx) throws OXException {

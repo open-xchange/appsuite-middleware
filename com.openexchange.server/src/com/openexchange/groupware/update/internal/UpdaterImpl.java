@@ -68,10 +68,23 @@ import com.openexchange.timer.TimerService;
  */
 public class UpdaterImpl extends Updater {
 
+    private static final UpdaterImpl INSTANCE = new UpdaterImpl();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static UpdaterImpl getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------ //
+
     /**
      * Default constructor.
      */
-    public UpdaterImpl() {
+    private UpdaterImpl() {
         super();
     }
 
