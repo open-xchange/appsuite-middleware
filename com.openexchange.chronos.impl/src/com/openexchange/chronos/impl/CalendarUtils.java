@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
@@ -136,16 +137,37 @@ public class CalendarUtils {
         return null != find(attendees, entity);
     }
 
+    /**
+     * Gets the calendar address for a user (as mailto URI).
+     *
+     * @param contextID The context identifier
+     * @param user The user
+     * @return The calendar address
+     */
     public static String getCalAddress(User user) {
         return "mailto:" + user.getMail();
     }
 
+    /**
+     * Gets the calendar address for a resource (as uniform resource name URI).
+     *
+     * @param contextID The context identifier
+     * @param resource The resource
+     * @return The calendar address
+     */
     public static String getCalAddress(int contextID, Resource resource) {
-        return "urn:uuid:" + resource.getIdentifier(); //TODO encode into uid
+        return ResourceId.forResource(contextID, resource.getIdentifier());
     }
 
+    /**
+     * Gets the calendar address for a group (as uniform resource name URI).
+     *
+     * @param contextID The context identifier
+     * @param group The group
+     * @return The calendar address
+     */
     public static String getCalAddress(int contextID, Group group) {
-        return "urn:uuid:" + group.getIdentifier(); //TODO encode into uid
+        return ResourceId.forGroup(contextID, group.getIdentifier());
     }
 
     public static <T extends CalendarUser> T applyProperties(T calendarUser, User user) {
