@@ -115,7 +115,7 @@ public abstract class ChronosAction extends AppointmentAction {
         Date timestamp = new Date(0L);
         List<Appointment> appointments = new ArrayList<Appointment>(events.size());
         for (UserizedEvent event : events) {
-            appointments.add(EventMapper.getAppointment(event));
+            appointments.add(EventConverter.getAppointment(event));
             timestamp = getLatestModified(timestamp, event);
         }
         return new AJAXRequestResult(appointments, timestamp, "appointment");
@@ -131,13 +131,13 @@ public abstract class ChronosAction extends AppointmentAction {
         CollectionDelta<Appointment> delta = new CollectionDelta<Appointment>();
         if (null != newAndModifiedEvents) {
             for (UserizedEvent event : newAndModifiedEvents) {
-                delta.addNewOrModified(EventMapper.getAppointment(event));
+                delta.addNewOrModified(EventConverter.getAppointment(event));
                 timestamp = getLatestModified(timestamp, event);
             }
         }
         if (null != deletedEvents) {
             for (UserizedEvent event : deletedEvents) {
-                Appointment appointment = EventMapper.getAppointment(event);
+                Appointment appointment = EventConverter.getAppointment(event);
                 appointment.setMarker(Marker.ID_ONLY);
                 delta.addDeleted(appointment);
                 timestamp = getLatestModified(timestamp, event);
@@ -186,7 +186,7 @@ public abstract class ChronosAction extends AppointmentAction {
         if (null != end) {
             parameters.set(CalendarParameters.PARAMETER_RANGE_END, request.applyTimeZone2Date(end.getTime()));
         }
-        EventField orderBy = EventMapper.getField(request.optInt(AJAXServlet.PARAMETER_SORT));
+        EventField orderBy = EventConverter.getField(request.optInt(AJAXServlet.PARAMETER_SORT));
         parameters.set(CalendarParameters.PARAMETER_ORDER_BY, null == orderBy ? EventField.START_DATE : orderBy);
         String order = request.getParameter(AJAXServlet.PARAMETER_ORDER);
         if (null != order) {
@@ -230,7 +230,7 @@ public abstract class ChronosAction extends AppointmentAction {
                 }
             }
         }
-        return EventMapper.getFields(columnIDs);
+        return EventConverter.getFields(columnIDs);
     }
 
     private static CalendarParameters requireParameters(CalendarParameters parameters, String... requiredParameters) throws OXException {

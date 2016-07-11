@@ -76,12 +76,12 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Compat}
+ * {@link EventConverter}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventMapper {
+public class EventConverter {
 
     /**
      * Gets the event fields for the supplied column identifiers.
@@ -432,18 +432,29 @@ public class EventMapper {
         List<Attendee> attendees = new ArrayList<Attendee>(participants.length);
         for (Participant participant : participants) {
             Attendee attendee = new Attendee();
-            attendee.setEntity(participant.getIdentifier());
-            attendee.setCuType(Appointment2Event.getCalendarUserType(participant.getType()));
+            if (0 < participant.getIdentifier()) {
+                attendee.setEntity(participant.getIdentifier());
+            }
+            if (0 < participant.getType()) {
+                attendee.setCuType(Appointment2Event.getCalendarUserType(participant.getType()));
+            }
             if (null != participant.getEmailAddress()) {
                 Appointment2Event.getURI(participant.getEmailAddress());
             }
-            attendee.setCommonName(participant.getDisplayName());
+            if (null != participant.getDisplayName()) {
+                attendee.setCommonName(participant.getDisplayName());
+            }
             if (ConfirmableParticipant.class.isInstance(participant)) {
                 int confirm = ((ConfirmableParticipant) participant).getConfirm();
-                attendee.setPartStat(Appointment2Event.getParticipationStatus(confirm));
+                if (0 < confirm) {
+                    attendee.setPartStat(Appointment2Event.getParticipationStatus(confirm));
+                }
             }
             if (UserParticipant.class.isInstance(participant)) {
-                attendee.setComment(((UserParticipant) participant).getConfirmMessage());
+                String message = ((UserParticipant) participant).getConfirmMessage();
+                if (null != message) {
+                    attendee.setComment(message);
+                }
             }
             attendees.add(attendee);
         }
