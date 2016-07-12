@@ -512,7 +512,7 @@ public class IMAPDefaultFolderChecker {
      */
     protected TIntObjectMap<String> getSpecialUseInfo(String[] names, String[] fullNames) throws OXException {
         try {
-            TIntObjectMap<String> indexes = new TIntObjectHashMap<String>(6);
+            TIntObjectMap<String> indexes = new TIntObjectHashMap<>(6);
             IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
             boolean isPrimary = MailAccount.DEFAULT_ID == accountId;
 
@@ -696,11 +696,14 @@ public class IMAPDefaultFolderChecker {
              * Null'ify full name if not on root level OR not equal to name; meaning not intended to create default folders next to INBOX
              * In that case create them with respect to determined prefix
              */
-            TIntObjectMap<String> namesToSet = new TIntObjectHashMap<String>(6);
+            TIntObjectMap<String> namesToSet = new TIntObjectHashMap<>(6);
             TIntList indexes = new TIntLinkedList();
             for (int i = 0; i < fullNames.length; i++) {
                 String fullName = fullNames[i];
                 if (isEmpty(fullName)) {
+                    if (!isEmpty(names[i])) {
+                        continue;
+                    }
                     // No full name given
                     if (null != checkedIndexes) {
                         String expectedFullName = checkedIndexes.get(i);
@@ -776,8 +779,8 @@ public class IMAPDefaultFolderChecker {
             }
         } else {
             if (null != checkedIndexes && !checkedIndexes.isEmpty()) {
-                TIntObjectMap<String> fullNamesToSet = new TIntObjectHashMap<String>(6);
-                TIntObjectMap<String> namesToSet = new TIntObjectHashMap<String>(6);
+                TIntObjectMap<String> fullNamesToSet = new TIntObjectHashMap<>(6);
+                TIntObjectMap<String> namesToSet = new TIntObjectHashMap<>(6);
                 for (int i = 0; i < fullNames.length; i++) {
                     String expectedFullName = checkedIndexes.get(i);
                     if (null != expectedFullName) {
@@ -984,7 +987,7 @@ public class IMAPDefaultFolderChecker {
         if (!f.exists()) {
             // Check against siblings
             IMAPFolder parent = (IMAPFolder) f.getParent();
-            List<Folder> candidates = new ArrayList<Folder>(2);
+            List<Folder> candidates = new ArrayList<>(2);
             {
                 Folder[] folders = parent.list();
                 String mName = f.getName();
@@ -1232,7 +1235,7 @@ public class IMAPDefaultFolderChecker {
         if (null != mass) {
             try {
                 TIntList indexes = new TIntArrayList(map.size());
-                List<String> fullNames = new ArrayList<String>(map.size());
+                List<String> fullNames = new ArrayList<>(map.size());
                 for (int index : map.keys()) {
                     indexes.add(index);
                     fullNames.add(map.get(index));
@@ -1258,7 +1261,7 @@ public class IMAPDefaultFolderChecker {
         if (null != mass) {
             try {
                 TIntList indexes = new TIntArrayList(map.size());
-                List<String> names = new ArrayList<String>(map.size());
+                List<String> names = new ArrayList<>(map.size());
                 for (int index : map.keys()) {
                     indexes.add(index);
                     names.add(map.get(index));

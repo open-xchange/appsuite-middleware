@@ -265,7 +265,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (!rs.next()) {
                 return Collections.<String> emptySet();
             }
-            final Set<String> caps = new HashSet<String>(16);
+            final Set<String> caps = new HashSet<>(16);
             do {
                 caps.add(rs.getString(1));
             } while (rs.next());
@@ -404,7 +404,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(2, user.getId().intValue());
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    existing = new HashSet<String>(16);
+                    existing = new HashSet<>(16);
                     do {
                         existing.add(rs.getString(1));
                     } while (rs.next());
@@ -415,7 +415,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = null;
                 rs = null;
             }
-            final Set<String> capsToInsert = new HashSet<String>(capsToAdd);
+            final Set<String> capsToInsert = new HashSet<>(capsToAdd);
             // Delete existing ones
             if (null != capsToRemove && !capsToRemove.isEmpty()) {
                 for (final String cap : capsToRemove) {
@@ -860,7 +860,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // "prg_contacts_update_needed")
             final Class<? extends User> c = usrdata.getClass();
             final Method[] theMethods = c.getMethods();
-            final HashSet<String> notallowed = new HashSet<String>(9);
+            final HashSet<String> notallowed = new HashSet<>(9);
             // Define all those fields which are contained in the user table
             notallowed.add("Id");
             notallowed.add("Password");
@@ -879,8 +879,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             StringBuilder contact_query = new StringBuilder("UPDATE prg_contacts SET ");
 
-            List<Method> methodlist2 = new LinkedList<Method>();
-            List<String> returntypes = new LinkedList<String>();
+            List<Method> methodlist2 = new LinkedList<>();
+            List<String> returntypes = new LinkedList<>();
 
             boolean prg_contacts_update_needed = false;
             boolean displayNameUpdate = false;
@@ -1265,7 +1265,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         Cache cache = cacheService.getCache("User");
                         cache.remove(key);
                         if (null != quotaAffectedUserIDs) {
-                            List<Serializable> keys = new ArrayList<Serializable>(quotaAffectedUserIDs.size());
+                            List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
                             for (Integer userID : quotaAffectedUserIDs) {
                                 keys.add(cacheService.newCacheKey(contextId, userID.intValue()));
                             }
@@ -1285,7 +1285,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache = cacheService.getCache("QuotaFileStorages");
                         cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
                         if (null != quotaAffectedUserIDs) {
-                            List<Serializable> keys = new ArrayList<Serializable>(quotaAffectedUserIDs.size());
+                            List<Serializable> keys = new ArrayList<>(quotaAffectedUserIDs.size());
                             for (Integer userID : quotaAffectedUserIDs) {
                                 keys.add(userID);
                             }
@@ -1399,7 +1399,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final int contextId = ctx.getId().intValue();
         final MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         final MailAccountDescription account = new MailAccountDescription();
-        final Set<Attribute> changed = new HashSet<Attribute>();
+        final Set<Attribute> changed = new HashSet<>();
         account.setDefaultFlag(true);
         account.setId(0);
         account.setName(MailFolder.DEFAULT_FOLDER_NAME);
@@ -1499,7 +1499,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 Databases.closeSQLStuff(prep);
             }
             if (0 < updated) {
-                Set<Integer> affectedUserIDs = new HashSet<Integer>();
+                Set<Integer> affectedUserIDs = new HashSet<>();
                 ResultSet result = null;
                 PreparedStatement stmt = null;
                 try {
@@ -1792,7 +1792,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 StringBuilder contactInsert = new StringBuilder("INSERT INTO prg_contacts (cid,userid,creating_date,created_from,changing_date,changed_from,fid,intfield01,field90,uid,");
                 StringBuilder placeHolders = new StringBuilder();
-                List<Method> methodlist2 = new LinkedList<Method>();
+                List<Method> methodlist2 = new LinkedList<>();
                 for (MethodAndNames methodandname : methodlist) {
                     // First we have to check which return value we have. We have to distinguish four types.
                     final Method method = methodandname.getMethod();
@@ -2154,7 +2154,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
             if (viewFactory != null) {
                 try {
-                    ConfigView view = viewFactory.getView(user.getId(), ctx.getId());
+                    ConfigView view = viewFactory.getView(userId, ctx.getId());
                     check = view.get("com.openexchange.mail.useStaticDefaultFolders", Boolean.class);
                 } catch (OXException e) {
                     log.warn("Unable to load com.openexchange.mail.useStaticDefaultFolders property.");
@@ -2346,7 +2346,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         Connection read_ox_con = null;
         PreparedStatement stmt = null;
         try {
-            List<Integer> list = new LinkedList<Integer>();
+            List<Integer> list = new LinkedList<>();
             read_ox_con = cache.getConnectionForContext(context_id);
             stmt = read_ox_con.prepareStatement("SELECT con.userid,con.field01,con.field02,con.field03,lu.uid FROM prg_contacts con JOIN login2user lu  ON con.userid = lu.id WHERE con.cid = ? AND con.cid = lu.cid AND (lu.uid LIKE '%' OR con.field01 LIKE '%');");
 
@@ -2411,7 +2411,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(2, filestore_id.intValue());
             }
             rs = stmt.executeQuery();
-            List<User> retval = new LinkedList<User>();
+            List<User> retval = new LinkedList<>();
             while (rs.next()) {
                 retval.add(new User(rs.getInt(1)));
             }
@@ -2479,7 +2479,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setString(3, new_search_pattern);
             }
             rs = stmt.executeQuery();
-            List<User> retval = new LinkedList<User>();
+            List<User> retval = new LinkedList<>();
             while (rs.next()) {
                 retval.add(new User(rs.getInt(1)));
             }
@@ -2558,7 +2558,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if( s != null ) {
                 settStor.readValues(con, s);
                 if( ret == null ) {
-                    ret = new HashMap<String, String>();
+                    ret = new HashMap<>();
                 }
                 final String value = (String)s.getSingleValue();
                 if( value != null ) {
@@ -2574,7 +2574,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 final String path = module.getPath() + "/gui";
                 settStor.readValues(con, guiSetting);
                 if( ret == null ) {
-                    ret = new HashMap<String, String>();
+                    ret = new HashMap<>();
                 }
                 final String value = (String)guiSetting.getSingleValue();
                 if( value != null ) {
@@ -2590,8 +2590,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final int contextId = i(ctx.getId());
         final Class<User> c = User.class;
         final Method[] theMethods = c.getMethods();
-        final List<Method> list = new LinkedList<Method>();
-        final HashSet<String> notallowed = new HashSet<String>(9);
+        final List<Method> list = new LinkedList<>();
+        final HashSet<String> notallowed = new HashSet<>(9);
 
         // Define all those fields which are contained in the user table
         notallowed.add("setMailFolderDrafts");
@@ -2631,7 +2631,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmtuserattributes = null;
         PreparedStatement stmtusm = null;
         PreparedStatement stmtacc = null;
-        List<User> userlist = new LinkedList<User>();
+        List<User> userlist = new LinkedList<>();
 
         try {
             read_ox_con = cache.getConnectionForContext(contextId);
@@ -3438,7 +3438,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             final ResultSet rs = prep.executeQuery();
 
-            final List<Integer> tmp = new LinkedList<Integer>();
+            final List<Integer> tmp = new LinkedList<>();
 
             // add colubrids ALL_GROUPS_AND_USERS group to the group
             tmp.add(Integer.valueOf(0));
@@ -3523,10 +3523,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     private List<MethodAndNames> getGetters(final Method[] theMethods) {
-        final List<MethodAndNames> retlist = new LinkedList<MethodAndNames>();
+        final List<MethodAndNames> retlist = new LinkedList<>();
 
         // Define the returntypes we search for
-        final HashSet<String> returntypes = new HashSet<String>(4);
+        final HashSet<String> returntypes = new HashSet<>(4);
         returntypes.add("java.lang.String");
         returntypes.add("java.lang.Integer");
         returntypes.add("java.lang.Long");
@@ -3589,7 +3589,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt.setString(2, "%" + aliasDomain);
 
             rs = stmt.executeQuery();
-            List<User> retval = new LinkedList<User>();
+            List<User> retval = new LinkedList<>();
             while (rs.next()) {
                 retval.add(new User(rs.getInt(1)));
             }
