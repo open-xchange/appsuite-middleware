@@ -245,14 +245,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private int currentNestingLevel = 0;
     private final int maxNestedMessageLevels;
     private String initialiserSequenceId;
-    
-    public String getInitialiserSequenceId() {
-        return initialiserSequenceId;
-    }
-    
-    public void setInitialiserSequenceId(String initialiserSequenceId) {
-        this.initialiserSequenceId = initialiserSequenceId;
-    }
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -364,7 +356,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
                 this.initialiserSequenceId = mail.getSequenceId();
-                
+
 
                 String originalId = null;
                 if (mail.containsOriginalId()) {
@@ -421,6 +413,14 @@ public final class JsonMessageHandler implements MailMessageHandler {
     public JsonMessageHandler setIncludePlainText(final boolean includePlainText) {
         this.includePlainText = includePlainText;
         return this;
+    }
+
+    public String getInitialiserSequenceId() {
+        return initialiserSequenceId;
+    }
+
+    public void setInitialiserSequenceId(String initialiserSequenceId) {
+        this.initialiserSequenceId = initialiserSequenceId;
     }
 
     private AttachmentListing getAttachmentListing() {
@@ -1300,25 +1300,28 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 msgHandler.exactLength = exactLength;
                 // msgHandler.originalMailPath = originalMailPath;
                 msgHandler.currentNestingLevel = currentNestingLevel + 1;
-                if (this.initialiserSequenceId != null)
+                if (this.initialiserSequenceId != null) {
                     nestedMessageFullId = this.initialiserSequenceId + "." + id;
                     msgHandler.setInitialiserSequenceId(initialiserSequenceId);
+                }
                 new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
                 nestedObject = msgHandler.getJSONObject();
-                if (!nestedMessageFullId.equals(""))
+                if (nestedMessageFullId.length() != 0) {
                     nestedObject.put(ID, nestedMessageFullId);
+                }
             } else {
                 // Only basic information
                 nestedObject = new JSONObject(3);
-                
+
             }
             /*
              * Sequence ID
              */
-            if (!nestedObject.has(ID) && this.initialiserSequenceId == null) 
-              nestedObject.put(ID, mailPart.containsSequenceId() ? mailPart.getSequenceId() : id);
-            else if (this.initialiserSequenceId != null && !this.initialiserSequenceId.equals(""))
-              nestedObject.put(ID, this.initialiserSequenceId + "." + id);
+            if (!nestedObject.has(ID) && this.initialiserSequenceId == null) {
+                nestedObject.put(ID, mailPart.containsSequenceId() ? mailPart.getSequenceId() : id);
+            } else if (this.initialiserSequenceId != null && this.initialiserSequenceId.length() != 0) {
+                nestedObject.put(ID, this.initialiserSequenceId + "." + id);
+            }
             /*
              * Filename (if present)
              */

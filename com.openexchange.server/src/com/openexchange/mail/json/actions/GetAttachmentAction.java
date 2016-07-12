@@ -89,7 +89,6 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
@@ -300,18 +299,18 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                     }
                 }
-                
+
                 if (asJson && mailPart.getContentType().startsWith("message/rfc822")) {
                     MailMessage nestedMailMessage = MailMessageParser.getMessageContentFrom(mailPart);
                     if (null != nestedMailMessage) {
                         nestedMailMessage.setAccountId(mailInterface.getAccountID());
-                        nestedMailMessage.setSequenceId(sequenceId + (nestedMailMessage.getSequenceId() == null ? "" : "." + nestedMailMessage.getSequenceId()));
+                        nestedMailMessage.setSequenceId(nestedMailMessage.getSequenceId() == null ? sequenceId : sequenceId + "." + nestedMailMessage.getSequenceId());
                         // Prepare request/result objects
                         AJAXRequestData requestData = req.getRequest();
                         requestData.putParameter("embedded", "true");
                         requestData.putParameter(Mail.PARAMETER_ALLOW_NESTED_MESSAGES, "false");
                         AJAXRequestResult requestResult = new AJAXRequestResult(nestedMailMessage, "mail");
-                        
+
                         return requestResult;
                     }
                 }
