@@ -83,7 +83,7 @@ public class CheckDatabase extends DatabaseAbstraction {
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 precsvinfos(databases);
             } else {
-                sysoutOutput(databases);
+                sysoutOutput(databases, parser);
             }
 
             sysexit(0);
@@ -93,24 +93,29 @@ public class CheckDatabase extends DatabaseAbstraction {
 
     }
 
-    private void sysoutOutput(Database[][] databases) throws InvalidDataException, URISyntaxException {
+    private void sysoutOutput(Database[][] databases, AdminParser parser) throws InvalidDataException, URISyntaxException {
         Database[] needingUpdate = databases[0];
         Database[] currentlyUpdating = databases[1];
         Database[] outdatedUpdating = databases[2];
 
-        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(needingUpdate.length + currentlyUpdating.length + outdatedUpdating.length);
-        for (Database database : needingUpdate) {
-            data.add(makeStandardData(database, false, "Needs update"));
-        }
-        for (Database database : currentlyUpdating) {
-            data.add(makeStandardData(database, false, "Blocking updates running"));
-        }
-        for (Database database : outdatedUpdating) {
-            data.add(makeStandardData(database, false, "Blocking updates running for too long"));
-        }
+        int total = needingUpdate.length + currentlyUpdating.length + outdatedUpdating.length;
+        if (total <= 0) {
+            createMessageForStdout("Neither pending, blocking nor stale schemas found", parser);
+        } else {
+            ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(total);
+            for (Database database : needingUpdate) {
+                data.add(makeStandardData(database, false, "Needs update"));
+            }
+            for (Database database : currentlyUpdating) {
+                data.add(makeStandardData(database, false, "Blocking updates running"));
+            }
+            for (Database database : outdatedUpdating) {
+                data.add(makeStandardData(database, false, "Blocking updates running for too long"));
+            }
 
-        doOutput(new String[] { "r", "l", "l", "l", "l" },
-                 new String[] { "id", "name", "hostname", "scheme", "status" }, data);
+            doOutput(new String[] { "r", "l", "l", "l", "l" },
+                new String[] { "id", "name", "hostname", "scheme", "status" }, data);
+        }
     }
 
     private void precsvinfos(final Database[][] databases) throws URISyntaxException, InvalidDataException {
