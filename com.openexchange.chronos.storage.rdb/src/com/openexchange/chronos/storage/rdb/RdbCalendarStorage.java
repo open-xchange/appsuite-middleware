@@ -182,8 +182,10 @@ public class RdbCalendarStorage implements CalendarStorage {
         try {
             connection = dbProvider.getReadConnection(context);
             Event event = selectEvent(connection, context.getContextId(), objectID, fields);
-            event.setAttendees(selectAttendees(connection, context.getContextId(), objectID));
-            event.setAttachments(selectAttachments(connection, context.getContextId(), objectID));
+            if (null != event) {
+                event.setAttendees(selectAttendees(connection, context.getContextId(), objectID));
+                event.setAttachments(selectAttachments(connection, context.getContextId(), objectID));
+            }
             return event;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
