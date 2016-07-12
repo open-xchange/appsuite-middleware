@@ -162,6 +162,7 @@ public class UnblockDatabase extends DatabaseAbstraction {
 
     private final void displayUnblockedMultipleMessage(String id, Database[] databases, AdminParser parser) throws Exception {
         createMessageForStdout("unblocked the following schemas from database " + id + ":", parser);
+        createLinefeedForStdout(parser);
         sysoutOutput(databases);
     }
 

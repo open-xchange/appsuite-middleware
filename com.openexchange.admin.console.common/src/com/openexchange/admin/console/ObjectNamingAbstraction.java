@@ -99,6 +99,10 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         createMessage(message, System.out, parser, false);
     }
 
+    protected void createLinefeedForStdout(AdminParser parser) {
+        createMessage("", System.out, parser, false);
+    }
+
     /**
      * @param id
      * @param ctxid
@@ -128,7 +132,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
 
     private void createMessage(String message, PrintStream ps, AdminParser parser, boolean followingtext) {
         if (null != parser && parser.checkNoNewLine()) {
-            String output = message.replaceAll("\r?\n", "");
+            String output = null == message || 0 == message.length() ? "" : message.replaceAll("\r?\n", "");
             if (followingtext) {
                 ps.print(output);
             } else {
