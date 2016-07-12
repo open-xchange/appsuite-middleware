@@ -48,12 +48,16 @@
  */
 package com.openexchange.admin.console.util.database;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.rmi.Naming;
+import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  *
@@ -91,18 +95,58 @@ public class UnblockDatabase extends DatabaseAbstraction {
                 overridingObjectName = "schema";
                 successtext = db.getScheme();
                 if (unblockedSchemas.length == 0) {
-                    displayAlreadyUnblockedMessage(successtext, null, parser);
+                    displayAlreadyUnblockedMessage(successtext, parser);
                 } else {
-                    displayUnblockedMessage(successtext, null, parser);
+                    displayUnblockedMessage(successtext, parser);
                 }
             } else {
-                displayUnblockedMessage(successtext, null, parser);
+                if (unblockedSchemas.length == 0) {
+                    displayAlreadyUnblockedMessage(successtext, parser);
+                } else {
+                    displayUnblockedMultipleMessage(successtext, unblockedSchemas, parser);
+                }
             }
 
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);
         }
+    }
+
+    private void sysoutOutput(Database[] databases) throws InvalidDataException, URISyntaxException {
+        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>(databases.length);
+        for (Database database : databases) {
+            data.add(makeStandardData(database));
+        }
+
+        doOutput(new String[] { "r", "l", "l", "l" },
+                 new String[] { "id", "name", "hostname", "scheme" }, data);
+    }
+
+    private ArrayList<String> makeStandardData(Database db) throws URISyntaxException {
+        ArrayList<String> rea_data = new ArrayList<String>();
+
+        rea_data.add(db.getId().toString());
+
+        if (null != db.getName()) {
+            rea_data.add(db.getName());
+        } else {
+            rea_data.add(null);
+        }
+
+        if (null != db.getUrl()) {
+            rea_data.add(new URI(db.getUrl().substring("jdbc:".length())).getHost());
+        } else {
+            rea_data.add(null);
+        }
+
+        if (null != db.getScheme()) {
+            rea_data.add(db.getScheme().toString());
+        } else {
+            rea_data.add(null);
+        }
+
+        return rea_data;
     }
 
     private String overridingObjectName;
@@ -112,12 +156,17 @@ public class UnblockDatabase extends DatabaseAbstraction {
         return null == overridingObjectName ? super.getObjectName() : overridingObjectName;
     }
 
-    private final void displayUnblockedMessage(final String id, final Integer ctxid, final AdminParser parser) {
-        createMessageForStdout(id, ctxid, "unblocked", parser);
+    private final void displayUnblockedMessage(String id, AdminParser parser) {
+        createMessageForStdout(id, null, "unblocked", parser);
     }
 
-    private final void displayAlreadyUnblockedMessage(final String id, final Integer ctxid, final AdminParser parser) {
-        createMessageForStdout(id, ctxid, "already unblocked", parser);
+    private final void displayUnblockedMultipleMessage(String id, Database[] databases, AdminParser parser) throws Exception {
+        createMessageForStdout("unblocked the following schemas from database " + id + ":", parser);
+        sysoutOutput(databases);
+    }
+
+    private final void displayAlreadyUnblockedMessage(String id, AdminParser parser) {
+        createMessageForStdout(id, null, "is already unblocked", parser);
     }
 
     public static void main(final String args[]) {

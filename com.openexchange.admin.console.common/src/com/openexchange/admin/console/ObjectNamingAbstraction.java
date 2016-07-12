@@ -95,6 +95,10 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         createMessage(id, ctxid, type, System.out, parser, false);
     }
 
+    protected void createMessageForStdout(final String message, final AdminParser parser) {
+        createMessage(message, System.out, parser, false);
+    }
+
     /**
      * @param id
      * @param ctxid
@@ -119,15 +123,19 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             sb.append(" ");
             sb.append(type);
         }
-        if( null != parser && parser.checkNoNewLine()) {
-            final String output = sb.toString().replace("\n", "");
+        createMessage(sb.toString(), ps, parser, followingtext);
+    }
+
+    private void createMessage(String message, PrintStream ps, AdminParser parser, boolean followingtext) {
+        if (null != parser && parser.checkNoNewLine()) {
+            String output = message.replaceAll("\r?\n", "");
             if (followingtext) {
                 ps.print(output);
             } else {
                 ps.println(output);
             }
         } else {
-            ps.println(sb.toString());
+            ps.println(message);
         }
     }
 
