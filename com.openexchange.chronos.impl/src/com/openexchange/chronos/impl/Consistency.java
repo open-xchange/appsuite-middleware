@@ -88,13 +88,36 @@ public class Consistency {
         return attendee;
     }
 
+    /**
+     * Sets an event's organizer to a specific calendar user.
+     *
+     * @param event The event to set the organizer for
+     * @param user The user to become the organizer
+     * @return The organizer, as added to the event
+     */
     public static Organizer setOrganizer(Event event, User user) {
+        return setOrganizer(event, user, null);
+    }
+
+    /**
+     * Sets an event's organizer to a specific calendar user.
+     *
+     * @param event The event to set the organizer for
+     * @param user The user to become the organizer
+     * @param sentBy Another user who is acting on behalf of the organizer, or <code>null</code> if not set
+     * @return The organizer, as added to the event
+     */
+    public static Organizer setOrganizer(Event event, User user, User sentBy) {
         Organizer organizer = event.getOrganizer();
         if (null == organizer) {
             organizer = new Organizer();
             event.setOrganizer(organizer);
         }
-        return CalendarUtils.applyProperties(organizer, user);
+        organizer = CalendarUtils.applyProperties(organizer, user);
+        if (null != sentBy) {
+            organizer.setSentBy(CalendarUtils.getCalAddress(sentBy));
+        }
+        return organizer;
     }
 
     public static void setModifiedNow(Event event, int modifiedBy) {
