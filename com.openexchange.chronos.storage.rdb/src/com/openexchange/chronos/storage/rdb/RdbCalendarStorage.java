@@ -204,8 +204,11 @@ public class RdbCalendarStorage implements CalendarStorage {
             int objectID = IDGenerator.getId(context, Types.APPOINTMENT, connection);
             event.setId(objectID);
             updated = insertEvent(connection, context.getContextId(), event);
-            if (null != event.getAttendees()) {
+            if (event.containsAttendees() && null != event.getAttendees()) {
                 updated += insertAttendees(connection, context.getContextId(), objectID, event.getAttendees());
+            }
+            if (event.containsAttachments() && null != event.getAttachments()) {
+                //TODO
             }
             txPolicy.commit(connection);
             return objectID;
@@ -224,14 +227,14 @@ public class RdbCalendarStorage implements CalendarStorage {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             updated = updateEvent(connection, context.getContextId(), event.getId(), event);
-            if (event.containsAttachments()) {
-                //TODO
-            }
             if (event.containsAttendees()) {
                 updated += deleteAttendees(connection, context.getContextId(), event.getId());
                 if (null != event.getAttendees()) {
                     updated += insertAttendees(connection, context.getContextId(), event.getId(), event.getAttendees());
                 }
+            }
+            if (event.containsAttachments()) {
+                //TODO
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -269,6 +272,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             txPolicy.setAutoCommit(connection, false);
             updated = deleteEvent(connection, context.getContextId(), objectID);
             updated += deleteAttendees(connection, context.getContextId(), objectID);
+            //TODO: updated += deleteAttachments(connection, context.getContextId(), objectID);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);

@@ -93,6 +93,14 @@ public class Check {
         }
     }
 
+    public static void allowedOrganizerSchedulingObjectChange(Event originalEvent, Event udpatedEvent) throws OXException {
+
+    }
+
+    public static void allowedAttendeeSchedulingObjectChange(Event originalEvent, Event udpatedEvent) throws OXException {
+
+    }
+
     /**
      * Checks that the supplied client timestamp is equal to or greater than the last modification time of the event.
      *

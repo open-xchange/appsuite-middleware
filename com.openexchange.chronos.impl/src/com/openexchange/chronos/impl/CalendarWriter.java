@@ -69,8 +69,6 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
@@ -92,12 +90,9 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarWriter {
+public class CalendarWriter extends CalendarReader {
 
     private static final int ATTENDEE_PUBLIC_FOLDER_ID = -2;
-
-    private final ServerSession session;
-    private final CalendarStorage storage;
 
     /**
      * Initializes a new {@link CalendarWriter}.
@@ -105,10 +100,18 @@ public class CalendarWriter {
      * @param session The session
      */
     public CalendarWriter(ServerSession session) throws OXException {
-		super();
-        this.session = session;
-        this.storage = Services.getService(CalendarStorageFactory.class).create(session.getContext());
-	}
+        this(session, Services.getService(CalendarStorageFactory.class).create(session.getContext()));
+    }
+
+    /**
+     * Initializes a new {@link CalendarWriter}.
+     *
+     * @param session The session
+     * @param storage The storage
+     */
+    public CalendarWriter(ServerSession session, CalendarStorage storage) {
+        super(session, storage);
+    }
 
     public void deleteEvent(int folderID, int objectID, long clientTimestamp) throws OXException {
         deleteEvent(getFolder(folderID), objectID, clientTimestamp);
@@ -313,7 +316,7 @@ public class CalendarWriter {
          */
         int objectID = storage.insertEvent(event);
         storage.insertAlarms(objectID, user.getId(), userizedEvent.getAlarms());
-        return new CalendarReader(session).readEvent(folder, objectID, null);
+        return readEvent(folder, objectID, null);
     }
 
     private UserizedEvent updateEvent(UserizedFolder folder, UserizedEvent userizedEvent, long clientTimestamp) throws OXException {
@@ -354,11 +357,7 @@ public class CalendarWriter {
             //TODO: allowed attendee changes
             throw new OXException();
         }
-        return new CalendarReader(session).readEvent(folder, originalEvent.getId(), null);
-    }
-
-    private UserizedFolder getFolder(int folderID) throws OXException {
-        return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session, null);
+        return readEvent(folder, originalEvent.getId(), null);
     }
 
 }

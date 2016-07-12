@@ -170,6 +170,13 @@ public class CalendarUtils {
         return ResourceId.forGroup(contextID, group.getIdentifier());
     }
 
+    /**
+     * Applies common properties of a specific user to a calendar user instance.
+     *
+     * @param calendarUser The calendar user to apply the properties to
+     * @param user The user to get the properties from
+     * @return The passed calendar user reference
+     */
     public static <T extends CalendarUser> T applyProperties(T calendarUser, User user) {
         calendarUser.setEntity(user.getId());
         calendarUser.setCommonName(user.getDisplayName());

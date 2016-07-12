@@ -68,6 +68,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CalendarServiceImpl implements CalendarService {
 
+    /**
+     * Initializes a new {@link CalendarServiceImpl}.
+     */
+    public CalendarServiceImpl() throws OXException {
+        super();
+    }
+
     @Override
     public UserizedEvent getEvent(ServerSession session, int folderID, int objectID, CalendarParameters parameters) throws OXException {
         EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
@@ -133,26 +140,44 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UserizedEvent createEvent(ServerSession session, UserizedEvent event, CalendarParameters parameters) throws OXException {
-        CalendarWriter writer = new CalendarWriter(session);
-        return writer.insertEvent(event);
+    public UserizedEvent createEvent(ServerSession session, final UserizedEvent event, CalendarParameters parameters) throws OXException {
+        StorageOperation<UserizedEvent> operation = new StorageOperation<UserizedEvent>(session) {
+
+            @Override
+            protected UserizedEvent execute(CalendarWriter writer) throws OXException {
+                return writer.insertEvent(event);
+            }
+        };
+        return operation.execute();
     }
 
     @Override
-    public UserizedEvent updateEvent(ServerSession session, int folderID, UserizedEvent event, CalendarParameters parameters) throws OXException {
+    public UserizedEvent updateEvent(ServerSession session, final int folderID, final UserizedEvent event, CalendarParameters parameters) throws OXException {
         Long clientTimestampValue = parameters.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
-        long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-        CalendarWriter writer = new CalendarWriter(session);
-        return writer.updateEvent(folderID, event, clientTimestamp);
+        final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
+        return new StorageOperation<UserizedEvent>(session) {
+
+            @Override
+            protected UserizedEvent execute(CalendarWriter writer) throws OXException {
+                return writer.updateEvent(folderID, event, clientTimestamp);
+            }
+        }.execute();
     }
 
     @Override
-    public void deleteEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException {
+    public void deleteEvents(ServerSession session, final List<EventID> eventIDs, CalendarParameters parameters) throws OXException {
         Long clientTimestampValue = parameters.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
-        long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-        CalendarWriter writer = new CalendarWriter(session);
-        for (EventID eventID : eventIDs) {
-            writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID(), clientTimestamp);
-        }
+        final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
+        new StorageOperation<Void>(session) {
+
+            @Override
+            protected Void execute(CalendarWriter writer) throws OXException {
+                for (EventID eventID : eventIDs) {
+                    writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID(), clientTimestamp);
+                }
+                return null;
+            }
+        }.execute();
     }
+
 }

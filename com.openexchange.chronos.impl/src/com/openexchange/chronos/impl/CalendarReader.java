@@ -84,8 +84,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CalendarReader {
 
-    private final ServerSession session;
-    private final CalendarStorage storage;
+    protected final ServerSession session;
+    protected final CalendarStorage storage;
 
     /**
      * Initializes a new {@link CalendarReader}.
@@ -93,10 +93,20 @@ public class CalendarReader {
      * @param session The session
      */
     public CalendarReader(ServerSession session) throws OXException {
-		super();
+        this(session, Services.getService(CalendarStorageFactory.class).create(session.getContext()));
+    }
+
+    /**
+     * Initializes a new {@link CalendarReader}.
+     *
+     * @param session The session
+     * @param storage The storage
+     */
+    public CalendarReader(ServerSession session, CalendarStorage storage) {
+        super();
         this.session = session;
-        this.storage = Services.getService(CalendarStorageFactory.class).create(session.getContext());
-	}
+        this.storage = storage;
+    }
 
     public UserizedEvent readEvent(EventID eventID, EventField[] fields) throws OXException {
         return readEvent(eventID.getFolderID(), eventID.getObjectID(), fields);
@@ -209,7 +219,7 @@ public class CalendarReader {
         return -1;
     }
 
-    private UserizedFolder getFolder(int folderID) throws OXException {
+    protected UserizedFolder getFolder(int folderID) throws OXException {
         return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session, null);
     }
 
