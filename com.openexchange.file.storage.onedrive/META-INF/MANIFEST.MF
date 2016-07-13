@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.file.storage.onedrive
 Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.fasterxml.jackson.core,
+Import-Package: com.fasterxml.jackson.annotation,
+ com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
  com.fasterxml.jackson.core.io,
@@ -13,6 +14,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.fasterxml.jackson.databind,
  com.openexchange.config,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
@@ -122,7 +124,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.scribe.services,
  org.scribe.utils,
  org.slf4j
-Bundle-ClassPath: lib/jackson-annotations-2.2.3.jar,
- lib/jackson-databind-2.2.4.jar,
- .
+Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.file.storage.onedrive.osgi.OneDriveActivator

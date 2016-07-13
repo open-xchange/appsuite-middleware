@@ -6,6 +6,7 @@ Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.davekoelle,
+ com.fasterxml.jackson.annotation,
  com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -14,6 +15,7 @@ Import-Package: com.davekoelle,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.fasterxml.jackson.databind,
  com.google.common.annotations,
  com.google.common.base,
  com.google.common.base.internal,
@@ -556,4 +558,3 @@ Bundle-ClassPath: .,
  lib/jaudiotagger-2.2.2.jar,
  lib/xmpcore.jar,
  lib/metadata-extractor-2.6.1.jar
-

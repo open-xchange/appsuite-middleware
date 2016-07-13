@@ -79,6 +79,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.cache.PreviewFilestoreLocationUpdater;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeJsonConverter;
+import com.openexchange.ajax.requesthandler.converters.Bean2JSONConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.Native2JSONConverter;
 import com.openexchange.ajax.requesthandler.converters.NativeConverter;
@@ -156,6 +157,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         for (final ResultConverter converter : BasicTypeJsonConverter.CONVERTERS) {
             defaultConverter.addConverter(converter);
         }
+        
+        defaultConverter.addConverter(new Bean2JSONConverter());
         /*
          * Add cover extractor converter
          */

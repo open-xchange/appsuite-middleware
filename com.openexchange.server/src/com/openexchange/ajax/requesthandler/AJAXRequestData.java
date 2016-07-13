@@ -69,6 +69,9 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fields.RequestConstants;
@@ -97,6 +100,8 @@ import com.openexchange.tools.strings.StringParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestData {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
      * The upload {@link InputStream stream} provider.
@@ -1025,6 +1030,31 @@ public class AJAXRequestData {
      */
     public @Nullable Object getData() {
         return data;
+    }
+    
+    public @Nullable <T> T getData(Class<T> klazz) throws OXException {
+        final Object local = this.data;
+        if ((local == null) || (klazz == null)) {
+            return null;
+        }
+
+        if (klazz.isInstance(local)) {
+            return klazz.cast(local);
+        }
+
+        if (klazz == String.class) {
+            return (T) local.toString();
+        }
+
+        try {
+            return MAPPER.readValue(getData(String.class), klazz);
+        } catch (JsonParseException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        } catch (JsonMappingException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
     }
 
     /**
