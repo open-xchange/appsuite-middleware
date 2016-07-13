@@ -125,7 +125,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            Alarm alarm = selectReminder(connection, context.getContextId(), userID, objectID);
+            Alarm alarm = selectReminder(connection, context.getContextId(), objectID, userID);
             return null != alarm ? Collections.singletonList(alarm) : null;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
@@ -228,6 +228,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             txPolicy.setAutoCommit(connection, false);
             updated = updateEvent(connection, context.getContextId(), event.getId(), event);
             if (event.containsAttendees()) {
+                //TODO: merge - loosing reminder otherwise
                 updated += deleteAttendees(connection, context.getContextId(), event.getId());
                 if (null != event.getAttendees()) {
                     updated += insertAttendees(connection, context.getContextId(), event.getId(), event.getAttendees());

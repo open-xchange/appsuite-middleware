@@ -428,38 +428,52 @@ public class EventConverter {
         return appointment;
     }
 
+    /**
+     * Converts the supplied participant into a corresponding attendee.
+     *
+     * @param participant The participant to convert
+     * @return The attendee
+     */
+    public static Attendee getAttendee(Participant participant) {
+        Attendee attendee = new Attendee();
+        if (0 < participant.getIdentifier()) {
+            attendee.setEntity(participant.getIdentifier());
+        }
+        if (0 < participant.getType()) {
+            attendee.setCuType(Appointment2Event.getCalendarUserType(participant.getType()));
+        }
+        if (null != participant.getEmailAddress()) {
+            Appointment2Event.getURI(participant.getEmailAddress());
+        }
+        if (null != participant.getDisplayName()) {
+            attendee.setCommonName(participant.getDisplayName());
+        }
+        if (ConfirmableParticipant.class.isInstance(participant)) {
+            int confirm = ((ConfirmableParticipant) participant).getConfirm();
+            if (0 < confirm) {
+                attendee.setPartStat(Appointment2Event.getParticipationStatus(confirm));
+            }
+            String message = ((ConfirmableParticipant) participant).getMessage();
+            if (null != message) {
+                attendee.setComment(message);
+            }
+        }
+        if (UserParticipant.class.isInstance(participant)) {
+            String message = ((UserParticipant) participant).getConfirmMessage();
+            if (null != message) {
+                attendee.setComment(message);
+            }
+        }
+        return attendee;
+    }
+
     private static List<Attendee> getAttendees(Participant[] participants) {
         if (null == participants) {
             return null;
         }
         List<Attendee> attendees = new ArrayList<Attendee>(participants.length);
         for (Participant participant : participants) {
-            Attendee attendee = new Attendee();
-            if (0 < participant.getIdentifier()) {
-                attendee.setEntity(participant.getIdentifier());
-            }
-            if (0 < participant.getType()) {
-                attendee.setCuType(Appointment2Event.getCalendarUserType(participant.getType()));
-            }
-            if (null != participant.getEmailAddress()) {
-                Appointment2Event.getURI(participant.getEmailAddress());
-            }
-            if (null != participant.getDisplayName()) {
-                attendee.setCommonName(participant.getDisplayName());
-            }
-            if (ConfirmableParticipant.class.isInstance(participant)) {
-                int confirm = ((ConfirmableParticipant) participant).getConfirm();
-                if (0 < confirm) {
-                    attendee.setPartStat(Appointment2Event.getParticipationStatus(confirm));
-                }
-            }
-            if (UserParticipant.class.isInstance(participant)) {
-                String message = ((UserParticipant) participant).getConfirmMessage();
-                if (null != message) {
-                    attendee.setComment(message);
-                }
-            }
-            attendees.add(attendee);
+            attendees.add(getAttendee(participant));
         }
         return attendees;
     }

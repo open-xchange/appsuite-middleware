@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.EventField;
@@ -159,6 +160,17 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected UserizedEvent execute(CalendarWriter writer) throws OXException {
                 return writer.updateEvent(folderID, event, clientTimestamp);
+            }
+        }.execute();
+    }
+
+    @Override
+    public UserizedEvent updateAttendee(ServerSession session, final int folderID, final int objectID, final Attendee attendee, CalendarParameters parameters) throws OXException {
+        return new StorageOperation<UserizedEvent>(session) {
+
+            @Override
+            protected UserizedEvent execute(CalendarWriter writer) throws OXException {
+                return writer.updateAttendee(folderID, objectID, attendee);
             }
         }.execute();
     }

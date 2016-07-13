@@ -74,6 +74,8 @@ public interface CalendarService {
 
     UserizedEvent updateEvent(ServerSession session, int folderID, UserizedEvent event, CalendarParameters parameters) throws OXException;
 
+    UserizedEvent updateAttendee(ServerSession session, int folderID, int objectID, Attendee attendee, CalendarParameters parameters) throws OXException;
+
     void deleteEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException;
 
     List<UserizedEvent> getUpdatedEventsInFolder(ServerSession session, int folderID, Date updatedSince, CalendarParameters parameters) throws OXException;

@@ -118,6 +118,10 @@ public class CalendarWriter extends CalendarReader {
         return updateEvent(getFolder(folderID), event, clientTimestamp);
     }
 
+    public UserizedEvent updateAttendee(int folderID, int objectID, Attendee attendee) throws OXException {
+        return updateAttendee(getFolder(folderID), objectID, attendee);
+    }
+
     public void deleteEvent(int folderID, int objectID, long clientTimestamp) throws OXException {
         deleteEvent(getFolder(folderID), objectID, clientTimestamp);
     }
@@ -350,6 +354,39 @@ public class CalendarWriter extends CalendarReader {
             /*
              * update by?
              */
+        }
+        return readEvent(folder, originalEvent.getId(), null);
+    }
+
+    private UserizedEvent updateAttendee(UserizedFolder folder, int objectID, Attendee attendee) throws OXException {
+        requireCalendarContentType(folder);
+        requireWritePermission(folder, Permission.WRITE_OWN_OBJECTS);
+        Event originalEvent = storage.loadEvent(objectID, null);
+        if (session.getUserId() != originalEvent.getCreatedBy()) {
+            requireWritePermission(folder, Permission.WRITE_ALL_OBJECTS);
+        }
+        Attendee originalAttendee = CalendarUtils.find(originalEvent.getAttendees(), attendee);
+        if (null == originalAttendee) {
+            throw new OXException();
+        }
+        User calendarUser = getCalendarUser(folder);
+        if (calendarUser.getId() != originalAttendee.getEntity()) {
+            // hm?
+        } else {
+            if (attendee.containsComment()) {
+                originalAttendee.setComment(attendee.getComment());
+            }
+            if (attendee.containsPartStat()) {
+                originalAttendee.setPartStat(attendee.getPartStat());
+            }
+            if (session.getUserId() != calendarUser.getId()) {
+                originalAttendee.setSentBy(CalendarUtils.getCalAddress(calendarUser));
+            }
+            Event event = new Event();
+            event.setId(objectID);
+            event.setAttendees(originalEvent.getAttendees());
+            Consistency.setModifiedNow(event, session.getUserId());
+            storage.updateEvent(event);
         }
         return readEvent(folder, originalEvent.getId(), null);
     }
