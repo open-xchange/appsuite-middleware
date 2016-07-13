@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarStorage;
@@ -182,7 +183,7 @@ public class RdbCalendarStorage extends AbstractRdbStorage implements CalendarSt
                 event.setSummary(resultSet.getString("field01"));
                 event.setLocation(resultSet.getString("field02"));
                 event.setDescription(resultSet.getString("field04"));
-                event.setRecurrenceRule(Recurrence.getRecurrenceRule(resultSet.getString("field06")));
+                event.setRecurrenceRule(Recurrence.getRecurrenceRule(resultSet.getString("field06"), TimeZone.getTimeZone(event.getStartTimezone()), event.isAllDay()));
                 event.setDeleteExceptionDates(parseExceptionDates(resultSet.getString("field07")));
                 event.setChangeExceptionDates(parseExceptionDates(resultSet.getString("field08")));
                 event.setCategories(parseSeparatedStrings(resultSet.getString("field09")));

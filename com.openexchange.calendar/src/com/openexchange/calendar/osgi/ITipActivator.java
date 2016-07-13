@@ -119,7 +119,7 @@ public class ITipActivator extends HousekeepingActivator {
         int detailInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.detail", 120000);
         int stateChangeInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.states", 600000);
         int priorityInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.priority", 900000);
-        boolean poolEnabled = config.getBoolProperty("com.openexchange.calendar.notify.poolenabled", true);
+        boolean poolEnabled = false;
 
         final AttachmentMemory attachmentMemory = new AttachmentMemory(detailInterval * 3, timers);
         MailSenderService sender = new DefaultMailSenderService(emitter, htmlService, attachments, contexts, users, userConfigs, attachmentMemory);

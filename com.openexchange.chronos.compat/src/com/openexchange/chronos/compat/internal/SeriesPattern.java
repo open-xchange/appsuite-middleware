@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos.compat.internal;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 /**
  * {@link SeriesPattern}
  *
@@ -59,26 +62,30 @@ public class SeriesPattern {
 
     private final String pattern;
 
-    private int type;
-    private int interval;
-    private int daysOfWeek;
-    private int dayOfMonth;
-    private int month;
-    private int occurrences;
-    private long seriesStart;
-    private long seriesEnd;
+    private Integer type;
+    private Integer interval;
+    private Integer daysOfWeek;
+    private Integer dayOfMonth;
+    private Integer month;
+    private Integer occurrences;
+    private Long seriesStart;
+    private Long seriesEnd;
+    private TimeZone tz;
+    private Boolean fullTime;
 
     /**
      * Initializes a new {@link SeriesPattern}.
      *
      * @param pattern The serialized, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
      */
-    public SeriesPattern(String pattern) throws IllegalArgumentException {
+    public SeriesPattern(String pattern, TimeZone tz, Boolean fullTime) throws IllegalArgumentException {
         super();
         this.pattern = pattern;
         if (null != pattern) {
             deserialize(pattern);
         }
+        this.tz = tz;
+        this.fullTime = fullTime;
     }
 
     private void deserialize(String pattern) throws IllegalArgumentException {
@@ -122,7 +129,7 @@ public class SeriesPattern {
      *
      * @return The type
      */
-    public int getType() {
+    public Integer getType() {
         return type;
     }
 
@@ -131,7 +138,7 @@ public class SeriesPattern {
      *
      * @return The interval
      */
-    public int getInterval() {
+    public Integer getInterval() {
         return interval;
     }
 
@@ -140,7 +147,7 @@ public class SeriesPattern {
      *
      * @return The daysOfWeek
      */
-    public int getDaysOfWeek() {
+    public Integer getDaysOfWeek() {
         return daysOfWeek;
     }
 
@@ -149,7 +156,7 @@ public class SeriesPattern {
      *
      * @return The dayOfMonth
      */
-    public int getDayOfMonth() {
+    public Integer getDayOfMonth() {
         return dayOfMonth;
     }
 
@@ -158,7 +165,7 @@ public class SeriesPattern {
      *
      * @return The month
      */
-    public int getMonth() {
+    public Integer getMonth() {
         return month;
     }
 
@@ -167,7 +174,7 @@ public class SeriesPattern {
      *
      * @return The occurrences
      */
-    public int getOccurrences() {
+    public Integer getOccurrences() {
         return occurrences;
     }
 
@@ -176,8 +183,19 @@ public class SeriesPattern {
      *
      * @return The seriesStart
      */
-    public long getSeriesStart() {
+    public Long getSeriesStart() {
         return seriesStart;
+    }
+
+    /**
+     * Gets the series start as Calendar with proper TimeZone.
+     * 
+     * @return
+     */
+    public Calendar getSeriesStartCalendar() {
+        Calendar retval = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        retval.setTimeInMillis(getSeriesStart());
+        return retval;
     }
 
     /**
@@ -185,8 +203,32 @@ public class SeriesPattern {
      *
      * @return The seriesEnd
      */
-    public long getSeriesEnd() {
+    public Long getSeriesEnd() {
         return seriesEnd;
+    }
+
+    public Calendar getSeriesEndCalendar() {
+        Calendar retval = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        retval.setTimeInMillis(getSeriesEnd());
+        return retval;
+    }
+
+    /**
+     * Gets the time zone
+     *
+     * @return The time zone
+     */
+    public TimeZone getTimeZone() {
+        return tz;
+    }
+
+    /**
+     * Is full time?
+     *
+     * @return true if full time, false otherwise
+     */
+    public Boolean isFullTime() {
+        return fullTime;
     }
 
     @Override
