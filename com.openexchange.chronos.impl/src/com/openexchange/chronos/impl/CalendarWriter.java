@@ -50,6 +50,8 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.CalendarUtils.contains;
+import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
+import static com.openexchange.chronos.impl.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
 import static com.openexchange.chronos.impl.Check.requireDeletePermission;
 import static com.openexchange.chronos.impl.Check.requireFolderPermission;
@@ -74,15 +76,10 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link CalendarWriter}
@@ -111,6 +108,14 @@ public class CalendarWriter extends CalendarReader {
      */
     public CalendarWriter(ServerSession session, CalendarStorage storage) {
         super(session, storage);
+    }
+
+    public UserizedEvent insertEvent(UserizedEvent event) throws OXException {
+        return insertEvent(getFolder(event.getFolderId()), event);
+    }
+
+    public UserizedEvent updateEvent(int folderID, UserizedEvent event, long clientTimestamp) throws OXException {
+        return updateEvent(getFolder(folderID), event, clientTimestamp);
     }
 
     public void deleteEvent(int folderID, int objectID, long clientTimestamp) throws OXException {
@@ -151,38 +156,40 @@ public class CalendarWriter extends CalendarReader {
         return tombstoneAttendee;
     }
 
-    public void deleteEvent(UserizedFolder folder, int objectID, long clientTimestamp) throws OXException {
+
+    protected void deleteEvent(UserizedFolder folder, int objectID, long clientTimestamp) throws OXException {
         requireCalendarContentType(folder);
         requireDeletePermission(folder, Permission.DELETE_OWN_OBJECTS);
-        Event event = storage.loadEvent(objectID, null);
-        requireUpToDateTimestamp(event, clientTimestamp);
-        if (session.getUserId() != event.getCreatedBy()) {
+        Event originalEvent = storage.loadEvent(objectID, null);
+        requireUpToDateTimestamp(originalEvent, clientTimestamp);
+        if (session.getUserId() != originalEvent.getCreatedBy()) {
             requireDeletePermission(folder, Permission.DELETE_ALL_OBJECTS);
         }
-        User user = SharedType.getInstance().equals(folder.getType()) ? getUser(folder.getCreatedBy()) : session.getUser();
-        if (null != event.getOrganizer() && event.getOrganizer().getEntity() == user.getId()) {
+        User calendarUser = getCalendarUser(folder);
+        if (isOrganizer(originalEvent, calendarUser.getId())) {
             /*
              * deletion by organizer
              */
-            Event tombstoneEvent = getTombstone(event);
-            Consistency.setModifiedNow(tombstoneEvent, user.getId());
+            Event tombstoneEvent = getTombstone(originalEvent);
+            Consistency.setModifiedNow(tombstoneEvent, session.getUserId());
             storage.insertTombstoneEvent(tombstoneEvent);
             storage.deleteAlarms(objectID);
             storage.deleteEvent(objectID);
-        } else if (CalendarUtils.contains(event.getAttendees(), user.getId())) {
+
+        } else if (isAttendee(originalEvent, calendarUser.getId())) {
             /*
              * deletion as attendee
              */
-            if (1 == event.getAttendees().size()) {
-                Event tombstoneEvent = getTombstone(event);
-                Consistency.setModifiedNow(tombstoneEvent, user.getId());
+            if (1 == originalEvent.getAttendees().size()) {
+                Event tombstoneEvent = getTombstone(originalEvent);
+                Consistency.setModifiedNow(tombstoneEvent, calendarUser.getId());
                 storage.insertTombstoneEvent(tombstoneEvent);
                 storage.deleteAlarms(objectID);
                 storage.deleteEvent(objectID);
             } else {
-                Attendee attendee = CalendarUtils.find(event.getAttendees(), user.getId());
-                Event tombstoneEvent = getTombstone(event);
-                Consistency.setModifiedNow(tombstoneEvent, user.getId());
+                Attendee attendee = CalendarUtils.find(originalEvent.getAttendees(), calendarUser.getId());
+                Event tombstoneEvent = getTombstone(originalEvent);
+                Consistency.setModifiedNow(tombstoneEvent, calendarUser.getId());
                 tombstoneEvent.setAttendees(Collections.singletonList(getTombstone(attendee)));
                 storage.insertTombstoneEvent(tombstoneEvent);
                 storage.deleteAlarms(objectID, session.getUserId());
@@ -190,33 +197,12 @@ public class CalendarWriter extends CalendarReader {
                 //                event.getAttendees().remove(attendee);
                 //                storage.update
             }
+        } else {
+            /*
+             * deletion as ?
+             */
+
         }
-    }
-
-    public UserizedEvent insertEvent(UserizedEvent event) throws OXException {
-        return insertEvent(getFolder(event.getFolderId()), event);
-    }
-
-    public UserizedEvent updateEvent(int folderID, UserizedEvent event, long clientTimestamp) throws OXException {
-        return updateEvent(getFolder(folderID), event, clientTimestamp);
-    }
-
-    private User getUser(int userID) throws OXException {
-        UserService userService = Services.getService(UserService.class);
-        return userService.getUser(userID, session.getContext());
-    }
-
-    private Group getGroup(int groupID) throws OXException {
-        return Services.getService(GroupService.class).getGroup(session.getContext(), groupID);
-    }
-
-    private Resource getResource(int resourceID) throws OXException {
-        return Services.getService(ResourceService.class).getResource(resourceID, session.getContext());
-    }
-
-    private int getDefaultFolderID(User user) throws OXException {
-        return new OXFolderAccess(session.getContext()).getDefaultFolderID(user.getId(), FolderObject.CALENDAR);
-        //TODO: via higher level service?
     }
 
     private List<Attendee> prepareAttendees(UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
@@ -297,25 +283,21 @@ public class CalendarWriter extends CalendarReader {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.CREATE_OBJECTS_IN_FOLDER);
         requireWritePermission(folder, Permission.WRITE_OWN_OBJECTS);
-
-        User user = SharedType.getInstance().equals(folder.getType()) ? getUser(folder.getCreatedBy()) : session.getUser();
         Event event = userizedEvent.getEvent();
-
-        Consistency.setCreatedNow(event, user.getId());
-        Consistency.setModifiedNow(event, user.getId());
+        User calendarUser = getCalendarUser(folder);
+        Consistency.setCreatedNow(event, calendarUser.getId());
+        Consistency.setModifiedNow(event, session.getUserId());
+        Consistency.setOrganizer(event, calendarUser, getProxyUser(folder));
         event.setUid(Strings.isEmpty(event.getUid()) ? UUID.randomUUID().toString() : event.getUid());
         event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? Integer.parseInt(folder.getID()) : 0);
-
-        /*
-         * use current user as organizer & take over attendees
-         */
-        Consistency.setOrganizer(event, user);
         event.setAttendees(prepareAttendees(folder, event.getAttendees()));
         /*
          * insert event & alarms of user
          */
         int objectID = storage.insertEvent(event);
-        storage.insertAlarms(objectID, user.getId(), userizedEvent.getAlarms());
+        if (userizedEvent.containsAlarms() && null != userizedEvent.getAlarms() && 0 < userizedEvent.getAlarms().size()) {
+            storage.insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
+        }
         return readEvent(folder, objectID, null);
     }
 
@@ -328,34 +310,46 @@ public class CalendarWriter extends CalendarReader {
         if (session.getUserId() != originalEvent.getCreatedBy()) {
             requireWritePermission(folder, Permission.WRITE_ALL_OBJECTS);
         }
-        if (0 < userizedEvent.getFolderId() && Integer.parseInt(folder.getID()) != userizedEvent.getFolderId()) {
+        if (userizedEvent.containsFolderId() && 0 < userizedEvent.getFolderId() && Integer.parseInt(folder.getID()) != userizedEvent.getFolderId()) {
             /*
              * move ...
              */
             //TODO
         }
-        User user = SharedType.getInstance().equals(folder.getType()) ? getUser(folder.getCreatedBy()) : session.getUser();
-        if (null == originalEvent.getOrganizer() || originalEvent.getOrganizer().getEntity() == user.getId()) {
+
+        User calendarUser = getCalendarUser(folder);
+        if (isOrganizer(originalEvent, calendarUser.getId())) {
             /*
              * no organizer or update by (or on behalf of) organizer
              */
-            Consistency.setModifiedNow(event, user.getId());
+            Consistency.setModifiedNow(event, session.getUserId());
             if (event.containsAttendees()) {
                 event.setAttendees(prepareAttendees(folder, event.getAttendees()));
             }
             storage.updateEvent(event);
-            List<Alarm> alarms = userizedEvent.getAlarms();
-            if (null == alarms) {
-                storage.deleteAlarms(originalEvent.getId(), user.getId());
-            } else {
-                storage.updateAlarms(originalEvent.getId(), user.getId(), alarms);
+            if (userizedEvent.containsAlarms()) {
+                List<Alarm> alarms = userizedEvent.getAlarms();
+                if (null == alarms) {
+                    storage.deleteAlarms(originalEvent.getId(), calendarUser.getId());
+                } else {
+                    storage.updateAlarms(originalEvent.getId(), calendarUser.getId(), alarms);
+                }
             }
-        } else if (CalendarUtils.contains(originalEvent.getAttendees(), user.getId())) {
+        } else if (isAttendee(originalEvent, calendarUser.getId())) {
             /*
              * update by attendee
              */
             //TODO: allowed attendee changes
             throw new OXException();
+        } else if (isAttendee(event, calendarUser.getId())) {
+            /*
+             * party crasher?
+             */
+
+        } else {
+            /*
+             * update by?
+             */
         }
         return readEvent(folder, originalEvent.getId(), null);
     }

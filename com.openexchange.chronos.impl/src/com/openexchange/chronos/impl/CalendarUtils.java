@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
@@ -66,6 +67,26 @@ import com.openexchange.resource.Resource;
 public class CalendarUtils {
 
     /**
+     * Looks up a specific internal attendee in a collection of attendees, utilizing the
+     * {@link CalendarUtils#matches(Attendee, Attendee)} routine.
+     *
+     * @param attendees The attendees to search
+     * @param attendee The attendee to lookup
+     * @return The matching attendee, or <code>null</code> if not found
+     * @see CalendarUtils#matches(Attendee, Attendee)
+     */
+    static Attendee find(List<Attendee> attendees, Attendee attendee) {
+        if (null != attendees && 0 < attendees.size()) {
+            for (Attendee candidateAttendee : attendees) {
+                if (matches(attendee, candidateAttendee)) {
+                    return candidateAttendee;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets a value indicating whether a specific attendee is present in a collection of attendees, utilizing the
      * {@link CalendarUtils#matches(Attendee, Attendee)} routine.
      *
@@ -75,14 +96,7 @@ public class CalendarUtils {
      * @see CalendarUtils#matches(Attendee, Attendee)
      */
     static boolean contains(List<Attendee> attendees, Attendee attendee) {
-        if (null != attendees) {
-            for (Attendee candidateAttendee : attendees) {
-                if (matches(attendee, candidateAttendee)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return null != find(attendees, attendee);
     }
 
     /**
@@ -135,6 +149,28 @@ public class CalendarUtils {
      */
     static boolean contains(List<Attendee> attendees, int entity) {
         return null != find(attendees, entity);
+    }
+
+    /**
+     * Gets a value indicating whether a specific user is the organizer of an event or not.
+     *
+     * @param event The event
+     * @param userId The identifier of the user to check
+     * @return <code>true</code> if the user with the supplied identifier is the organizer, <code>false</code>, otherwise
+     */
+    static boolean isOrganizer(Event event, int userId) {
+        return null != event.getOrganizer() && userId == event.getOrganizer().getEntity();
+    }
+
+    /**
+     * Gets a value indicating whether a specific user is an attendee of an event or not.
+     *
+     * @param event The event
+     * @param userId The identifier of the user to check
+     * @return <code>true</code> if the user with the supplied identifier is an attendee, <code>false</code>, otherwise
+     */
+    static boolean isAttendee(Event event, int userId) {
+        return contains(event.getAttendees(), userId);
     }
 
     /**

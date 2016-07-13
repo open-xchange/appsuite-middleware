@@ -60,11 +60,28 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class UserizedEvent {
 
-    private final int folderId;
-    private final List<Alarm> alarms;
     private final Event event;
     private final ServerSession session;
-    private final int onBehalfOf;
+
+    private List<Alarm> alarms;
+    private boolean alarmsSet;
+
+    private int folderId;
+    private boolean folderIdSet;
+
+    private int onBehalfOf;
+
+    /**
+     * Initializes a new {@link UserizedEvent}.
+     *
+     * @param session The current user's session
+     * @param event The underlying event data
+     */
+    public UserizedEvent(ServerSession session, Event event) {
+        super();
+        this.session = session;
+        this.event = event;
+    }
 
     /**
      * Initializes a new {@link UserizedEvent}.
@@ -85,16 +102,7 @@ public class UserizedEvent {
     }
 
     /**
-     * Gets the folder identifier representing the view on the event
-     *
-     * @return The folder identifier
-     */
-    public int getFolderId() {
-        return folderId;
-    }
-
-    /**
-     * Gets the attendee's alarms for the event
+     * Gets the attendee's alarms for the event.
      *
      * @return The alarms
      */
@@ -103,7 +111,70 @@ public class UserizedEvent {
     }
 
     /**
-     * Gets the underlying event data
+     * Gets the attendee's alarms for the event.
+     *
+     * @param alarms The alarms to set
+     */
+    public void setAlarms(List<Alarm> alarms) {
+        this.alarms = alarms;
+        alarmsSet = true;
+    }
+
+    /**
+     * Gets a value indicating whether attendee's alarms for the event have been set or not.
+     *
+     * @return <code>true</code> if the attendee's alarms are set, <code>false</code>, otherwise
+     */
+    public boolean containsAlarms() {
+        return alarmsSet;
+    }
+
+    /**
+     * Removes the attendee's alarms of the event.
+     */
+    public void removeAlarms() {
+        alarms = null;
+        alarmsSet = false;
+    }
+
+    /**
+     * Gets the folder identifier representing the view on the event.
+     *
+     * @return The folder identifier
+     */
+    public int getFolderId() {
+        return folderId;
+    }
+
+    /**
+     * Sets the folder identifier representing the view on the event.
+     *
+     * @param folderId The folder identifier
+     */
+    public void setFolderId(int folderId) {
+        this.folderId = folderId;
+        folderIdSet = true;
+    }
+
+    /**
+     * Gets a value indicating whether folder identifier representing the view on the event has been set or not.
+     *
+     * @return <code>true</code> if the folder identifier is set, <code>false</code>, otherwise
+     */
+    public boolean containsFolderId() {
+        return folderIdSet;
+    }
+
+    /**
+     * Removes the folder identifier of the event.
+     */
+    public void removeFolderId() {
+        folderId = 0;
+        folderIdSet = false;
+    }
+
+    /**
+     * Gets the underlying event data.
      *
      * @return The event data
      */
@@ -112,7 +183,7 @@ public class UserizedEvent {
     }
 
     /**
-     * Gets the current user's session
+     * Gets the user's session.
      *
      * @return The session
      */

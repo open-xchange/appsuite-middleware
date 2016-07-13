@@ -56,7 +56,6 @@ import static com.openexchange.chronos.impl.Check.requireReadPermission;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarStorage;
@@ -71,10 +70,16 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.type.PrivateType;
-import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link CalendarService}
@@ -116,7 +121,7 @@ public class CalendarReader {
         return readEvent(getFolder(folderID), objectID, fields);
     }
 
-    public UserizedEvent readEvent(UserizedFolder folder, int objectID, EventField[] fields) throws OXException {
+    protected UserizedEvent readEvent(UserizedFolder folder, int objectID, EventField[] fields) throws OXException {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
@@ -180,47 +185,72 @@ public class CalendarReader {
     }
 
     private UserizedEvent userize(Event event, UserizedFolder inFolder) throws OXException {
-        /*
-         * load alarms
-         * - of folder owner for shared/personal folder
-         * - of session user for public folder, if user is attendee
-         * - otherwise not (not attending)
-         */
-        int targetAttendee = getTargetAttendee(inFolder, event.getAttendees());
-        List<Alarm> alarms = 0 < targetAttendee ? storage.loadAlarms(targetAttendee, event.getId()) : null;
-        /*
-         * build userized event & return
-         */
-        return new UserizedEvent(session, targetAttendee, Integer.parseInt(inFolder.getID()), event, alarms);
+        UserizedEvent userizedEvent = new UserizedEvent(session, event);
+        User calendarUser = getCalendarUser(inFolder);
+        if (contains(event.getAttendees(), calendarUser.getId())) {
+            userizedEvent.setAlarms(storage.loadAlarms(event.getId(), calendarUser.getId()));
+        }
+        userizedEvent.setFolderId(Integer.parseInt(inFolder.getID()));
+        return userizedEvent;
     }
 
     private UserizedEvent userize(Event event, int forUser) throws OXException {
-        int folderId = event.getPublicFolderId();
-        List<Alarm> alarms = null;
+        UserizedEvent userizedEvent = new UserizedEvent(session, event);
+        if (0 < event.getPublicFolderId()) {
+            userizedEvent.setFolderId(event.getPublicFolderId());
+        }
         Attendee userAttendee = CalendarUtils.find(event.getAttendees(), forUser);
         if (null != userAttendee) {
-            alarms = storage.loadAlarms(event.getId(), userAttendee.getEntity());
+            userizedEvent.setAlarms(storage.loadAlarms(event.getId(), userAttendee.getEntity()));
             if (0 < userAttendee.getFolderID()) {
-                folderId = userAttendee.getFolderID();
+                userizedEvent.setFolderId(userAttendee.getFolderID());
             }
         }
-        return new UserizedEvent(session, forUser, folderId, event, alarms);
-    }
-
-    private static int getTargetAttendee(UserizedFolder folder, List<Attendee> attendees) {
-        int userId = folder.getSession().getUserId();
-        if (PrivateType.getInstance().equals(folder.getType()) && contains(attendees, userId)) {
-            return userId;
-        } else if (SharedType.getInstance().equals(folder.getType()) && contains(attendees, folder.getCreatedBy())) {
-            return folder.getCreatedBy();
-        } else if (PublicType.getInstance().equals(folder.getType()) && contains(attendees, userId)) {
-            return userId;
-        }
-        return -1;
+        return userizedEvent;
     }
 
     protected UserizedFolder getFolder(int folderID) throws OXException {
         return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session, null);
+    }
+
+    /**
+     * Gets the actual target calendar user for a specific folder. This is either the current session's user for "private" or "public"
+     * folders, or the folder owner for "shared" calendar folders.
+     *
+     * @param folder The folder to get the calendar user for
+     * @return The calendar user
+     */
+    protected User getCalendarUser(UserizedFolder folder) throws OXException {
+        return SharedType.getInstance().equals(folder.getType()) ? getUser(folder.getCreatedBy()) : session.getUser();
+    }
+
+    /**
+     * Gets the "acting" calendar user for a specific folder, i.e. the proxy user who is acting on behalf of the calendar owner, which is
+     * the current session's user in case the folder is a "shared" calendar, otherwise <code>null</code> for "private" or "public" folders.
+     *
+     * @param folder The folder to determine the proxy user for
+     * @return The proxy calendar user, or <code>null</code> if the current session's user is acting on behalf of it's own
+     */
+    protected User getProxyUser(UserizedFolder folder) throws OXException {
+        return SharedType.getInstance().equals(folder.getType()) ? getUser(folder.getCreatedBy()) : session.getUser();
+    }
+
+    protected User getUser(int userID) throws OXException {
+        UserService userService = Services.getService(UserService.class);
+        return userService.getUser(userID, session.getContext());
+    }
+
+    protected Group getGroup(int groupID) throws OXException {
+        return Services.getService(GroupService.class).getGroup(session.getContext(), groupID);
+    }
+
+    protected Resource getResource(int resourceID) throws OXException {
+        return Services.getService(ResourceService.class).getResource(resourceID, session.getContext());
+    }
+
+    protected int getDefaultFolderID(User user) throws OXException {
+        //TODO: via higher level service?
+        return new OXFolderAccess(session.getContext()).getDefaultFolderID(user.getId(), FolderObject.CALENDAR);
     }
 
 }
