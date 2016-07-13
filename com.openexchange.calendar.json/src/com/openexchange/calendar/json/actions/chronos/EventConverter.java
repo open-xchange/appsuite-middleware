@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -188,13 +187,10 @@ public class EventConverter {
      *
      * @param appointment The appointment to convert
      * @param session The current user's session
-     * @param onBehalfOf The identifier of the user the session's user is acting on behalf of, or <code>0</code> if not specified
-     * @param folderId The identifier of the folder the appointment is located
      * @return The userized event
      */
-    public static UserizedEvent getEvent(Appointment appointment, ServerSession session, int onBehalfOf, int folderId) {
+    public static UserizedEvent getEvent(Appointment appointment, ServerSession session) {
         Event event = new Event();
-        List<Alarm> alarms = null;
         if (appointment.containsObjectID()) {
             event.setId(appointment.getObjectID());
         }
@@ -236,9 +232,6 @@ public class EventConverter {
         if (appointment.containsNote()) {
             event.setDescription(appointment.getNote());
         }
-        if (appointment.containsAlarm()) {
-            alarms = Collections.singletonList(Appointment2Event.getAlarm(appointment.getAlarm()));
-        }
         if (appointment.containsRecurrenceID()) {
             event.setRecurrenceId(appointment.getRecurrenceID());
         }
@@ -279,7 +272,15 @@ public class EventConverter {
         if (appointment.containsTimezone()) {
             event.setStartTimezone(appointment.getTimezone());
         }
-        return new UserizedEvent(session, onBehalfOf, folderId, event, alarms);
+
+        UserizedEvent userizedEvent = new UserizedEvent(session, event);
+        if (appointment.containsAlarm()) {
+            userizedEvent.setAlarms(Collections.singletonList(Appointment2Event.getAlarm(appointment.getAlarm())));
+        }
+        if (appointment.containsParentFolderID()) {
+            userizedEvent.setFolderId(appointment.getParentFolderID());
+        }
+        return userizedEvent;
     }
 
     /**
@@ -306,7 +307,9 @@ public class EventConverter {
         if (event.containsLastModified()) {
             appointment.setLastModified(event.getLastModified());
         }
-        appointment.setParentFolderID(userizedEvent.getFolderId());
+        if (userizedEvent.containsFolderId()) {
+            appointment.setParentFolderID(userizedEvent.getFolderId());
+        }
         //        appointment.setParentFolderID(event.getPublicFolderId());
         //        appointment.setPersonalFolderID(event.getFolderId());
         if (event.containsCategories()) {
@@ -339,9 +342,9 @@ public class EventConverter {
         if (event.containsDescription()) {
             appointment.setNote(event.getDescription());
         }
-        Integer reminder = Event2Appointment.getReminder(userizedEvent.getAlarms());
-        if (null != reminder) {
-            appointment.setAlarm(reminder.intValue());
+        if (userizedEvent.containsAlarms()) {
+            Integer reminder = Event2Appointment.getReminder(userizedEvent.getAlarms());
+            appointment.setAlarm(null == reminder ? -1 : reminder.intValue());
         }
         if (event.containsRecurrenceId()) {
             appointment.setRecurrenceID(event.getRecurrenceId());

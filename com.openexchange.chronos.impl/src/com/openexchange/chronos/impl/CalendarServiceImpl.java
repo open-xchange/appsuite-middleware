@@ -141,14 +141,13 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public UserizedEvent createEvent(ServerSession session, final UserizedEvent event, CalendarParameters parameters) throws OXException {
-        StorageOperation<UserizedEvent> operation = new StorageOperation<UserizedEvent>(session) {
+        return new StorageOperation<UserizedEvent>(session) {
 
             @Override
             protected UserizedEvent execute(CalendarWriter writer) throws OXException {
                 return writer.insertEvent(event);
             }
-        };
-        return operation.execute();
+        }.execute();
     }
 
     @Override

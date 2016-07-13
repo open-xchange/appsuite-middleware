@@ -65,11 +65,8 @@ public class UserizedEvent {
 
     private List<Alarm> alarms;
     private boolean alarmsSet;
-
     private int folderId;
     private boolean folderIdSet;
-
-    private int onBehalfOf;
 
     /**
      * Initializes a new {@link UserizedEvent}.
@@ -84,21 +81,21 @@ public class UserizedEvent {
     }
 
     /**
-     * Initializes a new {@link UserizedEvent}.
+     * Gets the underlying event data.
      *
-     * @param session The current user's session
-     * @param onBehalfOf The identifier of the attendee the session's user is acting on behalf of, or <code>0</code> if not specified
-     * @param folderId The folder identifier representing the view on the event
-     * @param event The underlying event data
-     * @param alarms The attendee's alarms for the event
+     * @return The event data
      */
-    public UserizedEvent(ServerSession session, int onBehalfOf, int folderId, Event event, List<Alarm> alarms) {
-        super();
-        this.session = session;
-        this.event = event;
-        this.onBehalfOf = onBehalfOf;
-        this.folderId = folderId;
-        this.alarms = alarms;
+    public Event getEvent() {
+        return event;
+    }
+
+    /**
+     * Gets the user's session.
+     *
+     * @return The session
+     */
+    public ServerSession getSession() {
+        return session;
     }
 
     /**
@@ -173,31 +170,9 @@ public class UserizedEvent {
         folderIdSet = false;
     }
 
-    /**
-     * Gets the underlying event data.
-     *
-     * @return The event data
-     */
-    public Event getEvent() {
-        return event;
-    }
-
-    /**
-     * Gets the user's session.
-     *
-     * @return The session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-
-    /**
-     * Gets the identifier of the attendee the session's user is acting on behalf of.
-     *
-     * @return The identifier of the attendee the session's user is acting on behalf of, or <code>0</code> if not specified
-     */
-    public int getOnBehalfOf() {
-        return onBehalfOf;
+    @Override
+    public String toString() {
+        return "UserizedEvent [userId=" + session.getUserId() + ", folderId=" + folderId + ", event=" + event + "]";
     }
 
 }

@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.CalendarUtils.contains;
+import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
 import static com.openexchange.chronos.impl.Check.requireFolderPermission;
 import static com.openexchange.chronos.impl.Check.requireReadPermission;
@@ -187,7 +187,7 @@ public class CalendarReader {
     private UserizedEvent userize(Event event, UserizedFolder inFolder) throws OXException {
         UserizedEvent userizedEvent = new UserizedEvent(session, event);
         User calendarUser = getCalendarUser(inFolder);
-        if (contains(event.getAttendees(), calendarUser.getId())) {
+        if (isAttendee(event, calendarUser.getId())) {
             userizedEvent.setAlarms(storage.loadAlarms(event.getId(), calendarUser.getId()));
         }
         userizedEvent.setFolderId(Integer.parseInt(inFolder.getID()));
