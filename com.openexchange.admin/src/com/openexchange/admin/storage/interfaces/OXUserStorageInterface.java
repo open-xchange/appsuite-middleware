@@ -174,6 +174,16 @@ public abstract class OXUserStorageInterface {
      */
     public abstract void changeModuleAccess(final Context ctx,final int[] user_ids,final UserModuleAccess moduleAccess) throws StorageException;
 
+    /**
+     * Manipulate users module access within the given context.
+     *
+     * @param ctx The context object
+     * @param user_ids The user identifiers
+     * @param moduleAccess The module access having such options set to <code>true</code> that are supposed to be changed
+     * @param value Whether to set marked options to <code>true</code> or <code>false</code>
+     * @throws StorageException
+     */
+    public abstract void changeModuleAccess(Context ctx, int[] user_ids, UserModuleAccess moduleAccess, boolean value) throws StorageException;
 
     /**
      * Retrieve user objects for a range of users identified by User.getUsername().
