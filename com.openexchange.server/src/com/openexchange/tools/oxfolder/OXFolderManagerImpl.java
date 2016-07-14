@@ -60,6 +60,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -130,6 +131,7 @@ import com.openexchange.tools.exceptions.SimpleIncorrectStringAttribute;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnInsert;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnRemove;
+import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnUpdate;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -811,7 +813,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    protected void update(final FolderObject fo, final int options, final FolderObject storageObj, final long lastModified, final boolean handDown) throws OXException {
+    protected void update(FolderObject fo, int options, FolderObject storageObj, long lastModified, boolean handDown) throws OXException {
+        doUpdate(fo, options, storageObj, lastModified, handDown, new TIntHashSet());
+    }
+
+    void doUpdate(FolderObject fo, int options, FolderObject storageObj, long lastModified, boolean handDown, TIntSet alreadyCheckedParents) throws OXException {
         if (fo.getObjectID() <= 0) {
             throw OXFolderExceptionCode.INVALID_OBJECT_ID.create(Integer.valueOf(fo.getObjectID()));
         }
@@ -905,7 +911,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnUpdate(fo.getObjectID(), removedPerms, lastModified);
                 }
             }
-            new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(), fo.getNonSystemPermissionsAsArray(), lastModified);
+            if (alreadyCheckedParents.add(storageObj.getParentFolderID())) {
+                new CheckPermissionOnUpdate(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(), fo.getNonSystemPermissionsAsArray(), storageObj.getNonSystemPermissionsAsArray(), lastModified, alreadyCheckedParents);
+            }
         }
 
         boolean rename = false;
@@ -975,7 +983,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (containsPermissions) {
                     final List<OCLPermission> permissions = fo.getPermissions();
                     if (permissions != null && !permissions.isEmpty()) {
-                        handDown(fo.getObjectID(), options, permissions, lastModified, FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null);
+                        handDown(fo.getObjectID(), options, permissions, lastModified, alreadyCheckedParents, FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null);
                     }
                 }
             } catch (final DataTruncation e) {
@@ -997,7 +1005,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    protected void handDown(final int folderId, final int options, final List<OCLPermission> permissions, final long lastModified, final FolderCacheManager cacheManager) throws OXException, SQLException {
+    protected void handDown(final int folderId, final int options, final List<OCLPermission> permissions, final long lastModified, final TIntSet alreadyCheckedParents, final FolderCacheManager cacheManager) throws OXException, SQLException {
         final Context ctx = this.ctx;
         final TIntList subfolders = OXFolderSQL.getSubfolderIDs(folderId, writeCon, ctx);
         if (!subfolders.isEmpty()) {
@@ -1009,16 +1017,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     try {
                         final FolderObject tmp = new FolderObject(subfolderId);
                         tmp.setPermissions(permissions);
-                        update(tmp, options, getFolderFromMaster(subfolderId), lastModified, true);
+                        doUpdate(tmp, options, getFolderFromMaster(subfolderId), lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
                         if (null != cacheManager) {
                             cacheManager.removeFolderObject(subfolderId, ctx);
                         }
                         CacheFolderStorage.getInstance().removeFromCache(Integer.toString(subfolderId), FolderStorage.REAL_TREE_ID, true, session);
-                        handDown(subfolderId, options, permissions, lastModified, cacheManager);
                         return true;
                     } catch (final OXException e) {
-                        throw new ProcedureFailedException(e);
-                    } catch (final SQLException e) {
                         throw new ProcedureFailedException(e);
                     } catch (final RuntimeException e) {
                         throw new ProcedureFailedException(e);
