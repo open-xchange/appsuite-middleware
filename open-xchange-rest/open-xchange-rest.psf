@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.adminAuth"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.capabilities"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.configuration"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.database"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.html"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.session"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.users.mailMapping"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.1,com.openexchange.rest.services"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.1,com.openexchange.rest.services.adminAuth"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.1,com.openexchange.rest.services.capabilities"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.1,com.openexchange.rest.services.configuration"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.1,com.openexchange.rest.services.database"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.1,com.openexchange.rest.services.html"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.1,com.openexchange.rest.services.session"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.1,com.openexchange.rest.services.users.mailMapping"/>
 </provider>
 </psf>
