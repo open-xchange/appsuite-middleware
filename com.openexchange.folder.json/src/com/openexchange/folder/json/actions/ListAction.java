@@ -225,10 +225,9 @@ public final class ListAction extends AbstractFolderAction {
 
         // Determine last-modified time stamp
         for (int i = length - 1; i >= 0; i--) {
-            final Date modified = subfolders[i].getLastModifiedUTC();
-            if (modified != null) {
-                final long time = modified.getTime();
-                lastModified = ((lastModified >= time) ? lastModified : time);
+            Date modified = subfolders[i].getLastModifiedUTC();
+            if (modified != null && lastModified < modified.getTime()) {
+                lastModified = modified.getTime();
             }
         }
 

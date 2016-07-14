@@ -135,6 +135,9 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
     // The character encoding \"%1$s\" is not supported. Please choose another one.
     public static final String UNSUPPORTED_CHARACTER_ENCODING_MSG = "The character encoding \"%1$s\" is not supported. Please choose another one.";
 
+    // The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s
+    public static final String CONTACT_TOO_SIMILAR = "The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s";
+
     private ImportExportExceptionMessages() {
         super();
     }

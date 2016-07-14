@@ -60,9 +60,10 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
+import com.openexchange.mailaccount.TransportAccountDescription;
 import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.session.Session;
-import com.openexchange.tools.net.URIDefaults;
 
 /**
  * {@link SanitizingStorageService}
@@ -110,6 +111,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
             Sanitizer.sanitize(userId, cid, storageService);
             return storageService.getRawMailAccount(id, userId, cid);
         }
+    }
+
+    @Override
+    public boolean existsMailAccount(int id, int userId, int contextId) throws OXException {
+        return storageService.existsMailAccount(id, userId, contextId);
     }
 
     @Override
@@ -255,21 +261,18 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
-    public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws OXException {
-        return storageService.getByHostNames(hostNames, user, cid);
+    public int getTransportByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws OXException {
+        return storageService.getTransportByPrimaryAddress(primaryAddress, user, cid);
     }
 
     @Override
-    public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws OXException {
-        try {
-            return storageService.getTransportAccountForID(id, user, cid);
-        } catch (final OXException e) {
-            if (!isURIError(e)) {
-                throw e;
-            }
-            Sanitizer.sanitize(user, cid, storageService, URIDefaults.SMTP, "smtp://localhost:25");
-            return storageService.getTransportAccountForID(id, user, cid);
-        }
+    public TransportAccount getTransportByReference(String reference, int userId, int contextId) throws OXException {
+        return storageService.getTransportByReference(reference, userId, contextId);
+    }
+
+    @Override
+    public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws OXException {
+        return storageService.getByHostNames(hostNames, user, cid);
     }
 
     @Override
@@ -290,6 +293,31 @@ final class SanitizingStorageService implements MailAccountStorageService {
     @Override
     public boolean hasAccounts(final Session session) throws OXException {
         return storageService.hasAccounts(session);
+    }
+
+    @Override
+    public int insertTransportAccount(TransportAccountDescription transportAccount, int userId, Context ctx, Session session) throws OXException {
+        return storageService.insertTransportAccount(transportAccount, userId, ctx, session);
+    }
+
+    @Override
+    public void deleteTransportAccount(int id, int userId, int contextId) throws OXException {
+        storageService.deleteTransportAccount(id, userId, contextId);
+    }
+
+    @Override
+    public TransportAccount getTransportAccount(int accountId, int userId, int contextId, Connection con) throws OXException {
+        return storageService.getTransportAccount(accountId, userId, contextId, con);
+    }
+
+    @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int cid, Session session) throws OXException {
+        storageService.updateTransportAccount(transportAccount, userId, cid, session);
+    }
+
+    @Override
+    public TransportAccount getTransportAccount(int accountId, int userId, int contextId) throws OXException {
+        return storageService.getTransportAccount(accountId, userId, contextId);
     }
 
 }

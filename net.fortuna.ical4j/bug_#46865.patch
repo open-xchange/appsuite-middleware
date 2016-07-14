@@ -1,0 +1,64 @@
+diff --git a/net.fortuna.ical4j/src/net/fortuna/ical4j/model/TimeZoneRegistryImpl.java b/net.fortuna.ical4j/src/net/fortuna/ical4j/model/TimeZoneRegistryImpl.java
+index 67f6a72..19db5b7 100644
+--- a/net.fortuna.ical4j/src/net/fortuna/ical4j/model/TimeZoneRegistryImpl.java
++++ b/net.fortuna.ical4j/src/net/fortuna/ical4j/model/TimeZoneRegistryImpl.java
+@@ -34,11 +34,14 @@ package net.fortuna.ical4j.model;
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.net.URL;
++import java.net.URLConnection;
+ import java.util.Map;
+ import java.util.Properties;
+ import java.util.regex.Matcher;
+ import java.util.regex.Pattern;
+-
++import org.apache.commons.logging.Log;
++import org.apache.commons.logging.LogFactory;
++import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
+ import net.fortuna.ical4j.data.CalendarBuilder;
+ import net.fortuna.ical4j.data.ParserException;
+ import net.fortuna.ical4j.model.component.VTimeZone;
+@@ -47,11 +50,6 @@ import net.fortuna.ical4j.util.CompatibilityHints;
+ import net.fortuna.ical4j.util.Configurator;
+ import net.fortuna.ical4j.util.ResourceLoader;
+ 
+-import org.apache.commons.logging.Log;
+-import org.apache.commons.logging.LogFactory;
+-
+-import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
+-
+ /**
+  * $Id$
+  *
+@@ -221,9 +219,14 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
+     private VTimeZone updateDefinition(VTimeZone vTimeZone) {
+         final TzUrl tzUrl = vTimeZone.getTimeZoneUrl();
+         if (tzUrl != null) {
++            InputStream inputStream = null;
+             try {
++                URLConnection connection = tzUrl.getUri().toURL().openConnection();
++                connection.setConnectTimeout(5000);
++                connection.setReadTimeout(5000);
++                inputStream = connection.getInputStream();
+                 final CalendarBuilder builder = new CalendarBuilder();
+-                final Calendar calendar = builder.build(tzUrl.getUri().toURL().openStream());
++                final Calendar calendar = builder.build(inputStream);
+                 final VTimeZone updatedVTimeZone = (VTimeZone) calendar.getComponent(Component.VTIMEZONE);
+                 if (updatedVTimeZone != null) {
+                     return updatedVTimeZone;
+@@ -233,6 +236,15 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
+                 Log log = LogFactory.getLog(TimeZoneRegistryImpl.class);
+                 log.warn("Unable to retrieve updates for timezone: " + vTimeZone.getTimeZoneId().getValue(), e);
+             }
++            finally {
++                if (null != inputStream) {
++                    try {
++                        inputStream.close();
++                    } catch (IOException e) {
++                        LogFactory.getLog(TimeZoneRegistryImpl.class).debug("Error closing stream", e);
++                    }
++                }
++            }
+         }
+         return vTimeZone;
+     }

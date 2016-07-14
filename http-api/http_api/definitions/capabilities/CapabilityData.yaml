@@ -1,0 +1,8 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The identifier of the capability.
+  attributes:
+    type: object
+    description: A JSON object holding properties of the capability.

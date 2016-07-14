@@ -1,0 +1,24 @@
+/user?action=getAttribute:
+  get:
+    operationId: getUserAttribute
+    tags:
+      - user
+    summary: Gets a user attribute (**available since v6.20**).
+    description: Gets a custom user attribute that was previously set with the `/user?action=setAttribute` request.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The ID of the user.
+        required: true
+      - in: query
+        name: name
+        type: string
+        description: The name of the attribute.
+        required: true
+    responses:
+      200:
+        description: A JSON object containing the attribute data. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/UserAttributeResponse"

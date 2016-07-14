@@ -89,7 +89,8 @@ public final class Tools  {
         Properties properties = new Properties();
         FileInputStream in = null;
         try {
-            properties.load(new FileInputStream(getFile(fileName)));
+            in = new FileInputStream(getFile(fileName));
+            properties.load(in);
         } catch (FileNotFoundException e) {
             throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (IOException e) {
@@ -113,7 +114,8 @@ public final class Tools  {
         Properties properties = new Properties();
         FileInputStream in = null;
         try {
-            properties.load(new FileInputStream(file));
+            in = new FileInputStream(file);
+            properties.load(in);
         } catch (FileNotFoundException e) {
             throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (IOException e) {

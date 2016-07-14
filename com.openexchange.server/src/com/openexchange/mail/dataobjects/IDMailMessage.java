@@ -66,7 +66,6 @@ public final class IDMailMessage extends MailMessage {
     private long uid;
     private long originalUid;
     private String mailId;
-    private char separator;
     private int seqnum;
     private int unreadMessages;
 
@@ -169,24 +168,6 @@ public final class IDMailMessage extends MailMessage {
         if (originalUid > 0) {
             setOriginalId(Long.toString(originalUid));
         }
-    }
-
-    /**
-     * Gets the separator.
-     *
-     * @return The separator
-     */
-    public char getSeparator() {
-        return separator;
-    }
-
-    /**
-     * Sets the separator.
-     *
-     * @param separator The separator to set
-     */
-    public void setSeparator(final char separator) {
-        this.separator = separator;
     }
 
     /**

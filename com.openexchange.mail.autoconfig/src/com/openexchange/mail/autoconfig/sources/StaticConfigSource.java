@@ -99,8 +99,13 @@ public abstract class StaticConfigSource implements ConfigSource {
 
     @Override
     public final Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
+        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+    }
+
+    @Override
+    public final Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
         if (null != filter && filter.accept(emailDomain)) {
-            return getStaticAutoconfig(emailLocalPart, emailDomain, password, user, context);
+            return getStaticAutoconfig(emailLocalPart, emailDomain, password, user, context, forceSecure);
         }
         return null;
     }
@@ -116,6 +121,6 @@ public abstract class StaticConfigSource implements ConfigSource {
      * @return The auto-config or <code>null</code>
      * @throws OXException If an error occurs
      */
-    protected abstract Autoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
+    protected abstract Autoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException;
 
 }

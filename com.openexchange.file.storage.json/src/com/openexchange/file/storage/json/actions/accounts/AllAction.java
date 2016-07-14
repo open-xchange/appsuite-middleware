@@ -154,10 +154,12 @@ public class AllAction extends AbstractFileStorageAccountAction {
 
         CapabilityAware capabilityAware = (CapabilityAware) access;
         Set<String> caps = new HashSet<String>();
+
         Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
         if (null != supported && supported.booleanValue()) {
             caps.add(FileStorageCapability.FILE_VERSIONS.name());
         }
+
         supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
         if (null != supported && supported.booleanValue()) {
             caps.add(FileStorageCapability.EXTENDED_METADATA.name());
@@ -167,10 +169,32 @@ public class AllAction extends AbstractFileStorageAccountAction {
         if (null != supported && supported.booleanValue()) {
             caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
         }
+
         supported = capabilityAware.supports(FileStorageCapability.LOCKS);
         if (null != supported && supported.booleanValue()) {
             caps.add(FileStorageCapability.LOCKS.name());
         }
+
+        supported = capabilityAware.supports(FileStorageCapability.READ_ONLY);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.READ_ONLY.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.MAIL_ATTACHMENTS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.AUTO_NEW_VERSION);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.AUTO_NEW_VERSION.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.ZIPPABLE_FOLDER);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.ZIPPABLE_FOLDER.name());
+        }
+
         return caps;
     }
 

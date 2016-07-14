@@ -1,0 +1,12 @@
+type: object
+properties:
+  tests:
+    type: array
+    description: Array of available test-objects.
+    items:
+      $ref: "#/definitions/MailFilterConfigTest"
+  actioncommands:
+    type: array
+    description: Array of available action commands.
+    items:
+      type: string

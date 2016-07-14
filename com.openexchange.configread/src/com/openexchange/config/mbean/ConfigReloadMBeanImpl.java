@@ -114,7 +114,12 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
                 Map<String, String[]> configs = i.next().getConfigFileNames();
                 if (null != configs && !configs.isEmpty()) {
                     for (Entry<String, String[]> fileEntry : configs.entrySet()) {
-                        map.put(fileEntry.getKey(), Arrays.asList(fileEntry.getValue()));
+                        String[] value = fileEntry.getValue();
+                        if (value == null) {
+                            logger.warn("The property array of the properties file '{}' is 'null', thus the properties of that file were not reloaded", fileEntry.getKey());
+                        } else {
+                            map.put(fileEntry.getKey(), Arrays.asList(value));
+                        }
                     }
                 }
             }
@@ -125,5 +130,4 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
             throw new MBeanException(new Exception(message), message);
         }
     }
-
 }

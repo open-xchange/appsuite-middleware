@@ -1,0 +1,51 @@
+# In the model SingleRequest are stored all possible URI parameters. This may ease the use
+# of the multiple request in client APIs. To keep the multiple request up-to-date new parameters
+# should be added to the SingleRequest model too!
+/multiple:
+  put:
+    operationId: process
+    tags:
+      - multiple
+    summary: Processes multiple requests to other modules in a single request.
+    description: |
+      #### Not supported requests are:
+       * the ones from modules login and multiple
+       * POST requests with a multipart encoding (uploads)
+       * GET requests which do not use an object as described in [Low level protocol](#low-level-protocol)
+      
+      #### Request body
+      A JSON array with JSON objects describing the requests. Each object contains a field `module` with the
+      name of the request's module and the field `action` with the concrete request action to execute. Additionally the
+      parameters of the request are added as fields too. A session parameter is not included! If the request has
+      a request body itself, this body is stored as a JSON object in a field `data`.
+      
+      #### Example: query reminder range and update a reminder's alarm
+      ```json
+      [{"module":"reminder","action":"range","end":1497461067180},{"module":"reminder","action":"remindAgain","id":51,"data":{"alarm":1459478800000}}]
+      ```
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: continue
+        type: boolean
+        description: Specifies whether processing of requests should stop when an error occurs, or whether all request should be processed regardless of errors.
+        required: false
+      - in: body
+        name: body
+        description: A JSON array with JSON objects, each describing one request.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/SingleRequest"
+    responses:
+      200:
+        description: A JSON array containing the response data of the processed requests where response[0] corresponds to request[0], response[1] to request[1], and so on.
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/SingleResponse"
+      400:
+        description: Syntactically incorrect request.

@@ -2,9 +2,7 @@
 title: Security Considerations
 ---
 
-# Open-Xchange OAuth 2.0 Security Considerations
-
-## Authorization
+# Authorization
 
   * Granting access to external applications is a two-step process. Firstly the user needs to login via a special login screen. Secondly he must grant access to the application on a second screen. All requested permissions and details about the requesting application are shown to him.
   * On successful authentication a transient session is created. Some OAuth parameters are used as additional input for the cookie hashes. Therefore thoses sessions should not be usable outside the authorization context. After granting/denying access the session is terminated again. If the user closes the browser window instead, the session will continue to exist for approximately the configured short term lifetime. All subsequent requests after signing in verify the users session based on the provided session ID and secret cookie. If IP check is configured to happen, it will also take place.
@@ -14,7 +12,7 @@ title: Security Considerations
   * The authorization code is valid for max. 10 minutes. Exchanging it always results in a refresh/access token pair.
 
 
-## Permissions / Limits
+# Permissions / Limits
 
   * A user may grant access to at most 50 different clients.
   * A user may allow the generation of at most 10 refresh/access token pairs per application. Every further requests leads to a deletion of the oldest token pair.
@@ -22,19 +20,19 @@ title: Security Considerations
   * It is possible to deny OAuth access at all for certain users via a config-cascade enabled property `com.openexchange.oauth.provider.enabled`.
 
 
-## Data Storage
+# Data Storage
 
   * OAuth clients are stored within the global DB. Their secrets are encrypted via a configurable static secret.
   * OAuth token pairs are stored within the user DB without any encryption.
 
 
-## API Access
+# API Access
 
   * A selected subset of the public HTTP API will be published under a separate path to support OAuth.
   * The Card- and CalDAV endpoints will be extended to support OAuth directly via the `Bearer` authentication scheme.
   
 
-## Other
+# Other
 
   * Every time a user grants access to an external application, a notification email is sent out to his primary mail address.
   * Refresh tokens don't expire but can be revoked by both, the user and the client application.

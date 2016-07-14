@@ -1,0 +1,23 @@
+/group?action=new:
+  put:
+    operationId: createGroup
+    tags:
+      - groups
+    summary: Creates a group (**introduced 2008-06-12**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object containing the group data. The field id is not present.
+        required: true
+        schema:
+          $ref: "#/definitions/GroupData"
+    responses:
+      200:
+        description: |
+          A JSON object with the ID of the newly created group. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/GroupUpdateResponse"

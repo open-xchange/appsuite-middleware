@@ -161,8 +161,7 @@ public final class GetStructureAction extends AbstractMailAction {
                 LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
                     e);
                 try {
-                    final Object[] args = e.getDisplayArgs();
-                    final String uid = null == args || 0 == args.length || null == args[0] ? null : args[0].toString();
+                    final String uid = getUidFromException(e);
                     if ("undefined".equalsIgnoreCase(uid)) {
                         throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
                     }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.admin.reseller"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.admin.reseller.console"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.admin.reseller.rmi"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.admin.reseller"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.admin.reseller.console"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.admin.reseller.rmi"/>
 </provider>
 </psf>

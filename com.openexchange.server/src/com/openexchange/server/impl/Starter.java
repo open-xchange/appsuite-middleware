@@ -184,18 +184,6 @@ public class Starter implements Initialization {
         } else {
             LOG.info("Groupware server initialized with errors.");
         }
-
-        /*
-         * TODO: Check property ENABLE_INTERNAL_USER_EDIT OXFolderSQL.updateCtxAddrBookPermission
-         * (FolderCacheProperties.isEnableInternalUsersEdit())
-         */
-
-        if (started.size() == inits.length) {
-            LOG.info("SYSTEM IS UP & RUNNING...");
-        } else {
-            LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS...");
-        }
-
     }
 
     /**

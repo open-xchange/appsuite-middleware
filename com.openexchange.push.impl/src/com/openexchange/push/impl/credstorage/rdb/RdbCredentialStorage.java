@@ -120,6 +120,10 @@ public class RdbCredentialStorage implements CredentialStorage {
 
     @Override
     public void storeCredentials(Credentials credentials) throws OXException {
+        if ((null == credentials) || (false == isValid(credentials))) {
+            throw OXException.general("Invalid credentials given: " + (null == credentials ? "null" : credentials.toString()));
+        }
+
         int contextId = credentials.getContextId();
         DatabaseService service = CredStorageServices.requireService(DatabaseService.class);
         Connection connection = service.getWritable(contextId);
@@ -133,6 +137,10 @@ public class RdbCredentialStorage implements CredentialStorage {
                 service.backWritableAfterReading(contextId, connection);
             }
         }
+    }
+
+    private boolean isValid(Credentials credentials) {
+        return (null != credentials.getLogin()) && (null != credentials.getPassword());
     }
 
     private boolean storeCredentials(Credentials obfuscatedCredentials, Connection connection) throws OXException {

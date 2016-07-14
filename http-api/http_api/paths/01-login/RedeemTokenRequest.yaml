@@ -1,0 +1,45 @@
+/login?action=redeemToken:
+  post:
+    operationId: redeemToken
+    tags:
+      - login
+    summary: Redeem Token Login (**available since v7.4.0**).
+    description: |
+      With a valid session it is possible to acquire a secret (see `token?action=acquireToken`). Using this secret another system is able
+      to generate a valid session. This session may also contain the users password (configurable).
+      The system in question needs to be registered at the server and has to identify itself with a key
+      configured at the open-xchange server. This is only for internal communication and by default no keys
+      are available.
+    parameters:
+      - in: formData
+        name: token
+        type: string
+        description: The token created with `token?action=acquireToken`.
+        required: true
+      - in: query
+        type: string
+        name: authId
+        description: |
+          Identifier for tracing every single login request passed between different systems in a cluster.
+          The value should be some token that is unique for every login request. This parameter must be
+          given as URL parameter and not inside the body of the POST request.
+        required: true
+      - in: formData
+        name: client
+        type: string
+        description: Identifier of the client using the HTTP/JSON interface. The client must identifier must be the same for each request after creating the login session.
+        required: true
+      - in: formData
+        name: secret
+        type: string
+        description: The value of the secret string for token logins. This is configured through the tokenlogin-secrets configuration file.
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object containing the session ID used for all subsequent requests. Additionally a random
+          token is contained to be used for the Easy Login method. If configured within tokenlogin-secrets
+          configuration file even the user password will be returned. In case of errors the responsible
+          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/LoginResponse"

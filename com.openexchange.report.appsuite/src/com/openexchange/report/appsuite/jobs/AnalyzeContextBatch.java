@@ -61,10 +61,12 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ReportContextHandler;
 import com.openexchange.report.appsuite.ReportExceptionCodes;
+import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportUserHandler;
-import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
+import com.openexchange.report.appsuite.internal.Services;
+import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.user.UserService;
 
 /**
@@ -72,6 +74,7 @@ import com.openexchange.user.UserService;
  * context ids and is distributed cluster-wide via hazelcasts executor service.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class AnalyzeContextBatch implements Callable<Void>, Serializable {
 
@@ -82,6 +85,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
     private final String uuid;
     private String reportType;
     private List<Integer> contextIds;
+    private Report report;
 
     /**
      *
@@ -97,48 +101,77 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
         this.reportType = reportType;
         this.contextIds = chunk;
     }
+    
+    /**
+    *
+    * Initializes a new {@link AnalyzeContextBatch} with a report instead of just a report-type.
+    * This means, additional options are selected and stored in the report object.
+    *
+    * @param uuid The uuid of the report we're running
+    * @param reportType The type of report that is being run
+    * @param chunk a list of context IDs to analyze
+    */
+   public AnalyzeContextBatch(String uuid, Report report, List<Integer> chunk) {
+       super();
+       this.uuid = uuid;
+       this.report = report;
+       this.reportType = report.getType();
+       this.contextIds = chunk;
+   }
 
     @Override
     public Void call() throws Exception {
-        int previousPriority = Thread.currentThread().getPriority();
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+        Thread currentThread = Thread.currentThread();
+        int previousPriority = currentThread.getPriority();
+        currentThread.setPriority(Thread.MIN_PRIORITY);
 
         try {
             if (reportType == null) {
                 reportType = "default";
             }
 
-            for (Integer ctxId : contextIds) {
+            for (int i = contextIds.size(); (!currentThread.isInterrupted()) && (i-- > 0);) {
+                Integer ctxId = contextIds.get(i);
+                ReportService reportService = Services.getService(ReportService.class);
+                ContextReport contextReport = null;
                 try {
                     Context ctx = loadContext(ctxId);
-                    ContextReport contextReport = new ContextReport(uuid, reportType, ctx);
+                    contextReport = new ContextReport(uuid, reportType, ctx);
 
                     handleContext(contextReport);
-                    handleUsers(ctx, contextReport);
-                    handleGuests(ctx, contextReport);
+                    handleUsersGuestsLinks(ctx, contextReport);
 
-                    Orchestration.getInstance().done(contextReport);
+                    reportService.finishContext(contextReport);
                 } catch (OXException oxException) {
+                    if (oxException.similarTo(ContextExceptionCodes.UPDATE)) {
+                        reportService.abortGeneration(uuid, reportType, "Not all schemas are up to date! Please ensure schema up-to-dateness (e. g. by calling 'runupdate' CLT).");
+                        break;
+                    }
                     if (oxException.similarTo(ReportExceptionCodes.REPORT_GENERATION_CANCELED)) {
                         LOG.info("Stop execution of report generation due to an user intruction!");
                         contextIds = Collections.emptyList();
+                        reportService.abortGeneration(uuid, reportType, "Cancelled report generation based on user interaction.");
                         break;
                     }
                     LOG.error("Exception thrown while loading context. Skip report for context {}. Move to next context", ctxId, oxException);
-                    Orchestration.getInstance().abort(uuid, reportType);
+                    reportService.abortContextReport(uuid, reportType);
                     continue;
                 } catch (Exception e) {
                     LOG.error("Unexpected error while context report generation!", e);
+                    reportService.abortContextReport(uuid, reportType);
                 }
             }
         } finally {
-            Thread.currentThread().setPriority(previousPriority);
+            currentThread.setPriority(previousPriority);
         }
         return null;
     }
 
     /**
+     * Run the report for the given context, to get/set all relevant data.
+     * 
      * @param contextReport
+     * @throws OXException
      */
     private void handleContext(ContextReport contextReport) {
         // Run all Context Analyzers that apply to this reportType
@@ -156,18 +189,33 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
      * @param contextReport
      * @throws OXException
      */
-    private void handleUsers(Context ctx, ContextReport contextReport) throws OXException {
+    private void handleUsersGuestsLinks(Context ctx, ContextReport contextReport) throws OXException {
         // Next, let's look at all the users in this context
         User[] loadUsers = loadUsers(ctx);
         for (User user : loadUsers) {
             UserReport userReport = new UserReport(uuid, reportType, ctx, user, contextReport);
+            // Are extended options available?
+            if (this.report != null) {
+                if (report.isAdminIgnore() && ctx.getMailadmin() == user.getId()) {
+                    continue;
+                }
+                userReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
+                userReport.setShowMailMetrics(this.report.isShowMailMetrics());
+                userReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
+                userReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+                //Add user to context
+                contextReport.getUserList().add(user.getId());
+                contextReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
+                contextReport.setShowMailMetrics(this.report.isShowMailMetrics());
+                contextReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
+                contextReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+            }
             // Run User Analyzers
             for (ReportUserHandler userHandler : Services.getUserHandlers()) {
                 if (userHandler.appliesTo(reportType)) {
                     userHandler.runUserReport(userReport);
                 }
             }
-
             // Compact User Analysis and add to context report
             for (UserReportCumulator cumulator : Services.getUserReportCumulators()) {
                 if (cumulator.appliesTo(reportType)) {
@@ -177,53 +225,11 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
         }
     }
 
-    /**
-     * Handles guests for the given context
-     *
-     * @param ctx
-     * @param contextReport
-     * @throws OXException
-     */
-    private void handleGuests(Context ctx, ContextReport contextReport) throws OXException {
-        User[] guests = loadGuests(ctx);
-        for (User guest : guests) {
-            UserReport guestReport = new UserReport(uuid, reportType, ctx, guest, contextReport);
-
-            for (UserReportCumulator cumulator : Services.getUserReportCumulators()) {
-                if (cumulator.appliesTo(reportType)) {
-                    cumulator.merge(guestReport, contextReport);
-                }
-            }
-        }
-    }
-
     protected User[] loadUsers(Context ctx) throws OXException {
-        return Services.getService(UserService.class).getUser(ctx);
-    }
-
-    protected User[] loadGuests(Context ctx) throws OXException {
-        return Services.getService(UserService.class).getUser(ctx, true, true);
+        return Services.getService(UserService.class).getUser(ctx, true, false);
     }
 
     protected Context loadContext(int contextId) throws OXException {
-        try {
-            return Services.getService(ContextService.class).getContext(contextId);
-        } catch (OXException e) {
-            if (e.similarTo(ContextExceptionCodes.UPDATE)) {
-                for (int i = 1; i <= 3; i++) {
-                    try {
-                        LOG.info("Schema update in progress. Wait {} of 3 and try again", i);
-                        Thread.sleep(30000L);
-                        return Services.getService(ContextService.class).getContext(contextId);
-                    } catch (InterruptedException e1) {
-                        // should not happen
-                    } catch (OXException e1) {
-                        LOG.info("Schema update still in progress.");
-                    }
-                }
-                LOG.error("Blocking schema update took to long. Unable to retrieve context. Stop report generation.");
-            }
-            throw e;
-        }
+        return Services.getService(ContextService.class).getContext(contextId);
     }
 }

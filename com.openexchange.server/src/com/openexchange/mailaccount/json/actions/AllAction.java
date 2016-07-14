@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -90,18 +90,13 @@ public final class AllAction extends AbstractMailAccountAction {
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException {
-        final String colString = requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS);
-
-        final List<Attribute> attributes = getColumns(colString);
-
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        List<Attribute> attributes = getColumns(requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS));
 
         MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
 
-        final boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
-        final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
-
+        boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
+        List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
         for (final MailAccount userMailAccount : userMailAccounts) {
             final MailAccount mailAccount = userMailAccount;
             if (!isUnifiedINBOXAccount(mailAccount) && (multipleEnabled || isDefaultMailAccount(mailAccount))) {
@@ -111,7 +106,7 @@ public final class AllAction extends AbstractMailAccountAction {
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
-        final JSONArray jsonArray = MailAccountWriter.writeArray(userMailAccounts, attributes, session);
+        JSONArray jsonArray = DefaultMailAccountWriter.writeArray(userMailAccounts, attributes, session);
         return new AJAXRequestResult(jsonArray);
     }
 

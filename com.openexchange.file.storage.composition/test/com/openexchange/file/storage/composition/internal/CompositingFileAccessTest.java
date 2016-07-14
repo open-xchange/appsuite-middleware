@@ -518,7 +518,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         verifyAccount();
         fileAccess.assertAllWereCalled();
 
-        assertEquals(file.getId(), fileId.toUniqueID());
+        assertEquals(file.getId(), fileId.getFileId());
     }
 
     @Test
@@ -538,7 +538,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         verifyAccount();
         fileAccess.assertAllWereCalled();
 
-        assertEquals(file.getId(), fileId.toUniqueID());
+        assertEquals(file.getId(), fileId.getFileId());
     }
 
     @Test
@@ -558,7 +558,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         verifyAccount();
         fileAccess.assertAllWereCalled();
 
-        assertEquals(file.getId(), fileId.toUniqueID());
+        assertEquals(file.getId(), fileId.getFileId());
     }
 
     @Test
@@ -578,7 +578,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         verifyAccount();
         fileAccess.assertAllWereCalled();
 
-        assertEquals(file.getId(), fileId.toUniqueID());
+        assertEquals(file.getId(), fileId.getFileId());
     }
 
     // Moving across filestores

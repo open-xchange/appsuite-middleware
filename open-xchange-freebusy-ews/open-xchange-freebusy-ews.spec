@@ -70,35 +70,7 @@ done
 * Wed Feb 03 2016 Markus Wagner <markus.wagner@open-xchange.com>
 Second candidate for 7.8.1 release
 * Tue Jan 26 2016 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2016-01-19 (3062)
-* Tue Jan 26 2016 Markus Wagner <markus.wagner@open-xchange.com>
 First candidate for 7.8.1 release
-* Mon Jan 25 2016 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2016-01-25 (3031)
-* Sat Jan 23 2016 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2016-02-05 (3058)
-* Sat Jan 23 2016 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2016-02-05 (3058)
-* Fri Jan 15 2016 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2016-01-15 (3028)
-* Wed Jan 13 2016 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2016-01-13 (2982)
-* Tue Jan 12 2016 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2015-12-23 (3011)
-* Tue Dec 29 2015 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2016-01-05 (2989)
-* Tue Dec 22 2015 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2015-12-23 (2971)
-* Fri Dec 11 2015 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2015-12-21 (2953)
-* Tue Dec 08 2015 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2015-12-07 (2918)
-* Thu Nov 19 2015 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2015-11-23 (2878)
-* Thu Nov 05 2015 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2015-11-09 (2840)
-* Fri Oct 30 2015 Markus Wagner <markus.wagner@open-xchange.com>
-Build for patch 2015-11-02 (2853)
 * Mon Oct 19 2015 Markus Wagner <markus.wagner@open-xchange.com>
 Build for patch 2015-10-26 (2812)
 * Thu Oct 08 2015 Markus Wagner <markus.wagner@open-xchange.com>

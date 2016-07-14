@@ -1,0 +1,60 @@
+type: object
+properties:
+  $ref: ../common/CommonObjectData.yaml
+  object_permissions:
+    type: array
+    description: An array of object permissions (preliminary, available since v7.8.0).
+    items:
+      $ref: "#/definitions/InfoItemPermission"
+  shareable:
+    type: boolean
+    description: (read-only) Indicates if the item can be shared (preliminary, available since v7.8.0).
+  title:
+    type: string
+    description: The title.
+  url:
+    type: string
+    description: Link/URL to item.
+  filename:
+    type: string
+    description: Displayed filename of the document.
+  file_mimetype:
+    type: string
+    description: MIME type of the document. The client converts known types to more readable names before displaying them.
+  file_size:
+    type: integer
+    format: int64
+    description: The size of the document in bytes.
+  version:
+    type: string
+    description: Version of the document. NULL can be used to denote the most recent version and will be set in responses if versions are not supported by the underlying storage.
+  description:
+    type: string
+    description: A description if the item.
+  locked_until:
+    type: integer
+    format: int64
+    description: The time until which this item will presumably be locked. Only set if the docment is currently locked, 0 otherwise.
+  file_md5sum:
+    type: string
+    description: MD5Sum of the document.
+  version_comment:
+    type: string
+    description: A version comment is used to file a changelog for the file.
+  current_version:
+    type: boolean
+    description: '"true" if this version is the current version, "false" otherwise. Note: This is not writeable.'
+  number_of_versions:
+    type: integer
+    description: 'The number of all versions of the item. Note: This is not writeable.'
+  com.openexchange.share.extendedObjectPermissions:
+    type: array
+    description: An array of extended object permissions (read-only). (available since 7.8.0)
+    items:
+      $ref: "#/definitions/InfoItemExtendedPermission"
+  com.openexchange.realtime.resourceID:
+    type: string
+    description: The resource identifier for the infoitem for usage within the realtime component (read-only). (available since 7.8.0)
+  com.openexchange.file.storage.mail.mailMetadata:
+    type: object
+    description: Contains additional metadata for items in the "maildrive" file storage (read-only). (available since 7.8.2)

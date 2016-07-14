@@ -73,6 +73,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -88,6 +89,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.ServiceException;
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -105,6 +107,7 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -191,8 +194,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private static final String DEFAULT_IMAP_SERVER_CREATE = "imap://localhost:143";
 
+    private final AdminCache cache;
+    private final PropertyHandler prop;
+
+    /**
+     * Initializes a new {@link OXUserMySQLStorage}.
+     */
     public OXUserMySQLStorage() {
         super();
+        cache = ClientAdminThread.cache;
+        prop = cache.getProperties();
     }
 
     @Override
@@ -314,6 +325,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     try {
                         Cache cache = cacheService.getCache("MailAccount");
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
+                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
                         cache.invalidateGroup(ctx.getId().toString());
                     } catch (final OXException e) {
                         log.error("", e);
@@ -3083,10 +3095,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         log.error("Pool Error pushing ox write connection to pool!", e);
                     }
                 }
-            } while (condition.checkRetry());
+            } while (retry(condition, users, ctx));
         } catch (final SQLException sql) {
             throw new StorageException(sql.toString(), sql);
         }
+    }
+
+    private boolean retry(DBUtils.TransactionRollbackCondition condition, final User[] users, Context ctx) throws SQLException {
+        SQLException sqle = condition.getTransactionRollbackException();
+        boolean retry = condition.checkRetry();
+        if (retry) {
+            log.info("Retrying to delete users {} from context {} as suggested by: {}", Arrays.toString(users), ctx.getId(), sqle.getMessage());
+        }
+        return retry;
     }
 
     @Override

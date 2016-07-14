@@ -65,6 +65,7 @@ public class MailAccountSuite {
         tests.addTestSuite(MailAccountLifecycleTest.class);
         tests.addTestSuite(MailAccountAllTest.class);
         tests.addTestSuite(MailAccountValidateTest.class);
+        tests.addTestSuite(MailAccountStartTlsTest.class);
         return tests;
     }
 }

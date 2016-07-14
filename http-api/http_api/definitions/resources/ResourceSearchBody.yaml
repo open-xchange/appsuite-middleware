@@ -1,0 +1,5 @@
+type: object
+properties:
+  pattern:
+    type: string
+    description: Search pattern to find resources. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.

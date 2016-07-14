@@ -1,0 +1,33 @@
+/infostore?action=notify:
+  put:
+    operationId: notifyAboutSharedInfoItem
+    tags:
+      - infostore
+    summary: Notifies users or groups about a shared infoitem (**available since v7.8.0, preliminary**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the shared infoitem to notify about.
+        required: true
+      - in: body
+        name: body
+        description: |
+          JSON object providing the JSON array `entities`, which holds the entity ID(s) of the users or groups that
+          should be notified. To send a custom message to the recipients, an additional JSON object `notification` may
+          be included, inside of which an optional message can be passed (otherwise, some default message is used).
+          (Example: {"entities":["2332"]} or {"entities":["2332"],"notification":{"transport":"mail","message":"The message"}})
+        required: true
+        schema:
+          $ref: "#/definitions/InfoItemSharingNotificationBody"
+    responses:
+      200:
+        description: |
+          An empty JSON object. Any transport warnings that occurred during sending the
+          notifications are available in the warnings array of the response. In case
+          of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/InfoItemSharingNotificationResponse"

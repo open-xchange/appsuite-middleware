@@ -1,0 +1,24 @@
+/mail?action=receipt_ack:
+  put:
+    operationId: receiptMailAck
+    tags:
+      - mail
+    summary: Requests a delivery receipt for a priviously sent mail.
+    description: This delivery receipt only acknowledges that the message could be receipted on the recipients computer.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object containing the information of a mail for which a delivery receipt shall be requested.
+        required: true
+        schema:
+          $ref: "#/definitions/MailAckBody"
+    responses:
+      200:
+        description: |
+          A JSON object with an empty data field if everything went well or a JSON object containing the error
+          information. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailAckResponse"

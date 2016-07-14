@@ -330,7 +330,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                 fileAccess.startTransaction();
                 rollbackNeeded = true;
                 try {
-                    fileAccess.saveDocument(file, in, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, modifiedColumns, false, true);
+                    fileAccess.saveDocument(file, in, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, modifiedColumns, false, true, false);
                     fileAccess.commit();
                     rollbackNeeded = false;
                     retry = false;

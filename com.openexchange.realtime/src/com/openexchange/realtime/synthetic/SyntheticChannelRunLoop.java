@@ -104,12 +104,11 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
             }
 
             // remove remaining messages from queue
-            Iterator<MessageDispatch> iterator = queue.iterator();
-            while (iterator.hasNext()) {
+            for (Iterator<MessageDispatch> iterator = queue.iterator(); iterator.hasNext();) {
                 MessageDispatch next = iterator.next();
                 if (isDestinedForID(destination, next)) {
                     matchingElements.add(next);
-                    queue.remove(next);
+                    iterator.remove();
                 }
             }
         } catch (Exception e) {

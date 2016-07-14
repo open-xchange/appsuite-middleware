@@ -1,0 +1,5 @@
+type: object
+properties:
+  $ref: ./CommonResponseData.yaml
+  data:
+    $ref: "#/definitions/DriveJumpData"

@@ -61,38 +61,40 @@ public enum DriveClientType {
     /**
      * An unknown client
      */
-    UNKNOWN(null),
+    UNKNOWN(null, true),
 
     /**
      * The windows desktop client
      */
-    WINDOWS("OpenXchange.HTTPClient.OXDrive"),
+    WINDOWS("OpenXchange.HTTPClient.OXDrive", true),
 
     /**
      * The Mac OS desktop client
      */
-    MAC_OS("OSX.OXDrive"),
+    MAC_OS("OSX.OXDrive", true),
 
     /**
      * The iOS mobile client
      */
-    IOS("OpenXchange.iosClient.OXDrive"),
+    IOS("OpenXchange.iosClient.OXDrive", false),
 
     /**
      * The Android mobile client
      */
-    ANDROID("OpenXchange.Android.OXDrive"),
+    ANDROID("OpenXchange.Android.OXDrive", false),
 
     /**
      * The .NET test drive client
      */
-    TEST_DRIVE("OpenXchange.HTTPClient.TestDrive"),
+    TEST_DRIVE("OpenXchange.HTTPClient.TestDrive", true),
     ;
 
     private String clientString;
+    private boolean desktop;
 
-    private DriveClientType(String clientString) {
+    private DriveClientType(String clientString, boolean desktop) {
         this.clientString = clientString;
+        this.desktop = desktop;
     }
 
     /**
@@ -102,6 +104,15 @@ public enum DriveClientType {
      */
     public String getClientString() {
         return clientString;
+    }
+
+    /**
+     * Gets a value indicating whether the client denotes a "desktop" client or not.
+     *
+     * @return <code>true</code> for a "desktop" client, <code>false</code>, otherwise
+     */
+    public boolean isDesktop() {
+        return desktop;
     }
 
     /**

@@ -117,4 +117,5 @@ public class SimQuotaFileStorageService implements QuotaFileStorageService {
     public StorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException {
         return null;
     }
+
 }

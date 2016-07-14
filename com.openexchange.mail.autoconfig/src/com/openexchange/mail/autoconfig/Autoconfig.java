@@ -68,6 +68,8 @@ public class Autoconfig {
     private Boolean transportSecure;
     private String username;
     private String source;
+    private boolean mailStartTls;
+    private boolean transportStartTls;
 
     /**
      * Initializes a new ranked {@link Autoconfig}.
@@ -256,6 +258,22 @@ public class Autoconfig {
         this.username = username;
     }
 
+    public boolean isMailStartTls() {
+        return mailStartTls;
+    }
+
+    public void setMailStartTls(boolean mailStartTls) {
+        this.mailStartTls = mailStartTls;
+    }
+
+    public boolean isTransportStartTls() {
+        return transportStartTls;
+    }
+
+    public void setTransportStartTls(boolean transportStartTls) {
+        this.transportStartTls = transportStartTls;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(256);
@@ -273,9 +291,9 @@ public class Autoconfig {
             builder.append("transportProtocol=").append(transportProtocol).append(", ");
         }
         builder.append("mailPort=").append(mailPort).append(", transportPort=").append(transportPort).append(", mailSecure=").append(mailSecure).append(", transportSecure=").append(
-            transportSecure).append(", ");
+            transportSecure).append(", mailStartTls=").append(mailStartTls).append(", transportStartTls=").append(transportStartTls);
         if (username != null) {
-            builder.append("username=").append(username);
+            builder.append(", username=").append(username);
         }
         builder.append("]");
         return builder.toString();

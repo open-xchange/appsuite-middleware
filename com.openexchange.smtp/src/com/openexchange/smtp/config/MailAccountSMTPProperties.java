@@ -77,6 +77,16 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         this.mailAccountId = mailAccount.getId();
     }
 
+    /**
+     * Initializes a new {@link MailAccountSMTPProperties}.
+     *
+     * @param accountId The transport account identifier
+     */
+    public MailAccountSMTPProperties(int accountId) {
+        super();
+        this.mailAccountId = accountId;
+    }
+
     @Override
     public String getSmtpAuthEnc() {
         String smtpAuthEncStr = properties.get("com.openexchange.smtp.smtpAuthEnc");

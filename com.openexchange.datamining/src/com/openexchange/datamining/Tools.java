@@ -62,7 +62,7 @@ public class Tools {
     static String humanReadableBytes(String string) {
         String returnString = "";
         BigInteger number = new BigInteger(string);
-        if (number.equals(new BigInteger("9999999999"))){
+        if (number.equals(new BigInteger("9999999999")) || Integer.parseInt(string) == Integer.MAX_VALUE ){
             returnString = "INFINITE";
         }
         else if (number.equals(new BigInteger("1"))){

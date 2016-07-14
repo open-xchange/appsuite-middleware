@@ -64,6 +64,10 @@ import com.openexchange.dav.mixins.ACL;
 import com.openexchange.dav.mixins.ACLRestrictions;
 import com.openexchange.dav.mixins.CTag;
 import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
+import com.openexchange.dav.mixins.Invite;
+import com.openexchange.dav.mixins.Principal;
+import com.openexchange.dav.mixins.ShareAccess;
+import com.openexchange.dav.mixins.ShareResourceURI;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.reports.SyncStatus;
@@ -116,6 +120,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
         if (null != folder) {
             includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this));
             includeProperties(new ACL(folder.getPermissions()), new ACLRestrictions(), new SupportedPrivilegeSet());
+            includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this), new Principal(getOwner()));
         }
     }
 
@@ -383,7 +388,13 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
         return folderToUpdate;
     }
 
-    private static AbstractFolder prepareUpdatableFolder(UserizedFolder folder) {
+    /**
+     * Prepares an "updateable" folder to use with the folder service.
+     *
+     * @param folder The original folder to use as template, or <code>null</code> to initialize a blank folder
+     * @return The folder
+     */
+    public static AbstractFolder prepareUpdatableFolder(UserizedFolder folder) {
         AbstractFolder updatableFolder = new AbstractFolder() {
 
             private static final long serialVersionUID = -367640273380922433L;

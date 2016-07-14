@@ -50,8 +50,8 @@
 package com.openexchange.authentication.database.impl;
 
 import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.AuthenticationDriver;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.BasicAuthenticationService;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
 
@@ -62,27 +62,24 @@ import com.openexchange.exception.OXException;
  */
 public class DatabaseAuthentication implements AuthenticationService {
 
-    private final BasicAuthenticationService basicAuthService;
+    private final AuthenticationDriver databaseAuthenticationDriver;
 
     /**
      * Default constructor.
      */
-    public DatabaseAuthentication(BasicAuthenticationService basicAuthService) {
+    public DatabaseAuthentication(AuthenticationDriver databaseAuthenticationDriver) {
         super();
-        this.basicAuthService = basicAuthService;
+        this.databaseAuthenticationDriver = databaseAuthenticationDriver;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
-        return basicAuthService.handleLoginInfo(loginInfo);
+        return databaseAuthenticationDriver.handleLoginInfo(loginInfo);
     }
 
     @Override
     public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
-        return basicAuthService.handleAutoLoginInfo(loginInfo);
+        return databaseAuthenticationDriver.handleAutoLoginInfo(loginInfo);
     }
 
 }

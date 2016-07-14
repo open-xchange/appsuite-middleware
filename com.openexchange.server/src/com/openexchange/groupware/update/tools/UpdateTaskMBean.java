@@ -179,31 +179,54 @@ public final class UpdateTaskMBean implements DynamicMBean {
     public Object invoke(final String actionName, final Object[] params, final String[] signature) throws MBeanException, ReflectionException {
         if (actionName.equals("runUpdate")) {
             try {
-                final Object param = params[0];
-                if (param instanceof Integer) {
-                    new UpdateProcess(((Integer) param).intValue()).run();
-                } else {
-                    final String sParam = param.toString();
-                    final int parsed = parsePositiveInt(sParam);
+                // Initialize UpdateProcess instance
+                UpdateProcess updateProcess;
+                {
+                    Object param = params[0];
+                    if (param instanceof Integer) {
+                        updateProcess = new UpdateProcess(((Integer) param).intValue());
+                    } else {
+                        final String sParam = param.toString();
+                        final int parsed = parsePositiveInt(sParam);
 
-                    final UpdateProcess updateProcess = parsed >= 0 ? new UpdateProcess(parsed, true) : new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString()), true);
-                    updateProcess.run();
-
-                    final Queue<TaskInfo> failures = updateProcess.getFailures();
-                    if (null != failures && !failures.isEmpty()) {
-                        final StringBuilder sb = new StringBuilder("The following update task(s) failed: \\R");
-                        boolean first = true;
-                        for (final TaskInfo taskInfo : failures) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                sb.append("\\R");
-                            }
-                            sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
-                        }
-                        return sb.toString();
+                        updateProcess = parsed >= 0 ? new UpdateProcess(parsed, true) : new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString()), true);
                     }
                 }
+
+                // Trigger run
+                updateProcess.run();
+
+                // Return possible failures
+                Queue<TaskInfo> failures = updateProcess.getFailures();
+                if (null != failures && !failures.isEmpty()) {
+                    final StringBuilder sb = new StringBuilder("The following update task(s) failed: \\R");
+                    boolean first = true;
+                    for (final TaskInfo taskInfo : failures) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            sb.append("\\R");
+                        }
+                        sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
+                    }
+                    return sb.toString();
+                }
+            } catch (final OXException e) {
+                LOG.error("", e);
+                final Exception wrapMe = new Exception(e.getMessage());
+                throw new MBeanException(wrapMe);
+            } catch (final RuntimeException e) {
+                LOG.error("", e);
+                throw e;
+            } catch (final Error e) {
+                LOG.error("", e);
+                throw e;
+            }
+            // Void
+            return null;
+        } else if (actionName.equals("runAllUpdate")) {
+            try {
+                UpdateTaskToolkit.runUpdateOnAllSchemas();
             } catch (final OXException e) {
                 LOG.error("", e);
                 final Exception wrapMe = new Exception(e.getMessage());
@@ -273,22 +296,6 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error("", e);
                 throw e;
             }
-        } else if (actionName.equals("runAllUpdate")) {
-            try {
-                UpdateTaskToolkit.runUpdateOnAllSchemas();
-            } catch (final OXException e) {
-                LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
-                throw new MBeanException(wrapMe);
-            } catch (final RuntimeException e) {
-                LOG.error("", e);
-                throw e;
-            } catch (final Error e) {
-                LOG.error("", e);
-                throw e;
-            }
-            // Void
-            return null;
         }
         final ReflectionException e = new ReflectionException(new NoSuchMethodException(actionName));
         LOG.error("", e);

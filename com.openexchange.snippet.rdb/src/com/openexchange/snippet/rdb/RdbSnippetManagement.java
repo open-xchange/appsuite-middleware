@@ -488,7 +488,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         AccountQuota quota = getQuota();
         if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
             Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
-            if (amountQuota.isExceeded() || amountQuota.willExceed(getOwnSnippetsCount())) {
+            if (amountQuota.isExceeded() || amountQuota.willExceed(1)) {
                 throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
             }
         }

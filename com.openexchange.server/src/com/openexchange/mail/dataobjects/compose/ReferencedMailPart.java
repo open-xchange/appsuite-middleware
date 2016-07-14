@@ -52,38 +52,29 @@ package com.openexchange.mail.dataobjects.compose;
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.mail.MessageRemovedException;
 import javax.mail.Part;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.mime.datasource.StreamDataSource;
-import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
+import com.openexchange.mail.mime.datasource.FileHolderDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.io.IOUtils;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ReferencedMailPart} - A {@link MailPart} implementation that points to a referenced part in original mail.
@@ -105,16 +96,10 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     private static final int MB = 1048576;
 
     private final boolean isMail;
+    private final ThresholdFileHolder file;
 
     private transient DataSource dataSource;
-
     private transient Object cachedContent;
-
-    private byte[] data;
-
-    private ManagedFile file;
-
-    private String fileId;
 
     /**
      * Initializes a new {@link ReferencedMailPart}.
@@ -129,14 +114,10 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      */
     protected ReferencedMailPart(final MailPart referencedPart, final Session session) throws OXException {
         isMail = referencedPart.getContentType().isMimeType(MimeTypes.MIME_MESSAGE_RFC822) && !referencedPart.getContentDisposition().isAttachment();
-        try {
-            handleReferencedPart(referencedPart, session);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
+        int partLimit = TransportProperties.getInstance().getReferencedPartLimit();
+        ThresholdFileHolder sink = partLimit <= 0 ? new ThresholdFileHolder() : new ThresholdFileHolder(partLimit);
+        file = sink;
+        handleReferencedPart(referencedPart, sink);
     }
 
     /**
@@ -152,14 +133,10 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      */
     protected ReferencedMailPart(final MailMessage referencedMail, final Session session) throws OXException {
         isMail = true;
-        try {
-            handleReferencedPart(referencedMail, session);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
+        int partLimit = TransportProperties.getInstance().getReferencedPartLimit();
+        ThresholdFileHolder sink = partLimit <= 0 ? new ThresholdFileHolder() : new ThresholdFileHolder(partLimit);
+        file = sink;
+        handleReferencedPart(referencedMail, sink);
     }
 
     /**
@@ -167,67 +144,23 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * content is temporary written to disc; otherwise its content is kept inside an array of <code>byte</code>.
      *
      * @param referencedPart The referenced mail part
-     * @param session The session to manage a possible temporary disc file
+     * @param file The associated file holder
      * @return A file ID if content is written to disc; otherwise <code>null</code> to indicate content is held inside.
      * @throws OXException If a mail error occurs
-     * @throws IOException If an I/O error occurs
      */
-    private void handleReferencedPart(final MailPart referencedPart, final Session session) throws OXException, IOException {
-        final long size = referencedPart.getSize();
-        if (size > 0 && size <= TransportProperties.getInstance().getReferencedPartLimit()) {
-            if (isMail) {
-                // Consume surrounding part's headers until nested message bytes appears
-                data = Streams.stream2bytes(messageSource(referencedPart));
-                setContentType(MimeTypes.MIME_MESSAGE_RFC822);
-                setContentDisposition(Part.INLINE);
-                setSize(size);
-            } else {
-                copy2ByteArr(referencedPart.getInputStream());
-                setHeaders(referencedPart);
-            }
+    private void handleReferencedPart(MailPart referencedPart, ThresholdFileHolder file) throws OXException {
+        if (isMail) {
+            file.write(messageSource(referencedPart));
+            setContentType(MimeTypes.MIME_MESSAGE_RFC822);
+            setContentDisposition(Part.INLINE);
+            setSize(file.getLength());
         } else {
-            if (isMail) {
-                // Consume surrounding part's headers until nested message bytes appears
-                copy2File(messageSource(referencedPart));
-                setContentType(MimeTypes.MIME_MESSAGE_RFC822);
-                setContentDisposition(Part.INLINE);
-                setSize(file.getFile().length());
-            } else {
-                copy2File(referencedPart.getInputStream());
-                setHeaders(referencedPart);
-            }
-            ManagedFile mf = file;
-            if (null != mf) {
-                File tmpFile = mf.getFile();
-                if (null != tmpFile) {
-                    LOG.debug("Referenced mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB), tmpFile.getName());
-                }
-            }
+            file.write(referencedPart.getInputStream());
+            setHeaders(referencedPart);
         }
+
         if (!containsFileName() && referencedPart.containsFileName()) {
             setFileName(referencedPart.getFileName());
-        }
-    }
-
-    private void copy2File(final InputStream in) throws IOException {
-        try {
-            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            if (null == mfm) {
-                throw new IOException("Missing file management");
-            }
-            final ManagedFile mf;
-            try {
-                mf = mfm.createManagedFile(in, false);
-            } catch (final OXException e) {
-                final IOException ioerr = new IOException();
-                ioerr.initCause(e);
-                throw ioerr;
-            }
-            setSize(mf.getSize());
-            file = mf;
-            fileId = mf.getID();
-        } finally {
-            IOUtils.closeStreamStuff(in);
         }
     }
 
@@ -237,20 +170,6 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             return MimeMessageUtility.getStreamFromMailPart(referencedPart);
         }
         return referencedPart.getInputStream();
-    }
-
-    private void copy2ByteArr(final InputStream in) throws IOException {
-        try {
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-            final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-            for (int read; (read = in.read(bbuf)) > 0;) {
-                out.write(bbuf, 0, read);
-            }
-            out.flush();
-            data = out.toByteArray();
-        } finally {
-            IOUtils.closeStreamStuff(in);
-        }
     }
 
     private void setHeaders(final MailPart referencedPart) {
@@ -273,55 +192,19 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     private static final String TEXT = "text/";
 
-    private DataSource getDataSource() throws OXException {
+    private DataSource getDataSource() {
         /*
          * Lazy creation
          */
         if (null == dataSource) {
-            try {
-                if (data != null) {
-                    if (getContentType().startsWith(TEXT) && getContentType().getCharsetParameter() == null) {
-                        /*
-                         * Add default mail charset
-                         */
-                        getContentType().setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
-                    }
-                    return (dataSource = new MessageDataSource(data, getContentType().toString()));
+            if (getContentType().startsWith(TEXT) && getContentType().getCharsetParameter() == null) {
+                if (file.isInMemory()) {
+                    getContentType().setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+                } else {
+                    getContentType().setCharsetParameter(System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
                 }
-                if (file != null) {
-                    if (getContentType().startsWith(TEXT) && getContentType().getCharsetParameter() == null) {
-                        /*
-                         * Add system charset
-                         */
-                        getContentType().setCharsetParameter(
-                            System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
-                    }
-                    final ManagedFile managedFile = file;
-                    final InputStreamProvider isp = new InputStreamProvider() {
-
-                        @Override
-                        public InputStream getInputStream() throws IOException {
-                            try {
-                                return managedFile.getInputStream();
-                            } catch (final OXException e) {
-                                final IOException err = new IOException();
-                                err.initCause(e);
-                                throw err;
-                            }
-                        }
-
-                        @Override
-                        public String getName() {
-                            return null;
-                        }
-                    };
-                    return (dataSource = new StreamDataSource(isp, getContentType().toString()));
-                }
-                throw MailExceptionCode.NO_CONTENT.create();
-            } catch (final MailConfigException e) {
-                LOG.error("", e);
-                dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
             }
+            dataSource = new FileHolderDataSource(file, getContentType().toString());
         }
         return dataSource;
     }
@@ -332,51 +215,42 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             return cachedContent;
         }
         if (getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL)) {
-            if (data != null) {
-                String charset = getContentType().getCharsetParameter();
-                if (null == charset) {
-                    charset = MailProperties.getInstance().getDefaultMimeCharset();
-                }
-                applyByteContent(charset);
-                return cachedContent;
+            if (file.isInMemory()) {
+                cachedContent = getByteContent(file.getBuffer());
+            } else {
+                cachedContent = getFileContent(file.getTempFile());
             }
-            if (file != null) {
-                String charset = getContentType().getCharsetParameter();
-                if (null == charset) {
-                    charset = System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset());
-                }
-                applyFileContent(charset);
-                return cachedContent;
-            }
+            return cachedContent;
         }
         return null;
     }
 
-    private void applyFileContent(final String charset) throws OXException {
+    private String getFileContent(File file) throws OXException {
+        String charset = getContentType().getCharsetParameter();
+        if (null == charset) {
+            charset = System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset());
+        }
+
         InputStream fis = null;
         try {
-            fis = file.getInputStream();
-            cachedContent = readStream(fis, charset);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
+            fis = new FileInputStream(file);
+            return readStream(fis, charset);
+        } catch (IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (final IOException e) {
-                    LOG.error("", e);
-                }
-            }
+            Streams.close(fis);
         }
     }
 
-    private void applyByteContent(final String charset) throws OXException {
+    private String getByteContent(ByteArrayOutputStream buf) throws OXException {
+        String charset = getContentType().getCharsetParameter();
+        if (null == charset) {
+            charset = MailProperties.getInstance().getDefaultMimeCharset();
+        }
+
         try {
-            cachedContent = new String(data, Charsets.forName(charset));
-        } catch (final UnsupportedCharsetException e) {
+            return new String(buf.toByteArray(), Charsets.forName(charset));
+        } catch (UnsupportedCharsetException e) {
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
@@ -398,13 +272,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     @Override
     public InputStream getInputStream() throws OXException {
-        if (data != null) {
-            return new UnsynchronizedByteArrayInputStream(data);
-        }
-        if (file != null) {
-            return file.getInputStream();
-        }
-        throw MailExceptionCode.NO_CONTENT.create();
+        return file.getStream();
     }
 
     @Override
@@ -418,12 +286,13 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     }
 
     /**
-     * Gets this referenced part's file ID if its content has been written to disc.
-     *
-     * @return The file ID or <code>null</code> if content is kept inside rather than on disc.
+     * Closes this referenced part's file (if any).
      */
-    public String getFileID() {
-        return fileId;
+    public void close() {
+        ThresholdFileHolder sink = this.file;
+        if (null != sink) {
+            sink.close();
+        }
     }
 
     /**
@@ -433,16 +302,6 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      */
     public boolean isMail() {
         return isMail;
-    }
-
-    /**
-     * Generates a UUID using {@link UUID#randomUUID()}; e.g.:<br>
-     * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i>
-     *
-     * @return A UUID string
-     */
-    private static String randomUUID() {
-        return UUID.randomUUID().toString();
     }
 
     @Override

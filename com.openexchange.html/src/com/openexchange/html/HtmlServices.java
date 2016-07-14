@@ -92,7 +92,7 @@ public final class HtmlServices {
             return false;
         }
         String lc = asciiLowerCase(val.trim());
-        if (lc.indexOf("javascript:") >= 0 || lc.indexOf("vbscript:") >= 0) {
+        if (lc.indexOf("javascript:") >= 0 || lc.indexOf("vbscript:") >= 0 || lc.indexOf("<script") >= 0) {
             return false;
         }
         if (null != more && more.length > 0) {

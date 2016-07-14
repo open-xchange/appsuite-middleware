@@ -1,0 +1,14 @@
+Source: open-xchange-mail-categories
+Section: web
+Priority: optional
+Maintainer: Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), java7-jdk, open-xchange-core (>= @OXVERSION@), open-xchange-mailfilter (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-mail-categories
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@), open-xchange-mailfilter (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: Open Xchange Mail Categories Plugin
+ This package offers the possibility to manage system and user categories for mails.

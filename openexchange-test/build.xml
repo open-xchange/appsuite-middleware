@@ -31,7 +31,7 @@
             <include name="*.jar"/>
         </fileset>
         <fileset dir="${testBundlesDir}">
-            <include name="*.jar"/>
+            <include name="**/*.jar"/>
         </fileset>
         <fileset dir="${lib}">
             <include name="*.jar"/>
@@ -107,14 +107,14 @@
             <param name="testClass" value="com.openexchange.updater.test.AllTests"/>
         </antcall>
     </target>
-	
+
     <target name="run-oxrtc-tests">
         <antcall target="run-tests">
             <param name="testJar" value="open-xchange-rtc-test.jar"/>
             <param name="testClass" value="com.openexchange.ajax.rtc.RTCTestSuite"/>
         </antcall>
     </target>
-    	
+
     <target name="run-unit-tests">
         <antcall target="run-tests">
             <param name="testJar" value="open-xchange-unit-tests.jar"/>
@@ -149,6 +149,7 @@
             <sysproperty key="user.country" value="US"/>
             <sysproperty key="logback.configurationFile" value="${confDir}/logback.xml"/>
             <sysproperty key="java.awt.headless" value="true"/>
+            <sysproperty key="jaxp.debug" value="true"/>
         </junit>
     </target>
 

@@ -1,0 +1,21 @@
+/contacts?action=get:
+  get:
+    operationId: getContact
+    tags:
+      - contacts
+    summary: Gets a contact.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the requested contact.
+        required: true
+      - $ref: "#/parameters/gblQueryParamContactFolder"
+    responses:
+      200:
+        description: |
+          An object containing all data of the requested contact. In case of errors the
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/ContactResponse"

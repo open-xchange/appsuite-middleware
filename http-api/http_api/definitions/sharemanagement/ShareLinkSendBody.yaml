@@ -1,0 +1,13 @@
+type: object
+properties:
+  $ref: ./RawShareTargetData.yaml
+  recipients:
+    type: array
+    description: An array that lists the recipients. Each element is itself a two-element array specifying one recipient. The first element represents the personal name, the second element is the email address.
+    items:
+      type: array
+      items:
+        type: string
+  message:
+    type: string
+    description: Can contain an optional custom message.

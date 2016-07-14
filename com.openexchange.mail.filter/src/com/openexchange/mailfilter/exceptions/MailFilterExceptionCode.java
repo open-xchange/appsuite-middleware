@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -195,6 +195,10 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      * Mailfilter not available for user %1$d in context %1$d.
      */
     MAILFILTER_NOT_AVAILABLE("Mailfilter not available for user %1$d in context %1$d.", MAILFILTER_NOT_AVAILABLE_MSG, CATEGORY_PERMISSION_DENIED, 27),
+    /**
+     * The specified 'reorder' array is invalid as the size (%1$d) exceeds the amount (%2$d) of rules for user '%3$d' in context '%4$d'. 
+     */
+    INVALID_REORDER_ARRAY("The specified 'reorder' array is invalid as the size (%1$d) exceeds the amount (%2$d) of rules for user '%3$d' in context '%4$d'.", CATEGORY_ERROR, 28),
     ;
 
     private final String message;

@@ -1,0 +1,13 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: Array of attachments. Each attachment is described as an array itself.
+    items:
+      type: array
+      items:
+        type: object
+        description: |
+          Array with elements that contain the information of an attachment specified by the corresponding
+          identifiers in the `columns` parameter. Therefore, the element types can be distinguished.

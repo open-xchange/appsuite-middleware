@@ -78,8 +78,9 @@ public final class LoginConfiguration {
     private final boolean disableTrimLogin;
     private final boolean formLoginWithoutAuthId;
     private final boolean isRandomTokenEnabled;
+    private final boolean checkPunyCodeLoginString;
 
-    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean ipCheck, ClientWhitelist ipCheckWhitelist, boolean redirectIPChangeAllowed, List<IPRange> ranges, boolean disableTrimLogin, boolean formLoginWithoutAuthId, boolean isRandomTokenEnabled) {
+    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean ipCheck, ClientWhitelist ipCheckWhitelist, boolean redirectIPChangeAllowed, List<IPRange> ranges, boolean disableTrimLogin, boolean formLoginWithoutAuthId, boolean isRandomTokenEnabled, boolean checkPunyCodeLoginString) {
         super();
         this.uiWebPath = uiWebPath;
         this.sessiondAutoLogin = sessiondAutoLogin;
@@ -98,6 +99,7 @@ public final class LoginConfiguration {
         this.disableTrimLogin = disableTrimLogin;
         this.formLoginWithoutAuthId = formLoginWithoutAuthId;
         this.isRandomTokenEnabled = isRandomTokenEnabled;
+        this.checkPunyCodeLoginString = checkPunyCodeLoginString;
     }
 
     public String getUiWebPath() {
@@ -166,6 +168,10 @@ public final class LoginConfiguration {
 
     public boolean isRandomTokenEnabled() {
         return isRandomTokenEnabled;
+    }
+
+    public boolean isCheckPunyCodeLoginString() {
+        return checkPunyCodeLoginString;
     }
 
 }

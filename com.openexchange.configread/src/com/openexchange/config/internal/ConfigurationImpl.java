@@ -123,14 +123,21 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     private static final String[] getDirectories() {
-        final List<String> tmp = new ArrayList<String>();
-        for (final String property : new String[] { "openexchange.propdir" }) {
-            final String sysProp = System.getProperty(property);
+        // Collect "openexchange.propdir" system properties
+        List<String> properties = new ArrayList<String>(4);
+        properties.add(System.getProperty("openexchange.propdir"));
+        boolean checkNext;
+        int i = 2;
+        do {
+            checkNext = false;
+            String sysProp = System.getProperty(new StringBuilder("openexchange.propdir").append(i++).toString());
             if (null != sysProp) {
-                tmp.add(sysProp);
+                properties.add(sysProp);
+                checkNext = true;
             }
-        }
-        return tmp.toArray(new String[tmp.size()]);
+        } while (checkNext);
+
+        return properties.toArray(new String[properties.size()]);
     }
 
     private static interface FileNameMatcher {
@@ -155,9 +162,10 @@ public final class ConfigurationImpl implements ConfigurationService {
     };
 
     /*-
-     * ------------- Member stuff -------------
+     * -------------------------------------------------- Member stuff ---------------------------------------------------------
      */
 
+    /** Holds tracked <code>Reloadable</code> services */
     private final ConcurrentMap<String, Reloadable> reloadableServices;
 
     private final Map<String, String> texts;
@@ -251,6 +259,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         };
 
+        // Third filter+processor pair
         FileFilter fileFilter3 = new FileFilter() {
 
             @Override
@@ -290,12 +299,13 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     private synchronized void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
-        final File[] files = dir.listFiles(fileFilter);
+        File[] files = dir.listFiles(fileFilter);
         if (files == null) {
-            LOG.info("Can't read {}. Skipping.", dir);
+            LOG.info("Cannot read {}. Skipping.", dir);
             return;
         }
-        for (final File file : files) {
+
+        for (File file : files) {
             if (file.isDirectory()) {
                 processDirectory(file, fileFilter, processor);
             } else {
@@ -317,12 +327,15 @@ public final class ConfigurationImpl implements ConfigurationService {
             propertiesByFile.put(propFile, tmp);
 
             String propFilePath = propFile.getPath();
+            boolean debug = LOG.isDebugEnabled();
             for (Map.Entry<Object, Object> e : tmp.entrySet()) {
                 String propName = e.getKey().toString().trim();
-                String otherValue = properties.get(propName);
-                if (otherValue != null && !otherValue.equals(e.getValue())) {
-                    String otherFile = propertiesFiles.get(propName);
-                    LOG.debug("Overwriting property {} from file ''{}'' with property from file ''{}'', overwriting value ''{}'' with value ''{}''", propName, otherFile, propFilePath, otherValue, e.getValue());
+                if (debug) {
+                    String otherValue = properties.get(propName);
+                    if (otherValue != null && !otherValue.equals(e.getValue())) {
+                        String otherFile = propertiesFiles.get(propName);
+                        LOG.debug("Overwriting property {} from file ''{}'' with property from file ''{}'', overwriting value ''{}'' with value ''{}''", propName, otherFile, propFilePath, otherValue, e.getValue());
+                    }
                 }
                 properties.put(propName, e.getValue().toString().trim());
                 propertiesFiles.put(propName, propFilePath);
@@ -336,10 +349,10 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
     }
 
-    private static Properties loadProperties(final File propFile) throws IOException {
-        final InputStream fis = new BufferedInputStream(new FileInputStream(propFile), 65536);
+    private static Properties loadProperties(File propFile) throws IOException {
+        InputStream fis = new BufferedInputStream(new FileInputStream(propFile), 65536);
         try {
-            final Properties tmp = new Properties();
+            Properties tmp = new Properties();
             tmp.load(fis);
             return tmp;
         } finally {

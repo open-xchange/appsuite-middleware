@@ -115,9 +115,9 @@ public final class ConfigTree {
     public static Setting optSettingByPath(final Setting actual, final String[] path) {
         Setting retval = actual;
         if (path.length != 0) {
-            final String[] remainingPath = new String[path.length - 1];
+            String[] remainingPath = new String[path.length - 1];
             System.arraycopy(path, 1, remainingPath, 0, path.length - 1);
-            final Setting child = 0 == path[0].length() ? actual : actual.getElement(path[0]);
+            Setting child = isSegmentEmpty(path[0]) ? actual : actual.getElement(path[0]);
             if (null == child) {
                 return null;
             }
@@ -149,11 +149,11 @@ public final class ConfigTree {
     public static Setting getSettingByPath(final Setting actual, final String[] path) throws OXException {
         Setting retval = actual;
         if (path.length != 0) {
-            final String[] remainingPath = new String[path.length - 1];
+            String[] remainingPath = new String[path.length - 1];
             System.arraycopy(path, 1, remainingPath, 0, path.length - 1);
-            final Setting child = 0 == path[0].length() ? actual : actual.getElement(path[0]);
+            Setting child = isSegmentEmpty(path[0]) ? actual : actual.getElement(path[0]);
             if (null == child) {
-                final StringBuilder sb = new StringBuilder(path[0]);
+                StringBuilder sb = new StringBuilder(path[0]);
                 Setting parent = actual;
                 while (null != parent) {
                     sb.insert(0, '/');
@@ -170,16 +170,11 @@ public final class ConfigTree {
     private static <T extends AbstractSetting<? extends T>> T getSettingByPath(final T actual, final String[] path) throws OXException {
         T retval = actual;
         if (path.length != 0) {
-            final String[] remainingPath = new String[path.length - 1];
+            String[] remainingPath = new String[path.length - 1];
             System.arraycopy(path, 1, remainingPath, 0, path.length - 1);
-            final T child;
-            if (0 == path[0].length()) {
-                child = actual;
-            } else {
-                child = null == actual ? null : actual.getElement(path[0]);
-            }
+            T child = isSegmentEmpty(path[0]) ? actual : (null == actual ? null : actual.getElement(path[0]));
             if (null == child) {
-                final StringBuilder sb = new StringBuilder(path[0]);
+                StringBuilder sb = new StringBuilder(path[0]);
                 Setting parent = actual;
                 while (null != parent) {
                     sb.insert(0, '/');
@@ -191,6 +186,13 @@ public final class ConfigTree {
             retval = getSettingByPath(child, remainingPath);
         }
         return retval;
+    }
+
+    /** TODO: To be removed with v7.8.3 development */
+    private static final boolean SUPPORT_EMPTY_PATH_SEGMENTS = true;
+
+    private static boolean isSegmentEmpty(String pathSegment) {
+        return SUPPORT_EMPTY_PATH_SEGMENTS && 0 == pathSegment.length();
     }
 
     /**
@@ -225,8 +227,7 @@ public final class ConfigTree {
         addSharedValue(null, item.getPath(), item.getSharedValue());
     }
 
-    private void addSharedValue(final TreeSetting actual, final String[] path,
-        final IValueHandler shared) throws OXException {
+    private void addSharedValue(final TreeSetting actual, final String[] path, final IValueHandler shared) throws OXException {
         if (null == actual) {
             addSharedValue(tree, path, shared);
         } else if (1 == path.length) {
@@ -239,10 +240,10 @@ public final class ConfigTree {
             }
             addElementWithoutOverwriting(actual, new TreeSetting(path[0], shared.getId(), shared));
         } else {
-            TreeSetting sub = actual.getElement(path[0]);
-            if (null == actual.getElement(path[0])) {
-                final IValueHandler node = new SharedNode(path[0]);
-                final TreeSetting toAdd = new TreeSetting(path[0], node.getId(), node);
+            TreeSetting sub = isSegmentEmpty(path[0]) ? actual : actual.getElement(path[0]);
+            if (null == sub) {
+                IValueHandler node = new SharedNode(path[0]);
+                TreeSetting toAdd = new TreeSetting(path[0], node.getId(), node);
                 addElementWithoutOverwriting(actual, toAdd);
                 sub = toAdd;
             }
@@ -411,7 +412,6 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.tasks.NotifyAcceptedDeclinedAsParticipant.class,
             com.openexchange.groupware.settings.tree.modules.tasks.NotifyNewModifiedDeleted.class,
             com.openexchange.groupware.settings.tree.participants.AutoSearch.class,
-            com.openexchange.groupware.settings.tree.participants.MaximumNumberParticipants.class,
             com.openexchange.groupware.settings.tree.participants.ShowDialog.class,
             com.openexchange.groupware.settings.tree.participants.ShowWithoutEmail.class,
             com.openexchange.groupware.settings.tree.ReloadTimes.class,

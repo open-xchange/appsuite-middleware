@@ -157,14 +157,12 @@ public class RdbTaskSearch extends TaskSearch {
         if (StorageType.DELETED == type) {
             final StringBuilder sql2 = new StringBuilder();
             sql2.append("SELECT ");
-            sql2.append(SQL.getFields(columns, false));
+            final String activeTaskTable = SQL.TASK_TABLES.get(StorageType.ACTIVE);
+            sql2.append(SQL.getFields(columns, false, activeTaskTable));
             sql2.append(" FROM ");
-            final String activeTaskTable = SQL.TASK_TABLES.get(StorageType
-                .ACTIVE);
             sql2.append(activeTaskTable);
             sql2.append(" JOIN ");
-            final String removedPartsTable = SQL.PARTS_TABLES.get(StorageType
-                .REMOVED);
+            final String removedPartsTable = SQL.PARTS_TABLES.get(StorageType.REMOVED);
             sql2.append(removedPartsTable);
             sql2.append(" ON ");
             sql2.append(activeTaskTable);

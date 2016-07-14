@@ -50,6 +50,7 @@
 package com.openexchange.drive.json;
 
 import java.util.Comparator;
+import java.util.List;
 import com.openexchange.drive.DriveSession;
 
 
@@ -64,9 +65,10 @@ public interface LongPollingListenerFactory {
      * Creates a new {@link LongPollingListener} for the supplied drive session.
      *
      * @param session The drive session
+     * @param rootFolderIDs The root folder IDs to listen for changes in
      * @return A new long polling listener instance
      */
-    LongPollingListener create(DriveSession session);
+    LongPollingListener create(DriveSession session, List<String> rootFolderIDs);
 
     /**
      * Gets the priority of the factory. With multiple factories being present, the factory with the highest priority is chosen when

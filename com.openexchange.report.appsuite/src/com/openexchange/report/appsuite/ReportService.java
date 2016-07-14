@@ -49,57 +49,82 @@
 
 package com.openexchange.report.appsuite;
 
+import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link ReportService} runs reports and manages pending and finished reports. This service is available via OSGi
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public interface ReportService {
 
     /**
-     * Same as calling {@link #run(String)} with the 'default' reportType
-     */
-    public abstract String run() throws OXException;
-
-    /**
-     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is triggered and the
-     * uuid of the running report is returned instead
-     * 
-     * @return The uuid of triggered or the already running report
-     */
-    public abstract String run(String reportType) throws OXException;
-
-    /**
      * Same as calling {@link #getLastReport(String)} with the 'default' reportType
      */
-    public abstract Report getLastReport();
+    Report getLastReport();
 
     /**
      * Get the last finished report of the given reportType or null if during the uptime of this cluster, no report has been produced.
      */
-    public abstract Report getLastReport(String reportType);
+    Report getLastReport(String reportType);
 
     /**
      * Get a list of currently running reports. You can check the progress of these reports by examining the startTime, pendingTasks and numberOfTasks of the running reports
      */
-    public abstract Report[] getPendingReports(String reportType);
+    Report[] getPendingReports(String reportType);
 
     /**
      * Same as calling {@link #getPendingReports(String)} with the 'default' reportType
      */
-    public abstract Report[] getPendingReports();
+    Report[] getPendingReports();
 
     /**
-     * Remove the hazelcast markers for the pending report with the given uuid, to make way to start a new report. Useful to cancel crashed reports.
+     * Remove the markers for the pending report with the given uuid, to make way to start a new report. Useful to cancel crashed reports.
      */
-    public abstract void flushPending(String uuid, String reportType);
+    void flushPending(String uuid, String reportType);
 
     /**
      * Same as calling {@link #flushPending(String, String)} with the 'default' reportType
      */
-    public abstract void flushPending(String uuid);
+    void flushPending(String uuid);
 
+    /**
+     * Called if the report generation for related context (provided within {@link ContextReport}) has been finished.
+     * 
+     * @param contextReport Context information encapsulated within the {@link ContextReport}
+     * @throws OXException
+     */
+    void finishContext(ContextReport contextReport) throws OXException;
+
+    /**
+     * Called if the report for related context cannot be created
+     * 
+     * @param uuid The generated UUID of the complete Report
+     * @param reportType The type of report that should be generated
+     */
+    void abortContextReport(String uuid, String reportType);
+
+    /**
+     * Aborts report generation based on the provided reason
+     * 
+     * @param uuid The generated UUID of the complete Report
+     * @param reportType The type of report that should be generated
+     * @param reason Reason why the report becomes canceled
+     */
+    void abortGeneration(String uuid, String reportType, String reason);
+
+    /**
+     * Returns a report that contains information about failed report generation. The report will be existent after com.openexchange.report.appsuite.ReportService.abortGeneration(String, String, String) has been called.
+     * 
+     * @param reportType The type of report that the error report should be returned for.
+     * @return {@link Report} that contains the status while abortion and the detailed error description.
+     */
+    Report getLastErrorReport(String reportType);
+
+    String run(ReportConfigs reportConfig) throws OXException;
 }

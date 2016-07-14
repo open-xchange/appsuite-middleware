@@ -420,11 +420,12 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                  * set public session cookie if not yet present
                  */
                 Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-                Cookie cookie = cookies.get(getPublicSessionCookieName(request));
+                Cookie cookie = cookies.get(getPublicSessionCookieName(request, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }));
                 if (null == cookie) {
                     String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
                     if (null != altId) {
-                        response.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(request), altId), request, loginConfig));
+                        response.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(request, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }),
+                            altId), request, loginConfig));
                     }
                 }
             }

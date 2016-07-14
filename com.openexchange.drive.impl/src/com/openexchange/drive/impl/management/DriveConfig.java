@@ -125,6 +125,10 @@ public class DriveConfig implements Initialization {
     private int maxFilesPerDirectory;
     private Set<String> enabledServices;
     private Set<String> excludedFolders;
+    private long checksumCleanerInterval;
+    private long checksumCleanerMaxAge;
+    private long optimisticSaveThresholdMobile;
+    private long optimisticSaveThresholdDesktop;
 
     private EnumMap<DriveClientType, DriveClientVersion> softMinimumVersions;
     private EnumMap<DriveClientType, DriveClientVersion> hardMinimumVersions;
@@ -434,6 +438,42 @@ public class DriveConfig implements Initialization {
     }
 
     /**
+     * Gets the checksumCleanerInterval
+     *
+     * @return The checksumCleanerInterval
+     */
+    public long getChecksumCleanerInterval() {
+        return checksumCleanerInterval;
+    }
+
+    /**
+     * Gets the checksumCleanerMaxAge
+     *
+     * @return The checksumCleanerMaxAge
+     */
+    public long getChecksumCleanerMaxAge() {
+        return checksumCleanerMaxAge;
+    }
+
+    /**
+     * Gets the optimisticSaveThresholdMobile
+     *
+     * @return The optimisticSaveThresholdMobile
+     */
+    public long getOptimisticSaveThresholdMobile() {
+        return optimisticSaveThresholdMobile;
+    }
+
+    /**
+     * Gets the optimisticSaveThresholdDesktop
+     *
+     * @return The optimisticSaveThresholdDesktop
+     */
+    public long getOptimisticSaveThresholdDesktop() {
+        return optimisticSaveThresholdDesktop;
+    }
+
+    /**
      * Loads all relevant drive properties from the configuration service.
      *
      * @param configService The configuration service
@@ -484,6 +524,32 @@ public class DriveConfig implements Initialization {
             cleanerMaxAge = MILLIS_PER_HOUR;
         }
         /*
+         * checksum cleaner
+         */
+        final long MILLIS_PER_DAY = MILLIS_PER_HOUR * 24;
+        String checksumCleanerIntervalValue = configService.getProperty("com.openexchange.drive.checksum.cleaner.interval", "1D");
+        try {
+            checksumCleanerInterval = TimeSpanParser.parseTimespan(checksumCleanerIntervalValue);
+        } catch (IllegalArgumentException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, checksumCleanerIntervalValue);
+        }
+        if (0 < checksumCleanerInterval) {
+            if (MILLIS_PER_HOUR > checksumCleanerInterval) {
+                LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one hour. Falling back to ''1h'' instead.", checksumCleanerIntervalValue);
+                checksumCleanerInterval = MILLIS_PER_HOUR;
+            }
+            String checksumCleanerMaxAgeValue = configService.getProperty("com.openexchange.drive.checksum.cleaner.maxAge", "4W");
+            try {
+                checksumCleanerMaxAge = TimeSpanParser.parseTimespan(checksumCleanerMaxAgeValue);
+            } catch (IllegalArgumentException e) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, checksumCleanerMaxAgeValue);
+            }
+            if (MILLIS_PER_DAY > checksumCleanerMaxAge) {
+                LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one day. Falling back to ''1D'' instead.", checksumCleanerMaxAgeValue);
+                checksumCleanerMaxAge = MILLIS_PER_DAY;
+            }
+        }
+        /*
          * throttling
          */
         String maxBandwidthValue = configService.getProperty("com.openexchange.drive.maxBandwidth");
@@ -520,16 +586,19 @@ public class DriveConfig implements Initialization {
         jumpLink = configService.getProperty("com.openexchange.drive.jumpLink",
             "[protocol]://[hostname]/[uiwebpath]#[app]&[folder]&[id]");
         previewImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.previewImageSize", "1600x1600"));
-        thumbnailImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.thumbnailImageSize", "100x100"));
+        thumbnailImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.thumbnailImageSize", "200x150"));
         imageLinkImageFile = configService.getProperty("com.openexchange.drive.imageLinkImageFile",
-            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&folder=[folder]&id=[object]&version=[version]&" +
-            "delivery=download&scaleType=contain&width=[width]&height=[height]&rotate=true");
+            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&" +
+            "folder=[folder]&id=[object]&version=[version]&context=[contextid]&user=[userid]&" +
+            "delivery=download&scaleType=contain&width=[width]&height=[height]&shrinkOnly=true&rotate=true");
         imageLinkAudioFile = configService.getProperty("com.openexchange.drive.imageLinkAudioFile",
-            "[protocol]://[hostname]/[dispatcherPrefix]/image/file/mp3Cover?folder=[folder]&id=[object]&version=[version]&" +
+            "[protocol]://[hostname]/[dispatcherPrefix]/image/file/mp3Cover?" +
+            "folder=[folder]&id=[object]&version=[version]&context=[contextid]&user=[userid]&" +
             "delivery=download&scaleType=contain&width=[width]&height=[height]");
         imageLinkDocumentFile = configService.getProperty("com.openexchange.drive.imageLinkDocumentFile",
-            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&format=preview_image&folder=[folder]&id=[object]&" +
-            "version=[version]&delivery=download&scaleType=contain&width=[width]&height=[height]");
+            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&format=preview_image&" +
+            "folder=[folder]&id=[object]&version=[version]&context=[contextid]&user=[userid]&" +
+            "delivery=download&scaleType=contain&width=[width]&height=[height]");
         directLinkFragmentsDirectory = configService.getProperty("com.openexchange.drive.directLinkFragmentsDirectory",
             "m=infostore&f=[folder]");
         directLinkDirectory = configService.getProperty("com.openexchange.drive.directLinkDirectory",
@@ -557,6 +626,15 @@ public class DriveConfig implements Initialization {
             parseClientVersion(configService.getProperty("com.openexchange.drive.version.android.hardMinimum", "0")));
         hardMinimumVersions.put(DriveClientType.IOS,
             parseClientVersion(configService.getProperty("com.openexchange.drive.version.ios.hardMinimum", "0")));
+        /*
+         * optimistic save thresholds
+         */
+        String optimisticSaveThresholdDesktopValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdDesktop", "64kB");
+        optimisticSaveThresholdDesktop = Strings.isEmpty(optimisticSaveThresholdDesktopValue) || "-1".equals(optimisticSaveThresholdDesktopValue) ? -1 :
+            parseBytes(optimisticSaveThresholdDesktopValue);
+        String optimisticSaveThresholdMobileValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdMobile", "64kB");
+        optimisticSaveThresholdMobile = Strings.isEmpty(optimisticSaveThresholdMobileValue) || "-1".equals(optimisticSaveThresholdMobileValue) ? -1 :
+            parseBytes(optimisticSaveThresholdMobileValue);
     }
 
     private static DriveClientVersion parseClientVersion(String value) throws OXException {

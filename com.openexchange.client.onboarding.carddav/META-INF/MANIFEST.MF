@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The On-Boardin bundle for CardDAV
 Bundle-SymbolicName: com.openexchange.client.onboarding.carddav
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.ctc.wstx.api;version="4.2.0",

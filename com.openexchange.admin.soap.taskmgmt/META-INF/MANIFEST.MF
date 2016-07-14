@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Admin SOAP Taskmgmt Bundle
 Bundle-SymbolicName: com.openexchange.admin.soap.taskmgmt
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.admin.rmi,

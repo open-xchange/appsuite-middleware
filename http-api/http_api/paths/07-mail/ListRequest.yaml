@@ -1,0 +1,32 @@
+/mail?action=list:
+  put:
+    operationId: getMailList
+    tags:
+      - mail
+    summary: Gets a list of mails.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamMailColumns"
+      - in: query
+        name: headers
+        type: string
+        description: (preliminary) A comma-separated list of header names. Each name requests denoted header from each mail.
+        required: false
+      - in: body
+        name: body
+        description: A JSON array of JSON objects with the id and folder of the requested mails.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/MailListElement"
+    responses:
+      200:
+        description: |
+          'A JSON object containing an array with mail data. Mails are represented by arrays. The elements of each array contain the
+          information specified by the corresponding identifiers in the `columns` parameter. Not IMAP: with timestamp. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+        schema:
+          $ref: "#/definitions/MailsResponse"

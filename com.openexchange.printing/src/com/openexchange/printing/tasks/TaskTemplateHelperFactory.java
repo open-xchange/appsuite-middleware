@@ -58,7 +58,7 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.TemplateHelperFactory;
+import com.openexchange.ajax.printing.TemplateHelperFactory;
 import com.openexchange.tools.session.ServerSession;
 
 public class TaskTemplateHelperFactory implements TemplateHelperFactory {

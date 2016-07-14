@@ -1,0 +1,28 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The object ID of the corresponding appointment if available.
+  folder_id:
+    type: string
+    description: The folder ID of the corresponding appointment if available.
+  title:
+    type: string
+    description: The title of the corresponding appointment if available.
+  start_date:
+    type: integer
+    format: int64
+    description: The start time of the interval.
+  end_date:
+    type: integer
+    format: int64
+    description: The end time of the interval.
+  shown_as:
+    type: integer
+    description: 'The busy status of this interval, one of: 0 (unknown), 1 (reserved), 2 (temporary), 3 (absent), 4 (free).'
+  location:
+    type: string
+    description: The location of the corresponding appointment if available.
+  full_time:
+    type: boolean
+    description: Indicates whether the corresponding appointment is a whole day appointment, not present otherwise.

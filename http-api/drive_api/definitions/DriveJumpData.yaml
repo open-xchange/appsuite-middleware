@@ -1,0 +1,5 @@
+type: object
+properties:
+  redirectUrl:
+    type: string
+    description: The direct link to the file/folder.

@@ -121,7 +121,7 @@ public class OXUtilMySQLStorageCommon {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorageCommon.class);
 
-    private static AdminCache cache = ClientAdminThread.cache;
+    private static final AdminCache cache = ClientAdminThread.cache;
 
     public void createDatabase(final Database db) throws StorageException {
         final Connection con;

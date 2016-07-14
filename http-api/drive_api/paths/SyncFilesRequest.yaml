@@ -1,0 +1,65 @@
+/drive?action=syncfiles:
+  put:
+    operationId: syncFiles
+    tags:
+      - drive
+    summary: Synchronizes files in a folder.
+    description: |
+      This request performs the synchronization of a single folder, resulting in different actions that should be
+      executed on the client afterwards. This action is typically executed as result of a `/drive?action=syncfolders`
+      request.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: "#/parameters/gblQueryParamPath"
+      - in: query
+        name: device
+        type: string
+        description: A friendly name identifying the client device from a user's point of view, e.g. "My Tablet PC".
+        required: false
+      - in: query
+        name: apiVersion
+        type: integer
+        description: The API version that the client is using. If not set, the initial version 0 is assumed.
+        required: false
+        default: 0
+      - in: query
+        name: diagnostics
+        type: boolean
+        description: If set to `true`, an additional diagnostics trace is supplied in the response.
+        required: false
+      - in: query
+        name: columns
+        type: string
+        description: A comma-separated list of numeric column identifiers representing additional metadata that is relevant for the client. See [File metadata](#file-metadata). (deprecated, available until API version 2)
+        required: false
+      - in: query
+        name: pushToken
+        type: string
+        description: The client's push registration token to associate it to generated events.
+        required: false
+      - in: query
+        name: driveMeta
+        type: string
+        description: Controls the `.drive_meta` synchronization mode. `true`/`false` to forcibly enable or disable metadata synchronization for the request, or `inline` to include `.drive-meta`-data inside a corresponding `download` action as `data`-parameter. (available since v7.8.2)
+        required: false
+      - in: body
+        name: body
+        description: |
+          A JSON object containing the fields `clientVersions` and `originalVersions`, both representing JSON arrays.
+          Since API version 2, the JSON object may also contain an array named `fileExclusions`.
+        required: true
+        schema:
+          $ref: "#/definitions/DriveSyncFilesBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array of actions the client should execute for synchronization. If the
+          `diagnostics` parameter was set, the array is wrapped into an additional JSON object in the field
+          `actions` and the diagnostics trace is provided at `diagnostics`. If `driveMeta` was set to `inline`,
+          `download` actions for `.drive-meta` will carry the metadata in an additional JSON object in `data`
+          field of `action`. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveExtendedActionsResponse"

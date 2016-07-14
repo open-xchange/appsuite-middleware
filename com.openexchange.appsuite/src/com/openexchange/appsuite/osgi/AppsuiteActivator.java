@@ -125,7 +125,8 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
         };
 
         // Initialize Servlet
-        AppsLoadServlet appsLoadServlet = new AppsLoadServlet(apps, zoneinfo, compositeContributor);
+        AppsLoadServlet appsLoadServlet = new AppsLoadServlet(compositeContributor);
+        appsLoadServlet.reinitialize(apps, zoneinfo);
         this.appsLoadServlet = appsLoadServlet;
 
         // Register as reloadable

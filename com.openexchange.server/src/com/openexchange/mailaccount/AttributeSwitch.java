@@ -102,5 +102,8 @@ public interface AttributeSwitch {
     public Object addresses();
     public Object replyTo();
     public Object transportAuth();
+    public Object mailStartTls();
+    public Object transportStartTls();
+    public Object rootFolder();
 
 }

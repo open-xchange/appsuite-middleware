@@ -1,0 +1,25 @@
+/folders?action=path:
+  get:
+    operationId: getPath
+    tags:
+      - folders
+    summary: Gets the parent folders above the specified folder.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of a folder.
+        required: true
+      - $ref: "#/parameters/gblQueryParamFolderColumns"
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - $ref: "#/parameters/gblQueryParamAllowedModules"
+    responses:
+      200:
+        description: |
+          An array with data for all parent nodes of a folder. Each array element describes one folder and
+          is itself an array. The elements of each array contain the information specified by the corresponding
+          identifiers in the `columns` parameter. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FoldersResponse"

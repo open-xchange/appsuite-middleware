@@ -98,18 +98,14 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private final String DESTROY_DOCUMENT = "destroyDocument";
 
-    private volatile PublicationDataLoaderService dataLoader;
-
-    private volatile InfostoreDocumentPublicationService publisher;
-
-    private volatile ContextService context;
-
-    private volatile IDBasedFileAccessFactory fileAccessFactory;
+    private final PublicationDataLoaderService dataLoader;
+    private final InfostoreDocumentPublicationService publisher;
+    private final ContextService contextService;
+    private final IDBasedFileAccessFactory fileAccessFactory;
 
     public InfostorePublicationServlet(ContextService context, PublicationDataLoaderService dataLoader, IDBasedFileAccessFactory fileAccessFactory, InfostoreDocumentPublicationService publicationService) {
         super();
-
-        this.context = context;
+        this.contextService = context;
         this.dataLoader = dataLoader;
         this.fileAccessFactory = fileAccessFactory;
         this.publisher = publicationService;
@@ -273,7 +269,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         if(cid == -1) {
             throw new IllegalArgumentException("URL did not contain context id");
         }
-        return context.getContext(cid);
+        return contextService.getContext(cid);
     }
 
 }

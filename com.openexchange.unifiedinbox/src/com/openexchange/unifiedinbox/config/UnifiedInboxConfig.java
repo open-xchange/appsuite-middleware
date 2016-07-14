@@ -52,6 +52,7 @@ package com.openexchange.unifiedinbox.config;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.UrlInfo;
 
 /**
  * {@link UnifiedInboxConfig}
@@ -107,7 +108,7 @@ public final class UnifiedInboxConfig extends MailConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) {
+    protected void parseServerURL(final UrlInfo urlInfo) {
         // Nothing to parse
         login = "dummy";
         password = "secret";

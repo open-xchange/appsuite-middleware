@@ -1,0 +1,43 @@
+/calendar?action=all:
+  get:
+    operationId: getAllAppointments
+    tags:
+      - calendar
+    summary: Gets all appointments.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamCalendarColumns"
+      - in: query
+        name: start
+        type: integer
+        format: int64
+        description: Lower inclusive limit of the queried range as a Date. Only appointments which start on or after this date are returned.
+        required: true
+      - in: query
+        name: end
+        type: integer
+        format: int64
+        description: Upper exclusive limit of the queried range as a Date. Only appointments which end before this date are returned.
+        required: true
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder, whose contents are queried. If not specified, defaults to all calendar folders.
+        required: false
+      - $ref: "#/parameters/gblQueryParamRecurrenceMaster"
+      - in: query
+        name: showPrivate
+        type: boolean
+        description: 'Only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information (since 6.18)'
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with appointment data. Each array element describes one appointment and
+          is itself an array. The elements of each array contain the information specified by the corresponding
+          identifiers in the `columns` parameter. Appointment sequencies are broken up into individual appointments
+          and each occurrence of a sequence in the requested range is returned separately. The appointments are
+          sorted in ascending order by the field `start_date`. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/AppointmentsResponse"

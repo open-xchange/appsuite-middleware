@@ -103,6 +103,8 @@ public class AutoconfigResultConverter implements ResultConverter {
             json.put("transport_protocol", autoconfig.getTransportProtocol());
             json.put("mail_secure", autoconfig.isMailSecure());
             json.put("transport_secure", autoconfig.isTransportSecure());
+            json.put("mail_starttls", autoconfig.isMailStartTls());
+            json.put("transport_starttls", autoconfig.isTransportStartTls());
             final String sourceName = autoconfig.getSource();
             if (null != sourceName) {
                 json.put("config_source", sourceName);

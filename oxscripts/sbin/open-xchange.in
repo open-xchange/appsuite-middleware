@@ -67,8 +67,6 @@ test -f $OXFUNCTIONS || {
 
 test -f $OXCONFIG && . $OXCONFIG
 
-ox_kill_readerengine_instances
-
 ox_set_JAVA_BIN
 
 ox_update_config_init @configini@ @configini@.template @bundle.d@

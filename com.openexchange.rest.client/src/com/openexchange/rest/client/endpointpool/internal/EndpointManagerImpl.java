@@ -108,18 +108,23 @@ public class EndpointManagerImpl implements EndpointManager {
     public Endpoint get() {
         lock.readLock().lock();
         try {
-            if (available.isEmpty()) {
+            int size = available.size();
+            if (size == 0) {
                 return null;
+            }
+
+            if (size == 1) {
+                return available.get(0);
             }
 
             int next = counter.incrementAndGet();
             if (next < 0) {
-                int newNext = available.size();
+                int newNext = size;
                 counter.compareAndSet(next, newNext);
                 next = newNext;
             }
 
-            return available.get(next % available.size());
+            return available.get(next % size);
         } finally {
             lock.readLock().unlock();
         }

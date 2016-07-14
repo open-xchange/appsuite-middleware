@@ -207,4 +207,18 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // The content/body of the message is too big
     public static final String CONTENT_TOO_BIG_MSG = "The content of the mail is too big.";
 
+    // Invalid parameter value: %1$s
+    public static final String INVALID_PARAMETER_VALUE_MSG = "Invalid parameter value: %1$s";
+
+    // The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+    public static final String INVALID_FLAG_WITH_LEADING_BACKSLASH_MSG = "The flag name %1$s is not valid. Flags may not begin with a leading '\\'.";
+
+    public static final String USED_SHARING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachments with the E-Mail, the attachments are shared and the links are added to your E-Mail. Whoever receives the E-Mail can then access the attachments.";
+
+    // User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
+    public static final String SHARING_NOT_POSSIBLE_MSG = "You are not allowed to compose a message containing share links";
+
+    // User wants to compose a share message but does not specify an expiration date which is required
+    public static final String EXPIRATION_DATE_MISSING_MSG = "Please specify an expiration date in order to compose a message containing share links";
+
 }

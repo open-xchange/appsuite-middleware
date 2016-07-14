@@ -63,11 +63,12 @@ import com.openexchange.drive.DriveVersion;
 public interface DriveEvent {
 
     /**
-     * Gets the consecutive actions to be executed by the client.
+     * Gets the consecutive actions to be executed by the client, based on the supplied root folder identifier(s).
      *
+     * @param rootFolderIDs The root folder IDs the client is interested in.
      * @return The client actions
      */
-    List<DriveAction<? extends DriveVersion>> getActions();
+    List<DriveAction<? extends DriveVersion>> getActions(List<String> rootFolderIDs);
 
     /**
      * Gets the context ID.

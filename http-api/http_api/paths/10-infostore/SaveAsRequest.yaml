@@ -1,0 +1,36 @@
+/infostore?action=saveAs:
+  put:
+    operationId: importAttachment
+    tags:
+      - infostore
+    summary: Saves an attachment in the infostore.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamAttached"
+      - $ref: "#/parameters/gblQueryParamAttachmentsFolder"
+      - $ref: "#/parameters/gblQueryParamAttachmentsModule"
+      - in: query
+        name: attachment
+        type: string
+        description: The ID of the attachment to save.
+        required: true
+      - in: body
+        name: body
+        description: |
+          A JSON object describing the attachment's infoitem. The field `id`is not included. The fields in
+          this infoitem object override values from the attachment. The folder_id must be given. It is possible to
+          let added object permission entities be notified about newly shared files. In that case add a "notification" object.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/InfoItemBody"
+    responses:
+      200:
+        description: |
+          A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/InfoItemUpdateResponse"

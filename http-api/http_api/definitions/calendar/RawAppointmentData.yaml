@@ -1,0 +1,39 @@
+$ref: ../tasks/RawTaskAndAppointmentData.yaml
+recurrence_id:
+  type: integer
+  description: Object ID of the entire appointment sequence. Present on series and change exception appointments. Equals to object identifier on series appointment and is different to object identifier on change exceptions.
+recurrence_position:
+  type: integer
+  description: 1-based position of an individual appointment in a sequence. Present if and only if recurrence_type > 0.
+recurrence_date_position:
+  type: integer
+  format: int64
+  description: Date of an individual appointment in a sequence. Present if and only if recurrence_type > 0.
+change_exceptions:
+  type: array
+  description: An array of Dates, representing all change exceptions of a sequence.
+  items:
+    type: integer
+    format: int64
+delete_exceptions:
+  type: array
+  description: An array of Dates, representing all delete exceptions of a sequence.
+  items:
+    type: integer
+    format: int64
+location:
+  type: string
+  description: The location of the appointment.
+shown_as:
+  type: integer
+  description: 'Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).'
+timezone:
+  type: string
+  description: The timezone of the appointment.
+recurrence_start:
+  type: integer
+  format: int64
+  description: Start of a sequence without time.
+ignore_conflicts:
+  type: boolean
+  description: Ignore soft conflicts for the new or modified appointment. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.

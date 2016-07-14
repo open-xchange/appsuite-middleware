@@ -67,6 +67,7 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.subscribe.microformats.OXMFServiceRegistry;
 
@@ -84,8 +85,9 @@ public class HTTPToolkit {
      * @return The grabbed HTML content
      * @throws HttpException If a HTTP error occurs
      * @throws IOException If an I/O error occurs
+     * @throws IllegalArgumentException if the site is <code>null</code>
      */
-    public static Reader grab(final String site) throws HttpException, IOException {
+    public static Reader grab(final String site) throws HttpException, IOException, OXException {
         final HttpClient client = new HttpClient();
         final int timeout = 5000;
         client.getParams().setSoTimeout(timeout);

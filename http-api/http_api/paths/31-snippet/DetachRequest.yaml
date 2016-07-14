@@ -1,0 +1,30 @@
+/snippet?action=detach:
+  put:
+    operationId: removeSnippetAttachments
+    tags:
+      - snippet
+    summary: Detaches one or more files from an existing snippet (**available since v7.0.0/v6.22.0**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The identifier of the snippet.
+        required: true
+      - in: body
+        name: body
+        description: A JSON array with JSON objects each containing a field `id` with the identifier of an attachment that shall be removed.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/SnippetAttachmentListElement"
+    responses:
+      200:
+        description: |
+          A JSON object containing the ID of the updated snippet. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/SnippetUpdateResponse"

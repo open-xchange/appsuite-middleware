@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.loxandra"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.loxandra.common"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.loxandra.dto"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.loxandra.hector"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.loxandra.impl"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.loxandra.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.loxandra.util"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.loxandra"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.loxandra.common"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.loxandra.dto"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.loxandra.hector"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.loxandra.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.loxandra.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.loxandra.util"/>
 </provider>
 </psf>

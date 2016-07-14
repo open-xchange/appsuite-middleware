@@ -54,7 +54,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
@@ -76,7 +75,7 @@ public class Bug31453Test extends CalDAVTest {
 
     private FolderObject publicFolder = null;
     private String publicFolderID = null;
-    
+
     private static final String[] DUMMY_ALARM_INDICATORS = new String[] {"TRIGGER;VALUE=DATE-TIME:19760401T005545Z", "X-APPLE-LOCAL-DEFAULT-ALARM:TRUE", "X-APPLE-DEFAULT-ALARM:TRUE"};
 
     @Before

@@ -1,0 +1,16 @@
+# "Global" parameters that can be referenced in operation parameters with
+# - $ref: "#/parameters/TheParamNameFromBelow"
+gblQueryParamSession:
+  $ref: ../../http_api/parameters/index.yaml#/gblQueryParamSession
+gblQueryParamRoot:
+  name: root
+  in: query
+  type: string
+  description: The ID of the referenced root folder on the server.
+  required: true
+gblQueryParamPath:
+  name: path
+  in: query
+  type: string
+  description: The path to the synchronized folder, relative to the root folder, starting with `/`.
+  required: true

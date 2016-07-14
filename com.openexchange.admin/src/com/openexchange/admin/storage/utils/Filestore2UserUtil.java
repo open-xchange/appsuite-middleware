@@ -834,7 +834,18 @@ public class Filestore2UserUtil {
 
     private static boolean mark(Connection con) throws SQLException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
+            stmt = con.prepareStatement("SELECT 1 FROM reason_text WHERE id=?");
+            stmt.setInt(1, REASON);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return false;
+            }
+
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+
             stmt = con.prepareStatement("INSERT INTO reason_text (id, text) VALUES (?, ?)");
             stmt.setInt(1, REASON);
             stmt.setString(2, TEXT_PROCESSING);
@@ -843,13 +854,13 @@ public class Filestore2UserUtil {
                 return true;
             } catch (SQLException e) {
                 if (Databases.isPrimaryKeyConflictInMySQL(e)) {
-                    // Another machine is currently processing
+                    // Another machine is currently processing or the update has already been applied (text = TERMINATED)
                     return false;
                 }
                 throw e;
             }
         } finally {
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

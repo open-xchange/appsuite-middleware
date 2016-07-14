@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertNotNull;
 import java.rmi.server.UID;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.user.actions.SetAttributeRequest;
@@ -68,16 +69,16 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAjaxSession {
 
     /**
      * Initializes a new {@link AbstractPlistSMSTest}.
-     * 
+     *
      * @param name
      */
-    protected AbstractPlistSMSTest(String name) {
-        super(name);
+    protected AbstractPlistSMSTest() {
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        setUpConfiguration(client, false);
         SetAttributeRequest req = new SetAttributeRequest(client.getValues().getUserId(), "user_sms_link_secret", UID, false);
         SetAttributeResponse response = client.execute(req);
         assertNotNull(response);

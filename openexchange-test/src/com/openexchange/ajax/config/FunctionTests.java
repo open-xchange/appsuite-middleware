@@ -201,11 +201,6 @@ public class FunctionTests extends AbstractAJAXSession {
         LOG.info("Minimum of characters for a search pattern: " + response.getInteger());
     }
 
-    public void testMaximumNumberParticipants() throws Throwable {
-        final GetResponse response = client.execute(new GetRequest(Tree.MAXIMUM_NUMBER_PARTICIPANTS));
-        LOG.info("Maximum number of participants for appointments and tasks: " + response.getInteger());
-    }
-
     public void testSingleFolderSearch() throws Throwable {
         final GetResponse response = client.execute(new GetRequest(Tree.SingleFolderSearch));
         LOG.info("User is only allowed to search in a single folder: " + response.getBoolean());

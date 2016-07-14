@@ -1,0 +1,80 @@
+$ref: ../common/CommonObjectData.yaml
+title:
+  type: string
+  description: Short description.
+start_date:
+  type: integer
+  format: int64
+  description: Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time).
+end_date:
+  type: integer
+  format: int64
+  description: Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time).
+note:
+  type: string
+  description: Long description.
+alarm:
+  type: integer
+  format: int64
+  description: Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.
+recurrence_type:
+  type: integer
+  description: 'Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).'
+days:
+  type: integer
+  description: Specifies which days of the week are part of a sequence. The value is a bitfield with bit 0 indicating sunday, bit 1 indicating monday and so on. May be present if recurrence_type > 1. If allowed but not present, the value defaults to 127 (all 7 days).
+day_in_month:
+  type: integer
+  description: Specifies which day of a month is part of the sequence. Counting starts with 1. If the field "days" is also present, only days selected by that field are counted. If the number is bigger than the number of available days, the last available day is selected. Present if and only if recurrence_type > 2.
+month:
+  type: integer
+  description: Month of the year in yearly sequencies. 0 represents January, 1 represents February and so on. Present if and only if recurrence_type = 4.
+interval:
+  type: integer
+  description: Specifies an integer multiplier to the interval specified by recurrence_type. Present if and only if recurrence_type > 0. Must be 1 if recurrence_type = 4.
+until:
+  type: integer
+  format: int64
+  description: 'Inclusive end date of a sequence. May be present only if recurrence_type > 0. The sequence has no end date if recurrence_type > 0 and this field is not present. Note: since this is a Date, the entire day after the midnight specified by the value is included.'
+notification:
+  type: boolean
+  description: If true, all participants are notified of any changes to this object. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.
+participants:
+  type: array
+  description: Each element identifies a participant, user, group or booked resource.
+  items:
+    $ref: "#/definitions/TaskParticipant"
+users:
+  type: array
+  description: Each element represents a participant. User groups are resolved and are represented by their members. Any user can occur only once.
+  items:
+    $ref: "#/definitions/TaskUser"
+occurrences:
+  type: integer
+  description: Specifies how often a recurrence should appear. May be present only if recurrence_type > 0.
+uid:
+  type: string
+  description: Can only be written when the object is created. Internal and external globally unique identifier of the appointment or task. Is used to recognize appointments within iCal files. If this attribute is not written it contains an automatic generated UUID.
+organizer:
+  type: string
+  description: Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.
+sequence:
+  type: integer
+  description: iCal sequence number. Not implemented for tasks. Must be incremented on update. Will be incremented by the server, if not set.
+confirmations:
+  type: array
+  description: Each element represents a confirming participant. This can be internal and external user. Not implemented for tasks.
+  items:
+    $ref: "#/definitions/TaskConfirmation"
+organizerId:
+  type: integer
+  description: Contains the userIId of the appointment organizer if it is an internal user. Not implemented for tasks (introduced with 6.20.1).
+principal:
+  type: string
+  description: Contains the email address of the appointment principal which is not necessarily an internal user. Not implemented for tasks (introduced with 6.20.1).
+principalId:
+  type: integer
+  description: Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks (introduced with 6.20.1).
+full_time:
+  type: boolean
+  description: True if the event is a whole day appointment or task, false otherwise.

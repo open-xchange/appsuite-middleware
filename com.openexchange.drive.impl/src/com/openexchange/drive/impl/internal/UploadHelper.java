@@ -111,7 +111,7 @@ public class UploadHelper {
         /*
          * Try to save directly if applicable (no upload resume, no replace, total length is known and smaller than threshold)
          */
-        if (null == originalVersion && 0 >= offset && 0 < totalLength && DriveConstants.OPTIMISTIC_UPLOAD_SIZE_THRESHOLD >= totalLength) {
+        if (null == originalVersion && 0 >= offset && 0 < totalLength && session.getOptimisticSaveThreshold() >= totalLength) {
 
             Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
 
@@ -392,7 +392,7 @@ public class UploadHelper {
         String uploadPath;
         File uploadFile;
         if (session.getTemp().supported()) {
-            boolean existedBefore = session.getTemp().exists(); 
+            boolean existedBefore = session.getTemp().exists();
             uploadPath = session.getTemp().getPath(true);
             if (null == uploadPath) {
                 session.trace("Unable to get path to temp folder, falling back to direct upload.");
@@ -402,7 +402,7 @@ public class UploadHelper {
         } else {
             uploadPath = path;
             uploadFile = session.getStorage().getFileByName(path, uploadFileName);
-        }       
+        }
         if (null == uploadFile) {
             /*
              * create new upload file
@@ -453,7 +453,7 @@ public class UploadHelper {
         String uploadPath;
         if (session.getTemp().supported()) {
             /*
-             * partial uploads would be stored in temp folder, if it exists 
+             * partial uploads would be stored in temp folder, if it exists
              */
             if (false == session.getTemp().exists()) {
                 return Collections.emptyList();

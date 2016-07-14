@@ -67,7 +67,11 @@ public interface Operand<V> {
         /**
          * A column/field within a data object.
          */
-        COLUMN("column");
+        COLUMN("column"),
+        /**
+         * A attachment operand.
+         */
+        ATTACHMENT("attachment");
 
         private final String str;
 

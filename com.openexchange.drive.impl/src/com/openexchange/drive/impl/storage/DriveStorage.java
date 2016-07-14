@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.FolderStats;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveStrings;
 import com.openexchange.drive.impl.DriveUtils;
@@ -1184,6 +1185,30 @@ public class DriveStorage {
      */
     public boolean supports(FolderID folderID, FileStorageCapability...capabilities) throws OXException {
         return supports(folderID.getService(), folderID.getAccountId(), capabilities);
+    }
+
+    /**
+     * Gets statistics for a specific folder.
+     *
+     * @param folderID The identifier of the folder to get the statistics for
+     * @param recursive <code>true</code> to include subfolders, <code>false</code>, otherwise
+     * @return The folder statistics
+     */
+    public FolderStats getFolderStats(String folderID, boolean recursive) throws OXException {
+        IDBasedFolderAccess folderAccess = getFolderAccess();
+        FolderStats stats = new FolderStats();
+        stats.incrementNumFiles(folderAccess.getNumFiles(folderID));
+        stats.incrementTotalSize(folderAccess.getTotalSize(folderID));
+        FileStorageFolder[] subfolders = folderAccess.getSubfolders(folderID, true);
+        if (null != subfolders && 0 < subfolders.length) {
+            stats.incrementNumFolders(subfolders.length);
+            if (recursive) {
+                for (FileStorageFolder subfolder : subfolders) {
+                    stats.add(getFolderStats(subfolder.getId(), recursive));
+                }
+            }
+        }
+        return stats;
     }
 
     /**

@@ -122,7 +122,7 @@ public interface DirectoryChecksumStore {
      * @return The number of affected rows
      * @throws OXException
      */
-    int removeDirectoryChecksums(List<FolderID> folderIDs) throws OXException;
+    int removeAllDirectoryChecksums(List<FolderID> folderIDs) throws OXException;
 
     /**
      * Gets the directory checksum of a folder.
@@ -153,5 +153,18 @@ public interface DirectoryChecksumStore {
      * @return The number of updated rows
      */
     int touchDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
+
+    /**
+     * Gets a list of directory checksums that were not "used", i.e. not have been inserted/updated or touched since the supplied
+     * timestamp.
+     *
+     * @param unusedSince The maximum "used" timestamp of a checksum to be considered as "unused"
+     * @return The unused checksums, or <code>null</code> if there are none
+     */
+    List<DirectoryChecksum> getUnusedDirectoryChecksums(long unusedSince) throws OXException;
+
+    List<DirectoryChecksum> getDirectoryChecksums(List<FolderID> folderIDs) throws OXException;
+
+    int removeDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
 
 }

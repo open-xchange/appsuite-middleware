@@ -125,14 +125,14 @@ public final class MailConfigTest extends TestCase {
                 }
 
                 @Override
-                protected void parseServerURL(String serverURL) throws OXException {
+                protected void parseServerURL(UrlInfo urlInfo) throws OXException {
                     // Nothing
                 }
             };
 
             SimSession session = new SimSession(1, 1);
 
-            final CustomMailAccount account = new CustomMailAccount();
+            final CustomMailAccount account = new CustomMailAccount(0);
             account.setLogin("login");
             account.setPassword("password");
 

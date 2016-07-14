@@ -343,7 +343,7 @@ if [ $permval -lt 256 ]; then
     nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
 fi
 # -----------------------------------------------------------------------
-for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
+for opt in "-server" "-Djava.awt.headless=true" \
     "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
     "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
     "-XX:-OmitStackTraceInFastThrow"; do
@@ -608,14 +608,6 @@ ox_set_property com.openexchange.server.considerXForwards "true" /opt/open-xchan
 
 # SoftwareChange_Request-1607
 pfile=/opt/open-xchange/etc/preview.properties
-VALUE=$(ox_read_property com.openexchange.preview.cache.quota $pfile)
-if [ "$VALUE" == "0" ]; then
-    ox_set_property com.openexchange.preview.cache.quota 10485760 $pfile
-fi
-VALUE=$(ox_read_property com.openexchange.preview.cache.quotaPerDocument $pfile)
-if [ "$VALUE" == "0" ]; then
-    ox_set_property com.openexchange.preview.cache.quotaPerDocument 524288 $pfile
-fi
 if ! ox_exists_property com.openexchange.preview.cache.type $pfile; then
     ox_set_property com.openexchange.preview.cache.type "FS" $pfile
 fi
@@ -1164,14 +1156,44 @@ fi
 # SoftwareChange_Request-3159
 ox_add_property com.openexchange.snippet.quota.limit -1 /opt/open-xchange/etc/snippets.properties
 
+# SoftwareChange_Request-3219
+ox_remove_property com.openexchange.participant.MaximumNumberParticipants /opt/open-xchange/etc/participant.properties
+
+# SoftwareChange_Request-3248
+ox_add_property com.openexchange.connector.networkSslListenerPort 8010 /opt/open-xchange/etc/server.properties
+
 # SoftwareChange_Request-3254
-if dpkg --compare-versions "7.8.1-11" gt-nl "$2"; then
+if dpkg --compare-versions "7.8.2-0" gt-nl "$2"; then
     VALUE=$(ox_read_property com.openexchange.mail.account.blacklist /opt/open-xchange/etc/mail.properties)
     if [ "" = "$VALUE" ]; then
         ox_set_property com.openexchange.mail.account.blacklist "127.0.0.1-127.255.255.255,localhost" /opt/open-xchange/etc/mail.properties
     fi
 fi
 ox_add_property com.openexchange.mail.account.whitelist.ports "143,993, 25,465,587, 110,995" /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-3225
+ox_add_property com.openexchange.tools.images.transformations.preferThumbnailThreshold 0.8 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-3246
+ox_add_property com.openexchange.mail.mailStartTls false /opt/open-xchange/etc/mail.properties
+ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-3350
+sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+
+# SoftwareChange_Request-3355,3417
+oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
+if [[ ${oldlink} == *"[uiwebpath]#m=[module]&i=[object]&f=[folder]" ]]
+then
+  newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/[module]\&id=[object]\&folder=[folder];')
+  ox_set_property object_link ${newlink} /opt/open-xchange/etc/notification.properties
+fi
+
+# SoftwareChange_Request-3356
+ox_add_property com.openexchange.ajax.login.checkPunyCodeLoginString false /opt/open-xchange/etc/login.properties
+
+# SoftwareChange_Request-3405
+ox_add_property com.openexchange.ical.updateTimezones true /opt/open-xchange/etc/server.properties
 
 # SoftwareChange_Request-3406
 TMPFILE=$(mktemp)
@@ -1213,6 +1235,14 @@ if [ -e $TMPFILE ]; then
     cat $TMPFILE > /opt/open-xchange/etc/logback.xml
     rm -f $TMPFILE
 fi
+
+# SoftwareChange_Request-3421
+ox_remove_property com.openexchange.mail.transport.enablePublishOnExceededQuota /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.publishPrimaryAccountOnly /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.sendAttachmentToExternalRecipients /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.provideLinksInAttachment /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.publishedDocumentTimeToLive /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt/open-xchange/etc/transport.properties
 
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )

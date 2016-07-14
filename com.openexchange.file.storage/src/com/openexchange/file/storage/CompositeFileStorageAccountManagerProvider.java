@@ -100,7 +100,7 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
      * @param provider The provider
      * @return <code>true</code> if added; otherwise <code>false</code>
      */
-    public boolean addProvider(final FileStorageAccountManagerProvider provider) {
+    public synchronized boolean addProvider(final FileStorageAccountManagerProvider provider) {
         if (null == provider) {
             return false;
         }
@@ -116,7 +116,7 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
      *
      * @param provider The provider
      */
-    public void removeProvider(final FileStorageAccountManagerProvider provider) {
+    public synchronized void removeProvider(final FileStorageAccountManagerProvider provider) {
         if (null == provider) {
             return;
         }

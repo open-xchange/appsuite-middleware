@@ -1,0 +1,27 @@
+/attachment?action=detach:
+  put:
+    operationId: deleteAttachments
+    tags:
+      - attachments
+    summary: Deletes attachments.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamAttached"
+      - $ref: "#/parameters/gblQueryParamAttachmentsFolder"
+      - $ref: "#/parameters/gblQueryParamAttachmentsModule"
+      - in: body
+        name: body
+        description: A JSON array with the identifiers of the attachments that shall be deleted.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: |
+          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

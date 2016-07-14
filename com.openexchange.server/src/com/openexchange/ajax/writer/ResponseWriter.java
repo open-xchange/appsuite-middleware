@@ -479,7 +479,22 @@ public final class ResponseWriter {
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, String errorKey, final OXException exception, final Locale locale, final boolean includeStackTraceOnError) throws JSONException {
-        final Locale l;
+        addException(json, exception, locale, new WriteExceptionProps().errorKey(errorKey).includeStackTraceOnError(includeStackTraceOnError));
+    }
+
+    /**
+     * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
+     *
+     * @param json The JSON object
+     * @param errorKey The key value for the error value inside the JSON object
+     * @param exception The exception to write
+     * @param locale The locale
+     * @param properties The properties to obey when writing specified exception to given JSON object
+     * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
+     */
+    public static void addException(JSONObject json, OXException exception, Locale locale, WriteExceptionProps properties) throws JSONException {
+        Locale l;
         {
             final String property = exception.getProperty(OXExceptionConstants.PROPERTY_LOCALE);
             if (null == property) {
@@ -489,7 +504,7 @@ public final class ResponseWriter {
                 l = null == parsedLocale ? LocaleTools.getSaneLocale(locale) : parsedLocale;
             }
         }
-        json.put(errorKey, exception.getDisplayMessage(l));
+        json.put(properties.errorKey, exception.getDisplayMessage(l));
         /*
          * Put argument JSON array for compatibility reasons
          */
@@ -502,10 +517,12 @@ public final class ResponseWriter {
             if ((null == args) || (0 == args.length)) {
                 json.put(ERROR_PARAMS, new JSONArray(0));
             } else {
-                final JSONArray jArgs = new JSONArray(args.length);
+                JSONArray jArgs = new JSONArray(args.length);
                 for (int i = 0; i < args.length; i++) {
                     Object obj = args[i];
-                    jArgs.put(obj instanceof Localizable ? obj.toString() : obj);
+                    if (obj != null) {
+                        jArgs.put(obj instanceof Localizable ? obj.toString() : obj);
+                    }
                 }
                 json.put(ERROR_PARAMS, jArgs);
             }
@@ -530,7 +547,7 @@ public final class ResponseWriter {
                     json.put(ERROR_CATEGORIES, new JSONArray(0));
                 } else {
                     JSONArray jArray = new JSONArray(size);
-                    for (final Category category : categories) {
+                    for (Category category : categories) {
                         jArray.put(category.toString());
                     }
                     json.put(ERROR_CATEGORIES, jArray);
@@ -542,14 +559,28 @@ public final class ResponseWriter {
                 }
             }
         }
+        /*
+         * Error code, identifier, and description
+         */
         json.put(ERROR_CODE, exception.getErrorCode());
         json.put(ERROR_ID, exception.getExceptionId());
         json.put(ERROR_DESC, exception.getSoleMessage());
-        toJSON(json, exception.getProblematics());
-        if (Category.CATEGORY_TRUNCATED.equals(exception.getCategory())) {
+        /*
+         * Problematics
+         */
+        if (properties.checkProblematic) {
+            toJSON(json, exception.getProblematics());
+        }
+        /*
+         * Truncated
+         */
+        if (properties.checkTruncated && Category.CATEGORY_TRUNCATED.equals(exception.getCategory())) {
             addTruncated(json, exception.getProblematics());
         }
-        if (includeStackTraceOnError || includeStackTraceOnError()) {
+        /*
+         * Stack trace
+         */
+        if (properties.checkIncludeStackTraceOnError && (properties.includeStackTraceOnError || includeStackTraceOnError())) {
             // Write exception
             StackTraceElement[] traceElements = exception.getStackTrace();
             final JSONArray jsonStack = new JSONArray(traceElements.length << 1);
@@ -976,6 +1007,101 @@ public final class ResponseWriter {
         }
         String uc = Strings.toUpperCase(clientId);
         return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Creates a new instance of {@link WriteExceptionProps}.
+     *
+     * @return A new instance of {@link WriteExceptionProps}
+     */
+    public static WriteExceptionProps newWriteExceptionProps() {
+        return new WriteExceptionProps();
+    }
+
+    /**
+     * {@link WriteExceptionProps} - Specifies properties to obey when serializing an {@link OXException} instance into a JSON object.
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * @since v7.8.2
+     */
+    public static final class WriteExceptionProps {
+
+        String errorKey;
+        boolean checkIncludeStackTraceOnError;
+        boolean includeStackTraceOnError;
+        boolean checkProblematic;
+        boolean checkTruncated;
+
+        /**
+         * Initializes a new {@link WriteExceptionProps} instance.
+         */
+        public WriteExceptionProps() {
+            super();
+            errorKey = ERROR;
+            includeStackTraceOnError = false;
+            checkIncludeStackTraceOnError = true;
+            checkProblematic = true;
+            checkTruncated = true;
+        }
+
+        /**
+         * Sets the error key to use.
+         *
+         * @param errorKey The error key to use
+         * @return This instance
+         */
+        public WriteExceptionProps errorKey(String errorKey) {
+            this.errorKey = errorKey;
+            return this;
+        }
+
+        /**
+         * Sets whether the check to include the exception's stack trace should be performed
+         *
+         * @param checkIncludeStackTraceOnError <code>true</code> to check for including exception's stack trace; otherwise <code>false</code>
+         * @return This instance
+         */
+        public WriteExceptionProps checkIncludeStackTraceOnError(boolean checkIncludeStackTraceOnError) {
+            this.checkIncludeStackTraceOnError = checkIncludeStackTraceOnError;
+            return this;
+        }
+
+        /**
+         * Sets whether to include the exception's stack trace.
+         * <p>
+         * Provided that {@link #checkIncludeStackTraceOnError(boolean)} is set to <code>true</code>.
+         *
+         * @param checkIncludeStackTraceOnError <code>true</code> to include the exception's stack trace; otherwise <code>false</code>
+         * @return This instance
+         */
+        public WriteExceptionProps includeStackTraceOnError(boolean includeStackTraceOnError) {
+            this.includeStackTraceOnError = includeStackTraceOnError;
+            return this;
+        }
+
+        /**
+         * Sets whether possible problematic arguments as indicated by an {@link OXException} instance should be considered.
+         *
+         * @param checkProblematic <code>true</code> to consider possible problematic arguments; otherwise <code>false</code>
+         * @return This instance
+         */
+        public WriteExceptionProps checkProblematic(boolean checkProblematic) {
+            this.checkProblematic = checkProblematic;
+            return this;
+        }
+
+        /**
+         * Sets whether possible truncated arguments as indicated by an {@link OXException} instance should be considered.
+         *
+         * @param checkProblematic <code>true</code> to consider possible truncated arguments; otherwise <code>false</code>
+         * @return This instance
+         */
+        public WriteExceptionProps checkTruncated(boolean checkTruncated) {
+            this.checkTruncated = checkTruncated;
+            return this;
+        }
     }
 
 }

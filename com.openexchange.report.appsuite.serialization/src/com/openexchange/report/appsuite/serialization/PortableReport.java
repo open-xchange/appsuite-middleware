@@ -49,10 +49,15 @@
 
 package com.openexchange.report.appsuite.serialization;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.hazelcast.nio.serialization.PortableReader;
@@ -64,6 +69,7 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
  * {@link PortableReport} that is distributed within a hazelcast cluster.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since 7.6.1
  */
 public class PortableReport extends AbstractCustomPortable {
@@ -82,6 +88,24 @@ public class PortableReport extends AbstractCustomPortable {
 
     public static final String PARAMETER_NAMESPACES = "namespaces";
 
+    public static final String PARAMETER_CONSIDERED_TIMEFRAME_START = "start";
+
+    public static final String PARAMETER_CONSIDERED_TIMEFRAME_END = "end";
+    
+    public static final String PARAMETER_IS_SINGLE_DEPLOYMENT = "singleDeployment";
+    
+    public static final String PARAMETER_TENANTS = "tenants";
+    
+    public static final String PARAMETER_IS_SHOW_SINGLE_TENANT = "singleTenant";
+    
+    public static final String PARAMETER_SINGLE_TENANT_ID = "singleTenantID";
+    
+    public static final String PARAMETER_IS_ADMIN_IGNORE = "adminIgnore";
+    
+    public static final String PARAMETER_IS_DRIVE_METRICS = "driveMetrics";
+    
+    public static final String PARAMETER_IS_MAIL_METRICS = "mailMetrics";
+
     private String uuid;
 
     private String type;
@@ -95,6 +119,24 @@ public class PortableReport extends AbstractCustomPortable {
     private int numberOfTasks;
 
     private int pendingTasks;
+
+    private Long consideredTimeframeStart;
+
+    private Long consideredTimeframeEnd;
+    
+    private LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap;
+
+    private boolean isSingleDeployment;
+    
+    private boolean isShowSingleTenant;
+    
+    private Long singleTenantId = 0l;
+    
+    private boolean isIgnoreAdmin;
+    
+    private boolean isShowDriveMetrics;
+    
+    private boolean isShowMailMetrics;
 
     public PortableReport() {
         super();
@@ -119,6 +161,15 @@ public class PortableReport extends AbstractCustomPortable {
         writer.writeLong(PARAMETER_STOPTIME, stopTime);
         writer.writeInt(PARAMETER_NUMBER_OF_TASKS, numberOfTasks);
         writer.writeInt(PARAMETER_PENDING_TASKS, pendingTasks);
+        writer.writeLong(PARAMETER_CONSIDERED_TIMEFRAME_START, consideredTimeframeStart);
+        writer.writeLong(PARAMETER_CONSIDERED_TIMEFRAME_END, consideredTimeframeEnd);
+        writer.writeBoolean(PARAMETER_IS_SINGLE_DEPLOYMENT, isSingleDeployment);
+        writer.writeByteArray(PARAMETER_TENANTS, this.toByteArray(tenantMap));
+        writer.writeBoolean(PARAMETER_IS_SHOW_SINGLE_TENANT, isShowSingleTenant);
+        writer.writeLong(PARAMETER_SINGLE_TENANT_ID, singleTenantId);
+        writer.writeBoolean(PARAMETER_IS_ADMIN_IGNORE, isIgnoreAdmin);
+        writer.writeBoolean(PARAMETER_IS_DRIVE_METRICS, isShowDriveMetrics);
+        writer.writeBoolean(PARAMETER_IS_MAIL_METRICS, isShowMailMetrics);
         writer.getRawDataOutput().writeObject(namespaces);
     }
 
@@ -133,6 +184,20 @@ public class PortableReport extends AbstractCustomPortable {
         stopTime = reader.readLong(PARAMETER_STOPTIME);
         numberOfTasks = reader.readInt(PARAMETER_NUMBER_OF_TASKS);
         pendingTasks = reader.readInt(PARAMETER_PENDING_TASKS);
+        consideredTimeframeStart = reader.readLong(PARAMETER_CONSIDERED_TIMEFRAME_START);
+        consideredTimeframeEnd = reader.readLong(PARAMETER_CONSIDERED_TIMEFRAME_END);
+        isSingleDeployment = reader.readBoolean(PARAMETER_IS_SINGLE_DEPLOYMENT);
+        byte [] tenantsByteArray = reader.readByteArray(PARAMETER_TENANTS);
+        try {
+            tenantMap = (LinkedHashMap<String, LinkedHashMap<String, Object>>) this.toObject(tenantsByteArray);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        isShowSingleTenant = reader.readBoolean(PARAMETER_IS_SHOW_SINGLE_TENANT);
+        singleTenantId = reader.readLong(PARAMETER_SINGLE_TENANT_ID);
+        isIgnoreAdmin = reader.readBoolean(PARAMETER_IS_ADMIN_IGNORE);
+        isShowDriveMetrics = reader.readBoolean(PARAMETER_IS_DRIVE_METRICS);
+        isShowMailMetrics = reader.readBoolean(PARAMETER_IS_MAIL_METRICS);
         namespaces = reader.getRawDataInput().readObject();
     }
 
@@ -155,6 +220,15 @@ public class PortableReport extends AbstractCustomPortable {
         portableReport.numberOfTasks = report.getNumberOfTasks();
         portableReport.pendingTasks = report.getNumberOfPendingTasks();
         portableReport.namespaces = report.getData();
+        portableReport.consideredTimeframeStart = report.getConsideredTimeframeStart();
+        portableReport.consideredTimeframeEnd = report.getConsideredTimeframeEnd();
+        portableReport.isSingleDeployment = report.isSingleDeployment();
+        portableReport.tenantMap = report.getTenantMap();
+        portableReport.isShowSingleTenant = report.isShowSingleTenant();
+        portableReport.singleTenantId = report.getSingleTenantId();
+        portableReport.isIgnoreAdmin = report.isAdminIgnore();
+        portableReport.isShowDriveMetrics = report.isShowDriveMetrics();
+        portableReport.isShowMailMetrics = report.isShowMailMetrics();
         return portableReport;
     }
 
@@ -173,6 +247,15 @@ public class PortableReport extends AbstractCustomPortable {
         report.setStopTime(portableReport.stopTime);
         report.setTaskState(portableReport.numberOfTasks, portableReport.pendingTasks);
         report.getData().putAll(portableReport.namespaces);
+        report.setConsideredTimeframeStart(portableReport.consideredTimeframeStart);
+        report.setConsideredTimeframeEnd(portableReport.consideredTimeframeEnd);
+        report.setSingleDeployment(portableReport.isSingleDeployment);
+        report.setTenantMap(portableReport.tenantMap);
+        report.setShowSingleTenant(portableReport.isShowSingleTenant);
+        report.setSingleTenantId(portableReport.singleTenantId);
+        report.setAdminIgnore(portableReport.isIgnoreAdmin);
+        report.setShowDriveMetrics(portableReport.isShowDriveMetrics);
+        report.setShowMailMetrics(portableReport.isShowMailMetrics);
         return report;
     }
 
@@ -189,7 +272,7 @@ public class PortableReport extends AbstractCustomPortable {
         for (PortableReport portableReport : portableReports) {
             reports.add(PortableReport.unwrap(portableReport));
         }
-        return null != reports ? reports.toArray(new Report[reports.size()]) : new Report[0];
+        return reports.toArray(new Report[reports.size()]);
     }
 
     /**
@@ -239,11 +322,58 @@ public class PortableReport extends AbstractCustomPortable {
         if (stopTime != other.stopTime) {
             return false;
         }
+        if (consideredTimeframeStart != other.consideredTimeframeStart) {
+            return false;
+        }
+        if (consideredTimeframeEnd != other.consideredTimeframeEnd) {
+            return false;
+        }
         return true;
     }
-    
+
     @Override
     public String toString() {
         return "PortableReport [UUID=" + uuid + ", tasks=" + numberOfTasks + ", tasksToDo=" + pendingTasks + "]";
+    }
+    
+    // toByteArray and toObject are taken from: http://tinyurl.com/69h8l7x
+    private static byte[] toByteArray(Object obj) throws IOException {
+        byte[] bytes = null;
+        ByteArrayOutputStream bos = null;
+        ObjectOutputStream oos = null;
+        try {
+            bos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(obj);
+            oos.flush();
+            bytes = bos.toByteArray();
+        } finally {
+            if (oos != null) {
+                oos.close();
+            }
+            if (bos != null) {
+                bos.close();
+            }
+        }
+        return bytes;
+    }
+
+    private static Object toObject(byte[] bytes) throws IOException, ClassNotFoundException {
+        Object obj = null;
+        ByteArrayInputStream bis = null;
+        ObjectInputStream ois = null;
+        try {
+            bis = new ByteArrayInputStream(bytes);
+            ois = new ObjectInputStream(bis);
+            obj = ois.readObject();
+        } finally {
+            if (bis != null) {
+                bis.close();
+            }
+            if (ois != null) {
+                ois.close();
+            }
+        }
+        return obj;
     }
 }

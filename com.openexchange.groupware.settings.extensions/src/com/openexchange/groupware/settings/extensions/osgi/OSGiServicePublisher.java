@@ -60,8 +60,13 @@ import com.openexchange.groupware.settings.extensions.ServicePublisher;
 public class OSGiServicePublisher implements ServicePublisher {
 
     private final Map<Object, ServiceRegistration> serviceRegistrations = new HashMap<Object, ServiceRegistration>();
-    private BundleContext context = null;
+    private final BundleContext context;
 
+    /**
+     * Initializes a new {@link OSGiServicePublisher}.
+     *
+     * @param context The OSGi bundle context
+     */
     public OSGiServicePublisher(final BundleContext context) {
         this.context = context;
     }

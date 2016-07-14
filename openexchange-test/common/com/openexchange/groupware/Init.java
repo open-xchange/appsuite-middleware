@@ -156,6 +156,8 @@ import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.autoconfig.AutoconfigService;
+import com.openexchange.mail.autoconfig.internal.AutoconfigServiceImpl;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.transport.config.TransportPropertiesInit;
@@ -442,6 +444,10 @@ public final class Init {
         startTestServices = System.currentTimeMillis();
         startAndInjectMailAccountStorageService();
         System.out.println("startAndInjectMailAccountStorageService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectMailAutoconfigService();
+        System.out.println("startAndInjectMailAutoconfigService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
         startAndInjectMailBundle();
@@ -896,6 +902,14 @@ public final class Init {
             final UnifiedInboxManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
             services.put(UnifiedInboxManagement.class, unifiedINBOXManagement);
             TestServiceRegistry.getInstance().addService(UnifiedInboxManagement.class, unifiedINBOXManagement);
+        }
+    }
+
+    private static void startAndInjectMailAutoconfigService() throws Exception {
+        if (null == TestServiceRegistry.getInstance().getService(AutoconfigService.class)) {
+            AutoconfigService service = new AutoconfigServiceImpl(LOOKUP);
+            services.put(AutoconfigService.class, service);
+            TestServiceRegistry.getInstance().addService(AutoconfigService.class, service);
         }
     }
 

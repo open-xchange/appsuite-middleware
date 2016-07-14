@@ -63,7 +63,6 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
-
 /**
  * {@link DelDatesMembersPrimaryKeyUpdateTask}
  *
@@ -117,9 +116,9 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         try {
             stmt = con.prepareStatement("SELECT object_id, member_uid, confirm, reason, reminder, cid FROM " + table + " WHERE pfid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
-            PreparedStatement stmt2 = null;
-            try {
-                while (rs.next()) {
+            while (rs.next()) {
+                PreparedStatement stmt2 = null;
+                try {
                     oldPos = 1;
                     StringBuilder sb = new StringBuilder();
                     int objectId = rs.getInt(oldPos++);
@@ -161,9 +160,9 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
                     }
                     stmt2.setInt(newPos++, cid);
                     stmt2.execute();
+                } finally {
+                    DBUtils.closeSQLStuff(stmt2);
                 }
-            } finally {
-                DBUtils.closeSQLStuff(stmt2);
             }
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);

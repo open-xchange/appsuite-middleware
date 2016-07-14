@@ -65,6 +65,11 @@ public abstract class AbstractSearchTermVisitor implements SearchTermVisitor {
     }
 
     @Override
+    public void visit(FileNameTerm term) {
+        // Nothing to do
+    }
+
+    @Override
     public void visit(final ANDTerm term) {
         // Nothing to do
     }
@@ -91,6 +96,11 @@ public abstract class AbstractSearchTermVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(final FlagTerm term) {
+        // Nothing to do
+    }
+
+    @Override
+    public void visit(UserFlagTerm term) {
         // Nothing to do
     }
 

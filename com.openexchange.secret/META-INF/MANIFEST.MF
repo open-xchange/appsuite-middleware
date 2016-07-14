@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Secret Service Plugin
 Bundle-SymbolicName: com.openexchange.secret
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.secret.osgi.SecretActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

@@ -1,0 +1,17 @@
+type: object
+properties:
+  type:
+    type: integer
+    description: 'Type of participant: 0 (user), 5 (external user).'
+  mail:
+    type: string
+    description: Email address of external participant.
+  display_name:
+    type: string
+    description: Display name of external participant.
+  status:
+    type: integer
+    description: '0 (none), 1 (accepted), 2 (declined), 3 (tentative).'
+  message:
+    type: string
+    description: Confirm message of the participant.

@@ -1,0 +1,26 @@
+/infostore?action=zipdocuments:
+  put:
+    operationId: getDocumentsAsZip
+    tags:
+      - infostore
+    summary: Gets multiple documents as a ZIP archive (**available since v7.4.0**).
+    consumes:
+      - application/json
+    produces:
+      - application/zip
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON array of JSON objects with the id, folder and optionally the documents' versions to include in the requested ZIP archive (if missing, it refers to the latest/current version).
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/InfoItemZipElement"
+    responses:
+      200:
+        description: The raw byte data of the ZIP archive. The response type for the HTTP request is set to `application/zip`.
+        schema:
+          type: string
+          format: binary

@@ -1,0 +1,21 @@
+/calendar?action=resolveuid:
+  get:
+    operationId: resolveUID
+    tags:
+      - calendar
+    summary: Resolves the UID to an OX object ID.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: uid
+        type: string
+        description: The UID that shall be resolved.
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object containing the related object ID in the field `id`. If no object exists with the
+          specified UID or in case of errors the responsible fields in the response are filled
+          (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/AppointmentUpdateResponse"

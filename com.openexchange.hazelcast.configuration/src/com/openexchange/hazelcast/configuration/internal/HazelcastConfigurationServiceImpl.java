@@ -469,7 +469,8 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         Properties properties = new Properties();
         FileInputStream in = null;
         try {
-            properties.load(new FileInputStream(file));
+            in = new FileInputStream(file);
+            properties.load(in);
         } catch (FileNotFoundException e) {
             throw ConfigurationExceptionCodes.READ_ERROR.create(file);
         } catch (IOException e) {

@@ -114,8 +114,9 @@ public class ZipMaker {
      *
      * @param out The output stream to write to
      * @throws OXException If create operation fails
+     * @return long with the number of bytes that have been written to the {@link OutputStream}
      */
-    public void writeZipArchive(OutputStream out) throws OXException {
+    public long writeZipArchive(OutputStream out) throws OXException {
         ZipArchiveOutputStream zipOutput = null;
         try {
             // Initialize ZIP output stream
@@ -139,6 +140,7 @@ public class ZipMaker {
                     addFile2Archive(file, fileAccess.getDocument(idVersionPair.getIdentifier(), idVersionPair.getVersion()), zipOutput, "", buflen, buf);
                 }
             }
+            return zipOutput.getBytesWritten();
         } finally {
             // Complete the ZIP file
             Streams.close(zipOutput);

@@ -62,6 +62,7 @@ import com.openexchange.mail.api.AllMailProvider;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
 
 /**
@@ -72,6 +73,9 @@ import com.openexchange.session.Session;
 public final class MailProviderRegistry {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailProviderRegistry.class);
+
+    /** The special protocol associated with Unified Mail provider */
+    private static final Protocol PROTOCOL_UNIFIED_MAIL = new Protocol(UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX);
 
     /**
      * Concurrent map used as set for mail providers
@@ -85,6 +89,15 @@ public final class MailProviderRegistry {
      */
     private MailProviderRegistry() {
         super();
+    }
+
+    /**
+     * Checks if the special provider for Unified Mail has been registered.
+     *
+     * @return <code>true</code> if Unified Mail provider is registered; otherwise <code>false</code>
+     */
+    public static boolean isUnifiedMailAvailable() {
+        return PROVIDERS.containsKey(PROTOCOL_UNIFIED_MAIL);
     }
 
     /**
@@ -116,7 +129,7 @@ public final class MailProviderRegistry {
              */
             provider = null;
         }
-        final String mailServerURL = MailConfig.getMailServerURL(session, accountId);
+        final String mailServerURL = MailConfig.getMailServerURL(session, accountId).getServerURL();
         final String protocol;
         if (mailServerURL == null) {
             LOG.warn("Missing mail server URL. Mail server URL not set in account {} for user {} in context {}. Using fallback protocol {}", accountId, session.getUserId(), session.getContextId(), MailProperties.getInstance().getDefaultMailProvider());

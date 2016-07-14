@@ -1202,7 +1202,7 @@ public final class MailFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
 
-            if (!session.getUserConfiguration().hasWebMail()) {
+            if (!session.getUserPermissionBits().hasWebMail()) {
                 return new SortableId[0];
             }
 

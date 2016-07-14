@@ -68,6 +68,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.WhitelistedSchemes;
+import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
@@ -139,6 +140,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
              */
             WhitelistedSchemes.dropInstance();
             HTMLFilterHandler.resetWhitelist();
+            JerichoParser.shutDown();
             /*
              * Close trackers
              */

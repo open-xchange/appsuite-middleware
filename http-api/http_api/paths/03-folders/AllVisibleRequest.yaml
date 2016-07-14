@@ -1,0 +1,23 @@
+/folders?action=allVisible:
+  get:
+    operationId: getVisibleFolders
+    tags:
+      - folders
+    summary: Gets all visible folders of a certain module (**available since v6.18.2**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - in: query
+        name: content_type
+        type: string
+        description: The desired content type (either numbers or strings; e.g. "tasks", "calendar", "contacts", "mail", "infostore").
+        required: true
+      - $ref: "#/parameters/gblQueryParamFolderColumns"
+    responses:
+      200:
+        description: |
+          A JSON object containing three fields: "private", "public, and "shared". Each field is a
+          JSON array with data for all folders. Each folder is itself described by an array. In case
+          of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FoldersVisibilityResponse"

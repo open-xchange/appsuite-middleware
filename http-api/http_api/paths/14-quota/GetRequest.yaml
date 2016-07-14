@@ -1,0 +1,33 @@
+/quota?action=get:
+  get:
+    operationId: getQuotaInformation
+    tags:
+      - quota
+    summary: Gets quota information (**available since v7.6.1, preliminary**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: module
+        type: string
+        description: The module identifier (e.g. "share_links", "filestorage", ...) to get quota information for, required if account is set.
+        required: false
+      - in: query
+        name: account
+        type: string
+        description: The account identifier within the module to get quota information for.
+        required: false
+    responses:
+      200:
+        description: |
+          If `module` is not specified it is returned a JSON object containing all quota modules as fields.
+          Each field is an object itself consisting of a field `display_name` and a field `accounts`.
+          `accounts` is an array of JSON objects containing the properties `account_id`, `account_name`,
+          `countquota` (account's quota limit for the number of items, or not set if not defined),
+          `countuse` (account's actual usage for the number of items, or not set if no count quota defined),
+          `quota` (account's quota limit for the storage in bytes, or not set if not defined) and `use`
+          (account's actual usage for the storage in bytes, or not set if no storage quota defined). In case of errors the responsible
+          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/QuotasResponse"
+      400:
+        description: If a specified `module` is not existing.

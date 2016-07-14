@@ -99,8 +99,9 @@ public class GetAction extends AbstractFileStorageAccountAction {
 
         FileStorageAccountAccess access = fsService.getAccountAccess(account.getId(), session);
         FileStorageFolder rootFolder = access.getRootFolder();
-        //check filestorage capabilities
-        Set<String> caps = new HashSet<String>();
+
+        // Check file storage capabilities
+        Set<String> caps = new HashSet<String>(8, 0.9f);
         if (access instanceof CapabilityAware) {
             CapabilityAware capabilityAware = (CapabilityAware) access;
 
@@ -122,6 +123,16 @@ public class GetAction extends AbstractFileStorageAccountAction {
             supported = capabilityAware.supports(FileStorageCapability.LOCKS);
             if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.LOCKS.name());
+            }
+
+            supported = capabilityAware.supports(FileStorageCapability.READ_ONLY);
+            if (null != supported && supported.booleanValue()) {
+                caps.add(FileStorageCapability.READ_ONLY.name());
+            }
+
+            supported = capabilityAware.supports(FileStorageCapability.MAIL_ATTACHMENTS);
+            if (null != supported && supported.booleanValue()) {
+                caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
             }
         }
         return new AJAXRequestResult(writer.write(account, rootFolder, caps));

@@ -64,6 +64,7 @@ import com.openexchange.carddav.resources.CardDAVCollection;
 import com.openexchange.carddav.resources.ContactResource;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.SimilarityException;
 import com.openexchange.dav.actions.POSTAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -71,6 +72,7 @@ import com.openexchange.webdav.action.WebdavPutAction.SizeExceededInputStream;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
@@ -85,6 +87,8 @@ public class CardDAVPOSTAction extends POSTAction {
 
     private final GroupwareCarddavFactory factory;
 
+    private static final String MAX_SIMILARITY = "X-OX-MAX-SIMILARITY";
+
     /**
      * Initializes a new {@link CardDAVPOSTAction}.
      *
@@ -97,7 +101,7 @@ public class CardDAVPOSTAction extends POSTAction {
 
 	@Override
 	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-	    if (super.handleAction(request, response)) {
+	    if (super.handle(request, response)) {
 	        return;
 	    }
 	    if (ContactResource.CONTENT_TYPE.equalsIgnoreCase(getContentType(request))) {
@@ -134,7 +138,15 @@ public class CardDAVPOSTAction extends POSTAction {
             if (0 < maxSize) {
                 inputStream = new SizeExceededInputStream(inputStream, maxSize);
             }
-            importResults = collection.bulkImport(inputStream);
+            String maxSimStr = request.getHeader(MAX_SIMILARITY);
+            float maxSimilarity = 0;
+            if (maxSimStr != null) {
+                maxSimilarity = Float.valueOf(maxSimStr);
+                if (maxSimilarity > 1) {
+                    maxSimilarity = 1;
+                }
+            }
+            importResults = collection.bulkImport(inputStream, maxSimilarity);
         } catch (IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST, e);
         } catch (OXException e) {
@@ -181,7 +193,10 @@ public class CardDAVPOSTAction extends POSTAction {
                 Element propElement = new Element("prop", DAV_NS);
 //                propElement.addContent(marshaller.marshalProperty(child.getProperty(DAV_NS.getURI(), "getetag"), protocol));
                 propElement.addContent(new Element("uid", CarddavProtocol.CALENDARSERVER_NS).setText(importResult.getUid()));
-                propElement.addContent(marshaller.marshalProperty(child.getProperty(DAVProtocol.CARD_NS.getURI(), "address-data"), protocol));
+                WebdavProperty addressDataProperty = child.getProperty(DAVProtocol.CARD_NS.getURI(), "address-data");
+                if (null != addressDataProperty) {
+                    propElement.addContent(marshaller.marshalProperty(addressDataProperty, protocol));
+                }
                 propstatElement.addContent(propElement);
                 propstatElement.addContent(marshaller.marshalStatus(HttpServletResponse.SC_OK));
             } else {
@@ -195,15 +210,29 @@ public class CardDAVPOSTAction extends POSTAction {
         }
     }
 
-    private Element marshalErrorResponse(PropfindResponseMarshaller marshaller, PreconditionException error, String uid) {
-        Element responseElement = new Element("response", DAV_NS);
-        responseElement.addContent(new Element("href", DAV_NS));
-        responseElement.addContent(marshaller.marshalStatus(error.getStatus()));
-        Element errorElement = new Element("error", DAVProtocol.DAV_NS);
-        errorElement.addContent(error.getPreconditionElement());
-        errorElement.addContent(new Element("uid", CarddavProtocol.CALENDARSERVER_NS).setText(uid));
-        responseElement.addContent(errorElement);
-        return responseElement;
+    private Element marshalErrorResponse(PropfindResponseMarshaller marshaller, OXException error, String uid) {
+        if (error instanceof PreconditionException) {
+            PreconditionException preError = (PreconditionException) error;
+            Element responseElement = new Element("response", DAV_NS);
+            responseElement.addContent(new Element("href", DAV_NS));
+            responseElement.addContent(marshaller.marshalStatus(preError.getStatus()));
+            Element errorElement = new Element("error", DAVProtocol.DAV_NS);
+            errorElement.addContent(preError.getPreconditionElement());
+            errorElement.addContent(new Element("uid", CarddavProtocol.CALENDARSERVER_NS).setText(uid));
+            responseElement.addContent(errorElement);
+            return responseElement;
+        }
+        if (error instanceof SimilarityException) {
+            SimilarityException simError = (SimilarityException) error;
+            Element responseElement = new Element("response", DAV_NS);
+            responseElement.addContent(new Element("href", DAV_NS));
+            responseElement.addContent(marshaller.marshalStatus(simError.getStatus()));
+            Element errorElement = new Element("error", DAVProtocol.DAV_NS);
+            errorElement.addContent(simError.getElement());
+            responseElement.addContent(errorElement);
+            return responseElement;
+        }
+        return null;
     }
 
 }

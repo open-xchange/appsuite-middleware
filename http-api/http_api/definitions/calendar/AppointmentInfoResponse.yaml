@@ -1,0 +1,7 @@
+type: object
+properties:
+  data:
+    type: array
+    description: Array with elements that correspond with days in the time range, explaining whether a day has appointments or not.
+    items:
+      type: boolean

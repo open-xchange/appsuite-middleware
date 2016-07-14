@@ -1,0 +1,6 @@
+type: object
+properties:
+  datasource:
+    $ref: "#/definitions/ConversionDataSource"
+  datahandler:
+    $ref: "#/definitions/ConversionDataHandler"

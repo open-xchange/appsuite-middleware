@@ -99,7 +99,7 @@ public class DriveEventSubscriptionsMakeUuidPrimaryTask extends UpdateTaskAdapte
             fillUUIDs(connection);
             Tools.modifyColumns(connection, "driveEventSubscriptions", new Column("uuid", "BINARY(16) NOT NULL"));
             Tools.createPrimaryKeyIfAbsent(connection, "driveEventSubscriptions", new String[] { "cid", "uuid" });
-            Tools.createIndex(connection, "driveEventSubscriptions", new String[] { "cid", "service,", "token" });
+            Tools.createIndex(connection, "driveEventSubscriptions", new String[] { "cid", "service", "token" });
             connection.commit();
             committed = true;
         } catch (SQLException e) {

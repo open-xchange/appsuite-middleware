@@ -225,6 +225,16 @@ public enum Privilege {
     UNBIND("unbind", "Remove resources from the collection"),
 
     /**
+     * <b>DAV:share Privilege</b>
+     * <p/>
+     * The share element is a WebDAV ACL [RFC3744] privilege that allows a
+     * client to inspect whether a user may be allowed to share a resource.
+     *
+     * @see <a href="https://tools.ietf.org/html/draft-pot-webdav-resource-sharing-03#section-5.2">draft-pot-webdav-resource-sharing, section 5.2</a>
+     */
+    SHARE("share", "Share the collection"),
+
+    /**
      * <b>DAV: Privilege</b>
      * <p/>
      * DAV:all is an aggregate privilege that contains the entire set of

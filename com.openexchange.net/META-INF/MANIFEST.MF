@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Network Utilities Bundle
 Bundle-SymbolicName: com.openexchange.net
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.sun.net,
@@ -17,4 +17,8 @@ Import-Package: com.sun.net,
  javax.security.auth.x500,
  javax.security.sasl,
  sun.misc
-Export-Package: com.openexchange.tools.ssl
+Export-Package: com.googlecode.ipv6,
+ com.openexchange.tools.ssl,
+ edazdarevic.commons.net
+Bundle-ClassPath: lib/java-ipv6-0.17-SNAPSHOT.jar,
+ .

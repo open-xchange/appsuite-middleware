@@ -1,0 +1,11 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: |
+      A boolean if parameter `tree` is not specified indicating the validation result otherwise the folder
+      tree object (see **FolderData** model) extended by a field `subfolder_array` that contains possible subfolders.
+      In the tree case a value of `null` indicating a failed validation.
+  warnings:
+      $ref: "#/definitions/CommonResponse"

@@ -279,6 +279,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         }
 
         this.capabilities = mailConfig.getCapabilities().getCapabilities();
+        if (mailConfig.getCapabilities().hasFileNameSearch()) {
+            addSupportedCapabilities("FILENAME_SEARCH");
+        }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
             mp.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
@@ -286,6 +289,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         if (!mailFolder.isHoldsMessages() && mp.canReadOwnObjects()) {
             // Cannot contain messages; therefore deny read access. Folder is not selectable.
             mp.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
+        }
+        final int canStoreSeenFlag = mp.canStoreSeenFlag();
+        if (canStoreSeenFlag > 0 || ((canStoreSeenFlag < 0) && (mp.getReadPermission() > MailPermission.NO_PERMISSIONS))) {
+            addSupportedCapabilities("STORE_SEEN");
         }
         // Permission bits
         int permissionBits = createPermissionBits(mp.getFolderPermission(), mp.getReadPermission(), mp.getWritePermission(), mp.getDeletePermission(), mp.isFolderAdmin());

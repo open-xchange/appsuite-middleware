@@ -64,7 +64,6 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
-
 /**
  * {@link PrgContactsLinkageAddPrimaryKeyUpdateTask}
  *
@@ -114,9 +113,9 @@ public class PrgContactsLinkageAddPrimaryKeyUpdateTask extends UpdateTaskAdapter
         try {
             stmt = con.prepareStatement("SELECT intfield01, intfield02, field01, field02, cid FROM prg_contacts_linkage WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
-            PreparedStatement stmt2 = null;
-            try {
-                while (rs.next()) {
+            while (rs.next()) {
+                PreparedStatement stmt2 = null;
+                try {
                     StringBuilder sb = new StringBuilder();
                     sb.append("UPDATE prg_contacts_linkage SET uuid = ? WHERE intfield01 ");
                     oldPos = 1;
@@ -164,9 +163,9 @@ public class PrgContactsLinkageAddPrimaryKeyUpdateTask extends UpdateTaskAdapter
                     stmt2.setString(newPos++, field02);
                     stmt2.setInt(newPos++, cid);
                     stmt2.execute();
+                } finally {
+                    DBUtils.closeSQLStuff(stmt2);
                 }
-            } finally {
-                DBUtils.closeSQLStuff(stmt2);
             }
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);

@@ -506,11 +506,6 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
         }
 
         @Override
-        public void reset() {
-            contact.reset();
-        }
-
-        @Override
         public void addWarning(OXException warning) {
             contact.addWarning(warning);
         }

@@ -332,4 +332,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
         return EMPTY_RETVAL;
     }
+
+    @Override
+    public abstract int getUnreadCount(String folder, SearchTerm<?> searchTerm) throws OXException;
 }

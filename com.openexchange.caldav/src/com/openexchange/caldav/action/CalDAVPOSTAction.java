@@ -80,7 +80,7 @@ public class CalDAVPOSTAction extends POSTAction {
 
 	@Override
 	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-	    if (super.handleAction(request, response)) {
+	    if (super.handle(request, response)) {
 	        return;
 	    }
 		WebdavResource resource = request.getResource();

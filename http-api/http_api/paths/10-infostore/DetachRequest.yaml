@@ -1,0 +1,44 @@
+/infostore?action=detach:
+  put:
+    operationId: deleteInfoItemVersions
+    tags:
+      - infostore
+    summary: Deletes versions of an infoitem.
+    description: |
+      #### Note
+      When the current version of a document is deleted the new current version will be the latest version.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The ID of the base object.
+        required: true
+      - in: query
+        name: folder
+        type: string
+        description: The folder ID of the base object.
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the infoitem.
+        required: true
+      - in: body
+        name: body
+        description: A JSON array of version numbers to detach.
+        required: true
+        schema:
+          type: array
+          items:
+            type: integer
+    responses:
+      200:
+        description: |
+          A JSON object with an empty array of version numbers that were not deleted. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/InfoItemDetachResponse"

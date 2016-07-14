@@ -1,14 +1,14 @@
 # Luiz Fernando Ranghetti <luiz@bureau-cornavin.com>, 2013, 2016.
-# Bianca Oliveira <bianca@bureau-cornavin.com>, 2013, 2014, 2015.
+# Bianca Oliveira <bianca@bureau-cornavin.com>, 2013, 2014, 2015, 2016.
 # Aracele Torres <aracele@bureau-cornavin.com>, 2013, 2014, 2015, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-05-17 01:31-0300\n"
-"Last-Translator: Aracele Torres <aracele@bureau-cornavin.com>\n"
-"Language-Team: Portuguese <>\n"
+"PO-Revision-Date: 2016-06-12 20:57-0300\n"
+"Last-Translator: Bianca Oliveira <bianca@bureau-cornavin.com>\n"
+"Language-Team: Portuguese <kde-i18n-pt_BR@kde.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1458,6 +1458,7 @@ msgstr "UID"
 #. A document's file name
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:87
@@ -1845,6 +1846,10 @@ msgstr ""
 msgid "The token \"%1$s\" is already registered."
 msgstr "O token \"%1$s\" já está registrado."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:96
+msgid "Empty files indicated for directory \"%1$s\"."
+msgstr "Arquivos vazios indicados para o diretório \"%1$s\"."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1855,6 +1860,95 @@ msgstr "O token \"%1$s\" já está registrado."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
 msgid "Select an existing account"
 msgstr "Selecione uma conta existente"
+
+#. The name for the virtual folder containing all attachments from all messages
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:67
+msgid "All attachments"
+msgstr "Todos os anexos"
+
+#. The name for the virtual folder containing all attachments of received messages
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:70
+msgid "Received attachments"
+msgstr "Anexos recebidos"
+
+#. The name for the virtual folder containing all attachments of sent messages
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:73
+msgid "Sent attachments"
+msgstr "Anexos enviados"
+
+#. The account display name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:76
+msgid "Mail Drive"
+msgstr "Correio Drive"
+
+#. Search in From sender.
+#. Search for mails sent from ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:81
+msgid "From"
+msgstr "De"
+
+#. Search in To recipient.
+#. Search for mails sent to ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:84
+msgid "To"
+msgstr "Para"
+
+#. Search in original mail subject
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
+msgid "Subject"
+msgstr "Assunto"
+
+#. Search in file type.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
+msgid "File type"
+msgstr "Tipo de arquivo"
+
+#. Search in file size
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:84
+msgid "File size"
+msgstr "Tamanho do arquivo"
+
+#. ---------------------------------------------------------------------------------- //
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in file name.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
+msgid "in file name"
+msgstr "no nome do arquivo"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in From sender.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:91
+msgid "in From sender"
+msgstr "Do remetente"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in To recipient.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:96
+msgid "in To recipient"
+msgstr "Para o destinatário"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#. Context: Searching in appointments.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#. Context: Searching in mail.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
+msgid "in subject"
+msgstr "no assunto"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
@@ -2411,17 +2505,6 @@ msgstr ""
 "opções de pesquisa e tente novamente."
 
 #. Context: Searching in appointments.
-#. Displayed as: [Search for] 'user input' in subject.
-#. The 'user input' part is always prepended, please heed this in translations.
-#. Context: Searching in mail.
-#. Displayed as: [Search for] 'user input' in subject.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
-msgid "in subject"
-msgstr "no assunto"
-
-#. Context: Searching in appointments.
 #. Displayed as: [Search for] 'user input' in description.
 #. The 'user input' part is always prepended, please heed this in translations.
 #. Context: Searching in tasks.
@@ -2511,7 +2594,9 @@ msgstr "Séries"
 msgid "Folder type"
 msgstr "Tipo de pasta"
 
+#. The default name for a folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:70
 msgid "Folder"
 msgstr "Pasta"
 
@@ -2614,16 +2699,6 @@ msgstr "Contatos"
 msgid "File description"
 msgstr "Descrição do arquivo"
 
-#. Search in file type.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
-msgid "File type"
-msgstr "Tipo de arquivo"
-
-#. Search in file size
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:84
-msgid "File size"
-msgstr "Tamanho do arquivo"
-
 #. -------------------------- i18n strings for file types ---------------------------- //
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:88
 msgid "Images"
@@ -2667,13 +2742,6 @@ msgid "Shared folders"
 msgstr "Pastas compartilhadas"
 
 #. Context: Searching in drive.
-#. Displayed as: [Search for] 'user input' in file name.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
-msgid "in file name"
-msgstr "no nome do arquivo"
-
-#. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file description.
 #. The 'user input' part is always prepended, please heed this in translations.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:117
@@ -2704,15 +2772,9 @@ msgstr "Pessoa"
 msgid "From/To"
 msgstr "De/Para"
 
-#. Search for mails sent from ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:81
-msgid "From"
-msgstr "De"
-
-#. Search for mails sent to ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:84
-msgid "To"
-msgstr "Para"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+msgid "in attachment file names"
+msgstr "em anexo o nome do arquivo"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Context: Searching in tasks.
@@ -3551,6 +3613,15 @@ msgid ""
 "The character encoding \"%1$s\" is not supported. Please choose another one."
 msgstr "A codificação de caractere \"%1$s\" não é suportada. Escolha outra."
 
+#. The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:139
+msgid ""
+"The contact with uid %1$s is too similar to the existing contact with uid "
+"%2$s in folder %3$s"
+msgstr ""
+"O contato com uid %1$s é muito semelhante ao contato existente com uid %2$s"
+" na pasta %3$s"
+
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid ""
@@ -3566,6 +3637,41 @@ msgstr "MAIL-AUTOCONFIG"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "O endereço de e-mail %1$s é inválido."
+
+#. Reorganizing of mails failed. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:63
+msgid "Reorganizing of mails failed. Please try again later."
+msgstr ""
+"Reorganizando os e-mails que falharam. Por favor, tente novamente mais tarde."
+
+#. The user category %1$s does not exist.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:63
+msgid "The user category %1$s does not exist."
+msgstr "A categoria de usuário %1$s não existe."
+
+#. Invalid configuration: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:69
+msgid "Invalid configuration: %1$s"
+msgstr "Configuração inválida: %1$s"
+
+#. The required service %1$s is temporary not available. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:72
+msgid ""
+"The required service %1$s is temporary not available. Please try again later."
+msgstr ""
+"O serviço requirido %1$s está temporariamente não disponível. Por favor,"
+" tente novamente mais tarde."
+
+#. You are not allowed to change the name of the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:75
+msgid "You are not allowed to change the name of the category %1$s."
+msgstr "Você não tem permissão para alterar o nome da categoria %1$s."
+
+#. You are not allowed to enable or disable the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:78
+msgid "You are not allowed to enable or disable the category %1$s."
+msgstr "Você não tem permissão para ativar ou desativar a categoria %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
 msgid "The redirect address \"%1$s\" is not valid."
@@ -4682,14 +4788,14 @@ msgstr "Falha ao ler o feed RSS da URL: %2$s"
 #. The RSS feed is exceeding the maximum allowed size of '%1$s'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
 msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
-msgstr "O feed RSS excede o tamanho máximo permitido de '%1$s'"
+msgstr "O alimentador RSS está excedendo o tamanho máximo permitido de '%1$s'"
 
 #. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
 msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
 msgstr ""
-"Não foi possível conectar-se ao RSS com a URL:% $s. Altere-a e tente "
-"novamente."
+"Não é possível conectar ao RSS de URL: %1$s. Por favor, altere a URL e tente"
+" novamente."
 
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
@@ -5294,7 +5400,7 @@ msgstr "O número da sequência é antigo."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
 msgstr ""
-"Endereço do e-mail inválido: \"%s\". Por favor, corrija o endereço de e-mail."
+"Endereço de e-mail inválido: '%s'. Por favor, corrija o endereço de e-mail."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -7142,7 +7248,7 @@ msgstr ""
 #. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
 msgid "Group %1$s can't be used for object permissions."
-msgstr "Grupo %1$s não pode ser usado para permissões de objeto."
+msgstr "O grupo  %1$s não pode ser usado para permissões do objeto."
 
 #. Concurrent write attempt. Please await the previous save operation to terminate.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
@@ -8244,6 +8350,88 @@ msgstr "A parte do e-mail não pôde ser lida"
 msgid "The content of the mail is too big."
 msgstr "O conteúdo do e-mail é muito grande."
 
+#. Invalid parameter value: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:211
+msgid "Invalid parameter value: %1$s"
+msgstr "Valor de parâmetro inválido: %1$s"
+
+#. The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:214
+msgid ""
+"The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
+msgstr ""
+"O nome de marcador %1$s não é válido. Marcadores não podem iniciar com '\\'."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:216
+msgid ""
+"The attachments to this E-Mail exceeded the size limit for attachments. "
+"Instead of sending the attachments with the E-Mail, the attachments are "
+"shared and the links are added to your E-Mail. Whoever receives the E-Mail "
+"can then access the attachments."
+msgstr ""
+"Os anexos neste e-mail excederam o tamanho limite para anexos. Em vez de"
+" enviar os anexos com o e-mail, os anexos serão compartilhados e os links"
+" serão adicionados ao seu e-mail. Quem receber o e-mail poderá acessar os"
+" anexos."
+
+#. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:219
+msgid "You are not allowed to compose a message containing share links"
+msgstr ""
+"Você não tem permissão para compor uma mensagem contendo links compartilhados"
+
+#. User wants to compose a share message but does not specify an expiration date which is required
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
+msgid ""
+"Please specify an expiration date in order to compose a message containing "
+"share links"
+msgstr ""
+"Por favor, especifique uma data de expiração a fim de que esta componha uma"
+" mensagem contendo links compartilhados"
+
+#. The default name for a file
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
+msgid "File"
+msgstr "Arquivo"
+
+#. -----------------------------------------------------------------------------------------------------------------------------------
+#. The name of the folder holding the attachments, which were shared to other recipients.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:78
+msgid "My shared mail attachments"
+msgstr "Meus anexos de correio compartilhados"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Hints to the available attachments for affected message
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
+msgid ""
+"The available attachments for this E-Mail can be accessed via the link %1$s"
+msgstr "O anexo disponível para este e-mail pode ser acessado pelo link %1$s"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the elapsed date for affected message's attachments
+#. * The link will expire on 01/01/16 *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
+msgid "The link will expire on %1$s"
+msgstr "O link irá expirar em %1$s"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the password for affected message's attachments
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
+msgid "Please use the following password to access the attachments %1$s"
+msgstr "Por favor, use a seguinte senha para acessar o anexo %1$s"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the file names for affected message's attachments
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:94
+msgid "The following attachments are accessible:"
+msgstr "O seguinte anexo está acessível:"
+
+#. Fall-back name if a file has no valid name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
+msgid "Unnamed"
+msgstr "Sem nome"
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -9058,6 +9246,14 @@ msgstr "Falha ao autenticar nome de usuário: %1$s"
 msgid "No session found for identifier: %1$s"
 msgstr "Nenhuma sessão localizada para o identificador: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.limit/src/com/openexchange/share/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
+msgid ""
+"Download denied because download limits have been exceeded. Please try again "
+"later."
+msgstr ""
+"Download negado porque o limite de download foi alcançado. Por favor, tente"
+" novamente mais tarde."
+
 #. subject
 #. * $username has shared file "$filename" with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:65
@@ -9442,11 +9638,6 @@ msgstr "Ver item"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:233
 msgid "View items"
 msgstr "Ver itens"
-
-#. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
-msgid "The link will expire on %1$s"
-msgstr "O link irá expirar em %1$s"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:239
@@ -12391,15 +12582,15 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "Endereço de e-mail inválido."
+
 #~ msgid ""
 #~ "The maximum allowed size of '%1$s' for an image in the signature is "
 #~ "reached."
 #~ msgstr ""
 #~ "O tamanho máximo permitido de '%1$s' para uma imagem na assinatura foi "
 #~ "atingido."
-
-#~ msgid "Invalid E-Mail address."
-#~ msgstr "Endereço de e-mail inválido."
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "Ásia/Riade87"

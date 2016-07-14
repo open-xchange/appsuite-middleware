@@ -1,56 +1,32 @@
-open-xchange-realtime-json (7.8.1-16) stable; urgency=medium
+open-xchange-realtime-json (7.8.2-4) stable; urgency=medium
 
-  * Build for patch 2016-07-04 (3400)
+  * Second candidate for 7.8.2 release
 
- -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 30 Jun 2016 18:05:38 +0200
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 12 Jul 2016 09:21:04 +0200
 
-open-xchange-realtime-json (7.8.1-15) stable; urgency=medium
+open-xchange-realtime-json (7.8.2-3) stable; urgency=medium
 
-  * Build for patch 2016-06-20 (3347)
+  * First candidate for 7.8.2 release
 
- -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 15 Jun 2016 14:02:54 +0200
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 06 Jul 2016 15:32:55 +0200
 
-open-xchange-realtime-json (7.8.1-14) stable; urgency=medium
+open-xchange-realtime-json (7.8.2-2) stable; urgency=medium
 
-  * Build for patch 2016-06-06 (3317)
+  * Second candidate for 7.8.2 release
 
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 03 Jun 2016 14:44:11 +0200
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 29 Jun 2016 16:28:43 +0200
 
-open-xchange-realtime-json (7.8.1-13) stable; urgency=medium
+open-xchange-realtime-json (7.8.2-1) stable; urgency=medium
 
-  * Build for patch 2016-05-19 (3305)
+  * First candidate for 7.8.2 release
 
- -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 19 May 2016 16:23:59 +0200
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 16 Jun 2016 12:34:41 +0200
 
-open-xchange-realtime-json (7.8.1-12) stable; urgency=medium
+open-xchange-realtime-json (7.8.2-0) unstable; urgency=medium
 
-  * Build for patch 2016-05-23 (3294)
+  * prepare for 7.8.2 release
 
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 20 May 2016 11:56:10 +0200
-
-open-xchange-realtime-json (7.8.1-11) stable; urgency=medium
-
-  * Build for patch 2016-05-09 (3272)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 06 May 2016 14:53:19 +0200
-
-open-xchange-realtime-json (7.8.1-10) stable; urgency=medium
-
-  * Build for patch 2016-04-25 (3263)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 25 Apr 2016 18:33:44 +0200
-
-open-xchange-realtime-json (7.8.1-9) stable; urgency=medium
-
-  * Build for patch 2016-04-25 (3239)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 15 Apr 2016 14:49:21 +0200
-
-open-xchange-realtime-json (7.8.1-8) stable; urgency=medium
-
-  * Build for patch 2016-04-07 (3228)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 07 Apr 2016 18:14:06 +0200
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 06 Apr 2016 10:25:19 +0200
 
 open-xchange-realtime-json (7.8.1-7) stable; urgency=medium
 
@@ -99,126 +75,6 @@ open-xchange-realtime-json (7.8.1-0) unstable; urgency=medium
   * prepare for 7.8.1
 
  -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 08 Oct 2015 10:47:42 +0200
-
-open-xchange-realtime-json (7.8.0-27) stable; urgency=medium
-
-  * Build for patch 2016-03-29 (3188)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 23 Mar 2016 12:51:27 +0100
-
-open-xchange-realtime-json (7.8.0-26) stable; urgency=medium
-
-  * Build for patch 2016-03-14 (3148)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 07 Mar 2016 16:59:58 +0100
-
-open-xchange-realtime-json (7.8.0-25) stable; urgency=medium
-
-  * Build for patch 2016-02-29 (3141)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 26 Feb 2016 13:01:19 +0100
-
-open-xchange-realtime-json (7.8.0-24) stable; urgency=medium
-
-  * Build for patch 2016-02-29 (3121)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 22 Feb 2016 22:24:34 +0100
-
-open-xchange-realtime-json (7.8.0-23) stable; urgency=medium
-
-  * Build for patch 2016-02-18 (3106)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 15 Feb 2016 17:20:47 +0100
-
-open-xchange-realtime-json (7.8.0-22) stable; urgency=medium
-
-  * Build for patch 2016-02-08 (3073)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 10 Feb 2016 12:40:59 +0100
-
-open-xchange-realtime-json (7.8.0-21) stable; urgency=medium
-
-  * Build for patch 2016-01-19 (3062)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 26 Jan 2016 10:53:11 +0100
-
-open-xchange-realtime-json (7.8.0-20) stable; urgency=medium
-
-  * Build for patch 2016-01-25 (3031)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 25 Jan 2016 10:21:08 +0100
-
-open-xchange-realtime-json (7.8.0-19) stable; urgency=medium
-
-  * Build for patch 2016-02-05 (3058)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Sat, 23 Jan 2016 13:34:45 +0100
-
-open-xchange-realtime-json (7.8.0-18) stable; urgency=medium
-
-  * Build for patch 2016-02-05 (3058)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Sat, 23 Jan 2016 12:20:19 +0100
-
-open-xchange-realtime-json (7.8.0-17) stable; urgency=medium
-
-  * Build for patch 2016-01-15 (3028)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 15 Jan 2016 12:04:45 +0100
-
-open-xchange-realtime-json (7.8.0-16) stable; urgency=medium
-
-  * Build for patch 2016-01-13 (2982)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 13 Jan 2016 10:02:49 +0100
-
-open-xchange-realtime-json (7.8.0-15) stable; urgency=medium
-
-  * Build for patch 2015-12-23 (3011)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 12 Jan 2016 17:20:14 +0100
-
-open-xchange-realtime-json (7.8.0-14) stable; urgency=medium
-
-  * Build for patch 2016-01-05 (2989)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 29 Dec 2015 12:30:18 +0100
-
-open-xchange-realtime-json (7.8.0-13) stable; urgency=medium
-
-  * Build for patch 2015-12-23 (2971)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 22 Dec 2015 15:58:04 +0100
-
-open-xchange-realtime-json (7.8.0-12) stable; urgency=medium
-
-  * Build for patch 2015-12-21 (2953)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 11 Dec 2015 12:39:36 +0100
-
-open-xchange-realtime-json (7.8.0-11) stable; urgency=medium
-
-  * Build for patch 2015-12-07 (2918)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 08 Dec 2015 11:27:07 +0100
-
-open-xchange-realtime-json (7.8.0-10) stable; urgency=medium
-
-  * Build for patch 2015-11-23 (2878)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 19 Nov 2015 19:19:29 +0100
-
-open-xchange-realtime-json (7.8.0-9) stable; urgency=medium
-
-  * Build for patch 2015-11-09 (2840)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 05 Nov 2015 17:12:20 +0100
-
-open-xchange-realtime-json (7.8.0-8) stable; urgency=medium
-
-  * Build for patch 2015-11-02 (2853)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 30 Oct 2015 16:58:01 +0100
 
 open-xchange-realtime-json (7.8.0-7) stable; urgency=medium
 

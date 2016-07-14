@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.impl;
 
+import static com.openexchange.filestore.FileStorageCodes.NO_SUCH_FILE_STORAGE;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.slf4j.Logger;
@@ -65,6 +66,7 @@ import com.openexchange.filestore.StorageInfo;
 import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.FileStorageInfo;
+import com.openexchange.groupware.filestore.Filestore;
 import com.openexchange.groupware.filestore.FilestoreExceptionCodes;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.ldap.User;
@@ -210,10 +212,25 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
             StorageInfo info = getFileStorageInfoFor(userId, contextId);
 
             // Determine file storage's base URI
-            URI baseUri = FilestoreStorage.getInstance().getFilestore(info.getId()).getUri();
+            Filestore filestore;
+            try {
+                filestore = FilestoreStorage.getInstance().getFilestore(info.getId());
+            } catch (OXException e) {
+                if (false == NO_SUCH_FILE_STORAGE.equals(e)) {
+                    throw e;
+                }
+
+                // No such file storage -- apparently wrong file storage information. Retry.
+                invalidate(userId, contextId);
+                info = getFileStorageInfoFor(userId, contextId);
+                filestore = FilestoreStorage.getInstance().getFilestore(info.getId());
+            }
+
+            URI baseUri = filestore.getUri();
             try {
                 // Generate full URI
-                URI uri = new URI(baseUri.getScheme(), baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + info.getName(), baseUri.getQuery(), baseUri.getFragment());
+                String scheme = baseUri.getScheme();
+                URI uri = new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + info.getName(), baseUri.getQuery(), baseUri.getFragment());
 
                 // Create appropriate file storage instance
                 storage = new DBQuotaFileStorage(contextId, info.getOwner(), info.getQuota(), fileStorageService.getFileStorage(uri), uri);
@@ -226,6 +243,14 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         }
 
         return storage;
+    }
+
+    private void invalidate(int userId, int contextId) throws OXException {
+        ContextService contextService = Services.requireService(ContextService.class);
+        contextService.invalidateContext(contextId);
+
+        UserService userService = Services.requireService(UserService.class);
+        userService.invalidateUser(contextService.getContext(contextId), userId);
     }
 
     @Override

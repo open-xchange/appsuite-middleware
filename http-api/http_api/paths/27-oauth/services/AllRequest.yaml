@@ -1,0 +1,15 @@
+/oauth/services?action=all:
+  get:
+    operationId: getAllOAuthServices
+    tags:
+      - OAuth
+    summary: Gets all OAuth services' meta data (**available since v6.20**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array of JSON objects each describing an OAuth service's meta data. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/OAuthServicesResponse"

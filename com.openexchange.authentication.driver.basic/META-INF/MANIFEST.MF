@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Database Authentication
+Bundle-SymbolicName: com.openexchange.authentication.driver.basic
+Bundle-Version: 7.8.2
+Bundle-Activator: com.openexchange.authentication.driver.basic.osgi.BasicAuthenticationDriverActivator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.authentication,
+ com.openexchange.context,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.user,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j

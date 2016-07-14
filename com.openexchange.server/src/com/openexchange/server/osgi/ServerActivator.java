@@ -169,6 +169,7 @@ import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
+import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.internal.LoginNameRecorder;
@@ -184,6 +185,11 @@ import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
+import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
+import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
+import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
+import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
+import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -208,6 +214,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
+import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
@@ -228,6 +235,7 @@ import com.openexchange.server.impl.Starter;
 import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.spamhandler.SpamHandler;
@@ -404,15 +412,19 @@ public final class ServerActivator extends HousekeepingActivator {
          * Add service trackers
          */
         // Configuration service load
-        final ServiceTracker<ConfigurationService, ConfigurationService> confTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(
-            context,
-            ConfigurationService.class,
-            new ConfigurationCustomizer(context));
+        final ServiceTracker<ConfigurationService, ConfigurationService> confTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ConfigurationCustomizer(context));
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
 
         // I18n service load
         track(I18nService.class, new I18nServiceListener(context));
+
+        // Audit logger
+        track(AuditLogService.class, new RegistryCustomizer<AuditLogService>(context, AuditLogService.class));
+
+        // Full-name builder
+        track(ServerConfigService.class, new RegistryCustomizer<ServerConfigService>(context, ServerConfigService.class));
+        track(FullNameBuilderService.class, new RegistryCustomizer<FullNameBuilderService>(context, FullNameBuilderService.class));
 
         // Mail account delete listener
         track(MailAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
@@ -423,6 +435,12 @@ public final class ServerActivator extends HousekeepingActivator {
         track(MailcapCommandMap.class, new MailcapServiceTracker(context));
         track(CapabilityService.class, new MailCapabilityServiceTracker(context));
         track(AttachmentTokenService.class, new RegistryCustomizer<AttachmentTokenService>(context, AttachmentTokenService.class));
+        // Mail compose stuff
+        track(ComposeHandlerRegistry.class, new RegistryCustomizer<ComposeHandlerRegistry>(context, ComposeHandlerRegistry.class));
+        track(ShareLinkGeneratorRegistry.class, new RegistryCustomizer<ShareLinkGeneratorRegistry>(context, ShareLinkGeneratorRegistry.class));
+        track(MessageGeneratorRegistry.class, new RegistryCustomizer<MessageGeneratorRegistry>(context, MessageGeneratorRegistry.class));
+        track(AttachmentStorageRegistry.class, new RegistryCustomizer<AttachmentStorageRegistry>(context, AttachmentStorageRegistry.class));
+        track(EnabledCheckerRegistry.class, new RegistryCustomizer<EnabledCheckerRegistry>(context, EnabledCheckerRegistry.class));
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));
@@ -522,9 +540,7 @@ public final class ServerActivator extends HousekeepingActivator {
          */
 
         // Search for ConfigJumpService
-        track(
-            ConfigJumpService.class,
-            new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class));
+        track(ConfigJumpService.class, new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class));
         // Search for extensions of the preferences tree interface
         track(PreferencesItemService.class, new PreferencesCustomizer(context));
         // Search for UserPasswordChange service

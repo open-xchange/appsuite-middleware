@@ -1,0 +1,25 @@
+/drive?action=getFile:
+  get:
+    operationId: getFile
+    tags:
+      - drive
+    summary: Gets metadata of a specific synchronized file (**available since API version 4**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: "#/parameters/gblQueryParamPath"
+      - in: query
+        name: name
+        type: string
+        description: The name of the file version.
+        required: true
+      - in: query
+        name: checksum
+        type: string
+        description: The checksum of the file version.
+        required: true
+    responses:
+      200:
+        description: A JSON object containing the metadata of the requested file version. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveFileResponse"

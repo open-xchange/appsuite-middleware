@@ -1,0 +1,36 @@
+/tasks?action=confirm:
+  put:
+    operationId: confirmTask
+    tags:
+      - tasks
+    summary: Confirms a task.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the task that shall be confirmed.
+        required: true
+      - $ref: "#/parameters/gblQueryParamTaskFolder"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the task.
+        required: true
+      - in: body
+        name: body
+        description: A JSON object with the fields `confirmation` and `confirmmessage`.
+        required: true
+        schema:
+          $ref: "#/definitions/TaskConfirmationBody"
+    responses:
+      200:
+        description: |
+          Nothing, except the standard response object with empty data, the timestamp of the confirmed and thereby
+          updated task, and maybe errors. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

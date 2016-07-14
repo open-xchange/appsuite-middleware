@@ -232,14 +232,13 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     }
 
     private List<SyndMessage> filter(final List<SyndMessage> messages, final SearchTerm<?> searchTerm) throws OXException {
-        if(searchTerm == null) {
+        if (searchTerm == null) {
             return messages;
         }
 
-        final List<SyndMessage> list = new ArrayList<SyndMessage>(messages.size());
-
-        for (final SyndMessage syndMessage : list) {
-            if(searchTerm.matches(syndMessage)) {
+        List<SyndMessage> list = new ArrayList<SyndMessage>(messages.size());
+        for (SyndMessage syndMessage : messages) {
+            if (searchTerm.matches(syndMessage)) {
                 list.add(syndMessage);
             }
         }

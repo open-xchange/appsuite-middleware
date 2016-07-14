@@ -1,0 +1,32 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: A unique identifier of the rule (once created must not be changed).
+  position:
+    type: integer
+    description: The position inside the mail filter list (starts with 0).
+  rulename:
+    type: string
+    description: A name describing the rule, can be empty but must not contain a line break.
+  active:
+    type: boolean
+    description: If this rule is active or not.
+  flags:
+    type: array
+    description: 'An array containing flags which are set on this rule. Each flag can only contain the following characters: 1-9 a-z A-Z. Currently 3 flags are reserved here: "spam" which marks the default spam rule, "vacation" which marks the vacation rules and "autoforward" which marks an autoforwarding rule.'
+    items:
+      type: string
+  test:
+    $ref: "#/definitions/MailFilterTest"
+  actioncmds:
+    type: array
+    description: An array of action commands.
+    items:
+      $ref: "#/definitions/MailFilterAction"
+  text:
+    type: string
+    description: If this rule cannot be read in this string is filled containing the whole lines of this command.
+  errormsg:
+    type: string
+    description: If this rule cannot be read in this string is filled containing a message why, or what part of the rule isn't known.

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Common
 Bundle-SymbolicName: com.openexchange.common
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -133,7 +133,7 @@ Bundle-ClassPath: .,
  lib/httpmime-4.2.1.jar,
  lib/jakarta-slide-webdavlib-2.1.jar,
  lib/jboss-jms-api.jar,
- lib/jericho-html-3.3.jar,
+ lib/jericho-html-3.4.jar,
  lib/jsoup-1.8.1.jar,
  lib/libidn-1.9.jar,
  lib/mysql-connector-java-5.1.30-bin.jar,

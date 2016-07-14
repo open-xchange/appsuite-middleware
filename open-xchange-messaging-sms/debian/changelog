@@ -1,56 +1,32 @@
-open-xchange-messaging-sms (7.8.1-16) stable; urgency=medium
+open-xchange-messaging-sms (7.8.2-4) stable; urgency=medium
 
-  * Build for patch 2016-07-04 (3400)
+  * Second candidate for 7.8.2 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Jun 2016 18:05:19 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 12 Jul 2016 09:20:50 +0200
 
-open-xchange-messaging-sms (7.8.1-15) stable; urgency=medium
+open-xchange-messaging-sms (7.8.2-3) stable; urgency=medium
 
-  * Build for patch 2016-06-20 (3347)
+  * First candidate for 7.8.2 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 15 Jun 2016 14:02:37 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 06 Jul 2016 15:32:37 +0200
 
-open-xchange-messaging-sms (7.8.1-14) stable; urgency=medium
+open-xchange-messaging-sms (7.8.2-2) stable; urgency=medium
 
-  * Build for patch 2016-06-06 (3317)
+  * Second candidate for 7.8.2 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jun 2016 14:43:55 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 29 Jun 2016 16:28:28 +0200
 
-open-xchange-messaging-sms (7.8.1-13) stable; urgency=medium
+open-xchange-messaging-sms (7.8.2-1) stable; urgency=medium
 
-  * Build for patch 2016-05-19 (3305)
+  * First candidate for 7.8.2 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 19 May 2016 16:23:46 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 16 Jun 2016 12:34:22 +0200
 
-open-xchange-messaging-sms (7.8.1-12) stable; urgency=medium
+open-xchange-messaging-sms (7.8.2-0) unstable; urgency=medium
 
-  * Build for patch 2016-05-23 (3294)
+  * prepare for 7.8.2 release
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 May 2016 11:55:51 +0200
-
-open-xchange-messaging-sms (7.8.1-11) stable; urgency=medium
-
-  * Build for patch 2016-05-09 (3272)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 06 May 2016 14:53:06 +0200
-
-open-xchange-messaging-sms (7.8.1-10) stable; urgency=medium
-
-  * Build for patch 2016-04-25 (3263)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 25 Apr 2016 18:33:31 +0200
-
-open-xchange-messaging-sms (7.8.1-9) stable; urgency=medium
-
-  * Build for patch 2016-04-25 (3239)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 Apr 2016 14:49:08 +0200
-
-open-xchange-messaging-sms (7.8.1-8) stable; urgency=medium
-
-  * Build for patch 2016-04-07 (3228)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 07 Apr 2016 18:13:50 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 06 Apr 2016 10:25:12 +0200
 
 open-xchange-messaging-sms (7.8.1-7) stable; urgency=medium
 
@@ -99,126 +75,6 @@ open-xchange-messaging-sms (7.8.1-0) unstable; urgency=medium
   * prepare for 7.8.1
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 08 Oct 2015 10:47:34 +0200
-
-open-xchange-messaging-sms (7.8.0-27) stable; urgency=medium
-
-  * Build for patch 2016-03-29 (3188)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 23 Mar 2016 12:51:12 +0100
-
-open-xchange-messaging-sms (7.8.0-26) stable; urgency=medium
-
-  * Build for patch 2016-03-14 (3148)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 07 Mar 2016 16:59:44 +0100
-
-open-xchange-messaging-sms (7.8.0-25) stable; urgency=medium
-
-  * Build for patch 2016-02-29 (3141)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Feb 2016 13:00:58 +0100
-
-open-xchange-messaging-sms (7.8.0-24) stable; urgency=medium
-
-  * Build for patch 2016-02-29 (3121)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 22 Feb 2016 22:24:16 +0100
-
-open-xchange-messaging-sms (7.8.0-23) stable; urgency=medium
-
-  * Build for patch 2016-02-18 (3106)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Feb 2016 17:20:32 +0100
-
-open-xchange-messaging-sms (7.8.0-22) stable; urgency=medium
-
-  * Build for patch 2016-02-08 (3073)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 10 Feb 2016 12:40:45 +0100
-
-open-xchange-messaging-sms (7.8.0-21) stable; urgency=medium
-
-  * Build for patch 2016-01-19 (3062)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 26 Jan 2016 10:53:00 +0100
-
-open-xchange-messaging-sms (7.8.0-20) stable; urgency=medium
-
-  * Build for patch 2016-01-25 (3031)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 25 Jan 2016 10:20:57 +0100
-
-open-xchange-messaging-sms (7.8.0-19) stable; urgency=medium
-
-  * Build for patch 2016-02-05 (3058)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Sat, 23 Jan 2016 13:34:32 +0100
-
-open-xchange-messaging-sms (7.8.0-18) stable; urgency=medium
-
-  * Build for patch 2016-02-05 (3058)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Sat, 23 Jan 2016 12:20:08 +0100
-
-open-xchange-messaging-sms (7.8.0-17) stable; urgency=medium
-
-  * Build for patch 2016-01-15 (3028)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 Jan 2016 12:04:31 +0100
-
-open-xchange-messaging-sms (7.8.0-16) stable; urgency=medium
-
-  * Build for patch 2016-01-13 (2982)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 13 Jan 2016 10:02:34 +0100
-
-open-xchange-messaging-sms (7.8.0-15) stable; urgency=medium
-
-  * Build for patch 2015-12-23 (3011)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 12 Jan 2016 17:19:59 +0100
-
-open-xchange-messaging-sms (7.8.0-14) stable; urgency=medium
-
-  * Build for patch 2016-01-05 (2989)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 29 Dec 2015 12:30:04 +0100
-
-open-xchange-messaging-sms (7.8.0-13) stable; urgency=medium
-
-  * Build for patch 2015-12-23 (2971)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 22 Dec 2015 15:57:51 +0100
-
-open-xchange-messaging-sms (7.8.0-12) stable; urgency=medium
-
-  * Build for patch 2015-12-21 (2953)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 11 Dec 2015 12:39:22 +0100
-
-open-xchange-messaging-sms (7.8.0-11) stable; urgency=medium
-
-  * Build for patch 2015-12-07 (2918)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 08 Dec 2015 11:26:54 +0100
-
-open-xchange-messaging-sms (7.8.0-10) stable; urgency=medium
-
-  * Build for patch 2015-11-23 (2878)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 19 Nov 2015 19:19:17 +0100
-
-open-xchange-messaging-sms (7.8.0-9) stable; urgency=medium
-
-  * Build for patch 2015-11-09 (2840)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 05 Nov 2015 17:12:06 +0100
-
-open-xchange-messaging-sms (7.8.0-8) stable; urgency=medium
-
-  * Build for patch 2015-11-02 (2853)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 30 Oct 2015 16:57:48 +0100
 
 open-xchange-messaging-sms (7.8.0-7) stable; urgency=medium
 

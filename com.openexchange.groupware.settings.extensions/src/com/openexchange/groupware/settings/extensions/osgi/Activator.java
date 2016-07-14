@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.extensions.osgi;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.strings.StringParser;
@@ -85,9 +87,9 @@ public class Activator extends HousekeepingActivator {
 
     private static final String METADATA_PREFIX = "meta";
 
-    private ServicePublisher servicePublisher;
+    private volatile ServicePublisher servicePublisher;
 
-    private ServiceTracker<ConfigViewFactory,ConfigViewFactory> serviceTracker;
+    private volatile ServiceTracker<ConfigViewFactory,ConfigViewFactory> serviceTracker;
 
     /**
      * Initializes a new {@link Activator}.
@@ -111,34 +113,38 @@ public class Activator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
         unregisterListenerForConfigurationService();
-        servicePublisher.removeAllServices();
+        ServicePublisher servicePublisher = this.servicePublisher;
+        if (null != servicePublisher) {
+            this.servicePublisher = null;
+            servicePublisher.removeAllServices();
+        }
     }
 
     public void handleConfigurationUpdate(final ConfigViewFactory viewFactory) {
         LOG.info("Updating configtree");
         try {
-            final ConfigView view = viewFactory.getView();
-            final Map<String, ComposedConfigProperty<String>> all = view.all();
-            for(final Map.Entry<String,ComposedConfigProperty<String>> entry : all.entrySet()) {
-                final String propertyName = entry.getKey();
-                final ComposedConfigProperty<String> property = entry.getValue();
-                if (isPreferenceItem(property)) {
-                    export(viewFactory, property, propertyName);
+            ConfigView view = viewFactory.getView();
+            for (Map.Entry<String, ComposedConfigProperty<String>> entry : view.all().entrySet()) {
+                String propertyName = entry.getKey();
+                ComposedConfigProperty<String> property = entry.getValue();
+                String[] possiblePath = generatePathFor(property);
+                if (null != possiblePath) {
+                    export(viewFactory, property, propertyName, possiblePath);
                 }
             }
         } catch (final Throwable x) {
             LOG.error("", x);
         }
-
-
     }
 
     // Maybe that is an overuse of anonymous inner classes. Better get around to refactoring this at some point.
 
-    private void export(final ConfigViewFactory viewFactory, final ComposedConfigProperty<String> property, final String propertyName) throws OXException {
-
-        final String[] path = property.get(PREFERENCE_PATH).split("/");
-
+    private void export(final ConfigViewFactory viewFactory, final ComposedConfigProperty<String> property, final String propertyName, final String[] path) throws OXException {
+        ServicePublisher servicePublisher = this.servicePublisher;
+        if (null == servicePublisher) {
+            LOG.warn("Unable to export config-cascade option {}. Bundle not initialized.", propertyName);
+            return;
+        }
 
         final PreferencesItemService prefItem = new PreferencesItemService() {
 
@@ -343,17 +349,52 @@ public class Activator extends HousekeepingActivator {
         servicePublisher.publishService(PreferencesItemService.class, configurableItem);
     }
 
-    private boolean isPreferenceItem(final ComposedConfigProperty<String> property) throws OXException {
-        return property.get(PREFERENCE_PATH) != null;
+    /**
+     * Generates the appropriate path to be used in config tree in case provided property has a preference path setting.
+     * <p>
+     * <code>null</code> is returned to signal given property is not suitable to be placed into config tree.
+     *
+     * @param property The property to examine whether a preference path is available to generate a path for config tree
+     * @return The path for config tree or <code>null</code> if property is not suitable
+     * @throws OXException If preference path setting cannot be checked
+     */
+    private String[] generatePathFor(final ComposedConfigProperty<String> property) throws OXException {
+        String preferencePath = property.get(PREFERENCE_PATH);
+        if (null == preferencePath) {
+            return null;
+        }
+        String[] path = preferencePath.split("/", 0);
+        List<String> sanitizedPath = null;
+        for (int i = 0; null == sanitizedPath && i < path.length; i++) {
+            if (Strings.isEmpty(path[i])) {
+                // Sanitizing needed...
+                sanitizedPath = new ArrayList<String>(path.length);
+                for (int k = 0; k < i; k++) {
+                    sanitizedPath.add(path[k]);
+                }
+                for (int k = i+1; k < path.length; k++) {
+                    String segment = path[k];
+                    if (!Strings.isEmpty(segment)) {
+                        sanitizedPath.add(segment);
+                    }
+                }
+            }
+        }
+        return null == sanitizedPath ? path : sanitizedPath.toArray(new String[sanitizedPath.size()]);
     }
 
     private void registerListenerForConfigurationService() {
-        serviceTracker = new ServiceTracker<ConfigViewFactory,ConfigViewFactory>(context, ConfigViewFactory.class, new ConfigurationTracker(context, this));
+        ServiceTracker<ConfigViewFactory,ConfigViewFactory> serviceTracker = new ServiceTracker<ConfigViewFactory,ConfigViewFactory>(context, ConfigViewFactory.class, new ConfigurationTracker(context, this));
         serviceTracker.open();
+        this.serviceTracker = serviceTracker;
     }
 
     private void unregisterListenerForConfigurationService() {
-        serviceTracker.close();
+        ServiceTracker<ConfigViewFactory,ConfigViewFactory> serviceTracker = this.serviceTracker;
+        if (null != serviceTracker) {
+            this.serviceTracker = null;
+            serviceTracker.close();
+        }
     }
 
 

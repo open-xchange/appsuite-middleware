@@ -1,0 +1,9 @@
+requests:
+  - ConfigRequest.yaml
+  - ListRequest.yaml
+  - NewRequest.yaml
+  - DeleteRequest.yaml
+  - ReorderRequest.yaml
+  - UpdateRequest.yaml
+  - DeleteScriptRequest.yaml
+  - GetScriptRequest.yaml

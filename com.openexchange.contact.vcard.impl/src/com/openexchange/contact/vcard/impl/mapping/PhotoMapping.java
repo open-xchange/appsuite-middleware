@@ -178,14 +178,18 @@ public class PhotoMapping extends AbstractMapping {
             IFileHolder fileHolder = null;
             InputStream inputStream = null;
             try {
-                fileHolder = loadImageFromURL(urlString, parameters, warnings);
-                if (null != fileHolder) {
-                    if (null != parameters && 0 < parameters.getMaxContactImageSize() && parameters.getMaxContactImageSize() < fileHolder.getLength()) {
-                        addConversionWarning(warnings, "PHOTO", "Referenced image exceeds maximum contact image size");
-                    } else {
-                        inputStream = fileHolder.getStream();
-                        imageData = Streams.stream2bytes(inputStream);
+                try {
+                    fileHolder = loadImageFromURL(urlString, parameters, warnings);
+                    if (null != fileHolder) {
+                        if (null != parameters && 0 < parameters.getMaxContactImageSize() && parameters.getMaxContactImageSize() < fileHolder.getLength()) {
+                            addConversionWarning(warnings, "PHOTO", "Referenced image exceeds maximum contact image size");
+                        } else {
+                            inputStream = fileHolder.getStream();
+                            imageData = Streams.stream2bytes(inputStream);
+                        }
                     }
+                } finally {
+                    Streams.close(fileHolder);
                 }
             } catch (IOException e) {
                 addConversionWarning(warnings, e, "PHOTO", e.getMessage());
@@ -250,7 +254,7 @@ public class PhotoMapping extends AbstractMapping {
         }
         try {
             return imageService.transfom(imageBytes, getSource(parameters))
-                .scale((int) targetDimension.getWidth(), (int) targetDimension.getHeight(), ScaleType.CONTAIN).getFullTransformedImage(formatName);
+                .scale((int) targetDimension.getWidth(), (int) targetDimension.getHeight(), ScaleType.CONTAIN, true).getFullTransformedImage(formatName);
         } catch (IOException e) {
             throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

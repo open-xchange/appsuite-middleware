@@ -1,32 +1,33 @@
+
 package liquibase.database.core;
 
 import java.math.BigInteger;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.DatabaseConnection;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.GetViewDefinitionStatement;
-
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 
 /**
  * Encapsulates MS-SQL database support.
  */
 public class MSSQLDatabase extends AbstractJdbcDatabase {
+
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
@@ -65,10 +66,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
 
-        super.quotingStartCharacter ="[";
-        super.quotingEndCharacter="]";
+        super.quotingStartCharacter = "[";
+        super.quotingEndCharacter = "]";
     }
-
 
     @Override
     public int getPriority() {
@@ -108,8 +108,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String databaseProductName = conn.getDatabaseProductName();
-        return PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
-                || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
+        return PRODUCT_NAME.equalsIgnoreCase(databaseProductName) || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
     }
 
     @Override
@@ -124,9 +123,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getAutoIncrementClause() {
-    	return "IDENTITY";
+        return "IDENTITY";
     }
-    
+
     @Override
     protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
         return true;
@@ -139,12 +138,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getAutoIncrementStartWithClause() {
-    	return "%d";
+        return "%d";
     }
 
     @Override
     protected String getAutoIncrementByClause() {
-    	return "%d";
+        return "%d";
     }
 
     @Override
@@ -164,16 +163,34 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (getConnection() == null) {
             return null;
         }
+        PreparedStatement prepareStatement = null;
+        ResultSet resultSet = null;
         try {
-            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select schema_name()").executeQuery();
+            prepareStatement = ((JdbcConnection) getConnection()).prepareStatement("select schema_name()");
+            resultSet = prepareStatement.executeQuery();
             resultSet.next();
             return resultSet.getString(1);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
+        } finally {
+            if (prepareStatement != null) {
+                try {
+                    prepareStatement.close();
+                } catch (final SQLException e) {
+                    LogFactory.getLogger().warning("", e);
+                }
+            }
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (final SQLException e) {
+                    LogFactory.getLogger().warning("", e);
+                }
+            }
         }
         return null;
     }
-    
+
     @Override
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
@@ -196,45 +213,45 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
-//        Statement dropStatement = null;
-//        PreparedStatement fkStatement = null;
-//        ResultSet rs = null;
-//        try {
-//            dropStatement = conn.createStatement();
-//
-//            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
-//            fkStatement.setString(1, getDefaultCatalogName());
-//            rs = fkStatement.executeQuery();
-//            while (rs.next()) {
-//                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-//                dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
-//                dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
-//
-//                try {
-//                    dropStatement.execute(dropFK.generateStatements(this)[0]);
-//                } catch (UnsupportedChangeException e) {
-//                    throw new DatabaseException(e.getMessage());
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        } finally {
-//            try {
-//                if (dropStatement != null) {
-//                    dropStatement.close();
-//                }
-//                if (fkStatement != null) {
-//                    fkStatement.close();
-//                }
-//                if (rs != null) {
-//                    rs.close();
-//                }
-//            } catch (SQLException e) {
-//                throw new DatabaseException(e);
-//            }
-//        }
-//
-//    }
+    //        Statement dropStatement = null;
+    //        PreparedStatement fkStatement = null;
+    //        ResultSet rs = null;
+    //        try {
+    //            dropStatement = conn.createStatement();
+    //
+    //            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
+    //            fkStatement.setString(1, getDefaultCatalogName());
+    //            rs = fkStatement.executeQuery();
+    //            while (rs.next()) {
+    //                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+    //                dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
+    //                dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
+    //
+    //                try {
+    //                    dropStatement.execute(dropFK.generateStatements(this)[0]);
+    //                } catch (UnsupportedChangeException e) {
+    //                    throw new DatabaseException(e.getMessage());
+    //                }
+    //            }
+    //        } catch (SQLException e) {
+    //            throw new DatabaseException(e);
+    //        } finally {
+    //            try {
+    //                if (dropStatement != null) {
+    //                    dropStatement.close();
+    //                }
+    //                if (fkStatement != null) {
+    //                    fkStatement.close();
+    //                }
+    //                if (rs != null) {
+    //                    rs.close();
+    //                }
+    //            } catch (SQLException e) {
+    //                throw new DatabaseException(e);
+    //            }
+    //        }
+    //
+    //    }
 
     @Override
     public boolean supportsTablespaces() {
@@ -260,7 +277,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return "DF_" + tableName + "_" + columnName;
     }
 
-
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
@@ -270,7 +286,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (objectName.contains("(")) { //probably a function
             return objectName;
         }
-        return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
+        return this.quotingStartCharacter + objectName + this.quotingEndCharacter;
     }
 
     @Override
@@ -278,7 +294,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return super.getDateLiteral(isoDate).replace(' ', 'T');
     }
 
-	@Override
+    @Override
     public boolean supportsRestrictForeignKeys() {
         return false;
     }
@@ -290,7 +306,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-          schema = correctSchema(schema);
+        schema = correctSchema(schema);
         List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {
@@ -298,13 +314,13 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
         String definition = sb.toString();
 
-        String finalDef =definition.replaceAll("\r\n", "\n");
+        String finalDef = definition.replaceAll("\r\n", "\n");
         finalDef = INITIAL_COMMENT_PATTERN.matcher(finalDef).replaceFirst("").trim(); //handle views that start with '/****** Script for XYZ command from SSMS  ******/'
         finalDef = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("").trim();
 
         finalDef = finalDef.replaceAll("--.*", "").trim();
 
-        /**handle views that end up as '(select XYZ FROM ABC);' */
+        /** handle views that end up as '(select XYZ FROM ABC);' */
         if (finalDef.startsWith("(") && (finalDef.endsWith(")") || finalDef.endsWith(");"))) {
             finalDef = finalDef.replaceFirst("^\\(", "");
             finalDef = finalDef.replaceFirst("\\);?$", "");
@@ -315,6 +331,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     /**
      * SQLServer does not support specifying the database name as a prefix to the object name
+     * 
      * @return
      */
     @Override
@@ -322,6 +339,5 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return escapeObjectName(null, schemaName, viewName, View.class);
 
     }
-
 
 }

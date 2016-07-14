@@ -104,6 +104,9 @@ import com.openexchange.admin.tools.filestore.FilestoreDataMover;
 import com.openexchange.admin.tools.filestore.PostProcessTask;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -114,6 +117,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     /** The logger */
     static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXContext.class);
 
+    private final AdminCache cache;
     private final OXAdminPoolDBPoolExtension pool;
 
     /**
@@ -123,6 +127,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
      */
     public OXContext(final BundleContext context) {
         super(context);
+        cache = ClientAdminThread.cache;
         this.pool = new OXAdminPoolDBPoolExtension();
         LOGGER.debug("Class loaded: {}", this.getClass().getName());
     }
@@ -162,7 +167,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         final String[] mods = sModule.split(" *, *");
-        final Set<String> modules = new LinkedHashSet<String>(mods.length);
+        final Set<String> modules = new LinkedHashSet<>(mods.length);
         for (final String mod : mods) {
             modules.add(mod);
         }
@@ -206,7 +211,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
+            oxcox.changeQuota(ctx, new ArrayList<>(modules), quota, auth);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -416,7 +421,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         LOGGER.debug("{} - {} - {} - {}", ctx, admin_user, access_combination_name, auth);
 
-        UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim(), true);
+        UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim(), true);
         if (access == null) {
             // no such access combination name defined in configuration
             // throw error!
@@ -498,7 +503,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             oxcox.delete(ctx);
-            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), ClientAdminThread.cache);
+            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), cache);
             basicAuthenticator.removeFromAuthCache(ctx);
         } catch (final StorageException e) {
             LOGGER.error("", e);
@@ -796,7 +801,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             new BasicAuthenticator(context).doAuthentication(auth);
 
-            final List<Context> retval = new ArrayList<Context>();
+            final List<Context> retval = new ArrayList<>();
             boolean filled = true;
             for (final Context ctx : ctxs) {
                 if (!ctx.isListrun()) {
@@ -871,8 +876,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             Filter<Context, Context> loader = null;
             Filter<Integer, Integer> filter = null;
-            final ArrayList<Filter<Context, Context>> loaderFilter = new ArrayList<Filter<Context, Context>>();
-            final ArrayList<Filter<Integer, Integer>> contextFilter = new ArrayList<Filter<Integer, Integer>>();
+            final ArrayList<Filter<Context, Context>> loaderFilter = new ArrayList<>();
+            final ArrayList<Filter<Integer, Integer>> contextFilter = new ArrayList<>();
 
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
@@ -935,7 +940,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-            final List<Context> retval = new ArrayList<Context>();
+            final List<Context> retval = new ArrayList<>();
             final Context[] ret = oxcox.searchContextByDatabase(db);
             final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ret), auth, oxcox);
             if (null != callGetDataPlugins) {
@@ -969,7 +974,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchFilestoreException();
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            final List<Context> retval = new ArrayList<Context>();
+            final List<Context> retval = new ArrayList<>();
             final Context[] ret = oxcox.searchContextByFilestore(filestore);
             final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ret), auth, oxcox);
             if (null != callGetDataPlugins) {
@@ -1184,16 +1189,30 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         // If not defined or access combination name does NOT exist, use hardcoded fallback!
         UserModuleAccess createaccess;
         if (access == null) {
-            if (DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true) == null) {
+            if (DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true) == null) {
                 createaccess = AdminCache.getDefaultUserModuleAccess().clone();
             } else {
-                createaccess = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true).clone();
+                createaccess = cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true).clone();
             }
         } else {
             createaccess = access.clone();
         }
 
         Context ret = oxcox.create(ctx, admin_user, createaccess, schemaSelectStrategy == null ? getDefaultSchemaSelectStrategy() : schemaSelectStrategy);
+        final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (viewFactory != null) {
+            ConfigView view;
+            try {
+                view = viewFactory.getView(admin_user.getId(), ctx.getId());
+                Boolean check = view.get("com.openexchange.imap.initWithSpecialUse", Boolean.class);
+                if (check != null && check) {
+                    ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                    prop.set(Boolean.TRUE);
+                }
+            } catch (OXException e) {
+                LOGGER.error("Unable to set special use check property!");
+            }
+        }
 
         if (isAnyPluginLoaded()) {
             PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
@@ -1337,8 +1356,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            UserModuleAccess accessAdmin = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim(), true);
-            UserModuleAccess accessUser = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim(), false);
+            UserModuleAccess accessAdmin = cache.getNamedAccessCombination(access_combination_name.trim(), true);
+            UserModuleAccess accessUser = cache.getNamedAccessCombination(access_combination_name.trim(), false);
             if (null == accessAdmin || null == accessUser) {
                 // no such access combination name defined in configuration
                 // throw error!
@@ -1479,7 +1498,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             // Get admin id and fetch current access object and query cache for its name!
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
-            return ClientAdminThread.cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx)));
+            return cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx)));
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;

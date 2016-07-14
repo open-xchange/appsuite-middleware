@@ -151,10 +151,6 @@ public class SQL {
         return allocator.toString();
     }
 
-    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT =
-        "DELETE FROM fileChecksums " +
-        "WHERE cid=? AND folder=REVERSE(?);";
-
     public static final String DELETE_FILE_CHECKSUM_STMT =
         "DELETE FROM fileChecksums " +
         "WHERE cid=? AND folder=REVERSE(?) AND file=REVERSE(?) AND version=? AND sequence=?;";
@@ -171,13 +167,19 @@ public class SQL {
         "SELECT LOWER(HEX(uuid)),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums " +
         "WHERE cid=? AND folder=REVERSE(?);";
 
-    public static final String SELECT_MATCHING_FILE_CHECKSUMS_STMT =
-        "SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence FROM fileChecksums " +
-        "WHERE cid=? AND checksum=UNHEX(?);";
-
-    public static final String INSERT_DIRECTORY_CHECKSUM_STMT =
-        "INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum,used) " +
-        "VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?);";
+    /** INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum,used) VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?), ...; */
+    public static final String INSERT_DIRECTORY_CHECKSUMS_STMT(int count) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum,used) ");
+        if (0 < count) {
+            stringBuilder.append("VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?)");
+        }
+        for (int i = 1; i < count; i++) {
+            stringBuilder.append(",(UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?)");
+        }
+        stringBuilder.append(';');
+        return stringBuilder.toString();
+    }
 
     public static final String UPDATE_DIRECTORY_CHECKSUM_STMT =
         "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,etag=?,checksum=UNHEX(?),used=? " +
@@ -196,7 +198,7 @@ public class SQL {
 
     /**
      * DELETE FROM fileChecksums
-     * WHERE cid=? AND REVERSE(folder) IN (...);"
+     * WHERE cid=? AND folder IN (...);"
      */
     public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -208,7 +210,7 @@ public class SQL {
      * DELETE FROM directoryChecksums
      * WHERE cid=? AND folder IN (?,?,...);"
      */
-    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(int length) {
+    public static final String DELETE_DIRECTORY_CHECKSUMS_FOR_FOLDER_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM directoryChecksums WHERE cid=? AND folder");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
@@ -226,6 +228,22 @@ public class SQL {
     }
 
     /**
+     * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,user,view,LOWER(HEX(checksum)) FROM directoryChecksums
+     * WHERE cid=? AND folder IN (?,?,...);"
+     */
+    public static final String SELECT_ALL_DIRECTORY_CHECKSUMS_STMT(int length) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,user,view,LOWER(HEX(checksum)) FROM directoryChecksums ");
+        stringBuilder.append("WHERE cid=? AND folder");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
+    }
+
+    public static final String SELECT_UNUSED_DIRECTORY_CHECKSUMS_STMT =
+        "SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,user,view,LOWER(HEX(checksum)) " +
+        "FROM directoryChecksums WHERE cid=? AND used<?;"
+    ;
+
+    /**
      * SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums
      * WHERE cid=? AND checksum IN (?,?,...);"
      */
@@ -233,6 +251,13 @@ public class SQL {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) ");
         stringBuilder.append("FROM fileChecksums WHERE cid=? AND checksum");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
+    }
+
+    /** DELETE FROM directoryChecksums WHERE cid=? AND uuid IN (?,?,...);" */
+    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(int length) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("DELETE FROM directoryChecksums WHERE cid=? AND uuid");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
 

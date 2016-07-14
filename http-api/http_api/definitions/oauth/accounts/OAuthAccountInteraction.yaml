@@ -1,0 +1,14 @@
+type: object
+properties:
+  authUrl:
+    type: string
+    description: The numeric identifier of the OAuth account.
+  type:
+    type: string
+    description: The interaction type name, which can be "outOfBand" or "callback".
+  token:
+    type: string
+    description: The token.
+  uuid:
+    type: string
+    description: The UUID for this OAuth interaction.

@@ -1,0 +1,61 @@
+/drive?action=download:
+  put:
+    operationId: downloadFile
+    tags:
+      - drive
+    summary: Downloads a file from the server.
+    consumes:
+      - application/json
+    produces:
+      - application/octet-stream
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: "#/parameters/gblQueryParamPath"
+      - in: query
+        name: name
+        type: string
+        description: The name of the file version to download.
+        required: true
+      - in: query
+        name: checksum
+        type: string
+        description: The checksum of the file version to download.
+        required: true
+      - in: query
+        name: apiVersion
+        type: integer
+        description: The API version that the client is using. If not set, the initial version 0 is assumed.
+        required: false
+        default: 0
+      - in: query
+        name: offset
+        type: integer
+        format: int64
+        description: The start offset in bytes for the download. If not defined, an offset of 0 is assumed.
+        required: false
+        default: 0
+      - in: query
+        name: length
+        type: integer
+        format: int64
+        description: The numer of bytes to include in the download stream. If not defined, the file is read until the end.
+        required: false
+      - in: body
+        name: body
+        description: |
+          Optionally, available since API version 3, the request body can contain a JSON object with file- and/or
+          directory exclusion filters.
+        required: false
+        schema:
+          $ref: "#/definitions/DriveDownloadBody"
+    responses:
+      200:
+        description: The binary content of the requested file version.
+        schema:
+          type: string
+          format: binary
+      404:
+        description: In case of the requested file was deleted or modified in the meantime.
+      500:
+        description: In case of errors like missing parameters, etc.

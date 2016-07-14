@@ -1,0 +1,13 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The identifier of the file storage service, e.g. "boxcom".
+  displayName:
+    type: string
+    description: A human-readable display name of the service, e.g. "Box File Storage Service"
+  configuration:
+    type: array
+    description: An array of dynamic form fields. Same as in PubSub.
+    items:
+      $ref: "#/definitions/FileServiceConfiguration"

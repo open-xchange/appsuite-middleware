@@ -176,6 +176,7 @@ public abstract class MailMessage extends MailPart {
     /*-
      * ------------------- User Flags ------------------------------
      */
+    
     /**
      * The value of virtual forwarded flag.
      *
@@ -189,7 +190,14 @@ public abstract class MailMessage extends MailPart {
      * @value $MDNSent
      */
     public static final String USER_READ_ACK = "$MDNSent";
-
+    
+    /**
+     * The value of virtual spam flag.
+     *
+     * @value $Junk
+     */
+    public static final String USER_SPAM = "$Junk";
+    
     /*-
      * ------------------- Priority ------------------------------
      */

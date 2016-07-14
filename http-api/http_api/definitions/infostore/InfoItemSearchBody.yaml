@@ -1,0 +1,5 @@
+type: object
+properties:
+  pattern:
+    type: string
+    description: The search pattern, where "*" matches any sequence of characters.

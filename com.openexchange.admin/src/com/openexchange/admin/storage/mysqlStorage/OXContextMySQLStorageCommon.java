@@ -94,17 +94,13 @@ public class OXContextMySQLStorageCommon {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextMySQLStorageCommon.class);
 
     private final OXUtilMySQLStorageCommon oxutilcommon;
-
-    private static AdminCache cache = null;
-
-    private static PropertyHandler prop = null;
-
-    static {
-        cache = ClientAdminThread.cache;
-        prop = cache.getProperties();
-    }
+    private final AdminCache cache;
+    private final PropertyHandler prop;
 
     public OXContextMySQLStorageCommon() {
+        super();
+        cache = ClientAdminThread.cache;
+        prop = cache.getProperties();
         oxutilcommon = new OXUtilMySQLStorageCommon();
     }
 
@@ -321,6 +317,7 @@ public class OXContextMySQLStorageCommon {
      * @throws StorageException if somehow the check and delete process fails.
      */
     public static void deleteEmptySchema(int poolId, String dbSchema) throws StorageException {
+        AdminCache cache = ClientAdminThread.cache;
         final Connection con;
         try {
             con = cache.getWriteConnectionForConfigDB();
@@ -330,7 +327,7 @@ public class OXContextMySQLStorageCommon {
         try {
             startTransaction(con);
             cache.getPool().lock(con, poolId);
-            deleteEmptySchema(con, poolId, dbSchema);
+            deleteEmptySchema(con, poolId, dbSchema, cache);
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -354,10 +351,10 @@ public class OXContextMySQLStorageCommon {
      * If this method is used the surrounding code needs to take care, that according locks on the database tables are created. If they are
      * no such locks this method may delete schemas where another request currently writes to.
      */
-    public static void deleteEmptySchema(Connection con, int poolId, String dbSchema) throws StorageException {
+    public static void deleteEmptySchema(Connection con, int poolId, String dbSchema, AdminCache cache) throws StorageException {
         final int[] otherContexts;
         try {
-            otherContexts = ClientAdminThread.cache.getPool().getContextInSchema(con, poolId, dbSchema);
+            otherContexts = cache.getPool().getContextInSchema(con, poolId, dbSchema);
         } catch (PoolException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
@@ -370,7 +367,7 @@ public class OXContextMySQLStorageCommon {
     }
 
     public final void deleteContextFromConfigDB(Connection con, int contextId) throws StorageException {
-        OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
+        OXAdminPoolInterface pool = cache.getPool();
         PreparedStatement stmt = null;
         try {
             // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
@@ -379,7 +376,7 @@ public class OXContextMySQLStorageCommon {
             pool.lock(con, poolId);
             final String dbSchema = pool.getSchemaName(contextId);
             pool.deleteAssignment(con, contextId);
-            deleteEmptySchema(con, poolId, dbSchema);
+            deleteEmptySchema(con, poolId, dbSchema, cache);
             log.debug("Deleting login2context entries for context {}", I(contextId));
             stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
@@ -440,8 +437,8 @@ public class OXContextMySQLStorageCommon {
         fillContextTable(ctx, con);
 
         try {
-            final int serverId = ClientAdminThread.cache.getServerId();
-            ClientAdminThread.cache.getPool().writeAssignment(con, new AssignmentInsertData() {
+            final int serverId = cache.getServerId();
+            cache.getPool().writeAssignment(con, new AssignmentInsertData() {
                 @Override
                 public int getContextId() {
                     return i(ctx.getId());

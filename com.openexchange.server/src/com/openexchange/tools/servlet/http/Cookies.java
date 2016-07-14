@@ -300,7 +300,7 @@ public final class Cookies {
             }
             final String domain = cookie.getDomain();
             if (null != domain) {
-                sb.append("; domain=").append(path);
+                sb.append("; domain=").append(domain);
             }
             final boolean secure = cookie.getSecure();
             if (secure) {

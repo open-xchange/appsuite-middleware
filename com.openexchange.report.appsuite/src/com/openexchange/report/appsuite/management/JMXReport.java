@@ -49,11 +49,13 @@
 
 package com.openexchange.report.appsuite.management;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.report.appsuite.Services;
+import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.version.Version;
 
@@ -64,6 +66,7 @@ import com.openexchange.version.Version;
  * OX versioning information.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class JMXReport {
     private final String uuid;
@@ -78,7 +81,6 @@ public class JMXReport {
      * Creates a JMX friendly version of the given report
      */
     public JMXReport(Report report) throws Exception {
-
         this.uuid = report.getUUID();
         this.pendingTasks = report.getNumberOfPendingTasks();
         this.tasks = report.getNumberOfTasks();
@@ -88,16 +90,21 @@ public class JMXReport {
         this.type = report.getType();
 
         try {
-            JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(report.getData());
-
+            Map<String, Map<String, Object>> lData = report.getData();
+            
+            boolean adminMailLoginEnabled = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
+            Map<String, Object> configs = lData.get("configs");
+            if (configs == null) {
+                configs = new HashMap<String, Object>();
+            }
+            configs.put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled));
+            lData.put("configs", configs);
+            
+            JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(lData);
             jsonData.put("uuid", uuid);
             jsonData.put("reportType", type);
-
             jsonData.put("timestamps", new JSONObject().put("start", startTime).put("stop", stopTime));
             jsonData.put("version", new JSONObject().put("version", Version.getInstance().getVersionString()).put("buildDate", Version.getInstance().getBuildDate()));
-
-            boolean adminMailLoginEnabled = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
-            jsonData.put("configs", new JSONObject().put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled)));
 
             this.data = jsonData.toString();
         } catch (JSONException e) {

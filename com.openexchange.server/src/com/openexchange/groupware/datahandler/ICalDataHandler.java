@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -113,7 +114,7 @@ public abstract class ICalDataHandler implements DataHandler {
         }
     }
 
-    protected void insertAppointments(final Session session, final int calendarFolder, final Context ctx, final List<CalendarDataObject> appointments, final Confirm confirm, final JSONArray folderAndIdArray) throws OXException, JSONException, OXException {
+    protected void insertAppointments(final Session session, final int calendarFolder, final Context ctx, final List<CalendarDataObject> appointments, Confirm confirm, final JSONArray folderAndIdArray) throws OXException, JSONException, OXException {
         final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(
             session);
         for (final CalendarDataObject appointment : appointments) {
@@ -128,21 +129,23 @@ public abstract class ICalDataHandler implements DataHandler {
             }
 
             if (objectId != 0) {
-                if (confirm != null) {
-                    try {
-                        updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
-                    } catch (final OXException e) {
-                        if (e.isGeneric(Generic.NO_PERMISSION)) {
-                            handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
-                        } else {
-                            throw e;
-                        }
+                try {
+                    if (confirm == null) {
+                        confirm = new Confirm(CalendarDataObject.ACCEPT, null);
+                    } else {
+                        updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);                        
+                    }
+                    appointment.setObjectID(objectId);
+                    appointment.setIgnoreConflicts(true);
+                    updateAppointment(appointment, calendarFolder, appointmentSql);
+                    folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(DataFields.ID, objectId));
+                } catch (final OXException e) {
+                    if (e.isGeneric(Generic.NO_PERMISSION)) {
+                        handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
+                    } else {
+                        throw e;
                     }
                 }
-                appointment.setObjectID(objectId);
-                appointment.setIgnoreConflicts(true);
-                updateAppointment(appointment, calendarFolder, appointmentSql);
-                folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(DataFields.ID, objectId));
             } else {
                 appointment.setParentFolderID(calendarFolder);
                 appointment.setIgnoreConflicts(true);
@@ -170,14 +173,30 @@ public abstract class ICalDataHandler implements DataHandler {
     private void handleWithoutPermission(final Session session, final CalendarDataObject appointment, final int calendarFolder, final Confirm confirm, final AppointmentSQLInterface appointmentSql) throws OXException {
         appointment.removeUid();
         appointment.removeObjectID();
-        appointment.removeUsers();
-        appointment.removeParticipants();
         appointment.setParentFolderID(calendarFolder);
 
-        final UserParticipant self = new UserParticipant(session.getUserId());
-        self.setConfirm(confirm.getConfirm());
-        self.setConfirmMessage(confirm.getConfirmMessage());
-        appointment.setUsers(new UserParticipant[] { self });
+        boolean found = false;
+        if (appointment.getUsers() != null) {
+            for (UserParticipant up : appointment.getUsers()) {
+                if (up.getIdentifier() == session.getUserId()) {
+                    up.setConfirm(confirm.getConfirm());
+                    up.setConfirmMessage(confirm.getConfirmMessage());
+                }
+            }
+        }
+        if (!found) {
+            UserParticipant self = new UserParticipant(session.getUserId());
+            self.setConfirm(confirm.getConfirm());
+            self.setConfirmMessage(confirm.getConfirmMessage());
+            ArrayList<UserParticipant> ups = new ArrayList<UserParticipant>();
+            ups.add(self);
+            if (appointment.getUsers() != null) {
+                for (UserParticipant up : appointment.getUsers()) {
+                    ups.add(up);
+                }
+            }
+            appointment.setUsers(ups);
+        }
 
         appointmentSql.insertAppointmentObject(appointment);
     }

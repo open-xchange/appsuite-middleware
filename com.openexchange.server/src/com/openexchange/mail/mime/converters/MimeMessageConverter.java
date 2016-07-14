@@ -493,7 +493,8 @@ public final class MimeMessageConverter {
             if (composedMail.getSession() == null) {
                 compositionParameters = new ContextCompositionParameters(composedMail.getContext());
             } else {
-                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()));
+                UserSettingMail usm = null == composedMail.getMailSettings() ? UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()) : composedMail.getMailSettings();
+                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), usm);
             }
             final MimeMessageFiller filler = new MimeMessageFiller(compositionParameters);
             filler.setAccountId(composedMail.getAccountId());
@@ -2299,28 +2300,37 @@ public final class MimeMessageConverter {
      * @param flags The flags bit mask
      * @return The corresponding instance of {@link Flags}
      */
-    public static Flags convertMailFlags(final int flags) {
+    public static Flags convertMailFlags(int flags) {
         final Flags flagsObj = new Flags();
-        if ((flags & MailMessage.FLAG_ANSWERED) == MailMessage.FLAG_ANSWERED) {
+        if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
             flagsObj.add(Flags.Flag.ANSWERED);
         }
-        if ((flags & MailMessage.FLAG_DELETED) == MailMessage.FLAG_DELETED) {
+        if ((flags & MailMessage.FLAG_DELETED) > 0) {
             flagsObj.add(Flags.Flag.DELETED);
         }
-        if ((flags & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
+        if ((flags & MailMessage.FLAG_DRAFT) > 0) {
             flagsObj.add(Flags.Flag.DRAFT);
         }
-        if ((flags & MailMessage.FLAG_FLAGGED) == MailMessage.FLAG_FLAGGED) {
+        if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
             flagsObj.add(Flags.Flag.FLAGGED);
         }
-        if ((flags & MailMessage.FLAG_RECENT) == MailMessage.FLAG_RECENT) {
+        if ((flags & MailMessage.FLAG_RECENT) > 0) {
             flagsObj.add(Flags.Flag.RECENT);
         }
-        if ((flags & MailMessage.FLAG_SEEN) == MailMessage.FLAG_SEEN) {
+        if ((flags & MailMessage.FLAG_SEEN) > 0) {
             flagsObj.add(Flags.Flag.SEEN);
         }
-        if ((flags & MailMessage.FLAG_USER) == MailMessage.FLAG_USER) {
+        if ((flags & MailMessage.FLAG_USER) > 0) {
             flagsObj.add(Flags.Flag.USER);
+        }
+        if ((flags & MailMessage.FLAG_SPAM) > 0) {
+            flagsObj.add(MailMessage.USER_SPAM);
+        }
+        if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
+            flagsObj.add(MailMessage.USER_FORWARDED);
+        }
+        if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
+            flagsObj.add(MailMessage.USER_READ_ACK);
         }
         return flagsObj;
     }

@@ -1,0 +1,27 @@
+/login?action=changeip:
+  post:
+    operationId: changeIP
+    tags:
+      - login
+    summary: Change IP of client host in a session.
+    description: |
+      The following request is especially for integration with systems located in the providers
+      infrastructure. If those systems create a session with the following request the client host
+      IP address in the session can be changed. The IP check for following requests will be done using
+      this newly set client host IP address.
+    parameters:
+      - in: query
+        name: session
+        type: string
+        description: A session ID previously obtained from the login module.
+        required: true
+      - in: query
+        name: clientIP
+        type: string
+        description: New IP address of the client host for the current session.
+        required: true
+    responses:
+      200:
+        description: A JSON object containing the string "1" as data attribute. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/ChangeIPResponse"

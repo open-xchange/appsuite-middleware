@@ -49,9 +49,10 @@
 
 package com.openexchange.drive.json.comet.internal;
 
+import java.util.List;
 import org.glassfish.grizzly.comet.CometContext;
-import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.LongPollingListenerFactory;
 
@@ -78,8 +79,8 @@ public class CometListenerFactory implements LongPollingListenerFactory {
     }
 
     @Override
-    public LongPollingListener create(DriveSession session) {
-        return new CometListener(session, cometContext);
+    public LongPollingListener create(DriveSession session, List<String> rootFolderIDs) {
+        return new CometListener(session, cometContext, rootFolderIDs);
     }
 
     @Override

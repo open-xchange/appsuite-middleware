@@ -395,4 +395,19 @@ public class SimMailAccount implements MailAccount {
         // nothing to do
     }
 
+    @Override
+    public boolean isMailStartTls() {
+        return false;
+    }
+
+    @Override
+    public boolean isTransportStartTls() {
+        return false;
+    }
+
+    @Override
+    public String getRootFolder() {
+        return null;
+    }
+
 }

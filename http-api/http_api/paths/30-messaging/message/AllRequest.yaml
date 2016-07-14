@@ -1,0 +1,36 @@
+/messaging/message?action=all:
+  get:
+    operationId: getAllMessagingMessages
+    tags:
+      - messaging
+    summary: Gets all messaging messages.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: columns
+        type: string
+        description: A comma-separated list of column names, like "folder,headers,body". See [Messaging fields](#messaging fields) for valid column names.
+        required: true
+      - in: query
+        name: folder
+        type: string
+        description: The folder ID, like "com.openexchange.messaging.twitter://535/defaultTimeline/directMessages".
+        required: true
+      - in: query
+        name: sort
+        type: string
+        description: A column name to sort by.
+        required: false
+      - in: query
+        name: order
+        type: string
+        description: The order direction which can be "asc" for ascending (default) or "desc" for descending.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with data for all messages. Each array element describes one message and
+          is itself an array. The elements of each array contain the information specified by the corresponding
+          column names in the `columns` parameter. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MessagingMessagesResponse"

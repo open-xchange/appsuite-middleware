@@ -1,0 +1,25 @@
+/calendar?action=search:
+  put:
+    operationId: searchAppointments
+    tags:
+      - calendar
+    summary: Searches for appointments.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamCalendarColumns"
+      - in: body
+        name: body
+        description: A JSON object containing search parameters.
+        required: true
+        schema:
+          $ref: "#/definitions/AppointmentSearchBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with matching appointments. Appointments are represented by arrays. The elements of each array contain the
+          information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/AppointmentsResponse"

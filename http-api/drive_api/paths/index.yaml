@@ -1,0 +1,25 @@
+requests:
+  - SyncFoldersRequest.yaml
+  - SyncFilesRequest.yaml
+  - DownloadRequest.yaml
+  - UploadRequest.yaml
+  - ListenRequest.yaml
+  - QuotaRequest.yaml
+  - SettingsRequest.yaml
+  - SubscribeRequest.yaml
+  - UnsubscribeRequest.yaml
+  - UpdateTokenRequest.yaml
+  - DirectoryMetadataRequest.yaml
+  - FileMetadataRequest.yaml
+  - JumpRequest.yaml
+  - SubfoldersRequest.yaml
+  - GetLinkRequest.yaml
+  - UpdateLinkRequest.yaml
+  - DeleteLinkRequest.yaml
+  - SendLinkRequest.yaml
+  - SharesRequest.yaml
+  - GetFolderRequest.yaml
+  - GetFileRequest.yaml
+  - UpdateFolderRequest.yaml
+  - UpdateFileRequest.yaml
+  - NotifyRequest.yaml

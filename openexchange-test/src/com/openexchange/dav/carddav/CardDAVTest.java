@@ -69,6 +69,7 @@ import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.vcard.exceptions.VCardException;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -228,6 +229,25 @@ public abstract class CardDAVTest extends WebDAVTest {
             return getWebDAVClient().executeMethod(put);
         } finally {
             release(put);
+        }
+    }
+
+    protected String postVCard(String uid, String vCard, float maxSimilarity) throws Exception {
+        return postVCard(uid, vCard, "Contacts", maxSimilarity);
+    }
+
+    protected String postVCard(String uid, String vCard, String collection, float maxSimilarity) throws Exception {
+        PostMethod post = null;
+        try {
+            final String href = "/carddav/" + collection;
+            post = new PostMethod(getBaseUri() + href);
+            if (maxSimilarity > 0) {
+                post.addRequestHeader(Headers.MAX_SIMILARITY, String.valueOf(maxSimilarity));
+            }
+            post.setRequestEntity(new StringRequestEntity(vCard, "text/vcard", "UTF-8"));
+            return getWebDAVClient().doPost(post, 207);
+        } finally {
+            release(post);
         }
     }
 

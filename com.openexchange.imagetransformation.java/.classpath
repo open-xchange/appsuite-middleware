@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/imgscalr-lib-4.2.jar"/>
+	<classpathentry kind="lib" path="lib/common-image-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/common-io-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/common-lang-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
+	<classpathentry kind="lib" path="lib/imageio-core-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
+	<classpathentry kind="lib" path="lib/imageio-jpeg-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
+	<classpathentry kind="lib" path="lib/imageio-metadata-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
+	<classpathentry kind="lib" path="lib/imageio-thumbsdb-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-tiff-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
+	<classpathentry kind="lib" path="lib/imageio-bmp-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
+	<classpathentry kind="lib" path="lib/imageio-hdr-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-icns-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-iff-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
+	<classpathentry kind="lib" path="lib/imageio-pcx-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
+	<classpathentry kind="lib" path="lib/imageio-pict-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
+	<classpathentry kind="lib" path="lib/imageio-pnm-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-psd-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-sgi-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-tga-3.2.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>

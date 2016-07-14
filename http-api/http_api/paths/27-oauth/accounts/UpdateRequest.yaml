@@ -1,0 +1,28 @@
+/oauth/accounts?action=update:
+  put:
+    operationId: updateOAuthAccount
+    tags:
+      - OAuth
+    summary: Updates an OAuth account (**available since v6.20**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: integer
+        description: The account identifier. May also be provided in request body's JSON object by field `id`.
+        required: true
+      - in: body
+        name: body
+        description: A JSON object providing the OAuth account data to update. Currently the only values which make sense being updated are `displayName` and the `token`-`secret`-pair.
+        required: true
+        schema:
+          $ref: "#/definitions/OAuthAccountData"
+    responses:
+      200:
+        description: |
+          A JSON object indicating whether the update was successful. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/OAuthAccountUpdateResponse"

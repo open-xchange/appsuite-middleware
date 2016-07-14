@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: An array of JSON objects each describing one capability.
+    items:
+      $ref: "#/definitions/CapabilityData"

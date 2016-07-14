@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,8 +61,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
-import com.openexchange.file.storage.json.osgi.FileFieldCollector;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

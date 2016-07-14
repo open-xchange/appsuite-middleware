@@ -94,17 +94,6 @@ public class FileConverter implements ResultConverter {
              * write single file result
              */
             resultObject = writer.write(infostoreRequest, (File) resultObject);
-        } else if (SearchIterator.class.isInstance(resultObject)) {
-            /*
-             * write search iterator result
-             */
-            SearchIterator<File> searchIterator = null;
-            try {
-                searchIterator = (SearchIterator<File>) resultObject;
-                resultObject = writer.write(infostoreRequest, searchIterator);
-            } finally {
-                SearchIterators.close(searchIterator);
-            }
         } else if (Delta.class.isInstance(resultObject)) {
             /*
              * write delta result
@@ -133,6 +122,17 @@ public class FileConverter implements ResultConverter {
                 TimedResult<File> timedResult = (TimedResult<File>) resultObject;
                 result.setTimestamp(new Date(timedResult.sequenceNumber()));
                 searchIterator = timedResult.results();
+                resultObject = writer.write(infostoreRequest, searchIterator);
+            } finally {
+                SearchIterators.close(searchIterator);
+            }
+        } else if (SearchIterator.class.isInstance(resultObject)) {
+            /*
+             * write search iterator result
+             */
+            SearchIterator<File> searchIterator = null;
+            try {
+                searchIterator = (SearchIterator<File>) resultObject;
                 resultObject = writer.write(infostoreRequest, searchIterator);
             } finally {
                 SearchIterators.close(searchIterator);

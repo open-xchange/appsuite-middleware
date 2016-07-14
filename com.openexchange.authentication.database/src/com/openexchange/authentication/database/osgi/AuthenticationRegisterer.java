@@ -53,8 +53,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.authentication.AuthenticationDriver;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.BasicAuthenticationService;
 import com.openexchange.authentication.database.impl.DatabaseAuthentication;
 
 /**
@@ -62,9 +62,7 @@ import com.openexchange.authentication.database.impl.DatabaseAuthentication;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<BasicAuthenticationService,BasicAuthenticationService> {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthenticationRegisterer.class);
+public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<AuthenticationDriver,AuthenticationDriver> {
 
     private final BundleContext context;
 
@@ -81,29 +79,38 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
     }
 
     @Override
-    public BasicAuthenticationService addingService(ServiceReference<BasicAuthenticationService> reference) {
-        BasicAuthenticationService basicAuthenticationService = context.getService(reference);
-        registration = context.registerService(AuthenticationService.class, new DatabaseAuthentication(basicAuthenticationService), null);
-        LOG.info("Registered database authentication service.");
-        return basicAuthenticationService;
+    public AuthenticationDriver addingService(ServiceReference<AuthenticationDriver> reference) {
+        String driverId = (String) reference.getProperty(AuthenticationDriver.PROPERTY_ID);
+        if (!"database".equals(driverId)) {
+            return null;
+        }
+
+        AuthenticationDriver databaseAuthenticationDriver = context.getService(reference);
+        registration = context.registerService(AuthenticationService.class, new DatabaseAuthentication(databaseAuthenticationDriver), null);
+        org.slf4j.LoggerFactory.getLogger(AuthenticationRegisterer.class).info("Registered database authentication service.");
+        return databaseAuthenticationDriver;
     }
 
     @Override
-    public void modifiedService(ServiceReference<BasicAuthenticationService> reference, BasicAuthenticationService service) {
+    public void modifiedService(ServiceReference<AuthenticationDriver> reference, AuthenticationDriver driver) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference<BasicAuthenticationService> reference, BasicAuthenticationService service) {
-        try {
-            ServiceRegistration<AuthenticationService> registration = this.registration;
-            if (null != registration) {
-                registration.unregister();
-                this.registration = null;
-            }
-        } finally {
+    public void removedService(ServiceReference<AuthenticationDriver> reference, AuthenticationDriver driver) {
+        String driverId = (String) reference.getProperty(AuthenticationDriver.PROPERTY_ID);
+        if (!"database".equals(driverId)) {
             context.ungetService(reference);
+            return;
         }
+
+        ServiceRegistration<AuthenticationService> registration = this.registration;
+        if (null != registration) {
+            registration.unregister();
+            this.registration = null;
+        }
+
+        context.ungetService(reference);
     }
 
 }

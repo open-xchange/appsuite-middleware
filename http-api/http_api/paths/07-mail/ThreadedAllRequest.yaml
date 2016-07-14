@@ -1,0 +1,51 @@
+/mail?action=threadedAll:
+  get:
+    operationId: getMailConversations
+    tags:
+      - mail
+    summary: Gets all mail conversations.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - $ref: "#/parameters/gblQueryParamMailColumns"
+      - in: query
+        name: sort
+        type: string
+        description: 'The identifier of a column which determines the sort order of the response or the string “thread” to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified. Note: Applies only to root-level messages.'
+        required: false
+      - in: query
+        name: order
+        type: string
+        description: '"asc" if the response entires should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified. Note: Applies only to root-level messages.'
+        required: false
+      - in: query
+        name: includeSent
+        type: boolean
+        description: A boolean value to signal that conversations also include messages taken from special "sent" aka "sent items" folder.
+        required: false
+      - in: query
+        name: left_hand_limit
+        type: integer
+        description: 'A positive integer number to specify the "left-hand" limit of the range to return. Note: Applies only to root-level messages.'
+        required: false
+      - in: query
+        name: right_hand_limit
+        type: integer
+        description: 'A positive integer number to specify the "right-hand" limit of the range to return. Note: Applies only to root-level messages.'
+        required: false
+      - in: query
+        name: limit
+        type: integer
+        description: 'A positive integer number to specify how many items shall be returned according to given sorting; overrides `left_hand_limit`/`right_hand_limit` parameters and is equal to `left_hand_limit=0` and `right_hand_limit=<limit>`. Note: Applies only to root-level messages.'
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array of objects, each representing a conversation's root message along
+          with its message thread. The root message's JSON object is filled according to the specified `columns`
+          and is enhanced by a special `thread` field representing the full message thread (including the root
+          message itself). `thread` is a JSON array of objects each representing a message in the conversation
+          sorted by time-line and filled with the specified `columns`. Not IMAP: with timestamp. In case of
+          errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailConversationsResponse"

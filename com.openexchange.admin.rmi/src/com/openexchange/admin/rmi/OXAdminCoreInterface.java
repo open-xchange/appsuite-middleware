@@ -80,6 +80,7 @@ public interface OXAdminCoreInterface extends Remote {
     /**
      * This methods checks if all plugins have been loaded successfully
      *
+     * @param credentials The credentials
      * @return true if all plugins are loaded successfully, false if not
      * @throws RemoteException
      */

@@ -71,21 +71,9 @@ import com.openexchange.admin.tools.PropertyHandler;
  */
 public abstract class OXUserStorageInterface {
 
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends OXUserStorageInterface> implementingClass;
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUserStorageInterface.class);
 
-    protected static AdminCache cache = null;
-
-    protected static PropertyHandler prop = null;
-
-    static {
-        cache = ClientAdminThread.cache;
-        prop = cache.getProperties();
-    }
+    private static volatile OXUserStorageInterface instance;
 
     /**
      * Creates a new instance implementing the group storage interface.
@@ -93,46 +81,56 @@ public abstract class OXUserStorageInterface {
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXUserStorageInterface getInstance() throws StorageException {
-        synchronized (OXUserStorageInterface.class) {
-            if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandler.USER_STORAGE, null);
-                if (null != className) {
+        OXUserStorageInterface i = instance;
+        if (null == i) {
+            synchronized (OXUserStorageInterface.class) {
+                i = instance;
+                if (null == i) {
+                    Class<? extends OXUserStorageInterface> implementingClass;
+                    AdminCache cache = ClientAdminThread.cache;
+                    PropertyHandler prop = cache.getProperties();
+                    final String className = prop.getProp(PropertyHandler.USER_STORAGE, null);
+                    if (null != className) {
+                        try {
+                            implementingClass = Class.forName(className).asSubclass(OXUserStorageInterface.class);
+                        } catch (final ClassNotFoundException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    } else {
+                        final StorageException storageException = new StorageException("Property for user_storage not defined");
+                        log.error("", storageException);
+                        throw storageException;
+                    }
+
+                    Constructor<? extends OXUserStorageInterface> cons;
                     try {
-                        implementingClass = Class.forName(className).asSubclass(OXUserStorageInterface.class);
-                    } catch (final ClassNotFoundException e) {
+                        cons = implementingClass.getConstructor(new Class[] {});
+                        i = cons.newInstance(new Object[] {});
+                        instance = i;
+                    } catch (final SecurityException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final NoSuchMethodException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalArgumentException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InstantiationException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalAccessException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InvocationTargetException e) {
                         log.error("", e);
                         throw new StorageException(e);
                     }
-                } else {
-                    final StorageException storageException = new StorageException("Property for user_storage not defined");
-                    log.error("", storageException);
-                    throw storageException;
                 }
             }
         }
-        Constructor<? extends OXUserStorageInterface> cons;
-        try {
-            cons = implementingClass.getConstructor(new Class[] {});
-            return cons.newInstance(new Object[] {});
-        } catch (final SecurityException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InstantiationException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        }
+        return i;
     }
 
     /**
@@ -342,7 +340,7 @@ public abstract class OXUserStorageInterface {
 
     /**
      * Retrieve all users with given alias domain
-     * 
+     *
      * @param context The context
      * @param aliasDomain The alias domain
      * @return The users

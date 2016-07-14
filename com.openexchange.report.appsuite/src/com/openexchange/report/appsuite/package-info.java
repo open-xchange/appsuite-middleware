@@ -21,7 +21,7 @@
  *  <li> As the ReportFinishingTouches, it reformats these sums suitable for the report system
  *  </ol>
  *
- *  These tasks of analyzing a context and its users are performed by the entire cluster in groups of 200 contexts per task. See the class {@link com.openexchange.report.appsuite.jobs.Orchestration}
+ *  These tasks of analyzing a context and its users are performed by the entire cluster in groups of 200 contexts per task. See the class {@link com.openexchange.report.appsuite.internal.HazelcastReportService}
  *  for how this work is coordinated. The Orchestration class is the implementation for the ReportService and the basis for the ReportMXBean.
  *
  * <p>

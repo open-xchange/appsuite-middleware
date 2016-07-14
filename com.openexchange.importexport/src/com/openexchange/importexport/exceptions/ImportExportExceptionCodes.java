@@ -175,6 +175,9 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
     /** The character encoding \"%1$s\" is not supported. Please choose another one. */
     UNSUPPORTED_CHARACTER_ENCODING("Unsupported charset: \"%1$s\"", CATEGORY_USER_INPUT, 1318, ImportExportExceptionMessages.UNSUPPORTED_CHARACTER_ENCODING_MSG),
 
+    /** The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s */
+    CONTACT_TOO_SIMILAR("The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s", CATEGORY_CONFLICT, 1319, ImportExportExceptionMessages.CONTACT_TOO_SIMILAR),
+
     ;
 
     private String message;

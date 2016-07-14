@@ -79,6 +79,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
+import com.openexchange.tools.servlet.http.Cookies;
 
 /**
  * {@link AutoLoginTools}
@@ -149,46 +150,42 @@ public class AutoLoginTools {
      * @return The login result if a valid session was found, or <code>null</code>, otherwise
      */
     public static LoginResult tryAutologin(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response, String hash) throws OXException {
-        Cookie[] cookies = request.getCookies();
-        if (loginConfig.isSessiondAutoLogin() && null != cookies && 0 < cookies.length) {
-            /*
-             * extract session & secret from supplied cookies
-             */
-            String sessionID = null;
-            String secret = null;
-            String sessionCookieName = LoginServlet.SESSION_PREFIX + hash;
-            String secretCookieName = LoginServlet.SECRET_PREFIX + hash;
-            try {
-                for (int i = 0; i < cookies.length; i++) {
-                    String name = cookies[i].getName();
-                    if (name.startsWith(sessionCookieName)) {
-                        sessionID = cookies[i].getValue();
-                    } else if (name.startsWith(secretCookieName)) {
-                        secret = cookies[i].getValue();
-                    }
-                    /*
-                     * try to auto-login once matching session- and secret cookies found
-                     */
+        if (loginConfig.isSessiondAutoLogin()) {
+            Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+            if (null != cookies) {
+                // Extract session & secret from supplied cookies
+                String expectedSessionCookieName = LoginServlet.SESSION_PREFIX + hash;
+                String sessionID = optCookieValue(expectedSessionCookieName, cookies);
+                String secret = optCookieValue(LoginServlet.SECRET_PREFIX + hash, cookies);
+
+                // Try to auto-login once matching session- and secret cookies found
+                try {
                     if (null != sessionID && null != secret) {
                         LOG.debug("Successfully looked up session- & secret-cookie pair for hash {}, continuing auto-login procedure.", hash);
                         return tryAutoLogin(loginConfig, request, sessionID, secret);
                     }
+
+                    LOG.debug("No session- & secret-cookie pair for hash {} found, aborting auto-login procedure.", hash);
+                } catch (OXException e) {
+                    if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
+                        /*
+                         * session found, but IP changed -> discard session & cancel auto-login,
+                         * invalidate session-cookie (public- and secret-cookies are re-written later)
+                         */
+                        SessionUtility.removeOXCookies(request, response, Collections.singletonList(expectedSessionCookieName));
+                        LoginPerformer.getInstance().doLogout(sessionID);
+                        return null;
+                    }
+                    throw e;
                 }
-                LOG.debug("No session- & secret-cookie pair for hash {} found, aborting auto-login procedure.", hash);
-            } catch (OXException e) {
-                if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
-                    /*
-                     * session found, but IP changed -> discard session & cancel auto-login,
-                     * invalidate session-cookie (public- and secret-cookies are re-written later)
-                     */
-                    SessionUtility.removeOXCookies(request, response, Collections.singletonList(sessionCookieName));
-                    LoginPerformer.getInstance().doLogout(sessionID);
-                    return null;
-                }
-                throw e;
             }
         }
         return null;
+    }
+
+    private static String optCookieValue(String name, Map<String, Cookie> cookies) {
+        Cookie cookie = cookies.get(name);
+        return null == cookie ? null : cookie.getValue();
     }
 
     /**

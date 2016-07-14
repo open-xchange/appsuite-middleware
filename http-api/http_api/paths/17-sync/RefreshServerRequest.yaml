@@ -1,0 +1,27 @@
+/sync?action=refresh_server:
+  put:
+    operationId: clearFoldersSynced
+    tags:
+      - sync
+    summary: Clears a folder's content.
+    description: |
+      #### Note
+      Although the request offers to clear multiple folders at once it is recommended to clear only one folder per
+      request since if any exception occurs (e.g. missing permissions) the complete request is going to be aborted.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON array containing the folder ID(s).
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: |
+          A JSON object containing an array of folder IDs that could not be cleared due to a concurrent modification.
+          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FoldersCleanUpResponse"
+          

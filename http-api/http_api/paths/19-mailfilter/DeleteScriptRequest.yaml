@@ -1,0 +1,19 @@
+/mailfilter?action=deletescript:
+  put:
+    operationId: deleteScript
+    tags:
+      - mailfilter
+    summary: Deletes the whole mail filter script.
+    description: This call is only used as workaround for parsing errors in the backend, so that the user is able to kick a whole script if it contains errors in the grammar.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: username
+        type: string
+        description: Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.
+        required: false
+    responses:
+      200:
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

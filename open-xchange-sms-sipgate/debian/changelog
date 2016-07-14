@@ -1,56 +1,32 @@
-open-xchange-sms-sipgate (7.8.1-16) stable; urgency=medium
+open-xchange-sms-sipgate (7.8.2-4) stable; urgency=medium
 
-  * Build for patch 2016-07-04 (3400)
+  * Second candidate for 7.8.2 release
 
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 30 Jun 2016 18:05:53 +0200
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 12 Jul 2016 09:21:16 +0200
 
-open-xchange-sms-sipgate (7.8.1-15) stable; urgency=medium
+open-xchange-sms-sipgate (7.8.2-3) stable; urgency=medium
 
-  * Build for patch 2016-06-20 (3347)
+  * First candidate for 7.8.2 release
 
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 15 Jun 2016 14:03:09 +0200
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 06 Jul 2016 15:33:10 +0200
 
-open-xchange-sms-sipgate (7.8.1-14) stable; urgency=medium
+open-xchange-sms-sipgate (7.8.2-2) stable; urgency=medium
 
-  * Build for patch 2016-06-06 (3317)
+  * Second candidate for 7.8.2 release
 
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 03 Jun 2016 14:44:26 +0200
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 29 Jun 2016 16:28:54 +0200
 
-open-xchange-sms-sipgate (7.8.1-13) stable; urgency=medium
+open-xchange-sms-sipgate (7.8.2-1) stable; urgency=medium
 
-  * Build for patch 2016-05-19 (3305)
+  * First candidate for 7.8.2 release
 
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 19 May 2016 16:24:10 +0200
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 16 Jun 2016 12:34:55 +0200
 
-open-xchange-sms-sipgate (7.8.1-12) stable; urgency=medium
+open-xchange-sms-sipgate (7.8.2-0) unstable; urgency=medium
 
-  * Build for patch 2016-05-23 (3294)
+  * prepare for 7.8.2 release
 
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 20 May 2016 11:56:25 +0200
-
-open-xchange-sms-sipgate (7.8.1-11) stable; urgency=medium
-
-  * Build for patch 2016-05-09 (3272)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 06 May 2016 14:53:30 +0200
-
-open-xchange-sms-sipgate (7.8.1-10) stable; urgency=medium
-
-  * Build for patch 2016-04-25 (3263)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 25 Apr 2016 18:33:55 +0200
-
-open-xchange-sms-sipgate (7.8.1-9) stable; urgency=medium
-
-  * Build for patch 2016-04-25 (3239)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 15 Apr 2016 14:49:33 +0200
-
-open-xchange-sms-sipgate (7.8.1-8) stable; urgency=medium
-
-  * Build for patch 2016-04-07 (3228)
-
- -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 07 Apr 2016 18:14:19 +0200
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 06 Apr 2016 10:25:25 +0200
 
 open-xchange-sms-sipgate (7.8.1-7) stable; urgency=medium
 

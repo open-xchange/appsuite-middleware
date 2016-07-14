@@ -340,7 +340,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Message displayed to the user
      */
-    private String displayMessage;
+    private final String displayMessage;
 
     private MimeMailExceptionCode(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;

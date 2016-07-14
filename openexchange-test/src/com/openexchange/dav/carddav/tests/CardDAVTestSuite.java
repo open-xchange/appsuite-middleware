@@ -73,6 +73,7 @@ import org.junit.runners.Suite.SuiteClasses;
     ImageTest.class,
     CookieTest.class,
     BasicTest.class,
+    BulkImportTest.class,
     AddressbookQueryTest.class
 })
 public final class CardDAVTestSuite {

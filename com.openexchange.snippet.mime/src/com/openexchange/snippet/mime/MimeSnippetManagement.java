@@ -237,9 +237,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
-
-                    // Obviously associated file does no more exist
-                    deleteSnippetSafe(id, userId, contextId);
                 }
             }
             return list;
@@ -309,9 +306,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
-
-                    // Obviously associated file does no more exist
-                    deleteSnippetSafe(id, userId, contextId);
                 }
             }
             return list;
@@ -334,9 +328,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
             if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                 throw e;
             }
-
-            // Obviously associated file does no more exist
-            deleteSnippetSafe(id, userId, contextId);
             throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, id);
         } finally {
             databaseService.backReadOnly(contextId, con);
@@ -389,9 +380,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
-
-                    // Obviously associated file does no more exist
-                    deleteSnippetSafe(identifier, userId, contextId);
                     throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
                 } finally {
                     Streams.close(in);
@@ -501,7 +489,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         AccountQuota quota = getQuota();
         if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
             Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
-            if (amountQuota.isExceeded() || amountQuota.willExceed(getOwnSnippetsCount())) {
+            if (amountQuota.isExceeded() || amountQuota.willExceed(1)) {
                 throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
             }
         }
@@ -681,9 +669,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
-
-                    // Obviously associated file does no more exist
-                    deleteSnippetSafe(identifier, userId, contextId);
                     throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
                 } finally {
                     Streams.close(in);

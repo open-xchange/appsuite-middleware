@@ -1,0 +1,9 @@
+name:
+  type: string
+  description: The name of the file, including its extension, e.g. "test.doc". Not set if the target is a directory.
+path:
+  type: string
+  description: The path of the (file's parent) directory, relative to the root folder.
+checksum:
+  type: string
+  description: The MD5 hash of the file or directory, expressed as a lowercase hexadecimal number string, 32 characters long, e.g. "f8cacac95379527cd4fa15f0cb782a09".

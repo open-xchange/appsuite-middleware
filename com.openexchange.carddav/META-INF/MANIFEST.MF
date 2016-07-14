@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CardDAV
 Bundle-SymbolicName: com.openexchange.carddav
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -13,6 +13,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.capabilities,
  com.openexchange.config.cascade,
  com.openexchange.contact,
+ com.openexchange.contact.similarity,
  com.openexchange.contact.vcard,
  com.openexchange.contact.vcard.storage,
  com.openexchange.dav,

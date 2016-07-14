@@ -406,7 +406,7 @@ public final class CSSMatcher {
 
         // Check for internal invocation and thread pool availability
         ThreadPoolService threadPool = ThreadPools.getThreadPool();
-        if (internallyInvoked || (threadPool == null)) {
+        if (internallyInvoked || (threadPool == null) || (Thread.currentThread().getName().startsWith("JerichoParser"))) {
             boolean retval = doCheckCss(cssBld, styleMap, cssPrefix, removeIfAbsent);
             cssBuilder.append(cssBld);
             return retval;
@@ -914,7 +914,7 @@ public final class CSSMatcher {
      *            <code>false</code>
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
-    protected static boolean checkCSSElements(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
+    public static boolean checkCSSElements(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
         if ((null == styleMap) || (cssBuilder == null) || cssBuilder.isEmpty()) {
             return false;
         }

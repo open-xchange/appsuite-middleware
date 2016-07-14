@@ -1512,10 +1512,17 @@ public class JSONObject extends AbstractJSONValue {
                 case VALUE_NUMBER_INT:
                     try {
                         jo.put(fieldName, jParser.getIntValue());
-                    } catch (final JsonParseException e) {
-                        // Outside of range of Java int
-                        jo.put(fieldName, jParser.getLongValue());
-                    }
+                        } catch (final JsonParseException e) {
+                            // Outside of range of Java int
+                            try {
+                                jo.put(fieldName, jParser.getLongValue());
+                            } catch (final JsonParseException pe) {
+                                // Outside of range of Java long
+                                // Fallback: Treat number as double, so we don't lose
+                                // too much precision (#44850)
+                                jo.put(fieldName, jParser.getDoubleValue());
+                            }
+                        }
                     break;
                 case VALUE_TRUE:
                     jo.put(fieldName, true);

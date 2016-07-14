@@ -57,6 +57,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -78,29 +80,30 @@ public final class MailLoginHandler implements LoginHandlerService {
 
 	@Override
     public void handleLogin(final LoginResult login) throws OXException {
-		/*
-		 * Track mail login in data retention service
-		 */
-		final DataRetentionService retentionService = ServerServiceRegistry
-				.getInstance().getService(DataRetentionService.class);
-		final Context ctx = login.getContext();
-		final Session session = login.getSession();
-		if (null != retentionService
-				&& UserConfigurationStorage.getInstance()
-						.getUserConfiguration(session.getUserId(), ctx)
-						.hasWebMail()) {
-			final RetentionData retentionData = retentionService.newInstance();
-			retentionData.setStartTime(new Date(System.currentTimeMillis()));
-			retentionData.setIdentifier(MailAccess.getInstance(session)
-					.getMailConfig().getLogin());
-			retentionData.setIPAddress(session.getLocalIp());
-			retentionData.setLogin(session.getLogin());
-			/*
-			 * Finally store it
-			 */
-			retentionService.storeOnAccess(retentionData);
-		}
-	}
+        /*
+         * Track mail login in data retention service
+         */
+        final DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
+        final Context ctx = login.getContext();
+        final Session session = login.getSession();
+        if (null != retentionService && UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                RetentionData retentionData = retentionService.newInstance();
+                retentionData.setStartTime(new Date(System.currentTimeMillis()));
+                mailAccess = MailAccess.getInstance(session);
+                retentionData.setIdentifier(mailAccess.getMailConfig().getLogin());
+                retentionData.setIPAddress(session.getLocalIp());
+                retentionData.setLogin(session.getLogin());
+                /*
+                 * Finally store it
+                 */
+                retentionService.storeOnAccess(retentionData);
+            } finally {
+                MailAccess.closeInstance(mailAccess);
+            }
+        }
+    }
 
 	@Override
     public void handleLogout(final LoginResult logout) throws OXException {

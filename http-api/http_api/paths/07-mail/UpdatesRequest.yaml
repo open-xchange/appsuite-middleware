@@ -1,0 +1,19 @@
+/mail?action=updates:
+  get:
+    operationId: getMailUpdates
+    tags:
+      - mail
+    summary: Gets updated mails (not IMAP).
+    description: |
+      #### Not IMAP
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - $ref: "#/parameters/gblQueryParamMailColumns"
+    responses:
+      200:
+        description: |
+          Just an empty JSON array is going to be returned since this action cannot be applied to IMAP. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailUpdatesResponse"

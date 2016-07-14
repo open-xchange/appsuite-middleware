@@ -57,6 +57,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -95,6 +96,11 @@ public class UnifiedInboxIdentifier implements PreferencesItemService {
 
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                if (false == MailProviderRegistry.isUnifiedMailAvailable()) {
+                    setting.setSingleValue(null);
+                    return;
+                }
+
                 try {
                     final UnifiedInboxManagement management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                     final int id = management.getUnifiedINBOXAccountIDIfEnabled(session.getUserId(), session.getContextId());

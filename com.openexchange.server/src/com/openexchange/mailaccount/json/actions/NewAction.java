@@ -86,9 +86,9 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
-import com.openexchange.mailaccount.json.parser.MailAccountParser;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -125,7 +125,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
         MailAccountDescription accountDescription = new MailAccountDescription();
         List<OXException> warnings = new LinkedList<OXException>();
-        Set<Attribute> availableAttributes = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        Set<Attribute> availableAttributes = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (!availableAttributes.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
             accountDescription.setTransportAuth(TransportAuth.MAIL);
@@ -289,9 +289,9 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             if (null == loadedMailAccount) {
                 throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
             }
-            jsonAccount = MailAccountWriter.write(checkFullNames(loadedMailAccount, storageService, session));
+            jsonAccount = DefaultMailAccountWriter.write(checkFullNames(loadedMailAccount, storageService, session));
         } else {
-            jsonAccount = MailAccountWriter.write(newAccount);
+            jsonAccount = DefaultMailAccountWriter.write(newAccount);
         }
 
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);

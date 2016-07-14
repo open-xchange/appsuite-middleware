@@ -7,8 +7,8 @@
 
     <!-- Constants -->
     <property name="i18nDir" value="${prefix}/i18n"/>
-    <property name="languages" value="cs_CZ,da_DK,de_DE,en_GB,es_ES,es_MX,fr_CA,fi_FI,fr_FR,hu_HU,it_IT,ja_JP,lv_LV,nl_NL,pl_PL,pt_BR,ro_RO,ru_RU,sk_SK,sv_SE,th_TH,zh_CN,zh_TW"/>
-    <property name="community_languages" value="ca_ES,el_GR,eu_ES,gl_ES,he_HE,hi_IN,ko_KO,no_NB,pt_PT,tr_TR,vi_VI"/>
+    <property name="languages" value="cs_CZ,da_DK,de_DE,en_GB,es_ES,es_MX,fi_FI,fr_CA,fr_FR,hu_HU,it_IT,ja_JP,lv_LV,nl_NL,pl_PL,pt_BR,ro_RO,ru_RU,sk_SK,sv_SE,zh_CN,zh_TW"/>
+    <property name="community_languages" value="ca_ES,el_GR,eu_ES,gl_ES,he_HE,hi_IN,ko_KO,no_NB,pt_PT,th_TH,tr_TR,vi_VI"/>
 
     <import file="build-project.xml"/>
 

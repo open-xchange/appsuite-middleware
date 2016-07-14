@@ -56,8 +56,8 @@ import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.sender.MailSenderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -89,9 +89,9 @@ public class NotifyFeature implements CalendarFeature {
 
     @Override
     public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate, Session session) throws OXException {
-        UserConfiguration userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ContextStorage.getStorageContext(session));
+        UserPermissionBits permissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ContextStorage.getStorageContext(session));
 
-        if (userConfiguration.hasWebMail()) {
+        if (permissionBits.hasWebMail()) {
             return new NotifyingCalendar(generators, sender, delegate, attachmentMemory, services, session);
         }
 

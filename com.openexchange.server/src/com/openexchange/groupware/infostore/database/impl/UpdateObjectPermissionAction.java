@@ -237,7 +237,7 @@ public class UpdateObjectPermissionAction extends AbstractObjectPermissionAction
                 updatedPermissions = Collections.emptyList();
             } else if (null == newPermissions || 0 == newPermissions.size()) {
                 addedPermissions = Collections.emptyList();
-                removedPermissions = null == oldPermissions ? Collections.<ObjectPermission>emptyList() : oldPermissions;
+                removedPermissions = oldPermissions;
                 updatedPermissions = Collections.emptyList();
             } else {
                 addedPermissions = new ArrayList<ObjectPermission>();

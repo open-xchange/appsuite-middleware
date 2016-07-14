@@ -203,7 +203,11 @@ public final class Arrays {
      */
     public static <T> boolean contains(T[] array, T t) {
         if (null != t) {
-            for (int i = 0; i < array.length; i++) {
+            if (null == array) {
+                return false;
+            }
+
+            for (int i = array.length; i-- > 0;) {
                 if (t.equals(array[i])) {
                     return true;
                 }

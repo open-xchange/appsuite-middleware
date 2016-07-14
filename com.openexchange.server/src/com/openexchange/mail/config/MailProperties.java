@@ -55,10 +55,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
@@ -73,6 +69,7 @@ import com.openexchange.mail.api.MailConfig.ServerSource;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.HostList;
 
 /**
  * {@link MailProperties} - Global mail properties read from properties file.
@@ -197,7 +194,11 @@ public final class MailProperties implements IMailProperties {
 
     private int defaultArchiveDays;
 
-    private List<IPRange> ranges;
+    private HostList ranges;
+
+    private boolean mailStartTls;
+
+    private boolean transportStartTls;
 
     /**
      * Initializes a new {@link MailProperties}
@@ -206,7 +207,7 @@ public final class MailProperties implements IMailProperties {
         super();
         loaded = new AtomicBoolean();
         defaultSeparator = '/';
-        ranges = Collections.emptyList();
+        ranges = HostList.EMPTY;
     }
 
     /**
@@ -294,7 +295,9 @@ public final class MailProperties implements IMailProperties {
         supportMsisdnAddresses = false;
         enforceSecureConnection = false;
         defaultArchiveDays = 90;
-        ranges = Collections.emptyList();
+        ranges = HostList.EMPTY;
+        mailStartTls = false;
+        transportStartTls = false;
     }
 
     private void loadProperties0() throws OXException {
@@ -626,36 +629,20 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            List<IPRange> ranges = new LinkedList<IPRange>();
+            HostList ranges = HostList.EMPTY;
             String tmp = configuration.getProperty("com.openexchange.mail.rateLimitDisabledRange", "").trim();
             if (false == Strings.isEmpty(tmp)) {
-                for (String range : Strings.splitByComma(tmp)) {
-                    if (null == range) {
-                        LOG.warn("Invalid IP range value: 'null'");
-                    } else {
-                        try {
-                            IPRange parsedRange = IPRange.parseRange(range.trim());
-                            if (null == parsedRange) {
-                                LOG.warn("Invalid IP range value: '{}'", range);
-                            } else {
-                                ranges.add(parsedRange);
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Invalid IP range value: '{}'", range, e);
-                        }
-                    }
-
-                }
+                ranges = HostList.valueOf(tmp);
             }
             this.ranges = ranges;
-            logBuilder.append("\tWhite-listed from send rate limit: ").append(ranges.isEmpty() ? "<none>" : ranges.toString()).append('\n');
+            logBuilder.append("\tWhite-listed from send rate limit: ").append(ranges).append('\n');
         }
 
         {
             final String tmp = configuration.getProperty("com.openexchange.mail.archive.defaultDays", "90").trim();
             try {
                 defaultArchiveDays = Strings.parseInt(tmp);
-                logBuilder.append("\tDefault archive days: ").append(rateLimit).append('\n');
+                logBuilder.append("\tDefault archive days: ").append(defaultArchiveDays).append('\n');
             } catch (final NumberFormatException e) {
                 defaultArchiveDays = 90;
                 logBuilder.append("\tDefault archive days: Invalid value \"").append(tmp).append("\". Setting to fallback ").append(
@@ -721,6 +708,11 @@ public final class MailProperties implements IMailProperties {
             final String supportMsisdnAddressesStr = configuration.getProperty("com.openexchange.mail.supportMsisdnAddresses", "false").trim();
             supportMsisdnAddresses = Boolean.parseBoolean(supportMsisdnAddressesStr);
             logBuilder.append("\tSupports MSISDN addresses: ").append(supportMsisdnAddresses).append('\n');
+        }
+
+        {
+            this.mailStartTls = configuration.getBoolProperty("com.openexchange.mail.mailStartTls", false);
+            this.transportStartTls = configuration.getBoolProperty("com.openexchange.mail.transportStartTls", false);
         }
 
         logBuilder.append("Global mail properties successfully loaded!");
@@ -1074,8 +1066,16 @@ public final class MailProperties implements IMailProperties {
      *
      * @return The IP ranges
      */
-    public Collection<IPRange> getDisabledRateLimitRanges() {
+    public HostList getDisabledRateLimitRanges() {
         return ranges;
+    }
+
+    public boolean isMailStartTls() {
+        return mailStartTls;
+    }
+
+    public boolean isTransportStartTls() {
+        return transportStartTls;
     }
 
 }

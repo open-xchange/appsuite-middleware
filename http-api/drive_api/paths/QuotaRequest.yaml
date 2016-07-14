@@ -1,0 +1,23 @@
+/drive?action=quota:
+  get:
+    operationId: getQuota
+    tags:
+      - drive
+    summary: Gets quota limits and current usage.
+    description: |
+      Gets the quota limits and current usage for the storage the supplied root folder belongs to. Depending on
+      the filestore configuration, this may include both restrictions on the number of allowed files and the total
+      size of all contained files in bytes. If there's no limit, -1 is returned.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+    responses:
+      200:
+        description: |
+          A JSON object containing a field `quota` that is an array of quota objects. The array size may be zero, one
+          or two, depending on the filestore configuration. If one or more quota types are missing in the array, the
+          client can expect that there are no limitations for that type. Besides the array, the JSON object also contains
+          a hyperlink behind the `manageLink` field, poiting to an URL where the user can manage his quota restrictions.
+          In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveQuotaResponse"

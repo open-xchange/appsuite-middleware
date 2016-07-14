@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/jericho-html-3.4.jar" sourcepath="lib/jericho-html-3.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/boilerpipe-1.2.0.jar" sourcepath="lib/source/boilerpipe-sources-1.2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.2.jar" sourcepath="lib/source/commons-collections-3.2.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlcleaner-2.14.jar" sourcepath="lib/source/htmlcleaner-2.14-src.jar"/>
@@ -22,7 +23,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/httpcore-nio-4.2.1.jar" sourcepath="lib/source/httpcore-nio-4.2.1-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/httpmime-4.2.1.jar" sourcepath="lib/source/httpmime-4.2.1-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.18.jar" sourcepath="lib/source/nekohtml-1.9.18-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jericho-html-3.3.jar" sourcepath="lib/jericho-html-3.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cssparser-0.9.7.jar" sourcepath="lib/source/cssparser-0.9.7-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/backport-util-concurrent-3.1.jar" sourcepath="lib/backport-util-concurrent-3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-jms-api.jar" sourcepath="lib/source/jboss-jms-api-sources.jar"/>

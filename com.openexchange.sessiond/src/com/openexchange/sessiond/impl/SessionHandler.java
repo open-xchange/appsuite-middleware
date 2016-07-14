@@ -134,7 +134,7 @@ public final class SessionHandler {
     private static volatile boolean asyncPutToSessionStorage;
 
     /** The obfuscator */
-    protected static Obfuscator obfuscator;
+    protected static volatile Obfuscator obfuscatr;
 
     /** The initialized flag */
     private static final AtomicBoolean initialized = new AtomicBoolean();
@@ -179,7 +179,7 @@ public final class SessionHandler {
             asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
             synchronized (SessionHandler.class) {
                 // Make it visible to other threads, too
-                obfuscator = new Obfuscator(config.getObfuscationKey());
+                obfuscatr = new Obfuscator(config.getObfuscationKey().toCharArray());
             }
         }
     }
@@ -199,7 +199,7 @@ public final class SessionHandler {
      * @return The session obfuscator instance
      */
     public static Obfuscator getObfuscator() {
-        return obfuscator;
+        return obfuscatr;
     }
 
     /**
@@ -640,7 +640,7 @@ public final class SessionHandler {
                             Session[] retval = new Session[length];
                             List<String> remoteParameterNames = getRemoteParameterNames();
                             for (int i = length; i-- > 0;) {
-                                retval[i] = obfuscator.unwrap(userSessions[i], remoteParameterNames);
+                                retval[i] = getObfuscator().unwrap(userSessions[i], remoteParameterNames);
                             }
                             return retval;
                         }
@@ -684,7 +684,7 @@ public final class SessionHandler {
                             return storageService.getAnyActiveSessionForUser(userId, contextId);
                         }
                     };
-                    SessionImpl unwrappedSession = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
+                    SessionImpl unwrappedSession = getObfuscator().unwrap(getFrom(c, null), getRemoteParameterNames());
                     if (null != unwrappedSession) {
                         retval = new SessionControl(unwrappedSession);
                     }
@@ -711,7 +711,7 @@ public final class SessionHandler {
 
                         @Override
                         public Session call() throws Exception {
-                            return obfuscator.unwrap(storageService.findFirstSessionForUser(userId, contextId), getRemoteParameterNames());
+                            return getObfuscator().unwrap(storageService.findFirstSessionForUser(userId, contextId), getRemoteParameterNames());
                         }
                     };
                     retval = getFrom(c, null);
@@ -1110,7 +1110,7 @@ public final class SessionHandler {
 
                 @Override
                 public Void call() throws Exception {
-                    Session wrappedSession = obfuscator.wrap(currentSession, getRemoteParameterNames());
+                    Session wrappedSession = getObfuscator().wrap(currentSession, getRemoteParameterNames());
                     sessionStorage.changePassword(sessionid, wrappedSession.getPassword());
                     return null;
                 }
@@ -1312,7 +1312,7 @@ public final class SessionHandler {
                             return storageService.getSessionByRandomToken(randomToken, newIP);
                         }
                     };
-                    Session unwrappedSession = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
+                    Session unwrappedSession = getObfuscator().unwrap(getFrom(c, null), getRemoteParameterNames());
                     if (null != unwrappedSession) {
                         return unwrappedSession;
                     }
@@ -1472,7 +1472,7 @@ public final class SessionHandler {
                             return storageService.getSessionByAlternativeId(altId);
                         }
                     };
-                    SessionImpl unwrappedSession = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
+                    SessionImpl unwrappedSession = getObfuscator().unwrap(getFrom(c, null), getRemoteParameterNames());
                     if (null != unwrappedSession) {
                         return new SessionControl(unwrappedSession);
                     }
@@ -1504,7 +1504,7 @@ public final class SessionHandler {
                         return storageService.getCachedSession(sessionId);
                     }
                 };
-                SessionImpl unwrappedSession = obfuscator.unwrap(getFrom(c, null), getRemoteParameterNames());
+                SessionImpl unwrappedSession = getObfuscator().unwrap(getFrom(c, null), getRemoteParameterNames());
                 if (null != unwrappedSession) {
                     return new SessionControl(unwrappedSession);
                 }
@@ -1541,6 +1541,7 @@ public final class SessionHandler {
                 List<Session> list = getFrom(c, Collections.<Session> emptyList());
                 if (null != list && !list.isEmpty()) {
                     List<SessionControl> result = new ArrayList<SessionControl>();
+                    Obfuscator obfuscator = getObfuscator();
                     for (Session s : list) {
                         SessionImpl unwrappedSession = obfuscator.unwrap(s, getRemoteParameterNames());
                         if (null != unwrappedSession) {
@@ -1597,6 +1598,11 @@ public final class SessionHandler {
                 SESSION_DATA_REF.set(null);
             } else {
                 LOG.warn("\tSessionData instance is null.");
+            }
+            Obfuscator o = obfuscatr;
+            if (null != o) {
+                obfuscatr = null;
+                o.destroy();
             }
             sessionIdGenerator = null;
             config = null;
@@ -1947,12 +1953,12 @@ public final class SessionHandler {
         public Void call() {
             try {
                 if (addIfAbsent) {
-                    if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session, config.getRemoteParameterNames()))) {
+                    if (sessionStorageService.addSessionIfAbsent(getObfuscator().wrap(session, config.getRemoteParameterNames()))) {
                         LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                         postSessionStored(session);
                     }
                 } else {
-                    sessionStorageService.addSession(obfuscator.wrap(session, config.getRemoteParameterNames()));
+                    sessionStorageService.addSession(getObfuscator().wrap(session, config.getRemoteParameterNames()));
                     LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                     postSessionStored(session);
                 }
@@ -1997,7 +2003,7 @@ public final class SessionHandler {
      */
     private static SessionImpl getSessionFrom(String sessionId, long timeoutMillis, SessionStorageService storageService) throws OXException {
         try {
-            return obfuscator.unwrap(storageService.lookupSession(sessionId, timeoutMillis), getRemoteParameterNames());
+            return getObfuscator().unwrap(storageService.lookupSession(sessionId, timeoutMillis), getRemoteParameterNames());
         } catch (OXException e) {
             if (SessionStorageExceptionCodes.INTERRUPTED.equals(e)) {
                 // Expected...

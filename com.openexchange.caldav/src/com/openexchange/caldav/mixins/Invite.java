@@ -49,7 +49,6 @@
 
 package com.openexchange.caldav.mixins;
 
-import com.openexchange.caldav.CalDAVPermission;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.dav.mixins.PrincipalURL;
@@ -97,10 +96,10 @@ public class Invite extends SingleXMLPropertyMixin {
             try {
                 if (permission.isAdmin()) {
                     StringBuilder.append("<CS:organizer>").append(getEntityElements(permission)).append("</CS:organizer>");
-                } else if (CalDAVPermission.impliesReadPermissions(permission)) {
+                } else if (impliesReadPermissions(permission)) {
                     StringBuilder.append("<CS:user>").append(getEntityElements(permission)).append("<CS:invite-accepted/>")
                         .append("<CS:access><CS:read");
-                    if (CalDAVPermission.impliesReadWritePermissions(permission)) {
+                    if (impliesReadWritePermissions(permission)) {
                         StringBuilder.append("-write");
                     }
                     StringBuilder.append("/></CS:access></CS:user>");
@@ -135,6 +134,34 @@ public class Invite extends SingleXMLPropertyMixin {
             .append("<D:href>").append(mailtoPrefix ? "mailto:" : "").append(uri).append("</D:href>")
             .append("<CS:common-name>").append(commonName).append("</CS:common-name>")
         .toString();
+    }
+
+    /**
+     * Gets a value indicating whether the supplied permission implies (at least) a simplified CalDAV "read" access level.
+     *
+     * @param permission The permission to check
+     * @return <code>true</code> if "read" permissions can be assumed, <code>false</code>, otherwise
+     */
+    private static boolean impliesReadPermissions(Permission permission) {
+        return null != permission &&
+            permission.getFolderPermission() >= Permission.READ_FOLDER &&
+            permission.getReadPermission() >= Permission.READ_OWN_OBJECTS
+        ;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied permission implies (at least) a simplified CalDAV "read-write" access level.
+     *
+     * @param permission The permission to check
+     * @return <code>true</code> if "read-write" permissions can be assumed, <code>false</code>, otherwise
+     */
+    private static boolean impliesReadWritePermissions(Permission permission) {
+        return null != permission &&
+            permission.getFolderPermission() >= Permission.CREATE_OBJECTS_IN_FOLDER &&
+            permission.getWritePermission() >= Permission.WRITE_OWN_OBJECTS &&
+            permission.getDeletePermission() >= Permission.DELETE_OWN_OBJECTS &&
+            permission.getReadPermission() >= Permission.READ_OWN_OBJECTS
+        ;
     }
 
 }

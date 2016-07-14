@@ -1,0 +1,12 @@
+type: object
+properties:
+  fileExclusions:
+    type: array
+    description: Defines client-side exclusion filters for files (since API version 3). See [Client side filtering](#client-side-filtering) for further information.
+    items:
+      $ref: "#/definitions/DriveFilePattern"
+  directoryExclusions:
+    type: array
+    description: Defines client-side exclusion filters for directories (since API version 3). See [Client side filtering](#client-side-filtering) for further information.
+    items:
+      $ref: "#/definitions/DriveDirectoryPattern"

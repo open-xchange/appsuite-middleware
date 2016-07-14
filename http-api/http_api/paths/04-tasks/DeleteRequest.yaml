@@ -1,0 +1,34 @@
+/tasks?action=delete:
+  put:
+    operationId: deleteTasks
+    tags:
+      - tasks
+    summary: Deletes tasks (**available since v6.22**).
+    description: |
+      Before version 6.22 the request body contained a JSON object with the fields `id` and `folder` and could
+      only delete one task.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the deleted tasks.
+        required: true
+      - in: body
+        name: body
+        description: A JSON array of JSON objects with the id and folder of the tasks.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/TaskListElement"
+    responses:
+      200:
+        description: |
+          A JSON array with object IDs of tasks which were modified after the specified timestamp and were therefore not deleted. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/TaskDeletionsResponse"

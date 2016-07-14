@@ -1,22 +1,21 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
 # , 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-22 13:31+0000\n"
 "PO-Revision-Date: 2016-02-20 17:36+1100\n"
+"Last-Translator: \n"
 "Language-Team: Russian <>\n"
+"Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: \n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Lokalize 1.5\n"
-"Last-Translator: \n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"Language: ru_RU\n"
 
 # Drive Application
 msgid "Drive Application"
@@ -90,10 +89,9 @@ msgid ""
 "Windows® client software. The Updater automatically informs about new "
 "updates. You can download the updates from within the Updater."
 msgstr ""
-"При запуске этого файла откроется мастер установки. Следуйте его "
-"инструкциям и установите модуль обновлений, который установит последние "
-"версии программ клиента Windows®, сообщит о наличии обновлений и позволит "
-"их загрузить."
+"При запуске этого файла откроется мастер установки. Следуйте его инструкциям "
+"и установите модуль обновлений, который установит последние версии программ "
+"клиента Windows®, сообщит о наличии обновлений и позволит их загрузить."
 
 # Connector for Microsoft Outlook®
 msgid "Connector for Microsoft Outlook®"
@@ -108,9 +106,9 @@ msgstr ""
 "совместных и системных папок с клиентами Microsoft Outlook®."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
-msgid "Synchronize your Mail, Calendar and Address Book data with your device."
-msgstr ""
-"Синхронизируйте почту, календарь и адресную книгу со своим устройством."
+msgid ""
+"Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr "Синхронизируйте почту, календарь и адресную книгу со своим устройством."
 
 # To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
 msgid ""
@@ -133,4 +131,3 @@ msgid ""
 "To manually setup your Mail account, please use the following information"
 msgstr ""
 "Приведенная информация поможет вручную настроить почтовую учетную запись"
-

@@ -1,0 +1,8 @@
+type: object
+properties:
+  transport:
+    type: string
+    description: Can contain the transport mechanism to use, defaults to "mail".
+  message:
+    type: string
+    description: A notification message.

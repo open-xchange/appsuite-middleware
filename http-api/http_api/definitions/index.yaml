@@ -1,0 +1,541 @@
+# Common response containing the error fields and a timestamp
+CommonResponse:
+  type: object
+  properties:
+    $ref: ./common/CommonResponseData.yaml
+# Module: login
+LoginResponse:
+  $ref:  ./login/LoginResponse.yaml
+TokenLoginResponse:
+  $ref: ./login/TokenLoginResponse.yaml
+TokensData:
+  $ref: ./login/TokensData.yaml
+TokensResponse:
+  $ref: ./login/TokensResponse.yaml
+ChangeIPResponse:
+  $ref: ./login/ChangeIPResponse.yaml
+# Module: config
+ConfigBody:
+  $ref: ./config/ConfigBody.yaml
+ConfigResponse:
+  $ref: ./config/ConfigResponse.yaml
+ConfigProperty:
+  $ref: ./config/ConfigProperty.yaml
+ConfigPropertyResponse:
+  $ref: ./config/ConfigPropertyResponse.yaml
+ConfigPropertyBody:
+  $ref: ./config/ConfigPropertyBody.yaml
+# Module: folders
+FoldersResponse:
+  $ref: ./folders/FoldersResponse.yaml
+FolderUpdatesResponse:
+  $ref: ./folders/FolderUpdatesResponse.yaml
+FolderPermission:
+  $ref: ./folders/FolderPermission.yaml
+FolderExtendedPermission:
+  $ref: ./folders/FolderExtendedPermission.yaml
+FolderData:
+  $ref: ./folders/FolderData.yaml
+FolderResponse:
+  $ref: ./folders/FolderResponse.yaml
+FolderBodyNotification:
+  $ref: ./folders/FolderBodyNotification.yaml
+FolderBody:
+  $ref: ./folders/FolderBody.yaml
+FolderUpdateResponse:
+  $ref: ./folders/FolderUpdateResponse.yaml
+FoldersCleanUpResponse:
+  $ref: ./folders/FoldersCleanUpResponse.yaml
+FoldersVisibilityData:
+  $ref: ./folders/FoldersVisibilityData.yaml
+FoldersVisibilityResponse:
+  $ref: ./folders/FoldersVisibilityResponse.yaml
+FolderSharingNotificationBody:
+  $ref: ./folders/FolderSharingNotificationBody.yaml
+FolderSharingNotificationData:
+  $ref: ./folders/FolderSharingNotificationData.yaml
+FolderSharingNotificationResponse:
+  $ref: ./folders/FolderSharingNotificationResponse.yaml
+# Module: tasks
+TasksResponse:
+  $ref: ./tasks/TasksResponse.yaml
+TaskListElement:
+  $ref: ./tasks/TaskListElement.yaml
+TaskUpdatesResponse:
+  $ref: ./tasks/TaskUpdatesResponse.yaml
+TaskParticipant:
+  $ref: ./tasks/TaskParticipant.yaml
+TaskUser:
+  $ref: ./tasks/TaskUser.yaml
+TaskConfirmation:
+  $ref: ./tasks/TaskConfirmation.yaml
+TaskData:
+  $ref: ./tasks/TaskData.yaml
+TaskResponse:
+  $ref: ./tasks/TaskResponse.yaml
+TaskUpdateData:
+  $ref: ./tasks/TaskUpdateData.yaml
+TaskUpdateResponse:
+  $ref: ./tasks/TaskUpdateResponse.yaml
+TaskDeletionsResponse:
+  $ref: ./tasks/TaskDeletionsResponse.yaml
+TaskConfirmationBody:
+  $ref: ./tasks/TaskConfirmationBody.yaml
+TaskSearchBody:
+  $ref: ./tasks/TaskSearchBody.yaml
+# Module: contacts
+ContactsResponse:
+  $ref: ./contacts/ContactsResponse.yaml
+ContactListElement:
+  $ref: ./contacts/ContactListElement.yaml
+ContactUpdatesResponse:
+  $ref: ./contacts/ContactUpdatesResponse.yaml
+DistributionListMember:
+  $ref: ./contacts/DistributionListMember.yaml
+ContactData:
+  $ref: ./contacts/ContactData.yaml
+ContactResponse:
+  $ref: ./contacts/ContactResponse.yaml
+ContactUpdateData:
+  $ref: ./contacts/ContactUpdateData.yaml
+ContactUpdateResponse:
+  $ref: ./contacts/ContactUpdateResponse.yaml
+ContactDeletionsResponse:
+  $ref: ./contacts/ContactDeletionsResponse.yaml
+ContactSearchBody:
+  $ref: ./contacts/ContactSearchBody.yaml
+# Module: calendar
+AppointmentsResponse:
+  $ref: ./calendar/AppointmentsResponse.yaml
+AppointmentInfoResponse:
+  $ref: ./calendar/AppointmentInfoResponse.yaml
+AppointmentListElement:
+  $ref: ./calendar/AppointmentListElement.yaml
+AppointmentUpdatesResponse:
+  $ref: ./calendar/AppointmentUpdatesResponse.yaml
+AppointmentData:
+  $ref: ./calendar/AppointmentData.yaml
+AppointmentResponse:
+  $ref: ./calendar/AppointmentResponse.yaml
+AppointmentUpdateData:
+  $ref: ./calendar/AppointmentUpdateData.yaml
+AppointmentUpdateResponse:
+  $ref: ./calendar/AppointmentUpdateResponse.yaml
+AppointmentCreationConflict:
+  $ref: ./calendar/AppointmentCreationConflict.yaml
+AppointmentCreationData:
+  $ref: ./calendar/AppointmentCreationData.yaml
+AppointmentCreationResponse:
+  $ref: ./calendar/AppointmentCreationResponse.yaml
+AppointmentDeletionsElement:
+  $ref: ./calendar/AppointmentDeletionsElement.yaml
+AppointmentDeletionsResponse:
+  $ref: ./calendar/AppointmentDeletionsResponse.yaml
+AppointmentConfirmationBody:
+  $ref: ./calendar/AppointmentConfirmationBody.yaml
+AppointmentFreeBusyItem:
+  $ref: ./calendar/AppointmentFreeBusyItem.yaml
+AppointmentFreeBusyResponse:
+  $ref: ./calendar/AppointmentFreeBusyResponse.yaml
+AppointmentSearchBody:
+  $ref: ./calendar/AppointmentSearchBody.yaml
+# Module: mail
+MailCountResponse:
+  $ref: ./mail/MailCountResponse.yaml
+MailsResponse:
+  $ref: ./mail/MailsResponse.yaml
+MailAttachment:
+  $ref: ./mail/MailAttachment.yaml
+MailData:
+  $ref: ./mail/MailData.yaml
+MailConversationData:
+  $ref: ./mail/MailConversationData.yaml
+MailConversationsResponse:
+  $ref: ./mail/MailConversationsResponse.yaml
+MailListElement:
+  $ref: ./mail/MailListElement.yaml
+MailDestinationBody:
+  $ref: ./mail/MailDestinationBody.yaml
+MailDestinationData:
+  $ref: ./mail/MailDestinationData.yaml
+MailDestinationResponse:
+  $ref: ./mail/MailDestinationResponse.yaml
+MailUpdateBody:
+  $ref: ./mail/MailUpdateBody.yaml
+MailsAllSeenResponse:
+  $ref: ./mail/MailsAllSeenResponse.yaml
+MailUpdatesResponse:
+  $ref: ./mail/MailUpdatesResponse.yaml
+MailResponse:
+  $ref: ./mail/MailResponse.yaml
+MailHeadersResponse:
+  $ref: ./mail/MailHeadersResponse.yaml
+MailSourceResponse:
+  $ref: ./mail/MailSourceResponse.yaml
+SendMailData:
+  $ref: ./mail/SendMailData.yaml
+MailImportResponse:
+  $ref: ./mail/MailImportResponse.yaml
+MailReplyData:
+  $ref: ./mail/MailReplyData.yaml
+MailReplyResponse:
+  $ref: ./mail/MailReplyResponse.yaml
+MailsCleanUpResponse:
+  $ref: ./mail/MailsCleanUpResponse.yaml
+MailAckBody:
+  $ref: ./mail/MailAckBody.yaml
+MailAckResponse:
+  $ref: ./mail/MailAckResponse.yaml
+ResolveShareReferenceElement:
+  $ref: ./mail/ResolveShareReferenceElement.yaml
+ResolveShareReferenceResponse:
+  $ref: ./mail/ResolveShareReferenceResponse.yaml
+# Module: groups
+GroupData:
+  $ref: ./groups/GroupData.yaml
+GroupResponse:
+  $ref: ./groups/GroupResponse.yaml
+GroupListElement:
+  $ref: ./groups/GroupListElement.yaml
+GroupsResponse:
+  $ref: ./groups/GroupsResponse.yaml
+GroupSearchBody:
+  $ref: ./groups/GroupSearchBody.yaml
+GroupUpdateData:
+  $ref: ./groups/GroupUpdateData.yaml
+GroupUpdateResponse:
+  $ref: ./groups/GroupUpdateResponse.yaml
+GroupUpdatesData:
+  $ref: ./groups/GroupUpdatesData.yaml
+GroupUpdatesResponse:
+  $ref: ./groups/GroupUpdatesResponse.yaml
+# Module: resources
+AllResourcesResponse:
+  $ref: ./resources/AllResourcesResponse.yaml
+ResourceData:
+  $ref: ./resources/ResourceData.yaml
+ResourceResponse:
+  $ref: ./resources/ResourceResponse.yaml
+ResourceListElement:
+  $ref: ./resources/ResourceListElement.yaml
+ResourcesResponse:
+  $ref: ./resources/ResourcesResponse.yaml
+ResourceSearchBody:
+  $ref: ./resources/ResourceSearchBody.yaml
+ResourceUpdateData:
+  $ref: ./resources/ResourceUpdateData.yaml
+ResourceUpdateResponse:
+  $ref: ./resources/ResourceUpdateResponse.yaml
+ResourceUpdatesData:
+  $ref: ./resources/ResourceUpdatesData.yaml
+ResourceUpdatesResponse:
+  $ref: ./resources/ResourceUpdatesResponse.yaml
+# Module: infostore
+InfoItemsResponse:
+  $ref: ./infostore/InfoItemsResponse.yaml
+InfoItemListElement:
+  $ref: ./infostore/InfoItemListElement.yaml
+InfoItemUpdatesResponse:
+  $ref: ./infostore/InfoItemUpdatesResponse.yaml
+InfoItemPermission:
+  $ref: ./infostore/InfoItemPermission.yaml
+InfoItemExtendedPermission:
+  $ref: ./infostore/InfoItemExtendedPermission.yaml
+InfoItemData:
+  $ref: ./infostore/InfoItemData.yaml
+InfoItemResponse:
+  $ref: ./infostore/InfoItemResponse.yaml
+InfoItemSearchBody:
+  $ref: ./infostore/InfoItemSearchBody.yaml
+InfoItemZipElement:
+  $ref: ./infostore/InfoItemZipElement.yaml
+InfoItemsMovedResponse:
+  $ref: ./infostore/InfoItemsMovedResponse.yaml
+InfoItemBody:
+  $ref: ./infostore/InfoItemBody.yaml
+InfoItemBodyNotification:
+  $ref: ./infostore/InfoItemBodyNotification.yaml
+InfoItemUpdateResponse:
+  $ref: ./infostore/InfoItemUpdateResponse.yaml
+InfoItemDetachResponse:
+  $ref: ./infostore/InfoItemDetachResponse.yaml
+InfoItemSharingNotificationBody:
+  $ref: ./infostore/InfoItemSharingNotificationBody.yaml
+InfoItemSharingNotificationResponse:
+  $ref: ./infostore/InfoItemSharingNotificationResponse.yaml
+InfoItemSharingNotificationData:
+  $ref: ./infostore/InfoItemSharingNotificationData.yaml
+# Module: attachments
+AttachmentsResponse:
+  $ref: ./attachments/AttachmentsResponse.yaml
+AttachmentData:
+  $ref: ./attachments/AttachmentData.yaml
+AttachmentUpdatesResponse:
+  $ref: ./attachments/AttachmentUpdatesResponse.yaml
+AttachmentResponse:
+  $ref: ./attachments/AttachmentResponse.yaml
+# Module: reminder
+ReminderData:
+  $ref: ./reminder/ReminderData.yaml
+RemindersResponse:
+  $ref: ./reminder/RemindersResponse.yaml
+ReminderListElement:
+  $ref: ./reminder/ReminderListElement.yaml
+ReminderUpdateBody:
+  $ref: ./reminder/ReminderUpdateBody.yaml
+ReminderResponse:
+  $ref: ./reminder/ReminderResponse.yaml
+# Module: multiple
+SingleRequest:
+  $ref: ./multiple/SingleRequest.yaml
+SingleResponse:
+  $ref: ./multiple/SingleResponse.yaml
+# Module: quota
+QuotasResponse:
+  $ref: ./quota/QuotasResponse.yaml
+QuotaData:
+  $ref: ./quota/QuotaData.yaml
+QuotaResponse:
+  $ref: ./quota/QuotaResponse.yaml
+# Module: token
+AcquireTokenResponse:
+  $ref: ./token/AcquireTokenResponse.yaml
+# Module: mailfilter
+MailFilterConfigTest:
+  $ref: ./mailfilter/MailFilterConfigTest.yaml
+MailFilterConfigData:
+  $ref: ./mailfilter/MailFilterConfigData.yaml
+MailFilterConfigResponse:
+  $ref: ./mailfilter/MailFilterConfigResponse.yaml
+MailFilterNotTest:
+  $ref: ./mailfilter/MailFilterNotTest.yaml
+MailFilterTest:
+  $ref: ./mailfilter/MailFilterTest.yaml
+MailFilterAction:
+  $ref: ./mailfilter/MailFilterAction.yaml
+MailFilterRule:
+  $ref: ./mailfilter/MailFilterRule.yaml
+MailFilterRulesResponse:
+  $ref: ./mailfilter/MailFilterRulesResponse.yaml
+MailFilterCreationResponse:
+  $ref: ./mailfilter/MailFilterCreationResponse.yaml
+MailFilterDeletionBody:
+  $ref: ./mailfilter/MailFilterDeletionBody.yaml
+MailFilterScriptResponse:
+  $ref: ./mailfilter/MailFilterScriptResponse.yaml
+# Module: conversion
+ConversionDataSourcePair:
+  $ref: ./conversion/ConversionDataSourcePair.yaml
+ConversionDataSource:
+  $ref: ./conversion/ConversionDataSource.yaml
+ConversionDataHandlerPair:
+  $ref: ./conversion/ConversionDataHandlerPair.yaml
+ConversionDataHandler:
+  $ref: ./conversion/ConversionDataHandler.yaml
+ConversionBody:
+  $ref: ./conversion/ConversionBody.yaml
+ConversionResponse:
+  $ref: ./conversion/ConversionResponse.yaml
+# Module: mailaccount
+MailAccountsResponse:
+  $ref: ./mailaccount/MailAccountsResponse.yaml
+MailAccountData:
+  $ref: ./mailaccount/MailAccountData.yaml
+MailAccountResponse:
+  $ref: ./mailaccount/MailAccountResponse.yaml
+MailAccountUpdateResponse:
+  $ref: ./mailaccount/MailAccountUpdateResponse.yaml
+MailAccountDeletionResponse:
+  $ref: ./mailaccount/MailAccountDeletionResponse.yaml
+MailAccountValidationResponse:
+  $ref: ./mailaccount/MailAccountValidationResponse.yaml
+# Module: autoconfig
+AutoConfigResponse:
+  $ref: ./autoconfig/AutoConfigResponse.yaml
+# Module: user
+UsersResponse:
+  $ref: ./user/UsersResponse.yaml
+UserData:
+  $ref: ./user/UserData.yaml
+UserResponse:
+  $ref: ./user/UserResponse.yaml
+UserSearchBody:
+  $ref: ./user/UserSearchBody.yaml
+UserAttribute:
+  $ref: ./user/UserAttribute.yaml
+UserAttributeResponse:
+  $ref: ./user/UserAttributeResponse.yaml
+UserAttributionResponse:
+  $ref: ./user/UserAttributionResponse.yaml
+# Module: user/me
+CurrentUserData:
+  $ref: ./userme/CurrentUserData.yaml
+CurrentUserResponse:
+  $ref: ./userme/CurrentUserResponse.yaml
+# Module: OAuth
+OAuthAccountData:
+  $ref: ./oauth/accounts/OAuthAccountData.yaml
+OAuthAccountsResponse:
+  $ref: ./oauth/accounts/OAuthAccountsResponse.yaml
+OAuthAccountResponse:
+  $ref: ./oauth/accounts/OAuthAccountResponse.yaml
+OAuthAccountDeletionResponse:
+  $ref: ./oauth/accounts/OAuthAccountDeletionResponse.yaml
+OAuthAccountUpdateResponse:
+  $ref: ./oauth/accounts/OAuthAccountUpdateResponse.yaml
+OAuthAccountInteraction:
+  $ref: ./oauth/accounts/OAuthAccountInteraction.yaml
+OAuthAccountInteractionResponse:
+  $ref: ./oauth/accounts/OAuthAccountInteractionResponse.yaml
+OAuthServiceMetaData:
+  $ref: ./oauth/services/OAuthServiceMetaData.yaml
+OAuthServicesResponse:
+  $ref: ./oauth/services/OAuthServicesResponse.yaml
+OAuthServiceResponse:
+  $ref: ./oauth/services/OAuthServiceResponse.yaml
+OAuthGrantData:
+  $ref: ./oauth/grants/OAuthGrantData.yaml
+OAuthClientData:
+  $ref: ./oauth/grants/OAuthClientData.yaml
+OAuthGrantsResponse:
+  $ref: ./oauth/grants/OAuthGrantsResponse.yaml
+# Module: JSlob
+JSlobData:
+  $ref: ./jslob/JSlobData.yaml
+JSlobsResponse:
+  $ref: ./jslob/JSlobsResponse.yaml
+# Module: freebusy
+FreeBusyData:
+  $ref: ./freebusy/FreeBusyData.yaml
+FreeBusyResponse:
+  $ref: ./freebusy/FreeBusyResponse.yaml
+FreeBusysResponse:
+  $ref: ./freebusy/FreeBusysResponse.yaml
+# Module: messaging
+MessagingFormDescription:
+  $ref: ./messaging/service/MessagingFormDescription.yaml
+MessagingServiceData:
+  $ref: ./messaging/service/MessagingServiceData.yaml
+MessagingServicesResponse:
+  $ref: ./messaging/service/MessagingServicesResponse.yaml
+MessagingServiceResponse:
+  $ref: ./messaging/service/MessagingServiceResponse.yaml
+MessagingAccountData:
+  $ref: ./messaging/account/MessagingAccountData.yaml
+MessagingAccountsResponse:
+  $ref: ./messaging/account/MessagingAccountsResponse.yaml
+MessagingAccountResponse:
+  $ref: ./messaging/account/MessagingAccountResponse.yaml
+MessagingAccountUpdateResponse:
+  $ref: ./messaging/account/MessagingAccountUpdateResponse.yaml
+MessagingMessagesResponse:
+  $ref: ./messaging/message/MessagingMessagesResponse.yaml
+MessagingMessageData:
+  $ref: ./messaging/message/MessagingMessageData.yaml
+MessagingMessageResponse:
+  $ref: ./messaging/message/MessagingMessageResponse.yaml
+MessagingMessageUpdateResponse:
+  $ref: ./messaging/message/MessagingMessageUpdateResponse.yaml
+# Module: snippet
+SnippetAttachment:
+  $ref: ./snippet/SnippetAttachment.yaml
+SnippetData:
+  $ref: ./snippet/SnippetData.yaml
+SnippetsResponse:
+  $ref: ./snippet/SnippetsResponse.yaml
+SnippetResponse:
+  $ref: ./snippet/SnippetResponse.yaml
+SnippetUpdateResponse:
+  $ref: ./snippet/SnippetUpdateResponse.yaml
+SnippetAttachmentListElement:
+  $ref: ./snippet/SnippetAttachmentListElement.yaml
+# Module: halo
+HaloServicesResponse:
+  $ref: ./halo/contact/HaloServicesResponse.yaml
+HaloInvestigationResponse:
+  $ref: ./halo/contact/HaloInvestigationResponse.yaml
+# Module: capabilities
+CapabilityData:
+  $ref: ./capabilities/CapabilityData.yaml
+CapabilitiesResponse:
+  $ref: ./capabilities/CapabilitiesResponse.yaml
+CapabilityResponse:
+  $ref: ./capabilities/CapabilityResponse.yaml
+# Module: jump
+JumpTokenData:
+  $ref: ./jump/JumpTokenData.yaml
+JumpResponse:
+  $ref: ./jump/JumpResponse.yaml
+# Module: find
+FindOptionsData:
+  $ref: ./find/FindOptionsData.yaml
+FindFacetItem:
+  $ref: ./find/FindFacetItem.yaml
+FindFacetFilter:
+  $ref: ./find/FindFacetFilter.yaml
+FindFacetValue:
+  $ref: ./find/FindFacetValue.yaml
+FindFacetValueItem:
+  $ref: ./find/FindFacetValueItem.yaml
+FindFacetValueFilter:
+  $ref: ./find/FindFacetValueFilter.yaml
+FindFacetValueOption:
+  $ref: ./find/FindFacetValueOption.yaml
+FindFacetData:
+  $ref: ./find/FindFacetData.yaml
+FindAutoCompleteBody:
+  $ref: ./find/FindAutoCompleteBody.yaml
+FindAutoCompleteData:
+  $ref: ./find/FindAutoCompleteData.yaml
+FindAutoCompleteResponse:
+  $ref: ./find/FindAutoCompleteResponse.yaml
+FindActiveFacetFilter:
+  $ref: ./find/FindActiveFacetFilter.yaml
+FindActiveFacet:
+  $ref: ./find/FindActiveFacet.yaml
+FindQueryBody:
+  $ref: ./find/FindQueryBody.yaml
+FindQueryResponse:
+  $ref: ./find/FindQueryResponse.yaml
+# Module: share/management
+ShareTargetData:
+  $ref: ./sharemanagement/ShareTargetData.yaml
+ShareLinkData:
+  $ref: ./sharemanagement/ShareLinkData.yaml
+ShareLinkResponse:
+  $ref: ./sharemanagement/ShareLinkResponse.yaml
+ShareLinkUpdateBody:
+  $ref: ./sharemanagement/ShareLinkUpdateBody.yaml
+ShareLinkSendBody:
+  $ref: ./sharemanagement/ShareLinkSendBody.yaml
+ShareLinkSendResponse:
+  $ref: ./sharemanagement/ShareLinkSendResponse.yaml
+# Module: passwordchange
+PasswordChangeBody:
+  $ref: ./passwordchange/PasswordChangeBody.yaml
+# Module: filestorage
+FileServiceConfiguration:
+  $ref: ./filestorage/services/FileServiceConfiguration.yaml
+FileServiceData:
+  $ref: ./filestorage/services/FileServiceData.yaml
+FileServicesResponse:
+  $ref: ./filestorage/services/FileServicesResponse.yaml
+FileServiceResponse:
+  $ref: ./filestorage/services/FileServiceResponse.yaml
+FileAccountData:
+  $ref: ./filestorage/accounts/FileAccountData.yaml
+FileAccountsResponse:
+  $ref: ./filestorage/accounts/FileAccountsResponse.yaml
+FileAccountResponse:
+  $ref: ./filestorage/accounts/FileAccountResponse.yaml
+FileAccountCreationResponse:
+  $ref: ./filestorage/accounts/FileAccountCreationResponse.yaml
+FileAccountUpdateResponse:
+  $ref: ./filestorage/accounts/FileAccountUpdateResponse.yaml
+# Module: mail_categories
+Mail_CategoriesUnreadResponse:
+  $ref: ./mail_categories/Mail_CategoriesUnreadResponse.yaml
+Mail_CategoriesMoveBody:
+  $ref: ./mail_categories/Mail_CategoriesMoveBody.yaml
+Mail_CategoriesTrainBody:
+  $ref: ./mail_categories/Mail_CategoriesTrainBody.yaml

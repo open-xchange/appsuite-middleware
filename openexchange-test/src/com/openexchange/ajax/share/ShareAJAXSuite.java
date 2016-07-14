@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.share;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import com.openexchange.ajax.share.bugs.Bug40369Test;
 import com.openexchange.ajax.share.bugs.Bug40527Test;
 import com.openexchange.ajax.share.bugs.Bug40548Test;
@@ -72,6 +70,8 @@ import com.openexchange.ajax.share.tests.AggregateSharesTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestPasswordTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestTest;
 import com.openexchange.ajax.share.tests.ConvertToInternalPermissionTest;
+import com.openexchange.ajax.share.tests.CopySharedFilesPermissionRemovalTest;
+import com.openexchange.ajax.share.tests.CopySharedFilesVersionsRemovalTest;
 import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
 import com.openexchange.ajax.share.tests.DownloadHandlerTest;
@@ -98,6 +98,8 @@ import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 import com.openexchange.ajax.share.tests.ResolveLegacyLinkTest;
 import com.openexchange.ajax.share.tests.SharedFilesFolderTest;
 import com.openexchange.ajax.share.tests.ShowSharedFilesFolderTest;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * {@link ShareAJAXSuite}
@@ -142,6 +144,8 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(NotifyFolderSharesTest.class);
         tests.addTestSuite(NotifyFileSharesTest.class);
         tests.addTestSuite(SharedFilesFolderTest.class);
+        tests.addTestSuite(CopySharedFilesPermissionRemovalTest.class);
+        tests.addTestSuite(CopySharedFilesVersionsRemovalTest.class);
         tests.addTestSuite(Bug40369Test.class);
         tests.addTestSuite(Bug40548Test.class);
         tests.addTestSuite(Bug40596Test.class);

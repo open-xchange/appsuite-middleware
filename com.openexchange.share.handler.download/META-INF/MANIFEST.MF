@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Share handler to output files directly
 Bundle-SymbolicName: com.openexchange.share.handler.download
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax,
@@ -11,6 +11,9 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.responseRenderers,
  com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.download.limit.limiter,
+ com.openexchange.download.limit.limiter.exceptions,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.file.storage.composition,
@@ -23,6 +26,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.share,
  com.openexchange.share.servlet.handler,
  com.openexchange.tools.iterator,
+ com.openexchange.tools.servlet.ratelimit,
  com.openexchange.tools.session,
  com.openexchange.tx,
  com.openexchange.user,

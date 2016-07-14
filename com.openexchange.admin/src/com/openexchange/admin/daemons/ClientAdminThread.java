@@ -46,11 +46,13 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.daemons;
 
 import com.openexchange.admin.tools.AdminCache;
 
 public class ClientAdminThread extends Thread {
-    public static AdminCache      cache       = null;
-    public static Object create_mutex = new Object();
+
+    public static volatile AdminCache cache;
+    public static final Object create_mutex = new Object();
 }

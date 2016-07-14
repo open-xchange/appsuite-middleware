@@ -1,0 +1,82 @@
+/contacts?action=update:
+  put:
+    operationId: updateContact
+    tags:
+      - contacts
+    summary: Updates a contact.
+    description: |
+      Updates a contact's data. This request cannot change or add contact images. Therefore it
+      is necessary to use the `POST` method.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamContactFolder"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the contact that shall be updated.
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the updated contact. If the contact was modified after the specified timestamp, then the update must fail.
+        required: true
+      - in: body
+        name: body
+        description: A JSON object containing the contact's data. Only modified fields must be specified. To remove some contact image send the image attribute set to null.
+        required: true
+        schema:
+          $ref: "#/definitions/ContactData"
+    responses:
+      200:
+        description: |
+          A JSON object with a timestamp. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/ContactUpdateResponse"
+  post:
+    operationId: updateContactAdvanced
+    tags:
+      - contacts
+    summary: Updates a contact.
+    description: |
+      Updates a contact's data and images. The normal request body must be placed as form-data using the
+      content-type `multipart/form-data`. The form field `json` contains the contact's data while the image file
+      must be placed in a file field named `file` (see also [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)).
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamContactFolder"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the contact that shall be updated.
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the updated contact. If the contact was modified after the specified timestamp, then the update must fail.
+        required: true
+      - in: formData
+        name: json
+        type: string
+        description: Represents the normal request body as JSON string containing the contact data as described in [ContactData](#/definitions/ContactData) model. Only modified fields must be specified but at least "{}".
+        required: true
+        default: "{}"
+      - in: formData
+        name: file
+        type: file
+        description: The image file.
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing the object ID of the contact or errors if some occurred.
+        schema:
+          type: string

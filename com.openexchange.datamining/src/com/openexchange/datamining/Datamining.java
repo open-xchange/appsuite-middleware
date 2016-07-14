@@ -53,6 +53,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -68,6 +70,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -76,6 +79,9 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.mysql.jdbc.MySQLConnection;
 import com.openexchange.java.Streams;
 
@@ -103,8 +109,6 @@ public class Datamining {
     public static final String NUMBER_OF_CONTEXTS = "numberOfContexts";
 
     public static final String NUMBER_OF_SCHEMATA = "numberOfSchemata";
-
-    private static MySQLConnection instance = null;
 
     private static Connection configdbConnection = null;
 
@@ -209,7 +213,9 @@ public class Datamining {
             Questions.reportNumberOfUsersWhoLoggedInWithClientEASInTheLast30Days();
             Questions.reportNumberOfUsersWhoLoggedInWithClientCalDAVInTheLast30Days();
             Questions.reportNumberOfUsersWhoLoggedInWithClientCardDAVInTheLast30Days();
-
+            Questions.reportSliceAndDiceOnDraftMailSize();
+            Questions.reportSliceAndDiceOnExternalAccountUsage();
+            
             rightNow = Calendar.getInstance();
             final long after = rightNow.getTime().getTime();
             report("durationInSeconds", Long.toString((after - before) / 1000));
@@ -223,6 +229,28 @@ public class Datamining {
             } catch (SQLException e) {
                 System.out.println("Error : " + e.getMessage());
             }
+        }
+    }
+
+    private static void cleanupSql(final Object... clobj) {
+        try {
+            if( null != clobj ) {
+                for(final Object obj : clobj) {
+                    if( null != obj ) {
+                        if( obj instanceof Statement ) {
+                            ((Statement)obj).close();
+                        }
+                        if( obj instanceof ResultSet) {
+                            ((ResultSet)obj).close();
+                        }
+                        if( obj instanceof MySQLConnection) {
+                            ((MySQLConnection)obj).close();
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -262,12 +290,13 @@ public class Datamining {
     private static void reportNumberOfContexts() {
         allTheQuestions.add(NUMBER_OF_CONTEXTS);
         if (configdbConnection != null) {
-            Statement query;
+            Statement query = null;
+            ResultSet result = null;
             try {
                 query = configdbConnection.createStatement();
 
                 String sql = "SELECT count(*) FROM context";
-                ResultSet result = query.executeQuery(sql);
+                result = query.executeQuery(sql);
 
                 while (result.next()) {
                     String count = result.getString(1);
@@ -275,6 +304,8 @@ public class Datamining {
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
+            } finally {
+                cleanupSql(query, result);
             }
         }
     }
@@ -412,9 +443,11 @@ public class Datamining {
 
     private static void readProperties() {
         // Try to read configdb.properties
-        Properties configdbProperties = new Properties();
+        FileInputStream in = null;
         try {
-            configdbProperties.load(new FileInputStream("/opt/open-xchange/etc/configdb.properties"));
+            Properties configdbProperties = new Properties();
+            in = new FileInputStream("/opt/open-xchange/etc/configdb.properties");
+            configdbProperties.load(in);
             configDBURL = configdbProperties.getProperty("readUrl");
 
             configDBUser = configdbProperties.getProperty("readProperty.1").substring(5);
@@ -426,6 +459,14 @@ public class Datamining {
             System.out.println("File /opt/open-xchange/etc/configdb.properties is not available");
         } catch (IOException e) {
             System.out.println("File /opt/open-xchange/etc/configdb.properties is not available");
+        } finally {
+            if (null != in) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
         }
     }
 
@@ -473,7 +514,7 @@ public class Datamining {
         } catch (SQLException e) {
             System.out.println("Error : No SQL-connection possible to this URL: " + url + " with this user and password : (" + user + " / " + password + ")");
             System.out.println(e.getMessage());
-            System.exit(0);
+            System.exit(1);
         }
         return null;
     }
@@ -498,13 +539,14 @@ public class Datamining {
         try {
             if (configdbConnection != null) {
                 report("configdbUrl", configDBURL);
-                Statement query;
+                Statement query = null;
+                ResultSet result = null;
                 try {
                     query = configdbConnection.createStatement();
-
+                    
                     String sql = "SELECT DISTINCT csp.db_schema, csp.read_db_pool_id, dp.url, dp.login, dp.password FROM context_server2db_pool csp, db_pool dp WHERE csp.read_db_pool_id = dp.db_pool_id;";
-                    ResultSet result = query.executeQuery(sql);
-
+                    result = query.executeQuery(sql);
+                    
                     while (result.next()) {
                         Schema schema = new Schema(
                             result.getString("db_schema"),
@@ -516,6 +558,8 @@ public class Datamining {
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
+                } finally {
+                    cleanupSql(query, result);
                 }
             }
         } catch (Exception e) {
@@ -529,12 +573,13 @@ public class Datamining {
         ArrayList<String> schemata = new ArrayList<String>();
         try {
             if (configdbConnection != null) {
-                Statement query;
+                Statement query = null;
+                ResultSet result = null;
                 try {
                     query = configdbConnection.createStatement();
 
                     String sql = "SELECT ROUND(AVG(size)) FROM filestore";
-                    ResultSet result = query.executeQuery(sql);
+                    result = query.executeQuery(sql);
 
                     while (result.next()) {
                         String size = result.getString(1);
@@ -542,6 +587,8 @@ public class Datamining {
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
+                } finally {
+                    cleanupSql(query, result);
                 }
             }
         } catch (Exception e) {
@@ -557,13 +604,14 @@ public class Datamining {
                 String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
                 MySQLConnection conn = getDBConnection(url, schema.getLogin(), schema.getPassword());
                 if (conn != null) {
-                    Statement query;
+                    Statement query = null;
+                    ResultSet result = null;
                     try {
                         query = conn.createStatement();
-
+                        
                         String sql = "SELECT AVG(number_per_context) FROM (SELECT COUNT(id) AS number_per_context FROM infostore GROUP BY cid) AS T";
-                        ResultSet result = query.executeQuery(sql);
-
+                        result = query.executeQuery(sql);
+                        
                         while (result.next()) {
                             String numberInOneSchema = result.getString(1);
                             numberInAllSchemata += new Float(numberInOneSchema);
@@ -571,6 +619,8 @@ public class Datamining {
                         conn.close();
                     } catch (SQLException e) {
                         e.printStackTrace();
+                    } finally {
+                        cleanupSql(query, result, conn);
                     }
                 }
             }
@@ -587,13 +637,14 @@ public class Datamining {
                 String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
                 MySQLConnection conn = getDBConnection(url, schema.getLogin(), schema.getPassword());
                 if (conn != null) {
-                    Statement query;
+                    Statement query = null;
+                    ResultSet result = null;
                     try {
                         query = conn.createStatement();
-
+                        
                         String sql = "SELECT COUNT(*) FROM infostore";
-                        ResultSet result = query.executeQuery(sql);
-
+                        result = query.executeQuery(sql);
+                        
                         while (result.next()) {
                             String numberInOneSchema = result.getString(1);
                             numberInAllSchemata += new Float(numberInOneSchema);
@@ -601,6 +652,8 @@ public class Datamining {
                         conn.close();
                     } catch (SQLException e) {
                         e.printStackTrace();
+                    } finally {
+                        cleanupSql(query, result, conn);
                     }
                 }
             }
@@ -615,10 +668,11 @@ public class Datamining {
             String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
-                Statement query;
+                Statement query = null;
+                ResultSet result = null;
                 try {
                     query = conn.createStatement();
-                    ResultSet result = query.executeQuery(sql);
+                    result = query.executeQuery(sql);
                     while (result.next()) {
                         String numberInOneSchema = result.getString(1);
                         numberOfObjects = numberOfObjects.add(new BigInteger(numberInOneSchema));
@@ -626,15 +680,92 @@ public class Datamining {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    cleanupSql(query, result, conn);
                 }
             }
         }
         return numberOfObjects;
+    }
+
+    protected static LinkedHashMap<Integer, Integer> draftMailOverAllSchemata(final int ranges[]) {
+        // we want to keep the order of ranges
+        final LinkedHashMap<Integer, Integer> rm = new LinkedHashMap<>(ranges.length);
+        for(int r : ranges) {
+            rm.put(r, 0);
+        }
+        rm.put(Integer.MAX_VALUE, 0);
+        for (Schema schema : allSchemata) {
+            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
+            if (conn != null) {
+                java.sql.PreparedStatement prep = null;
+                ResultSet result = null;
+                try {
+                    prep = conn.prepareStatement("SELECT data FROM jsonStorage WHERE id=?");
+                    prep.setString(1, "io.ox/core");
+                    result = prep.executeQuery();
+                    while (result.next()) {
+                        // FIXME: maybe sufficient to just NOT check for savepoints and sum up just all data within jsonStorage with id=io.ox/core ?
+                        InputStream is = result.getBlob(1).getBinaryStream();
+                        JSONObject job = new JSONObject(new InputStreamReader(is));
+                        if( job.has("savepoints") ) {
+                            JSONArray sp = (JSONArray) job.get("savepoints");
+                            if( null != sp ) {
+                                int spsize = sp.toString().getBytes().length;
+                                int ll = 0;
+                                for(Integer rtb : rm.keySet()) {
+                                    if( spsize > ll && spsize <= rtb ) {
+                                        rm.put(rtb, (rm.get(rtb))+1);
+                                    }
+                                    ll = rtb;
+                                }
+                            }
+                        }
+                        is.close();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    cleanupSql(prep, result, conn);
+                }
+            }
+        }
+        return rm;
+    }
+
+    protected static HashMap<Integer, Integer> externalAccountsOverAllSchemata(int max) {
+        final HashMap<Integer, Integer> ret = new HashMap<>();
+        for (Schema schema : allSchemata) {
+            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
+            if (conn != null) {
+                java.sql.PreparedStatement prep = null;
+                ResultSet result = null;
+                try {
+                    prep = conn.prepareStatement("SELECT COUNT(id) FROM user_mail_account WHERE name != ? GROUP BY cid,user");
+                    prep.setString(1, "E-Mail");
+                    result = prep.executeQuery();
+                    while (result.next()) {
+                        Integer ecnt = result.getInt(1);
+                        ecnt = ecnt > max ? max : ecnt;
+                        if( null != ret.get(ecnt) ) {
+                            ret.put(ecnt, (ret.get(ecnt))+1);
+                        } else {
+                            ret.put(ecnt, 1);
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } finally {
+                    cleanupSql(prep, result, conn);
+                }
+            }
+        }
+        return ret;
     }
 
     protected static BigInteger maximumForAllSchemata(String sql) {
@@ -643,10 +774,11 @@ public class Datamining {
             String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
-                Statement query;
+                Statement query = null;
+                ResultSet result = null;
                 try {
                     query = conn.createStatement();
-                    ResultSet result = query.executeQuery(sql);
+                    result = query.executeQuery(sql);
                     while (result.next()) {
                         String numberInOneSchema = result.getString(1);
                         BigInteger numberInThisSchema = new BigInteger(numberInOneSchema);
@@ -657,11 +789,7 @@ public class Datamining {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    cleanupSql(query, result, conn);
                 }
             }
         }
@@ -674,10 +802,11 @@ public class Datamining {
             String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
-                Statement query;
+                Statement query = null;
+                ResultSet result = null;
                 try {
                     query = conn.createStatement();
-                    ResultSet result = query.executeQuery(sql);
+                    result = query.executeQuery(sql);
                     while (result.next()) {
                         String numberInOneSchema = result.getString(1);
                         Float numberInThisSchema = new Float(numberInOneSchema);
@@ -686,11 +815,7 @@ public class Datamining {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    cleanupSql(query, result, conn);
                 }
             }
         }

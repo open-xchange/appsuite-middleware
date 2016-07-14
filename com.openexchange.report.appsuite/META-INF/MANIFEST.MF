@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Report Generation Framework
 Bundle-SymbolicName: com.openexchange.report.appsuite
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.report.appsuite.osgi.ReportActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -23,7 +23,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,
- com.openexchange.filestore,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.filestore,
@@ -31,12 +30,16 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.hazelcast.serialization,
  com.openexchange.java.util,
  com.openexchange.log,
+ com.openexchange.logging,
  com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.report,
  com.openexchange.report.appsuite.serialization,
  com.openexchange.server,
+ com.openexchange.server.services,
  com.openexchange.tools.file,
+ com.openexchange.tools.session,
+ com.openexchange.tools.sql,
  com.openexchange.user,
  com.openexchange.version,
  javax.annotation.concurrent,
@@ -49,12 +52,11 @@ Import-Package: com.fasterxml.jackson.core,
  javax.management.remote,
  javax.management.remote.rmi,
  javax.management.timer,
- org.apache.commons.collections,
- org.apache.commons.lang,
+ org.apache.commons.collections;version="3.2.1",
+ org.apache.commons.lang;version="2.6.0",
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
- org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.report.appsuite,
  com.openexchange.report.appsuite.defaultHandlers

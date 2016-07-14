@@ -68,8 +68,8 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
     /**
      * Initializes a new {@link NonCachingIMAPStoreContainer}.
      */
-    public NonCachingIMAPStoreContainer(final String server, final int port, boolean propagateClientIp) {
-        super(propagateClientIp);
+    public NonCachingIMAPStoreContainer(int accountId, Session session, String server, int port, boolean propagateClientIp) {
+        super(accountId, session, propagateClientIp);
         this.port = port;
         this.server = server;
         inUseCount = new AtomicInteger();

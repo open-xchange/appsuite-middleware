@@ -1,0 +1,24 @@
+/calendar?action=getChangeExceptions:
+  get:
+    operationId: getChangeExceptions
+    tags:
+      - calendar
+    summary: Gets all change exceptions (**available since v7.2.0**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the appointment series.
+        required: true
+      - $ref: "#/parameters/gblQueryParamCalendarFolder"
+      - $ref: "#/parameters/gblQueryParamCalendarColumns"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with appointment data. Each array element describes one appointment and
+          is itself an array. The elements of each array contain the information specified by the corresponding
+          identifiers in the `columns` parameter. In case of errors the responsible fields in the response are filled
+          (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/AppointmentsResponse"

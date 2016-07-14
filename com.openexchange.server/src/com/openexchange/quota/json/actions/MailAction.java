@@ -49,7 +49,6 @@
 
 package com.openexchange.quota.json.actions;
 
-import static com.openexchange.mail.utils.StorageUtility.UNLIMITED_QUOTA;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -57,11 +56,10 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.quota.json.QuotaAJAXRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 
 /**
@@ -87,39 +85,34 @@ public final class MailAction extends AbstractQuotaAction {
 
     @Override
     protected AJAXRequestResult perform(final QuotaAJAXRequest req) throws OXException, JSONException {
+        // Get quota info
+        long[][] quotaInfo = getQuotaInfo(req.getSession());
+
+        JSONObject data = new JSONObject(6);
+        // STORAGE
+        data.put("quota", quotaInfo[0][0] << 10);
+        data.put("use", quotaInfo[0][1] << 10);
+        // MESSAGE
+        data.put("countquota", quotaInfo[1][0]);
+        data.put("countuse", quotaInfo[1][1]);
+        /*
+         * Write JSON object into writer as data content of a response object
+         */
+        return new AJAXRequestResult(data, "json");
+    }
+
+    private long[][] getQuotaInfo(Session session) throws OXException {
         MailServletInterface mi = null;
         try {
-            long[][] quotaInfo = null;
-            try {
-                mi = MailServletInterface.getInstance(req.getSession());
-                quotaInfo = mi.getQuotas(new int[] {
-                    MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
-            } catch (final OXException e) {
-                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
-                    LOG.debug("", e);
-                } else {
-                    LOG.error("", e);
-                }
-                quotaInfo = new long[][] { { UNLIMITED_QUOTA, UNLIMITED_QUOTA }, { UNLIMITED_QUOTA, UNLIMITED_QUOTA } };
-            }
-            final JSONObject data = new JSONObject();
-            // STORAGE
-            data.put("quota", quotaInfo[0][0] << 10);
-            data.put("use", quotaInfo[0][1] << 10);
-            // MESSAGE
-            data.put("countquota", quotaInfo[1][0]);
-            data.put("countuse", quotaInfo[1][1]);
-            /*
-             * Write JSON object into writer as data content of a response object
-             */
-            return new AJAXRequestResult(data, "json");
+            mi = MailServletInterface.getInstance(session);
+            return mi.getQuotas(new int[] { MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
         } finally {
-            try {
-                if (mi != null) {
+            if (mi != null) {
+                try {
                     mi.close(false);
+                } catch (Exception e) {
+                    // Ignore
                 }
-            } catch (final OXException e) {
-                // Ignore
             }
         }
     }

@@ -449,6 +449,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 final PushbackInputStream in = new PushbackInputStream(part.getInputStream());
                 final int read = in.read();
                 if (read < 0) {
+                    Streams.close(in);
                     return Streams.EMPTY_INPUT_STREAM;
                 }
                 in.unread(read);

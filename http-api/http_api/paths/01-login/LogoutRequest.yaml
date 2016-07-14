@@ -1,0 +1,12 @@
+/login?action=logout:
+  get:
+    operationId: doLogout
+    tags:
+      - login
+    summary: Does the logout.
+    description: Does the logout which invalidates the session.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      403:
+        description: FORBIDDEN. The server refuses to respond to the request.

@@ -70,6 +70,7 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
 
     /** */
     public OXAuthFileStorage() {
+        super();
     }
 
     /**

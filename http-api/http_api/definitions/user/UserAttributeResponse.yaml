@@ -1,0 +1,5 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    $ref: "#/definitions/UserAttribute"

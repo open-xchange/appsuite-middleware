@@ -1,0 +1,69 @@
+/find?action=autocomplete:
+  put:
+    operationId: doAutoComplete
+    tags:
+      - find
+    summary: Suggests possible search filters based on a user's input (**available since v7.6.1**).
+    description: |
+      Filters are grouped into categories, the so called facets.
+      #### Facets
+      The style of a facet is responsible for how the according object is structured, how it is handled on the
+      server-side and how the client has to handle it. We distinguish three styles of facets:
+       * simple
+       * default
+       * exclusive
+      ___
+      Every facet value contains an embedded `filter` object. The filter must not be changed by the client, it has
+      to be seen as a black-box. Instead the filters of selected facet values have to be copied and sent to the
+      server with the subsequent requests.
+      #### Simple facets
+      A simple facet is a special facet that has exactly one value. The facet's type and its value are strictly
+      coupled, in a way that a display name for both, facet and value would be redundant. A simple facet generally
+      denotes a logical field like 'phone number'. Internally this logical field can map to several internal
+      fields (e.g. 'phone_private', 'phone_mobile', 'phone_business'). In clients the facet as a whole can be
+      displayed as a single item. Example: "Search for 'term' in field 'phone number'".
+      #### Default facets
+      A default facet contains multiple values and may be present multiple times in search requests to filter
+      results by a combination of different values (e.g. "mails with 'foo' and 'bar' in subject").
+      
+      Facet values may be one- or two-dimensional. A one-dimensional value can be displayed as is and contains an
+      according filter object. A two-dimensional value contains an array "options" with every option defining
+      different semantics of how the value is used to filter the search results.
+      #### Exclusive facets
+      An exclusive facet is a facet where the contained values are mutually exclusive. That means that the facet
+      must only be present once in an autocomplete or query request.
+      
+      Facet values may be one- or two-dimensional. A one-dimensional value can be displayed as is and contains an
+      according filter object. A two-dimensional value contains an array "options" with every option defining
+      different semantics of how the value is used to filter the search results.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: module
+        type: string
+        description: |
+          The name of the module within that the search shall be performed. Possible modules are: mail, contacts,
+          calendar, tasks, drive. Because a user may have limited access to modules the useable modules might only
+          be a subset of the available ones. Retrieve a list of allowed modules by querying the user configuration,
+          see module "config" (path `search`) or module "JSlob" (e.g. `id=io.ox/core`).
+        required: true
+      - in: query
+        name: limit
+        type: integer
+        description: The maximum number of values returned per facet.
+        required: false
+      - in: body
+        name: body
+        description: A JSON object containing the user's input (specified in field `prefix`), already selected `facets`, and possible `options`.
+        required: true
+        schema:
+          $ref: "#/definitions/FindAutoCompleteBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing the facets that were found. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FindAutoCompleteResponse"

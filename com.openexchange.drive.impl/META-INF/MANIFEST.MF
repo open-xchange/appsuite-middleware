@@ -2,23 +2,26 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive Server Bundle
 Bundle-SymbolicName: com.openexchange.drive.impl
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.drive.impl.osgi.DriveActivator
 Bundle-ClassPath: .,
  lib/jacksum.jar
-Import-Package: com.openexchange.ajax.container,
+Import-Package: com.fasterxml.jackson.core,
+ com.openexchange.ajax.container,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.tools,
  com.openexchange.capabilities,
+ com.openexchange.cluster.timer,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.configuration,
  com.openexchange.contact,
  com.openexchange.contact.storage,
  com.openexchange.context,
+ com.openexchange.conversion,
  com.openexchange.database,
  com.openexchange.drive,
  com.openexchange.exception,
@@ -30,6 +33,8 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.type,
  com.openexchange.group,
+ com.openexchange.groupware.contact,
+ com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.delete,
@@ -37,10 +42,12 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.groupware.results,
+ com.openexchange.groupware.search,
  com.openexchange.groupware.update,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
  com.openexchange.i18n.tools,
+ com.openexchange.image,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
@@ -73,4 +80,5 @@ Import-Package: com.openexchange.ajax.container,
  org.json,
  org.osgi.framework,
  org.osgi.service.event,
+ org.osgi.util.tracker;version="1.5.1",
  org.slf4j

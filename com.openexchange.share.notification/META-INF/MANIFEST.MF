@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.share.notification
 Bundle-SymbolicName: com.openexchange.share.notification
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.share.notification.osgi.ShareNotificationActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -54,6 +54,10 @@ Import-Package: com.google.common.base;version="18.0.0",
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
  com.openexchange.user,
+ gnu.trove,
+ gnu.trove.iterator,
+ gnu.trove.map,
+ gnu.trove.map.hash,
  javax.activation,
  javax.mail,
  javax.mail.internet,

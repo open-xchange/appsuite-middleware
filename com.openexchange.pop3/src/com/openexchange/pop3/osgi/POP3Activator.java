@@ -59,6 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -147,6 +148,7 @@ public final class POP3Activator extends HousekeepingActivator {
              */
             track(POP3StorageProvider.class, customizer);
             track(SessiondService.class);
+            trackService(AuditLogService.class);
             openTrackers();
             /*
              * Register

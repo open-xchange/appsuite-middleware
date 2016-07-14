@@ -1,0 +1,21 @@
+/share/management?action=deleteLink:
+  put:
+    operationId: deleteShareLink
+    tags:
+      - share/management
+    summary: Deletes a share link (**available since v7.8.0**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object containing the share target where the link should be deleted for.
+        required: true
+        schema:
+          $ref: "#/definitions/ShareTargetData"
+    responses:
+      200:
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

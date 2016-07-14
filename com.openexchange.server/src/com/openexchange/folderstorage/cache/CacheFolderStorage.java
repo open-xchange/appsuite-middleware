@@ -727,6 +727,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             if (null != pathPerformer) {
                 try {
                     pathPerformer.getStorageParameters().setIgnoreCache(Boolean.TRUE);
+                    pathPerformer.getStorageParameters().putParameter(FolderType.GLOBAL, "DO_NOT_CACHE", true);
                     if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
                         UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
                         ids = new ArrayList<String>(path.length);

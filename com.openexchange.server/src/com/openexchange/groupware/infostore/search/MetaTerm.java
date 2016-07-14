@@ -56,7 +56,6 @@ import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.java.Strings;
 
 /**
  * {@link MetaTerm}
@@ -94,16 +93,7 @@ public final class MetaTerm implements SearchTerm<String> {
 
     @Override
     public boolean matches(final DocumentMetadata file) throws OXException {
-        if (Strings.isEmpty(pattern)) {
-            return false;
-        }
-
-        final Map<String, Object> meta = null;
-        if (null == meta || meta.isEmpty()) {
-            return false;
-        }
-
-        return lookUpMap(toLowerCase(pattern), meta);
+        return false;
     }
 
     private boolean lookUpMap(final String lookUp, final Map<String, Object> map) {

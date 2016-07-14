@@ -1,0 +1,30 @@
+/jslob?action=update:
+  put:
+    operationId: updateJSlob
+    tags:
+      - JSlob
+    summary: Updates a JSlob (**available since v6.22**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The JSlob indentifier.
+      - in: query
+        name: serviceId
+        type: string
+        description: The identifier for the JSlob service, default is "com.openexchange.jslob.config".
+        required: false
+      - in: body
+        name: body
+        description: The JSON object containing the updated JSON configuration to store. Fields that are not included are thus not affected and survive the change. Use `/jslob?action=set` to delete fields or entire JSlob.
+        required: true
+        schema:
+          type: object
+    responses:
+      200:
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

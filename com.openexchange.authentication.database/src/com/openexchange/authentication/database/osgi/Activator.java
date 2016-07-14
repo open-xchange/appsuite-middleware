@@ -49,7 +49,7 @@
 
 package com.openexchange.authentication.database.osgi;
 
-import com.openexchange.authentication.BasicAuthenticationService;
+import com.openexchange.authentication.AuthenticationDriver;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -71,7 +71,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        track(BasicAuthenticationService.class, new AuthenticationRegisterer(context));
+        track(AuthenticationDriver.class, new AuthenticationRegisterer(context));
         openTrackers();
     }
 

@@ -211,6 +211,23 @@ public class SessionFilterTest {
         Assert.assertTrue(filter.apply(simSession));
     }
 
+    @Test
+    public void testFilterSecret() throws Exception {
+        String sessionId = UUIDs.getUnformattedString(UUID.randomUUID());
+        String secret = UUIDs.getUnformattedString(UUID.randomUUID());
+        String hash = UUIDs.getUnformattedString(UUID.randomUUID());
+        String auth = UUIDs.getUnformattedString(UUID.randomUUID());
+        String client = UUIDs.getUnformattedString(UUID.randomUUID());
+        SimSession simSession = new SimSession(24, 48);
+        simSession.setSessionID(sessionId);
+        simSession.setHash(hash);
+        simSession.setSecret(secret);
+        simSession.setAuthId(auth);
+        simSession.setClient(client);
+        SessionFilter filter = SessionFilter.create("(" + SessionFilter.SECRET + "=" + secret + ")");
+        Assert.assertTrue(filter.apply(simSession));
+    }
+
     private static boolean matches(String filter, Matchee matchee) {
         return new SessionFilter.Parser(filter).parse().matches(matchee);
     }

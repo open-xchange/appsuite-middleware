@@ -120,6 +120,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -137,6 +138,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -156,6 +158,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }

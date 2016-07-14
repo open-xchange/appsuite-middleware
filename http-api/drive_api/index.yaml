@@ -1,0 +1,24 @@
+swagger: '2.0'
+# Document information
+info:
+  $ref: ./info/index.yaml
+# API host and basePath for testing requests
+host: example.com
+schemes:
+  - https
+basePath: /ajax
+# Usally OX HTTP API produces JSON objects as responses and consumes from data in request body
+produces:
+  - application/json
+consumes:
+  - application/x-www-form-urlencoded
+# The list of modules and their short descriptions
+tags:
+  - name: drive
+# References to the definitions, "global" parameters and paths
+definitions:
+  $ref: ./definitions/index.yaml
+parameters:
+  $ref: ./parameters/index.yaml
+paths:
+  source: ./paths/

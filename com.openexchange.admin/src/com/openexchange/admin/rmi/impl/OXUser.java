@@ -111,6 +111,9 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -1100,7 +1103,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             usrdata.testMandatoryCreateFieldsNull();
             userid = usrdata.getId();
 
-            if (!ClientAdminThread.cache.contextAuthenticationDisabled()) {
+            if (!cache.contextAuthenticationDisabled()) {
                 if( basicauth.isMasterOfContext(credentials, ctx) ) {
                     basicauth.doAuthentication(auth, ctx);
                 } else {
@@ -1250,8 +1253,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         // change cached admin credentials if necessary
         if (isContextAdmin && usrdata.getPassword() != null) {
-            final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
-            final String mech = ClientAdminThread.cache.getAdminAuthMech(ctx);
+            final Credentials cauth = cache.getAdminCredentials(ctx);
+            final String mech = cache.getAdminAuthMech(ctx);
             if ("{CRYPT}".equalsIgnoreCase(mech)) {
                 try {
                     cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
@@ -1277,7 +1280,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new StorageException(e);
                 }
             }
-            ClientAdminThread.cache.setAdminCredentials(ctx,mech,cauth);
+            cache.setAdminCredentials(ctx,mech,cauth);
         }
     }
 
@@ -1747,6 +1750,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 final Cache mailAccountCache = cacheService.getCache("MailAccount");
                 mailAccountCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(0), String.valueOf(usr.getId())));
+                mailAccountCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(usr.getId())));
                 mailAccountCache.invalidateGroup(ctx.getId().toString());
 
                 final Cache globalFolderCache = cacheService.getCache("GlobalFolderCache");
@@ -1758,6 +1762,21 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 folderCache.remove(cacheKey);
             } catch (final OXException e) {
                 LOGGER.error("", e);
+            }
+        }
+
+        final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (viewFactory != null) {
+            ConfigView view;
+            try {
+                view = viewFactory.getView(usr.getId(), ctx.getId());
+                Boolean check = view.get("com.openexchange.imap.initWithSpecialUse", Boolean.class);
+                if (check != null && check) {
+                    ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                    prop.set(Boolean.TRUE);
+                }
+            } catch (OXException e) {
+                LOGGER.error("Unable to set special use check property!");
             }
         }
 
@@ -1844,10 +1863,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
                 }
             } else {
-                if (!tool.existsUser(ctx, destUser)) {
-                    throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
-                }
                 if (destUser > 0) { // Move to master store
+                    if (!tool.existsUser(ctx, destUser)) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
+                    }
                     User masterUser = new User(destUser);
                     for (User filestoreOwner : filestoreOwners) {
                         LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
@@ -2542,7 +2561,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 permissionBits = Integer.parseInt(filter);
             } catch (final NumberFormatException nfe) {
-                final UserModuleAccess namedAccessCombination = ClientAdminThread.cache.getNamedAccessCombination(filter);
+                final UserModuleAccess namedAccessCombination = cache.getNamedAccessCombination(filter);
                 if (namedAccessCombination == null) {
                     throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"");
                 }

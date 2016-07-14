@@ -1,0 +1,25 @@
+/mail?action=resolve_share_reference:
+  put:
+    operationId: resolveShareReference
+    tags:
+      - mail
+    summary: Resolves a given share reference
+    consumes:
+      - application/json
+    produces:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object providing the share reference to resolve
+        required: true
+        schema:
+          $ref: "#/definitions/ResolveShareReferenceElement"
+    responses:
+      200:
+        description: |
+          'The JSON representation for the resolved share reference. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+        schema:
+          $ref: "#/definitions/ResolveShareReferenceResponse"

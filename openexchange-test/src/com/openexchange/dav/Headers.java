@@ -69,6 +69,10 @@ public final class Headers {
 	public static final String IF_MATCH = "If-Match";
 	
 	
+    /**
+     * max_similarity
+     */
+    public static final String MAX_SIMILARITY = "X-OX-MAX-SIMILARITY";
 	
 	private Headers() {
 		// prevent instantiation

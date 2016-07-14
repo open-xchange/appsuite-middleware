@@ -84,6 +84,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
@@ -305,10 +306,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 try {
                     URI uri = new URI(cbUrl);
 
-                    DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
-                    String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
-                    if (!path.startsWith("/")) {
-                        path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
+                    String path;
+                    {
+                        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+                        StringBuilder pathBuilder = new StringBuilder(prefixService.getPrefix()).append("defer");
+                        if (pathBuilder.charAt(0) != '/') {
+                            pathBuilder.insert(0, '/');
+                        }
+                        path = pathBuilder.toString();
                     }
 
                     String prevCbUrl = cbUrl;
@@ -970,6 +975,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage());
         } finally {
+            Databases.closeSQLStuff(stmt);
             provider.releaseWriteConnection(context, con);
         }
     }

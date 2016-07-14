@@ -1,0 +1,32 @@
+/attachment?action=attach:
+  post:
+    operationId: createAttachment
+    tags:
+      - attachments
+    summary: Creates an attachment.
+    description: |
+      #### Note
+      It is possible to create multiple attachments at once. Therefor add additional form fields and replace "[index]" in `json_[index]`
+      and `file_[index]` with the appropriate index, like `json_1`, `file_1`. The index always starts with 0 (mandatory attachment object).
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: formData
+        name: json_0
+        type: string
+        description: A JSON string representing an attachment object as described in [AttachmentData](#/definitions/AttachmentData) model with at least the fields `folder`, `attached` and `module`.
+        required: true
+      - in: formData
+        name: file_0
+        type: file
+        description: The attachment file as per `<input type="file" />`.
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON array of object IDs of the newly created attachments or errors if some occurred.
+        schema:
+          type: string

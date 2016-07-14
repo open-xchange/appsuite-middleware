@@ -1,0 +1,80 @@
+/mail?action=new:
+  post:
+    operationId: sendMail
+    tags:
+      - mail
+    summary: Sends a mail.
+    description: |
+      The request accepts file fields in upload form that denote referenced files that are going to be appended
+      as attachments.
+      For "text/plain" mail bodies, the JSON boolean field "raw" may be specified inside the body's JSON
+      representation to signal that the text content shall be kept as-is; meaning to keep all formatting
+      intact.
+    consumes:
+      - multipart/form-data
+      - multipart/mixed
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: lineWrapAfter
+        type: integer
+        description: An integer value specifying the line-wrap setting (only effective for plain-text content); if absent the setting is taken from user's mail settings. Available with v7.8.1.
+        required: false
+      - in: formData
+        name: json_0
+        type: string
+        description: |
+          Contains the rudimentary mail as JSON string (see [SendMailData](#/definitions/SendMailData) model) with just its message body
+          (as html content) defined in nested JSON array `attachments` and its header data (from, to,
+          subject, etc.). The field "content_type" defines whether the mail ought to be sent as plain text
+          ("text/plain"), as html ("text/html") or as multipart/alternative ("ALTERNATIVE"). Sending a mail
+          requires some special fields inside JSON mail object. The field "infostore_ids" defines a JSON
+          array of infostore document ID(s) that ought to be appended to this mail as attachments. The field
+          "msgref" indicates the ID of the referenced original mail. Moreover the field "sendtype" indicates
+          the type of the message: 0 (normal new mail), 1 (a reply mail, field `msgref` must be present),
+          2 (a forward mail, field `msgref` must be present), 3 (draft edit operation, field `msgref` must be
+          present in order to delete previous draft message since e.g. IMAP does not support changing/replacing
+          a message but requires a delete-and-insert sequence), 4 (transport of a draft mail, field `msgref`
+          must be present), 6 (signals that user intends to send out a saved draft message and expects the draft
+          message (referenced by `msgref` field) being deleted after successful transport).
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page containing the object ID of the newly created mail or in case of errors an error object (see [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) as an example).
+        schema:
+          type: string
+  put:
+    operationId: sendOrSaveMail
+    tags:
+      - mail
+    summary: Sends or saves a mail as MIME data block (RFC822) (**available since SP5**).
+    consumes:
+      - text/plain
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: |
+          In case the mail should not be sent out, but saved in a specific folder, the "folder" parameter
+          can be used. If the mail should be sent out to the recipient, the "folder" parameter must not be
+          included and the mail is stored in the folder "Sent Items".
+        required: false
+      - in: query
+        name: flags
+        type: string
+        description: |
+          In case the mail should be stored with status "read" (e.g. mail has been read already in the client
+          inbox), the parameter "flags" has to be included. If no `folder` parameter is specified, this parameter
+          must not be included. For information about mail flags see [Mail data](#/definitions/MailData) model.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing the folder ID and the object ID of the mail. In case of errors the
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailDestinationResponse"

@@ -49,67 +49,104 @@
 
 package com.openexchange.report.appsuite.management;
 
+import java.util.Date;
 import com.openexchange.exception.OXException;
-import com.openexchange.report.appsuite.jobs.Orchestration;
+import com.openexchange.report.appsuite.ReportService;
+import com.openexchange.report.appsuite.internal.HazelcastReportService;
+import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
-
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link ReportMXBeanImpl} implements the MXBean interface by delegating all calls to
- * the {@link Orchestration} singleton and wrapping reports as {@link JMXReport} instances
+ * the {@link HazelcastReportService} singleton and wrapping reports as {@link JMXReport} instances
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class ReportMXBeanImpl implements ReportMXBean {
 
-    @Override
-    public String run() throws Exception {
-        try {
-            return Orchestration.getInstance().run();
-        } catch (OXException e) {
-            throw new Exception(e.getMessage());
-        }
-    }
-
-    @Override
-    public String run(String reportType) throws Exception {
-        try {
-            return Orchestration.getInstance().run(reportType);
-        } catch (OXException e) {
-            throw new Exception(e.getMessage());
-        }
-    }
+//    @Override
+//    public String run() throws Exception {
+//        try {
+//            return Services.getService(ReportService.class).run();
+//        } catch (OXException e) {
+//            throw new Exception(e.getMessage());
+//        }
+//    }
+//
+//    @Override
+//    public String run(String reportType) throws Exception {
+//        try {
+//            return Services.getService(ReportService.class).run(reportType);
+//        } catch (OXException e) {
+//            throw new Exception(e.getMessage());
+//        }
+//    }
 
     @Override
     public JMXReport retrieveLastReport(String reportType) throws Exception {
-        Report lastReport = Orchestration.getInstance().getLastReport(reportType);
+        Report lastReport = Services.getService(ReportService.class).getLastReport(reportType);
         return null == lastReport ? null : new JMXReport(lastReport);
     }
 
     @Override
     public JMXReport retrieveLastReport() throws Exception {
-        Report lastReport = Orchestration.getInstance().getLastReport();
+        Report lastReport = Services.getService(ReportService.class).getLastReport();
         return null == lastReport ? null : new JMXReport(lastReport);
     }
 
     @Override
     public JMXReport[] retrievePendingReports(String reportType) throws Exception {
-        return JMXReport.wrap(Orchestration.getInstance().getPendingReports(reportType));
+        return JMXReport.wrap(Services.getService(ReportService.class).getPendingReports(reportType));
     }
 
     @Override
     public JMXReport[] retrievePendingReports() throws Exception {
-        return JMXReport.wrap(Orchestration.getInstance().getPendingReports());
+        return JMXReport.wrap(Services.getService(ReportService.class).getPendingReports());
     }
 
     @Override
     public void flushPending(String uuid, String reportType) {
-        Orchestration.getInstance().flushPending(uuid, reportType);
+        Services.getService(ReportService.class).flushPending(uuid, reportType);
     }
 
     @Override
     public void flushPending(String uuid) {
-        Orchestration.getInstance().flushPending(uuid);
+        Services.getService(ReportService.class).flushPending(uuid);
     }
 
+    @Override
+    public JMXReport retrieveLastErrorReport(String reportType) throws Exception {
+        Report lastReport = Services.getService(ReportService.class).getLastErrorReport(reportType);
+        return null == lastReport ? null : new JMXReport(lastReport);
+    }
+    
+//    @Override
+//    public String run(String reportType, Date startDate, Date endDate) throws Exception {
+//        try {
+//            return Services.getService(ReportService.class).run(reportType, startDate, endDate);
+//        } catch (OXException e) {
+//            throw new Exception(e.getMessage());
+//        }
+//    }
+//
+//    @Override
+//    public String run(String reportType, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) throws Exception {
+//        try {
+//            return Services.getService(ReportService.class).run(reportType, startDate, endDate, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
+//        } catch (OXException e) {
+//            throw new Exception(e.getMessage());
+//        }
+//    }
+
+    @Override
+    public String run(ReportConfigs reportConfig) throws Exception {
+        try {
+            return Services.getService(ReportService.class).run(reportConfig);
+        } catch (OXException e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+    
 }

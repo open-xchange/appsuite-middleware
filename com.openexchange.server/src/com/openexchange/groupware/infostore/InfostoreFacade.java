@@ -296,6 +296,18 @@ public interface InfostoreFacade extends TransactionAware {
     IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException;
 
     /**
+     * Saves given document meta data and binary content (if not <code>null</code>).
+     *
+     * @param document The document meta data
+     * @param data The optional binary content or <code>null</code>
+     * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+     * @param modifiedColumns The columns to modify
+     * @param session The session
+     * @throws OXException If save operation fails
+     */
+    IDTuple saveDocumentTryAddVersion(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+
+    /**
      * Removes all documents contained in specified folder.
      *
      * @param folderId The identifier of the folder to clear
@@ -531,6 +543,15 @@ public interface InfostoreFacade extends TransactionAware {
     int countDocuments(long folderId, ServerSession session) throws OXException;
 
     /**
+     * Gets the total size of all document versions in a folder.
+     *
+     * @param folderId The folder identifier
+     * @param session The associated session
+     * @return The total size of all document versions in a folder
+     */
+    long getTotalSize(long folderId, ServerSession session) throws OXException;
+
+    /**
      * Signals if denoted folder contains documents not owned by specified user.
      *
      * @param folderId The folder identifier
@@ -552,10 +573,10 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Performs necessary clean-up operations if specified user has been deleted.
-     * 
+     *
      * Moves all shared files to the user specified by <code>destUserID</code>. If <code>destUserID</code> set to null the context admin will be used instead.
      * If set to 0 or below all shared files will be deleted instead.
-     * 
+     *
      * @param userId The user identifier
      * @param context The context
      * @param destUserID The user id the public files will be assigned to.

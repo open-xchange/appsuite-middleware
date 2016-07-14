@@ -71,11 +71,11 @@ public abstract class DependentCapabilityChecker implements CapabilityChecker {
      *
      * @param capability The capability to check
      * @param session Provides the users session for which to check
-     * @param declaredCapabilities The capabilities
+     * @param capabilities The capabilities collected so far (declared capabilities are added at the very end)
      * @return Whether to award this capability or not
      * @throws OXException If check fails
      */
-    public abstract boolean isEnabled(String capability, Session session, CapabilitySet declaredCapabilities) throws OXException;
+    public abstract boolean isEnabled(String capability, Session session, CapabilitySet capabilities) throws OXException;
 
     @Override
     public boolean isEnabled(String capability, Session session) throws OXException {

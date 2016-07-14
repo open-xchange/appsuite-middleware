@@ -51,6 +51,7 @@ package com.openexchange.file.storage;
 
 import java.util.Collection;
 import com.openexchange.groupware.results.AbstractTimedResult;
+import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -68,6 +69,15 @@ public class FileTimedResult extends AbstractTimedResult<File> {
      */
     public FileTimedResult(final Collection<File> collection) {
         super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
+    }
+
+    /**
+     * Initializes a new {@link FileTimedResult} from given array.
+     *
+     * @param array The array
+     */
+    public FileTimedResult(final File[] array) {
+        super(new ArrayIterator<File>(array));
     }
 
     /**

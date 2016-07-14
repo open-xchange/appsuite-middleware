@@ -126,11 +126,18 @@ public class JarFileProvider implements IConfigurationFileProvider {
 
                         if (!"".equalsIgnoreCase(entryExt) && FilenameUtils.isExtension(entryExt, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE) && entryName.contains("conf/")) {
                             InputStream inputStream = jarFile.getInputStream(entry);
-                            String fileContent = IOUtils.toString(inputStream);
-
-                            String pathWithoutRootFolder = FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath() + "!/" + entryName, rootDirectory.getAbsolutePath());
-                            ConfigurationFile configurationFile = new ConfigurationFile(entryExt, rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(pathWithoutRootFolder), fileContent, isOriginal);
-                            ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
+                            try {
+                                String fileContent = IOUtils.toString(inputStream);
+                                IOUtils.closeQuietly(inputStream);
+                                inputStream = null;
+                                String pathWithoutRootFolder = FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath() + "!/" + entryName, rootDirectory.getAbsolutePath());
+                                ConfigurationFile configurationFile = new ConfigurationFile(entryExt, rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(pathWithoutRootFolder), fileContent, isOriginal);
+                                ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
+                            } finally {
+                                if (null != inputStream) {
+                                    IOUtils.closeQuietly(inputStream);
+                                }
+                            }
                         }
                     }
                 }

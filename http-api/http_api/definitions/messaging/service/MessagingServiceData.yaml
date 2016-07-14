@@ -1,0 +1,18 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The identifier of the messaging service. This is usually a string in reverse domain name notation, like "com.openexchange.messaging.twitter".
+  displayName:
+    type: string
+    description: Human-readable display name of the service.
+  formDescription:
+    type: array
+    description: An array of dynamic form fields. Same as in PubSub.
+    items:
+      $ref: "#/definitions/MessagingFormDescription"
+  messagingActions:
+    type: array
+    description: An array representing a dynamic set of actions that are possible with messages of this service.
+    items:
+      type: string

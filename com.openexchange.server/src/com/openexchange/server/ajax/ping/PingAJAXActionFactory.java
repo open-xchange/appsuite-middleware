@@ -64,13 +64,14 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PingAJAXActionFactory implements AJAXActionServiceFactory {
-    
-    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping", "whoami");
+
+    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping", "time", "whoami");
     private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>() {{
         put("ping", new PingAction());
+        put("time", new TimeAction());
         put("whoami", new WhoAmIAction());
     }};
-    
+
     @Override
     public Collection<?> getSupportedServices() {
         return SUPPORTED_SERVICES;

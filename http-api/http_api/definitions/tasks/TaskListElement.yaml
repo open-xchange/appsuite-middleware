@@ -1,0 +1,11 @@
+type: object
+required:
+  - id
+  - folder
+properties:
+  id:
+    type: string
+    description: The object ID of the task.
+  folder:
+    type: string
+    description: The object ID of the related folder.

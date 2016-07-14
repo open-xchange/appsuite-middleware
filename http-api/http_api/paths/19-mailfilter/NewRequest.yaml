@@ -1,0 +1,28 @@
+/mailfilter?action=new:
+  put:
+    operationId: createRule
+    tags:
+      - mailfilter
+    summary: Creates a mail filter rule.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: username
+        type: string
+        description: Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.
+        required: false
+      - in: body
+        name: body
+        description: A JSON object describing the mail filter rule. If the field `position` is included, it's taken as the position of the rule in the array on the server side (this value shouldn't be greater than the size of all rules).
+        required: true
+        schema:
+          $ref: "#/definitions/MailFilterRule"
+    responses:
+      200:
+        description: |
+          A JSON object containing the ID of the newly created rule. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailFilterCreationResponse"

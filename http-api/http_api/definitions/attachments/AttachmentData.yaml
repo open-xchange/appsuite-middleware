@@ -1,0 +1,25 @@
+type: object
+properties:
+  $ref: ../common/CommonObjectData.yaml
+  folder:
+    type: integer
+    description: The ID of the first folder in which the attached object resides.
+  attached:
+    type: integer
+    description: The ID of the object this attachment is attached to.
+  module:
+    type: integer
+    description: 'The module type of the object: 1 (appointment), 4 (task), 7 (contact), 137 (infostore).'
+  filename:
+    type: string
+    description: The filename of the attached file.
+  file_size:
+    type: integer
+    format: int64
+    description: The file size (in bytes) of the attached file.
+  file_mimetype:
+    type: string
+    description: The MIME type of the attached file.
+  rft_flag:
+    type: boolean
+    description: If the attachment is a RTF attachment of outlook (outlook descriptions can be stored as RTF documents).

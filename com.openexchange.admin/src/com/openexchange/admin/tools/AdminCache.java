@@ -728,53 +728,53 @@ public class AdminCache {
 
     @Deprecated
     public void closeConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
-        try {
-            if (stmt != null) {
+        if (stmt != null) {
+            try {
                 stmt.close();
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
             }
-        } catch (final SQLException e) {
-            log.error("Error closing statement", e);
         }
-        try {
-            if (con != null) {
+        if (con != null) {
+            try {
                 pushConnectionForConfigDB(con);
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing connection to pool!", exp);
             }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing connection to pool!", exp);
         }
     }
 
     public void closeReadConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
-        try {
-            if (stmt != null) {
+        if (stmt != null) {
+            try {
                 stmt.close();
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
             }
-        } catch (final SQLException e) {
-            log.error("Error closing statement", e);
         }
-        try {
-            if (con != null) {
+        if (con != null) {
+            try {
                 pushReadConnectionForConfigDB(con);
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing connection to pool!", exp);
             }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing connection to pool!", exp);
         }
     }
 
     public void closeWriteConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
-        try {
-            if (stmt != null) {
+        if (stmt != null) {
+            try {
                 stmt.close();
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
             }
-        } catch (final SQLException e) {
-            log.error("Error closing statement", e);
         }
-        try {
-            if (con != null) {
+        if (con != null) {
+            try {
                 pushWriteConnectionForConfigDB(con);
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing connection to pool!", exp);
             }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing connection to pool!", exp);
         }
     }
 

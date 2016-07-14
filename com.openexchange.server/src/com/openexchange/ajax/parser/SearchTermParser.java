@@ -61,6 +61,8 @@ import com.openexchange.search.SearchExceptionMessages;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.AttachmentOperand;
+import com.openexchange.search.internal.operands.AttachmentOperand.AttachmentOperandType;
 import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
 
@@ -138,10 +140,15 @@ public class SearchTermParser {
     }
 
     protected Operand<?> parseOperand(final JSONObject operand) throws OXException {
-        if (!operand.hasAndNotNull(SearchTermFields.FIELD)) {
-            throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.FIELD);
+        if (!operand.hasAndNotNull(SearchTermFields.FIELD) && !operand.hasAndNotNull(SearchTermFields.ATTACHMENT)) {
+            throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create();
         }
-        return new ColumnOperand(operand.optString(SearchTermFields.FIELD));
+
+        if (operand.hasAndNotNull(SearchTermFields.FIELD)) {
+            return new ColumnOperand(operand.optString(SearchTermFields.FIELD));
+        } else {
+            return new AttachmentOperand(AttachmentOperandType.valueOf(operand.optString(SearchTermFields.ATTACHMENT)));
+        }
     }
 
     private boolean isInteger(final String s) {

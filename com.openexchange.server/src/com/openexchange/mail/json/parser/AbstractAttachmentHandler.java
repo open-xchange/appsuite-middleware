@@ -66,14 +66,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractAttachmentHandler.class);
-
     protected final List<MailPart> attachments;
-
     protected final boolean doAction;
-
     protected final long uploadQuota;
-
     protected final long uploadQuotaPerFile;
 
     /**

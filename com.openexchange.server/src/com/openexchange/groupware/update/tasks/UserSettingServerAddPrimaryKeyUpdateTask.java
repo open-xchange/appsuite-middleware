@@ -68,7 +68,6 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
-
 /**
  * {@link UserSettingServerAddPrimaryKeyUpdateTask}
  *
@@ -96,7 +95,7 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
             dropDuplicates(con);
 
             // Drop possible foregin keys
-            String foreignKey = Tools.existsForeignKey(con, "user", new String[] {"cid", "id"}, "user_setting_server", new String[] {"cid", "user"});
+            String foreignKey = Tools.existsForeignKey(con, "user", new String[] { "cid", "id" }, "user_setting_server", new String[] { "cid", "user" });
             if (null != foreignKey && !foreignKey.equals("")) {
                 Tools.dropForeignKey(con, "user_setting_server", foreignKey);
             }
@@ -133,6 +132,7 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
             }
 
             class Orphaned {
+
                 final UUID uuid;
                 final int cid;
                 final int user;
@@ -179,6 +179,7 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
             }
 
             class Dup {
+
                 final UUID uuid;
                 final int cid;
                 final int user;
@@ -267,9 +268,9 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
         try {
             stmt = con.prepareStatement("SELECT cid, user, contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree FROM user_setting_server WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
-            PreparedStatement stmt2 = null;
-            try {
-                while (rs.next()) {
+            while (rs.next()) {
+                PreparedStatement stmt2 = null;
+                try {
                     StringBuilder sb = new StringBuilder();
                     sb.append("UPDATE user_setting_server SET uuid = ? WHERE cid ");
                     oldPos = 1;
@@ -394,9 +395,9 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
                         stmt2.setNull(newPos++, Types.INTEGER);
                     }
                     stmt2.execute();
+                } finally {
+                    DBUtils.closeSQLStuff(stmt2);
                 }
-            } finally {
-                DBUtils.closeSQLStuff(stmt2);
             }
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);

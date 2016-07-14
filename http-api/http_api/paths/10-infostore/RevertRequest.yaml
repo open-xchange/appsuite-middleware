@@ -1,0 +1,30 @@
+/infostore?action=revert:
+  put:
+    operationId: deleteAllInfoItemVersions
+    tags:
+      - infostore
+    summary: Deletes all versions of an infoitem leaving only the base object.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The ID of the base object.
+        required: true
+      - in: query
+        name: folder
+        type: string
+        description: The folder ID of the base object.
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the infoitem.
+        required: true
+    responses:
+      200:
+        description: |
+          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

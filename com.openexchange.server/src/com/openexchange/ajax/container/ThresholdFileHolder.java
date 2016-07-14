@@ -58,8 +58,8 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.nio.channels.FileChannel;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
@@ -281,7 +281,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         }
         if (null == tempFile && null == buf && bytes.length > threshold) {
             // Nothing written & content does exceed threshold
-            final File tempFile = TmpFileFileHolder.newTempFile();
+            final File tempFile = TmpFileFileHolder.newTempFile(autoManaged);
             this.tempFile = tempFile;
             OutputStream out = null;
             try {
@@ -389,10 +389,31 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @throws OXException If MD5 sum cannot be returned
      */
     public String getMD5() throws OXException {
+        File tempFile = this.tempFile;
+        if (null != tempFile) {
+            DigestInputStream digestStream = null;
+            try {
+                digestStream = new DigestInputStream(new FileInputStream(tempFile), MessageDigest.getInstance("MD5"));
+                byte[] buf = new byte[8192];
+                for (int read; (read = digestStream.read(buf, 0, 8192)) > 0;) {
+                    ;
+                }
+                byte[] digest = digestStream.getMessageDigest().digest();
+                return jonelo.jacksum.util.Service.format(digest);
+            } catch (NoSuchAlgorithmException e) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(digestStream);
+            }
+        }
+
+        // In memory...
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] digest = md5.digest(Streams.stream2bytes(getStream()));
-            return new BigInteger(1, digest).toString(16);
+            return jonelo.jacksum.util.Service.format(digest);
         } catch (NoSuchAlgorithmException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
@@ -528,7 +549,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         // Check if content is available
         if (count <= 0) {
             // No content to make a copy of
-            return new ThresholdFileHolder();
+            return copy;
         }
 
         // Check internal buffer vs temp. file
@@ -537,7 +558,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             copy.buf = new UnsynchronizedByteArrayOutputStream(buf);
         } else if (null != tempFile) {
             try {
-                final File newTempFile = TmpFileFileHolder.newTempFile();
+                final File newTempFile = TmpFileFileHolder.newTempFile(autoManaged);
                 copyFile(tempFile, newTempFile);
                 copy.tempFile = newTempFile;
             } catch (final IOException e) {

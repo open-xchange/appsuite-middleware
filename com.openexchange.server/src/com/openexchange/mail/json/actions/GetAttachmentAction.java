@@ -419,8 +419,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             IFileHolder fileHolder;
             if (saveToDisk) {
                 if (null == sink) {
-                    @SuppressWarnings("resource")
-                    FileHolder tmp = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
+                    @SuppressWarnings("resource") FileHolder tmp = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
                     tmp.setDelivery("download");
                     fileHolder = tmp;
                 } else {
@@ -663,34 +662,57 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     return tfh.getStream();
                 }
             }
+            PushbackInputStream in = null;
+            boolean error = true;
             try {
                 // Try to read first byte and push back immediately
-                PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
+                in = new PushbackInputStream(mailPart.getInputStream());
                 int read = in.read();
                 if (read < 0) {
                     return Streams.EMPTY_INPUT_STREAM;
                 }
                 in.unread(read);
+                error = false;
                 return in;
             } catch (final com.sun.mail.util.FolderClosedIOException e) {
                 // Need to reconnect
-                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
-                try {
-                    ma = MailAccess.getInstance(session, fa.getAccountId());
-                    ma.connect(false);
-                    final ThresholdFileHolder newTfh = new ThresholdFileHolder();
-                    if (image) {
-                        newTfh.write(ma.getMessageStorage().getImageAttachment(fa.getFullName(), uid, id).getInputStream());
-                    } else {
-                        newTfh.write(ma.getMessageStorage().getAttachment(fa.getFullName(), uid, id).getInputStream());
-                    }
-                    this.tfh = newTfh;
-                    return newTfh.getStream();
-                } finally {
-                    if (null != ma) {
-                        ma.close(true);
-                    }
+                return getReconnectedStream();
+            } finally {
+                if (error) {
+                    Streams.close(in);
+                }
+            }
+        }
+
+        private synchronized InputStream getReconnectedStream() throws OXException {
+            ThresholdFileHolder tfh = this.tfh;
+            if (null != tfh) {
+                // Already initialized
+                return tfh.getStream();
+            }
+
+            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
+            ThresholdFileHolder newTfh = null;
+            boolean error = true;
+            try {
+                ma = MailAccess.getInstance(session, fa.getAccountId());
+                ma.connect(false);
+                newTfh = new ThresholdFileHolder();
+                if (image) {
+                    newTfh.write(ma.getMessageStorage().getImageAttachment(fa.getFullName(), uid, id).getInputStream());
+                } else {
+                    newTfh.write(ma.getMessageStorage().getAttachment(fa.getFullName(), uid, id).getInputStream());
+                }
+                this.tfh = newTfh;
+                error = false;
+                return newTfh.getStream();
+            } finally {
+                if (null != ma) {
+                    ma.close(true);
+                }
+                if (error) {
+                    Streams.close(newTfh);
                 }
             }
         }

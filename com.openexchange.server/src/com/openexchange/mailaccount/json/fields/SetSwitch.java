@@ -349,4 +349,22 @@ public class SetSwitch implements AttributeSwitch {
         desc.addProperty("addresses", (String) value);
         return null;
     }
+
+    @Override
+    public Object mailStartTls() {
+        desc.setMailStartTls(Boolean.parseBoolean(value.toString()));
+        return null;
+    }
+
+    @Override
+    public Object transportStartTls() {
+        desc.setTransportStartTls(Boolean.parseBoolean(value.toString()));
+        return null;
+    }
+
+    @Override
+    public Object rootFolder() {
+        return null;
+    }
+
 }

@@ -72,12 +72,13 @@ public class LoginLocation {
     /**
      * The default allowed attributes consisting of:
      * <ul>
+     * <li><code>"login_name"</code></li>
      * <li><code>"login_type"</code></li>
      * <li><code>"share"</code></li>
      * <li><code>"target"</code></li>
      * </ul>
      */
-    public static final Collection<String> DEFAULT_ALLOWED_ATTRIBUTES = Collections.unmodifiableCollection(Arrays.asList("login_type", "share", "target"));
+    public static final Collection<String> DEFAULT_ALLOWED_ATTRIBUTES = Collections.unmodifiableCollection(Arrays.asList("login_name", "login_type", "share", "target"));
 
     /**
      * Builds the redirect location using specified token

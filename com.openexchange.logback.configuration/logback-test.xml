@@ -32,7 +32,7 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
-            <!--
+        	<!--
         	The '%sanitisedMessage' token has been introduced in order to address the 'CWE-117: Improper Output Neutralization for Logs' vulnerability.
         	This token ensures that the 'LogSanitisingConverter' is used in the logging pipeline in order to sanitise log messages that might contain
         	ESC sequences, something that could lead to log injection/tampering/forging.
@@ -107,6 +107,5 @@
 
     <!-- Set this to DEBUG to log spreadsheet operations more in detail -->
     <!-- <logger name="com.openexchange.office.calcengine.client.impl.CalcEngineJob" level="DEBUG"/> -->
-    <!--<logger name="com.openexchange" level="DEBUG"/>-->
 
 </configuration>

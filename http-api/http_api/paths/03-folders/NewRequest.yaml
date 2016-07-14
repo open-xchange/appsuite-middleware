@@ -1,0 +1,31 @@
+/folders?action=new:
+  put:
+    operationId: createFolder
+    tags:
+      - folders
+    summary: Creates a new folder.
+    consumes:
+      - application/json
+    parameters:
+      - in: query
+        name: folder_id
+        type: string
+        description: The parent folder object ID of the newly created folder.
+        required: true
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - $ref: "#/parameters/gblQueryParamAllowedModules"
+      - in: body
+        name: body
+        description: |
+          JSON object with "folder" object containing the modified fields and optional "notification"
+          object to let added permission entities be notified about newly shared folders for all modules
+          except mail. (Example: {"folder":{"title":"test123"}} or {"folder":{"permissions":[{"bits":403710016,"entity":84,"group":false}]},"notification":{"transport":"mail","message":"The message"}})
+        required: true
+        schema:
+          $ref: "#/definitions/FolderBody"
+    responses:
+      200:
+        description: A JSON object with the object ID of the folder. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FolderUpdateResponse"

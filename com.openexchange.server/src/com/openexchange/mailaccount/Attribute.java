@@ -55,7 +55,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountFields;
 
 /**
  * {@link Attribute}.
@@ -114,6 +114,12 @@ public enum Attribute {
     ARCHIVE_FULLNAME_LITERAL(MailAccountFields.ARCHIVE_FULLNAME, 1042),
     // Transport auth information
     TRANSPORT_AUTH_LITERAL(MailAccountFields.TRANSPORT_AUTH, 1043),
+    // Whether STARTTLS is required for mail server
+    MAIL_STARTTLS_LITERAL(MailAccountFields.MAIL_STARTTLS, 1044),
+    // Whether STARTTLS is required for transport server
+    TRANSPORT_STARTTLS_LITERAL(MailAccountFields.TRANSPORT_STARTTLS, 1045),
+    // Root folder identifier
+    ROOT_FOLDER(MailAccountFields.ROOT_FOLDER, 1046),
 
     ;
 
@@ -260,6 +266,12 @@ public enum Attribute {
         case META:
             // Ignore for virtual attribute
             return null;
+        case MAIL_STARTTLS_LITERAL:
+            return switcher.mailStartTls();
+        case TRANSPORT_STARTTLS_LITERAL:
+            return switcher.transportStartTls();
+        case ROOT_FOLDER:
+            return switcher.rootFolder();
         default:
             throw new IllegalArgumentException(getName());
         }

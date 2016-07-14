@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-02 16:26+0000\n"
-"PO-Revision-Date: 2016-03-08 12:08+0000\n"
+"POT-Creation-Date: 2016-07-05 08:05+0000\n"
+"PO-Revision-Date: 2016-07-04 18:36+0000\n"
 "Last-Translator: hv@webhuset.no <hv@webhuset.no>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nb_NO\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1457438913.000000\n"
+"X-POOTLE-MTIME: 1467657418.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -53,6 +53,14 @@ msgstr "foreløpig akseptert"
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr "foreløpig akseptert"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
+msgid ""
+"The server configuration cannot be retrieved due to an internal server "
+"error. Please try again later."
+msgstr ""
+"Tjenerkonfigurasjonen kunne ikke hentes på grunn av en intern tjenerfeil. "
+"Vennligst forsøk igjen senere."
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -1450,6 +1458,7 @@ msgstr "UID"
 #. A document's file name
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:87
@@ -1659,6 +1668,14 @@ msgstr "Ugyldig konfigurasjon for globale databaser: %1$s"
 msgid "No global database for context group \"%1$s\" found."
 msgstr "Ingen global database for domenegruppe \"%1$s\" ble funnet."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.download.limit/src/com/openexchange/download/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
+msgid ""
+"Download denied because download limits have been exceeded. Please try again "
+"later."
+msgstr ""
+"Nedlastingen ble nektet fordi nedlastingsbegrensningen er overskredet. "
+"Vennligst forsøk igjen senere."
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
@@ -1828,6 +1845,10 @@ msgstr ""
 msgid "The token \"%1$s\" is already registered."
 msgstr "Token-et \"%1$s\" er allerede registrert."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:96
+msgid "Empty files indicated for directory \"%1$s\"."
+msgstr "Tomme filer indikert for mappen \"%1$s\"."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1838,6 +1859,85 @@ msgstr "Token-et \"%1$s\" er allerede registrert."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
 msgid "Select an existing account"
 msgstr "Velg en eksisterende konto"
+
+#. The name for the virtual folder containing all attachments from all messages
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:67
+msgid "My attachments"
+msgstr "Mine vedlegg"
+
+#. The name for the virtual folder containing all attachments of a certain folder/mailbox
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:70
+msgid "In %1$s"
+msgstr "I %1$s"
+
+#. Search in From sender.
+#. Search for mails sent from ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:81
+msgid "From"
+msgstr "Fra"
+
+#. Search in To recipient.
+#. Search for mails sent to ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:84
+msgid "To"
+msgstr "Til"
+
+#. Search in original mail subject
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
+msgid "Subject"
+msgstr "Emne"
+
+#. Search in file type.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
+msgid "File type"
+msgstr "Filtype"
+
+#. Search in file size
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:84
+msgid "File size"
+msgstr "Filstørrelse"
+
+#. ---------------------------------------------------------------------------------- //
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in file name.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
+msgid "in file name"
+msgstr "i filnavn"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in From sender.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:91
+msgid "in From sender"
+msgstr "som avsender"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in To recipient.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:96
+msgid "in To recipient"
+msgstr "som mottaker"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#. Context: Searching in appointments.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#. Context: Searching in mail.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
+msgid "in subject"
+msgstr "i emnet"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
@@ -2382,17 +2482,6 @@ msgstr ""
 "søkealternativene dine og forsøk igjen."
 
 #. Context: Searching in appointments.
-#. Displayed as: [Search for] 'user input' in subject.
-#. The 'user input' part is always prepended, please heed this in translations.
-#. Context: Searching in mail.
-#. Displayed as: [Search for] 'user input' in subject.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
-msgid "in subject"
-msgstr "i emnet"
-
-#. Context: Searching in appointments.
 #. Displayed as: [Search for] 'user input' in description.
 #. The 'user input' part is always prepended, please heed this in translations.
 #. Context: Searching in tasks.
@@ -2482,7 +2571,9 @@ msgstr "Serier"
 msgid "Folder type"
 msgstr "Mappetype"
 
+#. The default name for a folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:70
 msgid "Folder"
 msgstr "Mappe"
 
@@ -2585,16 +2676,6 @@ msgstr "Kontakter"
 msgid "File description"
 msgstr "Beskrivelse av filen"
 
-#. Search in file type.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
-msgid "File type"
-msgstr "Filtype"
-
-#. Search in file size
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:84
-msgid "File size"
-msgstr "Filstørrelse"
-
 #. -------------------------- i18n strings for file types ---------------------------- //
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:88
 msgid "Images"
@@ -2638,13 +2719,6 @@ msgid "Shared folders"
 msgstr "Delte mapper"
 
 #. Context: Searching in drive.
-#. Displayed as: [Search for] 'user input' in file name.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
-msgid "in file name"
-msgstr "i filnavn"
-
-#. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file description.
 #. The 'user input' part is always prepended, please heed this in translations.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:117
@@ -2675,15 +2749,9 @@ msgstr "Personer"
 msgid "From/To"
 msgstr "Fra/Til"
 
-#. Search for mails sent from ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:81
-msgid "From"
-msgstr "Fra"
-
-#. Search for mails sent to ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:84
-msgid "To"
-msgstr "Til"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+msgid "in attachment file names"
+msgstr "i vedleggsfilnavn"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Context: Searching in tasks.
@@ -2909,43 +2977,48 @@ msgstr ""
 "Det oppstod en midlertidig feil inne i serveren som hindret den i å fullføre "
 "forespørselen. Prøv igjen senere."
 
-#. The general message for a conflicting update operation.
+#. The default message displayed to user when processing was intentionally denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:72
+msgid "The server is refusing to process the request."
+msgstr "Tjeneren nektet å prosessere forespørselen."
+
+#. The general message for a conflicting update operation.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
 msgid "The object has been changed in the meantime."
 msgstr "Objektet har blitt endret i mellomtiden."
 
 #. The general message for a missing object.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
 msgid "Object not found. %1$s"
 msgstr "Finner ikke objekt. %1$s"
 
 #. The general message if a user has no access to a certain module (e.g. calendar)
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:81
 msgid "No permission for module: %1$s."
 msgstr "Ingen tillatelse for modulen: %1$s."
 
 #. The general message if a user has no permission to access a certain folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:84
 msgid "No folder permission."
 msgstr "Ingen mappetillatelse."
 
 #. The general message for a missing field.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
 msgid "Missing field: %s"
 msgstr "Manglende felt: %s"
 
 #. The general message if an error occurred while reading or writing to the database
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
 msgid "Error while reading/writing data from/to the database."
 msgstr "Feil under lese/skrive data fra/til databasen."
 
 #. General message if a setting cannot be put into database because it exceeds a column's capacity constraints
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
 msgid "Data cannot be stored into the database because it is too big"
 msgstr "Data kan ikke lagres i databasen fordi den er for stor"
 
 #. The request sent by the client was syntactically incorrect
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:96
 msgid "The request sent by the client was syntactically incorrect"
 msgstr "Forespørselen som ble sendt av klienten var syntaktisk feil"
 
@@ -3500,6 +3573,15 @@ msgid ""
 "The character encoding \"%1$s\" is not supported. Please choose another one."
 msgstr "Tegnkodingen \"%1$s\" er ikke støttet. Vennligst velg en annen."
 
+#. The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:139
+msgid ""
+"The contact with uid %1$s is too similar to the existing contact with uid "
+"%2$s in folder %3$s"
+msgstr ""
+"Kontakten med uid %1$s er for lik den eksisterende kontakten med uid %2$s i "
+"mappen %3$s"
+
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid ""
@@ -3514,6 +3596,40 @@ msgstr "E-post-AUTOCONFIG"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
 msgstr "E-postadressen %1$s er ugyldig."
+
+#. Reorganizing of mails failed. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:63
+msgid "Reorganizing of mails failed. Please try again later."
+msgstr "Omorganisering av eposter feilet. Vennligst forsøk igjen senere."
+
+#. The user category %1$s does not exist.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:63
+msgid "The user category %1$s does not exist."
+msgstr "Brukerkategorien %1$s finnes ikke."
+
+#. Invalid configuration: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:69
+msgid "Invalid configuration: %1$s"
+msgstr "Ugyldig konfigurasjon: %1$s"
+
+#. The required service %1$s is temporary not available. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:72
+msgid ""
+"The required service %1$s is temporary not available. Please try again later."
+msgstr ""
+"Den påkrevde tjenesten %1$s er midlertidig utilgjengelig. Vennligst forsøk "
+"igjen senere."
+
+#. You are not allowed to change the name of the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:75
+msgid "You are not allowed to change the name of the category %1$s."
+msgstr "Du har ikke tillatelse til å endre navn på kategorien %1$s."
+
+#. You are not allowed to enable or disable the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:78
+msgid "You are not allowed to enable or disable the category %1$s."
+msgstr "Du har ikke tillatelse til å aktivere eller deaktivere kategorien %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
 msgid "The redirect address \"%1$s\" is not valid."
@@ -4599,6 +4715,17 @@ msgstr "Det oppstod en feil under lesing av RSS-feed fra URL: %1$s"
 msgid "Failed to read RSS feed from URL: %2$s"
 msgstr "Det oppstod en feil under lesing av RSS-feed fra URL: %1$s"
 
+#. The RSS feed is exceeding the maximum allowed size of '%1$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
+msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
+msgstr "RSS-feeden overskrider den maksimale størrelsen ('%1$s')."
+
+#. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
+msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr ""
+"Kan ikke koble til RSS med URL: %1$s. Vennligst sjekk URL-en og forsøk igjen."
+
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -5187,8 +5314,8 @@ msgid "Sequence number is outdated."
 msgstr "Sekvensnummer er utdatert."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
-msgid "Invalid E-Mail address."
-msgstr "Ugyldig e-postadresse."
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr "Ugyldig epostadresse: '%s'. Vennligst korriger epostadressen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -7015,8 +7142,13 @@ msgstr ""
 "På grunn av begrensede funksjoner for brukeren \"%1$s\" er det ikke mulig å "
 "lagre rettighetsendringene."
 
-#. Concurrent write attempt. Please await the previous save operation to terminate.
+#. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid "Group %1$s can't be used for object permissions."
+msgstr "Gruppen %1$s kan ikke brukes for objekttillatelser."
+
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
 msgid ""
 "Concurrent write attempt. Please await the previous save operation to "
 "terminate."
@@ -7025,7 +7157,7 @@ msgstr ""
 "lagringsoperasjonen fullføres."
 
 #. Your search took too long in order to be accomplished.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
 msgstr "Søket tok for lang tid."
 
@@ -7690,8 +7822,14 @@ msgid ""
 msgstr ""
 "Last opp filens innholdstype \"%1$s\" samsvarer ikke gitt filfilter \"%2$s\"."
 
+#. Upload file is invalid or illegal
+#. Thrown to indicate that currently uploaded file is not accepted for being saved due to illegal and/or harmful content
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:105
+msgid "Upload file is invalid or illegal."
+msgstr "Den opplastede filen er ugyldig eller ulovlig."
+
 #. Request rejected because its size exceeds the maximum configured size of %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:108
 msgid ""
 "Request rejected because its size exceeds the maximum configured size of "
 "%1$s."
@@ -7700,12 +7838,12 @@ msgstr ""
 "konfigurerte størrelsen på %1$s."
 
 #. Connection has been closed unexpectedly. Please try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:111
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "Tilkoblingen ble lukket uventet. Prøv på nytt."
 
 #. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:114
 msgid ""
 "Request rejected because file size (%1$s) exceeds the maximum configured "
 "file size of %2$s."
@@ -7714,7 +7852,7 @@ msgstr ""
 "tilatte filstørrelsen på %2$s."
 
 #. Request rejected because file size exceeds the maximum configured file size of %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:117
 msgid ""
 "Request rejected because file size exceeds the maximum configured file size "
 "of %1$s."
@@ -7723,7 +7861,7 @@ msgstr ""
 "filstørrelsen på %1$s."
 
 #. Read timed out. Waited too long for incoming data from client.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:120
 msgid "Read timed out. Waited too long for incoming data from client."
 msgstr "Lesing timet ut. Ventet for lenge på innkommende data fra klienten."
 
@@ -8101,6 +8239,92 @@ msgstr "Epostdelen kunne ikke leses"
 msgid "The content of the mail is too big."
 msgstr "Innholdet i eposten er for stort"
 
+#. Invalid parameter value: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:211
+msgid "Invalid parameter value: %1$s"
+msgstr "Ugyldig parameterverdi: %1$s"
+
+#. The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:214
+msgid ""
+"The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
+msgstr ""
+"Flagget %1$s er ikke gyldig. Flagg kan ikke begynne med innledende '\\'."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:216
+msgid ""
+"The attachments to this E-Mail exceeded the size limit for attachments. "
+"Instead of sending the attachments with the E-Mail, the attachments are "
+"shared and the links are added to your E-Mail. Whoever receives the E-Mail "
+"can then access the attachments."
+msgstr ""
+"Vedleggene i denne eposten overskrider størrelsesbegrensningen for vedlegg. "
+"I stedet for å sende vedleggene via epost har filene blitt delt, og lenker "
+"til filene er satt inn i eposten. Mottakeren av eposten kan så laste ned "
+"vedleggene via disse lenkene."
+
+#. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:219
+msgid "You are not allowed to compose a message containing share links"
+msgstr "Du har ikke tillatelse til å opprette eposter med delingslenker."
+
+#. User wants to compose a share message but does not specify an expiration date which is required
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
+msgid ""
+"Please specify an expiration date in order to compose a message containing "
+"share links"
+msgstr "Vennligst oppgi en utløpsdato for å opprette en epost med delingslenker"
+
+#. The default name for a file
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
+msgid "File"
+msgstr "Fil"
+
+#. -----------------------------------------------------------------------------------------------------------------------------------
+#. The name of the folder holding the attachments, which were shared to other recipients.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:78
+msgid "My shared mail attachments"
+msgstr "Mine delte epostvedlegg"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:80
+msgid "%1$s has shared the following file with you:"
+msgstr "%1$s har delt denne filen med deg: "
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
+msgid "%1$s has shared the following files with you:"
+msgstr "%1$s har delt disse filene med deg:"
+
+#. * View file
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:218
+msgid "View file"
+msgstr "Vis fil"
+
+#. * View files
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:221
+msgid "View files"
+msgstr "Vis filer"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the elapsed date for affected message's attachments
+#. * The link will expire on 01/01/16 *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:236
+msgid "The link will expire on %1$s"
+msgstr "Lenken vil utløpe %1$s"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the password for affected message's attachments
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:94
+msgid "Please use the following password: %1$s"
+msgstr "Vennligst bruk følgende passord: %1$s"
+
+#. Fall-back name if a file has no valid name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
+msgid "Unnamed"
+msgstr "Uten navn"
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -8327,13 +8551,18 @@ msgstr ""
 #. *
 #. * The message could not be sent due to a mail server temporary failure. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:192
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:193
 msgid ""
 "The message could not be sent due to a mail server temporary failure. Please "
 "try again later."
 msgstr ""
 "Meldingen kunne ikke sendes på grunn av en midlertidig feil med "
 "eposttjeneren. Vennligst forsøk igjen senere."
+
+#. Timeout while trying to send to the following recipient: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:196
+msgid "Timeout while trying to send to the following recipient: %1$s"
+msgstr "Det oppstod et tidsavbrudd under sending til følgende mottaker: %1$s"
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -8891,441 +9120,6 @@ msgstr "Godkjenning mislyktes for brukernavn: %1$s"
 msgid "No session found for identifier: %1$s"
 msgstr "Ingen sesjon funnet for ID: %1$s"
 
-#. subject
-#. * $username has shared file "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:65
-msgid "%1$s has shared the file \"%2$s\" with you."
-msgstr "%1$s har delt filen \"%2$s\" med deg."
-
-#. * $username has shared $number_of_files files with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:68
-msgid "%1$s has shared %2$s files with you."
-msgstr "%1$s har delt %2$s filer med deg."
-
-#. * $username has shared image "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:71
-msgid "%1$s has shared the image \"%2$s\" with you."
-msgstr "%1$s har delt bildet \"%2$s\" med deg."
-
-#. * $username has shared $number_of_images images with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:74
-msgid "%1$s has shared %2$s images with you."
-msgstr "%1$s har delt %2$s bilder med deg."
-
-#. * $username has shared item "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:77
-msgid "%1$s has shared the item \"%2$s\" with you."
-msgstr "%1$s har delt elementet \"%2$s\" med deg."
-
-#. * $username has shared $number items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:80
-msgid "%1$s has shared %2$s items with you."
-msgstr "%1$s har delt %2$s elementer med deg."
-
-#. * $username has shared folder "$folder" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:83
-msgid "%1$s has shared the folder \"%2$s\" with you."
-msgstr "%1$s har delt mappen \"%2$s\" med deg."
-
-#. * $username has shared $number folders with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:86
-msgid "%1$s has shared %2$d folders with you."
-msgstr "%1$s har delt %2$d mapper med deg."
-
-#. * $username has shared file "$filename" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:89
-msgid "%1$s has shared the file \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s har delt filen \"%2$s\" med gruppen \"%3$s\"."
-
-#. * $username has shared $number_of_files files with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:92
-msgid "%1$s has shared %2$s files with the group \"%3$s\"."
-msgstr "%1$s har delt %2$s filer med gruppen \"%3$s\"."
-
-#. * $username has shared image "$filename" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:95
-msgid "%1$s has shared the image \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s har delt bildet \"%2$s\" med gruppen \"%3$s\"."
-
-#. * $username has shared $number_of_images images with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:98
-msgid "%1$s has shared %2$s images with the group \"%3$s\"."
-msgstr "%1$s har delt %2$s bilder med gruppen \"%3$s\"."
-
-#. * $username has shared item "$filename" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:101
-msgid "%1$s has shared the item \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s har delt elementet \"%2$s\" med gruppen \"%3$s\"."
-
-#. * $username has shared $number items with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:104
-msgid "%1$s has shared %2$s items with the group \"%3$s\"."
-msgstr "%1$s har delt %2$s elementer med gruppen \"%3$s\"."
-
-#. * $username has shared folder "$folder" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:107
-msgid "%1$s has shared the folder \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s har delt mappen \"%2$s\" med gruppen \"%3$s\"."
-
-#. * $username has shared $number folders with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:110
-msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
-msgstr "%1$s har delt %2$d mapper med gruppen \"%3$s\"."
-
-#. detailed body
-#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:114
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr ""
-"%1$s (%2$s) har delt filen \"%3$s\" med deg. Klikk knappen under for å se "
-"den."
-
-#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:117
-msgid ""
-"%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
-"view them."
-msgstr ""
-"%1$s (%2$s) har delt %3$s filer med deg. Klikk knappen under for å se dem."
-
-#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:120
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr ""
-"%1$s (%2$s) har delt bildet \"%3$s\" med deg. Klikk knappen under for å se "
-"det."
-
-#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:123
-msgid ""
-"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
-"to view them."
-msgstr ""
-"%1$s (%2$s) har delt %3$s bilder med deg. Klikk knappen under for å se dem."
-
-#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:126
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr ""
-"%1$s (%2$s) har delt elementet \"%3$s\" med deg. Klikk knappen under for å "
-"se det."
-
-#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:129
-msgid ""
-"%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
-"view them."
-msgstr ""
-"%1$s (%2$s) har delt %3$s elementer med deg. Klikk knappen under for å se "
-"dem."
-
-#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:132
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr ""
-"%1$s (%2$s) har delt mappen \"%3$s\" med deg. Klikk knappen under for å se "
-"den."
-
-#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:135
-msgid ""
-"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
-"to view them."
-msgstr ""
-"%1$s (%2$s) har delt %3$ mapper med deg. Klikk knappen under for å se dem."
-
-#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:138
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) har delt filen %3$ med gruppen \"%4$s\". Klikk knappen under for "
-"å se den."
-
-#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:141
-msgid ""
-"%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) har delt %3$s filer med gruppen \"%4$s\". Klikk knappen under "
-"for å se dem."
-
-#. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:144
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) har delt bildet \"%3$s\" med gruppen \"%4$s\". Klikk knappen "
-"under for å se det."
-
-#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
-msgid ""
-"%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) har delt %3$s bilder med gruppen \"%4$s\". Klikk knappen under "
-"for å se dem."
-
-#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) har delt elementet \"%3$s\" med gruppen \"%4$s\". Klikk knappen "
-"under for å se det."
-
-#. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
-msgid ""
-"%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) har delt %3$s elementer med gruppen \"%4$s\". Klikk knappen "
-"under for å se dem."
-
-#. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) har delt mappen \"%3$s\" med gruppen \"%4$s\". Klikk knappen "
-"under for å se den."
-
-#. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:159
-msgid ""
-"%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) har delt %3$ mapper med gruppen \"%4$s\". Klikk knappen under "
-"for å se dem."
-
-#. * $username ($user_email) has shared file "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:163
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
-msgstr "%1$s (%2$s) har delt filen \"%3$\" med deg og la ved en melding:"
-
-#. * $username ($user_email) has shared $number_of_files files with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:166
-msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
-msgstr "%1$s (%2$s) har delt %3$s filer med deg og la ved en melding:"
-
-#. * $username ($user_email) has shared photo "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:169
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
-msgstr "%1$s (%2$s) har delt bildet \"%3$s\" med deg og la ved en melding:"
-
-#. * $username ($user_email) has shared $number_of_images images with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:172
-msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
-msgstr "%1$s (%2$s) har delt %3$s bilder med deg og la ved en melding:"
-
-#. * $username ($user_email) has shared a folder with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:175
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
-msgstr "%1$s (%2$s) har delt mappen \"%3$s\" med deg og la ved en melding:"
-
-#. * $username ($user_email) has shared item "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
-msgstr "%1$s (%2$s) har delt elementet \"%3$s\" med deg og la ved en melding:"
-
-#. * $username ($user_email) has shared $number_of_items items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
-msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
-msgstr "%1$s (%2$s) har delt %3$s elementer med deg og la ved en melding:"
-
-#. * $username ($user_email) has shared $number_of_folder items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
-msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
-msgstr "%1$s (%2$s) har delt %3$d mapper med deg og la ved en melding:"
-
-#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) har delt filen \"%3$s\" med gruppen \"%4$s\" og vedlagt en "
-"melding:"
-
-#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
-msgid ""
-"%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
-msgstr ""
-"%1$s (%2$s) har delt %3$s filer med gruppen \"%4$s\" og vedlagt en melding:"
-
-#. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) har delt bildet \"%3$s\" med gruppen \"%4$s\" og vedlagt en "
-"melding:"
-
-#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:196
-msgid ""
-"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) har delt %3$s bilder med gruppen \"%4$s\" og vedlagt en melding:"
-
-#. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:199
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
-"a message:"
-msgstr ""
-"%1$s (%2$s) har delt mappen \"%3$s\" med gruppen \"%4$s\" og vedlagt en "
-"melding:"
-
-#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:202
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) har delt elementet \"%3$s\" med gruppen \"%4$s\" og vedlagt en "
-"melding:"
-
-#. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:205
-msgid ""
-"%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
-msgstr ""
-"%1$s (%2$s) har delt %3$s elementer med gruppen \"%4$s\" og vedlagt en "
-"melding:"
-
-#. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:208
-msgid ""
-"%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) har delt %3$d mapper med gruppen \"%4$s\" og vedlagt en melding:"
-
-#. button with label
-#. * View image
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:212
-msgid "View image"
-msgstr "Vis bilde"
-
-#. * View images
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:215
-msgid "View images"
-msgstr "Vis bilder"
-
-#. * View file
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:218
-msgid "View file"
-msgstr "Vis fil"
-
-#. * View files
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:221
-msgid "View files"
-msgstr "Vis filer"
-
-#. * View folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:224
-msgid "View folder"
-msgstr "Vis mappe"
-
-#. * View folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:227
-msgid "View folders"
-msgstr "Vis mapper"
-
-#. * View item
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:230
-msgid "View item"
-msgstr "Vis element"
-
-#. * View items
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:233
-msgid "View items"
-msgstr "Vis elementer"
-
-#. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
-msgid "The link will expire on %1$s"
-msgstr "Lenken vil utløpe %1$s"
-
-#. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:239
-msgid ""
-"This link is password protected. You need the following password to open it:"
-msgstr ""
-"Lenken er passordbeskyttet. Du behøver det følgende passordet for åpne den:"
-
-#.
-#. * Password reset confirm mails
-#.
-#. *
-#. * OX App Suite - Forgot your password?
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:248
-msgid "%1$s - Forgot your password?"
-msgstr "%1$s - Glemt passordet ditt?"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:250
-msgid "Hello,"
-msgstr "Hei,"
-
-#. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:253
-msgid ""
-"we got informed that you forgot your password. You can set a new password "
-"here:"
-msgstr ""
-"vi har fått beskjed om at du har glemt passordet ditt. Du kan sette et nytt "
-"passord her:"
-
-#. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:256
-msgid "Set password"
-msgstr "Angi passord"
-
-#. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:259
-msgid ""
-"If you didn't request this, please ignore this email. Your password won't "
-"change until you access the button above and set a new one."
-msgstr ""
-"Om du ikke har bedt om dette, vennligst ignorer denne eposten. Passordet "
-"ditt vil ikke endres inntil du klikker knappen under og angir et nytt "
-"passord."
-
-#. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:262
-msgid "This is an automated message, please do not reply."
-msgstr "Dette er en automatisk melding, vennligst ikke svar på den."
-
-#. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:265
-msgid "unknown"
-msgstr "ukjent"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:62
 msgid "guest"
 msgstr "gjest"
@@ -9645,6 +9439,426 @@ msgstr "De angitte rettighetene for lenken er ugyldige."
 msgid "image"
 msgstr "bilde"
 
+#. subject
+#. * $username has shared file "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:65
+msgid "%1$s has shared the file \"%2$s\" with you."
+msgstr "%1$s har delt filen \"%2$s\" med deg."
+
+#. * $username has shared $number_of_files files with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:68
+msgid "%1$s has shared %2$s files with you."
+msgstr "%1$s har delt %2$s filer med deg."
+
+#. * $username has shared image "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:71
+msgid "%1$s has shared the image \"%2$s\" with you."
+msgstr "%1$s har delt bildet \"%2$s\" med deg."
+
+#. * $username has shared $number_of_images images with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:74
+msgid "%1$s has shared %2$s images with you."
+msgstr "%1$s har delt %2$s bilder med deg."
+
+#. * $username has shared item "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:77
+msgid "%1$s has shared the item \"%2$s\" with you."
+msgstr "%1$s har delt elementet \"%2$s\" med deg."
+
+#. * $username has shared $number items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:80
+msgid "%1$s has shared %2$s items with you."
+msgstr "%1$s har delt %2$s elementer med deg."
+
+#. * $username has shared folder "$folder" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:83
+msgid "%1$s has shared the folder \"%2$s\" with you."
+msgstr "%1$s har delt mappen \"%2$s\" med deg."
+
+#. * $username has shared $number folders with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:86
+msgid "%1$s has shared %2$d folders with you."
+msgstr "%1$s har delt %2$d mapper med deg."
+
+#. * $username has shared file "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:89
+msgid "%1$s has shared the file \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s har delt filen \"%2$s\" med gruppen \"%3$s\"."
+
+#. * $username has shared $number_of_files files with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:92
+msgid "%1$s has shared %2$s files with the group \"%3$s\"."
+msgstr "%1$s har delt %2$s filer med gruppen \"%3$s\"."
+
+#. * $username has shared image "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:95
+msgid "%1$s has shared the image \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s har delt bildet \"%2$s\" med gruppen \"%3$s\"."
+
+#. * $username has shared $number_of_images images with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:98
+msgid "%1$s has shared %2$s images with the group \"%3$s\"."
+msgstr "%1$s har delt %2$s bilder med gruppen \"%3$s\"."
+
+#. * $username has shared item "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:101
+msgid "%1$s has shared the item \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s har delt elementet \"%2$s\" med gruppen \"%3$s\"."
+
+#. * $username has shared $number items with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:104
+msgid "%1$s has shared %2$s items with the group \"%3$s\"."
+msgstr "%1$s har delt %2$s elementer med gruppen \"%3$s\"."
+
+#. * $username has shared folder "$folder" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:107
+msgid "%1$s has shared the folder \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s har delt mappen \"%2$s\" med gruppen \"%3$s\"."
+
+#. * $username has shared $number folders with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:110
+msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
+msgstr "%1$s har delt %2$d mapper med gruppen \"%3$s\"."
+
+#. detailed body
+#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:114
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) har delt filen \"%3$s\" med deg. Klikk knappen under for å se "
+"den."
+
+#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:117
+msgid ""
+"%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) har delt %3$s filer med deg. Klikk knappen under for å se dem."
+
+#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:120
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) har delt bildet \"%3$s\" med deg. Klikk knappen under for å se "
+"det."
+
+#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:123
+msgid ""
+"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) har delt %3$s bilder med deg. Klikk knappen under for å se dem."
+
+#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:126
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) har delt elementet \"%3$s\" med deg. Klikk knappen under for å "
+"se det."
+
+#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
+msgid ""
+"%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) har delt %3$s elementer med deg. Klikk knappen under for å se "
+"dem."
+
+#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:132
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) har delt mappen \"%3$s\" med deg. Klikk knappen under for å se "
+"den."
+
+#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) har delt %3$ mapper med deg. Klikk knappen under for å se dem."
+
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) har delt filen %3$ med gruppen \"%4$s\". Klikk knappen under for "
+"å se den."
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:141
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) har delt %3$s filer med gruppen \"%4$s\". Klikk knappen under "
+"for å se dem."
+
+#. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:144
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) har delt bildet \"%3$s\" med gruppen \"%4$s\". Klikk knappen "
+"under for å se det."
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:147
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) har delt %3$s bilder med gruppen \"%4$s\". Klikk knappen under "
+"for å se dem."
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) har delt elementet \"%3$s\" med gruppen \"%4$s\". Klikk knappen "
+"under for å se det."
+
+#. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
+msgid ""
+"%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) har delt %3$s elementer med gruppen \"%4$s\". Klikk knappen "
+"under for å se dem."
+
+#. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) har delt mappen \"%3$s\" med gruppen \"%4$s\". Klikk knappen "
+"under for å se den."
+
+#. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:159
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) har delt %3$ mapper med gruppen \"%4$s\". Klikk knappen under "
+"for å se dem."
+
+#. * $username ($user_email) has shared file "$filename" with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:163
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
+msgstr "%1$s (%2$s) har delt filen \"%3$\" med deg og la ved en melding:"
+
+#. * $username ($user_email) has shared $number_of_files files with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:166
+msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
+msgstr "%1$s (%2$s) har delt %3$s filer med deg og la ved en melding:"
+
+#. * $username ($user_email) has shared photo "$filename" with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:169
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
+msgstr "%1$s (%2$s) har delt bildet \"%3$s\" med deg og la ved en melding:"
+
+#. * $username ($user_email) has shared $number_of_images images with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:172
+msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
+msgstr "%1$s (%2$s) har delt %3$s bilder med deg og la ved en melding:"
+
+#. * $username ($user_email) has shared a folder with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:175
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
+msgstr "%1$s (%2$s) har delt mappen \"%3$s\" med deg og la ved en melding:"
+
+#. * $username ($user_email) has shared item "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:178
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
+msgstr "%1$s (%2$s) har delt elementet \"%3$s\" med deg og la ved en melding:"
+
+#. * $username ($user_email) has shared $number_of_items items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:181
+msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
+msgstr "%1$s (%2$s) har delt %3$s elementer med deg og la ved en melding:"
+
+#. * $username ($user_email) has shared $number_of_folder items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:184
+msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
+msgstr "%1$s (%2$s) har delt %3$d mapper med deg og la ved en melding:"
+
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:187
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) har delt filen \"%3$s\" med gruppen \"%4$s\" og vedlagt en "
+"melding:"
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:190
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
+msgstr ""
+"%1$s (%2$s) har delt %3$s filer med gruppen \"%4$s\" og vedlagt en melding:"
+
+#. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:193
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) har delt bildet \"%3$s\" med gruppen \"%4$s\" og vedlagt en "
+"melding:"
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:196
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) har delt %3$s bilder med gruppen \"%4$s\" og vedlagt en melding:"
+
+#. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:199
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
+"a message:"
+msgstr ""
+"%1$s (%2$s) har delt mappen \"%3$s\" med gruppen \"%4$s\" og vedlagt en "
+"melding:"
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:202
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) har delt elementet \"%3$s\" med gruppen \"%4$s\" og vedlagt en "
+"melding:"
+
+#. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:205
+msgid ""
+"%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
+msgstr ""
+"%1$s (%2$s) har delt %3$s elementer med gruppen \"%4$s\" og vedlagt en "
+"melding:"
+
+#. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:208
+msgid ""
+"%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) har delt %3$d mapper med gruppen \"%4$s\" og vedlagt en melding:"
+
+#. button with label
+#. * View image
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:212
+msgid "View image"
+msgstr "Vis bilde"
+
+#. * View images
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:215
+msgid "View images"
+msgstr "Vis bilder"
+
+#. * View folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:224
+msgid "View folder"
+msgstr "Vis mappe"
+
+#. * View folders
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:227
+msgid "View folders"
+msgstr "Vis mapper"
+
+#. * View item
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:230
+msgid "View item"
+msgstr "Vis element"
+
+#. * View items
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:233
+msgid "View items"
+msgstr "Vis elementer"
+
+#. * The link is password protected. To see it you must use the following password: kac7Nede *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:239
+msgid ""
+"This link is password protected. You need the following password to open it:"
+msgstr ""
+"Lenken er passordbeskyttet. Du behøver det følgende passordet for åpne den:"
+
+#.
+#. * Password reset confirm mails
+#.
+#. *
+#. * OX App Suite - Forgot your password?
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:248
+msgid "%1$s - Forgot your password?"
+msgstr "%1$s - Glemt passordet ditt?"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:250
+msgid "Hello,"
+msgstr "Hei,"
+
+#. * we got informed that you forgot your password. You can set a new password here:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:253
+msgid ""
+"we got informed that you forgot your password. You can set a new password "
+"here:"
+msgstr ""
+"vi har fått beskjed om at du har glemt passordet ditt. Du kan sette et nytt "
+"passord her:"
+
+#. * Set password
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:256
+msgid "Set password"
+msgstr "Angi passord"
+
+#. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:259
+msgid ""
+"If you didn't request this, please ignore this email. Your password won't "
+"change until you access the button above and set a new one."
+msgstr ""
+"Om du ikke har bedt om dette, vennligst ignorer denne eposten. Passordet "
+"ditt vil ikke endres inntil du klikker knappen under og angir et nytt "
+"passord."
+
+#. * This is an automated message, please do not reply.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:262
+msgid "This is an automated message, please do not reply."
+msgstr "Dette er en automatisk melding, vennligst ikke svar på den."
+
+#. An error occurred for user 'unknown'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:265
+msgid "unknown"
+msgstr "ukjent"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:64
 msgid ""
 "No notification mail could be sent to user \"%1$s\". We don't know his email "
@@ -9660,6 +9874,23 @@ msgstr "En feil oppstod, vi kunne ikke sende en epost til \"%2$s\"."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:68
 msgid "An error occurred, we were unable to send out the notification mails."
 msgstr "En feil oppstod, vi kunne ikke sende ut varslingseposter."
+
+#. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
+msgid ""
+"You have exceeded the maximum number of sms allowed. Please try again after "
+"%1$s hours"
+msgstr ""
+"Du har overskredet maksimalt antall SMS-er. Vennligst forsøk igjen etter %1$"
+"s timer."
+
+#. SMS limits apply. You can only send one more message in the next %1$s hours
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
+msgid ""
+"SMS limits apply. You can only send one more message in the next %1$s hours"
+msgstr ""
+"SMS-begrensninger er i effekt. Du kan bare sende èn melding til i løpet av "
+"de neste %1$s timene."
 
 #. Could not parse phone number %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64
@@ -9702,9 +9933,8 @@ msgstr "Ugyldig eller skadelig bildedata ble oppdaget"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
-msgid ""
-"The maximum allowed size of '%1$s' for an image in the signature is reached."
-msgstr "Maksimal størrelse på '%1$s' for et bilde i signaturen ble overskredet."
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
+msgstr "Signaturbildet overskrider den maksimalt tillatte størrelsen på '%1$s'."
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
@@ -12190,213 +12420,220 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "Ugyldig e-postadresse."
+
+#~ msgid ""
+#~ "The maximum allowed size of '%1$s' for an image in the signature is reached."
+#~ msgstr "Maksimal størrelse på '%1$s' for et bilde i signaturen ble overskredet."
+
 # Drive Application
-msgid "Drive Application"
-msgstr "Drive-app"
+#~ msgid "Drive Application"
+#~ msgstr "Drive-app"
 
 # Synchronize your files with our Drive application.
-msgid "Synchronize your files with our Drive application."
-msgstr "Synkroniser filene dine med Drive-appen"
+#~ msgid "Synchronize your files with our Drive application."
+#~ msgstr "Synkroniser filene dine med Drive-appen"
 
 # Mail + Calendar + Address Book
-msgid "Mail + Calendar + Address Book"
-msgstr "Epost + kalender + adressebok"
+#~ msgid "Mail + Calendar + Address Book"
+#~ msgstr "Epost + kalender + adressebok"
 
 # To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
-msgid ""
-"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
-"and install our desktop application."
-msgstr ""
-"For å synkronisere epost, kalendere, oppgaver og adressebok, last ned og "
-"installer skrivebordsapplikasjonen vår."
+#~ msgid ""
+#~ "To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+#~ "and install our desktop application."
+#~ msgstr ""
+#~ "For å synkronisere epost, kalendere, oppgaver og adressebok, last ned og "
+#~ "installer skrivebordsapplikasjonen vår."
 
 # Drive App
-msgid "Drive App"
-msgstr "Drive-appen"
+#~ msgid "Drive App"
+#~ msgstr "Drive-appen"
 
 # Synchronize your files with our Drive App.
-msgid "Synchronize your files with our Drive App."
-msgstr "Synkroniser filene dine med Drive-appen."
+#~ msgid "Synchronize your files with our Drive App."
+#~ msgstr "Synkroniser filene dine med Drive-appen."
 
 # Mail App
-msgid "Mail App"
-msgstr "Mail-app"
+#~ msgid "Mail App"
+#~ msgstr "Mail-app"
 
 # Synchronize your Mail with our Mail App.
-msgid "Synchronize your Mail with our Mail App."
-msgstr "Synkroniser eposten din med Mail-appen"
+#~ msgid "Synchronize your Mail with our Mail App."
+#~ msgstr "Synkroniser eposten din med Mail-appen"
 
 # Calendar + Address Book
-msgid "Calendar + Address Book"
-msgstr "Kalender + adressebok"
+#~ msgid "Calendar + Address Book"
+#~ msgstr "Kalender + adressebok"
 
 # Synchronize your Calendar and Address Book data with your device.
-msgid "Synchronize your Calendar and Address Book data with your device."
-msgstr "Synkroniser kalenderen og adresseboken med enheten din."
+#~ msgid "Synchronize your Calendar and Address Book data with your device."
+#~ msgstr "Synkroniser kalenderen og adresseboken med enheten din."
 
 # OX Sync
-msgid "OX Sync"
-msgstr "OX Sync"
+#~ msgid "OX Sync"
+#~ msgstr "OX Sync"
 
 # Synchronize all your appointments and contacts
-msgid "Synchronize all your appointments and contacts"
-msgstr "Synkroniser alle avtalene og kontaktene dine"
+#~ msgid "Synchronize all your appointments and contacts"
+#~ msgstr "Synkroniser alle avtalene og kontaktene dine"
 
 # To manually setup your Calendar and Address Book accounts, please use the following information.
-msgid ""
-"To manually setup your Calendar and Address Book accounts, please use the "
-"following information."
-msgstr ""
-"For å manuelt sette opp kalender- og adressebokkontoene dine, vennligst bruk "
-"den følgende informasjonen."
+#~ msgid ""
+#~ "To manually setup your Calendar and Address Book accounts, please use the "
+#~ "following information."
+#~ msgstr ""
+#~ "For å manuelt sette opp kalender- og adressebokkontoene dine, vennligst bruk "
+#~ "den følgende informasjonen."
 
 # Updater
-msgid "Updater"
-msgstr "Updater"
+#~ msgid "Updater"
+#~ msgstr "Updater"
 
 # When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
-msgid ""
-"When executing the downloaded file, an installation wizard will be launched. "
-"Follow the instructions and install the updater. Installs latest versions of "
-"Windows® client software. The Updater automatically informs about new "
-"updates. You can download the updates from within the Updater."
-msgstr ""
-"Når du kjører den nedlastede filen vil det startes en installasjonsveiviser. "
-"Følg instruksjonene og installer Updater-programmet. Programmet vil "
-"automatisk informere om nye oppdateringer, og du kan laste dem ned i Updater-"
-"programmet."
+#~ msgid ""
+#~ "When executing the downloaded file, an installation wizard will be launched. "
+#~ "Follow the instructions and install the updater. Installs latest versions of "
+#~ "Windows® client software. The Updater automatically informs about new "
+#~ "updates. You can download the updates from within the Updater."
+#~ msgstr ""
+#~ "Når du kjører den nedlastede filen vil det startes en installasjonsveiviser. "
+#~ "Følg instruksjonene og installer Updater-programmet. Programmet vil "
+#~ "automatisk informere om nye oppdateringer, og du kan laste dem ned i Updater-"
+#~ "programmet."
 
 # Connector for Microsoft Outlook®
-msgid "Connector for Microsoft Outlook®"
-msgstr "Connector for Microsoft Outlook®"
+#~ msgid "Connector for Microsoft Outlook®"
+#~ msgstr "Connector for Microsoft Outlook®"
 
 # Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
-msgid ""
-"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
-"Shared and System Folders to Microsoft Outlook® clients."
-msgstr ""
-"Synkronisering av epost, kalender, kontakter, oppgaver, sammen med "
-"offentlige og delte mapper med Outlook-klienter."
+#~ msgid ""
+#~ "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+#~ "Shared and System Folders to Microsoft Outlook® clients."
+#~ msgstr ""
+#~ "Synkronisering av epost, kalender, kontakter, oppgaver, sammen med "
+#~ "offentlige og delte mapper med Outlook-klienter."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
-msgid "Synchronize your Mail, Calendar and Address Book data with your device."
-msgstr "Synkroniser epost, kalender og adressebok med enheten din."
+#~ msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+#~ msgstr "Synkroniser epost, kalender og adressebok med enheten din."
 
 # To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
-msgid ""
-"To manually setup your Mail, Calendar and Address Book accounts, please use "
-"the following information."
-msgstr ""
-"For å manuelt sette opp kontoer for epost, kalender og adressebok, vennligst "
-"bruk den følgende informasjonen."
+#~ msgid ""
+#~ "To manually setup your Mail, Calendar and Address Book accounts, please use "
+#~ "the following information."
+#~ msgstr ""
+#~ "For å manuelt sette opp kontoer for epost, kalender og adressebok, vennligst "
+#~ "bruk den følgende informasjonen."
 
 # Mail
-msgid "Mail"
-msgstr "Mail"
+#~ msgid "Mail"
+#~ msgstr "Mail"
 
 # Synchronize your Mail with Apple Mail App.
-msgid "Synchronize your Mail with Apple Mail App."
-msgstr "Synkroniser epost med Apple Mail-appen."
+#~ msgid "Synchronize your Mail with Apple Mail App."
+#~ msgstr "Synkroniser epost med Apple Mail-appen."
 
 # To manually setup your Mail account, please use the following information
-msgid ""
-"To manually setup your Mail account, please use the following information"
-msgstr ""
-"For å manuelt sette opp epostkontoen din, vennligst bruk den følgende "
-"informasjonen"
+#~ msgid ""
+#~ "To manually setup your Mail account, please use the following information"
+#~ msgstr ""
+#~ "For å manuelt sette opp epostkontoen din, vennligst bruk den følgende "
+#~ "informasjonen"
 
 # OX Drive Windows Client
-msgid "OX Drive Windows Client"
-msgstr "OX Drive Windows-klient"
+#~ msgid "OX Drive Windows Client"
+#~ msgstr "OX Drive Windows-klient"
 
 # To use Drive on your device, simply download OX Drive Windows Client
-msgid "To use Drive on your device, simply download OX Drive Windows Client"
-msgstr ""
-"For å bruke Drive på enheten din, bare last ned Windows-klienten for OX Drive"
+#~ msgid "To use Drive on your device, simply download OX Drive Windows Client"
+#~ msgstr ""
+#~ "For å bruke Drive på enheten din, bare last ned Windows-klienten for OX Drive"
 
 # eM-Client
-msgid "eM-Client"
-msgstr "eM Client"
+#~ msgid "eM-Client"
+#~ msgstr "eM Client"
 
 # To use eM-Client on your device, simply download and install
-msgid "To use eM-Client on your device, simply download and install"
-msgstr "For å bruke eM Client på enheten din, bare last ned og installer"
+#~ msgid "To use eM-Client on your device, simply download and install"
+#~ msgstr "For å bruke eM Client på enheten din, bare last ned og installer"
 
 # OX Drive
-msgid "OX Drive"
-msgstr "OX Drive"
+#~ msgid "OX Drive"
+#~ msgstr "OX Drive"
 
 # To use Drive on your Mac, simply download OX Drive
-msgid "To use Drive on your Mac, simply download OX Drive"
-msgstr "For å bruke Drive på Mac-en din, bare last ned OX Drive"
+#~ msgid "To use Drive on your Mac, simply download OX Drive"
+#~ msgstr "For å bruke Drive på Mac-en din, bare last ned OX Drive"
 
 # OX Mail App
-msgid "OX Mail App"
-msgstr "OX Mail-app"
+#~ msgid "OX Mail App"
+#~ msgstr "OX Mail-app"
 
 # To use Mail on your device, simply download OX Mail App
-msgid "To use Mail on your device, simply download OX Mail App"
-msgstr "For å bruke epost på enheten din, bare last ned OX Mail-appen"
+#~ msgid "To use Mail on your device, simply download OX Mail App"
+#~ msgstr "For å bruke epost på enheten din, bare last ned OX Mail-appen"
 
 # OX Drive App
-msgid "OX Drive App"
-msgstr "OX Drive-app"
+#~ msgid "OX Drive App"
+#~ msgstr "OX Drive-app"
 
 # To use Drive on your device, simply download OX Drive App
-msgid "To use Drive on your device, simply download OX Drive App"
-msgstr "For å bruke Drive på enheten din, bare last ned OX Drive-appen"
+#~ msgid "To use Drive on your device, simply download OX Drive App"
+#~ msgstr "For å bruke Drive på enheten din, bare last ned OX Drive-appen"
 
 # Sync App
-msgid "Sync App"
-msgstr "Sync-app"
+#~ msgid "Sync App"
+#~ msgstr "Sync-app"
 
 # To use Drive on your device, simply download the App
-msgid "To use Drive on your device, simply download the App"
-msgstr "For å bruke Drive på enheten din, bare last ned appen"
+#~ msgid "To use Drive on your device, simply download the App"
+#~ msgstr "For å bruke Drive på enheten din, bare last ned appen"
 
 # Calendar + Contacts
-msgid "Calendar + Contacts"
-msgstr "Kalender + kontakter"
+#~ msgid "Calendar + Contacts"
+#~ msgstr "Kalender + kontakter"
 
 # Synchronize your data via Calendar and Addressbook natively on your device
-msgid ""
-"Synchronize your data via Calendar and Addressbook natively on your device"
-msgstr ""
-"Synkroniser dataen din via kalender og adressebok direkte på enheten din"
+#~ msgid ""
+#~ "Synchronize your data via Calendar and Addressbook natively on your device"
+#~ msgstr ""
+#~ "Synkroniser dataen din via kalender og adressebok direkte på enheten din"
 
 # To manually setup your Calendar & Addressbook accounts, please use the following information
-msgid ""
-"To manually setup your Calendar & Addressbook accounts, please use the "
-"following information"
-msgstr ""
-"For å manuelt sette opp kalender- og adressebokkontoene dine, bruk den "
-"følgende informasjonen"
+#~ msgid ""
+#~ "To manually setup your Calendar & Addressbook accounts, please use the "
+#~ "following information"
+#~ msgstr ""
+#~ "For å manuelt sette opp kalender- og adressebokkontoene dine, bruk den "
+#~ "følgende informasjonen"
 
 # Updater for Windows Clients
-msgid "Updater for Windows Clients"
-msgstr "Updater for Windows"
+#~ msgid "Updater for Windows Clients"
+#~ msgstr "Updater for Windows"
 
 # Exchange ActiveSync
-msgid "Exchange ActiveSync"
-msgstr "Exchange ActiveSync"
+#~ msgid "Exchange ActiveSync"
+#~ msgstr "Exchange ActiveSync"
 
 # Synchronize your emails, contacts, calendar, and tasks
-msgid "Synchronize your emails, contacts, calendar, and tasks"
-msgstr "Synkroniser epost, kontakter, kalendere og oppgaver"
+#~ msgid "Synchronize your emails, contacts, calendar, and tasks"
+#~ msgstr "Synkroniser epost, kontakter, kalendere og oppgaver"
 
 # eMail
-msgid "eMail"
-msgstr "epost"
+#~ msgid "eMail"
+#~ msgstr "epost"
 
 # Use your Apple Mail App to manage your mailbox
-msgid "Use your Apple Mail App to manage your mailbox"
-msgstr "Bruk Apple Mail-appen for å behandle postkassen din"
+#~ msgid "Use your Apple Mail App to manage your mailbox"
+#~ msgstr "Bruk Apple Mail-appen for å behandle postkassen din"
 
 # To manually setup your eMail client, please use the following information
-msgid ""
-"To manually setup your eMail client, please use the following information"
-msgstr ""
-"For å manuelt sette opp epostklienten din, bruk den følgende informasjonen"
+#~ msgid ""
+#~ "To manually setup your eMail client, please use the following information"
+#~ msgstr ""
+#~ "For å manuelt sette opp epostklienten din, bruk den følgende informasjonen"
 
 #~ msgid "tentatively accept"
 #~ msgstr "foreløpig godta"

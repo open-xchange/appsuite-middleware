@@ -1,0 +1,14 @@
+type: object
+properties:
+  path:
+    type: string
+    description: The path of the directory, relative to the root folder.
+  checksum:
+    type: string
+    description: The checksum of the directory.
+  directLink:
+    type: string
+    description: An URL with a direct link to the folder.
+  directLinkFragments:
+    type: string
+    description: The fragments part of the direct link that can be used in combination with the token login method to jump directly to the detail view in the web interface, bypassing the need to login manually.

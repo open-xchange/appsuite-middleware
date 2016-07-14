@@ -94,11 +94,13 @@ public final class MailAccountDescription implements Serializable {
     private int mailPort;
     private String mailProtocol;
     private boolean mailSecure;
+    private boolean mailStartTls;
     private TransportAuth transportAuth;
     private String transportServer;
     private int transportPort;
     private String transportProtocol;
     private boolean transportSecure;
+    private boolean transportStartTls;
     private String mailServerUrl;
     private String transportUrl;
     private boolean unifiedINBOXEnabled;
@@ -300,6 +302,24 @@ public final class MailAccountDescription implements Serializable {
     }
 
     /**
+     * Sets if STARTTLS should be used to connect to mail server
+     * 
+     * @return
+     */
+    public void setMailStartTls(boolean mailStartTls) {
+        this.mailStartTls = mailStartTls;
+    }
+
+    /**
+     * Checks if STARTTLS should be used to connect to mail server
+     * 
+     * @return
+     */
+    public boolean isMailStartTls() {
+        return mailStartTls;
+    }
+
+    /**
      * Gets the transport authentication information
      *
      * @return The transport authentication information
@@ -394,6 +414,24 @@ public final class MailAccountDescription implements Serializable {
     public void setTransportSecure(final boolean transportSecure) {
         transportUrl = null;
         this.transportSecure = transportSecure;
+    }
+
+    /**
+     * Sets if STARTTLS should be used to connect to transport server
+     * 
+     * @return
+     */
+    public void setTransportStartTls(boolean transportStartTls) {
+        this.transportStartTls = transportStartTls;
+    }
+
+    /**
+     * Checks if STARTTLS should be used to connect to transport server
+     * 
+     * @return
+     */
+    public boolean isTransportStartTls() {
+        return transportStartTls;
     }
 
     /**

@@ -138,6 +138,26 @@ public abstract class DAVAction extends AbstractAction {
     }
 
     /**
+     * Optionally gets the root element of the request body from the supplied WebDAV request.
+     * parsing fails.
+     *
+     * @param request The WebDAV request
+     * @param namespace The expected namespace of the root element
+     * @param name The expected name of the root element
+     * @return The root element, or <code>null</code> if there is none or no document could be parsed
+     */
+    protected Element optRootElement(WebdavRequest request, Namespace namespace, String name) throws WebdavProtocolException {
+        Document requestBody = optRequestBody(request);
+        if (null != requestBody) {
+            Element rootElement = requestBody.getRootElement();
+            if (null != rootElement && rootElement.getNamespace().equals(namespace) && rootElement.getName().equals(name)) {
+                return rootElement;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Optionally extracts the request body document from a WebDAV request.
      *
      * @param request The WebDAV request
@@ -147,7 +167,7 @@ public abstract class DAVAction extends AbstractAction {
         try {
             return request.getBodyAsDocument();
         } catch (JDOMException | IOException e) {
-            org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error getting WebDAV request body", e);
+            org.slf4j.LoggerFactory.getLogger(DAVAction.class).debug("Error getting WebDAV request body", e);
             return null;
         }
     }

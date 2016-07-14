@@ -1,0 +1,10 @@
+type: object
+properties:
+  test:
+    type: string
+    description: The name of the test, see [Possible tests](https://documentation.open-xchange.com/latest/middleware/http_api/4_mail_filter.html#possible-tests).
+  comparison:
+    type: array
+    description: An array of the valid comparison types for this test, see [Possible comparisons](https://documentation.open-xchange.com/latest/middleware/http_api/4_mail_filter.html#possible-comparisons).
+    items:
+      type: string

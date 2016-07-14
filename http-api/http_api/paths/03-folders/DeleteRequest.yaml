@@ -1,0 +1,45 @@
+/folders?action=delete:
+  put:
+    operationId: deleteFolders
+    tags:
+      - folders
+    summary: Deletes a list of folders.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: The optional timestamp of the last update of the deleted folders.
+        required: false
+      - $ref: "#/parameters/gblQueryParamAllowedModules"
+      - in: query
+        name: hardDelete
+        type: boolean
+        description: |
+          If set to `true`, the folders are deleted permanently. Otherwise, and if the underlying storage
+          supports a trash folder and the folders are not yet located below the trash folder, they are moved
+          to the trash folder.
+        required: false
+        default: false
+      - in: body
+        name: body
+        description: A JSON array with object IDs of the folders.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: |
+          An array with object IDs of folders that were NOT deleted. There may be a lot of different causes
+          for a not deleted folder: A folder has been modified in the mean time, the user does not have the
+          permission to delete it or those permissions have just been removed, the folder does not exist, etc.
+          You receive an empty JSON array if everything worked well. In case of errors the responsible fields
+          in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FoldersCleanUpResponse"

@@ -1,0 +1,45 @@
+/import?action=CSV:
+  post:
+    operationId: importCSV
+    tags:
+      - import
+    summary: Imports contact data from CSV file.
+    description: |
+      #### Example CSV
+      ```
+      "Given name","Sur name"
+      "Günther","Mustermann"
+      "Hildegard","Musterfrau"
+      ```
+      The delimiter may be any CSV-valid character (e.g. "," or ";"). The first line must contain the column titles that are related
+      to the corresponding fields of the [ContactData](#/definitions/ContactData) model. See [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data)
+      for a mapping of fields to CSV column titles.
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder into which the data should be imported. This must be a contact folder.
+        required: true
+      - in: query
+        name: charset
+        type: string
+        description: A fixed character encoding to use when parsing the uploaded file, overriding the built-in defaults, following the conventions documented in [RFC 2278](http://tools.ietf.org/html/rfc2278) (preliminary, since 7.6.2).
+        required: false
+      - in: formData
+        name: file
+        type: file
+        description: The CSV file containing the contact data. The column titles are the ones described in [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data).
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON object with the field `data` that represents
+          an array of objects each consisting of the fields `id`, `folder_id` and `last_modified` of the newly created contacts.
+          In case of errors the JSON object contains the well known [error fields](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling).
+        schema:
+          type: string

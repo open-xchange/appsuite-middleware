@@ -63,6 +63,7 @@ import com.openexchange.drive.client.windows.service.BrandingService;
 import com.openexchange.drive.client.windows.service.DriveUpdateService;
 import com.openexchange.drive.client.windows.service.internal.Utils;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.login.Interface;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.http.Tools;
@@ -94,8 +95,8 @@ public class DownloadServlet extends OXServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        InputStream file = null;
         try {
-            InputStream file = null;
             int fileSize = -1;
             ServerSession session = getServerSession(req);
             if (null == session) {
@@ -171,10 +172,11 @@ public class DownloadServlet extends OXServlet {
             }
 
             out.flush();
-            file.close();
         } catch (OXException e) {
             LOG.error("", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } finally {
+            Streams.close(file);
         }
     }
 

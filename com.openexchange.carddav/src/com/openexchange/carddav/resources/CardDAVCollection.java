@@ -68,12 +68,14 @@ import com.openexchange.carddav.mixins.SupportedReportSet;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.similarity.ContactSimilarityService;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.SimilarityException;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
@@ -86,6 +88,7 @@ import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -123,7 +126,7 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
      * @param inputStream The input stream to parse and import from
      * @return The import results
      */
-    public List<BulkImportResult> bulkImport(InputStream inputStream) throws OXException {
+    public List<BulkImportResult> bulkImport(InputStream inputStream, float maxSimilarity) throws OXException {
         List<BulkImportResult> importResults = new ArrayList<BulkImportResult>();
         VCardService vCardService = factory.requireService(VCardService.class);
         VCardParameters parameters = vCardService.createParameters(factory.getSession()).setKeepOriginalVCard(isStoreOriginalVCard())
@@ -132,7 +135,7 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
         try {
             searchIterator = vCardService.importVCards(inputStream, parameters);
             while (searchIterator.hasNext()) {
-                importResults.add(bulkImport(searchIterator.next()));
+                importResults.add(bulkImport(searchIterator.next(), maxSimilarity));
             }
         } finally {
             SearchIterators.close(searchIterator);
@@ -140,19 +143,29 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
         return importResults;
     }
 
-    private BulkImportResult bulkImport(VCardImport vCardImport) throws OXException {
+    private BulkImportResult bulkImport(VCardImport vCardImport, float maxSimilarity) throws OXException {
         BulkImportResult importResult = new BulkImportResult();
         if (null == vCardImport || null == vCardImport.getContact()) {
             importResult.setError(new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN));
         } else {
             Contact contact = vCardImport.getContact();
             importResult.setUid(contact.getUid());
-            WebdavPath url = constructPathForChildResource(contact);
-            importResult.setHref(url);
+            WebdavPath url = null;
+            if (contact.containsFilename() || contact.containsUid()) {
+                url = constructPathForChildResource(contact);
+                importResult.setHref(url);
+            }
             try {
                 checkMaxResourceSize(vCardImport);
                 checkUidConflict(contact.getUid());
+                checkSimilarityConflict(maxSimilarity, contact, importResult);
                 ContactResource.fromImport(factory, this, url, vCardImport).create();
+                if (importResult.getHref() == null) {
+                    url = constructPathForChildResource(contact);
+                    importResult.setHref(url);
+                }
+            } catch (SimilarityException e) {
+                importResult.setError(e);
             } catch (PreconditionException e) {
                 importResult.setError(e);
             } catch (WebdavProtocolException e) {
@@ -160,6 +173,29 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
             }
         }
         return importResult;
+    }
+
+    /**
+     * Tests if the given contact is too similar to another contact in the same folder
+     * 
+     * @param maxSimilarity The maximum accepted similarity
+     * @param contact The contact to test
+     * @param result The result object
+     * @throws OXException if the ContactSimilarityService is not available or if the contact is too similar to another contact
+     */
+    private void checkSimilarityConflict(float maxSimilarity, Contact contact, BulkImportResult result) throws OXException {
+        if (maxSimilarity > 0) {
+            // test if contact is too similar to other contacts
+            ContactSimilarityService service = this.factory.getService(ContactSimilarityService.class);
+            if (service == null) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactSimilarityService.class.getSimpleName());
+            }
+            Contact duplicate = service.getSimilar(factory.getSession(), contact, maxSimilarity);
+            if (duplicate != null) {
+                result.setUid(duplicate.getUid());
+                throw new SimilarityException(constructPathForChildResource(duplicate).toString(), contact.getUid(), HttpServletResponse.SC_CONFLICT);
+            }
+        }
     }
 
     /**

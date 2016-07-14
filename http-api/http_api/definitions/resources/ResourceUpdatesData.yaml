@@ -1,0 +1,17 @@
+type: object
+properties:
+  new:
+    type: array
+    description: Array of new resource objects.
+    items:
+      $ref: "#/definitions/ResourceData"
+  modified:
+    type: array
+    description: Array of modified resource objects.
+    items:
+      $ref: "#/definitions/ResourceData"
+  deleted:
+    type: array
+    description: Array of deleted resource objects.
+    items:
+      $ref: "#/definitions/ResourceData"

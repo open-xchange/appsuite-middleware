@@ -97,12 +97,13 @@ public class Strings {
         if (null == s) {
             return false;
         }
-        boolean startsWith = false;
-        for (int i = prefixes.length; !startsWith && i-- > 0;) {
+        for (int i = prefixes.length; i-- > 0;) {
             String prefix = prefixes[i];
-            startsWith = null == prefix ? false : s.startsWith(prefix, 0);
+            if (null != prefix && s.startsWith(prefix, 0)) {
+                return true;
+            }
         }
-        return startsWith;
+        return false;
     }
 
     /**
@@ -160,8 +161,7 @@ public class Strings {
         StringBuilder sb = new StringBuilder(2048);
         sb.append(objects[0] == null ? "null" : objects[0].toString());
         for (int i = 1; i < length; i++) {
-            sb.append(delimiter);
-            sb.append(objects[i] == null ? "null" : objects[i].toString());
+            sb.append(delimiter).append(objects[i] == null ? "null" : objects[i].toString());
         }
         return sb.toString();
     }
@@ -187,8 +187,7 @@ public class Strings {
         StringBuilder sb = new StringBuilder(2048);
         sb.append(strings[0] == null ? "null" : strings[0]);
         for (int i = 1; i < length; i++) {
-            sb.append(delimiter);
-            sb.append(strings[i] == null ? "null" : strings[i]);
+            sb.append(delimiter).append(strings[i] == null ? "null" : strings[i]);
         }
         return sb.toString();
     }
@@ -673,12 +672,7 @@ public class Strings {
         }
         final StringBuilder builder = new StringBuilder(size << 4);
         for (final Object obj : coll) {
-            if (obj == null) {
-                builder.append("null");
-            } else {
-                builder.append(obj.toString());
-            }
-            builder.append(connector);
+            builder.append(obj == null ? "null" : obj.toString()).append(connector);
         }
         return builder.substring(0, builder.length() - connector.length());
     }
@@ -700,12 +694,7 @@ public class Strings {
             return;
         }
         for (final Object obj : coll) {
-            if (obj == null) {
-                builder.append("null");
-            } else {
-                builder.append(obj.toString());
-            }
-            builder.append(connector);
+            builder.append(obj == null ? "null" : obj.toString()).append(connector);
         }
         builder.setLength(builder.length() - connector.length());
     }

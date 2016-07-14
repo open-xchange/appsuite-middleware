@@ -85,10 +85,13 @@ public class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implemen
 
     @Override
     public S addingService(final ServiceReference<S> reference) {
-        final S service = context.getService(reference);
-        if (services.add(service)) {
+        S service = context.getService(reference);
+
+        S serviceToAdd = onServiceAvailable(service);
+        if (services.add(serviceToAdd)) {
             return service;
         }
+
         context.ungetService(reference);
         return null;
     }
@@ -97,6 +100,16 @@ public class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implemen
     public void removedService(final ServiceReference<S> reference, final S service) {
         services.remove(service);
         context.ungetService(reference);
+    }
+
+    /**
+     * Invoked when a tracked service is available.
+     *
+     * @param service The available service
+     * @return The service to add
+     */
+    protected S onServiceAvailable(S service) {
+        return service;
     }
 
 }

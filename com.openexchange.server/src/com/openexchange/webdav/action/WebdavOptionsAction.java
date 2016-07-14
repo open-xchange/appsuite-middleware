@@ -54,10 +54,10 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavOptionsAction extends AbstractAction {
 
-    private static final String DAV_OPTIONS =
+    static final String DAV_OPTIONS =
         "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, calendar-schedule, " +
         "calendarserver-sharing, calendarserver-principal-search, calendarserver-principal-property-search, " +
-        "calendarserver-private-comments, extended-mkcol, calendar-managed-attachments"
+        "calendarserver-private-comments, resource-sharing, calendar-managed-attachments"
     ;
 
 	@Override

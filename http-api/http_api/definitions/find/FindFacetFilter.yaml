@@ -1,0 +1,13 @@
+type: object
+description: The filter to refine the search. (for simple)
+properties:
+  fields:
+    type: array
+    description: An array of fields to search for.
+    items:
+      type: string
+  queries:
+    type: array
+    description: An array of corresponding search values.
+    items:
+      type: string

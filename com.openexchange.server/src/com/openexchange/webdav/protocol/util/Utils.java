@@ -108,11 +108,17 @@ public class Utils {
 	}
 
 	public static String getStatusString(final int s) {
-		switch(s) {
-		case HttpServletResponse.SC_OK : return "OK";
-		case HttpServletResponse.SC_NOT_FOUND : return "NOT FOUND";
-		case HttpServletResponse.SC_FORBIDDEN : return "FORBIDDEN";
-		default : return "Unknown";
-		}
+        switch (s) {
+            case HttpServletResponse.SC_OK:
+                return "OK";
+            case HttpServletResponse.SC_NOT_FOUND:
+                return "NOT FOUND";
+            case HttpServletResponse.SC_FORBIDDEN:
+                return "FORBIDDEN";
+            case HttpServletResponse.SC_CONFLICT:
+                return "CONFLICT";
+            default:
+                return "Unknown";
+        }
 	}
 }

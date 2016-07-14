@@ -67,11 +67,25 @@ import com.openexchange.file.storage.meta.FileFieldHandling;
  */
 public abstract class AbstractFile implements File {
 
+    /** The boolean value indicating whether whether {@link #getFileSize()} returns the exact size w/o any encodings (e.g. base64) applied */
+    protected boolean accurateSize;
+
     /**
      * Initializes a new {@link AbstractFile}.
      */
     protected AbstractFile() {
         super();
+        accurateSize = true;
+    }
+
+    @Override
+    public boolean isAccurateSize() {
+        return accurateSize;
+    }
+
+    @Override
+    public void setAccurateSize(boolean accurateSize) {
+        this.accurateSize = accurateSize;
     }
 
     @Override

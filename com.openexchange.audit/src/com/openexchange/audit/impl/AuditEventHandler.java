@@ -86,6 +86,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
+import com.openexchange.java.Streams;
 import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -586,10 +587,11 @@ public class AuditEventHandler implements EventHandler {
      */
     protected String getPathToRoot(final int folderId, final Session sessionObj) {
         String retval = "";
-
+        FolderObjectIterator it = null;
         try {
             final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(sessionObj));
-            final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getPathToRoot(folderId)).asQueue();
+            it = (FolderObjectIterator) foldersqlinterface.getPathToRoot(folderId);
+            final Queue<FolderObject> q = it.asQueue();
             final int size = q.size();
             final Iterator<FolderObject> iter = q.iterator();
             for (int i = 0; i < size; i++) {
@@ -597,6 +599,8 @@ public class AuditEventHandler implements EventHandler {
             }
         } catch (final OXException e) {
             logger.error("", e);
+        } finally {
+            Streams.close(it);
         }
 
         return retval;

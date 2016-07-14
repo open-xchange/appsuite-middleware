@@ -49,39 +49,7 @@
 
 package com.openexchange.drive;
 
-import static com.openexchange.drive.DriveExceptionMessages.CLIENT_OUTDATED_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.CLIENT_VERSION_UPDATE_AVAILABLE_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.CONFLICTING_FILENAME_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.CONFLICTING_PATH_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.DIRECTORYVERSION_NOT_FOUND_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.FILEVERSION_NOT_FOUND_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.FILE_NOT_FOUND_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.IGNORED_FILENAME_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.IGNORED_PATH_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.INVALID_DIRECTORYVERSION_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.INVALID_FILENAME_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.INVALID_FILEVERSION_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.INVALID_FILE_OFFSET_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.INVALID_PATH_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.INVALID_PATTERN_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.LEVEL_CONFLICTING_FILENAME_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.LEVEL_CONFLICTING_PATH_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.LONG_POLLING_NOT_AVAILABLE_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.METDATA_PARSE_ERROR_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.NOT_SYNCHRONIZABLE_DIRECTORY_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.NO_CREATE_DIRECTORY_PERMISSION_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.NO_CREATE_FILE_PERMISSION_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.NO_DELETE_DIRECTORY_PERMISSION_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.NO_DELETE_FILE_PERMISSION_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.NO_MODIFY_FILE_PERMISSION_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.PATH_NOT_FOUND_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.QUOTA_REACHED_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.REPEATED_SYNC_PROBLEMS_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.SERVER_BUSY_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.TOKEN_ALREADY_REGISTERED_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.TOO_MANY_DIRECTORIES_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.TOO_MANY_FILES_MSG;
-import static com.openexchange.drive.DriveExceptionMessages.UPLOADED_FILE_CHECKSUM_ERROR_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.*;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -208,6 +176,9 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
 
     /** Client connection lost unexpectedly */
     CLIENT_CONNECTION_LOST("Client connection lost unexpectedly", OXExceptionStrings.MESSAGE, Category.CATEGORY_CONNECTIVITY, 38),
+
+    /** Empty files indicated for directory \"%1$s\". */
+    ZERO_BYTE_FILES(ZERO_BYTE_FILES_MSG, ZERO_BYTE_FILES_MSG, Category.CATEGORY_ERROR, 39),
 
     ;
 

@@ -50,16 +50,22 @@
 package com.openexchange.sessiond.impl;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang.math.LongRange;
+import org.apache.commons.lang.math.NumberRange;
 import org.apache.commons.lang.math.Range;
+import org.apache.commons.validator.routines.InetAddressValidator;
+import com.googlecode.ipv6.IPv6Address;
+import com.googlecode.ipv6.IPv6AddressRange;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.IPAddressUtil;
-
+import edazdarevic.commons.net.CIDRUtils;
 
 /**
  * {@link IPRange} - An IP range of either IPv4 or IPv6 addresses.
@@ -71,36 +77,24 @@ public class IPRange {
 
     private final Map<String, Boolean> cache;
     private final Range ipv4Range;
-    private final Range ipv6Range;
+    private final IPv6AddressRange ipv6Range;
 
     /**
      * Initializes a new {@link IPRange}.
+     * 
      * @param ipv4Range The IPv4 address range
      * @param ipv6Range The IPv6 address range
      */
     public IPRange(final Range ipv4Range, final Range ipv6Range) {
         super();
         this.ipv4Range = ipv4Range;
-        this.ipv6Range = ipv6Range;
+        if (ipv6Range != null) {
+            IPv6AddressRange v6Range = IPv6AddressRange.fromFirstAndLast(IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMinimumNumber()), IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMaximumNumber()));
+            this.ipv6Range = v6Range;
+        } else {
+            this.ipv6Range = null;
+        }
         cache = new ConcurrentHashMap<String, Boolean>(512, 0.9f, 1);
-    }
-
-    /**
-     * Gets the IP range for IPv4 addresses
-     *
-     * @return The IPv4 address range
-     */
-    public Range getIpv4Range() {
-        return ipv4Range;
-    }
-
-    /**
-     * Gets the IP range for IPv6 addresses
-     *
-     * @return The IPv6 address range
-     */
-    public Range getIpv6Range() {
-        return ipv6Range;
     }
 
     /**
@@ -128,16 +122,7 @@ public class IPRange {
             cache.put(ipAddress, Boolean.valueOf(ret));
             return ret;
         }
-        /*
-         * IPv6
-         */
-        octets = IPAddressUtil.textToNumericFormatV6(ipAddress);
-        if (null == octets) {
-            throw new IllegalArgumentException("Not an IP address: " + ipAddress);
-        }
-        boolean ret = null != ipv6Range && ipv6Range.containsNumber(ipToBigInteger(octets));
-        cache.put(ipAddress, Boolean.valueOf(ret));
-        return ret;
+        return containsIPv6(ipAddress);
     }
 
     /**
@@ -174,22 +159,22 @@ public class IPRange {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean containsIPv6(byte[] octets, String ipAddress) {
-        // Check for cached entry
+        return contains(ipAddress);
+    }
+
+    public boolean containsIPv6(String ipAddress) {
         if (null != ipAddress) {
             Boolean cached = cache.get(ipAddress);
             if (null != cached) {
                 return cached.booleanValue();
             }
         }
-
-        if (null != octets) {
-            boolean ret = null != ipv6Range && ipv6Range.containsNumber(ipToBigInteger(octets));
-            if (null != ipAddress) {
-                cache.put(ipAddress, Boolean.valueOf(ret));
-            }
-            return ret;
+        IPv6Address fromString = IPv6Address.fromString(ipAddress);
+        boolean ret = null != ipv6Range && ipv6Range.contains(fromString);
+        if (null != ipAddress) {
+            cache.put(ipAddress, Boolean.valueOf(ret));
         }
-        return false;
+        return ret;
     }
 
     @Override
@@ -208,16 +193,7 @@ public class IPRange {
             sb.setLength(sb.length() - 1);
         }
         if (null != ipv6Range) {
-            for (final byte b : longToIP(ipv6Range.getMinimumLong())) {
-                sb.append(b < 0 ? 256 + b : b);
-                sb.append('.');
-            }
-            sb.setCharAt(sb.length() - 1, '-');
-            for (final byte b : longToIP(ipv6Range.getMaximumLong())) {
-                sb.append(b < 0 ? 256 + b : b);
-                sb.append('.');
-            }
-            sb.setLength(sb.length() - 1);
+            sb.append(ipv6Range.toString());
         }
         return sb.toString();
     }
@@ -233,55 +209,60 @@ public class IPRange {
         if (com.openexchange.java.Strings.isEmpty(string)) {
             return null;
         }
-        if(string.indexOf('-') > 0) {
-            final String[] addresses = string.split("\\s*-\\s*");
-            // Try IPv4 first
+        if (string.indexOf('-') > 0) {  // Range with '-'
+            return handleWithSlash(string);
+        } else if (string.indexOf('/') > 0) { // Range as CIDR
+            return handleCIDR(string);
+        }
+        return handleSingleAddress(string);
+    }
+
+    private static IPRange handleSingleAddress(String address) {
+        if (InetAddressValidator.getInstance().isValidInet4Address(address)) {
+            byte[] octets = IPAddressUtil.textToNumericFormatV4(address);
+            return new IPRange(new LongRange(ipToLong(octets), ipToLong(octets)), null);
+        }
+        final IPv6Address iPv6Address = IPv6Address.fromString(address);
+        return new IPRange(null, new NumberRange(iPv6Address.toBigInteger(), iPv6Address.toBigInteger()));
+
+    }
+
+    private static IPRange handleCIDR(String cidrRange) {
+        try {
+            CIDRUtils cidrUtils = new CIDRUtils(cidrRange);
+            InetAddress startAddress = cidrUtils.getStartAddress();
+            InetAddress endAddress = cidrUtils.getEndAddress();
+            if (InetAddressValidator.getInstance().isValidInet4Address(startAddress.getHostAddress())) { //handle v4
+                byte[] octetsStart = IPAddressUtil.textToNumericFormatV4(startAddress.getHostName());
+                byte[] octetsEnd = IPAddressUtil.textToNumericFormatV4(endAddress.getHostName());
+
+                final LongRange ipv4Range = new LongRange(ipToLong(octetsStart), ipToLong(octetsEnd));
+                return new IPRange(ipv4Range, null);
+            }
+
+            final NumberRange ipv6Range = new NumberRange(IPv6Address.fromString(startAddress.toString().replaceAll("/", "")).toBigInteger(), IPv6Address.fromString(endAddress.toString().replaceAll("/", "")).toBigInteger());
+            return new IPRange(null, ipv6Range);
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            //LOG.
+        }
+        return null;
+    }
+
+    private static IPRange handleWithSlash(String range) {
+        final String[] addresses = range.split("\\s*-\\s*");
+
+        if (InetAddressValidator.getInstance().isValidInet4Address(addresses[0])) {
             byte[] octetsStart = IPAddressUtil.textToNumericFormatV4(addresses[0]);
-            if (null == octetsStart) {
-                // IPv6
-                octetsStart = IPAddressUtil.textToNumericFormatV6(addresses[0]);
-                if (null == octetsStart) {
-                    throw new IllegalArgumentException("Not an IP address range: " + string);
-                }
-                final byte[] octetsEnd = IPAddressUtil.textToNumericFormatV6(addresses[1]);
-                if (null == octetsEnd) {
-                    throw new IllegalArgumentException("Not an IPv6 address: " + addresses[1]);
-                }
-                final LongRange ipv6Range = new LongRange(ipToBigInteger(octetsStart), ipToBigInteger(octetsEnd));
-                return new IPRange(null, ipv6Range);
-            }
-            // IPv4
             final byte[] octetsEnd = IPAddressUtil.textToNumericFormatV4(addresses[1]);
-            if (null == octetsEnd) {
-                throw new IllegalArgumentException("Not an IPv4 address: " + addresses[1]);
-            }
             final LongRange ipv4Range = new LongRange(ipToLong(octetsStart), ipToLong(octetsEnd));
+
             return new IPRange(ipv4Range, null);
         }
-        // Try IPv4 first
-        byte[] octets = IPAddressUtil.textToNumericFormatV4(string);
-        if (null == octets) {
-            // IPv6
-            octets = IPAddressUtil.textToNumericFormatV6(string);
-            if (null == octets) {
-                throw new IllegalArgumentException("Not an IP address: " + string);
-            }
-            final byte[] octetsEnd = new byte[16];
-            int i;
-            boolean bool = true;
-            for (i = 0; bool && i < octetsEnd.length; i++) {
-                bool = (octets[i] == 0);
-                if (!bool) {
-                    octetsEnd[i] = octets[i];
-                }
-            }
-            while (i < octetsEnd.length) {
-                octetsEnd[i++] = (byte) 255;
-            }
-            return new IPRange(null, new LongRange(ipToBigInteger(octets), ipToBigInteger(octetsEnd)));
-        }
-        // IPv4
-        return new IPRange(new LongRange(ipToLong(octets), ipToLong(octets)), null);
+        final IPv6AddressRange rangeObj = IPv6AddressRange.fromFirstAndLast(IPv6Address.fromString(addresses[0]), IPv6Address.fromString(addresses[1]));
+
+        final NumberRange ipv6Range = new NumberRange(rangeObj.getFirst().toBigInteger(), rangeObj.getLast().toBigInteger());
+        return new IPRange(null, ipv6Range);
     }
 
     private static long ipToLong(final byte[] octets) {
@@ -295,21 +276,10 @@ public class IPRange {
         return result;
     }
 
-    private static BigInteger ipToBigInteger(final byte[] octets) {
-        BigInteger result = BigInteger.ZERO;
-        for (int i = 0; i < octets.length; i++) {
-            result = result.or(BigInteger.valueOf(octets[i]).and(BigInteger.valueOf(0xff)));
-            if (i < octets.length - 1) {
-                result = result.shiftLeft(8);
-            }
-        }
-        return result;
-    }
-
     private static byte[] longToIP(long value) {
         final List<Byte> retval = new ArrayList<Byte>();
         while (value != 0) {
-            retval.add(Byte.valueOf((byte)(value & 0xff)));
+            retval.add(Byte.valueOf((byte) (value & 0xff)));
             value >>= 8;
         }
         Collections.reverse(retval);

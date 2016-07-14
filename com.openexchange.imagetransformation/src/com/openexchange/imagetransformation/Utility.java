@@ -110,6 +110,18 @@ public class Utility {
             LOG.debug("Assuming 'bmp' for image format {}", val);
             return "bmp";
         }
+        if ("svg+xml".equals(val)) {
+            LOG.debug("Assuming 'svg' for image format {}", val);
+            return "svg";
+        }
+        if ("x-pcx".equals(val)) {
+            LOG.debug("Assuming 'pcx' for image format {}", val);
+            return "pcx";
+        }
+        if ("vnd.adobe.photoshop".equals(val)) {
+            LOG.debug("Assuming 'psd' for image format {}", val);
+            return "psd";
+        }
         return val;
     }
 

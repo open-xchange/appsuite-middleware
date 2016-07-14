@@ -52,8 +52,10 @@ package com.openexchange.mail.json.actions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.mail.MessageRemovedException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -68,6 +70,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
@@ -208,14 +211,15 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
             final int buflen = 8192;
             final byte[] buf = new byte[buflen];
 
+            Map<String, Integer> fileNamesInArchive = new HashMap<String, Integer>();
             if (null == sequenceIds) {
                 for (final MailPart mailPart : mailInterface.getAllMessageAttachments(folderPath, uid)) {
-                    addPart2Archive(mailPart, zipOutput, buflen, buf);
+                    addPart2Archive(mailPart, zipOutput, buflen, buf, fileNamesInArchive);
                 }
             } else {
                 for (final String sequenceId : sequenceIds) {
                     final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
-                    addPart2Archive(mailPart, zipOutput, buflen, buf);
+                    addPart2Archive(mailPart, zipOutput, buflen, buf, fileNamesInArchive);
                 }
             }
         } finally {
@@ -224,7 +228,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         }
     }
 
-    private void addPart2Archive(final MailPart mailPart, final ZipArchiveOutputStream zipOutput, final int buflen, final byte[] buf) throws OXException {
+    private void addPart2Archive(final MailPart mailPart, final ZipArchiveOutputStream zipOutput, final int buflen, final byte[] buf, Map<String, Integer> fileNamesInArchive) throws OXException {
         final InputStream in = mailPart.getInputStream();
         try {
             /*
@@ -235,30 +239,16 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 final List<String> extensions = MimeType2ExtMap.getFileExtensions(mailPart.getContentType().getBaseType());
                 name = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
             }
-            int num = 1;
-            ZipArchiveEntry entry;
-            while (true) {
-                try {
-                    final String entryName;
-                    {
-                        final int pos = name.indexOf('.');
-                        if (pos < 0) {
-                            entryName = name + (num > 1 ? "_(" + num + ")" : "");
-                        } else {
-                            entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
-                        }
-                    }
-                    entry = new ZipArchiveEntry(entryName);
-                    zipOutput.putArchiveEntry(entry);
-                    break;
-                } catch (final java.util.zip.ZipException e) {
-                    final String message = e.getMessage();
-                    if (message == null || !message.startsWith("duplicate entry")) {
-                        throw e;
-                    }
-                    num++;
-                }
+            String entryName = name;
+            Integer count = fileNamesInArchive.get(name);
+            if (null != count) {
+                entryName = FileStorageUtility.enhance(name, count++);
+                fileNamesInArchive.put(name, count);
+            } else {
+                fileNamesInArchive.put(name, 1);
             }
+            ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
+            zipOutput.putArchiveEntry(entry);
             /*
              * Transfer bytes from the file to the ZIP file
              */

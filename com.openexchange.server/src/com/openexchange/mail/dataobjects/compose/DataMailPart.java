@@ -50,36 +50,29 @@
 package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.MessageUtility.readStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.mail.MessageRemovedException;
 import javax.mail.Part;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.datasource.FileHolderDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.mime.datasource.StreamDataSource;
-import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.io.IOUtils;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link DataMailPart}
@@ -96,15 +89,10 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     private static final int MB = 1048576;
 
-    private byte[] bytes;
-
+    private final ThresholdFileHolder file;
+    private final byte[] bytes;
     private transient Object cachedContent;
-
     private transient DataSource dataSource;
-
-    private ManagedFile file;
-
-    private String fileId;
 
     /**
      * Initializes a new {@link DataMailPart}
@@ -117,85 +105,20 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     protected DataMailPart(final Object data, final Map<String, String> dataProperties, final Session session) throws OXException {
         super();
         setHeaders(dataProperties);
+
         if (data instanceof InputStream) {
-            /*
-             * Check data properties
-             */
-            long size;
-            try {
-                final String sSize = dataProperties.get(DataProperties.PROPERTY_SIZE);
-                size = null == sSize ? 0 : Long.parseLong(sSize.trim());
-                setSize(size);
-            } catch (final NumberFormatException e) {
-                size = 0;
-            }
-            handleInputStream((InputStream) data, size);
+            bytes = null;
+            int partLimit = TransportProperties.getInstance().getReferencedPartLimit();
+            ThresholdFileHolder sink = partLimit <= 0 ? new ThresholdFileHolder() : new ThresholdFileHolder(partLimit);
+            file = sink;
+            sink.write((InputStream) data);
+            setSize(sink.getLength());
         } else if (data instanceof byte[]) {
+            file = null;
             bytes = (byte[]) data;
             setSize(bytes.length);
         } else {
             throw MailExceptionCode.UNSUPPORTED_DATASOURCE.create();
-        }
-    }
-
-    private void applyByteContent(final String charset) throws OXException {
-        try {
-            cachedContent = new String(bytes, Charsets.forName(charset));
-        } catch (final UnsupportedCharsetException e) {
-            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private void applyFileContent(final String charset) throws OXException {
-        InputStream fis = null;
-        try {
-            fis = file.getInputStream();
-            cachedContent = readStream(fis, charset);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(fis);
-        }
-    }
-
-    private void copy2ByteArr(final InputStream in) throws IOException {
-        try {
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-            final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-            int len;
-            while ((len = in.read(bbuf)) > 0) {
-                out.write(bbuf, 0, len);
-            }
-            out.flush();
-            bytes = out.toByteArray();
-            setSize(bytes.length);
-        } finally {
-            IOUtils.closeStreamStuff(in);
-        }
-    }
-
-    private void copy2File(final InputStream in) throws IOException {
-        try {
-            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            if (null == mfm) {
-                throw new IOException("Missing file management");
-            }
-            final ManagedFile mf;
-            try {
-                mf = mfm.createManagedFile(in);
-            } catch (final OXException e) {
-                final IOException ioerr = new IOException();
-                ioerr.initCause(e);
-                throw ioerr;
-            }
-            setSize(mf.getSize());
-            file = mf;
-            fileId = mf.getID();
-        } finally {
-            IOUtils.closeStreamStuff(in);
         }
     }
 
@@ -206,23 +129,47 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         }
         if (getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL)) {
             if (bytes != null) {
-                String charset = getContentType().getCharsetParameter();
-                if (null == charset) {
-                    charset = MailProperties.getInstance().getDefaultMimeCharset();
+                cachedContent = getByteContent(bytes);
+            } else {
+                if (file.isInMemory()) {
+                    cachedContent = getByteContent(file.getBuffer().toByteArray());
+                } else {
+                    cachedContent = getFileContent(file.getTempFile());
                 }
-                applyByteContent(charset);
-                return cachedContent;
             }
-            if (file != null) {
-                String charset = getContentType().getCharsetParameter();
-                if (null == charset) {
-                    charset = System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset());
-                }
-                applyFileContent(charset);
-                return cachedContent;
-            }
+            return cachedContent;
         }
         return null;
+    }
+
+    private String getFileContent(File file) throws OXException {
+        String charset = getContentType().getCharsetParameter();
+        if (null == charset) {
+            charset = System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset());
+        }
+
+        InputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            return readStream(fis, charset);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(fis);
+        }
+    }
+
+    private String getByteContent(byte[] bytes) throws OXException {
+        String charset = getContentType().getCharsetParameter();
+        if (null == charset) {
+            charset = MailProperties.getInstance().getDefaultMimeCharset();
+        }
+
+        try {
+            return new String(bytes, Charsets.forName(charset));
+        } catch (UnsupportedCharsetException e) {
+            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -237,50 +184,26 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
          * Lazy creation
          */
         if (null == dataSource) {
-            try {
-                final ContentType contentType = getContentType();
-                if (bytes != null) {
-                    if (contentType.startsWith(TEXT) && !contentType.containsCharsetParameter()) {
-                        /*
-                         * Add default mail charset
-                         */
-                        contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
-                    }
-                    return (dataSource = new MessageDataSource(bytes, contentType.toString()));
+            ContentType contentType = getContentType();
+            if (bytes != null) {
+                if (contentType.startsWith(TEXT) && !contentType.containsCharsetParameter()) {
+                    /*
+                     * Add default mail charset
+                     */
+                    contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                 }
-                if (file != null) {
-                    if (contentType.startsWith(TEXT) && !contentType.containsCharsetParameter()) {
-                        /*
-                         * Add system charset
-                         */
-                        contentType.setCharsetParameter(System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
+                return (dataSource = new MessageDataSource(bytes, contentType.toString()));
+            } else if (file != null) {
+                if (getContentType().startsWith(TEXT) && getContentType().getCharsetParameter() == null) {
+                    if (file.isInMemory()) {
+                        getContentType().setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+                    } else {
+                        getContentType().setCharsetParameter(System.getProperty("file.encoding", MailProperties.getInstance().getDefaultMimeCharset()));
                     }
-                    final ManagedFile managedFile = file;
-                    final String fileName = getFileName();
-                    final InputStreamProvider isp = new InputStreamProvider() {
-
-                        @Override
-                        public InputStream getInputStream() throws IOException {
-                            try {
-                                return managedFile.getInputStream();
-                            } catch (final OXException e) {
-                                final IOException err = new IOException();
-                                err.initCause(e);
-                                throw err;
-                            }
-                        }
-
-                        @Override
-                        public String getName() {
-                            return fileName;
-                        }
-                    };
-                    return (dataSource = new StreamDataSource(isp, contentType.toString()));
                 }
+                dataSource = new FileHolderDataSource(file, getContentType().toString());
+            } else {
                 throw MailExceptionCode.NO_CONTENT.create();
-            } catch (final MailConfigException e) {
-                LOG.error("", e);
-                dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
             }
         }
         return dataSource;
@@ -299,10 +222,10 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     @Override
     public InputStream getInputStream() throws OXException {
         if (bytes != null) {
-            return new UnsynchronizedByteArrayInputStream(bytes);
+            return Streams.newByteArrayInputStream(bytes);
         }
         if (file != null) {
-            return file.getInputStream();
+            return file.getStream();
         }
         throw MailExceptionCode.NO_CONTENT.create();
     }
@@ -310,22 +233,6 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     @Override
     public ComposedPartType getType() {
         return ComposedPartType.DATA;
-    }
-
-    private void handleInputStream(final InputStream inputStream, final long size) throws OXException {
-        try {
-            if (size > 0 && size <= TransportProperties.getInstance().getReferencedPartLimit()) {
-                copy2ByteArr(inputStream);
-                return;
-            }
-            copy2File(inputStream);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
-        LOG.info("Data mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue(), file.getFile().getName());
     }
 
     @Override
@@ -339,12 +246,13 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     /**
-     * Gets this data part's file ID if its content has been written to disc.
-     *
-     * @return The file ID or <code>null</code> if content is kept inside rather than on disc.
+     * Closes this data part's file (if any).
      */
-    public String getFileID() {
-        return fileId;
+    public void close() {
+        ThresholdFileHolder sink = this.file;
+        if (null != sink) {
+            sink.close();
+        }
     }
 
     private void setHeaders(final Map<String, String> dataProperties) throws OXException {

@@ -58,6 +58,7 @@ import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUui
 import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsCreateTableService;
 import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsCreateTableTask;
 import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsDeleteListener;
+import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsMakeUuidPrimaryTask;
 import com.openexchange.drive.events.subscribe.rdb.RdbSubscriptionStore;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -92,8 +93,7 @@ public class SubscribeActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new DriveEventSubscriptionsCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsCreateTableTask()));
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsAddUuidColumnTask()));
-        // TODO: enable update task for next release
-//        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsMakeUuidPrimaryTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsMakeUuidPrimaryTask()));
         registerService(DeleteListener.class, new DriveEventSubscriptionsDeleteListener());
         registerService(DriveSubscriptionStore.class, new RdbSubscriptionStore());
     }

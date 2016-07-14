@@ -1,0 +1,26 @@
+/mailfilter?action=update:
+  put:
+    operationId: updateRule
+    tags:
+      - mailfilter
+    summary: Updates a mail filter rule.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: username
+        type: string
+        description: Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.
+        required: false
+      - in: body
+        name: body
+        description: A JSON object describing the rule with the `id` set (which identifies the rule to change). Only modified fields are present.
+        required: true
+        schema:
+          $ref: "#/definitions/MailFilterRule"
+    responses:
+      200:
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

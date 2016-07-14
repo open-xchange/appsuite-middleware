@@ -94,6 +94,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
+import com.openexchange.servlet.StatusKnowing;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
@@ -103,6 +104,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.StatusKnowingHttpServletResponse;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -330,7 +332,6 @@ public class DispatcherServlet extends SessionServlet {
             SessionUtility.verifySession(req, sessiondService, sessionId, session);
             SessionUtility.rememberSession(req, session);
             SessionUtility.checkPublicSessionCookie(req, resp, session, sessiondService);
-            sessionParamFound = true;
         }
 
         // Check if associated request allows no session (if no "session" parameter was found)
@@ -424,14 +425,18 @@ public class DispatcherServlet extends SessionServlet {
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         */
+
+        // Disable caching and create wrapper
         Tools.disableCaching(httpResponse);
+        HttpServletResponse httpResp = StatusKnowing.class.isInstance(httpResponse) ? httpResponse : new StatusKnowingHttpServletResponse(httpResponse);
 
         ServerSession session = null;
         AJAXState state = null;
-        AJAXRequestData requestData = null;
+        AJAXRequestResult result = null;
+        Exception exc = null;
         Dispatcher dispatcher = DISPATCHER.get();
         try {
-            requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
+            AJAXRequestData requestData = initializeRequestData(httpRequest, httpResp, preferStream);
 
             // Acquire session
             session = requestData.getSession();
@@ -444,10 +449,10 @@ public class DispatcherServlet extends SessionServlet {
             state = dispatcher.begin();
 
             // Perform request
-            AJAXRequestResult result = dispatcher.perform(requestData, state, requestData.getSession());
+            result = dispatcher.perform(requestData, state, requestData.getSession());
 
             // Render the request's result
-            if (renderResponse(requestData, result, httpRequest, httpResponse)) {
+            if (renderResponse(requestData, result, httpRequest, httpResp)) {
                 /*-
                  * A common result
                  *
@@ -457,13 +462,16 @@ public class DispatcherServlet extends SessionServlet {
                 /*
                  * ... and send response
                  */
-                sendResponse(requestData, result, httpRequest, httpResponse);
+                sendResponse(requestData, result, httpRequest, httpResp);
             }
         } catch (UploadException e) {
-            if (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e)) {
+            exc = e;
+            boolean forceJSON = AJAXRequestDataTools.parseBoolParameter(httpRequest.getParameter("force_json_response"));
+            if (!forceJSON && (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e))) {
                 // An upload failed
+
                 if (null == session || !Client.OX6_UI.getClientId().equals(session.getClient())) {
-                    httpResponse.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(getLocaleFrom(session, Locale.US)));
+                    httpResp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(getLocaleFrom(session, Locale.US)));
                     logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
                     return;
                 }
@@ -472,25 +480,25 @@ public class DispatcherServlet extends SessionServlet {
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
-            handleOXException(e, httpRequest, httpResponse);
+            handleOXException(e, httpRequest, httpResp);
         } catch (OXException e) {
+            exc = e;
             Locale locale = getLocaleFrom(session, null);
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
-            handleOXException(e, httpRequest, httpResponse);
+            handleOXException(e, httpRequest, httpResp);
         } catch (RuntimeException e) {
+            exc = e;
             logException(e);
             OXException oxe = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             Locale locale = getLocaleFrom(session, null);
             if (null != locale) {
                 oxe.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
-            super.handleOXException(oxe, httpRequest, httpResponse, false, false);
+            super.handleOXException(oxe, httpRequest, httpResp, false, false);
         } finally {
-            if (null != requestData) {
-                requestData.cleanUploads();
-            }
+            Dispatchers.signalDone(result, exc);
             if (null != state) {
                 dispatcher.end(state);
             }
@@ -690,7 +698,7 @@ public class DispatcherServlet extends SessionServlet {
             if (!dispatcher.mayOmitSession(module, action)) {
                 if (dispatcher.mayUseFallbackSession(module, action)) {
                     // "open-xchange-public-session" allowed, but missing for associated action
-                    String name = LoginServlet.getPublicSessionCookieName(httpRequest);
+                    String name = LoginServlet.getPublicSessionCookieName(httpRequest, null);
                     throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(name) : AjaxExceptionCodes.MISSING_COOKIE.create(name);
                 }
                 // "open-xchange-public-session" NOT allowed for associated action, therefore complain about missing "session" parameter
@@ -714,8 +722,9 @@ public class DispatcherServlet extends SessionServlet {
      * @param result The AJAX request result
      * @param httpRequest The associated HTTP Servlet request
      * @param httpResponse The associated HTTP Servlet response
+     * @throws IOException If an I/O error occurs
      */
-    protected static void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    protected static void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
         Iterator<ResponseRenderer> iter = responseRenderers.iterator();
         for (int i = responseRenderers.size(); i-- > 0;) {

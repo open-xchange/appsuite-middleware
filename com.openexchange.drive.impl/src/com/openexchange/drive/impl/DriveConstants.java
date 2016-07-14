@@ -114,12 +114,6 @@ public class DriveConstants {
     public static final int RETRY_BASEDELAY = 1000;
 
     /**
-     * The maximum file length of uploads to be stored directly at the target location - others are going to be written to a temporary
-     * upload file first.
-     */
-    public static final long OPTIMISTIC_UPLOAD_SIZE_THRESHOLD = 64 * 1024; // 64K
-
-    /**
      * The maximum allowed length of any synchronized path segment, i.e. the parts in a path separated by the {@link #PATH_SEPARATOR}
      * character.
      */
@@ -136,8 +130,9 @@ public class DriveConstants {
      * 2: client defined exclusion filters
      * 3: .drive-meta
      * 4: subfolders action, sharing
+     * 5: push for multiple root folders (listen/subscribe), inline .drive-meta, trash stats, empty trash
      */
-    public static final int SUPPORTED_API_VERSION = 4;
+    public static final int SUPPORTED_API_VERSION = 5;
 
     /**
      * The files module identifier.

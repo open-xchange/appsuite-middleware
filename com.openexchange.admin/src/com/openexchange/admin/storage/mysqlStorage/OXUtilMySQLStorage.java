@@ -79,6 +79,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.collections.keyvalue.MultiKey;
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -100,6 +101,7 @@ import com.openexchange.admin.storage.utils.Filestore2UserUtil.UserAndContext;
 import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -139,6 +141,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     private final AdminCacheExtended cache;
     private final PropertyHandlerExtended prop;
 
+    /**
+     * Initializes a new {@link OXUtilMySQLStorage}.
+     */
     public OXUtilMySQLStorage() {
         super();
         AdminCacheExtended cache = ClientAdminThreadExtended.cache;
@@ -1447,7 +1452,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @throws StorageException if parsing the configuration option fails.
      */
     private long getAverageFilestoreSpaceForUser() throws StorageException {
-        final String value = prop.getProp("AVERAGE_USER_SIZE", "100");
+        AdminCache cache = ClientAdminThread.cache;
+        PropertyHandler prop = cache.getProperties();
+        String value = prop.getProp("AVERAGE_USER_SIZE", "100");
         try {
             return Long.parseLong(value);
         } catch (final NumberFormatException e) {

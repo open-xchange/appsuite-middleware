@@ -850,6 +850,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
             if (diff.anyFieldChangedOf("participants")) {
                 final FieldUpdate update = diff.getUpdateFor("participants");
+                if (update == null) {
+                    return false;
+                }
                 final Difference difference = (Difference) update.getExtraInfo();
                 final List<Object> removed = difference.getRemoved();
                 for (final Object object : removed) {
@@ -867,6 +870,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
             if (diff.anyFieldChangedOf("participants")) {
                 final FieldUpdate update = diff.getUpdateFor("participants");
+                if (update == null) {
+                    return false;
+                }
                 final Difference difference = (Difference) update.getExtraInfo();
                 final List<Object> added = difference.getAdded();
                 for (final Object object : added) {
@@ -972,6 +978,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
             if (diff.onlyTheseChanged("participants", "confirmations", "users") && diff.anyFieldChangedOf("users")) {
                 final FieldUpdate update = diff.getUpdateFor("users");
+                if (update == null) {
+                    return false;
+                }
                 final Difference difference = (Difference) update.getExtraInfo();
                 final List<Change> changed = difference.getChanged();
                 if (changed.size() > 1) {

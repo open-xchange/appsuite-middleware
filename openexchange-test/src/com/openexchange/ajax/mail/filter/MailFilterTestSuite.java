@@ -49,6 +49,20 @@
 
 package com.openexchange.ajax.mail.filter;
 
+import com.openexchange.ajax.mail.filter.tests.api.AdminListTest;
+import com.openexchange.ajax.mail.filter.tests.api.AuxiliaryAPITest;
+import com.openexchange.ajax.mail.filter.tests.api.ConfigTest;
+import com.openexchange.ajax.mail.filter.tests.api.NewTest;
+import com.openexchange.ajax.mail.filter.tests.api.PGPTest;
+import com.openexchange.ajax.mail.filter.tests.api.ReorderTest;
+import com.openexchange.ajax.mail.filter.tests.api.UpdateTest;
+import com.openexchange.ajax.mail.filter.tests.api.VacationTest;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug11519Test;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug18490Test;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug31253Test;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug44363Test;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug46589Test;
+import com.openexchange.ajax.mail.filter.tests.bug.Bug46714Test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -61,7 +75,7 @@ import junit.framework.TestSuite;
 public final class MailFilterTestSuite {
 
     /**
-     * Initializes a new {@link MailFilterTestSuite}
+     * Initialises a new {@link MailFilterTestSuite}
      */
     private MailFilterTestSuite() {
         super();
@@ -72,13 +86,20 @@ public final class MailFilterTestSuite {
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("com.openexchange.ajax.mail.filter.MailFilterTestSuite");
-        suite.addTestSuite(ConfigTest.class);
-        suite.addTestSuite(NewTest.class);
-        suite.addTestSuite(UpdateTest.class);
         suite.addTestSuite(AdminListTest.class);
+        suite.addTestSuite(Bug11519Test.class);
         suite.addTestSuite(Bug18490Test.class);
         suite.addTestSuite(Bug31253Test.class);
         suite.addTestSuite(Bug44363Test.class);
+        suite.addTestSuite(Bug46589Test.class);
+        suite.addTestSuite(Bug46714Test.class);
+        suite.addTestSuite(ConfigTest.class);
+        suite.addTestSuite(NewTest.class);
+        suite.addTestSuite(UpdateTest.class);
+        suite.addTestSuite(VacationTest.class);
+        suite.addTestSuite(PGPTest.class);
+        suite.addTestSuite(ReorderTest.class);
+        suite.addTestSuite(AuxiliaryAPITest.class);
         return suite;
     }
 }

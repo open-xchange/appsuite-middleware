@@ -112,43 +112,32 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
 
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
-    private final char separator;
 
     private String[] args;
-
     private final String command;
-
     private boolean uid;
-
     private final int length;
-
     private int index;
-
     private boolean determineAttachmentByHeader;
-
     private final String fullname;
-
     private final Set<FetchItemHandler> lastHandlers;
-
     private final TLongObjectMap<MailMessage> map;
 
     /**
      * Initializes a new {@link SimpleFetchIMAPCommand}.
      *
      * @param imapFolder The IMAP folder providing connected protocol
-     * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param seqNums The sequence numbers to fetch
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
-        this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
@@ -165,19 +154,17 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * Initializes a new {@link SimpleFetchIMAPCommand}.
      *
      * @param imapFolder The IMAP folder providing connected protocol
-     * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param uids The UIDs to fetch
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
-        this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
         length = uids.length;
         map = new TLongObjectHashMap<MailMessage>(length);
@@ -284,7 +271,6 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         index++;
         final IDMailMessage mail = new IDMailMessage(null, fullname);
         // mail.setRecentCount(recentCount);
-        mail.setSeparator(separator);
         mail.setSeqnum(seqNum);
         boolean error = false;
         try {

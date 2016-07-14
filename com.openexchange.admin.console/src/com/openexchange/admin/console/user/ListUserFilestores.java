@@ -163,7 +163,7 @@ public class ListUserFilestores extends BasicCommandlineOptions {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        setContextOption(parser, NeededQuadState.notneeded);
+        setContextOption(parser, NeededQuadState.needed);
         this.master_only = setShortLongOpt(parser, MASTER_ONLY_SHORT, MASTER_ONLY_LONG, "Prints only the master user", false, NeededQuadState.notneeded);
         this.filestore_id = setShortLongOpt(parser, FILESTORE_ID_SHORT, FILESTORE_ID_LONG, "id", "The id of the filestore. Lists users for this filestore.", false);
     }

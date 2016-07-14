@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -94,6 +94,7 @@ public class ActionCommand extends ControlOrActionCommand {
         VACATION("vacation", 1, vacationTags(), "vacation", Collections.singletonList("vacation")),
         ENOTIFY("notify", 1, enotifyTags(), "notify", Collections.singletonList("enotify")),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
+        REMOVEFLAG("removeflag", 1, new Hashtable<String, Integer>(), "removeflags", java.util.Arrays.asList("imapflags", "imap4flags")),
         PGP_ENCRYPT("pgp_encrypt", 0, pgpEncryptTags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
         ADDHEADER("addheader", 2, addHeaderTags(), "addheader", Collections.singletonList("editheader")),
         DELETEHEADER("deleteheader", 1, deleteHeaderTags(), "deleteheader", Collections.singletonList("editheader")),

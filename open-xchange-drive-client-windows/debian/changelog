@@ -1,56 +1,32 @@
-open-xchange-drive-client-windows (7.8.1-16) stable; urgency=medium
+open-xchange-drive-client-windows (7.8.2-4) stable; urgency=medium
 
-  * Build for patch 2016-07-04 (3400)
+  * Second candidate for 7.8.2 release
 
- -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Thu, 30 Jun 2016 18:05:27 +0200
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 12 Jul 2016 09:20:56 +0200
 
-open-xchange-drive-client-windows (7.8.1-15) stable; urgency=medium
+open-xchange-drive-client-windows (7.8.2-3) stable; urgency=medium
 
-  * Build for patch 2016-06-20 (3347)
+  * First candidate for 7.8.2 release
 
- -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Wed, 15 Jun 2016 14:02:44 +0200
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Wed, 06 Jul 2016 15:32:45 +0200
 
-open-xchange-drive-client-windows (7.8.1-14) stable; urgency=medium
+open-xchange-drive-client-windows (7.8.2-2) stable; urgency=medium
 
-  * Build for patch 2016-06-06 (3317)
+  * Second candidate for 7.8.2 release
 
- -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Fri, 03 Jun 2016 14:44:01 +0200
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Wed, 29 Jun 2016 16:28:34 +0200
 
-open-xchange-drive-client-windows (7.8.1-13) stable; urgency=medium
+open-xchange-drive-client-windows (7.8.2-1) stable; urgency=medium
 
-  * Build for patch 2016-05-19 (3305)
+  * First candidate for 7.8.2 release
 
- -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Thu, 19 May 2016 16:23:51 +0200
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Thu, 16 Jun 2016 12:34:30 +0200
 
-open-xchange-drive-client-windows (7.8.1-12) stable; urgency=medium
+open-xchange-drive-client-windows (7.8.2-0) unstable; urgency=medium
 
-  * Build for patch 2016-05-23 (3294)
+  * prepare for 7.8.2 release
 
- -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Fri, 20 May 2016 11:55:59 +0200
-
-open-xchange-drive-client-windows (7.8.1-11) stable; urgency=medium
-
-  * Build for patch 2016-05-09 (3272)
-
- -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Fri, 06 May 2016 14:53:11 +0200
-
-open-xchange-drive-client-windows (7.8.1-10) stable; urgency=medium
-
-  * Build for patch 2016-04-25 (3263)
-
- -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Mon, 25 Apr 2016 18:33:36 +0200
-
-open-xchange-drive-client-windows (7.8.1-9) stable; urgency=medium
-
-  * Build for patch 2016-04-25 (3239)
-
- -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Fri, 15 Apr 2016 14:49:13 +0200
-
-open-xchange-drive-client-windows (7.8.1-8) stable; urgency=medium
-
-  * Build for patch 2016-04-07 (3228)
-
- -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Thu, 07 Apr 2016 18:13:56 +0200
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Wed, 06 Apr 2016 10:25:15 +0200
 
 open-xchange-drive-client-windows (7.8.1-7) stable; urgency=medium
 

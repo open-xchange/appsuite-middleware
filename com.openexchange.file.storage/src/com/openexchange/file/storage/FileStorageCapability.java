@@ -131,5 +131,25 @@ public enum FileStorageCapability {
      */
     MULTI_MOVE,
 
+    /**
+     * File storage only supports read-only access
+     */
+    READ_ONLY,
+
+    /**
+     * File storage contains mail attachments
+     */
+    MAIL_ATTACHMENTS,
+
+    /**
+     * Automatic add new file version if file already exists
+     */
+    AUTO_NEW_VERSION,
+
+    /**
+     * A folder's content can be downloaded as a ZIP archive
+     */
+    ZIPPABLE_FOLDER,
+
     ;
 }

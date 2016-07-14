@@ -69,7 +69,8 @@ public class ActionSMS implements ActionService {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilityProvisioningServlet.class);
 
-	public ProvisioningResponse handleAction(
+	@Override
+    public ProvisioningResponse handleAction(
 			final ProvisioningInformation provisioningInformation){
 		final ProvisioningResponse provisioningResponse = new ProvisioningResponse();
 		final int cid = provisioningInformation.getCtx().getContextId();
@@ -110,7 +111,6 @@ public class ActionSMS implements ActionService {
 				provisioningResponse.setSuccess(true);
 				LOG.info("SMS to recipient {} (unformatted nr:{}) sent successfully for user {} in context {}", to_formatted, to, userid, cid);
 			}else{
-				smssend.getErrorMessage();
 				provisioningResponse.setMessage("SMS could not be sent. Details: "+smssend.getErrorMessage());
 				provisioningResponse.setSuccess(false);
 				LOG.error("API error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, userid, cid);

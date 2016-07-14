@@ -1,0 +1,26 @@
+type: object
+properties:
+  com.openexchange.groupware.calendar.folder:
+    type: string
+    description: The calendar folder ID.
+  com.openexchange.groupware.task.folder:
+    type: string
+    description: The task folder ID.
+  com.openexchange.groupware.calendar.confirmstatus:
+    type: string
+    description: The status.
+  com.openexchange.groupware.calendar.confirmmessage:
+    type: string
+    description: The message.
+  com.openexchange.groupware.calendar.timezone:
+    type: string
+    description: The timezone ID.
+  com.openexchange.grouware.calendar.recurrencePosition:
+    type: string
+    description: The recurrence position.
+  com.openexchange.groupware.calendar.searchobject:
+    type: string
+    description: Can be `true` or `false`.
+  com.openexchange.groupware.contact.folder:
+    type: string
+    description: The contact folder ID.

@@ -140,6 +140,8 @@ public final class InterfaceTests {
         // TODO: enable
         tests.addTest(DriveAJAXSuite.suite());
         tests.addTest(OnboardingAJAXSuite.suite());
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class));
+
         return tests;
     }
 }

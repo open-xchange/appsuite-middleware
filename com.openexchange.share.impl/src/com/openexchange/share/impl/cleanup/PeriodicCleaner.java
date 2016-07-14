@@ -94,10 +94,11 @@ public class PeriodicCleaner implements Runnable {
         long start = System.currentTimeMillis();
         try {
             List<Integer> contextIDs = services.getService(ContextService.class).getAllContextIds();
-            LOG.info("Periodic share cleanup task starting, going to check {} contexts...", I(contextIDs.size()));
+            int size = contextIDs.size();
+            LOG.info("Periodic share cleanup task starting, going to check {} contexts...", I(size));
             long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
             long lastLogTime = start;
-            for (int i = 0; i < contextIDs.size(); i++) {
+            for (int i = 0, k = size; k-- > 0; i++) {
                 int contextID = contextIDs.get(i).intValue();
                 for (int retry = 0; retry < 3; retry++) {
                     if (false == active.get()) {
@@ -107,7 +108,7 @@ public class PeriodicCleaner implements Runnable {
                     long now = System.currentTimeMillis();
                     if (now > lastLogTime + logTimeDistance) {
                         LOG.info("Periodic share cleanup task {}% finished ({}/{}).",
-                            I(i * 100 / contextIDs.size()), I(i), I(contextIDs.size()));
+                            I(i * 100 / size), I(i), I(size));
                         lastLogTime = now;
                     }
                     try {

@@ -1,0 +1,23 @@
+/fileaccount?action=delete:
+  get:
+    operationId: deleteFileAccount
+    tags:
+      - filestorage
+    summary: Deletes a file storage account.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: filestorageService
+        type: string
+        description: The identifier of the file storage service the account belongs to.
+        required: true
+      - in: query
+        name: id
+        type: string
+        description: The ID of the account to delete.
+        required: true
+    responses:
+      200:
+        description: A JSON object containing the number 1 on success. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FileAccountUpdateResponse"

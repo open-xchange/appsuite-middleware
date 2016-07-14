@@ -1,0 +1,96 @@
+type: object
+properties:
+  id:
+    type: string
+    description: Object ID
+  created_by:
+    type: string
+    description: User ID of the user who created this object.
+  modified_by:
+    type: string
+    description: User ID of the user who last modified this object.
+  creation_date:
+    type: integer
+    format: int64
+    description: Date and time of creation.
+  last_modified:
+    type: integer
+    format: int64
+    description: Date and time of the last modification.
+  last_modified_utc:
+    type: integer
+    format: int64
+    description: Timestamp of the last modification. Note that the type is Timestamp, not Time (added 2008-10-17, with SP5, temporary workaround).
+  folder_id:
+    type: string
+    description: Object ID of the parent folder.
+  title:
+    type: string
+    description: Name of this folder.
+  module:
+    type: string
+    description: Name of the module which implements this folder; e.g. "tasks", "calendar", "contacts", "infostore", or "mail"
+  type:
+    type: integer
+    description: Type of folder.
+  subfolders:
+    type: boolean
+    description: true if this folder has subfolders.
+  own_rights:
+    type: integer
+    description: Permissions which apply to the current user, as described either in [Permission flags](https://documentation.open-xchange.com/latest/middleware/http_api/3_flags_bitmasks.html#permission-flags) or in http://tools.ietf.org/html/rfc2086.
+  permissions:
+    type: array
+    items:
+      $ref: "#/definitions/FolderPermission"
+  summary:
+    type: string
+    description: Information about contained objects.
+  standard_folder:
+    type: boolean
+    description: Indicates whether or not folder is marked as a default folder (only OX folder).
+  total:
+    type: integer
+    description: The number of objects in this Folder.
+  new:
+    type: integer
+    description: The number of new objects in this Folder.
+  unread:
+    type: integer
+    description: The number of unread objects in this Folder.
+  deleted:
+    type: integer
+    description: The number of deleted objects in this Folder.
+  capabilities:
+    type: integer
+    description: 'Bit mask containing information about mailing system capabilites: bit 0 (mailing system supports permissions), bit 1 (mailing system supports ordering mails by their thread reference), bit 2 (mailing system supports quota restrictions), bit 3 (mailing system supports sorting), bit 4 (mailing system supports folder subscription).'
+  subscribed:
+    type: boolean
+    description: Indicates whether this folder should appear in folder tree or not. Standard folders cannot be unsubscribed.
+  subscr_subflds:
+    type: boolean
+    description: Indicates whether subfolders should appear in folder tree or not.
+  standard_folder_type:
+    type: integer
+    description: 'Indicates the default folder type: 0 (non-default folder), 1 (task), 2 (calendar), 3 (contact), 7 (inbox), 8 (infostore), 9 (drafts), 10 (sent), 11 (spam), 12 (trash).'
+  supported_capabilities:
+    type: array
+    description: Can contain "permissions", "publication", "quota", "sort", "subscription".
+    items:
+      type: string
+  account_id:
+    type: string
+    description: Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder. Since 7.8.0.
+  com.openexchange.publish.publicationFlag:
+    type: boolean
+    description: Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin, since 6.14.
+  com.openexchange.subscribe.subscriptionFlag:
+    type: boolean
+    description: Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin, since 6.14.
+  com.openexchange.folderstorage.displayName:
+    type: string
+    description: Provides the display of the folder's owner. Read Only, Since 6.20.
+  com.openexchange.share.extendedPermissions:
+    type: array
+    items:
+      $ref: "#/definitions/FolderExtendedPermission"

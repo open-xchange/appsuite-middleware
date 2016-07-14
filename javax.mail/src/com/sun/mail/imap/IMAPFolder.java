@@ -287,6 +287,11 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     protected MailLogger logger;
     private MailLogger connectionPoolLogger;
 
+    private final boolean explicitCloseForReusedProtocol;   // Whether explicit closing (be it CLOSE or UNSELECT/re-EXAMINE) is supposed to
+                                                            // happen for an IMAP folder in case IMAPProtocol instance is reused
+
+    private final boolean issueNoopToKeepConnectionAlive;   // Whether to issue a noop command for the connection to keep it alive
+
     /**
      * A fetch profile item for fetching headers.
      * This inner class extends the <code>FetchProfile.Item</code>
@@ -396,6 +401,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	logger = new MailLogger(this.getClass(),
 				"DEBUG IMAP", store.getSession());
 	connectionPoolLogger = ((IMAPStore)store).getConnectionPoolLogger();
+	explicitCloseForReusedProtocol = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".explicitCloseForReusedProtocol", true);
+	issueNoopToKeepConnectionAlive = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".issueNoopToKeepConnectionAlive", true);
 
 	/*
 	 * Work around apparent bug in Exchange.  Exchange
@@ -812,21 +819,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    else {
 			p.create(fullName);
 
-			// Certain IMAP servers do not allow creation of folders
-			// that can contain messages *and* subfolders. So, if we
-			// were asked to create such a folder, we should verify
-			// that we could indeed do so.
-			if ((type & HOLDS_FOLDERS) != 0) {
-			    // we want to hold subfolders and messages. Check
-			    // whether we could create such a folder.
-			    ListInfo[] li = p.list("", fullName);
-			    if (li != null && !li[0].hasInferiors) {
-				// Hmm ..the new folder
-				// doesn't support Inferiors ? Fail
-				p.delete(fullName);
-				throw new ProtocolException("Unsupported type");
-			    }
-			}
 		    }
 		    return Boolean.TRUE;
 		}
@@ -839,8 +831,25 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// exists = true;
 	// this.type = type;
 	boolean retb = exists();	// set exists, type, and attributes
-	if (retb)		// Notify listeners on self and our Store
+	if (retb) {		// Notify listeners on self and our Store
+        // Certain IMAP servers do not allow creation of folders
+        // that can contain messages *and* subfolders. So, if we
+        // were asked to create such a folder, we should verify
+        // that we could indeed do so.
+	    if (((type & HOLDS_FOLDERS) != 0) && ((this.type & HOLDS_FOLDERS) == 0)) {
+            // Hmm ..the new folder
+            // doesn't support Inferiors ? Fail
+	        doCommandIgnoreFailure(new ProtocolCommand() {
+	            @Override
+	            public Object doCommand(IMAPProtocol p) throws ProtocolException {
+	                p.delete(fullName);
+	                return null;
+	            }
+	        });
+	        throw new MessagingException("Unsupported type");
+	    }
 	    notifyFolderListeners(FolderEvent.CREATED);
+	}
 	return retb;
     }
 
@@ -1182,6 +1191,14 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * Prefetch attributes, based on the given FetchProfile.
      */
     public synchronized void fetch(Message[] msgs, FetchProfile fp, Collection<String> extensions)
+            throws MessagingException {
+        fetch(msgs, null, fp, extensions);
+    }
+
+    /**
+     * Prefetch attributes, based on the given FetchProfile.
+     */
+    public synchronized void fetch(Message[] msgs, long[] uids, FetchProfile fp, Collection<String> extensions)
 			throws MessagingException {
     // cache this information in case connection is closed and
 	// protocol is set to null
@@ -1297,40 +1314,54 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
         }
 	}
 
-	Utility.Condition condition =
-	    new IMAPMessage.FetchProfileCondition(fp, fitems);
-
         // Acquire the Folder's MessageCacheLock.
         synchronized(messageCacheLock) {
 
 	    // check again to make sure folder is still open
 	    checkOpened();
 
-	    // Apply the test, and get the sequence-number set for
-	    // the messages that need to be prefetched.
-	    MessageSet[] msgsets = Utility.toMessageSetSorted(msgs, condition);
-
-	    if (msgsets == null)
-		// We already have what we need.
-		return;
-
+	    // fetch either by Message[] or by long[]
 	    Response[] r = null;
-	    // to collect non-FETCH responses & unsolicited FETCH FLAG responses 
-	    List<Response> v = new ArrayList<Response>();
-	    try {
-		r = getProtocol().fetch(msgsets, command.toString());
-	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(this, cex.getMessage(), cex);
-	    } catch (CommandFailedException cfx) {
-		// Ignore these, as per RFC 2180
-	    } catch (ProtocolException pex) {
-		throw new MessagingException(pex.getMessage(), pex);
+	    if (null != msgs) {
+	        Utility.Condition condition =
+	            new IMAPMessage.FetchProfileCondition(fp, fitems);
+
+	        // Apply the test, and get the sequence-number set for
+	        // the messages that need to be prefetched.
+	        MessageSet[] msgsets = Utility.toMessageSetSorted(msgs, condition);
+
+	        if (msgsets == null)
+            // We already have what we need.
+            return;
+
+	        try {
+            r = getProtocol().fetch(msgsets, command.toString());
+            } catch (ConnectionException cex) {
+            throw new FolderClosedException(this, cex.getMessage(), cex);
+            } catch (CommandFailedException cfx) {
+            // Ignore these, as per RFC 2180
+            } catch (ProtocolException pex) {
+            throw new MessagingException(pex.getMessage(), pex);
+            }
+	    } else {
+	        try {
+            r = getProtocol().fetch(UIDSet.createUIDSets(uids), command.toString());
+            } catch (ConnectionException cex) {
+            throw new FolderClosedException(this, cex.getMessage(), cex);
+            } catch (CommandFailedException cfx) {
+            // Ignore these, as per RFC 2180
+            } catch (ProtocolException pex) {
+            throw new MessagingException(pex.getMessage(), pex);
+            }
 	    }
 
 	    if (r == null)
 		return;
 
-	    for (int i = 0; i < r.length; i++) {
+	    // to collect non-FETCH responses & unsolicited FETCH FLAG responses 
+	    List<Response> v = new ArrayList<Response>(r.length);
+
+	    for (int k = r.length, i = 0; k-- > 0; i++) {
 		if (r[i] == null)
 		    continue;
 		if (!(r[i] instanceof FetchResponse)) {
@@ -1547,6 +1578,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    if (protocol != null)
 			protocol.logout();
                 } else {
+            if (explicitCloseForReusedProtocol) {
 		    // If the expunge flag is set or we're open read-only we
 		    // can just close the folder, otherwise open it read-only
 		    // before closing, or unselect it if supported.
@@ -1585,6 +1617,17 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			if (protocol != null)
 			    protocol.close();
 		    }
+            } else {
+                if (expunge && mode == READ_WRITE) {
+                    if (protocol != null) {
+                        try {
+                        protocol.expunge();
+                        } catch (ProtocolException pex2) {
+                            reuseProtocol = false;  // something went wrong
+                        }
+                    }
+                }
+            }
                 }
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -4021,10 +4064,11 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	assert Thread.holdsLock(messageCacheLock);
 	if (protocol == null)	// in case connection was closed
 	    return;
-        if (System.currentTimeMillis() - protocol.getTimestamp() > 1000) {
+        
+	if (issueNoopToKeepConnectionAlive && (System.currentTimeMillis() - protocol.getTimestamp() > 1000)) {
 	    waitIfIdle();
 	    if (protocol != null)
-		protocol.noop(); 
+		protocol.noop();
 	}
 
         if (keepStoreAlive && ((IMAPStore)store).hasSeparateStoreConnection()) {

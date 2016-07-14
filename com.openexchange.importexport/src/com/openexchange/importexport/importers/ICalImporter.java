@@ -306,7 +306,7 @@ public class ICalImporter extends AbstractImporter {
                     task.setUid(replacedUID);
                 }
 				try {
-                                       taskInterface.insertTaskObject(task);
+					taskInterface.insertTaskObject(task);
 					importResult.setObjectId(String.valueOf(task
 							.getObjectID()));
 					importResult.setDate(task.getLastModified());

@@ -236,6 +236,11 @@ public final class POP3MessageStorage extends MailMessageStorage implements ISim
     }
 
     @Override
+    public int getUnreadCount(final String folder, final SearchTerm<?> searchTerm) throws OXException {
+        return pop3MessageStorage.getUnreadCount(folder, searchTerm);
+    }
+
+    @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
         final MailMessage[] mails = pop3MessageStorage.searchMessages(folder, indexRange, effectiveSortField, order, searchTerm, fields);
@@ -269,6 +274,11 @@ public final class POP3MessageStorage extends MailMessageStorage implements ISim
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         pop3MessageStorage.updateMessageFlags(folder, mailIds, flags, set);
+    }
+
+    @Override
+    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, String[] userFlags, final boolean set) throws OXException {
+        pop3MessageStorage.updateMessageFlags(folder, mailIds, flags, userFlags, set);
     }
 
     /**

@@ -482,7 +482,9 @@ public final class JCSCacheServiceInit {
      * @return <code>true</code> if cache events should be performed via the cache event messaging service, <code>false</code>, otherwise
      */
     public boolean isEventInvalidation() {
-        return configurationService.getBoolProperty("com.openexchange.caching.jcs.eventInvalidation", true);
+        boolean def = true;
+        ConfigurationService configurationService = this.configurationService;
+        return null == configurationService ? def : configurationService.getBoolProperty("com.openexchange.caching.jcs.eventInvalidation", def);
     }
 
     /**

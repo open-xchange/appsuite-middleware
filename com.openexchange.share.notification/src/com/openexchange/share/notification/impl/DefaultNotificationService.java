@@ -51,11 +51,8 @@ package com.openexchange.share.notification.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -71,12 +68,14 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
@@ -84,11 +83,15 @@ import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.Entities;
+import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.impl.mail.MailNotifications;
 import com.openexchange.share.notification.impl.mail.MailNotifications.ShareCreatedBuilder;
 import com.openexchange.user.UserService;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link DefaultNotificationService} - The default share notification service.
@@ -107,8 +110,6 @@ public class DefaultNotificationService implements ShareNotificationService {
     /** The queue for additional handlers */
     private final ConcurrentMap<Transport, ShareNotificationHandler<?>> handlers;
 
-    private final NotifyDecision notifyDecision;
-
     /**
      * Initializes a new {@link DefaultNotificationService}.
      */
@@ -116,7 +117,6 @@ public class DefaultNotificationService implements ShareNotificationService {
         super();
         this.serviceLookup = serviceLookup;
         handlers = new ConcurrentHashMap<Transport, ShareNotificationHandler<?>>();
-        notifyDecision = new DefaultDecision(serviceLookup);
     }
 
     /**
@@ -139,12 +139,12 @@ public class DefaultNotificationService implements ShareNotificationService {
 
     @Override
     public List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData) {
-        return sendShareNotifications(transport, entities, message, targetPath, session, hostData, notifyDecision);
+        return sendShareNotifications0(transport, entities, message, targetPath, session, hostData);
     }
 
     @Override
     public List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData) {
-        return sendShareNotifications(transport, entities, message, targetPath, session, hostData, null);
+        return sendShareNotifications0(transport, entities, message, targetPath, session, hostData);
     }
 
     @Override
@@ -263,7 +263,7 @@ public class DefaultNotificationService implements ShareNotificationService {
 
             return shareCreatedBuilder.build();
         } catch (AddressException e) {
-            throw ShareNotifyExceptionCodes.INVALID_MAIL_ADDRESS.create(user.getMail());
+            throw ShareNotifyExceptionCodes.INVALID_MAIL_ADDRESS.create(e, user.getMail());
         }
     }
 
@@ -276,10 +276,9 @@ public class DefaultNotificationService implements ShareNotificationService {
      * @param targetPath The path to the share target
      * @param session The session of the notifying user
      * @param hostData The host data to generate share links
-     * @param notifyDecision The notify decision to consider, or <code>null</code> to always send a notification
      * @return Any exceptions occurred during notification, or an empty list if all was fine
      */
-    private List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData, NotifyDecision notifyDecision) {
+    private List<OXException> sendShareNotifications0(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData) {
         if (transport != Transport.MAIL) {
             throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
         }
@@ -296,14 +295,12 @@ public class DefaultNotificationService implements ShareNotificationService {
             return warnings;
         }
 
-        Map<Integer, UserDetail> usersById = new HashMap<>();
+       TIntObjectMap<UserDetail> usersById = new TIntObjectHashMap<>();
         for (int userId : entities.getUsers()) {
             User user = null;
             try {
                 user = userService.getUser(userId, context);
-                if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(transport, user, false, adjustPermissions(entities.getUserPermissionBits(userId)), targetPath, session)) {
-                    usersById.put(userId, new UserDetail(user));
-                }
+                usersById.put(userId, new UserDetail(user));
             } catch (OXException e) {
                 String mailAddress = null;
                 if (user != null) {
@@ -326,11 +323,9 @@ public class DefaultNotificationService implements ShareNotificationService {
                     User user = null;
                     try {
                         user = userService.getUser(userId, context);
-                        if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(transport, user, true, adjustPermissions(entities.getGroupPermissionBits(groupId)), targetPath, session)) {
-                            UserDetail userDetail = new UserDetail(user);
-                            userDetail.setGroup(group);
-                            usersById.put(userId, userDetail);
-                        }
+                        UserDetail userDetail = new UserDetail(user);
+                        userDetail.setGroup(group);
+                        usersById.put(userId, userDetail);
                     } catch (OXException e) {
                         String mailAddress = null;
                         if (user != null) {
@@ -348,15 +343,23 @@ public class DefaultNotificationService implements ShareNotificationService {
         ModuleSupport moduleSupport = serviceLookup.getService(ModuleSupport.class);
         ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
         Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
-        for (Entry<Integer, UserDetail> userEntry : usersById.entrySet()) {
+
+        TIntObjectIterator<UserDetail> it = usersById.iterator();
+        for (int i = usersById.size(); i-- > 0; ) {
+            it.advance();
             User user = null;
             try {
-                int userId = userEntry.getKey().intValue();
-                UserDetail userDetail = userEntry.getValue();
-                ShareTarget dstTarget = moduleSupport.adjustTarget(srcTarget, session, userId);
+                int userId = it.key();
+                UserDetail userDetail = it.value();
                 user = userDetail.getUser();
+                ShareTarget dstTarget = moduleSupport.adjustTarget(srcTarget, session, userId);
                 String shareUrl;
                 if (user.isGuest()) {
+                    if (dstTarget.getModule() == Module.MAIL.getFolderConstant()) {
+                        String m = Module.getForFolderConstant(dstTarget.getModule()).getName();
+                        throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(dstTarget.getModule()) : m);
+                    }
+
                     shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), targetPath);
                     String mail = user.getMail();
                     if (Strings.isNotEmpty(mail)) {
@@ -389,57 +392,57 @@ public class DefaultNotificationService implements ShareNotificationService {
     private static final class UserDetail {
 
         private final User user;
-
         private Group group;
 
-
-        private UserDetail(User user) {
+        /**
+         * Initializes a new {@link UserDetail}.
+         */
+        UserDetail(User user) {
             super();
             this.user = user;
         }
 
-        public User getUser() {
+        User getUser() {
             return user;
         }
 
-        public Group getGroup() {
+        Group getGroup() {
             return group;
         }
 
-        public void setGroup(Group group) {
+        void setGroup(Group group) {
             this.group = group;
         }
-
     }
 
-    private static void collectWarning(List<OXException> warnings, Exception e, String emailAddress) {
+    private static void collectWarning(List<OXException> warnings, OXException e, String emailAddress) {
         if (emailAddress == null) {
             emailAddress = "unknown";
         }
 
-        if (e instanceof OXException) {
-            OXException oxe = (OXException) e;
-            if (oxe.isPrefix(ShareNotifyExceptionCodes.PREFIX)) {
-                warnings.add(oxe);
-            } else {
-                LOG.error("Error while sending notification mail to {}", emailAddress, oxe);
-                warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR_FOR_RECIPIENT.create(oxe, oxe.getMessage(), emailAddress));
-            }
+        if (e.isPrefix(ShareNotifyExceptionCodes.PREFIX)) {
+            warnings.add(e);
         } else {
             LOG.error("Error while sending notification mail to {}", emailAddress, e);
             warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR_FOR_RECIPIENT.create(e, e.getMessage(), emailAddress));
         }
     }
 
-    private static void collectWarning(List<OXException> warnings, Exception e) {
+    private static void collectWarning(List<OXException> warnings, Exception e, String emailAddress) {
         if (e instanceof OXException) {
-            OXException oxe = (OXException) e;
-            if (oxe.isPrefix(ShareNotifyExceptionCodes.PREFIX)) {
-                warnings.add(oxe);
-            } else {
-                LOG.error("Error while sending notification mail", oxe);
-                warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(oxe, oxe.getMessage()));
+            collectWarning(warnings, (OXException) e, emailAddress);
+        } else {
+            if (emailAddress == null) {
+                emailAddress = "unknown";
             }
+            LOG.error("Error while sending notification mail to {}", emailAddress, e);
+            warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR_FOR_RECIPIENT.create(e, e.getMessage(), emailAddress));
+        }
+    }
+
+    private static void collectWarning(List<OXException> warnings, OXException e) {
+        if (e.isPrefix(ShareNotifyExceptionCodes.PREFIX)) {
+            warnings.add(e);
         } else {
             LOG.error("Error while sending notification mail", e);
             warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));

@@ -1,0 +1,43 @@
+/import?action=OUTLOOK_CSV:
+  post:
+    operationId: importOutlookCSV
+    tags:
+      - import
+    summary: Imports contact data from an Outlook CSV file.
+    description: |
+      #### Example: exported Outlook CSV
+      ```
+      First Name,Last Name
+      Günther,Mustermann
+      Hildegard,Musterfrau
+      ```
+      The column titles in the first line of the CSV file may be those used by the English, French or German version of Outlook.
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder into which the data should be imported. This must be a contact folder.
+        required: true
+      - in: query
+        name: charset
+        type: string
+        description: A fixed character encoding to use when parsing the uploaded file, overriding the built-in defaults, following the conventions documented in [RFC 2278](http://tools.ietf.org/html/rfc2278) (preliminary, since 7.6.2).
+        required: false
+      - in: formData
+        name: file
+        type: file
+        description: The CSV file **with Windows' default encoding CP-1252** containing the contact data. The column titles are those used by the English, French or German version of Outlook.
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON object with the field `data` that represents
+          an array of objects each consisting of the fields `id`, `folder_id` and `last_modified` of the newly created contacts.
+          In case of errors the JSON object contains the well known [error fields](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling).
+        schema:
+          type: string

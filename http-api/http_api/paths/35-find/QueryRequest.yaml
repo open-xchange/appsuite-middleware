@@ -1,0 +1,44 @@
+/find?action=query:
+  put:
+    operationId: doQuery
+    tags:
+      - find
+    summary: Performs the actual search and returns the found items (**available since v7.6.1**).
+    description: |
+      Before querying the search you should fetch the search filters (facets) by calling the `/find?action=autocomplete`
+      request.
+      #### Active facets
+      Every value that has been selected by a user must be remembered and provided with every subsequent request.
+      The representation of a facet within a request body differs from the one within an autocomplete response.
+      We call those "active facets". Their representation is independent from their style.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: module
+        type: string
+        description: |
+          The name of the module within that the search shall be performed. Possible modules are: mail, contacts,
+          calendar, tasks, drive. Because a user may have limited access to modules the useable modules might only
+          be a subset of the available ones. Retrieve a list of allowed modules by querying the user configuration,
+          see module "config" (path `search`) or module "JSlob" (e.g. `id=io.ox/core`).
+        required: true
+      - in: query
+        name: columns
+        type: string
+        description: A comma-separated list of module-specific columns that shall be contained in the response items. See [Column identifiers](#column-identifiers) for the numeric IDs of fields for specific modules.
+        required: false
+      - in: body
+        name: body
+        description: A JSON object containing the selected `facets` and possible `options`. For pagination the keys `start` and `size` can be set.
+        required: true
+        schema:
+          $ref: "#/definitions/FindQueryBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing the search result. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FindQueryResponse"

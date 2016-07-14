@@ -83,8 +83,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
      */
-    public UnboundedIMAPStoreContainer(String server, int port, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
-        super(propagateClientIp);
+    public UnboundedIMAPStoreContainer(int accountId, Session session, String server, int port, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
+        super(accountId, session, propagateClientIp);
         maxRetryCount = 10;
         availableQueue = new InheritedPriorityBlockingQueue();
         this.port = port;

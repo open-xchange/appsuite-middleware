@@ -1,0 +1,41 @@
+/import?action=ICAL:
+  post:
+    operationId: importICal
+    tags:
+      - import
+    summary: Imports calendar data from iCalendar file.
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder into which the data should be imported. This may be be an appointment or a task folder.
+        required: true
+      - in: query
+        name: suppressNotification
+        type: boolean
+        description: Can be used to disable the notifications for new appointments that are imported through the given iCal file. This help keeping the Inbox clean if a lot of appointments need to be imported. The value of this parameter does not matter because only for the existence of the parameter is checked.
+        required: false
+      - in: query
+        name: ignoreUIDs
+        type: boolean
+        description: When set to `true`, UIDs are partially ignored during import of tasks and appointments from iCal. Internally, each UID is replaced statically by a random one to preserve possibly existing relations between recurring appointments in the same iCal file, but at the same time to avoid collisions with already existing tasks and appointments.
+        required: false
+      - in: formData
+        name: file
+        type: file
+        description: The iCal file containing the appointment and task data.
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON object with the field `data` that represents
+          an array of objects each consisting of the fields `id`, `folder_id` and `last_modified` of the newly created appointments/tasks.
+          In case of errors the JSON object contains the well known [error fields](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling). Beside a field `warnings` may contain an array
+          of objects with warning data containing customary error fields.
+        schema:
+          type: string

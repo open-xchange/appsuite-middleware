@@ -66,6 +66,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface ModuleSearchDriver {
 
+    /** The superior ranking that must not be exceeded by a registered <code>ModuleSearchDriver</code> */
+    public static final int RANKING_SUPERIOR = 100000;
+
     /**
      * Gets the module supported by this driver.
      *

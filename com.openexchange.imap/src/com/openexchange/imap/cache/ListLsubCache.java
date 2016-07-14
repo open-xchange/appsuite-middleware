@@ -67,6 +67,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailExceptionCode;
@@ -182,8 +183,8 @@ public final class ListLsubCache {
         return new KeyedCache(new Key(userId, contextId));
     }
 
-    /** The default timeout for LIST/LSUB cache (5 minutes) */
-    private static final long DEFAULT_TIMEOUT = 300000;
+    /** The default timeout for LIST/LSUB cache (6 minutes) */
+    private static final long DEFAULT_TIMEOUT = 360000;
 
     private static final String INBOX = "INBOX";
 
@@ -263,7 +264,7 @@ public final class ListLsubCache {
      * Checks if associated mailbox is considered as MBox format.
      *
      * @param accountId The account ID
-     * @param imapFolder The IMAP folder
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @return {@link Boolean#TRUE} for MBox format, {@link Boolean#FALSE} for no MBOX format or <code>null</code> if undetermined
@@ -336,6 +337,30 @@ public final class ListLsubCache {
     /**
      * Adds single entry to cache. Replaces any existing entry.
      *
+     * @param imapFolder The IMAP folder to add
+     * @param subscribed Whether IMAP folder is subscribed
+     * @param fullName The entry's full name
+     * @param accountId The account ID
+     * @param session The session
+     * @param ignoreSubscriptions Whether to ignore subscriptions
+     * @throws OXException If entry could not be added
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static void addSingle(IMAPFolder imapFolder, boolean subscribed, int accountId, Session session, boolean ignoreSubscriptions) throws OXException, MessagingException {
+        ListLsubCollection collection = getCollection(accountId, imapFolder, session, ignoreSubscriptions);
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection, ignoreSubscriptions)) {
+                return;
+            }
+            collection.addSingle(imapFolder, subscribed, DO_STATUS, DO_GETACL);
+
+            fireInvalidateCacheEvent(session);
+        }
+    }
+
+    /**
+     * Adds single entry to cache. Replaces any existing entry.
+     *
      * @param accountId The account ID
      * @param imapFolder The IMAP folder providing connected protocol
      * @param session The session
@@ -393,7 +418,7 @@ public final class ListLsubCache {
      *
      * @param fullName The full name
      * @param accountId The account ID
-     * @param imapFolder The IMAP
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @return The cached LSUB entry
@@ -423,6 +448,10 @@ public final class ListLsubCache {
             /*
              * Update & re-check
              */
+            boolean exists = IMAPCommandsCollection.exists(fullName, imapFolder);
+            if (false == exists) {
+                return ListLsubCollection.emptyEntryFor(fullName);
+            }
             collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
             fireInvalidateCacheEvent(session);
             entry = collection.getLsub(fullName);
@@ -466,6 +495,10 @@ public final class ListLsubCache {
                 /*
                  * Update & re-check
                  */
+                boolean exists = IMAPCommandsCollection.exists(fullName, imapFolder);
+                if (false == exists) {
+                    return ListLsubCollection.emptyEntryFor(fullName);
+                }
                 collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
                 fireInvalidateCacheEvent(session);
                 entry = collection.getList(fullName);
@@ -567,11 +600,46 @@ public final class ListLsubCache {
     }
 
     /**
+     * Tries to gets cached LIST entry for specified full name.
+     * <p>
+     * Performs no initializations if cache or entry is absent
+     *
+     * @param fullName The full name
+     * @param accountId The account ID
+     * @param session The session
+     * @return The cached LIST entry or <code>null</code>
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static ListLsubEntry tryCachedLISTEntry(String fullName, int accountId, Session session) throws OXException, MessagingException {
+        KeyedCache cache = getCache(session);
+
+        // Get the associated map
+        ConcurrentMap<Integer, Future<ListLsubCollection>> map = cache.get();
+        if (null == map) {
+            return null;
+        }
+
+        Future<ListLsubCollection> f = map.get(Integer.valueOf(accountId));
+        if (null == f) {
+            return null;
+        }
+
+        try {
+            ListLsubCollection collection = getFrom(f);
+            return collection.getListIgnoreDeprecated(fullName);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Gets cached LIST entry for specified full name.
      *
      * @param fullName The full name
      * @param accountId The account ID
-     * @param imapFolder The IMAP
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @return The cached LIST entry
@@ -587,7 +655,7 @@ public final class ListLsubCache {
      *
      * @param fullName The full name
      * @param accountId The account ID
-     * @param imapFolder The IMAP
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @param reinitSpecialUseIfLoaded <code>true</code> to re-initialize SPECIAL-USE folders in case cache is already loaded; otherwise <code>false</code>
@@ -627,6 +695,10 @@ public final class ListLsubCache {
             /*
              * Update & re-check
              */
+            boolean exists = IMAPCommandsCollection.exists(fullName, imapFolder);
+            if (false == exists) {
+                return ListLsubCollection.emptyEntryFor(fullName);
+            }
             collection.update(fullName, imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
             fireInvalidateCacheEvent(session);
             entry = collection.getList(fullName);
@@ -634,11 +706,40 @@ public final class ListLsubCache {
         }
     }
 
+    /**
+     * Gets cached LIST entry for specified full name.
+     *
+     * @param fullName The full name
+     * @param accountId The account ID
+     * @param imapFolder The IMAP folder providing the protocol to use
+     * @param session The session
+     * @param ignoreSubscriptions Whether to ignore subscriptions
+     * @return The cached LIST entry or an empty entry
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static ListLsubEntry optCachedLISTEntry(String fullName, int accountId, IMAPFolder imapFolder, Session session, boolean ignoreSubscriptions) throws OXException, MessagingException {
+        ListLsubCollection collection = getCollection(accountId, imapFolder, session, ignoreSubscriptions);
+        if (isAccessible(collection)) {
+            ListLsubEntry entry = collection.getListIgnoreDeprecated(fullName);
+            return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
+        }
+        synchronized (collection) {
+            checkTimeStamp(imapFolder, collection, ignoreSubscriptions);
+            ListLsubEntry entry = collection.getList(fullName);
+            return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
+        }
+    }
+
     private static boolean checkTimeStamp(IMAPFolder imapFolder, ListLsubCollection collection, boolean ignoreSubscriptions) throws MessagingException {
         /*
-         * Check collection's stamp
+         * Check collection's deprecation status and stamp
          */
-        if (collection.isDeprecated() || ((System.currentTimeMillis() - collection.getStamp()) > getTimeout())) {
+        if (collection.isDeprecated()) {
+            collection.reinit(imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
+            return true;
+        }
+        if ((System.currentTimeMillis() - collection.getStamp()) > getTimeout()) {
             collection.reinit(imapFolder, DO_STATUS, DO_GETACL, ignoreSubscriptions);
             return true;
         }
@@ -711,7 +812,7 @@ public final class ListLsubCache {
      *
      * @param fullName The full name
      * @param accountId The account ID
-     * @param imapFolder The IMAP folder
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @return The cached LIST/LSUB entry
@@ -757,7 +858,7 @@ public final class ListLsubCache {
      * Re-Initializes the SPECIAL-USE folders (only if the IMAP store advertises support for <code>"SPECIAL-USE"</code> capability)
      *
      * @param accountId The account identifier
-     * @param imapFolder The IMAP store
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @throws OXException If re-initialization fails
@@ -781,7 +882,7 @@ public final class ListLsubCache {
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
      * @param accountId The account identifier
-     * @param imapFolder The IMAP folder
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @return The entries
@@ -802,7 +903,7 @@ public final class ListLsubCache {
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
      * @param accountId The account identifier
-     * @param imapFolder The IMAP folder
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @return The entries
@@ -823,7 +924,7 @@ public final class ListLsubCache {
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
      * @param accountId The account identifier
-     * @param imapFolder The IMAP folder
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @return The entries
@@ -844,7 +945,7 @@ public final class ListLsubCache {
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
      * @param accountId The account identifier
-     * @param imapFolder The IMAP folder
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @return The entries
@@ -865,7 +966,7 @@ public final class ListLsubCache {
      * Needs the <code>"SPECIAL-USE"</code> capability.
      *
      * @param accountId The account identifier
-     * @param imapFolder The IMAP folder
+     * @param imapFolder The IMAP folder providing the protocol to use
      * @param session The session
      * @param ignoreSubscriptions Whether to ignore subscriptions
      * @return The entries

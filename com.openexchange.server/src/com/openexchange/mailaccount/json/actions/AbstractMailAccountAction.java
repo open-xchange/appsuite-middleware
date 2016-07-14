@@ -54,9 +54,7 @@ import static com.openexchange.mailaccount.Tools.getUnsignedInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -88,7 +86,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountJsonUtility;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
@@ -123,8 +121,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         try {
             final Object data = requestData.getData();
             if (data instanceof JSONValue) {
-                final JSONValue jBody = (JSONValue) data;
-                return innerPerform(requestData, session, jBody);
+                return innerPerform(requestData, session, (JSONValue) data);
             }
             return innerPerform(requestData, session, null);
         } catch (final JSONException e) {
@@ -257,16 +254,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     }
 
     protected static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
-        // Check needed fields
-        if (isEmpty(accountDescription.getMailServer())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.MAIL_URL);
-        }
-        if (isEmpty(accountDescription.getLogin())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.LOGIN);
-        }
-        if (isEmpty(accountDescription.getPassword())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.PASSWORD);
-        }
+        MailAccountJsonUtility.checkNeededFields(accountDescription);
     }
 
     /**
@@ -294,7 +282,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * Checks if specified {@link MailAccountDescription} is considered as default aka primary account.
      *
      * @param mailAccount The mail account description to examine
-     * @return <code>true</code> if specified {@link MailAccountDescription} is considered as defaul account; otherwise <code>false</code>
+     * @return <code>true</code> if specified {@link MailAccountDescription} is considered as default account; otherwise <code>false</code>
      */
     protected static boolean isDefaultMailAccount(final MailAccountDescription mailAccount) {
         return MailAccount.DEFAULT_ID == mailAccount.getId();
@@ -307,19 +295,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The parsed attributes
      */
     protected static List<Attribute> getColumns(final String colString) {
-        List<Attribute> attributes = null;
-        if (colString != null && !"".equals(colString.trim())) {
-            attributes = new LinkedList<Attribute>();
-            for (final String col : colString.split("\\s*,\\s*")) {
-                if ("".equals(col)) {
-                    continue;
-                }
-                attributes.add(Attribute.getById(Integer.parseInt(col)));
-            }
-            return attributes;
-        }
-        // All columns
-        return Arrays.asList(Attribute.values());
+        return MailAccountJsonUtility.getColumns(colString);
     }
 
     /**
@@ -371,7 +347,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                     cause = cause.getCause();
                 }
                 if (null != cause) {
-                    warnings.add(MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(cause, mailConfig.getServer(), mailConfig.getLogin()));
+                    warnings.add(MailAccountExceptionCodes.VALIDATE_FAILED_MAIL.create(cause, mailConfig.getServer(), mailConfig.getLogin()));
                 }
             } else {
                 e.setCategory(Category.CATEGORY_WARNING);

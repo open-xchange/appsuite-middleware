@@ -306,9 +306,6 @@ public enum Tree {
     /** If a search for all users, groups and resources when participant selection dialog is opened. (read-only, added 2008-10-09/SP5) */
     ParticipantAutoSearch("/participants/autoSearch"),
 
-    /** Defines the maximum number of participants for appointments and tasks. (read-only, added 2008-10-20/SP5) */
-    MAXIMUM_NUMBER_PARTICIPANTS("/participants/maximumNumberParticipants"),
-
     /** If external participants without email should be shown. */
     ShowWithoutEmail("/participants/showWithoutEmail"),
 

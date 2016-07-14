@@ -89,6 +89,15 @@ public abstract class MailPermission extends OCLPermission {
         return -1;
     }
 
+    /**
+     * Checks if permission allows to store the <code>"seen"</code> flag permanently across sessions.
+     *
+     * @return <code>-1</code> if there's no special store <code>"seen"</code> flag permission, <code>1</code> if store <code>"seen"</code> flag permission is granted; otherwise <code>0</code> if not
+     */
+    public int canStoreSeenFlag() {
+        return -1;
+    }
+
     private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
 
     /**

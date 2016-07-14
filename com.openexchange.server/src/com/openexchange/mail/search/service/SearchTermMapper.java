@@ -52,6 +52,7 @@ package com.openexchange.mail.search.service;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.FileNameTerm;
 import com.openexchange.mail.search.BooleanTerm;
 import com.openexchange.mail.search.NOTTerm;
 import com.openexchange.mail.search.ORTerm;
@@ -128,15 +129,25 @@ public final class SearchTermMapper {
             }
             return new NOTTerm(map(searchTerms[0]));
         }
-        final Object[] values = getNameAndConstant((Operand[]) searchTerm.getOperands());
+
+        Operand<String>[] operands = (Operand<String>[]) searchTerm.getOperands();
+        final Object[] values = getNameAndConstant(operands);
         if (null == values) {
-            throw new IllegalArgumentException(MessageFormat.format(
-                "Invalid values for single search term: {0}",
-                Arrays.toString(searchTerm.getOperands())));
+            throw new IllegalArgumentException(MessageFormat.format("Invalid values for single search term: {0}", Arrays.toString(searchTerm.getOperands())));
         }
-        final SearchTerm<?> term =
-            MailAttributeFetcher.getInstance().getSearchTerm(values[0].toString(), getSingleOperation(operation), values[1]);
-        return null == term ? BooleanTerm.TRUE : term;
+        final SearchTerm<?> term;
+        switch (operands[0].getType()) {
+            case COLUMN:
+                term = MailAttributeFetcher.getInstance().getSearchTerm(values[0].toString(), getSingleOperation(operation), values[1]);
+                return null == term ? BooleanTerm.TRUE : term;
+            case ATTACHMENT:
+                return ("name".equals(values[0])) ? new FileNameTerm((String) values[1]) : BooleanTerm.TRUE;
+            default:
+                return BooleanTerm.TRUE;
+
+        }
+
+
     }
 
     private static SingleOperation getSingleOperation(final Operation operation) {

@@ -1,0 +1,54 @@
+/login?action=login:
+  post:
+    operationId: doLogin
+    tags:
+      - login
+    summary: Login with user credentials.
+    description: |
+      The login module is used to obtain a session from the user's login
+      credentials. Parameters are normally expected in the POST request body.
+    parameters:
+      - in: formData
+        name: name
+        type: string
+        description: The login name.
+        required: true
+      - in: formData
+        name: password
+        type: string
+        format: password
+        description: The password (MUST be placed in the request body, otherwise the login request will be denied).
+        required: true
+      - in: query
+        type: string
+        name: authId
+        description: |
+          Identifier for tracing every single login request passed between different systems in a cluster.
+          The value should be some token that is unique for every login request. This parameter must be
+          given as URL parameter and not inside the body of the POST request. (IS OPTIONAL, meaning can be empty)
+        required: false
+      - in: formData
+        name: client
+        type: string
+        description: Identifier of the client using the HTTP/JSON interface. This is for statistic evaluations what clients are used with Open-Xchange.
+        required: false
+      - in: formData
+        name: version
+        type: string
+        description: Used version of the HTTP/JSON interface client.
+        required: false
+      - in: formData
+        name: clientIP
+        type: string
+        description: IP address of the client host for that the session is created. If this parameter is not specified the IP address of the HTTP client doing this request is used.
+        required: false
+      - in: formData
+        name: clientUserAgent
+        type: string
+        description: Value of the User-Agent header of the client host for that the session is created. If this parameter is not specified the User-Agent of the current HTTP client doing this request is used.
+        required: false
+    responses:
+      200:
+        description: A JSON object containing the session ID used for all subsequent requests. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/LoginResponse"

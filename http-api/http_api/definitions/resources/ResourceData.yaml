@@ -1,0 +1,26 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: The resource ID.
+  display_name:
+    type: string
+    description: Display name of the resource.
+  name:
+    type: string
+    description: Internal name with character restrictions.
+  mailaddress:
+    type: string
+    description: Email address of the resource.
+  availability:
+    type: boolean
+    description: Can be false to mark the resource currently unavailable.
+  description:
+    type: string
+    description: The description of the resource.
+  last_modified:
+    type: string
+    description: Date and time of the last modification.
+  last_modified_utc:
+    type: string
+    description: Timestamp of the last modification.

@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.Bundle;
@@ -60,7 +61,7 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAdminCoreImpl.class);
 
-    private BundleContext context = null;
+    private final BundleContext context;
 
     public OXAdminCoreImpl(BundleContext context) {
         super();
@@ -68,7 +69,7 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
     }
 
     @Override
-    public boolean allPluginsLoaded() {
+    public boolean allPluginsLoaded() throws RemoteException {
         Bundle[] bundles = context.getBundles();
         List<Bundle> fragments = new ArrayList<Bundle>();
         List<Bundle> notStarted = new ArrayList<Bundle>();
@@ -88,4 +89,5 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
         log.error("The following bundles aren't started: {}", notStarted);
         return false;
     }
+
 }

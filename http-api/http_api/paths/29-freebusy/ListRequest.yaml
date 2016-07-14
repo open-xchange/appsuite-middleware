@@ -1,0 +1,46 @@
+/freebusy?action=list:
+  put:
+    operationId: getFreeBusyList
+    tags:
+      - freebusy
+    summary: Gets a list of free/busy information (**available since v6.22.1**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: from
+        type: integer
+        format: int64
+        description: The lower (inclusive) limit of the requested time range.
+        required: true
+      - in: query
+        name: until
+        type: integer
+        format: int64
+        description: The upper (exclusive) limit of the requested time range.
+        required: true
+      - in: query
+        name: merged
+        type: boolean
+        description: Indicates whether to pre-process free/busy data on the server or not. This includes sorting as well as merging overlapping free/busy intervals.
+        required: false
+      - in: body
+        name: body
+        description: |
+          A JSON array with identifiers of participants to get free/busy data for. The identifier my refer
+          to an internal user-, group- or resource-ID, or to an email address for external participants.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: |
+          A JSON object containing the free/busy data for all requested participants. For each participant it is added
+          an object (with the participant's ID as key) that contains a field `data` that is an array with objects representing
+          free/busy information as described in [FreeBusyData](#/definitions/FreeBusyData) model. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FreeBusysResponse"

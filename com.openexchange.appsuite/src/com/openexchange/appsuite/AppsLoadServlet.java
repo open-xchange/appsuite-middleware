@@ -84,23 +84,19 @@ public class AppsLoadServlet extends SessionServlet {
 
     // ----------------------------------------------------------------------------------------------------------------------
 
-    private final AtomicReference<FileCache> appCacheReference;
-    private final AtomicReference<FileCache> tzCacheReference;
+    private volatile FileCache appCache;
+    private volatile FileCache tzCache;
     private final AtomicReference<FileContributor> fileContributorReference;
 
     /**
      * Initializes a new {@link AppsLoadServlet}.
      *
-     * @param roots The app roots
-     * @param zoneinfo The zone information
      * @param contributor The (composite) file contributor.
      * @throws IOException If canonical path names of given files cannot be determined
      */
-    public AppsLoadServlet(File[] roots, File zoneinfo, FileContributor contributor) throws IOException {
+    public AppsLoadServlet(FileContributor contributor) throws IOException {
         super();
         fileContributorReference = new AtomicReference<FileContributor>(contributor);
-        appCacheReference = new AtomicReference<FileCache>(new FileCache(roots));
-        tzCacheReference = new AtomicReference<FileCache>(new FileCache(zoneinfo));
     }
 
     /**
@@ -110,9 +106,9 @@ public class AppsLoadServlet extends SessionServlet {
      * @param zoneinfo The zone information
      * @throws IOException If canonical path names of given files cannot be determined
      */
-    public void reinitialize(File[] roots, File zoneinfo) throws IOException {
-        appCacheReference.set(new FileCache(roots));
-        tzCacheReference.set(new FileCache(zoneinfo));
+    public synchronized void reinitialize(File[] roots, File zoneinfo) throws IOException {
+        appCache = new FileCache(roots);
+        tzCache = new FileCache(zoneinfo);
     }
 
     private String escapeName(String name) {
@@ -135,7 +131,7 @@ public class AppsLoadServlet extends SessionServlet {
      * Errors must not be cached. Since this is controlled by the "Expires" header at the start, data must be buffered until either an error
      * is found or the end of the data is reached. Since non-error data is cached in RAM anyway, the only overhead is an array of pointers.
      */
-    private class ErrorWriter {
+    private static class ErrorWriter {
 
         private boolean buffering = true;
         private final HttpServletResponse resp;
@@ -226,7 +222,7 @@ public class AppsLoadServlet extends SessionServlet {
             boolean isTZ = name.startsWith(ZONEINFO);
             final String resolved = isTZ ? name.substring(ZONEINFO.length()) : name;
 
-            FileCache cache = isTZ ? tzCacheReference.get() : appCacheReference.get();
+            FileCache cache = isTZ ? tzCache : appCache;
             byte[] data = cache.get(module, new FileCache.Filter() {
 
                 @Override

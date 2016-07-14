@@ -1,0 +1,9 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: |
+      An array with object IDs of folders that could not be processed because of a concurrent modification or something else.
+    items:
+      type: string

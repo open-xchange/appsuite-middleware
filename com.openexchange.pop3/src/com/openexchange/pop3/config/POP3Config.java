@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.pop3.POP3Capabilities;
 import com.openexchange.pop3.POP3ExceptionCode;
 
@@ -138,8 +139,9 @@ public final class POP3Config extends MailConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) {
-        pop3Server = serverURL;
+    protected void parseServerURL(final UrlInfo urlInfo) {
+        pop3Server = urlInfo.getServerURL();
+        startTls = urlInfo.isStartTls();
         pop3Port = 110;
         {
             final String[] parsed = parseProtocol(pop3Server);

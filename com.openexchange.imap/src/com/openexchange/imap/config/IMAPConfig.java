@@ -70,6 +70,7 @@ import com.openexchange.imap.cache.CapabilitiesCache.CapabilitiesResponse;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.net.URIDefaults;
@@ -348,16 +349,17 @@ public final class IMAPConfig extends MailConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) throws OXException {
+    protected void parseServerURL(final UrlInfo urlInfo) throws OXException {
         final URI uri;
         try {
-            uri = URIParser.parse(serverURL, URIDefaults.IMAP);
+            uri = URIParser.parse(urlInfo.getServerURL(), URIDefaults.IMAP);
         } catch (final URISyntaxException e) {
-            throw IMAPException.Code.URI_PARSE_FAILED.create(e, serverURL);
+            throw IMAPException.Code.URI_PARSE_FAILED.create(e, urlInfo.getServerURL());
         }
         secure = PROTOCOL_IMAP_SECURE.equals(uri.getScheme());
         imapServer = uri.getHost();
         imapPort = uri.getPort();
+        startTls = urlInfo.isStartTls();
     }
 
     /**

@@ -67,7 +67,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 public class ModuleHandlerRegistry {
 
     private final Map<Integer, ModuleHandler> handlers = new HashMap<Integer, ModuleHandler>();
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link ModuleHandlerRegistry}.

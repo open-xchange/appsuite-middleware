@@ -89,9 +89,9 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
-import com.openexchange.mailaccount.json.parser.MailAccountParser;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -104,8 +104,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a mail account", parameters = { @Parameter(name = "session", description = "A session ID previously obtained from the login module.") }, requestBody = "A JSON object identifiying (field ID is present) and describing the account to update. See mail account data.", responseDescription = "A JSON object representing the updated mail account. See mail account data.")
 public final class UpdateAction extends AbstractMailAccountAction implements MailAccountFields {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
 
@@ -124,7 +122,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
         MailAccountDescription accountDescription = new MailAccountDescription();
         List<OXException> warnings = new LinkedList<OXException>();
-        Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        Set<Attribute> fieldsToUpdate = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (fieldsToUpdate.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
             TransportAuth transportAuth = accountDescription.getTransportAuth();
@@ -293,9 +291,9 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         // Write to JSON structure
         final JSONObject jsonAccount;
         if (null == updatedAccount) {
-            jsonAccount = MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
+            jsonAccount = DefaultMailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
         } else {
-            jsonAccount = MailAccountWriter.write(updatedAccount);
+            jsonAccount = DefaultMailAccountWriter.write(updatedAccount);
         }
 
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);

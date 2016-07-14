@@ -357,7 +357,7 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, int[] fromToIndices, long lookAhead) throws OXException;
+    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, String[] headerFields, int[] fromToIndices, long lookAhead) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
@@ -488,6 +488,11 @@ public abstract class MailServletInterface implements Closeable {
     public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException;
 
     /**
+     * Sends messages.
+     */
+    public abstract List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage sentMail, ComposeType sendType, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException;
+
+    /**
      * Appends given messages to given folder.
      *
      * @param destFolder The destination folder
@@ -565,6 +570,19 @@ public abstract class MailServletInterface implements Closeable {
      * flags are set (<code>true</code>) or unset (<code>false</code>).
      */
     public abstract void updateMessageFlags(String folder, String[] msgUID, int flagBits, boolean flagVal) throws OXException;
+
+    /**
+     * Updates message's client-alterable system flags (e.g. //SEEN or //ANSWERED) and user flags. <code>flagVal</code> determines whether the affected
+     * flags are set (<code>true</code>) or unset (<code>false</code>).
+     *
+     * @param folder The folder full name
+     * @param mailIDs The mail IDs
+     * @param flagBits The system flag bits
+     * @param userFlags An array of user flags
+     * @param flagVal <code>true</code> to set the given flags or <code>false</code> to unset
+     * @throws OXException If flags cannot be updated
+     */
+    public abstract void updateMessageFlags(String folder, String[] mailIDs, int flagBits, String[] userFlags, boolean flagVal) throws OXException;
 
     /**
      * Gets all updated messages in given folder
@@ -689,6 +707,14 @@ public abstract class MailServletInterface implements Closeable {
      * @throws OXException If opening the folder fails
      */
     public abstract void openFor(String folder) throws OXException;
+
+    /**
+     * Applies specified {@code MailAccess} instance to this {@link MailServletInterface}.
+     *
+     * @param mailAccess The mail access to apply
+     * @throws OXException If applying the mail access fails
+     */
+    public abstract void applyAccess(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException;
 
     /**
      * Gets the account ID to which the (primary) mail access is connected

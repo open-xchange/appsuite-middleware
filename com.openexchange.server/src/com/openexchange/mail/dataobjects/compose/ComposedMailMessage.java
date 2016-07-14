@@ -56,11 +56,10 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -68,7 +67,6 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartTy
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -91,7 +89,8 @@ public abstract class ComposedMailMessage extends MailMessage {
     private transient MimeMessageFiller filler;
     private final Set<InternetAddress> recipients;
     private UserSettingMail mailSettings;
-    private String csid;
+    private boolean appendToSentFolder;
+    private boolean transportToRecipients;
 
     /**
      * Default constructor
@@ -100,25 +99,9 @@ public abstract class ComposedMailMessage extends MailMessage {
         super();
         this.session = session;
         this.ctx = ctx;
-        recipients = new HashSet<InternetAddress>();
-    }
-
-    /**
-     * Gets the identifier of the associated composition space
-     *
-     * @return The identifier of the associated composition space
-     */
-    public String getCsid() {
-        return csid;
-    }
-
-    /**
-     * Sets the identifier of the associated composition space
-     *
-     * @param csid The identifier of the associated composition space to set
-     */
-    public void setCsid(String csid) {
-        this.csid = csid;
+        recipients = new LinkedHashSet<InternetAddress>();
+        appendToSentFolder = true;
+        transportToRecipients = true;
     }
 
     /**
@@ -137,6 +120,42 @@ public abstract class ComposedMailMessage extends MailMessage {
      */
     public UserSettingMail getMailSettings() {
         return mailSettings;
+    }
+
+    /**
+     * Checks if this composed message is supposed to be appended to standard sent folder.
+     *
+     * @return <code>true</code> if it should be appended to standard sent folder; otherwise <code>false</code>
+     */
+    public boolean isAppendToSentFolder() {
+        return appendToSentFolder;
+    }
+
+    /**
+     * Sets if this composed message is supposed to be appended to standard sent folder.
+     *
+     * @param appendToSentFolder <code>true</code> if it should be appended to standard sent folder; otherwise <code>false</code>
+     */
+    public void setAppendToSentFolder(boolean appendToSentFolder) {
+        this.appendToSentFolder = appendToSentFolder;
+    }
+
+    /**
+     * Checks if this composed message is supposed to be actually transported.
+     *
+     * @return <code>true</code> if it should be transported; otherwise <code>false</code>
+     */
+    public boolean isTransportToRecipients() {
+        return transportToRecipients;
+    }
+
+    /**
+     * Sets if this composed message is supposed to be actually transported.
+     *
+     * @param transportToRecipients <code>true</code> if it should be transported; otherwise <code>false</code>
+     */
+    public void setTransportToRecipients(boolean transportToRecipients) {
+        this.transportToRecipients = transportToRecipients;
     }
 
     /**
@@ -260,28 +279,13 @@ public abstract class ComposedMailMessage extends MailMessage {
         }
         try {
             final int count = getEnclosedCount();
-            final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             for (int i = 0; i < count; i++) {
                 if (getEnclosedMailPart(i) instanceof ComposedMailPart) {
                     final ComposedMailPart composedMailPart = (ComposedMailPart) getEnclosedMailPart(i);
                     if (ComposedPartType.REFERENCE.equals(composedMailPart.getType())) {
-                        final String fileId = ((ReferencedMailPart) (composedMailPart)).getFileID();
-                        if (null != fileId) {
-                            try {
-                                mfm.removeByID(fileId);
-                            } catch (final OXException e) {
-                                LOG.warn("", e);
-                            }
-                        }
+                        ((ReferencedMailPart) (composedMailPart)).close();
                     } else if (ComposedPartType.DATA.equals(composedMailPart.getType())) {
-                        final String fileId = ((DataMailPart) (composedMailPart)).getFileID();
-                        if (null != fileId) {
-                            try {
-                                mfm.removeByID(fileId);
-                            } catch (final OXException e) {
-                                LOG.warn("", e);
-                            }
-                        }
+                        ((DataMailPart) (composedMailPart)).close();
                     } else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
                         final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
                         if (f.exists() && !f.delete()) {

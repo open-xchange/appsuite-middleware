@@ -69,6 +69,8 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.DispatcherListener;
+import com.openexchange.ajax.requesthandler.DispatcherListenerRegistry;
 import com.openexchange.ajax.requesthandler.DispatcherNotesProcessor;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.Dispatchers;
@@ -133,8 +135,10 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     	Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
     	Dispatcher.PREFIX.set(prefix);
 
-    	final DefaultDispatcher dispatcher = new DefaultDispatcher();
-        /*
+        OSGiDispatcherListenerRegistry dispatcherListenerRegistry = new OSGiDispatcherListenerRegistry(context);
+    	final DefaultDispatcher dispatcher = new DefaultDispatcher(dispatcherListenerRegistry);
+
+    	/*
          * Specify default converters
          */
         final DefaultConverter defaultConverter = new DefaultConverter();
@@ -355,9 +359,12 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 			}
 		});
 
+        track(DispatcherListener.class, dispatcherListenerRegistry);
+
         openTrackers();
 
         registerService(Dispatcher.class, dispatcher);
+        registerService(DispatcherListenerRegistry.class, dispatcherListenerRegistry);
 
         /*
          * Register preview filestore updater for move context filestore

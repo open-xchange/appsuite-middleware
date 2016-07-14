@@ -62,6 +62,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -520,22 +521,8 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 del_rights.executeBatch();
             }
         } finally {
-            final CalendarCollection collection = new CalendarCollection();
-            if (rs != null) {
-                collection.closeResultSet(rs);
-            }
-            if (pst != null) {
-                collection.closePreparedStatement(pst);
-            }
-            if (del_dates != null) {
-                collection.closePreparedStatement(del_dates);
-            }
-            if (del_rights != null) {
-                collection.closePreparedStatement(del_rights);
-            }
-            if (del_members != null) {
-                collection.closePreparedStatement(del_members);
-            }
+            Databases.closeSQLStuff(rs);
+            Databases.closeSQLStuff(pst, del_dates, del_rights, del_members, dateExternal);
         }
     }
 

@@ -336,14 +336,14 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     RESERVED_NAME("File name is a reserved name: \"%1$s\"", Category.CATEGORY_USER_INPUT, 66, FileStorageExceptionMessages.RESERVED_NAME_MSG),
 
     /**
-     * File name must not be \".\" or \"..\".
+     * File name must not be <code>"."</code> or <code>".."</code>.
      */
     ONLY_DOTS_NAME("File name must not be \".\" or \"..\".", Category.CATEGORY_USER_INPUT, 67, FileStorageExceptionMessages.ONLY_DOTS_MSG),
 
     /**
      * File name must not end with a dot or whitespace.
      */
-    WHITESPACE_END("File name must not end with a dot or whitespace.", Category.CATEGORY_USER_INPUT, 68, FileStorageExceptionMessages.WHITESPACE_END_MSG)
+    WHITESPACE_END("File name must not end with a dot or whitespace.", Category.CATEGORY_USER_INPUT, 68, FileStorageExceptionMessages.WHITESPACE_END_MSG),
 
     ;
 

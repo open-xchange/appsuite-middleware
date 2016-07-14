@@ -1,0 +1,57 @@
+/calendar?action=updates:
+  get:
+    operationId: getAppointmentUpdates
+    tags:
+      - calendar
+    summary: Gets updated appointments.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamCalendarColumns"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the requested appointments.
+        required: true
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder, whose contents are queried. That parameter may be absent in case ignore is set to "deleted", which means all accessible calendar folders are considered. If ignore is not set to "deleted", that parameter is mandatory.
+        required: false
+      - in: query
+        name: start
+        type: integer
+        format: int64
+        description: Lower inclusive limit of the queried range as a Date. Only appointments which end on or after this date are returned. This parameter is optional in case a certain folder is queried, but mandatory if all accessible calendar folders are supposed to be considered (folder not specified).
+        required: false
+      - in: query
+        name: end
+        type: integer
+        format: int64
+        description: Upper exclusive limit of the queried range as a Date. Only appointments which start before this date are returned. This parameter is optional in case a certain folder is queried, but mandatory if all accessible calendar folders are supposed to be considered (folder not specified).
+        required: false
+      - in: query
+        name: ignore
+        type: string
+        description: Which kinds of updates should be ignored. Currently, the only valid value – "deleted" – causes deleted object IDs not to be returned.
+        required: false
+        enum:
+          - deleted
+      - $ref: "#/parameters/gblQueryParamRecurrenceMaster"
+      - in: query
+        name: showPrivate
+        type: boolean
+        description: 'Only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information (since 6.18)'
+        required: false
+    responses:
+      200:
+        description: |
+          An array with new, modified and deleted appointments. New and modified appointments are represented by arrays.
+          The elements of each array contain the information specified by the corresponding identifiers in the
+          `columns` parameter. Deleted appointments (should the ignore parameter be ever implemented) would be identified
+          by their object IDs as integers, without being part of a nested array. Appointment sequencies are broken up
+          into individual appointments and each modified occurrence of a sequence in the requested range is returned
+          separately. The appointments are sorted in ascending order by the field start_date. In case of errors the
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/AppointmentUpdatesResponse"

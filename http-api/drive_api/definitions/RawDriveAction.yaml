@@ -1,0 +1,57 @@
+action:
+  type: string
+  description: The type of action to execute, currently one of `acknowledge`, `edit`, `download`, `upload`, `remove`, `sync`, or `error`. See [Action types overview](#action-types-overview), too.
+version:
+  type: object
+  description: The (original) file- or directory-version referenced by the action. See [FileVersion](#/definitions/FileVersion) and [DirectoryVersion](#/definitions/DirectoryVersion) model.
+newVersion:
+  type: object
+  description: The (new) file- or directory-version referenced by the action. See [FileVersion](#/definitions/FileVersion) and [DirectoryVersion](#/definitions/DirectoryVersion) model.
+path:
+  type: string
+  description: The path to the synchronized folder, relative to the root folder.
+offset:
+  type: integer
+  format: int64
+  description: The requested start offset in bytes for file uploads.
+totalLength:
+  type: integer
+  format: int64
+  description: The total length in bytes for file downloads.
+contentType:
+  type: string
+  description: The file's content type for downloads (deprecated, available until API version 2).
+created:
+  type: integer
+  format: int64
+  description: The file's creation time (always UTC, not translated into user time).
+modified:
+  type: integer
+  format: int64
+  description: The file's last modification time (always UTC, not translated into user time).
+error:
+  $ref: "#/definitions/DriveSyncErrorData"
+quarantine:
+  type: boolean
+  description: The flag to indicate whether the versions need to be excluded from synchronization.
+reset:
+  type: boolean
+  description: The flag to indicate whether locally stored checksums should be invalidated.
+stop:
+  type: boolean
+  description: The flag to signal that the client should stop the current sychronization cycle.
+acknowledge:
+  type: boolean
+  description: The flag to signal if the client should not update it's stored checksums when performing an `edit` action.
+thumbnailLink:
+  type: string
+  description: A direct link to a small thumbnail image of the file if available (deprecated, available until API version 2).
+previewLink:
+  type: string
+  description: A direct link to a medium-sized preview image of the file if available (deprected, available until API version 2).
+directLink:
+  type: string
+  description: A direct link to the detail view of the file in the web interface (deprecated, available until API version 2).
+directLinkFragments:
+  type: string
+  description: The fragments part of the direct link (deprecated, available until API version 2).

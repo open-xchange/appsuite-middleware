@@ -65,7 +65,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.osgi.RegistryCustomizer;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.templating.TemplateHelperFactory;
+import com.openexchange.ajax.printing.TemplateHelperFactory;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 

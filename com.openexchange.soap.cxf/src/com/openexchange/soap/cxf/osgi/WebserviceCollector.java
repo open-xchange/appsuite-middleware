@@ -49,6 +49,7 @@
 
 package com.openexchange.soap.cxf.osgi;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -128,7 +129,7 @@ public class WebserviceCollector implements ServiceListener {
      */
     public void close() {
         open = false;
-        for (final Entry<String, Endpoint> entry : endpoints.entrySet()) {
+        for (final Entry<String, Endpoint> entry : new ArrayList<Entry<String, Endpoint>>(endpoints.entrySet())) {
             remove(entry.getKey(), entry.getValue());
         }
     }

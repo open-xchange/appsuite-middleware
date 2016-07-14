@@ -91,6 +91,8 @@ import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginRequest.GuestCredentials;
 import com.openexchange.ajax.session.actions.LoginResponse;
+import com.openexchange.ajax.share.actions.RedeemRequest;
+import com.openexchange.ajax.share.actions.RedeemResponse;
 import com.openexchange.ajax.share.actions.ResolveShareRequest;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
@@ -341,11 +343,24 @@ public class GuestClient extends AJAXClient {
             loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, false);
         } else if ("anonymous_password".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);
+        } else if ("message".equals(shareResponse.getLoginType()) && null != shareResponse.getToken()) {
+            RedeemRequest req = new RedeemRequest(shareResponse.getToken(), true);
+            RedeemResponse resp = execute(req);
+            if ("guest".equals(resp.getLoginType()) || "guest_password".equals(resp.getLoginType())) {
+                GuestCredentials credentials = new GuestCredentials(config.username, config.password);
+                loginRequest = LoginRequest.createGuestLoginRequest(resp.getShare(), resp.getTarget(), credentials, config.client, false);
+            } else if ("anonymous_password".equals(resp.getLoginType())) {
+                loginRequest = LoginRequest.createAnonymousLoginRequest(resp.getShare(), resp.getTarget(), config.password, false);
+            } else {
+                Assert.fail("unknown login type: " + resp.getLoginType());
+            }
         } else {
             Assert.fail("unknown login type: " + shareResponse.getLoginType());
         }
         return Executor.execute(this, loginRequest, getProtocol(), getHostname());
     }
+    
+    
 
     private static void prepareClient(DefaultHttpClient httpClient, String username, String password) {
         httpClient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);

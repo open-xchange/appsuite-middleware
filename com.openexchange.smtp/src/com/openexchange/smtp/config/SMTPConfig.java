@@ -53,11 +53,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.mail.transport.config.ITransportProperties;
+import com.openexchange.mail.transport.config.TransportAuthSupportAware;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
-import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPExceptionCode;
@@ -69,7 +72,7 @@ import com.openexchange.tools.net.URIParser;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPConfig extends TransportConfig {
+public final class SMTPConfig extends TransportConfig implements TransportAuthSupportAware {
 
     private static final String PROTOCOL_SMTP_SECURE = "smtps";
 
@@ -123,16 +126,17 @@ public final class SMTPConfig extends TransportConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) throws OXException {
+    protected void parseServerURL(final UrlInfo urlInfo) throws OXException {
         final URI uri;
         try {
-            uri = URIParser.parse(serverURL, URIDefaults.SMTP);
+            uri = URIParser.parse(urlInfo.getServerURL(), URIDefaults.SMTP);
         } catch (final URISyntaxException e) {
-            throw SMTPExceptionCode.URI_PARSE_FAILED.create(e, serverURL);
+            throw SMTPExceptionCode.URI_PARSE_FAILED.create(e, urlInfo.getServerURL());
         }
         secure = PROTOCOL_SMTP_SECURE.equals(uri.getScheme());
         smtpServer = uri.getHost();
         smtpPort = uri.getPort();
+        startTls = urlInfo.isStartTls();
     }
 
     @Override
@@ -155,6 +159,15 @@ public final class SMTPConfig extends TransportConfig {
         return transportProperties;
     }
 
+    @Override
+    public boolean isAuthSupported() throws OXException {
+        ISMTPProperties transportProperties = this.transportProperties;
+        if (null == transportProperties) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create("SMTP config not yet initialized");
+        }
+        return transportProperties.isSmtpAuth();
+    }
+
     public ISMTPProperties getSMTPProperties() {
         return transportProperties;
     }
@@ -168,9 +181,12 @@ public final class SMTPConfig extends TransportConfig {
      * {@inheritDoc}
      */
     @Override
-    protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
+    protected boolean doCustomParsing(final Account account, final Session session) throws OXException {
         if (!account.isDefaultAccount()) {
             TransportAuth transportAuth = account.getTransportAuth();
+            if (transportAuth == null) {
+                return true;
+            }
             switch (transportAuth) {
             case CUSTOM:
                 login = saneLogin(account.getTransportLogin());

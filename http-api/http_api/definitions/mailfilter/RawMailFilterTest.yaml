@@ -1,0 +1,35 @@
+id:
+  type: string
+  description: The name of the test command, see [Possible tests](https://documentation.open-xchange.com/latest/middleware/http_api/4_mail_filter.html#possible-tests).
+comparison:
+  type: string
+  description: The comparison type, see [Possible comparisons](https://documentation.open-xchange.com/latest/middleware/http_api/4_mail_filter.html#possible-comparisons).
+headers:
+  type: array
+  description: An array containing the header fields (for address-, envelope- and header-test).
+  items:
+    type: string
+values:
+  type: array
+  description: An array containing the value for the header fields or the values for the body. The test will be true if any of the strings matches (for address-, envelope-, header-test and body-test).
+  items:
+    type: string
+size:
+  type: integer
+  format: int64
+  description: The size in bytes (for size-test).
+datepart:
+  type: string
+  description: Type of the comparison, which can be "date", "weekday" or "time" (available since v7.6.1) (for currentdate-test).
+datevalue:
+  type: array
+  description: Contains the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 (sunday) to 6 (saturday) reflecting the equivalent weekday (for currentdate-test).
+  items:
+    type: integer
+    format: int64
+extensionskey:
+  type: string
+  description: The [extension key](https://documentation.open-xchange.com/latest/middleware/http_api/4_mail_filter.html#possible-extensions) (for body-test).
+extensionsvalue:
+  type: string
+  description: A value for the given key. If the key has no value the value given here is ignored (for body-test).

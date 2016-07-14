@@ -206,7 +206,8 @@ public class ShareLoginConfiguration {
             defaultConfig.getRanges(),
             defaultConfig.isDisableTrimLogin(),
             defaultConfig.isFormLoginWithoutAuthId(),
-            defaultConfig.isRandomTokenEnabled()
+            defaultConfig.isRandomTokenEnabled(),
+            defaultConfig.isCheckPunyCodeLoginString()
         );
     }
 
@@ -296,7 +297,8 @@ public class ShareLoginConfiguration {
                     loginConfig.getRanges(),
                     loginConfig.isDisableTrimLogin(),
                     loginConfig.isFormLoginWithoutAuthId(),
-                    loginConfig.isRandomTokenEnabled()
+                    loginConfig.isRandomTokenEnabled(),
+                    loginConfig.isCheckPunyCodeLoginString()
                 );
             }
         }

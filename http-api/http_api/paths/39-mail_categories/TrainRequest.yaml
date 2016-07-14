@@ -1,0 +1,40 @@
+/mail/categories?action=train:
+  put:
+    operationId: train
+    tags: 
+      - mail_categories
+    summary: Add a new rule 
+    description: Adds a new rule with the given mail addresses to the given category and optionally reorganize all existing mails in the inbox.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: category_id
+        type: string
+        description: The identifier of a category.
+        required: true
+      - in: query
+        name: apply-for-existing
+        type: boolean
+        description: A flag indicating whether old mails should be reorganized. Defaults to 'false'.
+        required: false
+      - in: query
+        name: apply-for-future-ones
+        type: boolean
+        description: A flag indicating whether a rule should be created or not. Defaults to 'true'.
+        required: false  
+      - in: body
+        name: body
+        description: |
+          'A JSON object containing a "from" field which contains an array of mail addresses.' 
+        required: true
+        schema:
+          $ref: "#/definitions/Mail_CategoriesTrainBody"
+    responses:  
+      200:
+        description: |
+          'An empty response if everything went well. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+        schema:
+          $ref: "#/definitions/CommonResponse"

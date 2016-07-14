@@ -1,0 +1,288 @@
+# "Global" parameters that can be referenced in operation parameters with
+# - $ref: "#/parameters/TheParamNameFromBelow"
+gblQueryParamSession:
+  name: session
+  in: query
+  type: string
+  description: A session ID previously obtained from the login module.
+  required: true
+gblPathParamConfigNode:
+  name: path
+  in: path
+  type: string
+  description: The path to the node.
+  required: true
+  enum:
+    - gui
+    - fastgui
+    - context_id
+    - cookielifetime
+    - identifier
+    - contact_id
+    - language
+    - timezone
+    - availableTimeZones
+    - calendarnotification
+    - tasknotification
+    - reloadTimes
+    - serverVersion
+    - currentTime
+    - maxUploadIdleTimeout
+    - search
+    - folder
+    - folder/tasks
+    - folder/calendar
+    - folder/contacts
+    - folder/infostore
+    - folder/eas
+    - mail
+    - mail/addresses
+    - mail/defaultaddress
+    - mail/sendaddress
+    - mail/folder
+    - mail/folder/inbox
+    - mail/folder/drafts
+    - mail/folder/trash
+    - mail/folder/spam
+    - mail/folder/sent
+    - mail/htmlinline
+    - mail/colorquote
+    - mail/emoticons
+    - mail/harddelete
+    - mail/inlineforward
+    - mail/vcard
+    - mail/notifyonreadack
+    - mail/msgpreview
+    - mail/ignorereplytext
+    - mail/nocopytosent
+    - mail/spambutton
+    - participants
+    - participants/autoSearch
+    - participants/maximumNumberParticipants
+    - participants/showWithoutEmail
+    - participants/showDialog
+    - availableModules
+    - minimumSearchCharacters
+    - modules
+    - modules/portal
+    - modules/portal/gui
+    - modules/portal/module
+    - modules/mail
+    - modules/mail/addresses
+    - modules/mail/appendmailtext
+    - modules/mail/allowhtmlimages
+    - modules/mailcolorquoted
+    - modules/mail/contactCollectFolder
+    - modules/mail/contactCollectEnabled
+    - modules/mail/contactCollectOnMailAccess
+    - modules/mail/contactCollectOnMailTransport
+    - modules/mail/defaultaddress
+    - modules/mail/deletemail
+    - modules/mail/emoticons
+    - modules/mail/defaultFolder
+    - modules/mail/defaultFolder/drafts
+    - modules/mail/defaultFolder/inbox
+    - modules/mail/defaultFolder/sent
+    - modules/mail/defaultFolder/spam
+    - modules/mail/defaultFolder/trash
+    - modules/mail/forwardmessage
+    - modules/mail/gui
+    - modules/mail/inlineattachments
+    - modules/mail/linewrap
+    - modules/mail/module
+    - modules/mail/phishingheaders
+    - modules/mail/replyallcc
+    - modules/mail/sendaddress
+    - modules/mail/spambutton
+    - modules/mail/vcard
+    - modules/calendar
+    - modules/calendar/calendar_conflict
+    - modules/calendar/calendar_freebusy
+    - modules/calendar/calendar_teamview
+    - modules/calendar/gui
+    - modules/calendar/module
+    - modules/calendar/notifyNewModifiedDeleted
+    - modules/calendar/notifyAcceptedDeclinedAsCreator
+    - modules/calendar/notifyAcceptedDeclinedAsParticipant
+    - modules/calendar/defaultStatusPrivate
+    - modules/calendar/defaultStatusPublic
+    - modules/contacts
+    - modules/contacts/gui
+    - modules/contacts/mailAddressAutoSearch
+    - modules/contacts/module
+    - modules/contacts/singleFolderSearch
+    - modules/contacts/characterSearch
+    - modules/contacts/allFoldersForAutoComplete
+    - modules/tasks
+    - modules/tasks/gui
+    - modules/tasks/module
+    - modules/tasks/delegate_tasks
+    - modules/tasks/notifyNewModifiedDeleted
+    - modules/tasks/notifyAcceptedDeclinedAsCreator
+    - modules/tasks/notifyAcceptedDeclinedAsParticipant
+    - modules/infostore
+    - modules/infostore/gui
+    - modules/infostore/folder
+    - modules/infostore/folder/trash
+    - modules/infostore/folder/pictures
+    - modules/infostore/folder/documents
+    - modules/infostore/folder/music
+    - modules/infostore/folder/videos
+    - modules/infostore/folder/templates
+    - modules/infostore/module
+    - modules/interfaces
+    - modules/interfaces/ical
+    - modules/interfaces/vcard
+    - modules/interfaces/syncml
+    - modules/folder
+    - modules/folder/gui
+    - modules/folder/public_folders
+    - modules/folder/read_create_shared_folders
+    - modules/folder/tree
+    - modules/com.openexchange.extras
+    - modules/com.openexchange.extras/module
+    - modules/com.openexchange.user.passwordchange
+    - modules/com.openexchange.user.passwordchange/module
+    - modules/com.openexchange.user.personaldata
+    - modules/com.openexchange.user.personaldata/module
+    - modules/com.openexchange.group
+    - modules/com.openexchange.group/enabled
+    - modules/com.openexchange.resource
+    - modules/com.openexchange.resource/enabled
+    - modules/com.openexchange.publish
+    - modules/com.openexchange.publish/enabled
+    - modules/com.openexchange.subscribe
+    - modules/com.openexchange.subscribe/enabled
+    - modules/olox20
+    - modules/olox20/active
+    - modules/olox20/module
+    - modules/com.openexchange.oxupdater
+    - modules/com.openexchange.oxupdater/module
+    - modules/com.openexchange.oxupdater/active
+    - modules/com.openexchange.passwordchange
+    - modules/com.openexchange.passwordchange/showStrength
+    - modules/com.openexchange.passwordchange/minLength
+    - modules/com.openexchange.passwordchange/maxLength
+    - modules/com.openexchange.passwordchange/regexp
+    - modules/com.openexchange.passwordchange/special
+gblQueryParamFolderTree:
+  name: tree
+  in: query
+  type: string
+  description: The identifier of the folder tree. If missing "0" (primary folder tree) is assumed.
+  required: false
+  default: "0"
+gblQueryParamFolderColumns:
+  name: columns
+  in: query
+  type: string
+  description: A comma-separated list of columns to return, like "1,300". Each column is specified by a numeric column identifier, see [Common folder data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-folder-data) and [Detailed folder data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-folder-data).
+  required: true
+gblQueryParamAllowedModules:
+  name: allowed_modules
+  in: query
+  type: string
+  description: (Preliminary) An array of modules (either numbers or strings; e.g. "tasks,calendar,contacts,mail") supported by requesting client. If missing, all available modules are considered.
+  required: false
+gblQueryParamTaskFolder:
+  name: folder
+  in: query
+  type: string
+  description: Object ID of the folder who contains the tasks.
+  required: true
+gblQueryParamTaskColumns:
+  name: columns
+  in: query
+  type: string
+  description: A comma-separated list of columns to return, like "1,200". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data), [Detailed task and appointment data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-task-and-appointment-data) and [Detailed task data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-task-data).
+  required: true
+gblQueryParamContactFolder:
+  name: folder
+  in: query
+  type: string
+  description: Object ID of the folder who contains the contacts.
+  required: true
+gblQueryParamContactColumns:
+  name: columns
+  in: query
+  type: string
+  description: A comma-separated list of columns to return, like "1,500". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data) and [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data).
+  required: true
+gblQueryParamCalendarFolder:
+  name: folder
+  in: query
+  type: string
+  description: Object ID of the folder who contains the appointments.
+  required: true
+gblQueryParamCalendarColumns:
+  name: columns
+  in: query
+  type: string
+  description: A comma-separated list of columns to return, like "1,500". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data), [Detailed task and appointment data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-task-and-appointment-data) and [Detailed appointment data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-appointment-data).
+  required: true
+gblQueryParamRecurrenceMaster:
+  name: recurrence_master
+  in: query
+  type: boolean
+  description: Extract the recurrence to several appointments. The default value is false so every appointment of the recurrence will be calculated.
+  required: false
+gblQueryParamMailFolder:
+  name: folder
+  in: query
+  type: string
+  description: Object ID of the folder who contains the mails.
+  required: true
+gblQueryParamMailColumns:
+  name: columns
+  in: query
+  type: string
+  description: A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-mail-data).
+  required: true
+gblQueryParamInfostoreFolder:
+  name: folder
+  in: query
+  type: string
+  description: Object ID of the folder who contains the infoitems.
+  required: true
+gblQueryParamInfostoreColumns:
+  name: columns
+  in: query
+  type: string
+  description: A comma-separated list of columns to return, like "1,700". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data) and [Detailed infoitem data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-infoitem-data).
+  required: true
+gblQueryParamAttached:
+  name: attached
+  in: query
+  type: integer
+  description: The ID of the object to which the attachment belongs.
+  required: true
+gblQueryParamAttachmentsFolder:
+  name: folder
+  in: query
+  type: integer
+  description: The folder ID of the object.
+  required: true
+gblQueryParamAttachmentsModule:
+  name: module
+  in: query
+  type: integer
+  description: 'The module type of the object: 1 (appointment), 4 (task), 7 (contact), 137 (infostore).'
+  required: true
+gblQueryParamAttachmentsColumns:
+  name: columns
+  in: query
+  type: string
+  description: A comma-separated list of columns to return, like "1,800". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data) and [Attachment data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#attachment-data).
+  required: true
+gblQueryParamAccountColumns:
+  name: columns
+  in: query
+  type: string
+  description: A comma-separated list of columns to return, like "1,800". Each column is specified by a numeric column identifier, see [Mail account data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#mail-account-data).
+  required: true
+gblQueryParamUserColumns:
+  name: columns
+  in: query
+  type: string
+  description: A comma-separated list of columns to return, like "1,501,610". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data), [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data) and [Detailed user data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-user-data).
+  required: true

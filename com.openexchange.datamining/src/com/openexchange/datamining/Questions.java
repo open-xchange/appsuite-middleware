@@ -50,6 +50,8 @@
 package com.openexchange.datamining;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * {@link Questions}
@@ -81,6 +83,8 @@ public class Questions {
     public static final String NUMBER_OF_USERS_WITH_LINKED_SOCIAL_NETWORKING_ACCOUNTS = "numberOfUsersWithLinkedSocialNetworkingAccounts";
 
     public static final String AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CONTACTS_AT_ALL = "averageNumberOfContactsPerUserWhoHasContactsAtAll";
+
+    public static final String AVERAGE_DRAFT_MAIL_USAGE = "averageDraftMailUsage";
 
     public static final String AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CREATED_CONTACTS = "averageNumberOfContactsPerUserWhoHasCreatedContacts";
 
@@ -428,6 +432,31 @@ public class Questions {
                 }
             } else {
                 System.out.println("Error : Ranges in reportSliceAndDiceOnDocumentSize are not equal");
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public static void reportSliceAndDiceOnDraftMailSize() {
+        try {
+            LinkedHashMap<Integer, Integer> dms = Datamining.draftMailOverAllSchemata(new int[]{5000,10000,500000});
+            int ll=1;
+            for(final Integer key : dms.keySet() ) {
+                Datamining.report(
+                    "draftMailSizeBetween" + Tools.humanReadableBytes(""+ll) + "And" + Tools.humanReadableBytes(""+key),
+                    dms.get(key).toString());
+                ll=key;
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public static void reportSliceAndDiceOnExternalAccountUsage() {
+        try {
+            int MAXEXT = 5;
+            HashMap<Integer, Integer> eaos = Datamining.externalAccountsOverAllSchemata(MAXEXT);
+            for(final Integer key : eaos.keySet() ) {
+                Datamining.report("usersHaving" + (key < MAXEXT ? key : "MoreOrEqual" + key) + "ExternalAccounts", eaos.get(key).toString());
             }
         } catch (Exception e) {
         }

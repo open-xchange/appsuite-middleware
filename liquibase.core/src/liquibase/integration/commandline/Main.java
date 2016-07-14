@@ -1,3 +1,4 @@
+
 package liquibase.integration.commandline;
 
 import java.io.*;
@@ -18,7 +19,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
@@ -44,6 +44,7 @@ import liquibase.util.StringUtils;
  * Class for executing Liquibase via the command line.
  */
 public class Main {
+
     protected ClassLoader classLoader;
 
     protected String driver;
@@ -91,10 +92,6 @@ public class Main {
                 return;
             }
 
-//            if (!System.getProperties().contains("file.encoding")) {
-//                System.setProperty("file.encoding", "UTF-8");
-//            }
-
             Main main = new Main();
             if (args.length == 1 && "--help".equals(args[0])) {
                 main.printHelp(System.err);
@@ -115,10 +112,27 @@ public class Main {
             File localPropertiesFile = new File(main.defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1"));
 
             if (localPropertiesFile.exists()) {
-                main.parsePropertiesFile(new FileInputStream(localPropertiesFile));
+                FileInputStream propertiesInputStream = null;
+                try {
+                    propertiesInputStream = new FileInputStream(localPropertiesFile);
+                    main.parsePropertiesFile(propertiesInputStream);
+                } finally {
+                    if (propertiesInputStream != null) {
+                        propertiesInputStream.close();
+                    }
+                }
             }
             if (propertiesFile.exists()) {
-                main.parsePropertiesFile(new FileInputStream(propertiesFile));
+                FileInputStream propertiesInputStream = null;
+                try {
+                    propertiesInputStream = new FileInputStream(propertiesFile);
+                    main.parsePropertiesFile(propertiesInputStream);
+                } finally {
+                    if (propertiesInputStream != null) {
+                        propertiesInputStream.close();
+                    }
+                }
+
             }
 
             List<String> setupMessages = main.checkSetup();
@@ -140,7 +154,7 @@ public class Main {
                 if (e.getCause() instanceof ValidationFailedException) {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.err);
                 } else {
-                    System.err.println("Liquibase "+main.command+" Failed: " + message);
+                    System.err.println("Liquibase " + main.command + " Failed: " + message);
                     LogFactory.getLogger().severe(message, e);
                     System.err.println(generateLogLevelWarningMessage());
                 }
@@ -152,7 +166,7 @@ public class Main {
             } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
                 System.err.println("Liquibase Rollback Successful");
             } else if (!main.command.endsWith("SQL")) {
-                System.err.println("Liquibase '"+main.command+"' Successful");
+                System.err.println("Liquibase '" + main.command + "' Successful");
             }
         } catch (Throwable e) {
             String message = "Unexpected error running Liquibase: " + e.getMessage();
@@ -177,7 +191,7 @@ public class Main {
     }
 
     /**
-     * On windows machines, it splits args on '=' signs.  Put it back like it was.
+     * On windows machines, it splits args on '=' signs. Put it back like it was.
      */
     protected String[] fixupArgs(String[] args) {
         List<String> fixedArgs = new ArrayList<String>();
@@ -216,7 +230,7 @@ public class Main {
             }
 
             if (isNoArgCommand(command) && !commandParams.isEmpty()) {
-                messages.add("unexpected command parameters: "+commandParams);
+                messages.add("unexpected command parameters: " + commandParams);
             } else {
                 validateCommandParameters(messages);
             }
@@ -225,43 +239,25 @@ public class Main {
     }
 
     private void checkForUnexpectedCommandParameter(List<String> messages) {
-        if ("updateCount".equalsIgnoreCase(command)
-            || "updateCountSQL".equalsIgnoreCase(command)
-            || "rollback".equalsIgnoreCase(command)
-            || "rollbackToDate".equalsIgnoreCase(command)
-            || "rollbackCount".equalsIgnoreCase(command)
-            || "rollbackSQL".equalsIgnoreCase(command)
-            || "rollbackToDateSQL".equalsIgnoreCase(command)
-            || "rollbackCountSQL".equalsIgnoreCase(command)
-            || "calculateCheckSum".equalsIgnoreCase(command)
-            || "dbDoc".equalsIgnoreCase(command)
-            || "tag".equalsIgnoreCase(command)) {
-            
+        if ("updateCount".equalsIgnoreCase(command) || "updateCountSQL".equalsIgnoreCase(command) || "rollback".equalsIgnoreCase(command) || "rollbackToDate".equalsIgnoreCase(command) || "rollbackCount".equalsIgnoreCase(command) || "rollbackSQL".equalsIgnoreCase(command) || "rollbackToDateSQL".equalsIgnoreCase(command) || "rollbackCountSQL".equalsIgnoreCase(command) || "calculateCheckSum".equalsIgnoreCase(command) || "dbDoc".equalsIgnoreCase(command) || "tag".equalsIgnoreCase(command)) {
+
             if (commandParams.size() > 0 && commandParams.iterator().next().startsWith("-")) {
-                messages.add("unexpected command parameters: "+commandParams);
+                messages.add("unexpected command parameters: " + commandParams);
             }
-        } else if ("status".equalsIgnoreCase(command)
-                || "unexpectedChangeSets".equalsIgnoreCase(command)) {
+        } else if ("status".equalsIgnoreCase(command) || "unexpectedChangeSets".equalsIgnoreCase(command)) {
             if (commandParams.size() > 0 && !commandParams.iterator().next().equalsIgnoreCase("--verbose")) {
-                messages.add("unexpected command parameters: "+commandParams);
+                messages.add("unexpected command parameters: " + commandParams);
             }
-        } else if ("diff".equalsIgnoreCase(command)
-            || "diffChangeLog".equalsIgnoreCase(command)) {
+        } else if ("diff".equalsIgnoreCase(command) || "diffChangeLog".equalsIgnoreCase(command)) {
             if (commandParams.size() > 0) {
                 for (String cmdParm : commandParams) {
-                    if (!cmdParm.startsWith("--referenceUsername")
-                        && !cmdParm.startsWith("--referencePassword")
-                        && !cmdParm.startsWith("--referenceDriver")
-                            && !cmdParm.startsWith("--includeSchema")
-                            && !cmdParm.startsWith("--includeCatalog")
-                            && !cmdParm.startsWith("--includeTablespace")
-                            && !cmdParm.startsWith("--referenceUrl")) {
-                        messages.add("unexpected command parameters: "+commandParams);
+                    if (!cmdParm.startsWith("--referenceUsername") && !cmdParm.startsWith("--referencePassword") && !cmdParm.startsWith("--referenceDriver") && !cmdParm.startsWith("--includeSchema") && !cmdParm.startsWith("--includeCatalog") && !cmdParm.startsWith("--includeTablespace") && !cmdParm.startsWith("--referenceUrl")) {
+                        messages.add("unexpected command parameters: " + commandParams);
                     }
                 }
             }
         }
-        
+
     }
 
     private void validateCommandParameters(final List<String> messages) {
@@ -279,88 +275,33 @@ public class Main {
     }
 
     private void checkForMalformedCommandParameters(final List<String> messages) {
-      if (!commandParams.isEmpty()) {
-        if ("calculateCheckSum".equalsIgnoreCase(command)) {
-          for (final String param : commandParams) {
-            assert param != null;
-            if (param != null && !param.startsWith("-")) {
-              final String[] parts = param.split("::");
-              if (parts == null || parts.length < 3) {
-                messages.add("changeSet identifier must be of the form filepath::id::author");
-                break;
-              }
+        if (!commandParams.isEmpty()) {
+            if ("calculateCheckSum".equalsIgnoreCase(command)) {
+                for (final String param : commandParams) {
+                    assert param != null;
+                    if (param != null && !param.startsWith("-")) {
+                        final String[] parts = param.split("::");
+                        if (parts == null || parts.length < 3) {
+                            messages.add("changeSet identifier must be of the form filepath::id::author");
+                            break;
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     }
 
     private boolean isChangeLogRequired(String command) {
-        return command.toLowerCase().startsWith("update")
-                || command.toLowerCase().startsWith("rollback")
-                || "calculateCheckSum".equalsIgnoreCase(command)
-                || "status".equalsIgnoreCase(command)
-                || "validate".equalsIgnoreCase(command)
-                || "changeLogSync".equalsIgnoreCase(command)
-                || "changeLogSyncSql".equalsIgnoreCase(command);
+        return command.toLowerCase().startsWith("update") || command.toLowerCase().startsWith("rollback") || "calculateCheckSum".equalsIgnoreCase(command) || "status".equalsIgnoreCase(command) || "validate".equalsIgnoreCase(command) || "changeLogSync".equalsIgnoreCase(command) || "changeLogSyncSql".equalsIgnoreCase(command);
     }
 
     private boolean isCommand(String arg) {
-        return "migrate".equals(arg)
-                || "migrateSQL".equalsIgnoreCase(arg)
-                || "update".equalsIgnoreCase(arg)
-                || "updateSQL".equalsIgnoreCase(arg)
-                || "updateCount".equalsIgnoreCase(arg)
-                || "updateCountSQL".equalsIgnoreCase(arg)
-                || "rollback".equalsIgnoreCase(arg)
-                || "rollbackToDate".equalsIgnoreCase(arg)
-                || "rollbackCount".equalsIgnoreCase(arg)
-                || "rollbackSQL".equalsIgnoreCase(arg)
-                || "rollbackToDateSQL".equalsIgnoreCase(arg)
-                || "rollbackCountSQL".equalsIgnoreCase(arg)
-                || "futureRollbackSQL".equalsIgnoreCase(arg)
-                || "futureRollbackCountSQL".equalsIgnoreCase(arg)
-                || "updateTestingRollback".equalsIgnoreCase(arg)
-                || "tag".equalsIgnoreCase(arg)
-                || "listLocks".equalsIgnoreCase(arg)
-                || "dropAll".equalsIgnoreCase(arg)
-                || "releaseLocks".equalsIgnoreCase(arg)
-                || "status".equalsIgnoreCase(arg)
-                || "unexpectedChangeSets".equalsIgnoreCase(arg)
-                || "validate".equalsIgnoreCase(arg)
-                || "help".equalsIgnoreCase(arg)
-                || "diff".equalsIgnoreCase(arg)
-                || "diffChangeLog".equalsIgnoreCase(arg)
-                || "generateChangeLog".equalsIgnoreCase(arg)
-                || "calculateCheckSum".equalsIgnoreCase(arg)
-                || "clearCheckSums".equalsIgnoreCase(arg)
-                || "dbDoc".equalsIgnoreCase(arg)
-                || "changelogSync".equalsIgnoreCase(arg)
-                || "changelogSyncSQL".equalsIgnoreCase(arg)
-                || "markNextChangeSetRan".equalsIgnoreCase(arg)
-                || "markNextChangeSetRanSQL".equalsIgnoreCase(arg);
+        return "migrate".equals(arg) || "migrateSQL".equalsIgnoreCase(arg) || "update".equalsIgnoreCase(arg) || "updateSQL".equalsIgnoreCase(arg) || "updateCount".equalsIgnoreCase(arg) || "updateCountSQL".equalsIgnoreCase(arg) || "rollback".equalsIgnoreCase(arg) || "rollbackToDate".equalsIgnoreCase(arg) || "rollbackCount".equalsIgnoreCase(arg) || "rollbackSQL".equalsIgnoreCase(arg) || "rollbackToDateSQL".equalsIgnoreCase(arg) || "rollbackCountSQL".equalsIgnoreCase(arg) || "futureRollbackSQL".equalsIgnoreCase(arg) || "futureRollbackCountSQL".equalsIgnoreCase(arg) || "updateTestingRollback".equalsIgnoreCase(arg) || "tag".equalsIgnoreCase(arg) || "listLocks".equalsIgnoreCase(arg) || "dropAll".equalsIgnoreCase(arg) || "releaseLocks".equalsIgnoreCase(arg) || "status".equalsIgnoreCase(arg) || "unexpectedChangeSets".equalsIgnoreCase(arg) || "validate".equalsIgnoreCase(arg) || "help".equalsIgnoreCase(arg) || "diff".equalsIgnoreCase(arg) || "diffChangeLog".equalsIgnoreCase(arg) || "generateChangeLog".equalsIgnoreCase(arg) || "calculateCheckSum".equalsIgnoreCase(arg) || "clearCheckSums".equalsIgnoreCase(arg) || "dbDoc".equalsIgnoreCase(arg) || "changelogSync".equalsIgnoreCase(arg) || "changelogSyncSQL".equalsIgnoreCase(arg) || "markNextChangeSetRan".equalsIgnoreCase(arg) || "markNextChangeSetRanSQL".equalsIgnoreCase(arg);
     }
 
     private boolean isNoArgCommand(String arg) {
-            return "migrate".equals(arg)
-                    || "migrateSQL".equalsIgnoreCase(arg)
-                    || "update".equalsIgnoreCase(arg)
-                    || "updateSQL".equalsIgnoreCase(arg)
-                    || "futureRollbackSQL".equalsIgnoreCase(arg)
-                    || "updateTestingRollback".equalsIgnoreCase(arg)
-                    || "listLocks".equalsIgnoreCase(arg)
-                    || "dropAll".equalsIgnoreCase(arg)
-                    || "releaseLocks".equalsIgnoreCase(arg)
-                    || "validate".equalsIgnoreCase(arg)
-                    || "help".equalsIgnoreCase(arg)
-                    || "clearCheckSums".equalsIgnoreCase(arg)
-                    || "changelogSync".equalsIgnoreCase(arg)
-                    || "changelogSyncSQL".equalsIgnoreCase(arg)
-                    || "markNextChangeSetRan".equalsIgnoreCase(arg)
-                    || "markNextChangeSetRanSQL".equalsIgnoreCase(arg);
+        return "migrate".equals(arg) || "migrateSQL".equalsIgnoreCase(arg) || "update".equalsIgnoreCase(arg) || "updateSQL".equalsIgnoreCase(arg) || "futureRollbackSQL".equalsIgnoreCase(arg) || "updateTestingRollback".equalsIgnoreCase(arg) || "listLocks".equalsIgnoreCase(arg) || "dropAll".equalsIgnoreCase(arg) || "releaseLocks".equalsIgnoreCase(arg) || "validate".equalsIgnoreCase(arg) || "help".equalsIgnoreCase(arg) || "clearCheckSums".equalsIgnoreCase(arg) || "changelogSync".equalsIgnoreCase(arg) || "changelogSyncSQL".equalsIgnoreCase(arg) || "markNextChangeSetRan".equalsIgnoreCase(arg) || "markNextChangeSetRanSQL".equalsIgnoreCase(arg);
     }
-
-
 
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException, CommandLineParsingException {
         Properties props = new Properties();
@@ -408,7 +349,6 @@ public class Main {
         }
         stream.println();
     }
-
 
     protected void printHelp(PrintStream stream) {
         stream.println("Usage: java -jar liquibase.jar [options] [command]");
@@ -550,7 +490,7 @@ public class Main {
     }
 
     public Main() {
-//        options = createOptions();
+        //        options = createOptions();
     }
 
     protected void parseOptions(String[] args) throws CommandLineParsingException {
@@ -590,9 +530,9 @@ public class Main {
                     }
                     //Prompt for value
                     if (attributeName.toLowerCase().contains("password")) {
-                        value = new String(c.readPassword(attributeName+": "));
+                        value = new String(c.readPassword(attributeName + ": "));
                     } else {
-                        value = new String(c.readLine(attributeName+": "));
+                        value = new String(c.readLine(attributeName + ": "));
                     }
                 }
 
@@ -680,6 +620,7 @@ public class Main {
         }
         if (includeSystemClasspath) {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+
                 @Override
                 public URLClassLoader run() {
                     return new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
@@ -688,6 +629,7 @@ public class Main {
 
         } else {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+
                 @Override
                 public URLClassLoader run() {
                     return new URLClassLoader(urls.toArray(new URL[urls.size()]));
@@ -706,15 +648,13 @@ public class Main {
         Enumeration<? extends JarEntry> entries = warZip.entries();
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
-            if (entry.getName().startsWith("WEB-INF/lib")
-                    && entry.getName().toLowerCase().endsWith(".jar")) {
+            if (entry.getName().startsWith("WEB-INF/lib") && entry.getName().toLowerCase().endsWith(".jar")) {
                 File jar = extract(warZip, entry);
                 urls.add(new URL("jar:" + jar.toURL() + "!/"));
                 jar.deleteOnExit();
             }
         }
     }
-
 
     private File extract(JarFile jar, JarEntry entry) throws IOException {
         // expand to temp dir and add to list
@@ -725,8 +665,7 @@ public class Main {
         BufferedOutputStream outStream = null;
         try {
             inStream = new BufferedInputStream(jar.getInputStream(entry));
-            outStream = new BufferedOutputStream(
-                    new FileOutputStream(tempFile));
+            outStream = new BufferedOutputStream(new FileOutputStream(tempFile));
             int status;
             while ((status = inStream.read()) != -1) {
                 outStream.write(status);
@@ -769,10 +708,8 @@ public class Main {
 
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
-        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, 
-            this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, null, null);
+        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, null, null);
         try {
-
 
             CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
@@ -791,7 +728,6 @@ public class Main {
                 CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
                 return;
             }
-
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
             liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
@@ -978,40 +914,40 @@ public class Main {
             }
         }
 
-//        if (driver == null) {
-//            driver = DatabaseFactory.getWriteExecutor().findDefaultDriver(url);
-//        }
+        //        if (driver == null) {
+        //            driver = DatabaseFactory.getWriteExecutor().findDefaultDriver(url);
+        //        }
 
         if (url == null) {
             throw new CommandLineParsingException("referenceUrl parameter missing");
         }
 
         return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, null, null);
-//        Driver driverObject;
-//        try {
-//            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
-//        } catch (Exception e) {
-//            throw new RuntimeException("Cannot find database driver: " + e.getMessage());
-//        }
-//
-//        Properties info = new Properties();
-//        info.put("user", username);
-//        info.put("password", password);
-//
-//        Connection connection;
-//        try {
-//            connection = driverObject.connect(url, info);
-//        } catch (SQLException e) {
-//            throw new DatabaseException("Connection could not be created to " + url + ": " + e.getMessage(), e);
-//        }
-//        if (connection == null) {
-//            throw new DatabaseException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-//        }
-//
-//        Database database = DatabaseFactory.getWriteExecutor().findCorrectDatabaseImplementation(connection);
-//        database.setDefaultSchemaName(defaultSchemaName);
-//
-//        return database;
+        //        Driver driverObject;
+        //        try {
+        //            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
+        //        } catch (Exception e) {
+        //            throw new RuntimeException("Cannot find database driver: " + e.getMessage());
+        //        }
+        //
+        //        Properties info = new Properties();
+        //        info.put("user", username);
+        //        info.put("password", password);
+        //
+        //        Connection connection;
+        //        try {
+        //            connection = driverObject.connect(url, info);
+        //        } catch (SQLException e) {
+        //            throw new DatabaseException("Connection could not be created to " + url + ": " + e.getMessage(), e);
+        //        }
+        //        if (connection == null) {
+        //            throw new DatabaseException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+        //        }
+        //
+        //        Database database = DatabaseFactory.getWriteExecutor().findCorrectDatabaseImplementation(connection);
+        //        database.setDefaultSchemaName(defaultSchemaName);
+        //
+        //        return database;
     }
 
     private Writer getOutputWriter() throws UnsupportedEncodingException {

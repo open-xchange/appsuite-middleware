@@ -1,0 +1,47 @@
+/config/{path}:
+  get:
+    operationId: getConfigNode
+    tags:
+      - config
+    summary: Gets data of a configuration node.
+    description: |
+      The configuration is stored in a tree. Each node of the tree has a name and a value.
+      The values of leaf nodes are strings which store the actual configuration data. The
+      values of inner nodes are defined recursively as objects with one field for each child node.
+      The name and the value of each field is the name and the value of the corresponding child
+      node, respectively.
+    parameters:
+      - $ref: "#/parameters/gblPathParamConfigNode"
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      200:
+        description: Value of the node specified by path. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/ConfigResponse"
+  put:
+    operationId: putConfigNode
+    tags:
+      - config
+    summary: Sets the value of a configuration node.
+    description: |
+        The configuration is stored in a tree. Each node of the tree has a name and a value.
+        The values of leaf nodes are strings which store the actual configuration data. The
+        values of inner nodes are defined recursively as objects with one field for each child node.
+        The name and the value of each field is the name and the value of the corresponding child
+        node, respectively.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblPathParamConfigNode"
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object containing the value of the config node.
+        required: true
+        schema:
+          $ref: "#/definitions/ConfigBody"
+    responses:
+      200:
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

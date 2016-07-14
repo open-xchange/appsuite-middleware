@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 16
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -479,7 +479,7 @@ if [ $permval -lt 256 ]; then
     nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
 fi
 # -----------------------------------------------------------------------
-for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
+for opt in "-server" "-Djava.awt.headless=true" \
     "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
     "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
     "-XX:-OmitStackTraceInFastThrow"; do
@@ -751,14 +751,6 @@ ox_set_property com.openexchange.server.considerXForwards "true" /opt/open-xchan
 
 # SoftwareChange_Request-1607
 pfile=/opt/open-xchange/etc/preview.properties
-VALUE=$(ox_read_property com.openexchange.preview.cache.quota $pfile)
-if [ "$VALUE" == "0" ]; then
-    ox_set_property com.openexchange.preview.cache.quota 10485760 $pfile
-fi
-VALUE=$(ox_read_property com.openexchange.preview.cache.quotaPerDocument $pfile)
-if [ "$VALUE" == "0" ]; then
-    ox_set_property com.openexchange.preview.cache.quotaPerDocument 524288 $pfile
-fi
 if ! ox_exists_property com.openexchange.preview.cache.type $pfile; then
     ox_set_property com.openexchange.preview.cache.type "FS" $pfile
 fi
@@ -1326,12 +1318,42 @@ fi
 # SoftwareChange_Request-3159
 ox_add_property com.openexchange.snippet.quota.limit -1 /opt/open-xchange/etc/snippets.properties
 
+# SoftwareChange_Request-3219
+ox_remove_property com.openexchange.participant.MaximumNumberParticipants /opt/open-xchange/etc/participant.properties
+
+# SoftwareChange_Request-3248
+ox_add_property com.openexchange.connector.networkSslListenerPort 8010 /opt/open-xchange/etc/server.properties
+
 # SoftwareChange_Request-3254
 VALUE=$(ox_read_property com.openexchange.mail.account.blacklist /opt/open-xchange/etc/mail.properties)
 if [ "" = "$VALUE" ]; then
     ox_set_property com.openexchange.mail.account.blacklist "127.0.0.1-127.255.255.255,localhost" /opt/open-xchange/etc/mail.properties
 fi
 ox_add_property com.openexchange.mail.account.whitelist.ports "143,993, 25,465,587, 110,995" /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-3225
+ox_add_property com.openexchange.tools.images.transformations.preferThumbnailThreshold 0.8 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-3246
+ox_add_property com.openexchange.mail.mailStartTls false /opt/open-xchange/etc/mail.properties
+ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-3350
+sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+
+# SoftwareChange_Request-3355,3417
+oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
+if [[ ${oldlink} == *"[uiwebpath]#m=[module]&i=[object]&f=[folder]" ]]
+then
+  newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/[module]\&id=[object]\&folder=[folder];')
+  ox_set_property object_link ${newlink} /opt/open-xchange/etc/notification.properties
+fi
+
+# SoftwareChange_Request-3356
+ox_add_property com.openexchange.ajax.login.checkPunyCodeLoginString false /opt/open-xchange/etc/login.properties
+
+# SoftwareChange_Request-3405
+ox_add_property com.openexchange.ical.updateTimezones true /opt/open-xchange/etc/server.properties
 
 # SoftwareChange_Request-3406
 TMPFILE=$(mktemp)
@@ -1374,6 +1396,14 @@ if [ -e $TMPFILE ]; then
     rm -f $TMPFILE
 fi
 
+# SoftwareChange_Request-3421
+ox_remove_property com.openexchange.mail.transport.enablePublishOnExceededQuota /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.publishPrimaryAccountOnly /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.sendAttachmentToExternalRecipients /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.provideLinksInAttachment /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.publishedDocumentTimeToLive /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt/open-xchange/etc/transport.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1413,78 +1443,30 @@ exit 0
 %doc com.openexchange.server/doc/examples
 
 %changelog
-* Thu Jun 30 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-07-04 (3400)
-* Wed Jun 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-06-20 (3347)
-* Fri Jun 03 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-06-06 (3317)
-* Fri May 20 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-05-23 (3294)
-* Thu May 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-05-19 (3305)
-* Fri May 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-05-09 (3272)
-* Mon Apr 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-04-25 (3263)
-* Fri Apr 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-04-25 (3239)
-* Thu Apr 07 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-04-07 (3228)
+* Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Jun 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Thu Jun 16 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Apr 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.2 release
 * Wed Mar 30 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.1 release
 * Fri Mar 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.1 release
-* Wed Mar 23 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-03-29 (3188)
 * Tue Mar 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth preview for 7.8.1 release
-* Mon Mar 07 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-03-14 (3148)
 * Fri Mar 04 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth preview for 7.8.1 release
-* Fri Feb 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-02-29 (3141)
-* Mon Feb 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-02-29 (3121)
 * Sat Feb 20 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.8.1 release
-* Mon Feb 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-02-18 (3106)
-* Wed Feb 10 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-02-08 (3073)
 * Wed Feb 03 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.1 release
 * Tue Jan 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-01-19 (3062)
-* Tue Jan 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.1 release
-* Mon Jan 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-01-25 (3031)
-* Sat Jan 23 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-02-05 (3058)
-* Sat Jan 23 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-02-05 (3058)
-* Fri Jan 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-01-15 (3028)
-* Wed Jan 13 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-01-13 (2982)
-* Tue Jan 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-12-23 (3011)
-* Tue Dec 29 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-01-05 (2989)
-* Tue Dec 22 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-12-23 (2971)
-* Fri Dec 11 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-12-21 (2953)
-* Tue Dec 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-12-07 (2918)
-* Thu Nov 19 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-11-23 (2878)
-* Thu Nov 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-11-09 (2840)
-* Fri Oct 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-11-02 (2853)
 * Tue Oct 20 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-10-26 (2813)
 * Mon Oct 19 2015 Marcus Klein <marcus.klein@open-xchange.com>

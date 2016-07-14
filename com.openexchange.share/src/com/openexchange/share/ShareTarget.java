@@ -63,6 +63,7 @@ public class ShareTarget implements Cloneable, Serializable {
 
     private int module;
     private String folder;
+    private String realFolder;
     private String item;
 
     /**
@@ -90,9 +91,22 @@ public class ShareTarget implements Cloneable, Serializable {
      * @param item The identifier of the share's item
      */
     public ShareTarget(int module, String folder, String item) {
+        this(module, folder, null, item);
+    }
+
+    /**
+     * Initializes a new {@link ShareTarget}, pointing to an item located in a parent folder of a specific groupware module.
+     *
+     * @param module The groupware module of the share's target folder
+     * @param folder The identifier of the share's folder
+     * @param realFolder The identifier of the real folder (to load) in case it differs from <code>folder</code> parameter
+     * @param item The identifier of the share's item
+     */
+    public ShareTarget(int module, String folder, String realFolder, String item) {
         super();
         this.module = module;
         this.folder = folder;
+        this.realFolder = null == realFolder || (null != folder && folder.equals(realFolder)) ? null : realFolder;
         this.item = item;
     }
 
@@ -102,7 +116,7 @@ public class ShareTarget implements Cloneable, Serializable {
      * @param target The target to copy the properties from
      */
     public ShareTarget(ShareTarget target) {
-        this(target.getModule(), target.getFolder(), target.getItem());
+        this(target.getModule(), target.getFolder(), target.getRealFolder(), target.getItem());
     }
 
     /**
@@ -139,6 +153,33 @@ public class ShareTarget implements Cloneable, Serializable {
      */
     public void setFolder(String folder) {
         this.folder = folder;
+    }
+
+    /**
+     * Gets the identifier of the real folder (to load).
+     *
+     * @return The real folder or <code>null</code>
+     */
+    public String getRealFolder() {
+        return realFolder;
+    }
+
+    /**
+     * Sets the identifier of the real folder (to load).
+     *
+     * @param realFolder The real folder to set
+     */
+    public void setRealFolder(String realFolder) {
+        this.realFolder = realFolder;
+    }
+
+    /**
+     * Gets the identifier of the folder to load.
+     *
+     * @return The identifier of the folder to load
+     */
+    public String getFolderToLoad() {
+        return null == realFolder ? folder : realFolder;
     }
 
     /**

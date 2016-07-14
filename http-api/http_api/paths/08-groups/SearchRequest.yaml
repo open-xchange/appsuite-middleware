@@ -1,0 +1,23 @@
+/group?action=search:
+  put:
+    operationId: searchGroups
+    tags:
+      - groups
+    summary: Searches for groups.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object with the search parameters.
+        required: true
+        schema:
+          $ref: "#/definitions/GroupSearchBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array of group objects. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/GroupsResponse"

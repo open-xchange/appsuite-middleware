@@ -247,16 +247,17 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         if (session == null) {
             return;
         }
-        final SecretEncryptionService<EncryptedField> encryptionService = encryptionFactoryService.createService(STORAGE.get());
-        for (final String key : keys) {
-            if (map.containsKey(key)) {
-                final EncryptedField encryptedField = new EncryptedField(subscription, key);
 
-                final String toDecrypt = (String) map.get(key);
+        SecretEncryptionService<EncryptedField> encryptionService = encryptionFactoryService.createService(STORAGE.get());
+        for (String key : keys) {
+            if (map.containsKey(key)) {
+                EncryptedField encryptedField = new EncryptedField(subscription, key);
+
+                String toDecrypt = (String) map.get(key);
                 String decrypted;
                 try {
                     decrypted = encryptionService.decrypt(session, toDecrypt, encryptedField);
-                } catch (final OXException e) {
+                } catch (Exception e) {
                     // Fail silently
                     decrypted = null;
                 }

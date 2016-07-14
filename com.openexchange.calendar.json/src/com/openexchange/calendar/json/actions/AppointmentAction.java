@@ -100,8 +100,7 @@ public abstract class AppointmentAction implements AJAXActionService {
 
     public static final int[] COLUMNS_ALL_ALIAS = new int[] { 1, 20, 207, 206, 2 };
 
-    public static final int[] COLUMNS_LIST_ALIAS = new int[] {
-        1, 20, 207, 206, 2, 200, 201, 202, 203, 209, 221, 401, 402, 102, 400, 101, 220, 215, 100 };
+    public static final int[] COLUMNS_LIST_ALIAS = new int[] { 1, 20, 207, 206, 2, 200, 201, 202, 203, 209, 221, 401, 402, 102, 400, 101, 220, 215, 100 };
 
     public static final String RECURRENCE_MASTER = "recurrence_master";
 
@@ -215,22 +214,12 @@ public abstract class AppointmentAction implements AJAXActionService {
     }
 
     protected Date getDateByFieldId(final int field, final Appointment appointmentObj, final TimeZone timeZone) {
-        final Date date = null;
         if (field == CalendarObject.START_DATE) {
             return appointmentObj.getStartDate();
         } else if (field == CalendarObject.END_DATE) {
             return appointmentObj.getEndDate();
         }
-
-        if (date == null) {
-            return null;
-        }
-
-        if (appointmentObj.getFullTime()) {
-            return date;
-        }
-        final int offset = timeZone.getOffset(date.getTime());
-        return new Date(date.getTime() + offset);
+        return null;
     }
 
     protected void compareStartDateForList(final LinkedList<Appointment> appointmentList, final Appointment appointmentObj, final int limit) {
@@ -287,11 +276,7 @@ public abstract class AppointmentAction implements AJAXActionService {
 
     protected void checkAndAddAppointment(final List<Appointment> appointmentList, final Appointment appointmentObj, final Date betweenStart, final Date betweenEnd, final CalendarCollectionService calColl) {
         if (appointmentObj.getFullTime() && betweenStart != null && betweenEnd != null) {
-            if (calColl.inBetween(
-                appointmentObj.getStartDate().getTime(),
-                appointmentObj.getEndDate().getTime(),
-                betweenStart.getTime(),
-                betweenEnd.getTime())) {
+            if (calColl.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
                 appointmentList.add(appointmentObj);
             }
         } else {
@@ -301,11 +286,7 @@ public abstract class AppointmentAction implements AJAXActionService {
 
     protected void checkAndAddAppointmentAsNewOrModified(final CollectionDelta<Appointment> appointmentList, final Appointment appointmentObj, final Date betweenStart, final Date betweenEnd, final CalendarCollectionService calColl) {
         if (appointmentObj.getFullTime() && betweenStart != null && betweenEnd != null) {
-            if (calColl.inBetween(
-                appointmentObj.getStartDate().getTime(),
-                appointmentObj.getEndDate().getTime(),
-                betweenStart.getTime(),
-                betweenEnd.getTime())) {
+            if (calColl.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
                 appointmentList.addNewOrModified(appointmentObj);
             }
         } else {

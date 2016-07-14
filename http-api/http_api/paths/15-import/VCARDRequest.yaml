@@ -1,0 +1,35 @@
+/import?action=VCARD:
+  post:
+    operationId: importVCard
+    tags:
+      - import
+    summary: Imports data from vCard file.
+    description: |
+      #### Supported vCard formats
+       * vCard 2.1
+       * vCard 3.0
+       * vCalendar 1.0
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder into which the data should be imported. This must be a contact folder.
+        required: true
+      - in: formData
+        name: file
+        type: file
+        description: The vCard file.
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON object with the field `data` that represents
+          an array of objects each consisting of the fields `id`, `folder_id` and `last_modified` of the newly created objects.
+          In case of errors the JSON object contains the well known [error fields](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling).
+        schema:
+          type: string

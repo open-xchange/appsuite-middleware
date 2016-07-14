@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ./CommonResponseData.yaml
+  data:
+    type: array
+    description: An array of JSON objects representing directory metadata.
+    items:
+      $ref: "#/definitions/DriveDirectoryMetadata"

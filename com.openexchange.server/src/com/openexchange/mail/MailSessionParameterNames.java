@@ -73,8 +73,23 @@ public final class MailSessionParameterNames {
      *
      * @return The parameter name for publishing infostore folder ID
      */
+    @Deprecated
     public static String getParamPublishingInfostoreFolderID() {
         return PARAM_PUBLISHING_INFOSTORE_FOLDER_ID;
+    }
+
+    /**
+     * Sharing Drive folder ID.
+     */
+    private static final String PARAM_SHARING_DRIVE_FOLDER_ID = "mail.shareid";
+
+    /**
+     * Gets the parameter name for sharing Drive folder ID.
+     *
+     * @return The parameter name for sharing Drive folder ID
+     */
+    public static String getParamSharingDriveFolderID() {
+        return PARAM_SHARING_DRIVE_FOLDER_ID;
     }
 
     /*-

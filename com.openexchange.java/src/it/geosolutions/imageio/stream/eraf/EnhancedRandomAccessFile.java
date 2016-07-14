@@ -17,6 +17,24 @@
  * along with this library; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
+
+/*
+ *    ImageI/O-Ext - OpenSource Java Image translation Library
+ *    http://www.geo-solutions.it/
+ *    http://java.net/projects/imageio-ext/
+ *    (C) 2007 - 2009, GeoSolutions
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    either version 3 of the License, or (at your option) any later version.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ */
+
 /*
  * RandomAccessFile.java.  By Russ Rew, based on
  * BufferedRandomAccessFile by Alex McManus, based on Sun's source code
@@ -33,12 +51,23 @@ import java.io.DataOutput;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.io.UTFDataFormatException;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
 /**
+ *
+ * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+ * -- NOTES from a class we derived this class from --
+ * <p>
+ * RandomAccessFile.java. By Russ Rew, based on BufferedRandomAccessFile by Alex
+ * McManus, based on Sun's source code for java.io.RandomAccessFile. For Alex
+ * McManus version from which this derives, see his <a
+ * href="http://www.aber.ac.uk/~agm/Java.html"> Freeware Java Classes</a>.
+ * </div>
+ * <p>
  * A buffered drop-in replacement for java.io.RandomAccessFile. Instances of
  * this class realise substantial speed increases over java.io.RandomAccessFile
  * through the use of buffering. This is a subclass of Object, as it was not
@@ -49,41 +78,32 @@ import java.nio.channels.FileChannel;
  *
  * @author Alex McManus
  * @author Russ Rew
- * @version $Id: EnhancedRandomAccessFile.java 22077 2006-10-12 19:08:27Z
- *          simboss $
+ * @version $Id: EnhancedRandomAccessFile.java 1117 2007-02-20 09:46:00Z simboss $
  * @see DataInput
  * @see DataOutput
  * @see java.io.RandomAccessFile
  */
-public class EnhancedRandomAccessFile extends Object implements DataInput,
-        DataOutput {
+public class EnhancedRandomAccessFile implements DataInput, DataOutput {
 
     /** _more_ */
     static public final int BIG_ENDIAN = 0;
 
-    /** Read from the file. This is always implied. */
-    public static final int READ = 1;
+    /** _more_ */
+    static public final int LITTLE_ENDIAN = 1;
 
-    /** Write to the file. */
-    public static final int WRITE = 2;
-
-    /**
-     * Create the file rather than overwriting it. This is ignored if mode is
-     * not also WRITE.
-     */
-    public static final int CREATE = 4;
+    // debug leaks - keep track of open files
 
     /** The default buffer size, in bytes. */
-    protected static final int defaultBufferSize = 1024;
+    public static final int DEFAULT_BUFFER_SIZE = 4096;
 
     /** _more_ */
-    protected String location;
+    protected File file;
 
     /** The underlying java.io.RandomAccessFile. */
-    protected java.io.RandomAccessFile file;
+    protected java.io.RandomAccessFile eraf;
 
     /**
-     * The offset in bytes from the file start, of the next read or write
+     * The offset in bytes from the eraf start, of the next read or write
      * operation.
      */
     protected long filePosition;
@@ -93,13 +113,13 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * The offset in bytes of the start of the buffer, from the start of the
-     * file.
+     * eraf.
      */
     protected long bufferStart;
 
     /**
      * The offset in bytes of the end of the data in the buffer, from the start
-     * of the file. This can be calculated from
+     * of the eraf. This can be calculated from
      * <code>bufferStart + dataSize</code>, but it is cached to speed up the
      * read( ) method.
      */
@@ -111,26 +131,20 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      */
     protected int dataSize;
 
-    /** True if we are at the end of the file. */
+    /** True if we are at the end of the eraf. */
     protected boolean endOfFile;
 
-    /** The access mode of the file. */
+    /** The access mode of the eraf. */
     protected boolean readonly;
 
-    /** The current endian (big or little) mode of the file. */
+    /** The current endian (big or little) mode of the eraf. */
     protected boolean bigEndian;
-
-    /**
-     * The access mode of the file. This is a logical OR of READ, WRITE and
-     * CREATE.
-     */
-    protected int mode;
 
     /** True if the data in the buffer has been modified. */
     boolean bufferModified = false;
 
-    /** make sure file is this long when closed */
-    private long minLength = 0;
+    /** make sure eraf is this long when closed */
+    protected long minLength = 0;
 
     /**
      * stupid extendMode for truncated, yet valid files - old code allowed
@@ -147,7 +161,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *            _more_
      */
     protected EnhancedRandomAccessFile(int bufferSize) {
-        file = null;
+        eraf = null;
         readonly = true;
         init(bufferSize);
     }
@@ -155,40 +169,39 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     /**
      * Constructor, default buffer size.
      *
-     * @param location
-     *            location of the file
+     * @param file
+     *            file of the eraf
      * @param mode
      *            same as for java.io.RandomAccessFile
      * @throws IOException
      */
-    public EnhancedRandomAccessFile(String location, String mode)
+    public EnhancedRandomAccessFile(File file, String mode)
             throws IOException {
-        this(location, mode, defaultBufferSize);
-        this.location = location;
+        this(file, mode, DEFAULT_BUFFER_SIZE);
     }
 
     /**
      * Constructor.
      *
-     * @param location
-     *            location of the file
+     * @param file
+     *            file of the eraf
      * @param mode
      *            same as for java.io.RandomAccessFile
      * @param bufferSize
      *            size of buffer to use.
      * @throws IOException
      */
-    public EnhancedRandomAccessFile(String location, String mode, int bufferSize)
+    public EnhancedRandomAccessFile(File file, String mode, int bufferSize)
             throws IOException {
-        this.location = location;
-        this.file = new java.io.RandomAccessFile(location, mode);
+        this.file = file;
+        this.eraf = new java.io.RandomAccessFile(file, mode);
         this.readonly = mode.equals("r");
         init(bufferSize);
 
     }
 
     public java.io.RandomAccessFile getRandomAccessFile() {
-        return this.file;
+        return this.eraf;
     }
 
     /**
@@ -208,141 +221,52 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Create a new buffered random-access file with a default buffer size. Note
-     * that the mode CREATE implies WRITE.
+     * Close the eraf, and release any associated system resources.
      *
-     * @param filename
-     *            the name of the file.
-     * @param mode
-     *            how the file is to be opened. This may be a combination
-     *            (logical OR) of CREATE, WRITE, and READ.
      * @exception IOException
      *                if an I/O error occurrs.
-     * @exception SecurityException
-     *                if a security manager exists, its checkRead method is
-     *                called with the name argument to see if the application is
-     *                allowed read access to the file. If the mode argument is
-     *                WRITE, its checkWrite method also is called with the name
-     *                argument to see if the application is allowed write access
-     *                to the file. Either of these may result in a security
-     *                exception.
      */
-    public EnhancedRandomAccessFile(String filename, int mode)
-            throws IOException {
-        this(filename, mode, defaultBufferSize);
+    public void close() throws IOException {
+
+        if (eraf == null) {
+            return;
+        }
+
+        // If we are writing and the buffer has been modified, flush the
+        // contents of the buffer.
+        if (!readonly && bufferModified) {
+            eraf.seek(bufferStart);
+            eraf.write(buffer, 0, dataSize);
+        }
+
+        // may need to extend eraf, in case no fill is neing used
+        // may need to truncate eraf in case overwriting a longer eraf
+        // use only if minLength is set (by N3iosp)
+        if (!readonly && (minLength != 0) && (minLength != eraf.length())) {
+            eraf.setLength(minLength);
+            // System.out.println("TRUNCATE!!! minlength="+minLength);
+        }
+
+        // Close the underlying eraf object.
+        eraf.close();
+
     }
 
     /**
-     * Creates a random access file stream to read from, and optionally to write
-     * to, the file specified by the <code>File</code> argument. A new
-     * {@link FileDescriptor} object is created to represent this file
-     * connection.
-     * <p>
-     * The mode argument must either be equal to <code>"r"</code> or
-     * <code>"rw"</code>, indicating that the file is to be opened for input
-     * only or for both input and output, respectively. The write methods on
-     * this object will always throw an <code>IOException</code> if the file
-     * is opened with a mode of <code>"r"</code>. If the mode is
-     * <code>"rw"</code> and the file does not exist, then an attempt is made
-     * to create it.
+     * Close silently the underlying {@link RandomAccessFile}
      *
-     * @param file
-     *            the file object.
-     * @param modeString
-     *            the access mode.
-     * @exception IllegalArgumentException
-     *                if the mode argument is not equal to <code>"r"</code> or
-     *                to <code>"rw"</code>.
-     * @exception IOException
-     *                if an I/O error occurs.
-     * @exception SecurityException
-     *                if a security manager exists, its <code>checkRead</code>
-     *                method is called with the pathname of the
-     *                <code>File</code> argument to see if the application is
-     *                allowed read access to the file. If the mode argument is
-     *                equal to <code>"rw"</code>, its <code>checkWrite</code>
-     *                method also is called with the pathname to see if the
-     *                application is allowed write access to the file.
-     * @see java.io.File#getPath()
-     * @see java.lang.SecurityManager#checkRead(java.lang.String)
-     */
-    public EnhancedRandomAccessFile(File file, String modeString)
-            throws IOException {
-        this(file.getPath(), modeString);
-    }
-
-    /**
-     * Create a new buffered random-access file with a specified buffer size.
-     * Note that the mode CREATE implies WRITE, and the READ is always implied.
      *
-     * @param filename
-     *            the name of the file.
-     * @param mode
-     *            how the file is to be opened. This may be a combination
-     *            (logical OR) of CREATE, WRITE, and READ.
-     * @param bufferSize
-     *            the size of the temporary buffer, in bytes.
-     * @exception FileNotFoundException
-     *                if the access is readonly and the file doesn't exist.
-     * @exception IOException
-     *                if an I/O error occurrs.
-     * @exception SecurityException
-     *                if a security manager exists, its checkRead method is
-     *                called with the name argument to see if the application is
-     *                allowed read access to the file. If the mode argument is
-     *                WRITE, its checkWrite method also is called with the name
-     *                argument to see if the application is allowed write access
-     *                to the file. Either of these may result in a security
-     *                exception.
      */
-    public EnhancedRandomAccessFile(String filename, int mode, int bufferSize)
-            throws FileNotFoundException, IOException {
-        this.mode = mode;
-
-        // If we are CREATEing a file, we must also WRITE. READ is always
-        // set.
-        mode |= READ;
-        if ((this.mode & CREATE) > 0) {
-            this.mode |= WRITE;
+    @Override
+    public void finalize() {
+        try {
+            close();
+        } catch (IOException ex) {
         }
-
-        // To match java.io.RandomAccessFile semantics, if we want to write
-        // a nonexistant file, create it first (even if CREATE not set)
-        File checkfile = new File(filename);
-        if ((this.mode & WRITE) > 0 && !checkfile.exists()) {
-            mode |= CREATE;
-        }
-
-        // If a new file is to be created, delete any existing file with the
-        // same name.
-        if ((this.mode & CREATE) > 0) {
-            if (checkfile.exists()) {
-                if (!checkfile.delete()) {
-                    throw new IOException("Failed to delete " + filename);
-                }
-            }
-        }
-
-        // If only reading, check that the file exists.
-        if (this.mode == READ && !(new File(filename)).exists()) {
-            throw new FileNotFoundException(filename);
-        }
-
-        // Create the underlying file object.
-        String modeString = ((this.mode & WRITE) > 0) ? "rw" : "r";
-        file = new java.io.RandomAccessFile(filename, modeString);
-
-        // Initialise the buffer;
-        bufferStart = 0;
-        dataEnd = 0;
-        dataSize = 0;
-        filePosition = 0;
-        buffer = new byte[bufferSize];
-        endOfFile = false;
     }
 
     /**
-     * Return true if file pointer is at end of file.
+     * Return true if eraf pointer is at end of eraf.
      *
      * @return _more_
      */
@@ -350,70 +274,38 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
         return endOfFile;
     }
 
+    // Create channel from eraf
+
     /**
      * _more_
      *
      * @return _more_
      */
     public FileChannel getChannel() {
-        if (file == null) {
+        if (eraf == null) {
             return null;
         }
 
         try {
-            file.seek(0);
+            eraf.seek(0);
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
-        return file.getChannel();
+        return eraf.getChannel();
     }
 
     /**
-     * Close the file, and release any associated system resources.
-     *
-     * @exception IOException
-     *                if an I/O error occurrs.
-     */
-    public void close() throws IOException {
-
-        if (file == null) {
-            return;
-        }
-
-        // If we are writing and the buffer has been modified, flush the
-        // contents
-        // of the buffer.
-        if ((mode | WRITE) > 0 && bufferModified) {
-            file.seek(bufferStart);
-            file.write(buffer, 0, dataSize);
-        }
-
-        // may need to extend file, in case no fill is neing used
-        // may need to truncate file in case overwriting a longer file
-        // use only if minLength is set (by N3iosp)
-        if (!readonly && (minLength != 0) && (minLength != file.length())) {
-            file.setLength(minLength);
-            // System.out.println("TRUNCATE!!! minlength="+minLength);
-        }
-
-        // Close the underlying file object.
-        file.close();
-        file = null; // help the gc
-
-    }
-
-    /**
-     * Set the position in the file for the next read or write.
+     * Set the position in the eraf for the next read or write.
      *
      * @param pos
-     *            the offset (in bytes) from the start of the file.
+     *            the offset (in bytes) from the start of the eraf.
      * @exception IOException
      *                if an I/O error occurrs.
      */
     public void seek(long pos) throws IOException {
 
-        // If the seek is into the buffer, just update the file pointer.
-        if (pos >= bufferStart && pos < dataEnd) {
+        // If the seek is into the buffer, just update the eraf pointer.
+        if ((pos >= bufferStart) && (pos < dataEnd)) {
             filePosition = pos;
             return;
         }
@@ -428,7 +320,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
         filePosition = pos;
 
         dataSize = read_(pos, buffer, 0, buffer.length);
-        if (dataSize < 0) {
+        if (dataSize <= 0) {
             dataSize = 0;
             endOfFile = true;
         } else {
@@ -440,10 +332,10 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Returns the current position in the file, where the next read or write
+     * Returns the current position in the eraf, where the next read or write
      * will occur.
      *
-     * @return the offset from the start of the file in bytes.
+     * @return the offset from the start of the eraf in bytes.
      * @exception IOException
      *                if an I/O error occurrs.
      */
@@ -452,24 +344,24 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Get the file location, or name.
+     * Get the eraf file, or name.
      *
      * @return _more_
      */
-    public String getLocation() {
-        return location;
+    public File getFile() {
+        return file;
     }
 
     /**
-     * Get the length of the file. The data in the buffer (which may not have
+     * Get the length of the eraf. The data in the buffer (which may not have
      * been written the disk yet) is taken into account.
      *
-     * @return the length of the file in bytes.
+     * @return the length of the eraf in bytes.
      * @exception IOException
      *                if an I/O error occurrs.
      */
     public long length() throws IOException {
-        long fileLength = file.length();
+        long fileLength = eraf.length();
         if (fileLength < dataEnd) {
             return dataEnd;
         } else {
@@ -482,21 +374,25 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * double, long, char will use this. Does not currently effect writes.
      *
      * @param endian
-     *            BIG_ENDIAN or LITTLE_ENDIAN
+     *
      */
-    public void order(int endian) {
-        this.bigEndian = (endian == BIG_ENDIAN);
+    public void setByteOrder(final ByteOrder bo) {
+        this.bigEndian = (bo == ByteOrder.BIG_ENDIAN);
+    }
+
+    public ByteOrder getByteOrder() {
+        return bigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
     }
 
     /**
-     * Returns the opaque file descriptor object associated with this file.
+     * Returns the opaque eraf descriptor object associated with this eraf.
      *
-     * @return the file descriptor object associated with this file.
+     * @return the eraf descriptor object associated with this eraf.
      * @exception IOException
      *                if an I/O error occurs.
      */
     public FileDescriptor getFD() throws IOException {
-        return (file == null) ? null : file.getFD();
+        return (eraf == null) ? null : eraf.getFD();
     }
 
     /**
@@ -507,14 +403,15 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      */
     public void flush() throws IOException {
         if (bufferModified) {
-            file.seek(bufferStart);
-            file.write(buffer, 0, dataSize);
+            eraf.seek(bufferStart);
+            eraf.write(buffer, 0, dataSize);
             bufferModified = false;
         }
+
     }
 
     /**
-     * Make sure file is at least this long when its closed. needed when not
+     * Make sure eraf is at least this long when its closed. needed when not
      * using fill mode, and not all data is written.
      *
      * @param minLength
@@ -532,22 +429,24 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
         this.extendMode = true;
     }
 
-    //
+    // ////////////////////////////////////////////////////////////////////////////////////////////
     // Read primitives.
     //
 
     /**
-     * Read a byte of data from the file, blocking until data is available.
+     * Read a byte of data from the eraf, blocking until data is available.
      *
-     * @return the next byte of data, or -1 if the end of the file is reached.
+     * @return the next byte of data, or -1 if the end of the eraf is reached.
      * @exception IOException
      *                if an I/O error occurrs.
      */
-    public final int read() throws IOException {
+    public int read() throws IOException {
 
-        // If the file position is within the data, return the byte...
+        // If the eraf position is within the data, return the byte...
         if (filePosition < dataEnd) {
-            return buffer[(int) (filePosition++ - bufferStart)] & 0xff;
+            int pos = (int) (filePosition - bufferStart);
+            filePosition++;
+            return (buffer[pos] & 0xff);
 
             // ...or should we indicate EOF...
         } else if (endOfFile) {
@@ -571,19 +470,19 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @param len
      *            the number of bytes to copy.
      * @return the actual number of bytes read, or -1 if there is not more data
-     *         due to the end of the file being reached.
+     *         due to the end of the eraf being reached.
      * @exception IOException
      *                if an I/O error occurrs.
      */
     protected int readBytes(byte b[], int off, int len) throws IOException {
 
-        // Check for end of file.
+        // Check for end of eraf.
         if (endOfFile) {
             return -1;
         }
 
         // See how many bytes are available in the buffer - if none,
-        // seek to the file position to update the buffer and try again.
+        // seek to the eraf position to update the buffer and try again.
         int bytesAvailable = (int) (dataEnd - filePosition);
         if (bytesAvailable < 1) {
             seek(filePosition);
@@ -601,7 +500,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
             int extraCopy = len - copyLength;
 
             // If the amount remaining is more than a buffer's length, read it
-            // directly from the file.
+            // directly from the eraf.
             if (extraCopy > buffer.length) {
                 extraCopy = read_(filePosition, b, off + copyLength, len
                         - copyLength);
@@ -617,7 +516,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
                 }
             }
 
-            // If we did manage to copy any more, update the file position and
+            // If we did manage to copy any more, update the eraf position and
             // return the amount copied.
             if (extraCopy > 0) {
                 filePosition += extraCopy;
@@ -649,11 +548,10 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     protected int read_(long pos, byte[] b, int offset, int len)
             throws IOException {
 
-        file.seek(pos);
-        int n = file.read(b, offset, len);
+        eraf.seek(pos);
+        int n = eraf.read(b, offset, len);
 
         if (extendMode && (n < len)) {
-            // System.out.println(" read_ = "+len+" at "+pos+"; got = "+n);
             n = len;
         }
         return n;
@@ -670,7 +568,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @param len
      *            the number of bytes to copy.
      * @return the actual number of bytes read, or -1 if there is not more data
-     *         due to the end of the file being reached.
+     *         due to the end of the eraf being reached.
      * @exception IOException
      *                if an I/O error occurrs.
      */
@@ -685,7 +583,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @param b
      *            the byte array to receive the bytes.
      * @return the actual number of bytes read, or -1 if there is not more data
-     *         due to the end of the file being reached.
+     *         due to the end of the eraf being reached.
      * @exception IOException
      *                if an I/O error occurrs.
      */
@@ -694,26 +592,26 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Reads <code>b.length</code> bytes from this file into the byte array.
-     * This method reads repeatedly from the file until all the bytes are read.
+     * Reads <code>b.length</code> bytes from this eraf into the byte array.
+     * This method reads repeatedly from the eraf until all the bytes are read.
      * This method blocks until all the bytes are read, the end of the stream is
      * detected, or an exception is thrown.
      *
      * @param b
      *            the buffer into which the data is read.
      * @exception EOFException
-     *                if this file reaches the end before reading all the bytes.
+     *                if this eraf reaches the end before reading all the bytes.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final void readFully(byte b[]) throws IOException {
+    public void readFully(byte b[]) throws IOException {
         readFully(b, 0, b.length);
     }
 
     /**
-     * Reads exactly <code>len</code> bytes from this file into the byte
-     * array. This method reads repeatedly from the file until all the bytes are
+     * Reads exactly <code>len</code> bytes from this eraf into the byte
+     * array. This method reads repeatedly from the eraf until all the bytes are
      * read. This method blocks until all the bytes are read, the end of the
      * stream is detected, or an exception is thrown.
      *
@@ -724,16 +622,15 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @param len
      *            the number of bytes to read.
      * @exception EOFException
-     *                if this file reaches the end before reading all the bytes.
+     *                if this eraf reaches the end before reading all the bytes.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final void readFully(byte b[], int off, int len) throws IOException {
+    public void readFully(byte b[], int off, int len) throws IOException {
         int n = 0;
-        int count;
         while (n < len) {
-            count = this.read(b, off + n, len - n);
+            final int count = this.read(b, off + n, len - n);
             if (count < 0) {
                 throw new EOFException();
             }
@@ -750,7 +647,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *            the number of bytes to be skipped.
      * @return the number of bytes skipped, which is always <code>n</code>.
      * @exception EOFException
-     *                if this file reaches the end before skipping all the
+     *                if this eraf reaches the end before skipping all the
      *                bytes.
      * @exception IOException
      *                if an I/O error occurs.
@@ -762,10 +659,29 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
+     * Skips exactly <code>n</code> bytes of input. This method blocks until
+     * all the bytes are skipped, the end of the stream is detected, or an
+     * exception is thrown.
+     *
+     * @param n
+     *            the number of bytes to be skipped.
+     * @return the number of bytes skipped, which is always <code>n</code>.
+     * @exception EOFException
+     *                if this eraf reaches the end before skipping all the
+     *                bytes.
+     * @exception IOException
+     *                if an I/O error occurs.
+     */
+    public long skipBytes(long n) throws IOException {
+        seek(getFilePointer() + n);
+        return n;
+    }
+
+    /**
      * Unread the last byte read. This method should not be used more than once
      * between reading operations, or strange things might happen.
      */
-    public final void unread() {
+    public void unread() {
         filePosition--;
     }
 
@@ -774,26 +690,29 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     //
 
     /**
-     * Write a byte to the file. If the file has not been opened for writing, an
+     * Write a byte to the eraf. If the eraf has not been opened for writing, an
      * IOException will be raised only when an attempt is made to write the
-     * buffer to the file.
+     * buffer to the eraf.
      * <p>
-     * Caveat: the effects of seek( )ing beyond the end of the file are
+     * Caveat: the effects of seek( )ing beyond the end of the eraf are
      * undefined.
      *
+     *
+     * @param b
+     *            _more_
      * @exception IOException
      *                if an I/O error occurrs.
      */
     @Override
-    public final void write(int b) throws IOException {
+    public void write(int b) throws IOException {
 
-        // If the file position is within the block of data...
+        // If the eraf position is within the block of data...
         if (filePosition < dataEnd) {
             buffer[(int) (filePosition++ - bufferStart)] = (byte) b;
             bufferModified = true;
 
-            // ...or (assuming that seek will not allow the file pointer
-            // to move beyond the end of the file) get the correct block of
+            // ...or (assuming that seek will not allow the eraf pointer
+            // to move beyond the end of the eraf) get the correct block of
             // data...
         } else {
 
@@ -813,7 +732,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Write <code>len</code> bytes from an array to the file.
+     * Write <code>len</code> bytes from an array to the eraf.
      *
      * @param b
      *            the array containing the data.
@@ -824,7 +743,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurrs.
      */
-    public final void writeBytes(byte b[], int off, int len) throws IOException {
+    public void writeBytes(byte b[], int off, int len) throws IOException {
 
         // If the amount of data is small (less than a full buffer)...
         if (len < buffer.length) {
@@ -843,21 +762,24 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
                         (int) (filePosition - bufferStart), copyLength);
                 bufferModified = true;
                 long myDataEnd = filePosition + copyLength;
-                dataEnd = myDataEnd > dataEnd ? myDataEnd : dataEnd;
+                dataEnd = (myDataEnd > dataEnd) ? myDataEnd : dataEnd;
                 dataSize = (int) (dataEnd - bufferStart);
                 filePosition += copyLength;
+                // /System.out.println("--copy to buffer "+copyLength+" "+len);
             }
 
             // If there is any data remaining, move to the new position and copy
             // to
             // the new buffer.
             if (copyLength < len) {
-                seek(filePosition);
+                // System.out.println("--need more "+copyLength+" "+len+" space=
+                // "+spaceInBuffer);
+                seek(filePosition); // triggers a flush
                 System.arraycopy(b, off + copyLength, buffer,
                         (int) (filePosition - bufferStart), len - copyLength);
                 bufferModified = true;
                 long myDataEnd = filePosition + (len - copyLength);
-                dataEnd = myDataEnd > dataEnd ? myDataEnd : dataEnd;
+                dataEnd = (myDataEnd > dataEnd) ? myDataEnd : dataEnd;
                 dataSize = (int) (dataEnd - bufferStart);
                 filePosition += (len - copyLength);
             }
@@ -865,22 +787,22 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
             // ...or write a lot of data...
         } else {
 
-            // Flush the current buffer, and write this data to the file.
+            // Flush the current buffer, and write this data to the eraf.
             if (bufferModified) {
                 flush();
                 bufferStart = dataEnd = dataSize = 0;
-                // file.seek(filePosition); // JC added Oct 21, 2004
+                // eraf.seek(filePosition); // JC added Oct 21, 2004
             }
-            file.seek(filePosition); // moved per Steve Cerruti; Jan 14, 2005
-            file.write(b, off, len);
+            eraf.seek(filePosition); // moved per Steve Cerruti; Jan 14, 2005
+            eraf.write(b, off, len);
+            // System.out.println("--write at "+filePosition+" "+len);
             filePosition += len;
-            bufferStart = filePosition; // TF added Nov 11, 2013
         }
     }
 
     /**
      * Writes <code>b.length</code> bytes from the specified byte array
-     * starting at offset <code>off</code> to this file.
+     * starting at offset <code>off</code> to this eraf.
      *
      * @param b
      *            the data.
@@ -894,7 +816,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
 
     /**
      * Writes <code>len</code> bytes from the specified byte array starting at
-     * offset <code>off</code> to this file.
+     * offset <code>off</code> to this eraf.
      *
      * @param b
      *            the data.
@@ -915,20 +837,20 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     //
 
     /**
-     * Reads a <code>boolean</code> from this file. This method reads a single
-     * byte from the file. A value of <code>0</code> represents
+     * Reads a <code>boolean</code> from this eraf. This method reads a single
+     * byte from the eraf. A value of <code>0</code> represents
      * <code>false</code>. Any other value represents <code>true</code>.
      * This method blocks until the byte is read, the end of the stream is
      * detected, or an exception is thrown.
      *
      * @return the <code>boolean</code> value read.
      * @exception EOFException
-     *                if this file has reached the end.
+     *                if this eraf has reached the end.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final boolean readBoolean() throws IOException {
+    public boolean readBoolean() throws IOException {
         int ch = this.read();
         if (ch < 0) {
             throw new EOFException();
@@ -937,27 +859,27 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Reads a signed 8-bit value from this file. This method reads a byte from
-     * the file. If the byte read is <code>b</code>, where
+     * Reads a signed 8-bit value from this eraf. This method reads a byte from
+     * the eraf. If the byte read is <code>b</code>, where
      * <code>0&nbsp;&lt;=&nbsp;b&nbsp;&lt;=&nbsp;255</code>, then the result
      * is:
      * <ul>
      * <code>
      *     (byte)(b)
-     *</code>
+     * </code>
      * </ul>
      * <p>
      * This method blocks until the byte is read, the end of the stream is
      * detected, or an exception is thrown.
      *
-     * @return the next byte of this file as a signed 8-bit <code>byte</code>.
+     * @return the next byte of this eraf as a signed 8-bit <code>byte</code>.
      * @exception EOFException
-     *                if this file has reached the end.
+     *                if this eraf has reached the end.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final byte readByte() throws IOException {
+    public byte readByte() throws IOException {
         int ch = this.read();
         if (ch < 0) {
             throw new EOFException();
@@ -966,21 +888,21 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Reads an unsigned 8-bit number from this file. This method reads a byte
-     * from this file and returns that byte.
+     * Reads an unsigned 8-bit number from this eraf. This method reads a byte
+     * from this eraf and returns that byte.
      * <p>
      * This method blocks until the byte is read, the end of the stream is
      * detected, or an exception is thrown.
      *
-     * @return the next byte of this file, interpreted as an unsigned 8-bit
+     * @return the next byte of this eraf, interpreted as an unsigned 8-bit
      *         number.
      * @exception EOFException
-     *                if this file has reached the end.
+     *                if this eraf has reached the end.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final int readUnsignedByte() throws IOException {
+    public int readUnsignedByte() throws IOException {
         int ch = this.read();
         if (ch < 0) {
             throw new EOFException();
@@ -989,8 +911,8 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Reads a signed 16-bit number from this file. The method reads 2 bytes
-     * from this file. If the two bytes read, in order, are <code>b1</code>
+     * Reads a signed 16-bit number from this eraf. The method reads 2 bytes
+     * from this eraf. If the two bytes read, in order, are <code>b1</code>
      * and <code>b2</code>, where each of the two values is between
      * <code>0</code> and <code>255</code>, inclusive, then the result is
      * equal to:
@@ -1003,16 +925,16 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This method blocks until the two bytes are read, the end of the stream is
      * detected, or an exception is thrown.
      *
-     * @return the next two bytes of this file, interpreted as a signed 16-bit
+     * @return the next two bytes of this eraf, interpreted as a signed 16-bit
      *         number.
      * @exception EOFException
-     *                if this file reaches the end before reading two bytes.
+     *                if this eraf reaches the end before reading two bytes.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final short readShort() throws IOException {
-        byte b[] = new byte[2];
+    public short readShort() throws IOException {
+        final byte b[] = new byte[2];
         if (read(b, 0, 2) < 0) {
             throw new EOFException();
         }
@@ -1024,8 +946,27 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Reads an unsigned 16-bit number from this file. This method reads two
-     * bytes from the file. If the bytes read, in order, are <code>b1</code>
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void readShort(short[] pa, int start, int n) throws IOException {
+        for (int i = start, end = n + start; i < end; i++) {
+            pa[i] = readShort();
+        }
+    }
+
+    /**
+     * Reads an unsigned 16-bit number from this eraf. This method reads two
+     * bytes from the eraf. If the bytes read, in order, are <code>b1</code>
      * and <code>b2</code>, where
      * <code>0&nbsp;&lt;=&nbsp;b1, b2&nbsp;&lt;=&nbsp;255</code>, then the
      * result is equal to:
@@ -1038,15 +979,15 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This method blocks until the two bytes are read, the end of the stream is
      * detected, or an exception is thrown.
      *
-     * @return the next two bytes of this file, interpreted as an unsigned
+     * @return the next two bytes of this eraf, interpreted as an unsigned
      *         16-bit integer.
      * @exception EOFException
-     *                if this file reaches the end before reading two bytes.
+     *                if this eraf reaches the end before reading two bytes.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final int readUnsignedShort() throws IOException {
+    public int readUnsignedShort() throws IOException {
         byte b[] = new byte[2];
         if (read(b, 0, 2) < 0) {
             throw new EOFException();
@@ -1059,8 +1000,8 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Reads a Unicode character from this file. This method reads two bytes
-     * from the file. If the bytes read, in order, are <code>b1</code> and
+     * Reads a Unicode character from this eraf. This method reads two bytes
+     * from the eraf. If the bytes read, in order, are <code>b1</code> and
      * <code>b2</code>, where
      * <code>0&nbsp;&lt;=&nbsp;b1,&nbsp;b2&nbsp;&lt;=&nbsp;255</code>, then
      * the result is equal to:
@@ -1073,28 +1014,28 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This method blocks until the two bytes are read, the end of the stream is
      * detected, or an exception is thrown.
      *
-     * @return the next two bytes of this file as a Unicode character.
+     * @return the next two bytes of this eraf as a Unicode character.
      * @exception EOFException
-     *                if this file reaches the end before reading two bytes.
+     *                if this eraf reaches the end before reading two bytes.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final char readChar() throws IOException {
-        byte ch[] = new byte[2];
-        if (readBytes(ch, 0, 2) < 0) {
+    public char readChar() throws IOException {
+        final byte b[] = new byte[2];
+        if (read(b, 0, 2) < 0) {
             throw new EOFException();
         }
         if (bigEndian) {
-            return (char) (((ch[0] & 0xFF) << 8) + (ch[1] & 0xFF));
+            return (char) (((b[0] & 0xFF) << 8) + (b[1] & 0xFF));
         } else {
-            return (char) (((ch[1] & 0xFF) << 8) + (ch[0] & 0xFF));
+            return (char) (((b[1] & 0xFF) << 8) + (b[0] & 0xFF));
         }
     }
 
     /**
-     * Reads a signed 32-bit integer from this file. This method reads 4 bytes
-     * from the file. If the bytes read, in order, are <code>b1</code>,
+     * Reads a signed 32-bit integer from this eraf. This method reads 4 bytes
+     * from the eraf. If the bytes read, in order, are <code>b1</code>,
      * <code>b2</code>, <code>b3</code>, and <code>b4</code>, where
      * <code>0&nbsp;&lt;=&nbsp;b1, b2, b3, b4&nbsp;&lt;=&nbsp;255</code>,
      * then the result is equal to:
@@ -1107,34 +1048,94 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This method blocks until the four bytes are read, the end of the stream
      * is detected, or an exception is thrown.
      *
-     * @return the next four bytes of this file, interpreted as an
+     * @return the next four bytes of this eraf, interpreted as an
      *         <code>int</code>.
      * @exception EOFException
-     *                if this file reaches the end before reading four bytes.
+     *                if this eraf reaches the end before reading four bytes.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final int readInt() throws IOException {
-
-        byte ch[] = new byte[4];
-        if (readBytes(ch, 0, 4) < 0) {
+    public int readInt() throws IOException {
+        final byte b[] = new byte[4];
+        if (read(b, 0, 4) < 0) {
             throw new EOFException();
         }
-        int i0 = (ch[3] << 0), i1 = (ch[2] << 8), i2 = (ch[1] << 16), i3 = (ch[0] << 24);
-        return (i3 + i2 + i1 + i0);
-        // int ch1 = this.read();
-        // int ch2 = this.read();
-        // int ch3 = this.read();
-        // int ch4 = this.read();
-        // if ((ch1 | ch2 | ch3 | ch4) < 0)
-        // throw new EOFException();
-        // return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
+        if (bigEndian) {
+            return (((b[0] & 0xFF) << 24) + ((b[1] & 0xFF) << 16)
+                    + ((b[2] & 0xFF) << 8) + ((b[3] & 0xFF)));
+        } else {
+            return (((b[3] & 0xFF) << 24) + ((b[2] & 0xFF) << 16)
+                    + ((b[1] & 0xFF) << 8) + ((b[0] & 0xFF)));
+        }
+    }
+
+    public long readUnsignedInt() throws IOException {
+        // retaining only the first 4 bytes, ignoring sign when extending
+        return (readInt()) & 0xFFFFFFFFL;
     }
 
     /**
-     * Reads a signed 64-bit integer from this file. This method reads eight
-     * bytes from the file. If the bytes read, in order, are <code>b1</code>,
+     * Read an integer at the given position, bypassing all buffering.
+     *
+     * @param pos
+     *            read a byte at this position
+     * @return The int that was read
+     * @throws IOException
+     */
+    public int readIntUnbuffered(long pos) throws IOException {
+        byte[] bb = new byte[4];
+        read_(pos, bb, 0, 4);
+        int ch1 = bb[0] & 0xFF;
+        int ch2 = bb[1] & 0xFF;
+        int ch3 = bb[2] & 0xFF;
+        int ch4 = bb[3] & 0xFF;
+        if ((ch1 | ch2 | ch3 | ch4) < 0) {
+            throw new EOFException();
+        }
+
+        if (bigEndian) {
+            return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
+        } else {
+            return ((ch4 << 24) + (ch3 << 16) + (ch2 << 8) + (ch1 << 0));
+        }
+    }
+
+    /**
+     * Reads a signed 24-bit integer from this eraf. This method reads 3 bytes
+     * from the eraf. If the bytes read, in order, are <code>b1</code>,
+     * <code>b2</code>, and <code>b3</code>, where
+     * <code>0&nbsp;&lt;=&nbsp;b1, b2, b3&nbsp;&lt;=&nbsp;255</code>, then
+     * the result is equal to:
+     * <ul>
+     * <code>
+     *     (b1 &lt;&lt; 16) | (b2 &lt;&lt; 8) + (b3 &lt;&lt; 0)
+     * </code>
+     * </ul>
+     * <p>
+     * This method blocks until the three bytes are read, the end of the stream
+     * is detected, or an exception is thrown.
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     * @exception EOFException
+     *                if this eraf reaches the end before reading four bytes.
+     * @exception IOException
+     *                if an I/O error occurs.
+     */
+    public void readInt(int[] pa, int start, int n) throws IOException {
+        for (int i = start, end = n + start; i < end; i++) {
+            pa[i] = readInt();
+        }
+    }
+
+    /**
+     * Reads a signed 64-bit integer from this eraf. This method reads eight
+     * bytes from the eraf. If the bytes read, in order, are <code>b1</code>,
      * <code>b2</code>, <code>b3</code>, <code>b4</code>,
      * <code>b5</code>, <code>b6</code>, <code>b7</code>, and
      * <code>b8,</code> where:
@@ -1158,16 +1159,16 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This method blocks until the eight bytes are read, the end of the stream
      * is detected, or an exception is thrown.
      *
-     * @return the next eight bytes of this file, interpreted as a
+     * @return the next eight bytes of this eraf, interpreted as a
      *         <code>long</code>.
      * @exception EOFException
-     *                if this file reaches the end before reading eight bytes.
+     *                if this eraf reaches the end before reading eight bytes.
      * @exception IOException
      *                if an I/O error occurs.
      */
     @Override
-    public final long readLong() throws IOException {
-        byte b[] = new byte[8];
+    public long readLong() throws IOException {
+        final byte b[] = new byte[8];
         if (read(b, 0, 8) < 0) {
             throw new EOFException();
         }
@@ -1185,7 +1186,26 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Reads a <code>float</code> from this file. This method reads an
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void readLong(long[] pa, int start, int n) throws IOException {
+        for (int i = start, end = n + start; i < end; i++) {
+            pa[i] = readLong();
+        }
+    }
+
+    /**
+     * Reads a <code>float</code> from this eraf. This method reads an
      * <code>int</code> value as if by the <code>readInt</code> method and
      * then converts that <code>int</code> to a <code>float</code> using the
      * <code>intBitsToFloat</code> method in class <code>Float</code>.
@@ -1193,22 +1213,41 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This method blocks until the four bytes are read, the end of the stream
      * is detected, or an exception is thrown.
      *
-     * @return the next four bytes of this file, interpreted as a
+     * @return the next four bytes of this eraf, interpreted as a
      *         <code>float</code>.
      * @exception EOFException
-     *                if this file reaches the end before reading four bytes.
+     *                if this eraf reaches the end before reading four bytes.
      * @exception IOException
      *                if an I/O error occurs.
      * @see java.io.RandomAccessFile#readInt()
      * @see java.lang.Float#intBitsToFloat(int)
      */
     @Override
-    public final float readFloat() throws IOException {
+    public float readFloat() throws IOException {
         return Float.intBitsToFloat(readInt());
     }
 
     /**
-     * Reads a <code>double</code> from this file. This method reads a
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void readFloat(float[] pa, int start, int n) throws IOException {
+        for (int i = start, end = n + start; i < end; i++) {
+            pa[i] = Float.intBitsToFloat(readInt());
+        }
+    }
+
+    /**
+     * Reads a <code>double</code> from this eraf. This method reads a
      * <code>long</code> value as if by the <code>readLong</code> method and
      * then converts that <code>long</code> to a <code>double</code> using
      * the <code>longBitsToDouble</code> method in class <code>Double</code>.
@@ -1216,41 +1255,63 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * This method blocks until the eight bytes are read, the end of the stream
      * is detected, or an exception is thrown.
      *
-     * @return the next eight bytes of this file, interpreted as a
+     * @return the next eight bytes of this eraf, interpreted as a
      *         <code>double</code>.
      * @exception EOFException
-     *                if this file reaches the end before reading eight bytes.
+     *                if this eraf reaches the end before reading eight bytes.
      * @exception IOException
      *                if an I/O error occurs.
      * @see java.io.RandomAccessFile#readLong()
      * @see java.lang.Double#longBitsToDouble(long)
      */
     @Override
-    public final double readDouble() throws IOException {
+    public double readDouble() throws IOException {
         return Double.longBitsToDouble(readLong());
     }
 
     /**
-     * Reads the next line of text from this file. This method successively
-     * reads bytes from the file until it reaches the end of a line of text.
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void readDouble(double[] pa, int start, int n) throws IOException {
+        for (int i = start, end = n + start; i < end; i++) {
+            pa[i] = Double.longBitsToDouble(readLong());
+        }
+    }
+
+    /**
+     * Reads the next line of text from this eraf. This method successively
+     * reads bytes from the eraf until it reaches the end of a line of text.
      * <p>
+     *
      * A line of text is terminated by a carriage-return character (<code>'&#92;r'</code>),
      * a newline character (<code>'&#92;n'</code>), a carriage-return
      * character immediately followed by a newline character, or the end of the
      * input stream. The line-terminating character(s), if any, are included as
      * part of the string returned.
+     *
      * <p>
      * This method blocks until a newline character is read, a carriage return
      * and the byte following it are read (to see if it is a newline), the end
      * of the stream is detected, or an exception is thrown.
      *
-     * @return the next line of text from this file.
+     * @return the next line of text from this eraf.
      * @exception IOException
      *                if an I/O error occurs.
+     * @task we can optimize this
      */
     @Override
-    public final String readLine() throws IOException {
-        final StringBuffer input = new StringBuffer();
+    public String readLine() throws IOException {
+        StringBuilder input = new StringBuilder();
         int c;
 
         while (((c = read()) != -1) && (c != '\n')) {
@@ -1263,7 +1324,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Reads in a string from this file. The string has been encoded using a
+     * Reads in a string from this eraf. The string has been encoded using a
      * modified UTF-8 format.
      * <p>
      * The first two bytes are read as if by <code>readUnsignedShort</code>.
@@ -1277,7 +1338,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *
      * @return a Unicode string.
      * @exception EOFException
-     *                if this file reaches the end before reading all the bytes.
+     *                if this eraf reaches the end before reading all the bytes.
      * @exception IOException
      *                if an I/O error occurs.
      * @exception UTFDataFormatException
@@ -1286,8 +1347,22 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @see java.io.RandomAccessFile#readUnsignedShort()
      */
     @Override
-    public final String readUTF() throws IOException {
+    public String readUTF() throws IOException {
         return DataInputStream.readUTF(this);
+    }
+
+    /**
+     * Read a String of knoen length.
+     *
+     * @param nbytes
+     *            number of bytes to read
+     * @return String wrapping the bytes.
+     * @throws IOException
+     */
+    public String readString(int nbytes) throws IOException {
+        final byte[] data = new byte[nbytes];
+        readFully(data);
+        return new String(data);
     }
 
     //
@@ -1295,7 +1370,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     //
 
     /**
-     * Writes a <code>boolean</code> to the file as a 1-byte value. The value
+     * Writes a <code>boolean</code> to the eraf as a 1-byte value. The value
      * <code>true</code> is written out as the value <code>(byte)1</code>;
      * the value <code>false</code> is written out as the value
      * <code>(byte)0</code>.
@@ -1306,12 +1381,31 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *                if an I/O error occurs.
      */
     @Override
-    public final void writeBoolean(boolean v) throws IOException {
+    public void writeBoolean(boolean v) throws IOException {
         write(v ? 1 : 0);
     }
 
     /**
-     * Writes a <code>byte</code> to the file as a 1-byte value.
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void writeBoolean(boolean[] pa, int start, int n) throws IOException {
+        for (int i = start, end = start + n; i < end; i++) {
+            writeBoolean(pa[i]);
+        }
+    }
+
+    /**
+     * Writes a <code>byte</code> to the eraf as a 1-byte value.
      *
      * @param v
      *            a <code>byte</code> value to be written.
@@ -1319,12 +1413,12 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *                if an I/O error occurs.
      */
     @Override
-    public final void writeByte(int v) throws IOException {
+    public void writeByte(int v) throws IOException {
         write(v);
     }
 
     /**
-     * Writes a <code>short</code> to the file as two bytes, high byte first.
+     * Writes a <code>short</code> to the eraf as two bytes, high byte first.
      *
      * @param v
      *            a <code>short</code> to be written.
@@ -1332,13 +1426,32 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *                if an I/O error occurs.
      */
     @Override
-    public final void writeShort(int v) throws IOException {
+    public void writeShort(int v) throws IOException {
         write((v >>> 8) & 0xFF);
         write((v >>> 0) & 0xFF);
     }
 
     /**
-     * Writes a <code>char</code> to the file as a 2-byte value, high byte
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void writeShort(short[] pa, int start, int n) throws IOException {
+        for (int i = start, end = start + n; i < end; i++) {
+            writeShort(pa[i]);
+        }
+    }
+
+    /**
+     * Writes a <code>char</code> to the eraf as a 2-byte value, high byte
      * first.
      *
      * @param v
@@ -1347,13 +1460,32 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *                if an I/O error occurs.
      */
     @Override
-    public final void writeChar(int v) throws IOException {
+    public void writeChar(int v) throws IOException {
         write((v >>> 8) & 0xFF);
         write((v >>> 0) & 0xFF);
     }
 
     /**
-     * Writes an <code>int</code> to the file as four bytes, high byte first.
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void writeChar(char[] pa, int start, int n) throws IOException {
+        for (int i = start, end = start + n; i < end; i++) {
+            writeChar(pa[i]);
+        }
+    }
+
+    /**
+     * Writes an <code>int</code> to the eraf as four bytes, high byte first.
      *
      * @param v
      *            an <code>int</code> to be written.
@@ -1361,7 +1493,7 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *                if an I/O error occurs.
      */
     @Override
-    public final void writeInt(int v) throws IOException {
+    public void writeInt(int v) throws IOException {
         write((v >>> 24) & 0xFF);
         write((v >>> 16) & 0xFF);
         write((v >>> 8) & 0xFF);
@@ -1369,7 +1501,26 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     }
 
     /**
-     * Writes a <code>long</code> to the file as eight bytes, high byte first.
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void writeInt(int[] pa, int start, int n) throws IOException {
+        for (int i = start, end = start + n; i < end; i++) {
+            writeInt(pa[i]);
+        }
+    }
+
+    /**
+     * Writes a <code>long</code> to the eraf as eight bytes, high byte first.
      *
      * @param v
      *            a <code>long</code> to be written.
@@ -1377,21 +1528,53 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *                if an I/O error occurs.
      */
     @Override
-    public final void writeLong(long v) throws IOException {
-        write((int) (v >>> 56) & 0xFF);
-        write((int) (v >>> 48) & 0xFF);
-        write((int) (v >>> 40) & 0xFF);
-        write((int) (v >>> 32) & 0xFF);
-        write((int) (v >>> 24) & 0xFF);
-        write((int) (v >>> 16) & 0xFF);
-        write((int) (v >>> 8) & 0xFF);
-        write((int) (v >>> 0) & 0xFF);
+    public void writeLong(long v) throws IOException {
+
+        if (bigEndian) {
+            write((int) (v >>> 56) & 0xFF);
+            write((int) (v >>> 48) & 0xFF);
+            write((int) (v >>> 40) & 0xFF);
+            write((int) (v >>> 32) & 0xFF);
+            write((int) (v >>> 24) & 0xFF);
+            write((int) (v >>> 16) & 0xFF);
+            write((int) (v >>> 8) & 0xFF);
+            write((int) (v >>> 0) & 0xFF);
+        } else {
+            write((int) (v >>> 0) & 0xFF);
+            write((int) (v >>> 8) & 0xFF);
+            write((int) (v >>> 16) & 0xFF);
+            write((int) (v >>> 24) & 0xFF);
+            write((int) (v >>> 32) & 0xFF);
+            write((int) (v >>> 40) & 0xFF);
+            write((int) (v >>> 48) & 0xFF);
+            write((int) (v >>> 56) & 0xFF);
+
+        }
+    }
+
+    /**
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void writeLong(long[] pa, int start, int n) throws IOException {
+        for (int i = start, end = start + n; i < end; i++) {
+            writeLong(pa[i]);
+        }
     }
 
     /**
      * Converts the float argument to an <code>int</code> using the
      * <code>floatToIntBits</code> method in class <code>Float</code>, and
-     * then writes that <code>int</code> value to the file as a 4-byte
+     * then writes that <code>int</code> value to the eraf as a 4-byte
      * quantity, high byte first.
      *
      * @param v
@@ -1401,14 +1584,33 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @see java.lang.Float#floatToIntBits(float)
      */
     @Override
-    public final void writeFloat(float v) throws IOException {
+    public void writeFloat(float v) throws IOException {
         writeInt(Float.floatToIntBits(v));
+    }
+
+    /**
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void writeFloat(float[] pa, int start, int n) throws IOException {
+        for (int i = start, end = start + n; i < end; i++) {
+            writeFloat(pa[i]);
+        }
     }
 
     /**
      * Converts the double argument to a <code>long</code> using the
      * <code>doubleToLongBits</code> method in class <code>Double</code>,
-     * and then writes that <code>long</code> value to the file as an 8-byte
+     * and then writes that <code>long</code> value to the eraf as an 8-byte
      * quantity, high byte first.
      *
      * @param v
@@ -1418,12 +1620,31 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @see java.lang.Double#doubleToLongBits(double)
      */
     @Override
-    public final void writeDouble(double v) throws IOException {
+    public void writeDouble(double v) throws IOException {
         writeLong(Double.doubleToLongBits(v));
     }
 
     /**
-     * Writes the string to the file as a sequence of bytes. Each character in
+     * _more_
+     *
+     * @param pa
+     *            _more_
+     * @param start
+     *            _more_
+     * @param n
+     *            _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void writeDouble(double[] pa, int start, int n) throws IOException {
+        for (int i = start, end = start + n; i < end; i++) {
+            writeDouble(pa[i]);
+        }
+    }
+
+    /**
+     * Writes the string to the eraf as a sequence of bytes. Each character in
      * the string is written out, in sequence, by discarding its high eight
      * bits.
      *
@@ -1433,15 +1654,15 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *                if an I/O error occurs.
      */
     @Override
-    public final void writeBytes(String s) throws IOException {
-        int len = s.length();
+    public void writeBytes(String s) throws IOException {
+        final int len = s.length();
         for (int i = 0; i < len; i++) {
             write((byte) s.charAt(i));
         }
     }
 
     /**
-     * Writes the character array to the file as a sequence of bytes. Each
+     * Writes the character array to the eraf as a sequence of bytes. Each
      * character in the string is written out, in sequence, by discarding its
      * high eight bits.
      *
@@ -1454,14 +1675,14 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @exception IOException
      *                if an I/O error occurs.
      */
-    public final void writeBytes(char b[], int off, int len) throws IOException {
+    public void writeBytes(char b[], int off, int len) throws IOException {
         for (int i = off; i < len; i++) {
             write((byte) b[i]);
         }
     }
 
     /**
-     * Writes a string to the file as a sequence of characters. Each character
+     * Writes a string to the eraf as a sequence of characters. Each character
      * is written to the data output stream as if by the <code>writeChar</code>
      * method.
      *
@@ -1472,20 +1693,20 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      * @see java.io.RandomAccessFile#writeChar(int)
      */
     @Override
-    public final void writeChars(String s) throws IOException {
+    public void writeChars(String s) throws IOException {
         int len = s.length();
         for (int i = 0; i < len; i++) {
-            int v = s.charAt(i);
+            final int v = s.charAt(i);
             write((v >>> 8) & 0xFF);
             write((v >>> 0) & 0xFF);
         }
     }
 
     /**
-     * Writes a string to the file using UTF-8 encoding in a machine-independent
+     * Writes a string to the eraf using UTF-8 encoding in a machine-independent
      * manner.
      * <p>
-     * First, two bytes are written to the file as if by the
+     * First, two bytes are written to the eraf as if by the
      * <code>writeShort</code> method giving the number of bytes to follow.
      * This value is the number of bytes actually written out, not the length of
      * the string. Following the length, each character of the string is output,
@@ -1497,8 +1718,8 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      *                if an I/O error occurs.
      */
     @Override
-    public final void writeUTF(String str) throws IOException {
-        int strlen = str.length();
+    public void writeUTF(String str) throws IOException {
+        final int strlen = str.length();
         int utflen = 0;
 
         for (int i = 0; i < strlen; i++) {
@@ -1540,8 +1761,45 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     @Override
     public String toString() {
         return "fp=" + filePosition + ", bs=" + bufferStart + ", de=" + dataEnd
-                + ", ds=" + dataSize + ", bl=" + buffer.length + ", m=" + mode
-                + ", bm=" + bufferModified;
+                + ", ds=" + dataSize + ", bl=" + buffer.length + ", readonly="
+                + readonly + ", bm=" + bufferModified;
+    }
+
+    /** Support for FileCache. */
+    protected boolean cached;
+
+    protected String location;
+
+    /**
+     * _more_
+     *
+     * @param cached
+     *            _more_
+     */
+    public void setCached(boolean cached) {
+        this.cached = cached;
+    }
+
+    /**
+     * _more_
+     *
+     * @return _more_
+     */
+    public boolean isCached() {
+        return cached;
+    }
+
+    /**
+     * _more_
+     *
+     * @throws IOException
+     *             _more_
+     */
+    public void synch() throws IOException {
+    }
+
+    public String getLocation() {
+        return location;
     }
 
 }

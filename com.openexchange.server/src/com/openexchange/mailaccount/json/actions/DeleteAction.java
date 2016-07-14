@@ -97,7 +97,7 @@ public final class DeleteAction extends AbstractMailAccountAction {
          * Delete
          */
         try {
-            final JSONArray responseArray = new JSONArray();
+            final JSONArray responseArray = new JSONArray(len);
             if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
                 for (int i = 0; i < len; i++) {
                     final int id = jsonArray.getInt(i);

@@ -56,9 +56,6 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -80,6 +77,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
@@ -131,12 +129,15 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.lock.LockService;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.COUNT;
@@ -152,6 +153,9 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CalendarMySQL} - The MySQL implementation of {@link CalendarSqlImp}.
@@ -597,12 +601,17 @@ public class CalendarMySQL implements CalendarSqlImp {
             final String gid = String.valueOf(c.getContextId());
             List<List<Integer>> list = cache.getFromGroup(key, gid);
             if (null == list) {
-                synchronized (gid.intern()) {
+                LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+                Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getAllPrivateAppointmentAndFolderIdsForUser-").append(gid).toString());
+                lock.lock();
+                try {
                     list = cache.getFromGroup(key, gid);
                     if (null == list) {
                         list = getAllPrivateAppointmentAndFolderIdsForUser0(c, id, readcon);
                         cache.putInGroup(key, gid, list, Attribute.getIdleTimeSecondsAttribute(3));
                     }
+                } finally {
+                    lock.unlock();
                 }
             }
             return new SearchIteratorAdapter<List<Integer>>(list.iterator(), list.size());
@@ -2506,11 +2515,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             final int pfid = member.pfid;
 
             if (pfid > 0) {
-                if (pfid < 1) {
-                    LOG.error(StringCollection.convertArraytoString(new Object[] {
-                        "ERROR: getUserParticipantsSQLIn oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON),
-                        Integer.valueOf(cdaos.get(0).getObjectID()) }));
-                }
                 for (final CalendarDataObject cdao : cdaos) {
                     if (cdao.getFolderType() == FolderObject.PRIVATE) {
                         if (uid == tuid) {
@@ -2701,6 +2705,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (pushCon && readcon != null) {
                 DBPool.push(ctx, readcon);
             }
+            Streams.close(co);
         }
         return edao;
     }
@@ -2734,7 +2739,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cdao.getContextID()));
 
         final CalendarOperation co = new CalendarOperation();
-
+        try {
         if (isForbiddenPrivateMoveToPublicFolder(cdao, edao)) {
             throw OXCalendarExceptionCodes.PRIVATE_MOVE_TO_PUBLIC.create();
         }
@@ -3176,7 +3181,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             /*
              * Check if every possible occurrence is covered by a delete exception
              */
-            if (null != cdao.getDeleteException() && rresults.size() <= cdao.getDeleteException().length) {
+            if (rresults != null && cdao.getDeleteException() != null && rresults.size() <= cdao.getDeleteException().length) {
                 /*
                  * Commit current transaction
                  */
@@ -3205,6 +3210,9 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         }
         return null;
+        } finally {
+            Streams.close(co);
+        }
     }
 
     /**

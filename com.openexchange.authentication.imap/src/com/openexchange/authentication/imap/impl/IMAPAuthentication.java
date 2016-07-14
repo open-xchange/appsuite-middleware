@@ -91,6 +91,7 @@ public class IMAPAuthentication implements AuthenticationService {
         IMAP_CONNECTIONTIMEOUT("IMAP_CONNECTIONTIMEOUT"),
         USE_FULL_LOGIN_INFO("USE_FULL_LOGIN_INFO"),
         USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP("USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP"),
+        USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP("USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP"),
         IMAP_SERVER("IMAP_SERVER"),
         IMAP_PORT("IMAP_PORT"),
         USE_MULTIPLE("USE_MULTIPLE"),
@@ -181,6 +182,11 @@ public class IMAPAuthentication implements AuthenticationService {
                 useFullLoginForUserLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP.name)).trim());
             }
 
+            boolean useFullLoginForContextLookup = false;
+            if (props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP.name) != null) {
+                useFullLoginForContextLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP.name)).trim());
+            }
+
             String host = "localhost";
             if (props.get(PropertyNames.IMAP_SERVER.name) != null) {
                 host = IDNA.toASCII((String) props.get(PropertyNames.IMAP_SERVER.name));
@@ -201,7 +207,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
             // Set user/context info
             String userInfo = useFullLoginForUserLookup ? splitResult.fullLoginInfo : localPart;
-            String contextInfo = splitResult.domainPart;
+            String contextInfo = useFullLoginForContextLookup ? splitResult.fullLoginInfo : splitResult.domainPart;
 
             // Support for multiple IMAP servers
             boolean secure = false;

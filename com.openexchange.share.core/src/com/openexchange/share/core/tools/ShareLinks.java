@@ -60,6 +60,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
+import com.openexchange.share.Links;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.ShareConstants;
@@ -110,15 +111,7 @@ public class ShareLinks {
         String module = Module.getForFolderConstant(target.getModule()).getName();
         String folder = target.getFolder();
         String item = target.getItem();
-        StringBuilder fragment = new StringBuilder(64).append("!&app=io.ox/").append(module).append("&folder=").append(folder);
-        if (Strings.isNotEmpty(item)) {
-            fragment.append("&id=").append(item);
-        }
-
-        return prepare(hostData)
-            .setPath("/appsuite/ui")
-            .setFragment(fragment.toString())
-            .toString();
+        return Links.generateInternalLink(module, folder, item, hostData);
     }
 
     /**

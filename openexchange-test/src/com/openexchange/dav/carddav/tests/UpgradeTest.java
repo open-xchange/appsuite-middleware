@@ -258,7 +258,7 @@ public class UpgradeTest extends CardDAVTest {
     		}
         };
         createThread.start();
-		super.putVCardUpdate(contactsGroupUid, groupVCard, contactsGroupETag);
+		super.putVCardUpdate(contactsGroupUid, groupVCard);
         createThread.join();
         throwableHolder.reThrowIfSet();
         /*

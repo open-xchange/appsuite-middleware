@@ -49,20 +49,18 @@
 
 package com.openexchange.report.appsuite.osgi;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
+import com.openexchange.logging.LogLevelService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.ContextReportCumulator;
 import com.openexchange.report.appsuite.ReportContextHandler;
@@ -70,12 +68,13 @@ import com.openexchange.report.appsuite.ReportFinishingTouches;
 import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportSystemHandler;
 import com.openexchange.report.appsuite.ReportUserHandler;
-import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.defaultHandlers.CapabilityHandler;
 import com.openexchange.report.appsuite.defaultHandlers.ClientLoginCount;
 import com.openexchange.report.appsuite.defaultHandlers.Total;
-import com.openexchange.report.appsuite.jobs.Orchestration;
+import com.openexchange.report.appsuite.internal.HazelcastReportService;
+import com.openexchange.report.appsuite.internal.LocalReportService;
+import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.management.ReportMXBeanImpl;
 import com.openexchange.user.UserService;
 
@@ -88,12 +87,14 @@ public class ReportActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContextService.class, UserService.class, CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class, DatabaseService.class };
+        return new Class[] { ContextService.class, UserService.class, CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class, DatabaseService.class, InfostoreInformationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
+
+        trackService(HazelcastInstance.class);
 
         // ContextReportCumulator
         track(ContextReportCumulator.class, new SimpleRegistryListener<ContextReportCumulator>() {
@@ -202,63 +203,22 @@ public class ReportActivator extends HousekeepingActivator {
         ClientLoginCount clc = new ClientLoginCount();
         Services.add(clc);
 
-        track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this, getService(ManagementService.class)));
+        registerService(ReportService.class, new HazelcastReportService(new LocalReportService()));
+        trackService(ReportService.class);
+
+        trackService(LogLevelService.class);
 
         openTrackers();
+
+        // Register the MBean
+        ManagementService managementService = getService(ManagementService.class);
+        managementService.registerMBean(new ObjectName("com.openexchange.reporting.appsuite", "name", "AppSuiteReporting"), new ReportMXBeanImpl());
     }
 
-    private static class HazelcastInstanceTracker implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> {
+    protected void stopBundle() throws Exception {
+        Services.setServices(null);
 
-        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastInstanceTracker.class);
-
-        final BundleContext context;
-
-        final ReportActivator activator;
-
-        final ManagementService managementService;
-
-        public HazelcastInstanceTracker(BundleContext context, ReportActivator activator, ManagementService managementService) {
-            super();
-            this.context = context;
-            this.activator = activator;
-            this.managementService = managementService;
-        }
-
-        @Override
-        public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-            HazelcastInstance hzInstance = context.getService(reference);
-            try {
-                this.activator.addService(HazelcastInstance.class, hzInstance);
-                this.context.registerService(ReportService.class, Orchestration.getInstance(), null);
-                this.managementService.registerMBean(getObjectName(), new ReportMXBeanImpl());
-
-                return hzInstance;
-            } catch (MalformedObjectNameException | OXException e) {
-                LOG.error("", e);
-            }
-            context.ungetService(reference);
-            return null;
-        }
-
-        private ObjectName getObjectName() throws MalformedObjectNameException {
-            return new ObjectName("com.openexchange.reporting.appsuite", "name", "AppSuiteReporting");
-        }
-
-        @Override
-        public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
-            // Ignore
-        }
-
-        @Override
-        public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
-            activator.removeService(HazelcastInstance.class);
-            context.ungetService(reference);
-
-            try {
-                this.managementService.unregisterMBean(getObjectName());
-            } catch (MalformedObjectNameException | OXException e) {
-                LOG.error("", e);
-            }
-        }
+        super.stopBundle();
     }
+
 }

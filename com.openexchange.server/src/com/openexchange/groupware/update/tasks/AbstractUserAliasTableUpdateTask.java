@@ -121,7 +121,7 @@ abstract class AbstractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         private final UUID uuid;
 
         /**
-         * Initialises a new {@link Alias}.
+         * Initializes a new {@link Alias}.
          *
          * @param cid The context identifier
          * @param userId The user identifier
@@ -188,21 +188,11 @@ abstract class AbstractUserAliasTableUpdateTask extends UpdateTaskAdapter {
             return uuid;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#hashCode()
-         */
         @Override
         public int hashCode() {
             return hash;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
         @Override
         public boolean equals(final Object obj) {
             if (this == obj) {
@@ -245,4 +235,5 @@ abstract class AbstractUserAliasTableUpdateTask extends UpdateTaskAdapter {
             return AbstractUserAliasTableUpdateTask.this;
         }
     }
+
 }

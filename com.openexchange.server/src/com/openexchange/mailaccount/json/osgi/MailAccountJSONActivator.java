@@ -55,8 +55,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.mailaccount.Constants;
+import com.openexchange.mailaccount.json.DefaultMailAccountActionProvider;
+import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
-import com.openexchange.mailaccount.json.actions.MailAccountActionFactory;
+import com.openexchange.mailaccount.json.factory.TrackingMailAccountActionFactory;
 
 
 /**
@@ -80,8 +82,13 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(MailAccountActionFactory.getInstance(), Constants.getModule());
         final BundleContext context = this.context;
+
+        DefaultMailAccountActionProvider defaultProvider = new DefaultMailAccountActionProvider();
+
+        TrackingMailAccountActionFactory actionFactory = new TrackingMailAccountActionFactory(defaultProvider, context);
+        track(MailAccountActionProvider.class, actionFactory);
+
         track(JSlobStorageRegistry.class, new ServiceTrackerCustomizer<JSlobStorageRegistry, JSlobStorageRegistry>() {
 
             @Override
@@ -103,6 +110,9 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
             }
         });
         openTrackers();
+
+        registerModule(actionFactory, Constants.getModule());
+        registerService(DefaultMailAccountActionProvider.class, defaultProvider);
     }
 
 }
