@@ -534,16 +534,6 @@ public interface OXContextInterface extends Remote {
      */
     public void changeModuleAccess(final Context ctx,final UserModuleAccess access, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
-    /**
-     * Change module access rights for ALL users in the specified context.
-     *
-     * @param ctx The context object
-     * @param moduleAccess The module access having such options set to <code>true</code> that are supposed to be changed
-     * @param value Whether to set marked options to <code>true</code> or <code>false</code>
-     * @param auth The authentication credentials
-     * @throws StorageException
-     */
-    public void changeModuleAccess(Context ctx, UserModuleAccess moduleAccess, boolean value, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
     /**
      * Change module access rights by "access combination name" for ALL users in the specified context.<br>

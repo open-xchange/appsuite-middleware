@@ -3116,80 +3116,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void changeModuleAccess(Context ctx, int[] userIds, UserModuleAccess moduleAccess, boolean value) throws StorageException {
-        int contextId = ctx.getId().intValue();
-
-        Connection con = null;
-        boolean rollback = false;
-        try {
-            con = cache.getConnectionForContext(contextId);
-            con.setAutoCommit(false);
-            rollback = true;
-
-            lock(contextId, con);
-
-            // Loop through the int[] and change the module access rights for each user
-            for (int userId : userIds) {
-                // first get all groups the user is in
-                int[] groupsForUser = getGroupsForUser(ctx, userId, con);
-
-                // update last modified column
-                changeLastModified(userId, ctx, con);
-                myChangeInsertModuleAccess(ctx, userId, moduleAccess, false, con, groupsForUser, value ? BoolValue.TRUE : BoolValue.FALSE);
-            }
-            con.commit();
-            rollback = false;
-
-            // JCS
-            {
-                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                if (null != cacheService) {
-                    try {
-                        for (int userId : userIds) {
-                            final CacheKey key = cacheService.newCacheKey(contextId, userId);
-                            Cache cache = cacheService.getCache("User");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserPermissionBits");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserConfiguration");
-                            cache.remove(key);
-                            cache = cacheService.getCache("UserSettingMail");
-                            cache.remove(key);
-                            cache = cacheService.getCache("Capabilities");
-                            cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
-                            cache = cacheService.getCache("QuotaFileStorages");
-                            cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
-                        }
-                    } catch (final OXException e) {
-                        log.error("", e);
-                    }
-                }
-            }
-            // End of JCS
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
-        } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e.toString());
-        } catch (final RuntimeException e) {
-            log.error("", e);
-            throw e;
-        } finally {
-            if (rollback) {
-                DBUtils.rollback(con);
-            }
-            if (null != con) {
-                try {
-                    cache.pushConnectionForContext(contextId, con);
-                } catch (final PoolException e) {
-                    log.error("Pool Error pushing ox write connection to pool!", e);
-                }
-            }
-        }
-    }
-
-    @Override
     public void changeModuleAccess(final Context ctx, final int[] userIds, final UserModuleAccess moduleAccess) throws StorageException {
         int contextId = ctx.getId().intValue();
 
@@ -3503,52 +3429,38 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void myChangeInsertModuleAccess(Context ctx, int userId, UserModuleAccess access, boolean insert, Connection writeCon, int[] groups) throws StorageException {
-        myChangeInsertModuleAccess(ctx, userId, access, insert, writeCon, groups, null);
-    }
-
-    private void myChangeInsertModuleAccess(Context ctx, int userId, UserModuleAccess access, boolean insert, Connection writeCon, int[] groups, BoolValue value) throws StorageException {
+    private void myChangeInsertModuleAccess(final Context ctx, final int userId, final UserModuleAccess access, final boolean insert, final Connection writeCon, final int[] groups) throws StorageException {
         checkForIllegalCombination(access);
         try {
-            UserPermissionBits user = RdbUserPermissionBitsStorage.adminLoadUserPermissionBits(userId, groups, ctx.getId().intValue(), writeCon);
-
-            user.setCalendar(null == value ? access.getCalendar() : (access.getCalendar() ? value.booleanValue() : /*keep as-is*/user.hasCalendar()));
-            user.setContact(null == value ? access.getContacts() : (access.getContacts() ? value.booleanValue() : /*keep as-is*/user.hasContact()));
-            user.setFullPublicFolderAccess(null == value ? access.getEditPublicFolders() : (access.getEditPublicFolders() ? value.booleanValue() : /*keep as-is*/user.hasFullPublicFolderAccess()));
-            user.setFullSharedFolderAccess(null == value ? access.getReadCreateSharedFolders() : (access.getReadCreateSharedFolders() ? value.booleanValue() : /*keep as-is*/user.hasFullSharedFolderAccess()));
-            user.setICal(null == value ? access.getIcal() : (access.getIcal() ? value.booleanValue() : /*keep as-is*/user.hasICal()));
-            user.setInfostore(null == value ? access.getInfostore() : (access.getInfostore() ? value.booleanValue() : /*keep as-is*/user.hasInfostore()));
-            user.setSyncML(null == value ? access.getSyncml() : (access.getSyncml() ? value.booleanValue() : /*keep as-is*/user.hasSyncML()));
-            user.setTask(null == value ? access.getTasks() : (access.getTasks() ? value.booleanValue() : /*keep as-is*/user.hasTask()));
-            user.setVCard(null == value ? access.getVcard() : (access.getVcard() ? value.booleanValue() : /*keep as-is*/user.hasVCard()));
-            user.setWebDAV(null == value ? access.getWebdav() : (access.getWebdav() ? value.booleanValue() : /*keep as-is*/user.hasWebDAV()));
-            user.setWebDAVXML(null == value ? access.getWebdavXml() : (access.getWebdavXml() ? value.booleanValue() : /*keep as-is*/user.hasWebDAVXML()));
-            user.setWebMail(null == value ? access.getWebmail() : (access.getWebmail() ? value.booleanValue() : /*keep as-is*/user.hasWebMail()));
-            user.setDelegateTasks(null == value ? access.getDelegateTask() : (access.getDelegateTask() ? value.booleanValue() : /*keep as-is*/user.canDelegateTasks()));
-            user.setEditGroup(null == value ? access.getEditGroup() : (access.getEditGroup() ? value.booleanValue() : /*keep as-is*/user.isEditGroup()));
-            user.setEditResource(null == value ? access.getEditResource() : (access.getEditResource() ? value.booleanValue() : /*keep as-is*/user.isEditResource()));
-            user.setEditPassword(null == value ? access.getEditPassword() : (access.getEditPassword() ? value.booleanValue() : /*keep as-is*/user.isEditPassword()));
-            user.setCollectEmailAddresses(null == value ? access.isCollectEmailAddresses() : (access.isCollectEmailAddresses() ? value.booleanValue() : /*keep as-is*/user.isCollectEmailAddresses()));
-            user.setMultipleMailAccounts(null == value ? access.isMultipleMailAccounts() : (access.isMultipleMailAccounts() ? value.booleanValue() : /*keep as-is*/user.isMultipleMailAccounts()));
-            user.setSubscription(null == value ? access.isSubscription() : (access.isSubscription() ? value.booleanValue() : /*keep as-is*/user.isSubscription()));
-            user.setPublication(null == value ? access.isPublication() : (access.isPublication() ? value.booleanValue() : /*keep as-is*/user.isPublication()));
-            user.setActiveSync(null == value ? access.isActiveSync() : (access.isActiveSync() ? value.booleanValue() : /*keep as-is*/user.hasActiveSync()));
-            user.setUSM(null == value ? access.isUSM() : (access.isUSM() ? value.booleanValue() : /*keep as-is*/user.hasUSM()));
-            user.setOLOX20(null == value ? access.isOLOX20() : (access.isOLOX20() ? value.booleanValue() : /*keep as-is*/user.hasOLOX20()));
-            user.setDeniedPortal(null == value ? access.isDeniedPortal() : (access.isDeniedPortal() ? value.booleanValue() : /*keep as-is*/user.hasDeniedPortal()));
-
-            OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
-            if (null == value) {
-                adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
-                adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
-            } else {
-                if (access.isGlobalAddressBookDisabled()) {
-                    adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, value.booleanValue(), writeCon);
-                }
-                if (access.isPublicFolderEditable()) {
-                    adminHelper.setPublicFolderEditable(value.booleanValue(), ctx.getId().intValue(), userId, writeCon);
-                }
-            }
+            final UserPermissionBits user = RdbUserPermissionBitsStorage.adminLoadUserPermissionBits(userId, groups, ctx.getId().intValue(), writeCon);
+            user.setCalendar(access.getCalendar());
+            user.setContact(access.getContacts());
+            user.setFullPublicFolderAccess(access.getEditPublicFolders());
+            user.setFullSharedFolderAccess(access.getReadCreateSharedFolders());
+            user.setICal(access.getIcal());
+            user.setInfostore(access.getInfostore());
+            user.setSyncML(access.getSyncml());
+            user.setTask(access.getTasks());
+            user.setVCard(access.getVcard());
+            user.setWebDAV(access.getWebdav());
+            user.setWebDAVXML(access.getWebdavXml());
+            user.setWebMail(access.getWebmail());
+            user.setDelegateTasks(access.getDelegateTask());
+            user.setEditGroup(access.getEditGroup());
+            user.setEditResource(access.getEditResource());
+            user.setEditPassword(access.getEditPassword());
+            user.setCollectEmailAddresses(access.isCollectEmailAddresses());
+            user.setMultipleMailAccounts(access.isMultipleMailAccounts());
+            user.setSubscription(access.isSubscription());
+            user.setPublication(access.isPublication());
+            user.setActiveSync(access.isActiveSync());
+            user.setUSM(access.isUSM());
+            user.setOLOX20(access.isOLOX20());
+            user.setDeniedPortal(access.isDeniedPortal());
+            // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
+            final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
+            adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
+            adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
 
             RdbUserPermissionBitsStorage.saveUserPermissionBits(user, insert, writeCon);
             if (!insert) {
@@ -3672,20 +3584,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
             }
-        }
-    }
-
-    private static enum BoolValue {
-        TRUE(true), FALSE(false);
-
-        private final boolean value;
-
-        private BoolValue(boolean value) {
-            this.value = value;
-        }
-
-        public boolean booleanValue() {
-            return value;
         }
     }
 }

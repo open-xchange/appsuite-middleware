@@ -93,18 +93,15 @@ public class Change extends ChangeCore {
         // do the change
         oxctx.change(ctx, auth);
 
-        UserModuleAccess[] accesses = collectModuleAccessOptions(parser);
-        boolean wantsChange = (null != accesses[0] || null != accesses[1]);
-        String accessCombinationName = parseAndSetAccessCombinationName(parser);
 
-        if (wantsChange && accessCombinationName == null) {
+        UserModuleAccess changed_access = oxctx.getModuleAccess(ctx, auth);
+        final boolean wantsChange = setModuleAccessOptions(parser, changed_access);
+
+        final String accessCombinationName = parseAndSetAccessCombinationName(parser);
+
+        if( wantsChange && accessCombinationName == null) {
             // user wants to change individual perms
-            if (null != accesses[0]) {
-                oxctx.changeModuleAccess(ctx, accesses[0], false, auth);
-            }
-            if (null != accesses[1]) {
-                oxctx.changeModuleAccess(ctx, accesses[1], true, auth);
-            }
+            oxctx.changeModuleAccess(ctx, changed_access, auth);
         } else if (accessCombinationName != null && !wantsChange) {
             oxctx.changeModuleAccess(ctx, accessCombinationName, auth);
         } else if ( accessCombinationName != null && wantsChange ) {

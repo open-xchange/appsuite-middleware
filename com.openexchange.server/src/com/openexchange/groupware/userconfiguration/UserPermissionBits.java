@@ -581,15 +581,6 @@ public class UserPermissionBits implements Serializable, Cloneable {
     }
 
     /**
-     * Detects if user configuration has no portal page in GUI.
-     *
-     * @return <code>true</code> if portal page is disallowed; otherwise <code>false</code>
-     */
-    public boolean hasDeniedPortal() {
-        return hasPermission(DENIED_PORTAL);
-    }
-
-    /**
      * Sets if this user is denied to access portal.
      */
     public void setDeniedPortal(final boolean deniedPortal) {
