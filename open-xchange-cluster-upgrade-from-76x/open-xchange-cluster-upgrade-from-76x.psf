@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.hazelcast.upgrade324"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.hazelcast.upgrade324"/>
 </provider>
 </psf>
