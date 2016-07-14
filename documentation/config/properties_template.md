@@ -8,10 +8,23 @@ With release 7.8.3 Open-Xchange starts to use predefined values for properties s
 
 All properties will be described by using the layout of the table below:
 
-| Key | Description | Default | Version | Related | File |
-| :---         |     :---      |          :---: | :---: | :--- |:--- |
-| `com.openexchange.foo`   | Defines the foo     | true    | 7.8.3 |  `com.openexchange.bar`| |
-| `com.openexchange.bar`   | Defines the bar     | false    | 7.8.0 |  `com.openexchange.foo`| foobar.properties|
+| Key 		  	| `com.openexchange.foo` 	| 
+| :---        	|     :---      			|
+| Description 	| Defines the foo 			|
+| Default 		| true						|
+| Version 		| 7.8.3						|
+| Related 		| `com.openexchange.bar` 	|
+| File 			| 							|
+
+---
+
+| Key 		  	| `com.openexchange.bar` 	| 
+| :---        	|     :---      			|
+| Description 	| Defines the bar 			|
+| Default 		| false						|
+| Version 		| 7.8.0						|
+| Related 		| `com.openexchange.foo` 	|
+| File 			| foobar.properties			|
 
 These information are contained within the columns have the following meaning:
 
@@ -24,7 +37,31 @@ These information are contained within the columns have the following meaning:
 
 ## New properties
 
-Please structure the insertion of new properties based on its category and add a new section if not yet available (e. g. 'sharing', 'database', 'mail' and so on).
+To insert a new property you just have to create or update the corresponding yml file in /documentation/config folder.
+
+The yml file must have the following structure:
+
+array:
+  - data:
+      Key: c.o.some.property
+      Description: >
+        line1
+        line2
+        line3
+      Default: true
+      Version: 7.8.3
+      Related: 
+      File:
+  - data:
+      Key: c.o.some.property2
+      Description: >
+        line1
+        line2
+      Default: true
+      Version: 7.8.0
+      Related: c.o.some.property
+      File: somefile.properties
+
 
 If you would like to add a reference to another property use the following approach:
 
@@ -32,19 +69,3 @@ If you would like to add a reference to another property use the following appro
   * reference the tagged property by adding it to the 'related' column like `<a href="#com.openexchange.foo">com.openexchange.foo</a>`
 
 # Properties
-
-<span style="color:red">The following entries are just examples. Remove them when adding existing properties!</span>
-
-## Database (example)
-
-| Key | Description | Default | Version | Related | File |
-| :---         |     :---      |          :---: | :---: | :--- |:--- |
-| <a name="com.openexchange.foo">`com.openexchange.foo`</a>   | Defines the foo     | true    | 7.8.3 |  `com.openexchange.bar`| |
-| `com.openexchange.bar`   | Defines the bar     | false    | 7.8.0 |  `com.openexchange.foo`| foobar.properties|
-
-## Mail (example)
-
-| Key | Description | Default | Version | Related | File |
-| :---         |     :---      |          :---: | :---: | :--- |:--- |
-| `com.openexchange.foo`   | Defines the foo     | true    | 7.8.3 | `com.openexchange.bar`| |
-| `com.openexchange.bar`   | Defines the bar     | false   | 7.8.0 | <a href="#com.openexchange.foo">`com.openexchange.foo`</a>| foobar.properties|
