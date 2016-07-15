@@ -52,10 +52,13 @@ package com.openexchange.carddav.resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
+import org.jdom2.Element;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
 import com.openexchange.contact.ContactService;
@@ -383,19 +386,39 @@ public class ContactResource extends CommonResource<Contact> {
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
-        if (CarddavProtocol.CARD_NS.getURI().equals(namespace) && "address-data".equals(name) && exists()) {
-            WebdavProperty property = new WebdavProperty(namespace, name);
-            InputStream inputStream = null;
-            try {
-                inputStream = getBody();
-                property.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
-            } catch (IOException e) {
-                throw protocolException(e);
-            } finally {
-                Streams.close(inputStream);
+    protected WebdavProperty internalGetProperty(WebdavProperty property) throws WebdavProtocolException {
+        if (DAVProtocol.CARD_NS.getURI().equals(property.getNamespace()) && "address-data".equals(property.getName())) {
+            if (false == exists()) {
+                return null;
             }
-            return property;
+            Set<String> propertyNames = new HashSet<String>();
+            List<Element> children = property.getChildren();
+            if (null != children && 0 < children.size()) {
+                propertyNames = new HashSet<String>();
+                for (Element childElement : children) {
+                    if (DAVProtocol.CARD_NS.equals(childElement.getNamespace()) && "prop".equals(childElement.getName())) {
+                        String name = childElement.getAttributeValue("name");
+                        if (null != name) {
+                            propertyNames.add(name);
+                        }
+                    }
+                }
+            }
+            WebdavProperty result = new WebdavProperty(property.getNamespace(), property.getName());
+            if (null != propertyNames && 0 < propertyNames.size()) {
+                try (VCardExport vCardExport = generateVCardResource(propertyNames); InputStream inputStream = vCardExport.getClosingStream()) {
+                    result.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
+                } catch (IOException | OXException e) {
+                    throw protocolException(e);
+                }
+            } else {
+                try (InputStream inputStream = getBody()) {
+                    result.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
+                } catch (IOException e) {
+                    throw protocolException(e);
+                }
+            }
+            return result;
         }
         return null;
     }
@@ -516,40 +539,47 @@ public class ContactResource extends CommonResource<Contact> {
     private VCardExport getVCardResource(boolean reset) throws WebdavProtocolException {
         VCardExport vCardResource = this.vCardExport;
         if (null == vCardResource) {
-            /*
-             * retrieve an original vCard if available
-             */
-            InputStream originalVCard = null;
             try {
-                String vCardID = object.getVCardId();
-                if (null != vCardID) {
-                    int contextId = factory.getSession().getContextId();
-                    VCardStorageService vCardStorage = factory.getVCardStorageService(factory.getSession().getContextId());
-                    if (null != vCardStorage) {
-                        try {
-                            originalVCard = vCardStorage.getVCard(vCardID, contextId);
-                        } catch (OXException oxException) {
-                            LOG.warn("Error while retrieving VCard with id {} in context {} from storage.", vCardID, contextId, oxException);
-                        }
-                    }
-                }
-                /*
-                 * export current contact data & return resulting vCard stream
-                 */
-                try {
-                    VCardService vCardService = factory.requireService(VCardService.class);
-                    VCardParameters parameters = vCardService.createParameters(factory.getSession());
-                    applyAttachments(object);
-                    vCardResource = vCardService.exportContact(object, originalVCard, parameters);
-                } catch (OXException e) {
-                    throw protocolException(e);
-                }
-            } finally {
-                Streams.close(originalVCard);
+                vCardResource = generateVCardResource(null);
+            } catch (OXException e) {
+                throw protocolException(e);
             }
         }
         this.vCardExport = reset ? null : vCardResource;
         return vCardResource;
+    }
+
+    private VCardExport generateVCardResource(Set<String> propertyNames) throws OXException {
+        /*
+         * retrieve an original vCard if available
+         */
+        InputStream originalVCard = null;
+        try {
+            String vCardID = object.getVCardId();
+            if (null != vCardID) {
+                int contextId = factory.getSession().getContextId();
+                VCardStorageService vCardStorage = factory.getVCardStorageService(factory.getSession().getContextId());
+                if (null != vCardStorage) {
+                    try {
+                        originalVCard = vCardStorage.getVCard(vCardID, contextId);
+                    } catch (OXException e) {
+                        LOG.warn("Error retrieving vCard with id {} in context {} from storage.", vCardID, contextId, e);
+                    }
+                }
+            }
+            /*
+             * export current contact data & return resulting vCard stream
+             */
+            applyAttachments(object);
+            VCardService vCardService = factory.requireService(VCardService.class);
+            VCardParameters parameters = vCardService.createParameters(factory.getSession());
+            if (null != propertyNames && 0 < propertyNames.size()) {
+                parameters.setPropertyNames(propertyNames);
+            }
+            return vCardService.exportContact(object, originalVCard, parameters);
+        } finally {
+            Streams.close(originalVCard);
+        }
     }
 
 }
