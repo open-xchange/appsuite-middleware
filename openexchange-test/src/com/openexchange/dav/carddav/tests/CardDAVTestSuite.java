@@ -74,7 +74,9 @@ import org.junit.runners.Suite.SuiteClasses;
     CookieTest.class,
     BasicTest.class,
     BulkImportTest.class,
-    AddressbookQueryTest.class
+    AddressbookQueryTest.class,
+    AddressbookQueryPartialRetrievalTest.class,
+    AddressbookMultigetPartialRetrievalTest.class,
 })
 public final class CardDAVTestSuite {
 
