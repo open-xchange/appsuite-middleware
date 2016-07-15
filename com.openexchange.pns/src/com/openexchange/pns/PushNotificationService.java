@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,56 +49,26 @@
 
 package com.openexchange.pns;
 
-import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link PushNotification} - The push notification to distribute to an end-point.
+ * {@link PushNotificationService} - The service that handles specified push notifications.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotification {
+@SingletonService
+public interface PushNotificationService {
 
     /**
-     * A map containing the payload of the message
+     * Handles the specified notification.
+     * <p>
+     * Looks up associated subscriptions and delivers the notification using the appropriate {@link PushNotificationTransport transport}.
      *
-     * @return A map containing the key/value pairs for the message
+     * @param notification The push notification to handle
+     * @throws OXException If handling push notification fails
      */
-    Map<String, Object> getMessageData();
-
-    /**
-     * The affiliation
-     *
-     * @return The source of the subscription
-     */
-    PushAffiliation getAffiliation();
-
-    /**
-     * The context identifier
-     *
-     * @return The context identifier
-     */
-    int getContextId();
-
-    /**
-     * The user identifier
-     *
-     * @return The user identifier
-     */
-    int getUserId();
-
-    /**
-     * Gets the Google-specific key to stack messages; can be <code>null</code>
-     *
-     * @return The collapse key or <code>null</code>
-     */
-    String getCollapseKey();
-
-    /**
-     * Sets the Google-specific <code>COLLAPSE_KEY</code> to stack messages belonging to the key
-     *
-     * @param collapseKey The collapse key to set
-     */
-    void setCollapseKey(String collapseKey);
+    void handle(PushNotification notification) throws OXException;
 
 }

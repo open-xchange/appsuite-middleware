@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,56 +49,47 @@
 
 package com.openexchange.pns;
 
-import java.util.Map;
-
 /**
- * {@link PushNotification} - The push notification to distribute to an end-point.
+ * {@link PushSubscription} - Represents a push subscription.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotification {
+public interface PushSubscription {
 
     /**
-     * A map containing the payload of the message
-     *
-     * @return A map containing the key/value pairs for the message
-     */
-    Map<String, Object> getMessageData();
-
-    /**
-     * The affiliation
-     *
-     * @return The source of the subscription
-     */
-    PushAffiliation getAffiliation();
-
-    /**
-     * The context identifier
-     *
-     * @return The context identifier
-     */
-    int getContextId();
-
-    /**
-     * The user identifier
+     * Gets the user identifier
      *
      * @return The user identifier
      */
     int getUserId();
 
     /**
-     * Gets the Google-specific key to stack messages; can be <code>null</code>
+     * Gets the context identifier
      *
-     * @return The collapse key or <code>null</code>
+     * @return The context identifier
      */
-    String getCollapseKey();
+    int getContextId();
 
     /**
-     * Sets the Google-specific <code>COLLAPSE_KEY</code> to stack messages belonging to the key
+     * Gets the push affiliation for this subscription.
      *
-     * @param collapseKey The collapse key to set
+     * @return The affiliation
      */
-    void setCollapseKey(String collapseKey);
+    PushAffiliation getAffiliation();
+
+    /**
+     * Gets the identifier of the associated push transport.
+     *
+     * @return The transport identifier
+     */
+    String getTransportId();
+
+    /**
+     * Gets the subscription's token
+     *
+     * @return The token
+     */
+    String getToken();
 
 }

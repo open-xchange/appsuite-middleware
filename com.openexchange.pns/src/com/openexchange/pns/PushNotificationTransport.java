@@ -49,6 +49,7 @@
 
 package com.openexchange.pns;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,12 +61,13 @@ import com.openexchange.exception.OXException;
 public interface PushNotificationTransport {
 
     /**
-     * Transports an event to the service provider
+     * Transports a notification to the service provider
      *
-     * @param event The event to transport
-     * @throws OXException If given event cannot be transported
+     * @param notification The notification to transport
+     * @param subscriptions The associated subscriptions
+     * @throws OXException If given notification cannot be transported
      */
-    void transport(PushNotification event) throws OXException;
+    void transport(PushNotification notification, Collection<PushSubscription> subscriptions) throws OXException;
 
     /**
      * Gets this service's identifier.

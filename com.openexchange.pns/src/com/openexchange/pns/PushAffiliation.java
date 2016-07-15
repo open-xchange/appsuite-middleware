@@ -49,56 +49,97 @@
 
 package com.openexchange.pns;
 
-import java.util.Map;
-
 /**
- * {@link PushNotification} - The push notification to distribute to an end-point.
+ * {@link PushAffiliation} - Enumeration of possible push affiliations.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotification {
+public enum PushAffiliation {
 
     /**
-     * A map containing the payload of the message
-     *
-     * @return A map containing the key/value pairs for the message
+     * Enum field for mail-related push notifications
      */
-    Map<String, Object> getMessageData();
+    MAIL("mail", "io.ox/mail", "Mail"),
+    /**
+     * Enum field for appointment-related push notifications
+     */
+    APPOINTMENT("appointment", "io.ox/calendar", "Calendar"),
+    /**
+     * Enum field for task-related push notifications
+     */
+    TASKS("tasks", "io.ox/tasks", "Tasks"),
+    /**
+     * Enum field for reminder-related push notifications
+     */
+    REMINDER("reminder", "io.ox/reminder", "Reminder"),
+    /**
+     * Enum field for drive-related push notifications
+     */
+    DRIVE("drive", "io.ox/drive", "Drive"),
+
+    ;
+
+    private final String sourceName;
+    private final String frontendName;
+    private final String title;
+
+    private PushAffiliation(String providerName, String frontendName, String title) {
+        this.sourceName = providerName;
+        this.frontendName = frontendName;
+        this.title = title;
+    }
 
     /**
-     * The affiliation
+     * Gets the affiliation name (acting as identifier)
      *
-     * @return The source of the subscription
+     * @return The affiliation name
      */
-    PushAffiliation getAffiliation();
+    public String getAffiliationName() {
+        return sourceName;
+    }
 
     /**
-     * The context identifier
+     * Gets the front-end name
      *
-     * @return The context identifier
+     * @return The front-end name
      */
-    int getContextId();
+    public String getFrontendName() {
+        return frontendName;
+    }
 
     /**
-     * The user identifier
+     * Gets the title
      *
-     * @return The user identifier
+     * @return The title
      */
-    int getUserId();
+    public String getTitle() {
+        return title;
+    }
 
     /**
-     * Gets the Google-specific key to stack messages; can be <code>null</code>
+     * Gets the index position
      *
-     * @return The collapse key or <code>null</code>
+     * @return The index position
      */
-    String getCollapseKey();
+    public int getIndex() {
+        return ordinal() + 1;
+    }
 
     /**
-     * Sets the Google-specific <code>COLLAPSE_KEY</code> to stack messages belonging to the key
+     * Gets the affiliation for specified name.
      *
-     * @param collapseKey The collapse key to set
+     * @param affiliationName The affiliation name
+     * @return The affiliation or <code>null</code> if not found
      */
-    void setCollapseKey(String collapseKey);
-
+    public static PushAffiliation affiliationFor(String affiliationName) {
+        if (null != affiliationName) {
+            for (PushAffiliation p : PushAffiliation.values()) {
+                if (affiliationName.equals(p.getAffiliationName())) {
+                    return p;
+                }
+            }
+        }
+        return null;
+    }
 }

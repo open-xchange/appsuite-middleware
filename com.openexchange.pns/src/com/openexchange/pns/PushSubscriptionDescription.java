@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,56 +49,95 @@
 
 package com.openexchange.pns;
 
-import java.util.Map;
-
 /**
- * {@link PushNotification} - The push notification to distribute to an end-point.
+ * {@link PushSubscriptionDescription}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotification {
+public class PushSubscriptionDescription implements PushSubscription {
+
+    private int userId;
+    private int contextId;
+    private PushAffiliation affiliation;
+    private String transportId;
+    private String token;
 
     /**
-     * A map containing the payload of the message
-     *
-     * @return A map containing the key/value pairs for the message
+     * Initializes a new {@link PushSubscriptionDescription}.
      */
-    Map<String, Object> getMessageData();
+    public PushSubscriptionDescription() {
+        super();
+    }
+
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public PushAffiliation getAffiliation() {
+        return affiliation;
+    }
+
+    @Override
+    public String getTransportId() {
+        return transportId;
+    }
+
+    @Override
+    public String getToken() {
+        return token;
+    }
 
     /**
-     * The affiliation
+     * Sets the user identifier
      *
-     * @return The source of the subscription
+     * @param userId The user identifier to set
      */
-    PushAffiliation getAffiliation();
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
     /**
-     * The context identifier
+     * Sets the context identifier
      *
-     * @return The context identifier
+     * @param contextId The context identifier to set
      */
-    int getContextId();
+    public void setContextId(int contextId) {
+        this.contextId = contextId;
+    }
 
     /**
-     * The user identifier
+     * Sets the affiliation
      *
-     * @return The user identifier
+     * @param affiliation The affiliation to set
      */
-    int getUserId();
+    public void setAffiliation(PushAffiliation affiliation) {
+        this.affiliation = affiliation;
+    }
 
     /**
-     * Gets the Google-specific key to stack messages; can be <code>null</code>
+     * Sets the transport identifier
      *
-     * @return The collapse key or <code>null</code>
+     * @param transportId The transport identifier to set
      */
-    String getCollapseKey();
+    public void setTransportId(String transportId) {
+        this.transportId = transportId;
+    }
 
     /**
-     * Sets the Google-specific <code>COLLAPSE_KEY</code> to stack messages belonging to the key
+     * Sets the token
      *
-     * @param collapseKey The collapse key to set
+     * @param token The token to set
      */
-    void setCollapseKey(String collapseKey);
+    public void setToken(String token) {
+        this.token = token;
+    }
 
 }

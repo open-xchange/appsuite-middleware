@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,56 +49,56 @@
 
 package com.openexchange.pns;
 
+import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link PushNotification} - The push notification to distribute to an end-point.
+ * {@link PushSubscriptionRegistry}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotification {
+public interface PushSubscriptionRegistry {
 
     /**
-     * A map containing the payload of the message
+     * Gets all subscriptions for specified affiliation belonging to given user.
      *
-     * @return A map containing the key/value pairs for the message
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param affiliation The affiliation
+     * @param transportId The identifier of the transport that is supposed to be used
+     * @return All subscriptions for specified affiliation and transport
+     * @throws OXException If subscriptions cannot be returned
      */
-    Map<String, Object> getMessageData();
+    List<PushSubscription> getSubscriptions(int userId, int contextId, PushAffiliation affiliation, String transportId) throws OXException;
 
     /**
-     * The affiliation
+     * Gets all subscriptions for specified affiliation belonging to given user.
      *
-     * @return The source of the subscription
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param affiliation The affiliation
+     * @return All subscriptions for specified affiliation mapped to the associated transport
+     * @throws OXException If subscriptions cannot be returned
      */
-    PushAffiliation getAffiliation();
+    Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
 
     /**
-     * The context identifier
+     * Registers specified subscription.
      *
-     * @return The context identifier
+     * @param subscription The subscription to register
+     * @throws OXException If registration fails
      */
-    int getContextId();
+    void registerSubscription(PushSubscriptionDescription subscription) throws OXException;
 
     /**
-     * The user identifier
+     * Unregisters specified subscription.
      *
-     * @return The user identifier
+     * @param subscription The subscription to unregister
+     * @return <code>true</code> if such a subscription has been deleted; otherwise <code>false</code> if no such subscription existed
+     * @throws OXException If registration fails
      */
-    int getUserId();
-
-    /**
-     * Gets the Google-specific key to stack messages; can be <code>null</code>
-     *
-     * @return The collapse key or <code>null</code>
-     */
-    String getCollapseKey();
-
-    /**
-     * Sets the Google-specific <code>COLLAPSE_KEY</code> to stack messages belonging to the key
-     *
-     * @param collapseKey The collapse key to set
-     */
-    void setCollapseKey(String collapseKey);
+    boolean unregisterSubscription(PushSubscriptionDescription subscription) throws OXException;
 
 }

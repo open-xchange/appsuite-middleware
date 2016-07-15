@@ -5,16 +5,8 @@ Bundle-SymbolicName: com.openexchange.pns
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
- com.openexchange.config.cascade,
- com.openexchange.exception,
+Import-Package: com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.java,
- com.openexchange.log,
- com.openexchange.mime,
- com.openexchange.osgi,
- com.openexchange.osgi.annotation,
- com.openexchange.server,
- org.osgi.framework,
- org.osgi.util.tracker,
- org.slf4j
+ com.openexchange.osgi.annotation
+Export-Package: com.openexchange.pns
