@@ -49,56 +49,29 @@
 
 package com.openexchange.pns;
 
-import java.util.Map;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link PushEvent} - The push event.
+ * {@link PushNotificationTransport} - Transports specified events to the push service end-point.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushEvent {
+public interface PushNotificationTransport {
 
     /**
-     * A map containing the payload of the message
+     * Transports an event to the service provider
      *
-     * @return A map containing the key/value pairs for the message
+     * @param event The event to transport
+     * @throws OXException If given event cannot be transported
      */
-    Map<String, Object> getMessageData();
+    void transport(PushNotification event) throws OXException;
 
     /**
-     * The source
+     * Gets this service's identifier.
      *
-     * @return The source of the subscription
+     * @return The identifier
      */
-    PushSource getSource();
-
-    /**
-     * The context identifier
-     *
-     * @return The context identifier
-     */
-    int getContextId();
-
-    /**
-     * The user identifier
-     *
-     * @return The user identifier
-     */
-    int getUserId();
-
-    /**
-     * Gets the Google-specific key to stack messages; can be <code>null</code>
-     *
-     * @return The collapse key or <code>null</code>
-     */
-    String getCollapseKey();
-
-    /**
-     * Sets the Google-specific <code>COLLAPSE_KEY</code> to stack messages belonging to the key
-     *
-     * @param collapseKey The collapse key to set
-     */
-    void setCollapseKey(String collapseKey);
+    String getId();
 
 }

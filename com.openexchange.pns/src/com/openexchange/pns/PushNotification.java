@@ -49,26 +49,56 @@
 
 package com.openexchange.pns;
 
+import java.util.Map;
+
 /**
- * {@link PushNotificationService} - Publishes specified events to the push service end-point.
+ * {@link PushNotification} - The push notification to distribute to an end-point.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotificationService {
+public interface PushNotification {
 
     /**
-     * Publishes an event to the service provider
+     * A map containing the payload of the message
      *
-     * @param event The event to publish
+     * @return A map containing the key/value pairs for the message
      */
-    void publish(PushEvent event);
+    Map<String, Object> getMessageData();
 
     /**
-     * Gets this service's identifier.
+     * The source
      *
-     * @return The identifier
+     * @return The source of the subscription
      */
-    String getId();
+    PushSource getSource();
+
+    /**
+     * The context identifier
+     *
+     * @return The context identifier
+     */
+    int getContextId();
+
+    /**
+     * The user identifier
+     *
+     * @return The user identifier
+     */
+    int getUserId();
+
+    /**
+     * Gets the Google-specific key to stack messages; can be <code>null</code>
+     *
+     * @return The collapse key or <code>null</code>
+     */
+    String getCollapseKey();
+
+    /**
+     * Sets the Google-specific <code>COLLAPSE_KEY</code> to stack messages belonging to the key
+     *
+     * @param collapseKey The collapse key to set
+     */
+    void setCollapseKey(String collapseKey);
 
 }
