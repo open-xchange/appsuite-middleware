@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,66 +47,48 @@
  *
  */
 
-package com.openexchange.tools.servlet.ratelimit;
+package com.openexchange.ajax.requesthandler;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
+import org.fishwife.jrugged.CircuitBreaker;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link RateLimitedException} - Thrown if associated request is rate limited.
+ * {@link CircuitBreakerAJAXActionServiceFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class RateLimitedException extends RuntimeException {
-
-    private static final long serialVersionUID = 5342199025241682441L;
-    private static final int SC_TOO_MANY_REQUESTS = 429;
-
-    private final int retryAfterSeconds;
+public abstract class CircuitBreakerAJAXActionServiceFactory implements AJAXActionServiceFactory {
 
     /**
-     * Initializes a new {@link RateLimitedException}.
-     *
-     * @param message The message
-     * @param retryAfterSeconds The time in seconds to wait before retrying
+     * Initializes a new {@link CircuitBreakerAJAXActionServiceFactory}.
      */
-    public RateLimitedException(final String message, final int retryAfterSeconds) {
-        this(message, retryAfterSeconds, null);
+    protected CircuitBreakerAJAXActionServiceFactory() {
+        super();
+    }
+
+    @Override
+    public final AJAXActionService createActionService(String action) throws OXException {
+        AJAXActionService actionService = doCreateActionService(action);
+        CircuitBreaker circuitBreaker = getCircuitBreaker();
+        return null == circuitBreaker ? actionService : new CircuitBreakerAJAXActionService(circuitBreaker, actionService);
     }
 
     /**
-     * Initializes a new {@link RateLimitedException}.
+     * Gets the circuit break to apply for this action factory.
      *
-     * @param message The message
-     * @param retryAfterSeconds The time in seconds to wait before retrying
-     * @param cause The cause
+     * @return The circuit breaker
      */
-    public RateLimitedException(final String message, final int retryAfterSeconds, Throwable cause) {
-        super(message, cause);
-        this.retryAfterSeconds = retryAfterSeconds;
-    }
+    protected abstract CircuitBreaker getCircuitBreaker();
 
     /**
-     * Gets the time in seconds to wait before retrying
+     * Creates the action service for performing the request.
      *
-     * @return The time in seconds to wait before retrying
+     * @param action The name of the action
+     * @return The action service implementation and never <code>null</code>.
+     * @throws OXException If an action service can not be created for the given name.
      */
-    public int getRetryAfter() {
-        return retryAfterSeconds;
-    }
-
-    /**
-     * Sends an <code>HTTP 429</code> error response to the client based on this rate limited exception. The advised retry interval is
-     * put into an appropriate <code>Retry-After</code> header.
-     *
-     * @param response The response to use for sending the error
-     */
-    public void send(HttpServletResponse response) throws IOException {
-        response.setContentType("text/plain; charset=UTF-8");
-        if (0 < retryAfterSeconds) {
-            response.setHeader("Retry-After", String.valueOf(retryAfterSeconds));
-        }
-        response.sendError(SC_TOO_MANY_REQUESTS, "Too Many Requests - Your request is being rate limited.");
-    }
+    protected abstract AJAXActionService doCreateActionService(String action) throws OXException;
 
 }
