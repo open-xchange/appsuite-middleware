@@ -47,58 +47,59 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.subscription.storage.osgi;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.RdbPushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.groupware.CreatePnsSubscriptionTable;
+import com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask;
+import com.openexchange.pns.subscription.storage.groupware.PnsDeleteListener;
+
 
 /**
- * {@link PushSubscriptionRegistry}
+ * {@link RdbPushSubscriptionRegistryActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushSubscriptionRegistry {
+public class RdbPushSubscriptionRegistryActivator extends HousekeepingActivator {
 
     /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @param transportId The identifier of the transport that is supposed to be used
-     * @return All subscriptions for specified affiliation and transport
-     * @throws OXException If subscriptions cannot be returned
+     * Initializes a new {@link RdbPushSubscriptionRegistryActivator}.
      */
-    List<PushSubscription> getSubscriptions(int userId, int contextId, PushAffiliation affiliation, String transportId) throws OXException;
+    public RdbPushSubscriptionRegistryActivator() {
+        super();
+    }
 
-    /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @return All subscriptions for specified affiliation mapped to the associated transport
-     * @throws OXException If subscriptions cannot be returned
-     */
-    Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
 
-    /**
-     * Registers specified subscription.
-     *
-     * @param subscription The subscription to register
-     * @throws OXException If registration fails
-     */
-    void registerSubscription(PushSubscriptionDescription subscription) throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class };
+    }
 
-    /**
-     * Unregisters specified subscription.
-     *
-     * @param subscription The subscription to unregister
-     * @return <code>true</code> if such a subscription has been deleted; otherwise <code>false</code> if no such subscription existed
-     * @throws OXException If unregistration fails
-     */
-    boolean unregisterSubscription(PushSubscriptionDescription subscription) throws OXException;
+    @Override
+    protected void startBundle() throws Exception {
+        // Register update task, create table job and delete listener
+        boolean registerGroupwareStuff = false;
+        if (registerGroupwareStuff) {
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(this)));
+            registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
+            registerService(DeleteListener.class, new PnsDeleteListener());
+        }
+
+        // Register service
+        RdbPushSubscriptionRegistry pushSubscriptionRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class));
+        registerService(PushSubscriptionRegistry.class, pushSubscriptionRegistry);
+    }
 
 }

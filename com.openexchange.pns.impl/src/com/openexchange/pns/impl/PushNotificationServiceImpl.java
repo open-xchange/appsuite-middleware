@@ -47,58 +47,56 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.impl;
 
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.pns.PushNotification;
+import com.openexchange.pns.PushNotificationService;
+import com.openexchange.pns.PushNotificationTransport;
+import com.openexchange.pns.PushSubscription;
+import com.openexchange.pns.PushSubscriptionRegistry;
 
 /**
- * {@link PushSubscriptionRegistry}
+ * {@link PushNotificationServiceImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushSubscriptionRegistry {
+public class PushNotificationServiceImpl implements PushNotificationService {
+
+    private final PushSubscriptionRegistry subscriptionRegistry;
+    private final ServiceListing<PushNotificationTransport> transports;
 
     /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
+     * Initializes a new {@link PushNotificationServiceImpl}.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @param transportId The identifier of the transport that is supposed to be used
-     * @return All subscriptions for specified affiliation and transport
-     * @throws OXException If subscriptions cannot be returned
+     * @param subscriptionRegistry The subscription registry to use
      */
-    List<PushSubscription> getSubscriptions(int userId, int contextId, PushAffiliation affiliation, String transportId) throws OXException;
+    public PushNotificationServiceImpl(PushSubscriptionRegistry subscriptionRegistry, ServiceListing<PushNotificationTransport> transports) {
+        super();
+        this.subscriptionRegistry = subscriptionRegistry;
+        this.transports = transports;
+    }
 
-    /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @return All subscriptions for specified affiliation mapped to the associated transport
-     * @throws OXException If subscriptions cannot be returned
-     */
-    Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
+    @Override
+    public void handle(PushNotification notification) throws OXException {
+        // Query appropriate subscriptions
+        Map<String, List<PushSubscription>> subscriptionsMap = subscriptionRegistry.getSubscriptions(notification.getUserId(), notification.getContextId(), notification.getAffiliation());
+        if (null == subscriptionsMap || subscriptionsMap.isEmpty()) {
+            return;
+        }
 
-    /**
-     * Registers specified subscription.
-     *
-     * @param subscription The subscription to register
-     * @throws OXException If registration fails
-     */
-    void registerSubscription(PushSubscriptionDescription subscription) throws OXException;
-
-    /**
-     * Unregisters specified subscription.
-     *
-     * @param subscription The subscription to unregister
-     * @return <code>true</code> if such a subscription has been deleted; otherwise <code>false</code> if no such subscription existed
-     * @throws OXException If unregistration fails
-     */
-    boolean unregisterSubscription(PushSubscriptionDescription subscription) throws OXException;
+        // Transport each subscription using associated transport
+        List<PushNotificationTransport> transports = this.transports.getServiceList();
+        for (PushNotificationTransport transport : transports) {
+            List<PushSubscription> subscriptions = subscriptionsMap.get(transport.getId());
+            if (null != subscriptions) {
+                transport.transport(notification, subscriptions);
+            }
+        }
+    }
 
 }

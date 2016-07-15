@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The storage implementation for push subscriptions
+Bundle-SymbolicName: com.openexchange.pns.subscription.storage
+Bundle-Version: 7.8.3
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: 
+ com.openexchange.context,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
+ com.openexchange.groupware.update,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.pns,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ com.openexchange.tools.sql,
+ org.osgi.framework,
+ org.slf4j

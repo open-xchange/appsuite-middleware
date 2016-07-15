@@ -47,58 +47,94 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.subscription.storage;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
+import java.util.Date;
+import com.openexchange.pns.PushAffiliation;
+import com.openexchange.pns.PushSubscription;
+
 
 /**
- * {@link PushSubscriptionRegistry}
+ * {@link RdbPushSubscription}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushSubscriptionRegistry {
+public class RdbPushSubscription implements PushSubscription {
+
+    private final int contextId;
+    private final int userId;
+    private final String transportId;
+    private final String token;
+    private final PushAffiliation affiliation;
+    private final Date lastModified;
 
     /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
+     * Initializes a new {@link RdbPushSubscription}.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @param transportId The identifier of the transport that is supposed to be used
-     * @return All subscriptions for specified affiliation and transport
-     * @throws OXException If subscriptions cannot be returned
+     * @param transportId The transport identifier
+     * @param token The token
+     * @param affiliationName The affiliation name
+     * @param lastModified The last-modified date
      */
-    List<PushSubscription> getSubscriptions(int userId, int contextId, PushAffiliation affiliation, String transportId) throws OXException;
+    public RdbPushSubscription(int userId, int contextId, String transportId, String token, String affiliationName, Date lastModified) {
+        this(userId, contextId, transportId, token, PushAffiliation.affiliationFor(affiliationName), lastModified);
+    }
 
     /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
+     * Initializes a new {@link RdbPushSubscription}.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param transportId The transport identifier
+     * @param token The token
      * @param affiliation The affiliation
-     * @return All subscriptions for specified affiliation mapped to the associated transport
-     * @throws OXException If subscriptions cannot be returned
+     * @param lastModified The last-modified date
      */
-    Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
+    public RdbPushSubscription(int userId, int contextId, String transportId, String token, PushAffiliation affiliation, Date lastModified) {
+        super();
+        this.userId = userId;
+        this.contextId = contextId;
+        this.transportId = transportId;
+        this.token = token;
+        this.affiliation = affiliation;
+        this.lastModified = lastModified;
+    }
 
     /**
-     * Registers specified subscription.
+     * Gets the last-modified date
      *
-     * @param subscription The subscription to register
-     * @throws OXException If registration fails
+     * @return The last-modified date or <code>null</code>
      */
-    void registerSubscription(PushSubscriptionDescription subscription) throws OXException;
+    public Date getLastModified() {
+        return lastModified;
+    }
 
-    /**
-     * Unregisters specified subscription.
-     *
-     * @param subscription The subscription to unregister
-     * @return <code>true</code> if such a subscription has been deleted; otherwise <code>false</code> if no such subscription existed
-     * @throws OXException If unregistration fails
-     */
-    boolean unregisterSubscription(PushSubscriptionDescription subscription) throws OXException;
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public String getTransportId() {
+        return transportId;
+    }
+
+    @Override
+    public String getToken() {
+        return token;
+    }
+
+    @Override
+    public PushAffiliation getAffiliation() {
+        return affiliation;
+    }
 
 }

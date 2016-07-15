@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,52 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.subscription.storage.groupware;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link PushSubscriptionRegistry}
+ * {@link CreatePnsSubscriptionTable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public interface PushSubscriptionRegistry {
+public final class CreatePnsSubscriptionTable extends AbstractCreateTableImpl {
 
-    /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @param transportId The identifier of the transport that is supposed to be used
-     * @return All subscriptions for specified affiliation and transport
-     * @throws OXException If subscriptions cannot be returned
-     */
-    List<PushSubscription> getSubscriptions(int userId, int contextId, PushAffiliation affiliation, String transportId) throws OXException;
+    public static final String CREATE_TABLE_STATEMENT =
+        "CREATE TABLE pns_subscriptions (" +
+        "cid INT4 UNSIGNED NOT NULL," +
+        "user INT4 UNSIGNED NOT NULL," +
+        "token VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
+        "affiliation VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
+        "transport VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
+        "last_modified BIGINT(64) NOT NULL," +
+        "PRIMARY KEY (cid, user, token)," +
+        "INDEX `affiliationIndex` (cid, user, affiliation)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
-    /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @return All subscriptions for specified affiliation mapped to the associated transport
-     * @throws OXException If subscriptions cannot be returned
-     */
-    Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
+    public CreatePnsSubscriptionTable() {
+        super();
+    }
 
-    /**
-     * Registers specified subscription.
-     *
-     * @param subscription The subscription to register
-     * @throws OXException If registration fails
-     */
-    void registerSubscription(PushSubscriptionDescription subscription) throws OXException;
+    @Override
+    public String[] getCreateStatements() {
+        return createStatements;
+    }
 
-    /**
-     * Unregisters specified subscription.
-     *
-     * @param subscription The subscription to unregister
-     * @return <code>true</code> if such a subscription has been deleted; otherwise <code>false</code> if no such subscription existed
-     * @throws OXException If unregistration fails
-     */
-    boolean unregisterSubscription(PushSubscriptionDescription subscription) throws OXException;
+    @Override
+    public String[] requiredTables() {
+        return requiredTables;
+    }
+
+    @Override
+    public String[] tablesToCreate() {
+        return createdTables;
+    }
+
+    private static final String[] requiredTables = { "user" };
+
+    private static final String[] createdTables = { "pns_subscriptions" };
+
+    private static final String[] createStatements = { CREATE_TABLE_STATEMENT };
 
 }

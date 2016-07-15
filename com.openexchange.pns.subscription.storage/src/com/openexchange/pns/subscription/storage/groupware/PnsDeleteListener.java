@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,65 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.subscription.storage.groupware;
 
-import java.util.List;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link PushSubscriptionRegistry}
+ * {@link PnsDeleteListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public interface PushSubscriptionRegistry {
+public final class PnsDeleteListener implements DeleteListener {
 
     /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @param transportId The identifier of the transport that is supposed to be used
-     * @return All subscriptions for specified affiliation and transport
-     * @throws OXException If subscriptions cannot be returned
+     * Initializes a new {@link PnsDeleteListener}.
      */
-    List<PushSubscription> getSubscriptions(int userId, int contextId, PushAffiliation affiliation, String transportId) throws OXException;
+    public PnsDeleteListener() {
+        super();
+    }
 
-    /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @return All subscriptions for specified affiliation mapped to the associated transport
-     * @throws OXException If subscriptions cannot be returned
-     */
-    Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
-
-    /**
-     * Registers specified subscription.
-     *
-     * @param subscription The subscription to register
-     * @throws OXException If registration fails
-     */
-    void registerSubscription(PushSubscriptionDescription subscription) throws OXException;
-
-    /**
-     * Unregisters specified subscription.
-     *
-     * @param subscription The subscription to unregister
-     * @return <code>true</code> if such a subscription has been deleted; otherwise <code>false</code> if no such subscription existed
-     * @throws OXException If unregistration fails
-     */
-    boolean unregisterSubscription(PushSubscriptionDescription subscription) throws OXException;
+    @Override
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (DeleteEvent.TYPE_USER == event.getType()) {
+            int contextId = event.getContext().getContextId();
+            PreparedStatement stmt = null;
+            try {
+                final int userId = event.getId();
+                stmt = writeCon.prepareStatement("DELETE FROM pns_subscriptions WHERE cid = ? AND user = ?");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, userId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
+            int contextId = event.getContext().getContextId();
+            PreparedStatement stmt = null;
+            try {
+                stmt = writeCon.prepareStatement("DELETE FROM pns_subscriptions WHERE cid = ?");
+                stmt.setInt(1, contextId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        }
+    }
 
 }
