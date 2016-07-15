@@ -65,7 +65,7 @@ public class UIDMapping extends SimpleMapping<Uid> {
      * Initializes a new {@link UIDMapping}.
      */
     public UIDMapping() {
-        super(Contact.UID, Uid.class);
+        super(Contact.UID, Uid.class, "UID");
     }
 
     @Override

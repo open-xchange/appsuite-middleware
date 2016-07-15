@@ -68,7 +68,7 @@ public class StructuredNameMapping extends AbstractMapping {
      * Initializes a new {@link StructuredNameMapping}.
      */
     public StructuredNameMapping() {
-        super();
+        super("N");
     }
 
     @Override

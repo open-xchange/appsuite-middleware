@@ -82,4 +82,11 @@ public interface VCardMapping {
      */
     void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings);
 
+    /**
+     * Gets the property names affected by this mapping.
+     *
+     * @return The property names
+     */
+    String[] getPropertyNames();
+
 }

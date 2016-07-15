@@ -66,6 +66,13 @@ import ezvcard.property.RawProperty;
  */
 public class ProductIdMapping extends AbstractMapping {
 
+    /**
+     * Initializes a new {@link ProductIdMapping}.
+     */
+    public ProductIdMapping() {
+        super("PRODID");
+    }
+
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         vCard.removeProperties(ProductId.class);

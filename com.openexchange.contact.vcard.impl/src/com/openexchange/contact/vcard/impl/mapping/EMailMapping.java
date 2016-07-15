@@ -67,6 +67,13 @@ import ezvcard.property.Email;
  */
 public class EMailMapping extends AbstractMapping {
 
+    /**
+     * Initializes a new {@link EMailMapping}.
+     */
+    public EMailMapping() {
+        super("EMAIL");
+    }
+
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         List<Email> emails = vCard.getEmails();

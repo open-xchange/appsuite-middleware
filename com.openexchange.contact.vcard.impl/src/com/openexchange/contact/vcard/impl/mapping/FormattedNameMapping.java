@@ -62,7 +62,7 @@ import ezvcard.property.FormattedName;
 public class FormattedNameMapping extends SimpleMapping<FormattedName> {
 
     public FormattedNameMapping() {
-        super(Contact.DISPLAY_NAME, FormattedName.class);
+        super(Contact.DISPLAY_NAME, FormattedName.class, "FN");
     }
 
     @Override

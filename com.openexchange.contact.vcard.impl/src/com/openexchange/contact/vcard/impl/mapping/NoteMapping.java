@@ -65,7 +65,7 @@ public class NoteMapping extends SimpleMapping<Note> {
      * Initializes a new {@link NoteMapping}.
      */
     public NoteMapping() {
-        super(Contact.NOTE, Note.class);
+        super(Contact.NOTE, Note.class, "NOTE");
     }
 
     @Override

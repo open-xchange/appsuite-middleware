@@ -75,6 +75,13 @@ public class TelephoneMapping extends AbstractMapping {
     static final String TYPE_PRIMARY = "x-primary";
     static final String TYPE_2ND = "x-2nd";
 
+    /**
+     * Initializes a new {@link TelephoneMapping}.
+     */
+    public TelephoneMapping() {
+        super("TEL");
+    }
+
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         List<Telephone> properties = vCard.getProperties(Telephone.class);

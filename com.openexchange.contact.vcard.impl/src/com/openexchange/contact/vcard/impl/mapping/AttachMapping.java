@@ -86,7 +86,7 @@ public class AttachMapping extends AbstractMapping {
      * Initializes a new {@link AttachMapping}.
      */
     public AttachMapping() {
-        super();
+        super("ATTACH");
     }
 
     @Override

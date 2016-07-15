@@ -67,7 +67,7 @@ public class ClassMapping extends SimpleMapping<Classification> {
      * Initializes a new {@link ClassMapping}.
      */
     public ClassMapping() {
-        super(Contact.PRIVATE_FLAG, Classification.class);
+        super(Contact.PRIVATE_FLAG, Classification.class, "CLASS");
     }
 
     @Override

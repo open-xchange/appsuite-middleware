@@ -100,7 +100,7 @@ public class PhotoMapping extends AbstractMapping {
      * Initializes a new {@link PhotoMapping}.
      */
     public PhotoMapping() {
-        super();
+        super("PHOTO");
     }
 
     @Override

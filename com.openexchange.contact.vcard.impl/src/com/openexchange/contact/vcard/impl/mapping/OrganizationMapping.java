@@ -68,7 +68,7 @@ public class OrganizationMapping extends AbstractMapping {
      * Initializes a new {@link OrganizationMapping}.
      */
     public OrganizationMapping() {
-        super();
+        super("ORG");
     }
 
     @Override

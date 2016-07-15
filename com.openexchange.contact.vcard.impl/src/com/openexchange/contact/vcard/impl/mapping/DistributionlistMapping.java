@@ -82,7 +82,7 @@ public class DistributionlistMapping extends AbstractMapping {
      * Initializes a new {@link DistributionlistMapping}.
      */
     public DistributionlistMapping() {
-        super();
+        super("KIND", "MEMBER");
     }
 
     @Override

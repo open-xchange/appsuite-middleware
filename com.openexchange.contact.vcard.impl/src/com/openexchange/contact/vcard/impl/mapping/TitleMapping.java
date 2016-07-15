@@ -65,7 +65,7 @@ public class TitleMapping extends SimpleMapping<Title> {
      * Initializes a new {@link TitleMapping}.
      */
     public TitleMapping() {
-        super(Contact.POSITION, Title.class);
+        super(Contact.POSITION, Title.class, "POSITION");
     }
 
     @Override

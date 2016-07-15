@@ -445,4 +445,21 @@ public abstract class AbstractMapping implements VCardMapping {
         return null;
     }
 
+    private final String[] propertyNames;
+
+    /**
+     * Initializes a new {@link AbstractMapping}.
+     *
+     * @param propertyNames The affected vCard property names
+     */
+    protected AbstractMapping(String...propertyNames) {
+        super();
+        this.propertyNames = propertyNames;
+    }
+
+    @Override
+    public String[] getPropertyNames() {
+        return propertyNames;
+    }
+
 }

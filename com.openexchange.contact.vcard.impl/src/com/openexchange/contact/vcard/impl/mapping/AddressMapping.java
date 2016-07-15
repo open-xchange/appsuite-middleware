@@ -65,6 +65,13 @@ import ezvcard.property.Address;
  */
 public class AddressMapping extends AbstractMapping {
 
+    /**
+     * Initializes a new {@link AddressMapping}.
+     */
+    public AddressMapping() {
+        super("ADR");
+    }
+
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         List<Address> addresses = vCard.getAddresses();

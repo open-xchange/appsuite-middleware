@@ -65,7 +65,7 @@ public class RoleMapping extends SimpleMapping<Role> {
      * Initializes a new {@link RoleMapping}.
      */
     public RoleMapping() {
-        super(Contact.PROFESSION, Role.class);
+        super(Contact.PROFESSION, Role.class, "ROLE");
     }
 
     @Override
