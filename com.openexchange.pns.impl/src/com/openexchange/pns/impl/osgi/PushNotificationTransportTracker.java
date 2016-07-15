@@ -49,46 +49,69 @@
 
 package com.openexchange.pns.impl.osgi;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.pns.PushNotificationService;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.pns.PushNotificationTransport;
-import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.impl.PushNotificationServiceImpl;
-
+import com.openexchange.pns.impl.PushNotificationTransportRegistry;
 
 /**
- * {@link PushNotificationServiceImplActivator}
+ * {@link PushNotificationTransportTracker} - The tracker for transports.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class PushNotificationServiceImplActivator extends HousekeepingActivator {
+public final class PushNotificationTransportTracker implements ServiceTrackerCustomizer<PushNotificationTransport, PushNotificationTransport>, PushNotificationTransportRegistry {
+
+    private final ConcurrentMap<String, PushNotificationTransport> transportMap;
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link PushNotificationServiceImplActivator}.
+     * Initializes a new {@link PushNotificationTransportTracker}.
      */
-    public PushNotificationServiceImplActivator() {
+    public PushNotificationTransportTracker(BundleContext context) {
         super();
+        this.transportMap = new ConcurrentHashMap<>(4, 0.9F, 1);;
+        this.context = context;
     }
 
     @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    public PushNotificationTransport addingService(ServiceReference<PushNotificationTransport> reference) {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationTransportTracker.class);
+
+        PushNotificationTransport transport = context.getService(reference);
+        if (null == transportMap.putIfAbsent(transport.getId(), transport)) {
+            logger.info("Successfully registered '{}' push notification transport", transport.getId());
+            return transport;
+        }
+
+        logger.error("Failed to register '{}' push notification transport for class {}. There is already such a transport.", transport.getId(), transport.getClass().getName());
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { PushSubscriptionRegistry.class };
+    public void modifiedService(ServiceReference<PushNotificationTransport> reference, PushNotificationTransport service) {
+        // Nothing
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        PushNotificationTransportTracker transportTracker = new PushNotificationTransportTracker(context);
-        track(PushNotificationTransport.class, transportTracker);
-        openTrackers();
+    public void removedService(ServiceReference<PushNotificationTransport> reference, PushNotificationTransport transport) {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationTransportTracker.class);
 
-        PushNotificationServiceImpl serviceImpl = new PushNotificationServiceImpl(getService(PushSubscriptionRegistry.class), transportTracker);
-        registerService(PushNotificationService.class, serviceImpl);
+        if (null != transportMap.remove(transport.getId())) {
+            logger.info("Successfully unregistered '{}' push notification transport", transport.getId());
+            return;
+        }
+
+        context.ungetService(reference);
     }
 
+    @Override
+    public PushNotificationTransport getTransportFor(String transportId) {
+        return null == transportId ? null : transportMap.get(transportId);
+    }
 }

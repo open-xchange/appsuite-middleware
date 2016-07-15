@@ -51,8 +51,9 @@ package com.openexchange.pns.impl;
 
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ServiceListing;
+import com.openexchange.pns.PushAffiliation;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
@@ -67,34 +68,41 @@ import com.openexchange.pns.PushSubscriptionRegistry;
  */
 public class PushNotificationServiceImpl implements PushNotificationService {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImpl.class);
+
     private final PushSubscriptionRegistry subscriptionRegistry;
-    private final ServiceListing<PushNotificationTransport> transports;
+    private final PushNotificationTransportRegistry transportRegistry;
 
     /**
      * Initializes a new {@link PushNotificationServiceImpl}.
      *
      * @param subscriptionRegistry The subscription registry to use
      */
-    public PushNotificationServiceImpl(PushSubscriptionRegistry subscriptionRegistry, ServiceListing<PushNotificationTransport> transports) {
+    public PushNotificationServiceImpl(PushSubscriptionRegistry subscriptionRegistry, PushNotificationTransportRegistry transportRegistry) {
         super();
         this.subscriptionRegistry = subscriptionRegistry;
-        this.transports = transports;
+        this.transportRegistry = transportRegistry;
     }
 
     @Override
     public void handle(PushNotification notification) throws OXException {
         // Query appropriate subscriptions
-        Map<String, List<PushSubscription>> subscriptionsMap = subscriptionRegistry.getSubscriptions(notification.getUserId(), notification.getContextId(), notification.getAffiliation());
+        int contextId = notification.getContextId();
+        int userId = notification.getUserId();
+        PushAffiliation affiliation = notification.getAffiliation();
+        Map<String, List<PushSubscription>> subscriptionsMap = subscriptionRegistry.getSubscriptions(userId, contextId, affiliation);
         if (null == subscriptionsMap || subscriptionsMap.isEmpty()) {
             return;
         }
 
         // Transport each subscription using associated transport
-        List<PushNotificationTransport> transports = this.transports.getServiceList();
-        for (PushNotificationTransport transport : transports) {
-            List<PushSubscription> subscriptions = subscriptionsMap.get(transport.getId());
-            if (null != subscriptions) {
-                transport.transport(notification, subscriptions);
+        for (Map.Entry<String,List<com.openexchange.pns.PushSubscription>> entry : subscriptionsMap.entrySet()) {
+            String transportId = entry.getKey();
+            PushNotificationTransport transport = transportRegistry.getTransportFor(transportId);
+            if (null == transport) {
+                LOG.warn("No such transport for '{}' to publish notification from user {} in context {} for affiliation {}", transportId, userId, contextId, affiliation.getAffiliationName());
+            } else {
+                transport.transport(notification, entry.getValue());
             }
         }
     }

@@ -47,48 +47,24 @@
  *
  */
 
-package com.openexchange.pns.impl.osgi;
+package com.openexchange.pns.impl;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
-import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.impl.PushNotificationServiceImpl;
-
 
 /**
- * {@link PushNotificationServiceImplActivator}
+ * {@link PushNotificationTransportRegistry}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class PushNotificationServiceImplActivator extends HousekeepingActivator {
+public interface PushNotificationTransportRegistry {
 
     /**
-     * Initializes a new {@link PushNotificationServiceImplActivator}.
+     * Gets the transport for specified identifier
+     *
+     * @param transportId The transport identifier
+     * @return The transport or <code>null</code> if no such transport has been registered, yet
      */
-    public PushNotificationServiceImplActivator() {
-        super();
-    }
-
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { PushSubscriptionRegistry.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        PushNotificationTransportTracker transportTracker = new PushNotificationTransportTracker(context);
-        track(PushNotificationTransport.class, transportTracker);
-        openTrackers();
-
-        PushNotificationServiceImpl serviceImpl = new PushNotificationServiceImpl(getService(PushSubscriptionRegistry.class), transportTracker);
-        registerService(PushNotificationService.class, serviceImpl);
-    }
+    PushNotificationTransport getTransportFor(String transportId);
 
 }
