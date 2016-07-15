@@ -78,6 +78,7 @@ import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.property.PropContainer;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -412,10 +413,23 @@ public abstract class CardDAVTest extends WebDAVTest {
      * @return The vCard resources
      */
     protected List<VCardResource> addressbookMultiget(String collection, Collection<String> hrefs) throws Exception {
-        List<VCardResource> addressData = new ArrayList<VCardResource>();
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
         props.add(PropertyNames.ADDRESS_DATA);
+        return addressbookMultiget(collection, hrefs, props);
+    }
+
+    /**
+     * Performs a REPORT method in a specific collection, requesting the address data and ETags of all elements identified by the
+     * supplied hrefs.
+     *
+     * @param collection The collection to perform the report action in
+     * @param hrefs The hrefs to request
+     * @param props The properties to request
+     * @return The vCard resources
+     */
+    protected List<VCardResource> addressbookMultiget(String collection, Collection<String> hrefs, PropContainer props) throws Exception {
+        List<VCardResource> addressData = new ArrayList<VCardResource>();
         ReportInfo reportInfo = new AddressbookMultiGetReportInfo(hrefs.toArray(new String[hrefs.size()]), props);
         MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/" + collection + '/');
         for (MultiStatusResponse response : responses) {

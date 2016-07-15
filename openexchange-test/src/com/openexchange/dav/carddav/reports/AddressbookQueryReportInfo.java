@@ -52,7 +52,7 @@ package com.openexchange.dav.carddav.reports;
 import java.util.Collections;
 import java.util.List;
 import org.apache.jackrabbit.webdav.DavConstants;
-import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.property.PropContainer;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.apache.jackrabbit.webdav.xml.DomUtil;
 import org.apache.jackrabbit.webdav.xml.Namespace;
@@ -71,6 +71,7 @@ import com.openexchange.dav.PropertyNames;
 public class AddressbookQueryReportInfo extends ReportInfo {
 
     private final List<PropFilter> filters;
+    private final PropContainer propertyNames;
     private final String filterTest;
 
     /**
@@ -88,7 +89,7 @@ public class AddressbookQueryReportInfo extends ReportInfo {
      * @param filter The property filter
      * @param propertyNames the properties to include in the request
      */
-    public AddressbookQueryReportInfo(PropFilter filter, DavPropertyNameSet propertyNames) {
+    public AddressbookQueryReportInfo(PropFilter filter, PropContainer propertyNames) {
         this(Collections.singletonList(filter), propertyNames, null);
     }
 
@@ -100,10 +101,11 @@ public class AddressbookQueryReportInfo extends ReportInfo {
      * @param filterTest <code>allof</code> to combine the filters with a logical <code>AND</code>, <code>anyof</code>
      *        for a logical <code>OR</code>, or <code>null</code> for the default behavior
      */
-    public AddressbookQueryReportInfo(List<PropFilter> filters, DavPropertyNameSet propertyNames, String filterTest) {
-        super(AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET, DavConstants.DEPTH_0, propertyNames);
+    public AddressbookQueryReportInfo(List<PropFilter> filters, PropContainer propertyNames, String filterTest) {
+        super(AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET, DavConstants.DEPTH_0, null);
         this.filters = filters;
         this.filterTest = filterTest;
+        this.propertyNames = propertyNames;
     }
 
     @Override
@@ -119,7 +121,9 @@ public class AddressbookQueryReportInfo extends ReportInfo {
     	/*
     	 * append properties element
     	 */
-    	addressbookQueryElement.appendChild(getPropertyNameSet().toXml(document));
+    	if (null != propertyNames) {
+            addressbookQueryElement.appendChild(propertyNames.toXml(document));
+    	}
     	/*
     	 * append filters
     	 */
