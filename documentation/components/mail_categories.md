@@ -80,29 +80,29 @@ Add following properties:
     com.openexchange.mail.categories.promotion.flag=$promotion
     com.openexchange.mail.categories.promotion.force=false
     com.openexchange.mail.categories.promotion.active=true
-    com.openexchange.mail.categories.promotion.fallback=Promotions
+    com.openexchange.mail.categories.promotion.name.fallback=Promotions
     com.openexchange.mail.categories.promotion.name.de_DE=Angebote
 
     com.openexchange.mail.categories.social.flag=$social
     com.openexchange.mail.categories.social.force=false
     com.openexchange.mail.categories.social.active=true
-    com.openexchange.mail.categories.social.fallback=Social
+    com.openexchange.mail.categories.social.name.fallback=Social
     com.openexchange.mail.categories.social.name.de_DE=Social
 
     com.openexchange.mail.categories.purchases.flag=$purchases
     com.openexchange.mail.categories.purchases.force=false
     com.openexchange.mail.categories.purchases.active=true
-    com.openexchange.mail.categories.purchases.fallback=Purchases
+    com.openexchange.mail.categories.purchases.name.fallback=Purchases
     com.openexchange.mail.categories.purchases.name.de_DE=Eink\u00E4ufe
 
     com.openexchange.mail.categories.uc1.flag=$uc1
     com.openexchange.mail.categories.uc1.active=true
-    com.openexchange.mail.categories.uc1.fallback=Friends
+    com.openexchange.mail.categories.uc1.name.fallback=Friends
     com.openexchange.mail.categories.uc1.name.de_DE=Freunde
 
     com.openexchange.mail.categories.uc2.flag=$uc2
     com.openexchange.mail.categories.uc2.active=true
-    com.openexchange.mail.categories.uc2.fallback=Work
+    com.openexchange.mail.categories.uc2.name.fallback=Work
     com.openexchange.mail.categories.uc2.name.de_DE=Arbeit
 
 
@@ -190,29 +190,29 @@ Finally your ```mail-categories.properties``` file should look similar to this:
     com.openexchange.mail.categories.promotion.flag=$promotion
     com.openexchange.mail.categories.promotion.force=false
     com.openexchange.mail.categories.promotion.active=true
-    com.openexchange.mail.categories.promotion.fallback=Promotions
+    com.openexchange.mail.categories.promotion.name.fallback=Promotions
     com.openexchange.mail.categories.promotion.name.de_DE=Angebote
 
     com.openexchange.mail.categories.social.flag=$social
     com.openexchange.mail.categories.social.force=false
     com.openexchange.mail.categories.social.active=true
-    com.openexchange.mail.categories.social.fallback=Social
+    com.openexchange.mail.categories.social.name.fallback=Social
     com.openexchange.mail.categories.social.name.de_DE=Social
 
     com.openexchange.mail.categories.purchases.flag=$purchases
     com.openexchange.mail.categories.purchases.force=false
     com.openexchange.mail.categories.purchases.active=true
-    com.openexchange.mail.categories.purchases.fallback=Purchases
+    com.openexchange.mail.categories.purchases.name.fallback=Purchases
     com.openexchange.mail.categories.purchases.name.de_DE=Eink\u00E4ufe
 
     com.openexchange.mail.categories.uc1.flag=$uc1
     com.openexchange.mail.categories.uc1.active=true
-    com.openexchange.mail.categories.uc1.fallback=Friends
+    com.openexchange.mail.categories.uc1.name.fallback=Friends
     com.openexchange.mail.categories.uc1.name.de_DE=Freunde
 
     com.openexchange.mail.categories.uc2.flag=$uc2
     com.openexchange.mail.categories.uc2.active=true
-    com.openexchange.mail.categories.uc2.fallback=Work
+    com.openexchange.mail.categories.uc2.name.fallback=Work
     com.openexchange.mail.categories.uc2.name.de_DE=Arbeit
 
     # A flag indicating whether the rules should be applied or not
