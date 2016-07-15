@@ -64,6 +64,13 @@ import ezvcard.property.Revision;
  */
 public class RevisionMapping extends AbstractMapping {
 
+    /**
+     * Initializes a new {@link RevisionMapping}.
+     */
+    public RevisionMapping() {
+        super("REV");
+    }
+
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         Revision property = vCard.getRevision();

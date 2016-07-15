@@ -51,6 +51,7 @@ package com.openexchange.contact.vcard.impl.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.impl.mapping.AddressMapping;
 import com.openexchange.contact.vcard.impl.mapping.AnniversaryMapping;
@@ -80,6 +81,9 @@ import com.openexchange.contact.vcard.impl.mapping.VCardMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
+import ezvcard.io.scribe.ScribeIndex;
+import ezvcard.io.scribe.VCardPropertyScribe;
+import ezvcard.property.VCardProperty;
 
 /**
  * {@link VCardMapper}
@@ -87,6 +91,9 @@ import ezvcard.VCard;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class VCardMapper {
+
+    /** The default scribe index */
+    private static final ScribeIndex SCRIBE_INDEX = new ScribeIndex();
 
     private final List<VCardMapping> mappings;
 
@@ -358,9 +365,13 @@ public class VCardMapper {
     public VCard exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         if (null == vCard) {
             vCard = new VCard();
+        } else {
+            vCard = removeSkippedProperties(vCard, parameters);
         }
         for (VCardMapping mapping : mappings) {
-            mapping.exportContact(contact, vCard, parameters, warnings);
+            if (false == skip(mapping, parameters)) {
+                mapping.exportContact(contact, vCard, parameters, warnings);
+            }
         }
         return vCard;
     }
@@ -379,9 +390,60 @@ public class VCardMapper {
             contact = new Contact();
         }
         for (VCardMapping mapping : mappings) {
-            mapping.importVCard(vCard, contact, parameters, warnings);
+            if (false == skip(mapping, parameters)) {
+                mapping.importVCard(vCard, contact, parameters, warnings);
+            }
         }
         return contact;
+    }
+
+    /**
+     * Gets a value indicating whether the mapping may be skipped during import or export or not, based on the property names defined at
+     * {@link VCardParameters#getPropertyNames}.
+     *
+     * @param mapping The mapping to check
+     * @param parameters The parameters
+     * @return <code>true</code> if the mapping may be skipped, <code>false</code>, otherwise
+     */
+    private static boolean skip(VCardMapping mapping, VCardParameters parameters) {
+        if (null != parameters) {
+            Set<String> configuredProperties = parameters.getPropertyNames();
+            if (null != configuredProperties && 0 < configuredProperties.size()) {
+                String[] propertyNames = mapping.getPropertyNames();
+                if (null != propertyNames) {
+                    for (String propertyName : propertyNames) {
+                        if (configuredProperties.contains(propertyName)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes any properties in the vCard that are not exported/imported, based on the property names defined at
+     * {@link VCardParameters#getPropertyNames}.
+     *
+     * @param vCard the vCard to remove the skipped properties in
+     * @param parameters The vCard parameters
+     * @return The (stripped) vCard
+     */
+    private static VCard removeSkippedProperties(VCard vCard, VCardParameters parameters) {
+        if (null != parameters) {
+            Set<String> configuredProperties = parameters.getPropertyNames();
+            if (null != configuredProperties && 0 < configuredProperties.size()) {
+                for (VCardProperty property : vCard.getProperties()) {
+                    VCardPropertyScribe<? extends VCardProperty> scribe = SCRIBE_INDEX.getPropertyScribe(property);
+                    if (null == scribe || null == scribe.getPropertyName() || false == configuredProperties.contains(scribe.getPropertyName())) {
+                        vCard.removeProperty(property);
+                    }
+                }
+            }
+        }
+        return vCard;
     }
 
 }

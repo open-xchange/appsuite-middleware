@@ -69,7 +69,7 @@ public class ColorLabelMapping extends AbstractMapping {
      * Initializes a new {@link ColorLabelMapping}.
      */
     public ColorLabelMapping() {
-        super();
+        super(X_OX_COLOR_LABEL);
     }
 
     @Override

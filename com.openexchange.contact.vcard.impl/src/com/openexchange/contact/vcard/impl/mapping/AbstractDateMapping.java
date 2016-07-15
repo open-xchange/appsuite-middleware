@@ -63,8 +63,8 @@ import ezvcard.property.DateOrTimeProperty;
  */
 public abstract class AbstractDateMapping<T extends DateOrTimeProperty> extends SimpleMapping<T> {
 
-    protected AbstractDateMapping(int field, Class<T> propertyClass) {
-        super(field, propertyClass);
+    protected AbstractDateMapping(int field, Class<T> propertyClass, String...propertyNames) {
+        super(field, propertyClass, propertyNames);
     }
 
     protected abstract T newProperty();

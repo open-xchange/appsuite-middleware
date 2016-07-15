@@ -66,7 +66,7 @@ public abstract class ExtendedPropertyMapping extends SimpleMapping<RawProperty>
     protected final String propertyName;
 
     protected ExtendedPropertyMapping(int field, String name) {
-        super(field, RawProperty.class);
+        super(field, RawProperty.class, name);
         this.propertyName = name;
     }
 

@@ -78,6 +78,19 @@ public abstract class SimpleMapping<T extends VCardProperty> extends AbstractMap
         this.propertyClass = propertyClass;
     }
 
+    /**
+     * Initializes a new {@link SimpleMapping}.
+     *
+     * @param field The mapped contact column identifier
+     * @param propertyClass The vCard property class
+     * @param propertyNames The affected vCard property names
+     */
+    protected SimpleMapping(int field, Class<T> propertyClass, String...propertyNames) {
+        super(propertyNames);
+        this.field = field;
+        this.propertyClass = propertyClass;
+    }
+
     protected abstract void exportProperty(Contact contact, T property, List<OXException> warnings);
 
     protected abstract T exportProperty(Contact contact, List<OXException> warnings);

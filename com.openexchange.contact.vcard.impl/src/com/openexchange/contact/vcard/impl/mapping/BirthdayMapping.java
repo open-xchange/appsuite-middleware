@@ -64,7 +64,7 @@ public class BirthdayMapping extends AbstractDateMapping<Birthday> {
      * Initializes a new {@link BirthdayMapping}.
      */
     public BirthdayMapping() {
-        super(Contact.BIRTHDAY, Birthday.class);
+        super(Contact.BIRTHDAY, Birthday.class, "BIRTHDAY");
     }
 
     @Override

@@ -64,7 +64,7 @@ import ezvcard.property.Categories;
 public class CategoriesMapping extends SimpleMapping<Categories> {
 
     public CategoriesMapping() {
-        super(Contact.CATEGORIES, Categories.class);
+        super(Contact.CATEGORIES, Categories.class, "CATEGORIES");
     }
 
     @Override

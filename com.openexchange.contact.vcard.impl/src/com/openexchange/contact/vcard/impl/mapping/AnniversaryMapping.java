@@ -64,7 +64,7 @@ public class AnniversaryMapping extends AbstractDateMapping<Anniversary> {
      * Initializes a new {@link AnniversaryMapping}.
      */
     public AnniversaryMapping() {
-        super(Contact.ANNIVERSARY, Anniversary.class);
+        super(Contact.ANNIVERSARY, Anniversary.class, "ANNIVERSARY");
     }
 
     @Override

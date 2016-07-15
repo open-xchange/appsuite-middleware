@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.internal;
 import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardVersion;
 import com.openexchange.session.Session;
@@ -79,6 +80,7 @@ public class VCardParametersImpl implements VCardParameters {
     private boolean importAttachments;
     private boolean removeAttachmentsFromKeptVCard;
     private Map<String, Object> parameters;
+    private Set<String> propertyNames;
 
     /**
      * Initializes a new, empty {@link VCardParametersImpl}.
@@ -227,6 +229,17 @@ public class VCardParametersImpl implements VCardParameters {
     @Override
     public VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard) {
         this.removeAttachmentsFromKeptVCard = removeAttachmentsFromKeptVCard;
+        return this;
+    }
+
+    @Override
+    public Set<String> getPropertyNames() {
+        return propertyNames;
+    }
+
+    @Override
+    public VCardParameters setPropertyNames(Set<String> propertyNames) {
+        this.propertyNames = propertyNames;
         return this;
     }
 

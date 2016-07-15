@@ -62,7 +62,7 @@ import ezvcard.property.Url;
 public class URLMapping extends SimpleMapping<Url> {
 
     public URLMapping() {
-        super(Contact.URL, Url.class);
+        super(Contact.URL, Url.class, "URL");
     }
 
     @Override

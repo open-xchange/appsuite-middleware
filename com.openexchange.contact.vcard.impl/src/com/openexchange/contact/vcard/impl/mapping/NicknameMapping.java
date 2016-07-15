@@ -64,7 +64,7 @@ import ezvcard.property.Nickname;
 public class NicknameMapping extends SimpleMapping<Nickname> {
 
     public NicknameMapping() {
-        super(Contact.NICKNAME, Nickname.class);
+        super(Contact.NICKNAME, Nickname.class, "NICKNAME");
     }
 
     @Override

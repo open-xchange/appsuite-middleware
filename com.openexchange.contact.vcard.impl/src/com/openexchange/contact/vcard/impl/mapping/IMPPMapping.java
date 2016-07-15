@@ -68,6 +68,13 @@ import ezvcard.property.Impp;
  */
 public class IMPPMapping extends AbstractMapping {
 
+    /**
+     * Initializes a new {@link IMPPMapping}.
+     */
+    public IMPPMapping() {
+        super("IMPP");
+    }
+
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         List<Impp> impps = vCard.getImpps();
