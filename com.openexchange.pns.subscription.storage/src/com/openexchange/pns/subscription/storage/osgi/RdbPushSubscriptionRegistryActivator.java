@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.subscription.storage.osgi;
 
+import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -84,7 +85,7 @@ public class RdbPushSubscriptionRegistryActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class };
     }
 
     @Override
@@ -98,7 +99,7 @@ public class RdbPushSubscriptionRegistryActivator extends HousekeepingActivator 
         }
 
         // Register service
-        RdbPushSubscriptionRegistry pushSubscriptionRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class));
+        RdbPushSubscriptionRegistry pushSubscriptionRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class), getService(ContextService.class));
         registerService(PushSubscriptionRegistry.class, pushSubscriptionRegistry);
     }
 

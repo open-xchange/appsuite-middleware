@@ -55,10 +55,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -67,6 +70,7 @@ import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionDescription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbPushSubscriptionRegistry}
@@ -77,15 +81,18 @@ import com.openexchange.pns.PushSubscriptionRegistry;
 public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
     private final DatabaseService databaseService;
+    private final ContextService contextService;
 
     /**
      * Initializes a new {@link RdbPushSubscriptionRegistry}.
      *
      * @param databaseService The database service to use
+     * @param contextService The context service
      */
-    public RdbPushSubscriptionRegistry(DatabaseService databaseService) {
+    public RdbPushSubscriptionRegistry(DatabaseService databaseService, ContextService contextService) {
         super();
         this.databaseService = databaseService;
+        this.contextService = contextService;
     }
 
     /*-
@@ -285,6 +292,47 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public int unregisterSubscription(String token, String transportId) throws OXException {
+        int removed = 0;
+        Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
+        while (false == allContextIDs.isEmpty()) {
+            /*
+             * Delete for whole schema using connection for first context
+             */
+            int contextId = allContextIDs.iterator().next().intValue();
+            Connection connection = databaseService.getWritable(contextId);
+            try {
+                removed += deleteSubscription(connection, contextId, token, transportId);
+            } catch (SQLException e) {
+                throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                databaseService.backWritable(contextId, connection);
+            }
+            /*
+             * Remember processed contexts
+             */
+            int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId);
+            for (int cid : contextsInSameSchema) {
+                allContextIDs.remove(Integer.valueOf(cid));
+            }
+        }
+        return removed;
+    }
+
+    private static int deleteSubscription(Connection connection, int contextId, String token, String transportId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("DELETE FROM pns_subscriptions WHERE cid=? AND transport=? AND token=?");
+            stmt.setInt(1, contextId);
+            stmt.setString(2, transportId);
+            stmt.setString(3, token);
+            return stmt.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 

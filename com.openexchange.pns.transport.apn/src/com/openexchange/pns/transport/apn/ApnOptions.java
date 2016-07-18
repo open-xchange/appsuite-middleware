@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,68 +47,66 @@
  *
  */
 
-package com.openexchange.pns;
-
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
+package com.openexchange.pns.transport.apn;
 
 /**
- * {@link PushSubscriptionRegistry}
+ * {@link ApnOptions} - Holds the options to communicate with the Apple Push Notification System.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public interface PushSubscriptionRegistry {
+public class ApnOptions {
+
+    private final String password;
+    private final Object keystore;
+    private final boolean production;
 
     /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
+     * Initializes a new immutable {@link ApnOptions} instance.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @param transportId The identifier of the transport that is supposed to be used
-     * @return All subscriptions for specified affiliation and transport
-     * @throws OXException If subscriptions cannot be returned
+     * @param keystore A keystore containing the private key and the certificate signed by Apple.<br>
+     *                 The following formats can be used:
+     *                 <ul>
+     *                 <li><code>java.io.File</code></li>
+     *                 <li><code>java.io.InputStream</code></li>
+     *                 <li><code>byte[]</code></li>
+     *                 <li><code>java.security.KeyStore</code></li>
+     *                 <li><code>java.lang.String</code> for a file path</li>
+     *                 </ul>
+     * @param password The keystore's password.
+     * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
      */
-    List<PushSubscription> getSubscriptions(int userId, int contextId, PushAffiliation affiliation, String transportId) throws OXException;
+    public ApnOptions(Object keystore, String password, boolean production) {
+        super();
+        this.keystore = keystore;
+        this.password = password;
+        this.production = production;
+    }
 
     /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
+     * Gets the password
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @return All subscriptions for specified affiliation mapped to the associated transport
-     * @throws OXException If subscriptions cannot be returned
+     * @return The password
      */
-    Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
+    public String getPassword() {
+        return password;
+    }
 
     /**
-     * Registers specified subscription.
+     * Gets the keystore
      *
-     * @param subscription The subscription to register
-     * @throws OXException If registration fails
+     * @return The keystore
      */
-    void registerSubscription(PushSubscriptionDescription subscription) throws OXException;
+    public Object getKeystore() {
+        return keystore;
+    }
 
     /**
-     * Unregisters specified subscription.
+     * Gets the production
      *
-     * @param subscription The subscription to unregister
-     * @return <code>true</code> if such a subscription has been deleted; otherwise <code>false</code> if no such subscription existed
-     * @throws OXException If unregistration fails
+     * @return The production
      */
-    boolean unregisterSubscription(PushSubscriptionDescription subscription) throws OXException;
-
-    /**
-     * Unregisters all subscriptions associated with specified token and transport.
-     *
-     * @param token The token to unregister
-     * @param transportId The identifier of the associated transport
-     * @return The number of unregistered subscriptions
-     * @throws OXException If unregistration fails
-     */
-    int unregisterSubscription(String token, String transportId) throws OXException;
+    public boolean isProduction() {
+        return production;
+    }
 
 }
