@@ -71,7 +71,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @since v7.6.2
  */
-@Path("/capabilities/v1/")
+@Path("/preliminary/capabilities/v1/")
 public class CapabilitiesRESTService {
 
     private final ServiceLookup services;

@@ -77,9 +77,7 @@ public class Activator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
     private ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> cmTracker;
-
     private ServiceTracker<ConfigurationService, ConfigurationService> csTracker;
-
     final AtomicBoolean authRegistered = new AtomicBoolean();
 
     /**
@@ -90,7 +88,7 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         cmTracker = new ServiceTracker<ConfigurationAdmin, ConfigurationAdmin>(context, ConfigurationAdmin.class, null) {
 
             @Override
@@ -103,7 +101,7 @@ public class Activator implements BundleActivator {
                         if (properties == null) {
                             properties = new Hashtable<String, Object>(1);
                         }
-                        properties.put("root", "/preliminary");
+                        properties.put("root", "/");
                         configuration.update(properties);
                     } catch (IOException e) {
                         LOG.error("Could not set root path for jersey servlet. REST API will not be available!", e);
@@ -132,10 +130,12 @@ public class Activator implements BundleActivator {
         context.registerService(JSONReaderWriter.class, new JSONReaderWriter(), null);
         context.registerService(OXExceptionMapper.class, new OXExceptionMapper(), null);
         context.registerService(ApplicationConfiguration.class, new JerseyConfiguration(), null);
+
+
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public synchronized void stop(BundleContext context) throws Exception {
         ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> cmTracker = this.cmTracker;
         if (null != cmTracker) {
             cmTracker.close();

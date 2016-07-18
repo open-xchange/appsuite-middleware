@@ -52,7 +52,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-@Path("/http-notify/v1/")
+@Path("/preliminary/http-notify/v1/")
 public class DovecotPushRESTService {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushRESTService.class);

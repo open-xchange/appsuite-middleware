@@ -77,7 +77,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.8.0
  */
-@Path("/utilities/mailResolver/v1")
+@Path("/preliminary/utilities/mailResolver/v1")
 public class MailMappingRESTService {
 
     private final ServiceLookup services;

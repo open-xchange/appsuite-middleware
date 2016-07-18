@@ -75,7 +75,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@Path("/configuration/v1")
+@Path("/preliminary/configuration/v1")
 public class RESTConfigurationService {
 
     private final ServiceLookup services;

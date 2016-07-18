@@ -72,7 +72,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.8.1
  */
-@Path("/session/v1/")
+@Path("/preliminary/session/v1/")
 public class SessionRESTService {
 
     private final ServiceLookup services;
