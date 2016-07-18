@@ -86,13 +86,21 @@ handle_ymls(){
     for file in $1/*.yml 
         do
             filename=$(basename "$file")
-            filename="${filename%.*}"      
-            insert_yaml $file tmp.md $filename > mytest.md
-            rm tmp.md
-            cp mytest.md tmp.md
+            filename="${filename%.*}"
+            if [ "$filename" != "template" ] 
+            then
+              insert_yaml $file tmp.md $filename > mytest.md;
+              rm tmp.md;
+              cp mytest.md tmp.md;
+            fi
         done
     rm tmp.md
-    mv mytest.md $3
+    if [ -f mytest.md ]; then
+      mv mytest.md $3
+    else
+      echo "Parsing of yml files failed. Maybe there are no yml besides \"template.yml\"."
+    fi
+    
 }
 
 handle_ymls $1 $2 $3
