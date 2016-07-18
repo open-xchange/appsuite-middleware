@@ -57,6 +57,24 @@ package com.openexchange.pns;
  */
 public class PushSubscriptionDescription implements PushSubscription {
 
+    /**
+     * Gets the appropriate {@link PushSubscriptionDescription} instance from specified subscription
+     *
+     * @param subscription The subscription
+     * @return The appropriate {@link PushSubscriptionDescription} instance
+     */
+    public static PushSubscriptionDescription instanceFor(PushSubscription subscription) {
+        PushSubscriptionDescription description = new PushSubscriptionDescription();
+        description.setAffiliation(subscription.getAffiliation());
+        description.setContextId(subscription.getContextId());
+        description.setToken(subscription.getToken());
+        description.setTransportId(subscription.getTransportId());
+        description.setUserId(subscription.getUserId());
+        return null;
+    }
+
+    // --------------------------------------------------------------------------------------------------
+
     private int userId;
     private int contextId;
     private PushAffiliation affiliation;
