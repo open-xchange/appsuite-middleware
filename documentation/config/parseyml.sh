@@ -32,12 +32,14 @@ parse_yaml() {
                 multiline="true";
             } else {
                 if(multiline=="true"){
-                    printf("%s<br>", $1);
+                    printf("%s<br>", $0);
                 } else {
                      if ($1 == "Key"){
                         printf("<span style=\"font-weight:normal\">%s</span>", $2);
                      }else {
-                        printf("%s", $2);
+                        for(i=2;i<=NF;i++){
+                          printf("%s ", $i);
+                        }
                     }
                 }
             }
