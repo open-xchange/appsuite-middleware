@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.contact.vcard.impl.internal.VCardExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -166,7 +165,7 @@ public abstract class AbstractMapping implements VCardMapping {
             for (T property : properties) {
                 VCardParameters parameters = property.getParameters();
                 if (null != parameters) {
-                    Set<String> types = parameters.getTypes();
+                    List<String> types = parameters.getTypes();
                     if (null != types && types.contains("PREF")) {
                         return property;
                     }
@@ -185,7 +184,7 @@ public abstract class AbstractMapping implements VCardMapping {
             property.addParameter(VCardParameters.TYPE, type);
             return true;
         }
-        Set<String> types = parameters.getTypes();
+        List<String> types = parameters.getTypes();
         if (null != types) {
             for (String existingType : types) {
                 if (type.equalsIgnoreCase(existingType)) {

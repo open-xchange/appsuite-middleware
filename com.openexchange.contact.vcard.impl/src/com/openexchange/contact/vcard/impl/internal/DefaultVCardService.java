@@ -68,8 +68,8 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import ezvcard.Ezvcard;
-import ezvcard.Ezvcard.WriterChainText;
 import ezvcard.VCard;
+import ezvcard.io.chain.ChainingTextWriter;
 import ezvcard.util.IOUtils;
 
 /**
@@ -170,7 +170,7 @@ public class DefaultVCardService implements VCardService {
      */
     private ThresholdFileHolder exportVCards(List<VCard> vCards, VCardParameters parameters) throws OXException {
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-        WriterChainText writerChain = Ezvcard.write(vCards);
+        ChainingTextWriter writerChain = Ezvcard.write(vCards);
         applyOptions(getParametersOrDefault(parameters), writerChain);
         try {
             if(parameters.isEnforceUtf8()) {
@@ -185,7 +185,7 @@ public class DefaultVCardService implements VCardService {
         }
     }
 
-    private static WriterChainText applyOptions(VCardParameters parameters, WriterChainText writerChain) {
+    private static ChainingTextWriter applyOptions(VCardParameters parameters, ChainingTextWriter writerChain) {
         writerChain.prodId(false);
         if (null != parameters) {
             writerChain.version(getVCardVersion(parameters.getVersion()));

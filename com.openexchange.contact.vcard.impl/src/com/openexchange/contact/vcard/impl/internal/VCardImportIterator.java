@@ -62,9 +62,9 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
 import ezvcard.Ezvcard;
-import ezvcard.Ezvcard.WriterChainText;
 import ezvcard.VCard;
 import ezvcard.ValidationWarnings;
+import ezvcard.io.chain.ChainingTextWriter;
 import ezvcard.io.text.VCardReader;
 import ezvcard.util.IOUtils;
 
@@ -202,7 +202,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         ThresholdFileHolder originalVCard = null;
         if (parameters.isKeepOriginalVCard()) {
             originalVCard = new ThresholdFileHolder();
-            WriterChainText writerChain = Ezvcard.write(vCard).prodId(false);
+            ChainingTextWriter writerChain = Ezvcard.write(vCard).prodId(false);
             try {
                 if(parameters.isEnforceUtf8()) {
                     writerChain.go(IOUtils.utf8Writer(originalVCard.asOutputStream()));

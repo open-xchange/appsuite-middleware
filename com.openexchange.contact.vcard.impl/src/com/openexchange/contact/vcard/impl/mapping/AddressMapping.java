@@ -50,7 +50,6 @@
 package com.openexchange.contact.vcard.impl.mapping;
 
 import java.util.List;
-import java.util.Set;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -83,7 +82,7 @@ public class AddressMapping extends AbstractMapping {
             if (null == businessAddress) {
                 businessAddress = new Address();
                 vCard.addAddress(businessAddress);
-                businessAddress.addType(AddressType.WORK);
+                businessAddress.getTypes().add(AddressType.WORK);
             }
             businessAddress.setStreetAddress(contact.getStreetBusiness());
             businessAddress.setLocality(contact.getCityBusiness());
@@ -103,7 +102,7 @@ public class AddressMapping extends AbstractMapping {
             if (null == homeAddress) {
                 homeAddress = new Address();
                 vCard.addAddress(homeAddress);
-                homeAddress.addType(AddressType.HOME);
+                homeAddress.getTypes().add(AddressType.HOME);
             }
             homeAddress.setStreetAddress(contact.getStreetHome());
             homeAddress.setLocality(contact.getCityHome());
@@ -216,7 +215,7 @@ public class AddressMapping extends AbstractMapping {
         Address matchingAddress = null;
         if (null != addresses && 0 < addresses.size()) {
             for (Address address : addresses) {
-                Set<AddressType> types = address.getTypes();
+                List<AddressType> types = address.getTypes();
                 if (null != types && types.contains(type)) {
                     if (types.contains(AddressType.PREF)) {
                         /*
@@ -240,7 +239,7 @@ public class AddressMapping extends AbstractMapping {
         Address matchingAddress = null;
         if (null != addresses && 0 < addresses.size()) {
             for (Address address : addresses) {
-                Set<AddressType> types = address.getTypes();
+                List<AddressType> types = address.getTypes();
                 if (null != types && 0 < types.size()) {
                     for (AddressType addressType : types) {
                         String value = addressType.getValue();

@@ -85,8 +85,8 @@ public class IMPPMapping extends AbstractMapping {
         if (contact.containsInstantMessenger1() && isValid(contact.getInstantMessenger1())) {
             if (null == businessImpp) {
                 businessImpp = new Impp(getURI(contact.getInstantMessenger1()));
-                businessImpp.addType(ImppType.WORK);
-                businessImpp.addType(ImppType.PREF);
+                businessImpp.getTypes().add(ImppType.WORK);
+                businessImpp.getTypes().add(ImppType.PREF);
                 vCard.addImpp(businessImpp);
             } else {
                 businessImpp.setUri(getURI(contact.getInstantMessenger1()));
@@ -102,7 +102,7 @@ public class IMPPMapping extends AbstractMapping {
         if (contact.containsInstantMessenger2() && isValid(contact.getInstantMessenger2())) {
             if (null == homeImpp) {
                 homeImpp = new Impp(getURI(contact.getInstantMessenger2()));
-                homeImpp.addType(ImppType.HOME);
+                homeImpp.getTypes().add(ImppType.HOME);
                 vCard.addImpp(homeImpp);
             } else {
                 homeImpp.setUri(getURI(contact.getInstantMessenger2()));

@@ -81,11 +81,11 @@ public class OrganizationMapping extends AbstractMapping {
             } else {
                 property.getValues().clear();
             }
-            property.addValue(contact.getCompany());
-            property.addValue(contact.getDepartment());
+            property.getValues().add(contact.getCompany());
+            property.getValues().add(contact.getDepartment());
             if (contact.containsBranches() && false == Strings.isEmpty(contact.getBranches())) {
                 for (String branch : Strings.splitByComma(contact.getBranches())) {
-                    property.addValue(branch);
+                    property.getValues().add(branch);
                 }
             }
         } else if (null != property) {

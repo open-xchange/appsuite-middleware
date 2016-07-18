@@ -81,25 +81,25 @@ public class StructuredNameMapping extends AbstractMapping {
             }
             property.setFamily(contact.getSurName());
             property.setGiven(contact.getGivenName());
-            property.getAdditional().clear();
+            property.getAdditionalNames().clear();
             String middleName = contact.getMiddleName();
             if (false == Strings.isEmpty(middleName)) {
                 for (String additional : Strings.splitByWhitespaces(middleName)) {
-                    property.addAdditional(additional);
+                    property.getAdditionalNames().add(additional);
                 }
             }
             property.getPrefixes().clear();
             String title = contact.getTitle();
             if (false == Strings.isEmpty(title)) {
                 for (String prefix : Strings.splitByWhitespaces(title)) {
-                    property.addPrefix(prefix);
+                    property.getPrefixes().add(prefix);
                 }
             }
             property.getSuffixes().clear();
             String suffix = contact.getSuffix();
             if (false == Strings.isEmpty(suffix)) {
                 for (String value : Strings.splitByWhitespaces(suffix)) {
-                    property.addSuffix(value);
+                    property.getSuffixes().add(value);
                 }
             }
         } else if (null != property) {
@@ -118,7 +118,7 @@ public class StructuredNameMapping extends AbstractMapping {
         if (null != property) {
             surName = property.getFamily();
             givenName = property.getGiven();
-            List<String> additional = property.getAdditional();
+            List<String> additional = property.getAdditionalNames();
             middleName = null != additional && 0 < additional.size() ? Strings.join(additional, " ") : null;
             List<String> prefixes = property.getPrefixes();
             title = null != prefixes && 0 < prefixes.size() ? Strings.join(prefixes, " ") : null;
