@@ -97,12 +97,18 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3343
     ox_add_property com.openexchange.imap.rootSubfoldersAllowed "" $PFILE
-    
+
     # SoftwareChange_Request-3345
     ox_add_property com.openexchange.imap.auditLog.enabled false $PFILE
 
     # SoftwareChange_Request-3413
     ox_add_property com.openexchange.imap.initWithSpecialUse false $PFILE
+
+    # SoftwareChange_Request-3447
+    VALUE=$(ox_read_property com.openexchange.imap.imapSearch $PFILE)
+    if [ "imap" = "$VALUE" ]; then
+        ox_set_property com.openexchange.imap.imapSearch force-imap $PFILE
+    fi
 fi
 
 %clean

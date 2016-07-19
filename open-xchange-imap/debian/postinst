@@ -72,12 +72,20 @@ postFix() {
 
     # SoftwareChange_Request-3343
     ox_add_property com.openexchange.imap.rootSubfoldersAllowed "" $PFILE
-    
+
     # SoftwareChange_Request-3345
     ox_add_property com.openexchange.imap.auditLog.enabled false $PFILE
 
     # SoftwareChange_Request-3413
     ox_add_property com.openexchange.imap.initWithSpecialUse false $PFILE
+
+    # SoftwareChange_Request-3447
+    if dpkg --compare-versions "7.8.3-0" gt-nl "$2"; then
+        VALUE=$(ox_read_property com.openexchange.imap.imapSearch $PFILE)
+        if [ "imap" = "$VALUE" ]; then
+            ox_set_property com.openexchange.imap.imapSearch force-imap $PFILE
+        fi
+    fi
 }
 
 case "$1" in
