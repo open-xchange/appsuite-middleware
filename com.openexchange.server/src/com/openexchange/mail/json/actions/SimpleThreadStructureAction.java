@@ -74,6 +74,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
@@ -443,7 +444,13 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 }
             }
 
-            MailMessage[] ms = messageStorage.getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID, MailField.HEADERS));
+            MailMessage[] ms;
+            if (messageStorage instanceof IMailMessageStorageExt) {
+                ms = ((IMailMessageStorageExt) messageStorage).getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID), headerNames);
+            } else {
+                ms = messageStorage.getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID, MailField.HEADERS));
+            }
+
             headers = new HashMap<String, MailMessage>(ms.length);
             for (MailMessage header : ms) {
                 headers.put(header.getMailId(), header);

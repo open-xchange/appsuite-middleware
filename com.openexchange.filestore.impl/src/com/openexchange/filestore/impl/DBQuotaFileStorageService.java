@@ -213,7 +213,8 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
             URI baseUri = FilestoreStorage.getInstance().getFilestore(info.getId()).getUri();
             try {
                 // Generate full URI
-                URI uri = new URI(baseUri.getScheme(), baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + info.getName(), baseUri.getQuery(), baseUri.getFragment());
+                String scheme = baseUri.getScheme();
+                URI uri = new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + info.getName(), baseUri.getQuery(), baseUri.getFragment());
 
                 // Create appropriate file storage instance
                 storage = new DBQuotaFileStorage(contextId, info.getOwner(), info.getQuota(), fileStorageService.getFileStorage(uri), uri);

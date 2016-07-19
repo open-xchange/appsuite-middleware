@@ -47,29 +47,35 @@
  *
  */
 
-package com.openexchange.database.internal;
+package com.openexchange.logging;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest;
-import com.openexchange.database.internal.wrapping.UpdateFlagTest;
+import java.util.logging.Level;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link UnitTests}
+ * {@link LogLevelService} for dynamically handling of logs.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.2
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    JDBC4ConnectionReturnerTest.class,
-    UpdateFlagTest.class,
-    ReplicationMonitorTest.class,
-    GlobalDatabaseServiceImplTest.class
-})
-public class UnitTests {
+@SingletonService
+public interface LogLevelService {
 
-    public UnitTests() {
-        super();
-    }
+    /**
+     * Sets the log level for the defined class
+     * 
+     * @param className Fully qualified name of the class the log level should be changed for
+     * @param logLevel The new level for the class
+     */
+    void set(String className, Level logLevel);
+
+    /**
+     * Resets the (previously changed) log level for defined class to the origin definition (valid before calling {@link LogLevelService#set(String, Level)}).
+     * <p>
+     * If {@link LogLevelService#set(String, Level)} hasn't been executed before for provided class name nothing will be done.
+     * 
+     * @param className Fully qualified name of the class the log level should be reset for
+     */
+    void reset(String className);
+
 }

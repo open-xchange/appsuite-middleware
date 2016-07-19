@@ -1241,6 +1241,7 @@ public final class HtmlServiceImpl implements HtmlService {
          * Convert to absolute URIs
          */
         String html = htmlContent.substring(0, m.start()) + htmlContent.substring(m.end());
+        html = sanitizeAttributes(html);
         m = ImageProcessor.getInstance().getImgPattern().matcher(html);
         MatcherReplacer mr = new MatcherReplacer(m, html);
         final Stringer sb = new StringBuilderStringer(new StringBuilder(html.length()));
@@ -1350,6 +1351,29 @@ public final class HtmlServiceImpl implements HtmlService {
         mr.appendTail(sb);
         html = sb.toString();
         return html;
+    }
+    
+    private final static Pattern SRC_ATTRIBUTE_PATTERN = Pattern.compile("(src= *\"[^\"]*\")|(src= *'[^']*')", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static String sanitizeAttributes(String html) {
+        Matcher m = SRC_ATTRIBUTE_PATTERN.matcher(html);
+        String retval = html;
+        if (m.find()) {
+            /*
+             * Replace < > with &lt; &gt;
+             */
+            do {
+                final String attribute = m.group();
+                if(attribute.contains("<") && attribute.contains(">")) {
+                    String replace = attribute;
+                    replace = replace.replace("<", "&lt;");
+                    replace = replace.replace(">", "&gt;");
+                    retval = html.replace(attribute, replace);
+                }
+                    
+            } while (m.find()); 
+        }
+        return retval;
     }
 
     private static String trimHref(final String href) {
@@ -1702,6 +1726,8 @@ public final class HtmlServiceImpl implements HtmlService {
     private static final String CC_END_IF = " -->";
 
     private static final String CC_ENDIF = "<!-- <![endif] -->";
+    
+    private static final String CC_UNCOMMENTED_ENDIF = "<![endif] -->";
 
     /**
      * Processes detected downlevel-revealed <a href="http://en.wikipedia.org/wiki/Conditional_comment">conditional comments</a> through
@@ -1738,22 +1764,30 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             return htmlContent;
         }
+        
         int lastMatch = 0;
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
         do {
             sb.append(htmlContent.substring(lastMatch, m.start()));
             final String condition = m.group(2);
             if (isValidCondition(condition)) {
+                boolean isDownlevelRevealed = false;
+                if (m.group(1).startsWith("<![if")) {
+                    isDownlevelRevealed = true;
+                }
+                //check for downlevel hidden comments and leave them be
                 sb.append(CC_START_IF).append(condition);
                 final String wrappedContent = m.group(3);
-                if (!wrappedContent.startsWith("-->", 0) && !condition.endsWith("-->")) {
+                if (!wrappedContent.startsWith("-->", 0) && !condition.endsWith("-->") && isDownlevelRevealed) {
                     sb.append(CC_END_IF);
                 }
                 sb.append(wrappedContent);
                 if (wrappedContent.endsWith("<!--")) {
                     sb.append(m.group(4));
-                } else {
+                } else if (isDownlevelRevealed){
                     sb.append(CC_ENDIF);
+                } else {
+                    sb.append(CC_UNCOMMENTED_ENDIF);
                 }
             }
             lastMatch = m.end();

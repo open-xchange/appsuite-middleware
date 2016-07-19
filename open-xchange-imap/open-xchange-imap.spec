@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 16
+%define        ox_release 17
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -97,6 +97,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3343
     ox_add_property com.openexchange.imap.rootSubfoldersAllowed "" $PFILE
+
+    # SoftwareChange_Request-3413
+    ox_add_property com.openexchange.imap.initWithSpecialUse false $PFILE
 fi
 
 %clean
@@ -112,6 +115,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Thu Jul 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-07-18 (3433)
 * Thu Jun 30 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-07-04 (3400)
 * Wed Jun 15 2016 Marcus Klein <marcus.klein@open-xchange.com>

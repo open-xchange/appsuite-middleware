@@ -60,6 +60,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.logging.LogLevelService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -203,6 +204,8 @@ public class ReportActivator extends HousekeepingActivator {
         Services.add(clc);
 
         track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this, getService(ManagementService.class)));
+
+        trackService(LogLevelService.class);
 
         openTrackers();
     }
