@@ -49,54 +49,54 @@
 
 package com.openexchange.groupware.tools.mappings.database;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.Date;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link DateMapping} - Database mapping for <code>Types.DATE</code>.
+ * {@link DbMultiMapping} - Extends the generic mapping by database specific
+ * operations.
  *
+ * @param <T> the type of the property
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
+public interface DbMultiMapping<T, O> extends DbMapping<T, O> {
 
-	public DateMapping(final String columnName, final String readableName) {
-		super(columnName, readableName, Types.TIMESTAMP);
-	}
+	/**
+	 * Gets the value of the mapped property from a result set.
+	 *
+	 * @param resultSet the result set to get the property from
+	 * @return the value
+	 * @throws SQLException
+	 */
+    T get(ResultSet resultSet, String[] columnLabels) throws SQLException;
 
-	@Override
-	public Date get(final ResultSet resultSet, String columnLabel) throws SQLException {
-	    try {
-	        return resultSet.getTimestamp(columnLabel);
-	    } catch (SQLException e) {
-	        if ("S1009".equals(e.getSQLState())) {
-	            /*
-	             * http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-configuration-properties.html
-	             * DATETIME values that are composed entirely of zeros result in an exception with state S1009
-	             */
-	            return null;
-	        }
-	        throw e;
-	    }
-	}
+    /**
+     * Gets the column label of the mapped property.
+     *
+     * @return the column label
+     */
+    String[] getColumnLabels();
 
-	@Override
-    public int set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
-		if (this.isSet(object)) {
-			final Date value = this.get(object);
-			if (null != value) {
-				statement.setTimestamp(parameterIndex, new Timestamp(value.getTime()));
-			} else {
-				statement.setNull(parameterIndex, this.getSqlType());
-			}
-		} else {
-			statement.setNull(parameterIndex, this.getSqlType());
-		}
-        return 1;
-	}
+    /**
+     * Gets the column label of the mapped property, prefixed with the supplied value.
+     *
+     * @return the prefixed column label
+     */
+    String[] getColumnLabels(String prefix);
+
+    /**
+     * Sets the value of the mapped property in an object.
+     *
+     * @param resultSet the result set to read out the value from
+     * @param object the object to set the value
+     * @param columnLabel the label for the column specified with the SQL AS clause, or, if the SQL AS clause was not specified, the
+     *                    label of the column name
+     * @throws SQLException
+     * @throws OXException
+     */
+    void set(ResultSet resultSet, O object, String[] columnLabels) throws SQLException, OXException;
 
 }

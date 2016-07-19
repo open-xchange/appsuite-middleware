@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,67 @@
  *
  */
 
-package com.openexchange.groupware.tools.mappings.database;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.Date;
+package com.openexchange.chronos;
 
 /**
- * {@link DateMapping} - Database mapping for <code>Types.DATE</code>.
+ * {@link EventID}
  *
- * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
+public class EventID {
 
-	public DateMapping(final String columnName, final String readableName) {
-		super(columnName, readableName, Types.TIMESTAMP);
-	}
+    private final int folderID;
+    private final int objectID;
 
-	@Override
-	public Date get(final ResultSet resultSet, String columnLabel) throws SQLException {
-	    try {
-	        return resultSet.getTimestamp(columnLabel);
-	    } catch (SQLException e) {
-	        if ("S1009".equals(e.getSQLState())) {
-	            /*
-	             * http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-configuration-properties.html
-	             * DATETIME values that are composed entirely of zeros result in an exception with state S1009
-	             */
-	            return null;
-	        }
-	        throw e;
-	    }
-	}
+    /**
+     * Initializes a new {@link EventID}.
+     * 
+     * @param folderID The folder ID
+     * @param objectID The object ID
+     */
+    public EventID(int folderID, int objectID) {
+        super();
+        this.folderID = folderID;
+        this.objectID = objectID;
+    }
 
-	@Override
-    public int set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
-		if (this.isSet(object)) {
-			final Date value = this.get(object);
-			if (null != value) {
-				statement.setTimestamp(parameterIndex, new Timestamp(value.getTime()));
-			} else {
-				statement.setNull(parameterIndex, this.getSqlType());
-			}
-		} else {
-			statement.setNull(parameterIndex, this.getSqlType());
-		}
-        return 1;
-	}
+    public int getFolderID() {
+        return folderID;
+    }
+
+    public int getObjectID() {
+        return objectID;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + folderID;
+        result = prime * result + objectID;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EventID other = (EventID) obj;
+        if (folderID != other.folderID)
+            return false;
+        if (objectID != other.objectID)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "EventID [folderID=" + folderID + ", objectID=" + objectID + "]";
+    }
 
 }

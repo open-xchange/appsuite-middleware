@@ -97,8 +97,14 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
         final O object = this.newInstance();
         for (final E field : fields) {
             DbMapping<? extends Object, O> mapping = get(field);
-            String columnLabel = null == columnLabelPrefix ? mapping.getColumnLabel() : columnLabelPrefix + mapping.getColumnLabel();
-            mapping.set(resultSet, object, columnLabel);
+            if (DbMultiMapping.class.isInstance(mapping)) {
+                DbMultiMapping<? extends Object, O> multiMapping = (DbMultiMapping<? extends Object, O>) mapping;
+                String[] columnLabels = null == columnLabelPrefix ? multiMapping.getColumnLabels() : multiMapping.getColumnLabels(columnLabelPrefix);
+                multiMapping.set(resultSet, object, columnLabels);
+            } else {
+                String columnLabel = null == columnLabelPrefix ? mapping.getColumnLabel() : columnLabelPrefix + mapping.getColumnLabel();
+                mapping.set(resultSet, object, columnLabel);
+            }
         }
         return object;
     }
@@ -116,12 +122,18 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
         return list;
     }
 
-	@Override
-	public void setParameters(final PreparedStatement stmt, final O object, final E[] fields) throws SQLException, OXException {
-	    for (int i = 0; i < fields.length; i++) {
-	    	this.get(fields[i]).set(stmt, i + 1, object);
-	    }
-	}
+    @Override
+    public void setParameters(final PreparedStatement stmt, final O object, final E[] fields) throws SQLException, OXException {
+        setParameters(stmt, 1, object, fields);
+    }
+
+    @Override
+    public int setParameters(PreparedStatement stmt, int parameterIndex, O object, E[] fields) throws SQLException, OXException {
+        for (E field : fields) {
+            parameterIndex += get(field).set(stmt, parameterIndex, object);
+        }
+        return parameterIndex;
+    }
 
 	@Override
 	public DbMapping<? extends Object, O> get(final E field) throws OXException {
@@ -136,31 +148,39 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 	}
 
 	@Override
-	public E getMappedField(final String columnLabel) {
+    public E getMappedField(String columnLabel) {
 		if (null == columnLabel) {
 			throw new IllegalArgumentException("columnLabel");
 		}
-		for (final Entry<E, ? extends DbMapping<? extends Object, O>> entry : this.mappings.entrySet()) {
+        for (Entry<E, ? extends DbMapping<? extends Object, O>> entry : mappings.entrySet()) {
 			if (columnLabel.equals(entry.getValue().getColumnLabel())) {
 				return entry.getKey();
 			}
+            if (DbMultiMapping.class.isInstance(entry.getValue())) {
+                for (String column : ((DbMultiMapping<?, ?>) entry.getValue()).getColumnLabels()) {
+                    if (columnLabel.equals(column)) {
+                        return entry.getKey();
+                    }
+                }
+            }
 		}
 		return null;
 	}
 
 	@Override
-	public String getAssignments(final E[] fields) throws OXException {
+    public String getAssignments(E[] fields) throws OXException {
 		if (null == fields) {
 			throw new IllegalArgumentException("fields");
 		}
-		final StringBuilder columnsParamsBuilder = new StringBuilder(10 * fields.length);
+        StringBuilder stringBuilder = new StringBuilder(10 * fields.length);
 		if (null != fields && 0 < fields.length) {
-			columnsParamsBuilder.append(get(fields[0]).getColumnLabel()).append("=?");
+            appendAssignments(stringBuilder, get(fields[0]));
 			for (int i = 1; i < fields.length; i++) {
-				columnsParamsBuilder.append(',').append(get(fields[i]).getColumnLabel()).append("=?");
+                stringBuilder.append(',');
+                appendAssignments(stringBuilder, get(fields[i]));
 			}
 		}
-		return columnsParamsBuilder.toString();
+        return stringBuilder.toString();
 	}
 
     @Override
@@ -169,25 +189,41 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
     }
 
     @Override
-    public String getColumns(final E[] fields, String columnLabelPrefix) throws OXException {
+    public String getColumns(E[] fields, String columnLabelPrefix) throws OXException {
         if (null == fields) {
             throw new IllegalArgumentException("fields");
         }
-        final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length);
+        StringBuilder stringBuilder = new StringBuilder(10 * fields.length);
         if (null != fields && 0 < fields.length) {
-            if (null != columnLabelPrefix) {
-                columnsBuilder.append(columnLabelPrefix);
-            }
-            columnsBuilder.append(get(fields[0]).getColumnLabel());
+            appendColumnLabels(stringBuilder, get(fields[0]), columnLabelPrefix);
             for (int i = 1; i < fields.length; i++) {
-                columnsBuilder.append(',');
-                if (null != columnLabelPrefix) {
-                    columnsBuilder.append(columnLabelPrefix);
-                }
-                columnsBuilder.append(get(fields[i]).getColumnLabel());
+                stringBuilder.append(',');
+                appendColumnLabels(stringBuilder, get(fields[i]), columnLabelPrefix);
             }
         }
-        return columnsBuilder.toString();
+        return stringBuilder.toString();
+    }
+
+    /**
+     * Gets a string to be used as parameter values in <code>INSERT</code>- or <code>UPDATE</code>-statements, obeying the number of
+     * columns required per field.
+     *
+     * @param fields The fields to be inserted or updated
+     * @return The parameter string without surrounding parentheses, e.g. <code>?,?,?,?</code>
+     */
+    public String getParameters(E[] fields) throws OXException {
+        int count = 0;
+        if (null != fields) {
+            for (E field : fields) {
+                DbMapping<? extends Object, O> mapping = get(field);
+                if (DbMultiMapping.class.isInstance(mapping)) {
+                    count += ((DbMultiMapping<?, ?>) mapping).getColumnLabels().length;
+                } else {
+                    count++;
+                }
+            }
+        }
+        return getParameters(count);
     }
 
     /**
@@ -220,5 +256,61 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 	 * @return the mappings
 	 */
 	protected abstract EnumMap<E, ? extends DbMapping<? extends Object, O>> createMappings();
+
+    /**
+     * Appends database assignments to parameter values for the columns of a specific mapping, e.g. <code>column=?</code>. Mappings with
+     * multiple columns are separated with the <code>,</code>-character automatically.
+     *
+     * @param stringBuilder The string builder to use for appending
+     * @param mapping The mapping to append an assignment for
+     * @return The passed string builder reference
+     */
+    private static StringBuilder appendAssignments(StringBuilder stringBuilder, DbMapping<?, ?> mapping) {
+        String[] labels = getColumnLabels(mapping);
+        stringBuilder.append(labels[0]).append("=?");
+        for (int i = 1; i < labels.length; i++) {
+            stringBuilder.append(',').append(labels[i]).append("=?");
+        }
+        return stringBuilder;
+    }
+
+    /**
+     * Appends column labels of a specific mapping, optionally prefixed, e.g. <code>prefix.column</code>. Mappings with multiple columns
+     * are separated with the <code>,</code>-character automatically.
+     *
+     * @param stringBuilder The string builder to use for appending
+     * @param mapping The mapping to append the column label(s) for
+     * @param columnLabelPrefix The column label prefix to use, or <code>null</code> for no prefix
+     * @return The passed string builder reference
+     */
+    private static StringBuilder appendColumnLabels(StringBuilder stringBuilder, DbMapping<?, ?> mapping, String columnLabelPrefix) {
+        String[] labels = getColumnLabels(mapping);
+        if (null != columnLabelPrefix) {
+            stringBuilder.append(columnLabelPrefix);
+        }
+        stringBuilder.append(labels[0]);
+        for (int i = 1; i < labels.length; i++) {
+            stringBuilder.append(',');
+            if (null != columnLabelPrefix) {
+                stringBuilder.append(columnLabelPrefix);
+            }
+            stringBuilder.append(labels[i]);
+        }
+        return stringBuilder;
+    }
+
+    /**
+     * Gets all column labels a specific mapping uses. This is usually a single column, but also multiple column labels are possible.
+     *
+     * @param mapping The mapping to get the labels for
+     * @return The column labels
+     */
+    private static String[] getColumnLabels(DbMapping<?, ?> mapping) {
+        if (DbMultiMapping.class.isInstance(mapping)) {
+            return ((DbMultiMapping<?, ?>) mapping).getColumnLabels();
+        } else {
+            return new String[] { mapping.getColumnLabel() };
+        }
+    }
 
 }

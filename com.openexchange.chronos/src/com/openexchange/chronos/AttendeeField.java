@@ -47,29 +47,59 @@
  *
  */
 
-package com.openexchange.chronos.impl;
-
-import com.openexchange.chronos.CalendarService;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.type.PrivateType;
+package com.openexchange.chronos;
 
 /**
- * {@link CalendarService}
+ * {@link AttendeeField}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarFolder {
-	
-	private UserizedFolder folder;
+public enum AttendeeField {
 
-	public CalendarFolder(UserizedFolder folder) {
-		super();
-	}
-	
-	public boolean isPrivate() {
-		return PrivateType.getInstance().equals(folder.getType());
-	}
-	
-	
+    /**
+     * The calendar user address of the attendee.
+     */
+    URI,
+    /**
+     * The common name of the attendee.
+     */
+    CN,
+    /**
+     * The internal identifier of the attendee.
+     */
+    ENTITY,
+    /**
+     * The calendar user who is acting on behalf of the attendee.
+     */
+    SENT_BY,
+    /**
+     * The calendar user type of the attendee.
+     */
+    CU_TYPE,
+    /**
+     * The participation role of the attendee.
+     */
+    ROLE,
+    /**
+     * The participation status of the attendee.
+     */
+    PARTSTAT,
+    /**
+     * The attendee's comment.
+     */
+    COMMENT,
+    /**
+     * The RSVP expectation of the attendee.
+     */
+    RSVP,
+    /**
+     * The identifier of the folder where the event is located in for the attendee.
+     */
+    FOLDER_ID,
+    /**
+     * The group- or list membership of the attendee.
+     */
+    MEMBER,
+
 }

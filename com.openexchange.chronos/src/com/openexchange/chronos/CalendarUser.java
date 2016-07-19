@@ -62,7 +62,7 @@ public class CalendarUser {
     String commonName;
     int entity;
     String sentBy;
-    CalendarUserType cuType;
+    String email;
 
     /**
      * Gets the uri
@@ -137,21 +137,21 @@ public class CalendarUser {
     }
 
     /**
-     * Gets the cuType
-     *
-     * @return The cuType
+     * Gets the email
+     * 
+     * @return The email
      */
-    public CalendarUserType getCuType() {
-        return cuType;
+    public String getEmail() {
+        return email;
     }
 
     /**
-     * Sets the cuType
-     *
-     * @param cuType The cuType to set
+     * Sets the email
+     * 
+     * @param email The email to set
      */
-    public void setCuType(CalendarUserType cuType) {
-        this.cuType = cuType;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }

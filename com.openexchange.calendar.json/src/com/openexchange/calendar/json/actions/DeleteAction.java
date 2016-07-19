@@ -51,6 +51,7 @@ package com.openexchange.calendar.json.actions;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +63,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.EventID;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -85,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 }, requestBody = "The appointment object to delete. The fields for the object are described in Full identifier for an appointment. To delete multiple appointments send an array of appointments.",
 responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class DeleteAction extends AppointmentAction {
+public final class DeleteAction extends ChronosAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
@@ -156,6 +161,18 @@ public final class DeleteAction extends AppointmentAction {
             }
         }
         return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
+    }
+
+    private static final String[] REQUIRED_PARAMETERS = {
+        CalendarParameters.PARAMETER_TIMESTAMP
+    };
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarParameters parameters = parseParameters(request, REQUIRED_PARAMETERS);
+        List<EventID> requestedIDs = parseRequestedIDs(request);
+        calendarService.deleteEvents(request.getSession(), requestedIDs, parameters);
+        return new AJAXRequestResult(new JSONArray(0), new Date(), "json");
     }
 
 }

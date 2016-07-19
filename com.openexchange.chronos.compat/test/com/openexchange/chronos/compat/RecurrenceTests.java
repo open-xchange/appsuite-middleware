@@ -54,7 +54,6 @@ import java.util.GregorianCalendar;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.chronos.compat.internal.SeriesPattern;
 import net.fortuna.ical4j.model.TimeZone;
 
 /**

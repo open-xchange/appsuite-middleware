@@ -47,6 +47,7 @@
  *
  */
 
+<<<<<<< HEAD:com.openexchange.chronos.compat/src/com/openexchange/chronos/compat/Recurrence.java
 package com.openexchange.chronos.compat;
 
 import java.text.ParseException;
@@ -65,6 +66,7 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.compat.internal.SeriesPattern;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -72,15 +74,24 @@ import net.fortuna.ical4j.model.NumberList;
 import net.fortuna.ical4j.model.Recur;
 import net.fortuna.ical4j.model.WeekDay;
 import net.fortuna.ical4j.model.WeekDayList;
+=======
+package com.openexchange.chronos.ical.ical4j.mapping.event;
+
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.RRule;
+>>>>>>> 1c0d2034dbab185251aac5e3ea371fecc0532101:com.openexchange.chronos.ical.ical4j/src/com/openexchange/chronos/ical/ical4j/mapping/event/RRuleMapping.java
 
 /**
- * {@link Recurrence}
+ * {@link RRuleMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class Recurrence {
+public class RRuleMapping extends ICalTextMapping<VEvent, Event> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Recurrence.class);
 
@@ -113,13 +124,11 @@ public class Recurrence {
     }
 
     /**
-     * Gets the recurrence rule appropriate for the supplied series pattern.
-     *
-     * @param seriesPattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
-     * @return The corresponding recurrence rule
+     * Initializes a new {@link RRuleMapping}.
      */
+<<<<<<< HEAD:com.openexchange.chronos.compat/src/com/openexchange/chronos/compat/Recurrence.java
     public static String getRecurrenceRule(String seriesPattern, TimeZone tz, Boolean fullTime) {
-        SeriesPattern pattern = SeriesPattern.parse(seriesPattern, tz, fullTime);
+        SeriesPattern pattern = new SeriesPattern(seriesPattern, tz, fullTime);
         return generateRRule(pattern);
     }
 
@@ -560,6 +569,26 @@ public class Recurrence {
         // TODO:
         return null;
     }
+=======
+	public RRuleMapping() {
+        super(Property.RRULE);
+	}
+
+	@Override
+	protected String getValue(Event object) {
+        return object.getRecurrenceRule();
+	}
+
+	@Override
+	protected void setValue(Event object, String value) {
+        object.setRecurrenceRule(value);
+	}
+
+	@Override
+	protected Property createProperty() {
+        return new RRule();
+	}
+>>>>>>> 1c0d2034dbab185251aac5e3ea371fecc0532101:com.openexchange.chronos.ical.ical4j/src/com/openexchange/chronos/ical/ical4j/mapping/event/RRuleMapping.java
 
     private static Date calculateUntilForUnlimited(CalendarDataObject cObj, Recur rrule) {
         RecurrenceRule rRule = null;

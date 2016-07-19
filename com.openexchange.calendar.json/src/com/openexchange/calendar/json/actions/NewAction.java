@@ -63,6 +63,11 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.calendar.json.actions.chronos.EventConverter;
+import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -87,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
 }, requestBody = "Appointment object as described in Common object data, Detailed task and appointment data and Detailed appointment data. The field id is not present.",
 responseDescription = "If the appointment was created successfully, an object with the attribute id of the newly created appointment. If the appointment could not be created due to conflicts, the response body is an object with the field conflicts, which is an array of appointment objects which caused the conflict. Each appointment object which represents a resource conflict contains an additional field hard_conflict with the Boolean value true. If the user does not have read access to a conflicting appointment, only the fields id, start_date, end_date, shown_as and participants are present and the field participants contains only the participants which caused the conflict.")
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class NewAction extends AppointmentAction {
+public final class NewAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(NewAction.class);
@@ -149,6 +154,29 @@ public final class NewAction extends AppointmentAction {
 
         return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
 
+    }
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        JSONObject jsonObject = request.getData();
+        CalendarDataObject appointment = new CalendarDataObject();
+        appointment.setContext(request.getSession().getContext());
+        new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
+        if (false == appointment.containsParentFolderID()) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
+        }
+        convertExternalToInternalUsersIfPossible(appointment, request.getSession().getContext(), LOG);
+
+        CalendarParameters parameters = parseParameters(request);
+        if (appointment.containsNotification()) {
+            parameters.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
+        }
+        parameters.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
+
+        UserizedEvent event = EventConverter.getEvent(appointment, request.getSession());
+        UserizedEvent createdEvent = calendarService.createEvent(request.getSession(), event, parameters);
+
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, createdEvent.getEvent().getId()), createdEvent.getEvent().getLastModified(), "json");
     }
 
 }

@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos;
 
-import java.util.Date;
 import java.util.List;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UserizedEvent}
@@ -58,37 +58,48 @@ import java.util.List;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UserizedEvent extends Event {
+public class UserizedEvent {
 
-    int folderId;
-    List<Alarm> alarms;
-    Event delegate;
+    private final Event event;
+    private final ServerSession session;
 
-    public UserizedEvent(Event delegate) {
+    private List<Alarm> alarms;
+    private boolean alarmsSet;
+    private int folderId;
+    private boolean folderIdSet;
+
+    /**
+     * Initializes a new {@link UserizedEvent}.
+     *
+     * @param session The current user's session
+     * @param event The underlying event data
+     */
+    public UserizedEvent(ServerSession session, Event event) {
         super();
-        this.delegate = delegate;
+        this.session = session;
+        this.event = event;
     }
 
     /**
-     * Gets the folderId
+     * Gets the underlying event data.
      *
-     * @return The folderId
+     * @return The event data
      */
-    public int getFolderId() {
-        return folderId;
+    public Event getEvent() {
+        return event;
     }
 
     /**
-     * Sets the folderId
+     * Gets the user's session.
      *
-     * @param folderId The folderId to set
+     * @return The session
      */
-    public void setFolderId(int folderId) {
-        this.folderId = folderId;
+    public ServerSession getSession() {
+        return session;
     }
 
     /**
-     * Gets the alarms
+     * Gets the attendee's alarms for the event.
      *
      * @return The alarms
      */
@@ -97,244 +108,71 @@ public class UserizedEvent extends Event {
     }
 
     /**
-     * Sets the alarms
+     * Gets the attendee's alarms for the event.
      *
      * @param alarms The alarms to set
      */
     public void setAlarms(List<Alarm> alarms) {
         this.alarms = alarms;
+        alarmsSet = true;
     }
 
-    public boolean equals(Object obj) {
-        return delegate.equals(obj);
+    /**
+     * Gets a value indicating whether attendee's alarms for the event have been set or not.
+     *
+     * @return <code>true</code> if the attendee's alarms are set, <code>false</code>, otherwise
+     */
+    public boolean containsAlarms() {
+        return alarmsSet;
     }
 
-    public int getId() {
-        return delegate.getId();
+    /**
+     * Removes the attendee's alarms of the event.
+     */
+    public void removeAlarms() {
+        alarms = null;
+        alarmsSet = false;
     }
 
-    public String getUid() {
-        return delegate.getUid();
+    /**
+     * Gets the folder identifier representing the view on the event.
+     *
+     * @return The folder identifier
+     */
+    public int getFolderId() {
+        return folderId;
     }
 
-    public String getFilename() {
-        return delegate.getFilename();
+    /**
+     * Sets the folder identifier representing the view on the event.
+     *
+     * @param folderId The folder identifier
+     */
+    public void setFolderId(int folderId) {
+        this.folderId = folderId;
+        folderIdSet = true;
     }
 
-    public String getiCalId() {
-        return delegate.getiCalId();
+    /**
+     * Gets a value indicating whether folder identifier representing the view on the event has been set or not.
+     *
+     * @return <code>true</code> if the folder identifier is set, <code>false</code>, otherwise
+     */
+    public boolean containsFolderId() {
+        return folderIdSet;
     }
 
-    public Date getCreated() {
-        return delegate.getCreated();
+    /**
+     * Removes the folder identifier of the event.
+     */
+    public void removeFolderId() {
+        folderId = 0;
+        folderIdSet = false;
     }
 
-    public Date getLastModified() {
-        return delegate.getLastModified();
-    }
-
-    public int getCreatedBy() {
-        return delegate.getCreatedBy();
-    }
-
-    public int getModifiedBy() {
-        return delegate.getModifiedBy();
-    }
-
-    public String getSummary() {
-        return delegate.getSummary();
-    }
-
-    public String getLocation() {
-        return delegate.getLocation();
-    }
-
-    public String getDescription() {
-        return delegate.getDescription();
-    }
-
-    public EventStatus getStatus() {
-        return delegate.getStatus();
-    }
-
-    public Date getStartDate() {
-        return delegate.getStartDate();
-    }
-
-    public String getStartTimezone() {
-        return delegate.getStartTimezone();
-    }
-
-    public Date getEndDate() {
-        return delegate.getEndDate();
-    }
-
-    public String getEndTimezone() {
-        return delegate.getEndTimezone();
-    }
-
-    public boolean isAllDay() {
-        return delegate.isAllDay();
-    }
-
-    public TimeTransparency getTransp() {
-        return delegate.getTransp();
-    }
-
-    public int getRecurrenceId() {
-        return delegate.getRecurrenceId();
-    }
-
-    public String getRecurrenceRule() {
-        return delegate.getRecurrenceRule();
-    }
-
-    public List<Date> getDeleteExceptionDates() {
-        return delegate.getDeleteExceptionDates();
-    }
-
-    public List<Date> getChangeExceptionDates() {
-        return delegate.getChangeExceptionDates();
-    }
-
-    public Organizer getOrganizer() {
-        return delegate.getOrganizer();
-    }
-
-    public List<Attendee> getAttendees() {
-        return delegate.getAttendees();
-    }
-
-    public List<Attachment> getAttachments() {
-        return delegate.getAttachments();
-    }
-
-    public Classification getClassification() {
-        return delegate.getClassification();
-    }
-
-    public Integer getSequence() {
-        return delegate.getSequence();
-    }
-
-    public List<String> getCategories() {
-        return delegate.getCategories();
-    }
-
-    public int hashCode() {
-        return delegate.hashCode();
-    }
-
-    public void setId(int id) {
-        delegate.setId(id);
-    }
-
-    public void setUid(String uid) {
-        delegate.setUid(uid);
-    }
-
-    public void setFilename(String filename) {
-        delegate.setFilename(filename);
-    }
-
-    public void setiCalId(String iCalId) {
-        delegate.setiCalId(iCalId);
-    }
-
-    public void setCreated(Date created) {
-        delegate.setCreated(created);
-    }
-
-    public void setLastModified(Date lastModified) {
-        delegate.setLastModified(lastModified);
-    }
-
-    public void setCreatedBy(int createdBy) {
-        delegate.setCreatedBy(createdBy);
-    }
-
-    public void setModifiedBy(int modifiedBy) {
-        delegate.setModifiedBy(modifiedBy);
-    }
-
-    public void setSummary(String summary) {
-        delegate.setSummary(summary);
-    }
-
-    public void setLocation(String location) {
-        delegate.setLocation(location);
-    }
-
-    public void setDescription(String description) {
-        delegate.setDescription(description);
-    }
-
-    public void setStatus(EventStatus status) {
-        delegate.setStatus(status);
-    }
-
-    public void setStartDate(Date startDate) {
-        delegate.setStartDate(startDate);
-    }
-
-    public void setStartTimezone(String startTimezone) {
-        delegate.setStartTimezone(startTimezone);
-    }
-
-    public void setEndDate(Date endDate) {
-        delegate.setEndDate(endDate);
-    }
-
-    public void setEndTimezone(String endTimezone) {
-        delegate.setEndTimezone(endTimezone);
-    }
-
-    public void setAllDay(boolean allDay) {
-        delegate.setAllDay(allDay);
-    }
-
-    public void setTransp(TimeTransparency transp) {
-        delegate.setTransp(transp);
-    }
-
-    public void setRecurrenceId(int recurrenceId) {
-        delegate.setRecurrenceId(recurrenceId);
-    }
-
-    public void setRecurrenceRule(String recurrenceRule) {
-        delegate.setRecurrenceRule(recurrenceRule);
-    }
-
-    public void setDeleteExceptionDates(List<Date> deleteExceptionDates) {
-        delegate.setDeleteExceptionDates(deleteExceptionDates);
-    }
-
-    public void setChangeExceptionDates(List<Date> changeExceptionDates) {
-        delegate.setChangeExceptionDates(changeExceptionDates);
-    }
-
-    public void setOrganizer(Organizer organizer) {
-        delegate.setOrganizer(organizer);
-    }
-
-    public void setAttendees(List<Attendee> attendees) {
-        delegate.setAttendees(attendees);
-    }
-
-    public void setAttachments(List<Attachment> attachments) {
-        delegate.setAttachments(attachments);
-    }
-
-    public void setClassification(Classification classification) {
-        delegate.setClassification(classification);
-    }
-
-    public void setSequence(Integer sequence) {
-        delegate.setSequence(sequence);
-    }
-
-    public void setCategories(List<String> categories) {
-        delegate.setCategories(categories);
+    @Override
+    public String toString() {
+        return "UserizedEvent [userId=" + session.getUserId() + ", folderId=" + folderId + ", event=" + event + "]";
     }
 
 }

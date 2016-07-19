@@ -53,7 +53,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.compat.AppointmentConstants;
+import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.storage.rdb.MySqlTools;
 import com.openexchange.exception.OXException;
 
@@ -72,12 +73,12 @@ public class Status implements Field<Event> {
 
     @Override
     public void set(ResultSet rs, Event target) throws SQLException {
-        target.setStatus(AppointmentConstants.getEventStatus(rs.getInt(getSqlName())));
+        target.setStatus(Appointment2Event.getEventStatus(rs.getInt(getSqlName())));
     }
 
     @Override
     public void set(Event source, PreparedStatement stmt, int index) throws SQLException, OXException {
-        MySqlTools.setInt(stmt, index, AppointmentConstants.getShownAs(source.getStatus()));
+        MySqlTools.setInt(stmt, index, Event2Appointment.getShownAs(source.getStatus()));
     }
 
 }

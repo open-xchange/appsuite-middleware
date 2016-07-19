@@ -49,16 +49,22 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerAttendeeRef;
+import net.fortuna.ical4j.extensions.caldav.property.CalendarServerAttendeeComment;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.parameter.Cn;
+import net.fortuna.ical4j.model.parameter.CuType;
 import net.fortuna.ical4j.model.parameter.PartStat;
+import net.fortuna.ical4j.model.parameter.Role;
+import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.parameter.SentBy;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
@@ -84,13 +90,36 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
         List<Attendee> attendees = object.getAttendees();
         if (null == attendees || 0 == attendees.size()) {
             removeProperties(component, Property.ATTENDEE);
+            removeProperties(component, CalendarServerAttendeeComment.PROPERTY_NAME);
         } else {
-            removeProperties(component, Property.ATTENDEE);  // TODO: better merge?
+            PropertyList properties = component.getProperties(Property.ATTENDEE);
+            removeProperties(component, Property.ATTENDEE);
             for (Attendee attendee : attendees) {
+                net.fortuna.ical4j.model.property.Attendee property = getMatchingAttendee(properties, attendee.getUri());
+                if (null == property) {
+                    property = new net.fortuna.ical4j.model.property.Attendee();
+                }
                 try {
-                    component.getProperties().add(exportAttendee(attendee));
+                    component.getProperties().add(exportAttendee(attendee, property));
                 } catch (URISyntaxException e) {
                     addConversionWarning(warnings, e, Property.ATTENDEE, e.getMessage());
+                }
+            }
+            if (Boolean.TRUE.equals(parameters.get(ICalParameters.ATTENDEE_COMMENTS, Boolean.class))) {
+                properties = component.getProperties(CalendarServerAttendeeComment.PROPERTY_NAME);
+                removeProperties(component, CalendarServerAttendeeComment.PROPERTY_NAME);
+                for (Attendee attendee : attendees) {
+                    if (Strings.isNotEmpty(attendee.getComment())) {
+                        CalendarServerAttendeeComment property = getMatchingAttendeeComment(properties, attendee.getUri());
+                        if (null == property) {
+                            property = new CalendarServerAttendeeComment(CalendarServerAttendeeComment.FACTORY);
+                        }
+                        try {
+                            component.getProperties().add(exportAttendeeComment(attendee, property));
+                        } catch (URISyntaxException e) {
+                            addConversionWarning(warnings, e, CalendarServerAttendeeComment.PROPERTY_NAME, e.getMessage());
+                        }
+                    }
                 }
             }
         }
@@ -111,8 +140,7 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
         }
     }
 
-    private net.fortuna.ical4j.model.property.Attendee exportAttendee(Attendee attendee) throws URISyntaxException {
-        net.fortuna.ical4j.model.property.Attendee property = new net.fortuna.ical4j.model.property.Attendee();
+    private static net.fortuna.ical4j.model.property.Attendee exportAttendee(Attendee attendee, net.fortuna.ical4j.model.property.Attendee property) throws URISyntaxException {
         property.setValue(attendee.getUri());
         if (Strings.isNotEmpty(attendee.getCommonName())) {
             property.getParameters().replace(new Cn(attendee.getCommonName()));
@@ -129,11 +157,31 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
         } else {
             property.getParameters().removeAll(Parameter.PARTSTAT);
         }
-
+        if (null != attendee.getRole()) {
+            property.getParameters().replace(new Role(attendee.getRole().toString()));
+        } else {
+            property.getParameters().removeAll(Parameter.ROLE);
+        }
+        if (null != attendee.getCuType()) {
+            property.getParameters().replace(new CuType(attendee.getCuType().toString()));
+        } else {
+            property.getParameters().removeAll(Parameter.CUTYPE);
+        }
+        if (null != attendee.isRsvp()) {
+            property.getParameters().replace(new Rsvp(attendee.isRsvp()));
+        } else {
+            property.getParameters().removeAll(Parameter.RSVP);
+        }
         return property;
     }
 
-    private Attendee importAttendee(net.fortuna.ical4j.model.property.Attendee property) {
+    private static CalendarServerAttendeeComment exportAttendeeComment(Attendee attendee, CalendarServerAttendeeComment property) throws URISyntaxException {
+        property.getParameters().replace(new CalendarServerAttendeeRef(attendee.getUri()));
+        property.setValue(attendee.getComment());
+        return property;
+    }
+
+    private static Attendee importAttendee(net.fortuna.ical4j.model.property.Attendee property) {
         Attendee attendee = new Attendee();
         if (null != property.getCalAddress()) {
             attendee.setUri(property.getCalAddress().toString());
@@ -151,6 +199,42 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
         attendee.setCuType(Enums.parse(CalendarUserType.class, optParameterValue(property, Parameter.CUTYPE), null));
         attendee.setRsvp(Boolean.valueOf(optParameterValue(property, Parameter.RSVP)));
         return attendee;
+    }
+
+    /**
+     * Gets an attendee property from the supplied property list whose calendar address matches a specific URI.
+     * 
+     * @param properties The property list to check
+     * @param uri The URI to match the calendar user address against
+     * @return The matching attendee, or <code>null</code> if not found
+     */
+    private static net.fortuna.ical4j.model.property.Attendee getMatchingAttendee(PropertyList properties, String uri) {
+        for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
+            net.fortuna.ical4j.model.property.Attendee property = (net.fortuna.ical4j.model.property.Attendee) iterator.next();
+            URI calAddress = property.getCalAddress();
+            if (null != calAddress && calAddress.toString().equals(uri)) {
+                return property;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets an attendee property from the supplied property list whose calendar address matches a specific URI.
+     * 
+     * @param properties The property list to check
+     * @param uri The URI to match the calendar user address against
+     * @return The matching attendee, or <code>null</code> if not found
+     */
+    private static CalendarServerAttendeeComment getMatchingAttendeeComment(PropertyList properties, String uri) {
+        for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
+            CalendarServerAttendeeComment property = (CalendarServerAttendeeComment) iterator.next();
+            Parameter attendeeRefParameter = property.getParameter(CalendarServerAttendeeRef.PARAMETER_NAME);
+            if (null != attendeeRefParameter && null != attendeeRefParameter.getValue() && attendeeRefParameter.getValue().equals(uri)) {
+                return property;
+            }
+        }
+        return null;
     }
 
 }

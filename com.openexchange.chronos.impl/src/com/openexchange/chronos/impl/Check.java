@@ -47,34 +47,75 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.impl;
 
-import com.openexchange.chronos.CalendarStorage;
-import com.openexchange.chronos.CalendarStorageFactory;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.database.provider.DatabaseServiceDBProvider;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 
 /**
- * {@link CalendarStorage}
+ * {@link CalendarService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorageFactory implements CalendarStorageFactory {
+public class Check {
 
-    @Override
-    public CalendarStorage create(Context context) throws OXException {
-        return create(context, new DatabaseServiceDBProvider(Services.getService(DatabaseService.class)), DBTransactionPolicy.NORMAL_TRANSACTIONS);
+    public static void requireCalendarContentType(UserizedFolder folder) throws OXException {
+        if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
+            throw new OXException();
+        }
     }
 
-    @Override
-    public CalendarStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
-        return new RdbCalendarStorage(context, dbProvider, txPolicy);
+    public static void requireFolderPermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getFolderPermission() < requiredPermission) {
+            throw new OXException();
+        }
+    }
+
+    public static void requireReadPermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getReadPermission() < requiredPermission) {
+            throw new OXException();
+        }
+    }
+
+    public static void requireWritePermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getWritePermission() < requiredPermission) {
+            throw new OXException();
+        }
+    }
+
+    public static void requireDeletePermission(UserizedFolder folder, int requiredPermission) throws OXException {
+        if (folder.getOwnPermission().getDeletePermission() < requiredPermission) {
+            throw new OXException();
+        }
+    }
+
+    public static void allowedOrganizerSchedulingObjectChange(Event originalEvent, Event udpatedEvent) throws OXException {
+
+    }
+
+    public static void allowedAttendeeSchedulingObjectChange(Event originalEvent, Event udpatedEvent) throws OXException {
+
+    }
+
+    /**
+     * Checks that the supplied client timestamp is equal to or greater than the last modification time of the event.
+     *
+     * @param event The event to check the timestamp against
+     * @param clientTimestampp The client timestamp
+     * @throws OXException If the check fails
+     */
+    public static void requireUpToDateTimestamp(Event event, long clientTimestampp) throws OXException {
+        if (event.getLastModified().getTime() > clientTimestampp) {
+            throw new OXException();
+        }
+    }
+
+    private Check() {
+        super();
     }
 
 }

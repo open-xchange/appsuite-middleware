@@ -61,28 +61,66 @@ public enum CalendarUserType {
     /**
      * An individual.
      */
-    INDIVIDUAL,
+    INDIVIDUAL(1), // com.openexchange.groupware.container.Participant.USER
 
     /**
      * A group of individuals.
      */
-    GROUP,
+    GROUP(2), // com.openexchange.groupware.container.Participant.GROUP
 
     /**
      * A physical resource.
      */
-    RESOURCE,
+    RESOURCE(3), // com.openexchange.groupware.container.Participant.RESOURCE
 
     /**
      * A room resource.
      */
-    ROOM,
+    ROOM(-1), // com.openexchange.groupware.container.Participant.NO_ID
 
     /**
      * Otherwise not known.
      */
-    UNKNOWN
+    UNKNOWN(-1) // com.openexchange.groupware.container.Participant.NO_ID
 
     ;
+
+    private final int type;
+
+    /**
+     * Initializes a new {@link CUType}.
+     *
+     * @param type The type identifier
+     */
+    private CalendarUserType(int type) {
+        this.type = type;
+    }
+
+    /**
+     * Gets the corresponding type identifier for this calendar user type.
+     *
+     * @return The type, or <code>-1</code> if no matching type exists
+     */
+    public int getType() {
+        return type;
+    }
+
+    /**
+     * Gets the calendar user type for a specific type identifier.
+     *
+     * @param type The type identifier
+     * @return The corresponding calendar user type, or {@link CalendarUserType#UNKNOWN} if no matching type found
+     */
+    public static CalendarUserType fromType(int type) {
+        if (UNKNOWN.getType() == type) {
+            return CalendarUserType.UNKNOWN;
+        }
+        for (CalendarUserType cuType : CalendarUserType.values()) {
+            if (type == cuType.getType()) {
+                return cuType;
+            }
+        }
+        return UNKNOWN;
+    }
 
 }

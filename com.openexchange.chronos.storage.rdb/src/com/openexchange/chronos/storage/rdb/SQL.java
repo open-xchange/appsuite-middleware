@@ -63,27 +63,6 @@ public class SQL {
 
     public static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SQL.class);
 
-    public static final String SELECT_EVENT_STMT =
-        "SELECT creating_date,created_from,changing_date,changed_from,fid,pflag,timestampfield01,timestampfield02,timezone," +
-        "intfield02,intfield03,intfield04,intfield05,intfield06,intfield07,intfield08,field01,field02,field04,field06,field07," +
-        "field08,field09,uid,organizer,sequence,organizerId,principal,principalId,filename " +
-        "FROM prg_dates WHERE cid=? AND intfield01=?;";
-
-    public static final String SELECT_ALARMS_STMT =
-        "SELECT r.alarm,r.recurrence,r.description,m.reminder FROM reminder AS r LEFT JOIN prg_dates_members AS m ";
-
-    public static final String SELECT_EXTERNAL_ATTENDEES_STMT =
-        "SELECT mailAddress,displayName,confirm,reason FROM dateexternal WHERE cid=? AND objectId=?;";
-
-    public static final String SELECT_INTERNAL_ATTENDEES_STMT =
-        "SELECT r.id,r.type,r.ma,r.dn,m.confirm,m.reason FROM prg_date_rights AS r LEFT JOIN prg_dates_members AS m " +
-        "ON r.cid=m.cid AND r.object_id=m.object_id AND r.id=m.member_uid WHERE r.cid=? AND r.object_id=?;";
-
-//    public static final String INSERT_EVENT_STMT =
-//        "INSERT INTO prg_dates (creating_date,created_from,changing_date,changed_from,fid,pflag,cid,timestampfield01,timestampfield02," +
-//        "timezone,intfield01,intfield02,intfield03,intfield04,intfield05,intfield06,intfield07,intfield08,field01,field02,field04," +
-//        "field06,field07,field08,field09,uid,organizer,sequence,organizerId,principal,principalId,filename) VALUES ;";
-
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();
@@ -106,33 +85,8 @@ public class SQL {
         }
     }
 
-    /**
-     * Appends a SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
-     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
-     *
-     * @param stringBuilder The string builder to append the clause
-     * @param count The number of placeholders to append
-     * @return The string builder
-     */
-    public static StringBuilder appendPlaceholders(StringBuilder stringBuilder, int count) {
-        if (0 >= count) {
-            throw new IllegalArgumentException("count");
-        }
-        if (1 == count) {
-            stringBuilder.append("=?");
-        } else {
-            stringBuilder.append(" IN (?");
-            for (int i = 1; i < count; i++) {
-                stringBuilder.append(",?");
-            }
-            stringBuilder.append(')');
-        }
-        return stringBuilder;
-    }
-
     private SQL() {
         super();
     }
 
 }
-

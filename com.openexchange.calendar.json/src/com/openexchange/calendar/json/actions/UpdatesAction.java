@@ -51,6 +51,7 @@ package com.openexchange.calendar.json.actions;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -58,6 +59,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -97,7 +102,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "showPrivate", optional=true, description = "only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information (since 6.18)")
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted appointments. New and modified appointments are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted appointments (should the ignore parameter be ever implemented) would be identified by objects described in Full identifier for an appointment instead of arrays. Appointment sequencies are broken up into individual appointments and each modified occurrence of a sequence in the requested range is returned separately. The appointments are sorted in ascending order by the field start_date.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class UpdatesAction extends AppointmentAction {
+public final class UpdatesAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);
 
@@ -273,6 +278,43 @@ public final class UpdatesAction extends AppointmentAction {
         } finally {
             SearchIterators.close(it);
         }
+    }
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        Date since = request.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        String ignore = request.getParameter(AJAXServlet.PARAMETER_IGNORE);
+        boolean ignoreUpdated = null != ignore && ignore.contains("changed");
+        boolean ignoreDeleted = null != ignore && ignore.contains("deleted");
+        int folderID = request.getFolderId();
+        List<UserizedEvent> newAndModifiedEvents;
+        List<UserizedEvent> deletedEvents;
+        if (0 < folderID) {
+            CalendarParameters parameters = parseParameters(request);
+            if (false == ignoreUpdated) {
+                newAndModifiedEvents = calendarService.getUpdatedEventsInFolder(request.getSession(), folderID, since, parameters);
+            } else {
+                newAndModifiedEvents = null;
+            }
+            if (false == ignoreDeleted) {
+                deletedEvents = calendarService.getDeletedEventsInFolder(request.getSession(), folderID, since, parameters);
+            } else {
+                deletedEvents = null;
+            }
+        } else {
+            CalendarParameters parameters = parseParameters(request, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
+            if (false == ignoreUpdated) {
+                newAndModifiedEvents = calendarService.getUpdatedEventsOfUser(request.getSession(), since, parameters);
+            } else {
+                newAndModifiedEvents = null;
+            }
+            if (false == ignoreDeleted) {
+                deletedEvents = calendarService.getDeletedEventsOfUser(request.getSession(), since, parameters);
+            } else {
+                deletedEvents = null;
+            }
+        }
+        return getAppointmentDeltaResultWithTimestamp(newAndModifiedEvents, deletedEvents);
     }
 
 }

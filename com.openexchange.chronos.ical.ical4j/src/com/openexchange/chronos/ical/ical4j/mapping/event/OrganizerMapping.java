@@ -51,13 +51,11 @@ package com.openexchange.chronos.ical.ical4j.mapping.event;
 
 import java.net.URISyntaxException;
 import java.util.List;
-
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.parameter.Cn;
 import net.fortuna.ical4j.model.parameter.SentBy;
-
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -73,63 +71,66 @@ import com.openexchange.java.Strings;
  */
 public class OrganizerMapping extends AbstractICalMapping<VEvent, Event> {
 
-	@Override
-	public void export(Event event, VEvent component, ICalParameters parameters, List<OXException> warnings) {
-		Organizer organizer = event.getOrganizer();
-		if (null == organizer) {
-			removeProperties(component, Property.ORGANIZER);
-		} else {
-			removeProperties(component, Property.ORGANIZER); // TODO: better merge?
-			try {
-				component.getProperties().add(exportOrganizer(organizer));
-			} catch (URISyntaxException e) {
-				addConversionWarning(warnings, e, Property.ORGANIZER, e.getMessage());
-			}
-		}
-	}
+    @Override
+    public void export(Event event, VEvent component, ICalParameters parameters, List<OXException> warnings) {
+        Organizer organizer = event.getOrganizer();
+        if (null == organizer) {
+            removeProperties(component, Property.ORGANIZER);
+        } else {
+            net.fortuna.ical4j.model.property.Organizer property = component.getOrganizer();
+            if (null == property) {
+                property = new net.fortuna.ical4j.model.property.Organizer();
+                component.getProperties().add(organizer);
+            }
+            try {
+                exportOrganizer(organizer, property);
+            } catch (URISyntaxException e) {
+                addConversionWarning(warnings, e, Property.ORGANIZER, e.getMessage());
+            }
+        }
+    }
 
-	@Override
-	public void importICal(VEvent vEvent, Event event, ICalParameters parameters, List<OXException> warnings) {
-		net.fortuna.ical4j.model.property.Organizer property = vEvent.getOrganizer();
-		if (null == property) {
-			event.setOrganizer(null);
-		} else {
-			event.setOrganizer(importOrganizer(property));
-		}
-	}
+    @Override
+    public void importICal(VEvent vEvent, Event event, ICalParameters parameters, List<OXException> warnings) {
+        net.fortuna.ical4j.model.property.Organizer property = vEvent.getOrganizer();
+        if (null == property) {
+            event.setOrganizer(null);
+        } else {
+            event.setOrganizer(importOrganizer(property));
+        }
+    }
 
-	private net.fortuna.ical4j.model.property.Organizer exportOrganizer(Organizer organizer) throws URISyntaxException {
-		net.fortuna.ical4j.model.property.Organizer property = new net.fortuna.ical4j.model.property.Organizer();
-		property.setValue(organizer.getUri());
-		if (Strings.isNotEmpty(organizer.getCommonName())) {
-			property.getParameters().replace(new Cn(organizer.getCommonName()));
-		} else {
-			property.getParameters().removeAll(Parameter.CN);
-		}
-		if (Strings.isNotEmpty(organizer.getSentBy())) {
-			property.getParameters().replace(new SentBy(organizer.getSentBy()));
-		} else {
-			property.getParameters().removeAll(Parameter.SENT_BY);
-		}		
-		return property;
-	}
+    private static net.fortuna.ical4j.model.property.Organizer exportOrganizer(Organizer organizer, net.fortuna.ical4j.model.property.Organizer property) throws URISyntaxException {
+        property.setValue(organizer.getUri());
+        if (Strings.isNotEmpty(organizer.getCommonName())) {
+            property.getParameters().replace(new Cn(organizer.getCommonName()));
+        } else {
+            property.getParameters().removeAll(Parameter.CN);
+        }
+        if (Strings.isNotEmpty(organizer.getSentBy())) {
+            property.getParameters().replace(new SentBy(organizer.getSentBy()));
+        } else {
+            property.getParameters().removeAll(Parameter.SENT_BY);
+        }
+        return property;
+    }
 
-	private Organizer importOrganizer(net.fortuna.ical4j.model.property.Organizer property) {
-		Organizer organizer = new Organizer();
-		if (null != property.getCalAddress()) {
-			organizer.setUri(property.getCalAddress().toString());
-		} else if (Strings.isNotEmpty(property.getValue())) {
-		    if (property.getValue().startsWith("mailto:")) {
-		        organizer.setUri(property.getValue());
-		    } else {
-		        organizer.setUri("mailto:" + property.getValue());
-		    }
-		}
-		Parameter cnParameter = property.getParameter(Parameter.CN);
-		organizer.setCommonName(null != cnParameter ? cnParameter.getValue() : null);
-		Parameter sentByParameter = property.getParameter(Parameter.SENT_BY);
-		organizer.setSentBy(null != sentByParameter ? sentByParameter.getValue() : null);
-		return organizer;
-	}
+    private Organizer importOrganizer(net.fortuna.ical4j.model.property.Organizer property) {
+        Organizer organizer = new Organizer();
+        if (null != property.getCalAddress()) {
+            organizer.setUri(property.getCalAddress().toString());
+        } else if (Strings.isNotEmpty(property.getValue())) {
+            if (property.getValue().startsWith("mailto:")) {
+                organizer.setUri(property.getValue());
+            } else {
+                organizer.setUri("mailto:" + property.getValue());
+            }
+        }
+        Parameter cnParameter = property.getParameter(Parameter.CN);
+        organizer.setCommonName(null != cnParameter ? cnParameter.getValue() : null);
+        Parameter sentByParameter = property.getParameter(Parameter.SENT_BY);
+        organizer.setSentBy(null != sentByParameter ? sentByParameter.getValue() : null);
+        return organizer;
+    }
 
 }

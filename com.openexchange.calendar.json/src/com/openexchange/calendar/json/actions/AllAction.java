@@ -64,6 +64,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -87,7 +91,6 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link AllAction}
  *
@@ -95,20 +98,21 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "all", description = "Get all appointments.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "folder", optional=true, description = "Object ID of the folder, whose contents are queried. If not specified, defaults to all calendar folders."),
+    @Parameter(name = "folder", optional = true, description = "Object ID of the folder, whose contents are queried. If not specified, defaults to all calendar folders."),
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data. The alias \"all\" uses the predefined columnset [1, 20, 207, 206, 2]."),
     @Parameter(name = "start", description = "Lower inclusive limit of the queried range as a Date. Only appointments which start on or after this date are returned."),
     @Parameter(name = "end", description = "Upper exclusive limit of the queried range as a Date. Only appointments which end before this date are returned."),
     @Parameter(name = "recurrence_master", description = "Extract the recurrence to several appointments. The default value is false so every appointment of the recurrence will be calculated."),
-    @Parameter(name = "showPrivate", optional=true, description = "only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information (since 6.18)")
+    @Parameter(name = "showPrivate", optional = true, description = "only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information (since 6.18)")
 }, responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Appointment sequencies are broken up into individual appointments and each occurrence of a sequence in the requested range is returned separately. The appointments are sorted in ascending order by the field start_date.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class AllAction extends AppointmentAction {
+public final class AllAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
     /**
      * Initializes a new {@link AllAction}.
+     *
      * @param services
      */
     public AllAction(final ServiceLookup services) {
@@ -194,23 +198,23 @@ public final class AllAction extends AppointmentAction {
                             final int owner = ofa.getFolderOwner(appointment.getParentFolderID());
 
                             switch (folderType) {
-                            case FolderObject.PRIVATE:
-                                for (final UserParticipant u : appointment.getUsers()) {
-                                    if (u.getIdentifier() == userId && u.getAlarmMinutes() > -1) {
-                                        appointment.setAlarm(u.getAlarmMinutes());
-                                        break;
+                                case FolderObject.PRIVATE:
+                                    for (final UserParticipant u : appointment.getUsers()) {
+                                        if (u.getIdentifier() == userId && u.getAlarmMinutes() > -1) {
+                                            appointment.setAlarm(u.getAlarmMinutes());
+                                            break;
+                                        }
                                     }
-                                }
-                                break;
+                                    break;
 
-                            case FolderObject.SHARED:
-                                for (final UserParticipant u : appointment.getUsers()) {
-                                    if (u.getIdentifier() == owner && u.getAlarmMinutes() > -1) {
-                                        appointment.setAlarm(u.getAlarmMinutes());
-                                        break;
+                                case FolderObject.SHARED:
+                                    for (final UserParticipant u : appointment.getUsers()) {
+                                        if (u.getIdentifier() == owner && u.getAlarmMinutes() > -1) {
+                                            appointment.setAlarm(u.getAlarmMinutes());
+                                            break;
+                                        }
                                     }
-                                }
-                                break;
+                                    break;
                             }
                         } catch (final OXException e) {
                             LOG.error("An error occurred during filling an appointment with alarm information.", e);
@@ -295,17 +299,17 @@ public final class AllAction extends AppointmentAction {
                 Collections.sort(objectList);
 
                 switch (orderDir) {
-                case ASCENDING:
-                case NO_ORDER:
-                    for (final DateOrderObject dateOrderObject : objectList) {
-                        checkAndAddAppointment(appointmentList, (Appointment) dateOrderObject.getObject(), startUTC, endUTC, calColl);
-                    }
-                    break;
-                case DESCENDING:
-                    Collections.reverse(objectList);
-                    for (final DateOrderObject dateOrderObject : objectList) {
-                        checkAndAddAppointment(appointmentList, (Appointment) dateOrderObject.getObject(), startUTC, endUTC, calColl);
-                    }
+                    case ASCENDING:
+                    case NO_ORDER:
+                        for (final DateOrderObject dateOrderObject : objectList) {
+                            checkAndAddAppointment(appointmentList, (Appointment) dateOrderObject.getObject(), startUTC, endUTC, calColl);
+                        }
+                        break;
+                    case DESCENDING:
+                        Collections.reverse(objectList);
+                        for (final DateOrderObject dateOrderObject : objectList) {
+                            checkAndAddAppointment(appointmentList, (Appointment) dateOrderObject.getObject(), startUTC, endUTC, calColl);
+                        }
                 }
             }
 
@@ -339,6 +343,23 @@ public final class AllAction extends AppointmentAction {
         } finally {
             SearchIterators.close(it);
         }
+    }
+
+    private static final String[] REQUIRED_PARAMETERS = {
+        CalendarParameters.PARAMETER_FIELDS, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END
+    };
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarParameters parameters = parseParameters(request, REQUIRED_PARAMETERS);
+        int folderID = request.getFolderId();
+        List<UserizedEvent> events;
+        if (0 < folderID) {
+            events = calendarService.getEventsInFolder(request.getSession(), folderID, parameters);
+        } else {
+            events = calendarService.getEventsOfUser(request.getSession(), parameters);
+        }
+        return getAppointmentResultWithTimestamp(events);
     }
 
 }

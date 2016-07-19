@@ -7,7 +7,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/lib-recur-0.9.3.jar,
- rfc5545-datetime-0.2.4.jar
+ lib/rfc5545-datetime-0.2.4.jar
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.chronos,

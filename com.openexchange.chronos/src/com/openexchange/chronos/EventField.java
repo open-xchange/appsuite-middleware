@@ -47,34 +47,127 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
-
-import com.openexchange.chronos.CalendarStorage;
-import com.openexchange.chronos.CalendarStorageFactory;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.database.provider.DatabaseServiceDBProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+package com.openexchange.chronos;
 
 /**
- * {@link CalendarStorage}
+ * {@link EventField}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorageFactory implements CalendarStorageFactory {
+public enum EventField {
 
-    @Override
-    public CalendarStorage create(Context context) throws OXException {
-        return create(context, new DatabaseServiceDBProvider(Services.getService(DatabaseService.class)), DBTransactionPolicy.NORMAL_TRANSACTIONS);
-    }
-
-    @Override
-    public CalendarStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
-        return new RdbCalendarStorage(context, dbProvider, txPolicy);
-    }
+    /**
+     * The object identifier of the event.
+     */
+    ID,
+    /**
+     * The public folder identifier of the event.
+     */
+    PUBLIC_FOLDER_ID,
+    /**
+     * The universal identifier of the event.
+     */
+    UID,
+    /**
+     * The sequence number of the event.
+     */
+    SEQUENCE,
+    /**
+     * The creation date of the event.
+     */
+    CREATED,
+    /**
+     * The user identifier of the event's creator.
+     */
+    CREATED_BY,
+    /**
+     * The last modification date of the event.
+     */
+    LAST_MODIFIED,
+    /**
+     * The identifier of the user who last modified the event.
+     */
+    MODIFIED_BY,
+    /**
+     * The summary of the event.
+     */
+    SUMMARY,
+    /**
+     * The location of the event.
+     */
+    LOCATION,
+    /**
+     * The description of the event.
+     */
+    DESCRIPTION,
+    /**
+     * The categories of the event.
+     */
+    CATEGORIES,
+    /**
+     * The classification of the event.
+     */
+    CLASSIFICATION,
+    /**
+     * The color of the event.
+     */
+    COLOR,
+    /**
+     * The start date of the event.
+     */
+    START_DATE,
+    /**
+     * The start timezone of the event.
+     */
+    START_TIMEZONE,
+    /**
+     * The end date of the event.
+     */
+    END_DATE,
+    /**
+     * The end timezone of the event.
+     */
+    END_TIMEZONE,
+    /**
+     * The all-day character of the event.
+     */
+    ALL_DAY,
+    /**
+     * The time transparency of the event.
+     */
+    TRANSP,
+    /**
+     * The recurrence identifier of the event.
+     */
+    RECURRENCE_ID,
+    /**
+     * The recurrence rule of the event.
+     */
+    RECURRENCE_RULE,
+    /**
+     * The change exception dates of the event.
+     */
+    CHANGE_EXCEPTION_DATES,
+    /**
+     * The delete exception dates of the event.
+     */
+    DELETE_EXCEPTION_DATES,
+    /**
+     * The status of the event.
+     */
+    STATUS,
+    /**
+     * The organizer of the event.
+     */
+    ORGANIZER,
+    /**
+     * The attendees of the event.
+     */
+    ATTENDEES,
+    /**
+     * The attachments of the event.
+     */
+    ATTACHMENTS,
 
 }

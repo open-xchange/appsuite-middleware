@@ -49,54 +49,87 @@
 
 package com.openexchange.groupware.tools.mappings.database;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.Date;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.DefaultMapping;
 
 /**
- * {@link DateMapping} - Database mapping for <code>Types.DATE</code>.
+ * {@link DefaultDbMultiMapping} - Abstract {@link DbMapping} implementation.
  *
+ * @param <T> the type of the property
  * @param <O> the type of the object
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DateMapping<O> extends DefaultDbMapping<Date, O> {
+public abstract class DefaultDbMultiMapping<T, O> extends DefaultMapping<T, O> implements DbMultiMapping<T, O> {
 
-	public DateMapping(final String columnName, final String readableName) {
-		super(columnName, readableName, Types.TIMESTAMP);
-	}
+    private final String[] columnLabels;
+    private final String readableName;
 
-	@Override
-	public Date get(final ResultSet resultSet, String columnLabel) throws SQLException {
-	    try {
-	        return resultSet.getTimestamp(columnLabel);
-	    } catch (SQLException e) {
-	        if ("S1009".equals(e.getSQLState())) {
-	            /*
-	             * http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-configuration-properties.html
-	             * DATETIME values that are composed entirely of zeros result in an exception with state S1009
-	             */
-	            return null;
-	        }
-	        throw e;
-	    }
-	}
+    /**
+     * Initializes a new {@link DefaultDbMultiMapping}.
+     *
+     * @param columnLabels The column labels
+     * @param readableName The readable name
+     */
+    public DefaultDbMultiMapping(String[] columnLabels, String readableName) {
+        super();
+        this.columnLabels = columnLabels;
+        this.readableName = readableName;
+    }
 
-	@Override
-    public int set(final PreparedStatement statement, final int parameterIndex, final O object) throws SQLException {
-		if (this.isSet(object)) {
-			final Date value = this.get(object);
-			if (null != value) {
-				statement.setTimestamp(parameterIndex, new Timestamp(value.getTime()));
-			} else {
-				statement.setNull(parameterIndex, this.getSqlType());
-			}
-		} else {
-			statement.setNull(parameterIndex, this.getSqlType());
-		}
-        return 1;
-	}
+    @Override
+    public T get(ResultSet resultSet, String columnLabel) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getColumnLabel() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getColumnLabel(String prefix) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getReadableName(O object) {
+        return readableName;
+    }
+
+    @Override
+    public int getSqlType() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void set(ResultSet resultSet, O object) throws SQLException, OXException {
+        set(resultSet, object, getColumnLabels());
+    }
+
+    @Override
+    public void set(ResultSet resultSet, O object, String columnLabel) throws SQLException, OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void set(ResultSet resultSet, O object, String[] columnLabels) throws SQLException, OXException {
+        set(object, get(resultSet, columnLabels));
+    }
+
+    @Override
+    public String[] getColumnLabels() {
+        return columnLabels;
+    }
+
+    @Override
+    public String[] getColumnLabels(String prefix) {
+        String[] prefixedLabels = new String[columnLabels.length];
+        for (int i = 0; i < columnLabels.length; i++) {
+            prefixedLabels[i] = prefix + columnLabels[i];
+        }
+        return prefixedLabels;
+    }
 
 }

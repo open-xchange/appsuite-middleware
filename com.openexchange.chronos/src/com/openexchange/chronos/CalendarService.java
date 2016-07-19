@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos;
 
+import java.util.Date;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -60,7 +62,28 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface CalendarService {
 
-	
-	UserizedEvent getEvent(ServerSession session, int folderID, int objectID) throws OXException;
-	
+    UserizedEvent getEvent(ServerSession session, int folderID, int objectID, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getEventsInFolder(ServerSession session, int folderID, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getEventsOfUser(ServerSession session, CalendarParameters parameters) throws OXException;
+
+    UserizedEvent createEvent(ServerSession session, UserizedEvent event, CalendarParameters parameters) throws OXException;
+
+    UserizedEvent updateEvent(ServerSession session, int folderID, UserizedEvent event, CalendarParameters parameters) throws OXException;
+
+    UserizedEvent updateAttendee(ServerSession session, int folderID, int objectID, Attendee attendee, CalendarParameters parameters) throws OXException;
+
+    void deleteEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getUpdatedEventsInFolder(ServerSession session, int folderID, Date updatedSince, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getDeletedEventsInFolder(ServerSession session, int folderID, Date deletedSince, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getUpdatedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException;
+
+    List<UserizedEvent> getDeletedEventsOfUser(ServerSession session, Date deletedSince, CalendarParameters parameters) throws OXException;
+
 }

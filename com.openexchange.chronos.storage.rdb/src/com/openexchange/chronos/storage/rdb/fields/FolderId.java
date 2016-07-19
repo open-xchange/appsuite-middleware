@@ -71,7 +71,7 @@ public class FolderId implements Field<UserizedEvent> {
 
     @Override
     public void set(ResultSet rs, UserizedEvent target) throws SQLException {
-        target.setFolderId(rs.getInt(getSqlName()));
+        //        target.setFolderId(rs.getInt(getSqlName()));
     }
 
     @Override

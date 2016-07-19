@@ -63,6 +63,11 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.calendar.json.actions.chronos.EventConverter;
+import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -89,7 +94,7 @@ import com.openexchange.tools.session.ServerSession;
 }, requestBody = "Appointment object as described in Common object data, Detailed task and appointment data and Detailed appointment data. The field recurrence_id is always present if it is present in the original appointment. The field recurrence_position is present if it is present in the original appointment and only this single appointment should be modified. The field id is not present because it is already included as a parameter. Other fields are present only if modified.",
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated appointment, and maybe errors.")
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class UpdateAction extends AppointmentAction {
+public final class UpdateAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
@@ -150,6 +155,28 @@ public final class UpdateAction extends AppointmentAction {
         }
 
         return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
+    }
+
+    private static final String[] REQUIRED_PARAMETERS = {
+        CalendarParameters.PARAMETER_TIMESTAMP
+    };
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        JSONObject jsonObject = request.getData();
+        CalendarDataObject appointment = new CalendarDataObject();
+        appointment.setContext(request.getSession().getContext());
+        new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
+        convertExternalToInternalUsersIfPossible(appointment, request.getSession().getContext(), LOG);
+        int folderID = request.checkInt(AJAXServlet.PARAMETER_INFOLDER);
+        CalendarParameters parameters = parseParameters(request, REQUIRED_PARAMETERS);
+        if (appointment.containsNotification()) {
+            parameters.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
+        }
+        parameters.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
+        UserizedEvent event = EventConverter.getEvent(appointment, request.getSession());
+        UserizedEvent updatedEvent = calendarService.updateEvent(request.getSession(), folderID, event, parameters);
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, updatedEvent.getEvent().getId()), updatedEvent.getEvent().getLastModified(), "json");
     }
 
 }
