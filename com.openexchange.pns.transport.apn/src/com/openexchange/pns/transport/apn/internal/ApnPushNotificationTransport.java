@@ -47,13 +47,19 @@
  *
  */
 
-package com.openexchange.pns.transport.apn;
+package com.openexchange.pns.transport.apn.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.ConcurrentPriorityQueue;
+import com.openexchange.osgi.util.RankedService;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationField;
@@ -62,6 +68,8 @@ import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionDescription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.transport.apn.ApnOptions;
+import com.openexchange.pns.transport.apn.ApnOptionsProvider;
 import javapns.Push;
 import javapns.communication.exceptions.CommunicationException;
 import javapns.communication.exceptions.KeystoreException;
@@ -81,7 +89,7 @@ import javapns.notification.PushedNotifications;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class ApnPushNotificationTransport implements PushNotificationTransport {
+public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvider, ApnOptionsProvider> implements PushNotificationTransport {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ApnPushNotificationTransport.class);
 
@@ -96,16 +104,71 @@ public class ApnPushNotificationTransport implements PushNotificationTransport {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    private final ApnOptions options;
     private final PushSubscriptionRegistry subscriptionRegistry;
+    private final ConcurrentPriorityQueue<RankedService<ApnOptionsProvider>> trackedProviders;
+    private ServiceRegistration<PushNotificationTransport> registration; // non-volatile, protected by synchronized blocks
 
     /**
      * Initializes a new {@link ApnPushNotificationTransport}.
      */
-    public ApnPushNotificationTransport(ApnOptions options, PushSubscriptionRegistry subscriptionRegistry) {
-        super();
-        this.options = options;
+    public ApnPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, BundleContext context) {
+        super(context, ApnOptionsProvider.class, null);
+        this.trackedProviders = new ConcurrentPriorityQueue<RankedService<ApnOptionsProvider>>();
         this.subscriptionRegistry = subscriptionRegistry;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------
+
+    @Override
+    public synchronized ApnOptionsProvider addingService(ServiceReference<ApnOptionsProvider> reference) {
+        int ranking = RankedService.getRanking(reference);
+        ApnOptionsProvider provider = context.getService(reference);
+
+        trackedProviders.offer(new RankedService<ApnOptionsProvider>(provider, ranking));
+
+        if (null == registration) {
+            registration = context.registerService(PushNotificationTransport.class, this, null);
+        }
+
+        return provider;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<ApnOptionsProvider> reference, ApnOptionsProvider provider) {
+        // Nothing
+    }
+
+    @Override
+    public synchronized void removedService(ServiceReference<ApnOptionsProvider> reference, ApnOptionsProvider provider) {
+        trackedProviders.remove(new RankedService<ApnOptionsProvider>(provider, RankedService.getRanking(reference)));
+
+        if (trackedProviders.isEmpty() && null != registration) {
+            registration.unregister();
+            registration = null;
+        }
+
+        context.ungetService(reference);
+    }
+
+    /**
+     * Gets the currently available {@code ApnOptionsProvider} instance having the highest rank.
+     *
+     * @return The highest-ranked {@code ApnOptionsProvider} instance or <code>null</code>
+     * @throws OXException If no such provider is currently available
+     */
+    private ApnOptionsProvider provider() throws OXException {
+        RankedService<ApnOptionsProvider> rankedService = trackedProviders.peek();
+        if (null == rankedService) {
+            // About to shut-down
+            throw PushExceptionCodes.NO_SUCH_TRANSPORT.create("'Drive' search driver is about to shut-down");
+        }
+        return rankedService.service;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------
+
+    private ApnOptions getApnOptions() throws OXException {
+        return provider().getOptions();
     }
 
     @Override
@@ -123,10 +186,13 @@ public class ApnPushNotificationTransport implements PushNotificationTransport {
             if (!payloads.isEmpty()) {
                 PushedNotifications notifications = null;
                 try {
+                    ApnOptions options = getApnOptions();
                     notifications = Push.payloads(options.getKeystore(), options.getPassword(), options.isProduction(), payloads);
                 } catch (CommunicationException e) {
                     LOG.warn("error submitting push notifications", e);
                 } catch (KeystoreException e) {
+                    LOG.warn("error submitting push notifications", e);
+                } catch (OXException e) {
                     LOG.warn("error submitting push notifications", e);
                 }
 
@@ -231,6 +297,7 @@ public class ApnPushNotificationTransport implements PushNotificationTransport {
 
         List<Device> devices = null;
         try {
+            ApnOptions options = getApnOptions();
             devices = Push.feedback(options.getKeystore(), options.getPassword(), options.isProduction());
         } catch (Exception e) {
             LOG.warn("error querying feedback service", e);

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,66 +47,33 @@
  *
  */
 
-package com.openexchange.pns.transport.apn;
+package com.openexchange.pns.transport.apn.internal;
+
+import com.openexchange.pns.transport.apn.ApnOptions;
+import com.openexchange.pns.transport.apn.ApnOptionsProvider;
+
 
 /**
- * {@link ApnOptions} - Holds the (immutable) options to communicate with the Apple Push Notification System.
+ * {@link DefaultApnOptionsProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class ApnOptions {
+public class DefaultApnOptionsProvider implements ApnOptionsProvider {
 
-    private final String password;
-    private final Object keystore;
-    private final boolean production;
+    private final ApnOptions options;
 
     /**
-     * Initializes a new immutable {@link ApnOptions} instance.
-     *
-     * @param keystore A keystore containing the private key and the certificate signed by Apple.<br>
-     *                 The following formats can be used:
-     *                 <ul>
-     *                 <li><code>java.io.File</code></li>
-     *                 <li><code>java.io.InputStream</code></li>
-     *                 <li><code>byte[]</code></li>
-     *                 <li><code>java.security.KeyStore</code></li>
-     *                 <li><code>java.lang.String</code> for a file path</li>
-     *                 </ul>
-     * @param password The keystore's password.
-     * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
+     * Initializes a new {@link DefaultApnOptionsProvider}.
      */
-    public ApnOptions(Object keystore, String password, boolean production) {
+    public DefaultApnOptionsProvider(ApnOptions options) {
         super();
-        this.keystore = keystore;
-        this.password = password;
-        this.production = production;
+        this.options = options;
     }
 
-    /**
-     * Gets the password
-     *
-     * @return The password
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Gets the keystore
-     *
-     * @return The keystore
-     */
-    public Object getKeystore() {
-        return keystore;
-    }
-
-    /**
-     * Gets the production
-     *
-     * @return The production
-     */
-    public boolean isProduction() {
-        return production;
+    @Override
+    public ApnOptions getOptions() {
+        return options;
     }
 
 }

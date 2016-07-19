@@ -79,6 +79,10 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
      * A JSON error occurred: %1$s
      */
     JSON_ERROR("A JSON error occurred: %1$s", null, Category.CATEGORY_ERROR, 4),
+    /**
+     * No such transport: %1$s
+     */
+    NO_SUCH_TRANSPORT("No such transport: %1$s", null, Category.CATEGORY_ERROR, 5),
 
     ;
 

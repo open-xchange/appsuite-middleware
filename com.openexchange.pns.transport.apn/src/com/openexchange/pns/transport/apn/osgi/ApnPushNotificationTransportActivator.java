@@ -53,18 +53,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.apn.ApnOptions;
-import com.openexchange.pns.transport.apn.ApnPushNotificationTransport;
+import com.openexchange.pns.transport.apn.ApnOptionsProvider;
+import com.openexchange.pns.transport.apn.internal.ApnPushNotificationTransport;
+import com.openexchange.pns.transport.apn.internal.DefaultApnOptionsProvider;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
 
@@ -75,18 +81,31 @@ import com.openexchange.tools.strings.TimeSpanParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class ApnPushNotificationTransportActivator extends HousekeepingActivator {
+public class ApnPushNotificationTransportActivator extends HousekeepingActivator implements Reloadable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ApnPushNotificationTransportActivator.class);
 
-    private BundleContext _bundleContext;
-    private ServiceRegistration<PushNotificationTransport> transportRegistration;
+    private ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration;
+    private ApnPushNotificationTransport apnTransport;
 
     /**
      * Initializes a new {@link ApnPushNotificationTransportActivator}.
      */
     public ApnPushNotificationTransportActivator() {
         super();
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("pns-apn-transport.properties", new String[] {"all properties in file"});
+        return map;
     }
 
     @Override
@@ -101,49 +120,62 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        _bundleContext = context;
         reinit();
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        ServiceRegistration<PushNotificationTransport> transportRegistration = this.transportRegistration;
-        if (null != transportRegistration) {
-            transportRegistration.unregister();
-            this.transportRegistration = null;
+        ApnPushNotificationTransport apnTransport = this.apnTransport;
+        if (null != apnTransport) {
+            apnTransport.close();
+            this.apnTransport = null;
         }
-        _bundleContext = null;
+        ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration = this.optionsProviderRegistration;
+        if (null != optionsProviderRegistration) {
+            optionsProviderRegistration.unregister();
+            this.optionsProviderRegistration = null;
+        }
         super.stopBundle();
     }
 
     private synchronized void reinit() throws Exception {
-        ServiceRegistration<PushNotificationTransport> transportRegistration = this.transportRegistration;
-        if (null != transportRegistration) {
-            transportRegistration.unregister();
+        ApnPushNotificationTransport apnTransport = this.apnTransport;
+        if (null != apnTransport) {
+            apnTransport.close();
+            this.apnTransport = null;
+        }
+
+        ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration = this.optionsProviderRegistration;
+        if (null != optionsProviderRegistration) {
+            optionsProviderRegistration.unregister();
+            this.optionsProviderRegistration = null;
         }
 
         ConfigurationService configService = getService(ConfigurationService.class);
-
-        if (!configService.getBoolProperty("com.openxchange.mobilepush.events.apn.ios.enabled", false)) {
+        if (!configService.getBoolProperty("com.openexchange.pns.transport.apn.ios.enabled", false)) {
             LOG.info("APN push notification transport is disabled per configuration");
             return;
         }
 
-        String resourceName = configService.getProperty("com.openxchange.mobilepush.events.apn.ios.keystore");
-        if (Strings.isEmpty(resourceName)) {
-            LOG.error("Missing key store for APN push notification transport.");
-            return;
+        // Register default options provider if configuration option is available
+        {
+            String resourceName = configService.getProperty("com.openexchange.pns.transport.apn.ios.keystore");
+            if (Strings.isNotEmpty(resourceName)) {
+                String password = configService.getProperty("com.openexchange.pns.transport.apn.ios.password");
+                boolean production = configService.getBoolProperty("com.openexchange.pns.transport.apn.ios.production", false);
+                ApnOptions options = createOptions(resourceName, password, production);
+                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
+                optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, new DefaultApnOptionsProvider(options), dictionary);
+            }
         }
 
-        String password = configService.getProperty("com.openxchange.mobilepush.events.apn.ios.password");
-        boolean production = configService.getBoolProperty("com.openxchange.mobilepush.events.apn.ios.production", false);
-        ApnOptions options = createOptions(resourceName, password, production);
-        ApnPushNotificationTransport apnTransport = new ApnPushNotificationTransport(options, getService(PushSubscriptionRegistry.class));
+        apnTransport = new ApnPushNotificationTransport(getService(PushSubscriptionRegistry.class), context);
+        apnTransport.open();
+        this.apnTransport = apnTransport;
 
-        String feedbackQueryInterval = configService.getProperty("com.openxchange.mobilepush.events.apn.ios.feedbackQueryInterval", (String)null);
+        String feedbackQueryInterval = configService.getProperty("com.openexchange.pns.transport.apn.ios.feedbackQueryInterval", (String)null);
         setupFeedbackQueries(apnTransport, feedbackQueryInterval);
-
-        this.transportRegistration = _bundleContext.registerService(PushNotificationTransport.class, apnTransport, null);
     }
 
     private void setupFeedbackQueries(ApnPushNotificationTransport apnTransport, String feedbackQueryInterval) {
