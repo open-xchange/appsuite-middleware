@@ -75,6 +75,10 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
      * An SQL error occurred: %1$s
      */
     SQL_ERROR("An SQL error occurred: %1$s", null, Category.CATEGORY_ERROR, 3),
+    /**
+     * A JSON error occurred: %1$s
+     */
+    JSON_ERROR("A JSON error occurred: %1$s", null, Category.CATEGORY_ERROR, 4),
 
     ;
 

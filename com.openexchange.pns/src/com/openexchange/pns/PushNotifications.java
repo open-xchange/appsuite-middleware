@@ -50,6 +50,7 @@
 package com.openexchange.pns;
 
 import java.util.Map;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link PushNotifications} - The utility class for push notification module.
@@ -64,6 +65,26 @@ public class PushNotifications {
     }
 
     /**
+     * Gets the length in bytes for specified payload string.
+     *
+     * @param payload The payload
+     * @return The length in bytes
+     */
+    public static int getPayloadLength(String payload) {
+        if (null == payload) {
+            return 0;
+        }
+
+        byte[] bytes;
+        try {
+            bytes = payload.getBytes(Charsets.UTF_8);
+        } catch (Exception ex) {
+            bytes = payload.getBytes();
+        }
+        return bytes.length;
+    }
+
+    /**
      * Checks if specified push notification appears to be a refresh
      *
      * @param notification The push notification to examine
@@ -75,7 +96,115 @@ public class PushNotifications {
             return false;
         }
 
-        return "refresh".equals(messageData.get(PushNotificationFields.MESSAGE.getId()));
+        return "refresh".equals(messageData.get(PushNotificationField.MESSAGE.getId()));
+    }
+
+    /**
+     * Gets the value from notification's data associated with specified field.
+     *
+     * @param field The field
+     * @param notification The notification to grab from
+     * @return The value or <code>null</code>
+     */
+    public static <V> V getValueFor(PushNotificationField field, PushNotification notification) {
+        if (null == field) {
+            return null;
+        }
+        return getValueFor(field.getId(), notification);
+    }
+
+    /**
+     * Gets the value from notification's data associated with specified field.
+     *
+     * @param field The field
+     * @param notification The notification to grab from
+     * @return The value or <code>null</code>
+     */
+    public static <V> V getValueFor(String field, PushNotification notification) {
+        if (null == field || null == notification) {
+            return null;
+        }
+        return (V) notification.getMessageData().get(field);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------
+
+    /**
+     * Cuts given notification by specified number of bytes.
+     *
+     * @param notification The notification
+     * @param numBytesToCut The number of bytes to cut by
+     */
+    public static void cutNotification(PushNotification notification, int numBytesToCut) {
+        switch (notification.getAffiliation()) {
+            case MAIL:
+                cutMailNotification(notification, numBytesToCut, 10, 35);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Cuts specified mail push notification by the specified number of bytes
+     *
+     * @param notification The push notification with mail affiliation
+     * @param numBytesToCut The number of bytes to cut by
+     * @param senderMin The minimum length to preserve for sender
+     * @param subjectMin The minimum length to preserve for subject
+     * @throws IllegalArgumentException If affiliation is not mail
+     */
+    public static void cutMailNotification(PushNotification notification, int numBytesToCut, int senderMin, int subjectMin) {
+        if (null == notification || numBytesToCut <= 0) {
+            return;
+        }
+
+        if (PushAffiliation.MAIL != notification.getAffiliation()) {
+            throw new IllegalArgumentException("Invalid affilitation: " + notification.getAffiliation());
+        }
+
+        Map<String, Object> messageData = notification.getMessageData();
+        int toCut = numBytesToCut;
+
+        // First, cut from subject
+        {
+            String subject = (String) messageData.get(PushNotificationField.MAIL_SUBJECT.getId());
+            if (null != subject) {
+                int lengthSubject = subject.length();
+                int allowedShrinkSubject = lengthSubject - subjectMin;
+                if (allowedShrinkSubject > 0) {
+                    if (allowedShrinkSubject < toCut) {
+                        subject = subject.substring(0, (lengthSubject - allowedShrinkSubject));
+                        toCut -= allowedShrinkSubject;
+                    } else {
+                        subject = subject.substring(0, (lengthSubject - toCut));
+                        toCut = 0;
+                    }
+                }
+
+                messageData.put(PushNotificationField.MAIL_SUBJECT.getId(), subject);
+            }
+        }
+
+        // Then from sender
+        if (toCut > 0) {
+            String sender = (String) messageData.get(PushNotificationField.MAIL_SENDER.getId());
+            if (null != sender) {
+                int lengthFrom = sender.length();
+                int allowedShrinkFrom = lengthFrom - senderMin;
+                if (allowedShrinkFrom > 0) {
+                    if (allowedShrinkFrom < toCut) {
+                        sender = sender.substring(0, lengthFrom - allowedShrinkFrom);
+                        toCut -= allowedShrinkFrom;
+                    } else {
+                        sender = sender.substring(0, lengthFrom - toCut);
+                        toCut = 0;
+                    }
+                }
+
+                messageData.put(PushNotificationField.MAIL_SENDER.getId(), sender);
+            }
+        }
     }
 
 }

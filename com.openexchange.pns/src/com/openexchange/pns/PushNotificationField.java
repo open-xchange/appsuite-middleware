@@ -51,20 +51,16 @@ package com.openexchange.pns;
 
 
 /**
- * {@link PushNotificationFields} - The well-known fields for a push notification.
+ * {@link PushNotificationField} - The well-known fields for a push notification.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum PushNotificationFields {
+public enum PushNotificationField {
 
     // -------------------------------- Generic fields --------------------------------
     /** The key providing the actual message to display; type is <code>java.lang.String</code> */
     MESSAGE("message"),
-    /** The key providing the context identifier; type is <code>java.lang.Integer</code> */
-    CONTEXT_ID("cid"),
-    /** The key providing the user identifier; type is <code>java.lang.Integer</code> */
-    USER_ID("user"),
 
     // -------------------------------- Mail-related fields --------------------------------
     /** The subject of a mail; type is <code>java.lang.String</code> */
@@ -73,12 +69,14 @@ public enum PushNotificationFields {
     MAIL_SENDER("sender"),
     /** The unread count; type is <code>java.lang.Integer</code> */
     MAIL_UNREAD("unread"),
+    /** The key providing the mail path; type is <code>java.lang.String</code> */
+    MAIL_PATH("cid"),
 
     ;
 
     private final String id;
 
-    private PushNotificationFields(String id) {
+    private PushNotificationField(String id) {
         this.id = id;
     }
 

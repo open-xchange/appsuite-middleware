@@ -49,16 +49,31 @@
 
 package com.openexchange.pns.transport.apn;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushNotification;
+import com.openexchange.pns.PushNotificationField;
 import com.openexchange.pns.PushNotificationTransport;
+import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscription;
+import com.openexchange.pns.PushSubscriptionDescription;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import javapns.Push;
+import javapns.communication.exceptions.CommunicationException;
+import javapns.communication.exceptions.KeystoreException;
 import javapns.devices.Device;
+import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
+import javapns.json.JSONException;
+import javapns.notification.NewsstandNotificationPayload;
+import javapns.notification.Payload;
+import javapns.notification.PayloadPerDevice;
+import javapns.notification.PushNotificationPayload;
+import javapns.notification.PushedNotification;
+import javapns.notification.PushedNotifications;
 
 /**
  * {@link ApnPushNotificationTransport}
@@ -71,6 +86,15 @@ public class ApnPushNotificationTransport implements PushNotificationTransport {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ApnPushNotificationTransport.class);
 
     private static final String ID = "apn";
+
+    // https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/CommunicatingWIthAPS.html
+    private static final int STATUS_INVALID_TOKEN_SIZE = 5;
+
+    private static final int STATUS_INVALID_TOKEN = 8;
+
+    private static final int MAX_PAYLOAD_SIZE = 256;
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     private final ApnOptions options;
     private final PushSubscriptionRegistry subscriptionRegistry;
@@ -85,14 +109,117 @@ public class ApnPushNotificationTransport implements PushNotificationTransport {
     }
 
     @Override
-    public void transport(PushNotification notification, Collection<PushSubscription> subscriptions) throws OXException {
-        // TODO Auto-generated method stub
-
+    public String getId() {
+        return ID;
     }
 
     @Override
-    public String getId() {
-        return ID;
+    public void transport(PushNotification notification, Collection<PushSubscription> subscriptions) throws OXException {
+        if (null != subscriptions && 0 < subscriptions.size()) {
+            // Create payloads for each subscription
+            List<PayloadPerDevice> payloads = getPayloads(notification, subscriptions);
+
+            // Transport them
+            if (!payloads.isEmpty()) {
+                PushedNotifications notifications = null;
+                try {
+                    notifications = Push.payloads(options.getKeystore(), options.getPassword(), options.isProduction(), payloads);
+                } catch (CommunicationException e) {
+                    LOG.warn("error submitting push notifications", e);
+                } catch (KeystoreException e) {
+                    LOG.warn("error submitting push notifications", e);
+                }
+
+                processNotificationResults(notification, notifications);
+            }
+        }
+    }
+
+    private void processNotificationResults(PushNotification notification, PushedNotifications pushedNotifications) {
+        if (null != pushedNotifications && !pushedNotifications.isEmpty()) {
+            for (PushedNotification pushedNotification : pushedNotifications) {
+                if (pushedNotification.isSuccessful()) {
+                    LOG.debug("{}", pushedNotification);
+                } else {
+                    LOG.warn("Unsuccessful push notification: {}", pushedNotification);
+                    if (null != pushedNotification.getResponse()) {
+                        int status = pushedNotification.getResponse().getStatus();
+                        if (STATUS_INVALID_TOKEN == status || STATUS_INVALID_TOKEN_SIZE == status) {
+                            Device device = pushedNotification.getDevice();
+                            boolean removed = removeSubscription(notification, device);
+                            if (removed) {
+                                LOG.info("Removed subscription for device with token: {}.", device.getToken());
+                            }
+                            LOG.debug("Could not remove subscriptions for device with token: {}.", device.getToken());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private List<PayloadPerDevice> getPayloads(PushNotification notification, Collection<PushSubscription> subscriptions) throws OXException {
+        try {
+            Payload payload;
+            if (false == PushNotifications.isRefresh(notification)) {
+                payload = constructPayload(notification);
+                int payloadLength = PushNotifications.getPayloadLength(payload.toString());
+                // Check payload length
+                if (payloadLength > MAX_PAYLOAD_SIZE) {
+                    int bytesToCut = payloadLength - MAX_PAYLOAD_SIZE;
+                    PushNotifications.cutNotification(notification, bytesToCut);
+                    payload = constructPayload(notification);
+                }
+            } else {
+                payload = NewsstandNotificationPayload.contentAvailable();
+                payload.addCustomDictionary("message", "refresh");
+                payload.addCustomDictionary("SYNC_EVENT", "MAIL");
+            }
+
+            List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
+            for (PushSubscription subscription : subscriptions) {
+                try {
+                    payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
+                } catch (InvalidDeviceTokenFormatException e) {
+                    LOG.warn("Invalid device token: '{}', removing from subscription store.", subscription.getToken(), e);
+                    try {
+                        subscriptionRegistry.unregisterSubscription(PushSubscriptionDescription.instanceFor(subscription));
+                    } catch (OXException x) {
+                        LOG.error("Failed to remove subscription for invalid token {}", subscription.getToken(), x);
+                    }
+                }
+            }
+            return payloads;
+        } catch (JSONException e) {
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private PushNotificationPayload constructPayload(PushNotification notification) throws JSONException {
+        switch (notification.getAffiliation()) {
+            case MAIL:
+                return constructMailPayload(notification);
+            default:
+                break;
+        }
+        return null;
+    }
+
+    private PushNotificationPayload constructMailPayload(PushNotification notification) throws JSONException {
+        PushNotificationPayload payload = new PushNotificationPayload();
+        payload.addSound("beep.wav");
+
+        String subject = PushNotifications.getValueFor(PushNotificationField.MAIL_SUBJECT, notification);
+        String sender = PushNotifications.getValueFor(PushNotificationField.MAIL_SENDER, notification);
+        String path = PushNotifications.getValueFor(PushNotificationField.MAIL_PATH, notification);
+        Integer unread = PushNotifications.getValueFor(PushNotificationField.MAIL_UNREAD, notification);
+
+        payload.addAlert(new StringBuilder(sender).append("\n").append(subject).toString());
+        if (null != unread) {
+            payload.addBadge(unread.intValue());
+        }
+        payload.addCustomDictionary(PushNotificationField.MAIL_PATH.getId(), path);
+        return payload;
     }
 
     /**
@@ -134,6 +261,25 @@ public class ApnPushNotificationTransport implements PushNotificationTransport {
             LOG.error("Error removing subscription", e);
         }
         return 0;
+    }
+
+    private boolean removeSubscription(PushNotification notification, Device device) {
+        if (null == device || null == device.getToken() || null == device.getLastRegister()) {
+            LOG.warn("Unsufficient device information to remove subscriptions for: {}", device);
+            return false;
+        }
+
+        try {
+            PushSubscriptionDescription subscriptionDesc = new PushSubscriptionDescription();
+            subscriptionDesc.setAffiliation(notification.getAffiliation());
+            subscriptionDesc.setContextId(notification.getContextId());
+            subscriptionDesc.setToken(device.getToken());
+            subscriptionDesc.setUserId(notification.getUserId());
+            return subscriptionRegistry.unregisterSubscription(subscriptionDesc);
+        } catch (OXException e) {
+            LOG.error("Error removing subscription", e);
+        }
+        return false;
     }
 
 }
