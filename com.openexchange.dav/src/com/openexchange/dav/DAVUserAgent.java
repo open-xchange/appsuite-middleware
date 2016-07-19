@@ -63,6 +63,8 @@ public enum DAVUserAgent {
     THUNDERBIRD_LIGHTNING,
     EM_CLIENT,
     SMOOTH_SYNC,
+    WINDOWS_PHONE,
+    WINDOWS,
     UNKNOWN
     ;
 
@@ -74,17 +76,17 @@ public enum DAVUserAgent {
      */
     public static DAVUserAgent parse(String userAgent) {
         if (null != userAgent) {
-            if (userAgent.contains("eM Client")) {
-                return EM_CLIENT;
-            }
-            if (userAgent.contains("SmoothSync")) {
-                return SMOOTH_SYNC;
-            }
             if (userAgent.contains("Lightning") && userAgent.contains("Thunderbird") && userAgent.contains("Mozilla")) {
                 return THUNDERBIRD_LIGHTNING;
             }
-            if (userAgent.contains("iOS") && userAgent.contains("dataaccessd")) {
+            if (userAgent.contains("iOS") && userAgent.contains("dataaccessd") && false == userAgent.contains("Android")) {
                 return IOS;
+            }
+            if (userAgent.startsWith("MSFT-WP")) {
+                return WINDOWS_PHONE;
+            }
+            if (userAgent.startsWith("MSFT-WIN")) {
+                return WINDOWS;
             }
             if ((userAgent.contains("Mac OS") || userAgent.contains("Mac+OS")) &&
                 (userAgent.contains("CalendarStore") || (userAgent.contains("CalendarAgent")))) {
@@ -93,6 +95,12 @@ public enum DAVUserAgent {
             if ((userAgent.contains("Mac OS") || userAgent.contains("Mac_OS")) &&
                 (userAgent.contains("AddressBook"))) {
                 return MAC_CONTACTS;
+            }
+            if (userAgent.contains("eM Client")) {
+                return EM_CLIENT;
+            }
+            if (userAgent.contains("SmoothSync")) {
+                return SMOOTH_SYNC;
             }
         }
         return UNKNOWN;

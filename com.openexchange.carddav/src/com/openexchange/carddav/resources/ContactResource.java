@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -68,6 +67,7 @@ import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.resources.CommonResource;
 import com.openexchange.exception.Category;
@@ -78,7 +78,6 @@ import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -287,7 +286,7 @@ public class ContactResource extends CommonResource<Contact> {
              * set initial parent folder to the default contacts folder in case of an iOS client
              */
             contact.setContextId(factory.getSession().getContextId());
-            String parentFolderID = isIOSClient() ? factory.getState().getDefaultFolder().getID() : String.valueOf(this.parentFolderID);
+            String parentFolderID = DAVUserAgent.IOS.equals(getUserAgent()) ? factory.getState().getDefaultFolder().getID() : String.valueOf(this.parentFolderID);
             if (contact.getMarkAsDistribtuionlist()) {
                 /*
                  * insert & delete not supported contact group (next sync cleans up the client)
@@ -403,17 +402,6 @@ public class ContactResource extends CommonResource<Contact> {
             Streams.close(vCardImport);
             vCardImport = null;
         }
-    }
-
-    /**
-     * Gets a value indicating whether the request's user agent is assumed to represent an iOS client or not.
-     *
-     * @return <code>true</code> if the request originates in an iOS client, <code>false</code>, otherwise
-     */
-    private boolean isIOSClient() {
-        String userAgent = (String) factory.getSession().getParameter("user-agent");
-        return false == Strings.isEmpty(userAgent) &&
-            Pattern.matches(".*iOS.*dataaccessd.*", userAgent) && false == userAgent.contains("Android");
     }
 
     /**

@@ -178,14 +178,6 @@ public class GroupwareCaldavFactory extends DAVFactory implements BulkLoader {
         return icalParser;
     }
 
-    public String getLoginName() {
-        return getSession().getLoginName();
-    }
-
-    public SessionHolder getSessionHolder() {
-        return this;
-    }
-
     public CalendarCollectionService getCalendarUtilities() {
         return calendarUtils;
     }
@@ -235,24 +227,11 @@ public class GroupwareCaldavFactory extends DAVFactory implements BulkLoader {
         private Date maxDateTime = null;
         private String treeID;
         private UserizedFolder defaultFolder = null;
-        private CalDAVAgent userAgent;
 
         public State(final GroupwareCaldavFactory factory) {
             super();
             this.factory = factory;
             this.knownCollections = new HashMap<WebdavPath, DAVCollection>();
-        }
-
-        /**
-         * Gets the user agent performing the CalDAV request.
-         *
-         * @return The CalDAV agent, or {@link CalDAVAgent#UNKNOWN} if not recognized
-         */
-        public CalDAVAgent getUserAgent() {
-            if (null == userAgent) {
-                userAgent = CalDAVAgent.parse((String) factory.getSession().getParameter("user-agent"));
-            }
-            return userAgent;
         }
 
         /**
