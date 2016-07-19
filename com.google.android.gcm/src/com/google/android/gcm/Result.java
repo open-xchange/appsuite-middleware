@@ -16,6 +16,7 @@
 package com.google.android.gcm;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Result of a GCM message request that returned HTTP status code 200.
@@ -23,7 +24,7 @@ import java.io.Serializable;
  * <p>
  * If the message is successfully created, the {@link #getMessageId()} returns
  * the message id and {@link #getErrorCodeName()} returns {@literal null};
- * otherwise, {@link #getMessageId()} returns {@literal null} and 
+ * otherwise, {@link #getMessageId()} returns {@literal null} and
  * {@link #getErrorCodeName()} returns the code of the error.
  *
  * <p>
@@ -31,7 +32,7 @@ import java.io.Serializable;
  * created, but GCM has a canonical registration id for that device. In this
  * case, the server should update the registration id to avoid rejected requests
  * in the future.
- * 
+ *
  * <p>
  * In a nutshell, the workflow to handle a result is:
  * <pre>
@@ -45,78 +46,123 @@ import java.io.Serializable;
  */
 public final class Result implements Serializable {
 
-  private final String messageId;
-  private final String canonicalRegistrationId;
-  private final String errorCode;
+    private final String messageId;
+    private final String canonicalRegistrationId;
+    private final String errorCode;
+    private final Integer success;
+    private final Integer failure;
+    private final List<String> failedRegistrationIds;
 
-  public static final class Builder {
+    public static final class Builder {
 
-    // optional parameters
-    private String messageId;
-    private String canonicalRegistrationId;
-    private String errorCode;
+      // optional parameters
+      private String messageId;
+      private String canonicalRegistrationId;
+      private String errorCode;
+      private Integer success;
+      private Integer failure;
+      private List<String> failedRegistrationIds;
 
-    public Builder canonicalRegistrationId(String value) {
-      canonicalRegistrationId = value;
-      return this;
+      public Builder canonicalRegistrationId(String value) {
+        canonicalRegistrationId = value;
+        return this;
+      }
+
+      public Builder messageId(String value) {
+        messageId = value;
+        return this;
+      }
+
+      public Builder errorCode(String value) {
+        errorCode = value;
+        return this;
+      }
+
+      public Builder success(Integer value) {
+        success = value;
+        return this;
+      }
+
+      public Builder failure(Integer value) {
+        failure = value;
+        return this;
+      }
+
+      public Builder failedRegistrationIds(List<String> value) {
+        failedRegistrationIds = value;
+        return this;
+      }
+
+      public Result build() {
+        return new Result(this);
+      }
     }
 
-    public Builder messageId(String value) {
-      messageId = value;
-      return this;
+    private Result(Builder builder) {
+      canonicalRegistrationId = builder.canonicalRegistrationId;
+      messageId = builder.messageId;
+      errorCode = builder.errorCode;
+      success = builder.success;
+      failure = builder.failure;
+      failedRegistrationIds = builder.failedRegistrationIds;
     }
 
-    public Builder errorCode(String value) {
-      errorCode = value;
-      return this;
+    /**
+     * Gets the message id, if any.
+     */
+    public String getMessageId() {
+      return messageId;
     }
 
-    public Result build() {
-      return new Result(this);
+    /**
+     * Gets the canonical registration id, if any.
+     */
+    public String getCanonicalRegistrationId() {
+      return canonicalRegistrationId;
     }
-  }
 
-  private Result(Builder builder) {
-    canonicalRegistrationId = builder.canonicalRegistrationId;
-    messageId = builder.messageId;
-    errorCode = builder.errorCode;
-  }
-
-  /**
-   * Gets the message id, if any.
-   */
-  public String getMessageId() {
-    return messageId;
-  }
-
-  /**
-   * Gets the canonical registration id, if any.
-   */
-  public String getCanonicalRegistrationId() {
-    return canonicalRegistrationId;
-  }
-
-  /**
-   * Gets the error code, if any.
-   */
-  public String getErrorCodeName() {
-    return errorCode;
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder builder = new StringBuilder("[");
-    if (messageId != null) { 
-      builder.append(" messageId=").append(messageId);
+    /**
+     * Gets the error code, if any.
+     */
+    public String getErrorCodeName() {
+      return errorCode;
     }
-    if (canonicalRegistrationId != null) {
-      builder.append(" canonicalRegistrationId=")
-          .append(canonicalRegistrationId);
+
+    public Integer getSuccess() {
+      return success;
     }
-    if (errorCode != null) { 
-      builder.append(" errorCode=").append(errorCode);
+
+    public Integer getFailure() {
+      return failure;
     }
-    return builder.append(" ]").toString();
-  }
+
+    public List<String> getFailedRegistrationIds() {
+      return failedRegistrationIds;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder builder = new StringBuilder("[");
+      if (messageId != null) {
+        builder.append(" messageId=").append(messageId);
+      }
+      if (canonicalRegistrationId != null) {
+        builder.append(" canonicalRegistrationId=")
+            .append(canonicalRegistrationId);
+      }
+      if (errorCode != null) {
+        builder.append(" errorCode=").append(errorCode);
+      }
+      if (success != null) {
+        builder.append(" groupSuccess=").append(success);
+      }
+      if (failure != null) {
+        builder.append(" groupFailure=").append(failure);
+      }
+      if (failedRegistrationIds != null) {
+        builder.append(" failedRegistrationIds=").append(failedRegistrationIds);
+      }
+      return builder.append(" ]").toString();
+    }
 
 }
