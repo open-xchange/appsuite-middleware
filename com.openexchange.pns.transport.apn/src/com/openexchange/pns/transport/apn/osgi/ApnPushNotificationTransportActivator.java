@@ -97,8 +97,11 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        // TODO Auto-generated method stub
-
+        try {
+            reinit(configService);
+        } catch (Exception e) {
+            LOG.error("Failed to re-initialize APN transport", e);
+        }
     }
 
     @Override
@@ -120,7 +123,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        reinit();
+        reinit(getService(ConfigurationService.class));
     }
 
     @Override
@@ -138,7 +141,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
         super.stopBundle();
     }
 
-    private synchronized void reinit() throws Exception {
+    private synchronized void reinit(ConfigurationService configService) throws Exception {
         ApnPushNotificationTransport apnTransport = this.apnTransport;
         if (null != apnTransport) {
             apnTransport.close();
@@ -151,7 +154,6 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
             this.optionsProviderRegistration = null;
         }
 
-        ConfigurationService configService = getService(ConfigurationService.class);
         if (!configService.getBoolProperty("com.openexchange.pns.transport.apn.ios.enabled", false)) {
             LOG.info("APN push notification transport is disabled per configuration");
             return;
