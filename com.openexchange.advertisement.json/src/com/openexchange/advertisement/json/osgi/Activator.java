@@ -51,6 +51,7 @@ package com.openexchange.advertisement.json.osgi;
 
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.json.AdvertisementActionFactory;
+import com.openexchange.advertisement.json.OCPRestService;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 
 /**
@@ -72,6 +73,7 @@ public class Activator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
         registerModule(AdvertisementActionFactory.getInstance(), MODULE);
+        registerService(OCPRestService.class, new OCPRestService());
     }
 
 }

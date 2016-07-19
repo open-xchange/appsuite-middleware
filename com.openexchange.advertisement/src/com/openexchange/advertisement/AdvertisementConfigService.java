@@ -50,6 +50,7 @@
 package com.openexchange.advertisement;
 
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -74,5 +75,39 @@ public interface AdvertisementConfigService {
      * @return The config in json form
      */
     public JSONObject getConfig(Session session);
+
+    /**
+     * Sets an advertisement config for a given user by name. This is for testing purpose only.
+     * 
+     * @param name
+     * @throws OXException
+     */
+    public void putConfigByName(String name, String config) throws OXException;
+
+    /**
+     * Sets an advertisement config for a given user. This is for testing purpose only.
+     * 
+     * @param userId
+     * @param ctxId
+     * @throws OXException
+     */
+    public void putConfig(int userId, int ctxId, String config) throws OXException;
+
+    /**
+     * Sets an advertisement config for a given package of a given reseller
+     * 
+     * @param reseller
+     * @param pack
+     * @throws OXException
+     */
+    public void putConfig(String reseller, String pack, String config) throws OXException;
+
+    /**
+     * Sets an advertisement config for a given reseller
+     * 
+     * @param reseller
+     * @throws OXException
+     */
+    public void putConfig(String reseller, String config) throws OXException;
 
 }
