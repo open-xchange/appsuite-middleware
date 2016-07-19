@@ -131,7 +131,16 @@ public class Activator implements BundleActivator {
         context.registerService(OXExceptionMapper.class, new OXExceptionMapper(), null);
         context.registerService(ApplicationConfiguration.class, new JerseyConfiguration(), null);
 
-
+        /*-
+         * From now on all instances of registerable classes are handled/added in:
+         *  com.eclipsesource.jaxrs.publisher.internal.ResourceTracker.addingService(ResourceTracker.java:45)
+         *
+         * A registerable instance is defined as:
+         *
+         *   private boolean isRegisterableAnnotationPresent( Class<?> type ) {
+         *    return type.isAnnotationPresent( javax.ws.rs.Path.class ) || type.isAnnotationPresent( javax.ws.rs.ext.Provider.class );
+         *   }
+         */
     }
 
     @Override
