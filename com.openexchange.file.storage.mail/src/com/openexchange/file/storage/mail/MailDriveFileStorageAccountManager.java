@@ -70,7 +70,6 @@ public class MailDriveFileStorageAccountManager implements FileStorageAccountMan
     private static final Object DEFAULT_ID = MailDriveConstants.ACCOUNT_ID;
 
     private final MailDriveFileStorageService service;
-    private final FileStorageAccount defaultAccount;
 
     /**
      * Initializes a new {@link MailDriveFileStorageAccountManager}.
@@ -78,7 +77,6 @@ public class MailDriveFileStorageAccountManager implements FileStorageAccountMan
     public MailDriveFileStorageAccountManager(MailDriveFileStorageService service) {
         super();
         this.service = service;
-        defaultAccount = new MailDriveFileStorageAccount(service);
     }
 
     @Override
@@ -98,13 +96,13 @@ public class MailDriveFileStorageAccountManager implements FileStorageAccountMan
 
     @Override
     public List<FileStorageAccount> getAccounts(Session session) throws OXException {
-        return service.hasMailDriveAccess(session) ? Arrays.asList(defaultAccount) : Collections.<FileStorageAccount> emptyList();
+        return service.hasMailDriveAccess(session) ? Arrays.<FileStorageAccount> asList(new MailDriveFileStorageAccount(service, session)) : Collections.<FileStorageAccount> emptyList();
     }
 
     @Override
     public FileStorageAccount getAccount(String id, Session session) throws OXException {
-        if(DEFAULT_ID.equals(id)) {
-            return defaultAccount;
+        if (DEFAULT_ID.equals(id)) {
+            return new MailDriveFileStorageAccount(service, session);
         }
         throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, MailDriveConstants.ID, session.getUserId(), session.getContextId());
     }

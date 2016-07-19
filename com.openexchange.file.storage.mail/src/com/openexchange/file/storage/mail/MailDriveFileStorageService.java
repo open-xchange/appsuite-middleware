@@ -187,7 +187,7 @@ public final class MailDriveFileStorageService implements AccountAware, RootFold
             return Collections.emptyList();
         }
 
-        return Arrays.<FileStorageAccount> asList(new MailDriveFileStorageAccount(this));
+        return Arrays.<FileStorageAccount> asList(new MailDriveFileStorageAccount(this, session));
     }
 
     @Override
