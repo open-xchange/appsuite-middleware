@@ -47,12 +47,17 @@
  *
  */
 
-package com.openexchange.reseller.osgi;
+package com.openexchange.advertisement.osgi;
 
-import com.openexchange.database.DatabaseService;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.FailureAwareCapabilityChecker;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.internal.ResellerServiceImpl;
+import com.openexchange.session.Session;
 
 /**
  * {@link Activator}
@@ -64,14 +69,36 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class };
+        return new Class[] { AdvertisementConfigService.class, CapabilityService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerService(ResellerService.class, ResellerServiceImpl.getInstance());
+        final String sCapability = "ads";
+        Dictionary<String, Object> properties = new Hashtable<>(2);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+        registerService(CapabilityChecker.class, new FailureAwareCapabilityChecker() {
 
+            @Override
+            public FailureAwareCapabilityChecker.Result checkEnabled(String capability, Session session) throws OXException {
+                if (sCapability.equals(capability)) {
+                    AdvertisementConfigService confService = Services.optService(AdvertisementConfigService.class);
+                    if (confService == null) {
+                        return FailureAwareCapabilityChecker.Result.DISABLED;
+                    }
+                    if (confService.isAvailable(session)) {
+                        return FailureAwareCapabilityChecker.Result.ENABLED;
+                    } else {
+                        return FailureAwareCapabilityChecker.Result.DISABLED;
+                    }
+                }
+
+                return FailureAwareCapabilityChecker.Result.ENABLED;
+            }
+        }, properties);
+        getService(CapabilityService.class).declareCapability(sCapability);
     }
+
 
 }

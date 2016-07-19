@@ -59,18 +59,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.reseller.ResellerInterface;
+import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.reseller.data.Restriction;
 import com.openexchange.reseller.osgi.Services;
 
 /**
- * {@link ResellerInterfaceImpl}
+ * {@link ResellerServiceImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class ResellerInterfaceImpl implements ResellerInterface {
+public class ResellerServiceImpl implements ResellerService {
 
     private static final String DATABASE_COLUMN_VALUE = "value";
 
@@ -78,18 +78,18 @@ public class ResellerInterfaceImpl implements ResellerInterface {
 
     private static final String DATABASE_COLUMN_ID = "rid";
 
-    private static final Logger log = LoggerFactory.getLogger(ResellerInterfaceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ResellerServiceImpl.class);
     private DatabaseService dbService;
-    private static ResellerInterfaceImpl instance = null;
+    private static ResellerServiceImpl instance = null;
 
-    public static ResellerInterfaceImpl getInstance() {
+    public static ResellerServiceImpl getInstance() {
         if (instance == null) {
-            instance = new ResellerInterfaceImpl();
+            instance = new ResellerServiceImpl();
         }
         return instance;
     }
 
-    private ResellerInterfaceImpl() {
+    private ResellerServiceImpl() {
         dbService = Services.getService(DatabaseService.class);
     }
 

@@ -53,12 +53,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.reseller.data.ResellerAdmin;
 
 /**
- * {@link ResellerInterface}
+ * {@link ResellerService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public interface ResellerInterface {
+public interface ResellerService {
 
     /**
      * Retrieves the ResellerAdmin for the given context
