@@ -74,7 +74,6 @@ import com.openexchange.rest.services.security.AuthenticationFilter;
  */
 public class Activator implements BundleActivator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
     private ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> cmTracker;
     private ServiceTracker<ConfigurationService, ConfigurationService> csTracker;
@@ -89,6 +88,8 @@ public class Activator implements BundleActivator {
 
     @Override
     public synchronized void start(final BundleContext context) throws Exception {
+        final Logger logger = LoggerFactory.getLogger(Activator.class);
+
         cmTracker = new ServiceTracker<ConfigurationAdmin, ConfigurationAdmin>(context, ConfigurationAdmin.class, null) {
 
             @Override
@@ -104,7 +105,7 @@ public class Activator implements BundleActivator {
                         properties.put("root", "/");
                         configuration.update(properties);
                     } catch (IOException e) {
-                        LOG.error("Could not set root path for jersey servlet. REST API will not be available!", e);
+                        logger.error("Could not set root path for jersey servlet. REST API will not be available!", e);
                     }
                 }
                 return service;
