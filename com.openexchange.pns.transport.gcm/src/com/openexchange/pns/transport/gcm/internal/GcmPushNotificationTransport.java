@@ -76,6 +76,7 @@ import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionDescription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionDescription.Builder;
 import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
 
 
@@ -336,11 +337,15 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
 
     private void updateRegistrationIDs(PushNotification notification, String oldRegistrationID, String newRegistrationID) {
         try {
-            PushSubscriptionDescription subscriptionDesc = new PushSubscriptionDescription();
-            subscriptionDesc.setAffiliation(notification.getAffiliation());
-            subscriptionDesc.setContextId(notification.getContextId());
-            subscriptionDesc.setToken(oldRegistrationID);
-            subscriptionDesc.setUserId(notification.getUserId());
+            Builder builder = new Builder()
+                .affiliation(notification.getAffiliation())
+                .contextId(notification.getContextId())
+                .token(oldRegistrationID)
+                .transportId(ID)
+                .userId(notification.getUserId());
+
+            PushSubscriptionDescription subscriptionDesc = builder.build();
+
             boolean success = subscriptionRegistry.updateToken(subscriptionDesc, newRegistrationID);
             if (success) {
                 LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
@@ -353,11 +358,15 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
 
     private boolean removeRegistrations(PushNotification notification, String registrationID) {
         try {
-            PushSubscriptionDescription subscriptionDesc = new PushSubscriptionDescription();
-            subscriptionDesc.setAffiliation(notification.getAffiliation());
-            subscriptionDesc.setContextId(notification.getContextId());
-            subscriptionDesc.setToken(registrationID);
-            subscriptionDesc.setUserId(notification.getUserId());
+            Builder builder = new Builder()
+                .affiliation(notification.getAffiliation())
+                .contextId(notification.getContextId())
+                .token(registrationID)
+                .transportId(ID)
+                .userId(notification.getUserId());
+
+            PushSubscriptionDescription subscriptionDesc = builder.build();
+
             boolean success = subscriptionRegistry.unregisterSubscription(subscriptionDesc);
             if (success) {
                 LOG.info("Successfully removed registration ID {}.", registrationID);

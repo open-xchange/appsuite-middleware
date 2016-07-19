@@ -68,6 +68,7 @@ import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionDescription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionDescription.Builder;
 import com.openexchange.pns.transport.apn.ApnOptions;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
 import javapns.Push;
@@ -337,11 +338,15 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         }
 
         try {
-            PushSubscriptionDescription subscriptionDesc = new PushSubscriptionDescription();
-            subscriptionDesc.setAffiliation(notification.getAffiliation());
-            subscriptionDesc.setContextId(notification.getContextId());
-            subscriptionDesc.setToken(device.getToken());
-            subscriptionDesc.setUserId(notification.getUserId());
+            Builder builder = new Builder()
+                .affiliation(notification.getAffiliation())
+                .contextId(notification.getContextId())
+                .token(device.getToken())
+                .transportId(ID)
+                .userId(notification.getUserId());
+
+            PushSubscriptionDescription subscriptionDesc = builder.build();
+
             return subscriptionRegistry.unregisterSubscription(subscriptionDesc);
         } catch (OXException e) {
             LOG.error("Error removing subscription", e);

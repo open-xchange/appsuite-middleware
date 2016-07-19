@@ -64,28 +64,107 @@ public class PushSubscriptionDescription implements PushSubscription {
      * @return The appropriate {@link PushSubscriptionDescription} instance
      */
     public static PushSubscriptionDescription instanceFor(PushSubscription subscription) {
-        PushSubscriptionDescription description = new PushSubscriptionDescription();
-        description.setAffiliation(subscription.getAffiliation());
-        description.setContextId(subscription.getContextId());
-        description.setToken(subscription.getToken());
-        description.setTransportId(subscription.getTransportId());
-        description.setUserId(subscription.getUserId());
-        return null;
+        Builder builder = new Builder()
+            .affiliation(subscription.getAffiliation())
+            .contextId(subscription.getContextId())
+            .token(subscription.getToken())
+            .transportId(subscription.getTransportId())
+            .userId(subscription.getUserId());
+
+        return builder.build();
+    }
+
+    /** The builder for a <code>PushSubscriptionDescription</code> instance */
+    public static class Builder {
+
+        int userId;
+        int contextId;
+        PushAffiliation affiliation;
+        String transportId;
+        String token;
+
+        /** Creates a new builder */
+        public Builder() {
+            super();
+        }
+
+        /**
+         * Set the user identifier
+         * @param userId The user identifier
+         * @return This builder
+         */
+        public Builder userId(int userId) {
+            this.userId = userId;
+            return this;
+        }
+
+        /**
+         * Set the context identifier
+         * @param contextId The context identifier
+         * @return This builder
+         */
+        public Builder contextId(int contextId) {
+            this.contextId = contextId;
+            return this;
+        }
+
+        /**
+         * Set the affiliation
+         * @param affiliation The affiliation
+         * @return This builder
+         */
+        public Builder affiliation(PushAffiliation affiliation) {
+            this.affiliation = affiliation;
+            return this;
+        }
+
+        /**
+         * Set the transport identifier
+         * @param transportId The transport identifier
+         * @return This builder
+         */
+        public Builder transportId(String transportId) {
+            this.transportId = transportId;
+            return this;
+        }
+
+        /**
+         * Set the token
+         * @param token The token
+         * @return This builder
+         */
+        public Builder token(String token) {
+            this.token = token;
+            return this;
+        }
+
+        /**
+         * Builds the <code>PushSubscriptionDescription</code> instance.
+         * @return The resulting <code>PushSubscriptionDescription</code> instance
+         */
+        public PushSubscriptionDescription build() {
+            return new PushSubscriptionDescription(this);
+        }
     }
 
     // --------------------------------------------------------------------------------------------------
 
-    private int userId;
-    private int contextId;
-    private PushAffiliation affiliation;
-    private String transportId;
-    private String token;
+    private final int userId;
+    private final int contextId;
+    private final PushAffiliation affiliation;
+    private final String transportId;
+    private final String token;
 
     /**
      * Initializes a new {@link PushSubscriptionDescription}.
      */
-    public PushSubscriptionDescription() {
+    private PushSubscriptionDescription(Builder builder) {
         super();
+        this.affiliation = builder.affiliation;
+        this.contextId = builder.contextId;
+        this.token = builder.token;
+        this.transportId = builder.transportId;
+        this.userId = builder.userId;
     }
 
     @Override
@@ -111,51 +190,6 @@ public class PushSubscriptionDescription implements PushSubscription {
     @Override
     public String getToken() {
         return token;
-    }
-
-    /**
-     * Sets the user identifier
-     *
-     * @param userId The user identifier to set
-     */
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * Sets the context identifier
-     *
-     * @param contextId The context identifier to set
-     */
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
-    }
-
-    /**
-     * Sets the affiliation
-     *
-     * @param affiliation The affiliation to set
-     */
-    public void setAffiliation(PushAffiliation affiliation) {
-        this.affiliation = affiliation;
-    }
-
-    /**
-     * Sets the transport identifier
-     *
-     * @param transportId The transport identifier to set
-     */
-    public void setTransportId(String transportId) {
-        this.transportId = transportId;
-    }
-
-    /**
-     * Sets the token
-     *
-     * @param token The token to set
-     */
-    public void setToken(String token) {
-        this.token = token;
     }
 
 }
