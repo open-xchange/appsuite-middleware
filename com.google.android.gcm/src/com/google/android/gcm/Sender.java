@@ -73,6 +73,8 @@ import java.util.logging.Logger;
 
 /**
  * Helper class to send messages to the GCM service using an API Key.
+ * <p>
+ * <a href="https://github.com/google/gcm/tree/master/client-libraries/java/rest-client/src/com/google/android/gcm/server">Google Cloud Messaging - client libraries and sample implementations</a>
  */
 public class Sender {
 

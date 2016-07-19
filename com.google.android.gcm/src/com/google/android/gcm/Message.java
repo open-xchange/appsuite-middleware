@@ -56,6 +56,8 @@ import java.util.Map;
  * .addData("key2", "value2")
  * .build();
  * </pre></code>
+ * <p>
+ * <a href="https://github.com/google/gcm/tree/master/client-libraries/java/rest-client/src/com/google/android/gcm/server">Google Cloud Messaging - client libraries and sample implementations</a>
  */
 public final class Message implements Serializable {
 

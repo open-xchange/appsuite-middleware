@@ -39,6 +39,8 @@ import java.util.List;
  * .body("Here is a more detailed description")
  * .build();
  * </pre></code>
+ * <p>
+ * <a href="https://github.com/google/gcm/tree/master/client-libraries/java/rest-client/src/com/google/android/gcm/server">Google Cloud Messaging - client libraries and sample implementations</a>
  */
 public final class Notification implements Serializable {
 

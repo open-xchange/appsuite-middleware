@@ -43,6 +43,8 @@ import java.util.List;
  *         - if it returns {@literal null}, do nothing.
  *         - otherwise, update the server datastore with the new id.
  * </pre>
+ * <p>
+ * <a href="https://github.com/google/gcm/tree/master/client-libraries/java/rest-client/src/com/google/android/gcm/server">Google Cloud Messaging - client libraries and sample implementations</a>
  */
 public final class Result implements Serializable {
 

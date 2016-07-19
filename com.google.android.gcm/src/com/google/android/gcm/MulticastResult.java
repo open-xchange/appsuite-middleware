@@ -22,6 +22,8 @@ import java.util.List;
 
 /**
  * Result of a GCM multicast message request .
+ * <p>
+ * <a href="https://github.com/google/gcm/tree/master/client-libraries/java/rest-client/src/com/google/android/gcm/server">Google Cloud Messaging - client libraries and sample implementations</a>
  */
 public final class MulticastResult implements Serializable {
 

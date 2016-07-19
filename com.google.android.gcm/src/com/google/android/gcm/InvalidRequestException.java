@@ -22,6 +22,8 @@ import java.io.IOException;
  * Exception thrown when GCM returned an error due to an invalid request.
  * <p>
  * This is equivalent to GCM posts that return an HTTP error different of 200.
+ * <p>
+ * <a href="https://github.com/google/gcm/tree/master/client-libraries/java/rest-client/src/com/google/android/gcm/server">Google Cloud Messaging - client libraries and sample implementations</a>
  */
 public final class InvalidRequestException extends IOException {
 
