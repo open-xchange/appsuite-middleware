@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
@@ -78,7 +79,12 @@ public class TelephoneMapping extends AbstractMapping {
      * Initializes a new {@link TelephoneMapping}.
      */
     public TelephoneMapping() {
-        super("TEL");
+        super("TEL", ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_TTYTDD, ContactField.TELEPHONE_ISDN, ContactField.TELEPHONE_CAR,
+            ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2, ContactField.TELEPHONE_CALLBACK,
+            ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_ASSISTANT, ContactField.TELEPHONE_IP, ContactField.TELEPHONE_RADIO,
+            ContactField.TELEPHONE_PRIMARY, ContactField.FAX_BUSINESS, ContactField.FAX_BUSINESS, ContactField.FAX_OTHER,
+            ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_HOME1,
+            ContactField.TELEPHONE_HOME2, ContactField.TELEPHONE_OTHER);
     }
 
     @Override

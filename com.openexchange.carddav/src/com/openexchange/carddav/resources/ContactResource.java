@@ -72,6 +72,7 @@ import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.resources.CommonResource;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
@@ -116,9 +117,8 @@ public class ContactResource extends CommonResource<Contact> {
      */
     public ContactResource(GroupwareCarddavFactory factory, CardDAVCollection parent, Contact object, WebdavPath url) throws OXException {
         super(parent, object, url);
-        this.object = object;
-        this.parent = parent;
         this.factory = factory;
+        this.parent = parent;
     }
 
     /**
@@ -187,22 +187,15 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * store original vCard if possible
              */
-            ContactService contactService = factory.requireService(ContactService.class);
             previousVCardID = object.getVCardId();
             Contact contact = vCardImport.getContact();
             vCardFileHolder = vCardImport.getVCard();
-            if (null != vCardFileHolder) {
-                int contextId = factory.getSession().getContextId();
-                VCardStorageService vCardStorageService = factory.getVCardStorageService(contextId);
-                if (vCardStorageService != null) {
-                    vCardID = vCardStorageService.saveVCard(vCardFileHolder.getStream(), contextId);
-                    LOG.debug("{}: saved original vCard in '{}'.", getUrl(), vCardID);
-                    contact.setVCardId(vCardID);
-                }
-            }
+            vCardID = storeVCard(factory.getSession().getContextId(), vCardFileHolder);
+            contact.setVCardId(vCardID);
             /*
              * update contact, trying again in case of recoverable errors
              */
+            ContactService contactService = factory.requireService(ContactService.class);
             for (int i = 0; i < MAX_RETRIES && false == saved; i++) {
                 try {
                     contactService.updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
@@ -224,9 +217,9 @@ public class ContactResource extends CommonResource<Contact> {
             Streams.close(vCardFileHolder);
             closeVCardImport();
             if (saved) {
-                deleteVCard(previousVCardID);
+                deleteVCard(factory.getSession().getContextId(), previousVCardID);
             } else if (null != vCardID) {
-                deleteVCard(vCardID);
+                deleteVCard(factory.getSession().getContextId(), vCardID);
             }
         }
     }
@@ -257,7 +250,7 @@ public class ContactResource extends CommonResource<Contact> {
             }
         } finally {
             if (null != vCardID && deleted) {
-                deleteVCard(vCardID);
+                deleteVCard(factory.getSession().getContextId(), vCardID);
             }
         }
     }
@@ -314,14 +307,8 @@ public class ContactResource extends CommonResource<Contact> {
              * store original vCard if possible
              */
             vCardFileHolder = vCardImport.getVCard();
-            if (null != vCardFileHolder) {
-                VCardStorageService vCardStorageService = factory.getVCardStorageService(factory.getSession().getContextId());
-                if (null != vCardStorageService) {
-                    vCardID = vCardStorageService.saveVCard(vCardFileHolder.getStream(), factory.getSession().getContextId());
-                    LOG.debug("{}: saved original vCard in '{}'.", getUrl(), vCardID);
-                    contact.setVCardId(vCardID);
-                }
-            }
+            vCardID = storeVCard(factory.getSession().getContextId(), vCardFileHolder);
+            contact.setVCardId(vCardID);
             /*
              * save contact, trying again in case of recoverable errors
              */
@@ -347,7 +334,7 @@ public class ContactResource extends CommonResource<Contact> {
             Streams.close(vCardFileHolder);
             closeVCardImport();
             if (null != vCardID && false == created) {
-                deleteVCard(vCardID);
+                deleteVCard(factory.getSession().getContextId(), vCardID);
             }
         }
     }
@@ -387,24 +374,9 @@ public class ContactResource extends CommonResource<Contact> {
 
     @Override
     protected WebdavProperty internalGetProperty(WebdavProperty property) throws WebdavProtocolException {
-        if (DAVProtocol.CARD_NS.getURI().equals(property.getNamespace()) && "address-data".equals(property.getName())) {
-            if (false == exists()) {
-                return null;
-            }
-            Set<String> propertyNames = new HashSet<String>();
-            List<Element> children = property.getChildren();
-            if (null != children && 0 < children.size()) {
-                propertyNames = new HashSet<String>();
-                for (Element childElement : children) {
-                    if (DAVProtocol.CARD_NS.equals(childElement.getNamespace()) && "prop".equals(childElement.getName())) {
-                        String name = childElement.getAttributeValue("name");
-                        if (null != name) {
-                            propertyNames.add(name);
-                        }
-                    }
-                }
-            }
+        if (exists() && DAVProtocol.CARD_NS.getURI().equals(property.getNamespace()) && "address-data".equals(property.getName())) {
             WebdavProperty result = new WebdavProperty(property.getNamespace(), property.getName());
+            Set<String> propertyNames = extractRequestedProperties(property);
             if (null != propertyNames && 0 < propertyNames.size()) {
                 try (VCardExport vCardExport = generateVCardResource(propertyNames); InputStream inputStream = vCardExport.getClosingStream()) {
                     result.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
@@ -430,29 +402,6 @@ public class ContactResource extends CommonResource<Contact> {
         if (null != vCardImport) {
             Streams.close(vCardImport);
             vCardImport = null;
-        }
-    }
-
-    /**
-     * Deletes a vCard silently.
-     *
-     * @param vCardID The identifier of the vCard to delete, or <code>null</code> to do nothing
-     */
-    private void deleteVCard(String vCardID) {
-        if (null != vCardID) {
-            int contextId = factory.getSession().getContextId();
-            VCardStorageService vCardStorage = factory.getVCardStorageService(contextId);
-            if (null != vCardStorage) {
-                try {
-                    vCardStorage.deleteVCard(vCardID, contextId);
-                } catch (OXException e) {
-                    if ("FLS-0017".equals(e.getErrorCode())) {
-                        LOG.debug("vCard file with id {} in context {} no longer found in storage.", vCardID, contextId, e);
-                    } else {
-                        LOG.warn("Error while deleting vCard with id {} in context {} from storage.", vCardID, contextId, e);
-                    }
-                }
-            }
         }
     }
 
@@ -551,40 +500,125 @@ public class ContactResource extends CommonResource<Contact> {
 
     private VCardExport generateVCardResource(Set<String> propertyNames) throws OXException {
         /*
+         * determine required contact fields for the export
+         */
+        VCardService vCardService = factory.requireService(VCardService.class);
+        VCardParameters parameters = vCardService.createParameters(factory.getSession());
+        ContactField[] contactFields;
+        if (null != propertyNames && 0 < propertyNames.size()) {
+            parameters.setPropertyNames(propertyNames);
+            contactFields = vCardService.getContactFields(propertyNames);
+        } else {
+            contactFields = null;
+        }
+        /*
          * load required contact data from storage
          */
         Contact contact = factory.getContactService().getContact(
-            factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()));
+            factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()), contactFields);
+        applyAttachments(contact);
         /*
-         * retrieve an original vCard if available
+         * export contact data & return resulting vCard stream
          */
         InputStream originalVCard = null;
         try {
-            String vCardID = object.getVCardId();
-            if (null != vCardID) {
-                int contextId = factory.getSession().getContextId();
-                VCardStorageService vCardStorage = factory.getVCardStorageService(factory.getSession().getContextId());
-                if (null != vCardStorage) {
-                    try {
-                        originalVCard = vCardStorage.getVCard(vCardID, contextId);
-                    } catch (OXException e) {
-                        LOG.warn("Error retrieving vCard with id {} in context {} from storage.", vCardID, contextId, e);
-                    }
-                }
-            }
-            /*
-             * export current contact data & return resulting vCard stream
-             */
-            applyAttachments(contact);
-            VCardService vCardService = factory.requireService(VCardService.class);
-            VCardParameters parameters = vCardService.createParameters(factory.getSession());
-            if (null != propertyNames && 0 < propertyNames.size()) {
-                parameters.setPropertyNames(propertyNames);
-            }
+            originalVCard = optVCard(factory.getSession().getContextId(), object.getVCardId());
             return vCardService.exportContact(contact, originalVCard, parameters);
         } finally {
             Streams.close(originalVCard);
         }
+    }
+
+    /**
+     * Stores a vCard.
+     *
+     * @param contextID The context identifier
+     * @param fileHolder The file holder carrying the vCard data, or <code>null</code> to do nothing
+     * @return The identifier of the stored vCard
+     */
+    private String storeVCard(int contextID, IFileHolder fileHolder) {
+        if (null != fileHolder) {
+            VCardStorageService vCardStorageService = factory.getVCardStorageService(contextID);
+            if (null != vCardStorageService) {
+                try (InputStream inputStream = fileHolder.getStream()) {
+                    String vCardID = vCardStorageService.saveVCard(inputStream, contextID);
+                    LOG.debug("{}: saved vCard in '{}'.", getUrl(), vCardID);
+                    return vCardID;
+                } catch (OXException | IOException e) {
+                    LOG.warn("Error storing vCard in context {}.", contextID, e);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Optionally gets the input stream for a stored vCard.
+     *
+     * @param contextID The context identifier
+     * @param vCardID The identifier of the vCard to get, or <code>null</code> to do nothing
+     * @return The vCard, or <code>null</code> if not available
+     */
+    private InputStream optVCard(int contextID, String vCardID) {
+        if (null != vCardID) {
+            VCardStorageService vCardStorage = factory.getVCardStorageService(contextID);
+            if (null != vCardStorage) {
+                try {
+                    return vCardStorage.getVCard(vCardID, contextID);
+                } catch (OXException e) {
+                    LOG.warn("Error retrieving vCard with id {} in context {} from storage.", vCardID, contextID, e);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Deletes a vCard silently.
+     *
+     * @param contextID The context identifier
+     * @param vCardID The identifier of the vCard to delete, or <code>null</code> to do nothing
+     * @return <code>true</code> if a vCard file actually has been deleted, <code>false</code>, otherwise
+     */
+    private boolean deleteVCard(int contextID, String vCardID) {
+        if (null != vCardID) {
+            VCardStorageService vCardStorage = factory.getVCardStorageService(contextID);
+            if (null != vCardStorage) {
+                try {
+                    return vCardStorage.deleteVCard(vCardID, contextID);
+                } catch (OXException e) {
+                    if ("FLS-0017".equals(e.getErrorCode())) {
+                        LOG.debug("vCard file with id {} in context {} no longer found in storage.", vCardID, contextID, e);
+                    } else {
+                        LOG.warn("Error while deleting vCard with id {} in context {} from storage.", vCardID, contextID, e);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Extracts a set of vCard property names as specified in the child nodes of the supplied <code>CARDDAV:address-data</code> property.
+     *
+     * @param addressDataProperty The <code>CARDDAV:address-data</code> property to get the requested vCard properties from
+     * @return The requested vCard properties, or <code>null</code> if no specific properties are requested
+     */
+    private static Set<String> extractRequestedProperties(WebdavProperty addressDataProperty) {
+        List<Element> childElements = addressDataProperty.getChildren();
+        if (null != childElements && 0 < childElements.size()) {
+            Set<String> propertyNames = new HashSet<String>(childElements.size());
+            for (Element childElement : childElements) {
+                if (DAVProtocol.CARD_NS.equals(childElement.getNamespace()) && "prop".equals(childElement.getName())) {
+                    String name = childElement.getAttributeValue("name");
+                    if (null != name) {
+                        propertyNames.add(name);
+                    }
+                }
+            }
+            return propertyNames;
+        }
+        return null;
     }
 
 }

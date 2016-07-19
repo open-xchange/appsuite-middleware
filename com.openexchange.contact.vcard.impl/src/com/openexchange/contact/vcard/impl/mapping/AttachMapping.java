@@ -64,6 +64,7 @@ import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.AttachmentMetadataFactory;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -86,7 +87,7 @@ public class AttachMapping extends AbstractMapping {
      * Initializes a new {@link AttachMapping}.
      */
     public AttachMapping() {
-        super("ATTACH");
+        super("ATTACH", ContactField.NUMBER_OF_ATTACHMENTS, ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT);
     }
 
     @Override

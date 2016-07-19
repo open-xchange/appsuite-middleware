@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.encoding.URLCoder;
@@ -72,7 +73,7 @@ public class IMPPMapping extends AbstractMapping {
      * Initializes a new {@link IMPPMapping}.
      */
     public IMPPMapping() {
-        super("IMPP");
+        super("IMPP", ContactField.INSTANT_MESSENGER1, ContactField.INSTANT_MESSENGER2);
     }
 
     @Override

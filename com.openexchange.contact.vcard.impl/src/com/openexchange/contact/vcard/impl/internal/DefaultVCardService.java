@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.contact.vcard.VCardImport;
@@ -62,6 +63,7 @@ import com.openexchange.contact.vcard.VCardParametersFactory;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.VCardVersion;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
@@ -149,6 +151,11 @@ public class DefaultVCardService implements VCardService {
     public SearchIterator<VCardImport> importVCards(InputStream vCards, VCardParameters parameters) throws OXException {
         VCardParameters vCardParameters = getParametersOrDefault(parameters);
         return new VCardImportIterator(vCards, mapper, vCardParameters);
+    }
+
+    @Override
+    public ContactField[] getContactFields(Set<String> propertyNames) {
+        return mapper.getContactFields(propertyNames);
     }
 
     /**

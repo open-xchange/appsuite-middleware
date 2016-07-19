@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.parameter.AddressType;
@@ -68,7 +69,12 @@ public class AddressMapping extends AbstractMapping {
      * Initializes a new {@link AddressMapping}.
      */
     public AddressMapping() {
-        super("ADR");
+        super("ADR", ContactField.STREET_BUSINESS, ContactField.CITY_BUSINESS, ContactField.STATE_BUSINESS,
+            ContactField.POSTAL_CODE_BUSINESS, ContactField.COUNTRY_BUSINESS, ContactField.BUSINESS_ADDRESS,
+            ContactField.STREET_HOME, ContactField.CITY_HOME, ContactField.STATE_HOME, ContactField.POSTAL_CODE_HOME,
+            ContactField.COUNTRY_HOME, ContactField.HOME_ADDRESS, ContactField.STREET_OTHER, ContactField.CITY_OTHER,
+            ContactField.STATE_OTHER, ContactField.POSTAL_CODE_OTHER, ContactField.COUNTRY_OTHER, ContactField.OTHER_ADDRESS
+        );
     }
 
     @Override

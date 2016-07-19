@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.Classification;
@@ -67,7 +68,7 @@ public class ClassMapping extends SimpleMapping<Classification> {
      * Initializes a new {@link ClassMapping}.
      */
     public ClassMapping() {
-        super(Contact.PRIVATE_FLAG, Classification.class, "CLASS");
+        super(Contact.PRIVATE_FLAG, Classification.class, "CLASS", ContactField.PRIVATE_FLAG);
     }
 
     @Override

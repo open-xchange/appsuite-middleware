@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
@@ -68,7 +69,7 @@ public class OrganizationMapping extends AbstractMapping {
      * Initializes a new {@link OrganizationMapping}.
      */
     public OrganizationMapping() {
-        super("ORG");
+        super("ORG", ContactField.COMPANY, ContactField.BRANCHES, ContactField.DEPARTMENT);
     }
 
     @Override

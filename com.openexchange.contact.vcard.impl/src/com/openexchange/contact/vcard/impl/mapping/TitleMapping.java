@@ -51,6 +51,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Title;
 
@@ -65,7 +66,7 @@ public class TitleMapping extends SimpleMapping<Title> {
      * Initializes a new {@link TitleMapping}.
      */
     public TitleMapping() {
-        super(Contact.POSITION, Title.class, "POSITION");
+        super(Contact.POSITION, Title.class, "POSITION", ContactField.POSITION);
     }
 
     @Override

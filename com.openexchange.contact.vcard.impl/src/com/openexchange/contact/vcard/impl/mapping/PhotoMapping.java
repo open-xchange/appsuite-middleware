@@ -73,6 +73,7 @@ import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.impl.internal.VCardExceptionCodes;
 import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
@@ -100,7 +101,7 @@ public class PhotoMapping extends AbstractMapping {
      * Initializes a new {@link PhotoMapping}.
      */
     public PhotoMapping() {
-        super("PHOTO");
+        super("PHOTO", ContactField.IMAGE1, ContactField.NUMBER_OF_IMAGES, ContactField.IMAGE1_CONTENT_TYPE);
     }
 
     @Override

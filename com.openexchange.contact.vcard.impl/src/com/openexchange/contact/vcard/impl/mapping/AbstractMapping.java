@@ -56,6 +56,7 @@ import java.util.Comparator;
 import java.util.List;
 import com.openexchange.contact.vcard.impl.internal.VCardExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.parameter.VCardParameter;
@@ -445,15 +446,28 @@ public abstract class AbstractMapping implements VCardMapping {
     }
 
     private final String[] propertyNames;
+    private final ContactField[] contactFields;
 
     /**
      * Initializes a new {@link AbstractMapping}.
      *
      * @param propertyNames The affected vCard property names
+     * @param contactFields The corresponding contact fields
      */
-    protected AbstractMapping(String...propertyNames) {
+    protected AbstractMapping(String[] propertyNames, ContactField[] contactFields) {
         super();
         this.propertyNames = propertyNames;
+        this.contactFields = contactFields;
+    }
+
+    /**
+     * Initializes a new {@link AbstractMapping}.
+     *
+     * @param propertyName The affected vCard property name
+     * @param contactFields The corresponding contact fields
+     */
+    protected AbstractMapping(String propertyName, ContactField...contactFields) {
+        this(new String[] { propertyName }, contactFields);
     }
 
     @Override
@@ -461,4 +475,8 @@ public abstract class AbstractMapping implements VCardMapping {
         return propertyNames;
     }
 
+    @Override
+    public ContactField[] getContactFields() {
+        return contactFields;
+    }
 }

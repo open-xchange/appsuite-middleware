@@ -50,6 +50,7 @@
 package com.openexchange.contact.vcard.impl.mapping;
 
 import java.util.Date;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Anniversary;
 
@@ -64,7 +65,7 @@ public class AnniversaryMapping extends AbstractDateMapping<Anniversary> {
      * Initializes a new {@link AnniversaryMapping}.
      */
     public AnniversaryMapping() {
-        super(Contact.ANNIVERSARY, Anniversary.class, "ANNIVERSARY");
+        super(Contact.ANNIVERSARY, Anniversary.class, "ANNIVERSARY", ContactField.ANNIVERSARY);
     }
 
     @Override

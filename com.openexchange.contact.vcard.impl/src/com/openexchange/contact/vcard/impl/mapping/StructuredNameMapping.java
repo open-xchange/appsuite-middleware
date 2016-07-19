@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
@@ -68,7 +69,7 @@ public class StructuredNameMapping extends AbstractMapping {
      * Initializes a new {@link StructuredNameMapping}.
      */
     public StructuredNameMapping() {
-        super("N");
+        super("N", ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.MIDDLE_NAME, ContactField.TITLE, ContactField.SUFFIX);
     }
 
     @Override

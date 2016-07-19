@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.RawProperty;
@@ -69,7 +70,7 @@ public class ColorLabelMapping extends AbstractMapping {
      * Initializes a new {@link ColorLabelMapping}.
      */
     public ColorLabelMapping() {
-        super(X_OX_COLOR_LABEL);
+        super(X_OX_COLOR_LABEL, ContactField.COLOR_LABEL);
     }
 
     @Override

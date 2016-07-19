@@ -51,6 +51,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.FormattedName;
 
@@ -62,7 +63,7 @@ import ezvcard.property.FormattedName;
 public class FormattedNameMapping extends SimpleMapping<FormattedName> {
 
     public FormattedNameMapping() {
-        super(Contact.DISPLAY_NAME, FormattedName.class, "FN");
+        super(Contact.DISPLAY_NAME, FormattedName.class, "FN", ContactField.DISPLAY_NAME);
     }
 
     @Override

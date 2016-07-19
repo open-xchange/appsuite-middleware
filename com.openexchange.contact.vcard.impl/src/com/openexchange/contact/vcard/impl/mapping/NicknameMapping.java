@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.property.Nickname;
@@ -64,7 +65,7 @@ import ezvcard.property.Nickname;
 public class NicknameMapping extends SimpleMapping<Nickname> {
 
     public NicknameMapping() {
-        super(Contact.NICKNAME, Nickname.class, "NICKNAME");
+        super(Contact.NICKNAME, Nickname.class, "NICKNAME", ContactField.NICKNAME);
     }
 
     @Override
