@@ -47,63 +47,33 @@
  *
  */
 
-package com.openexchange.pns.impl;
+package com.openexchange.pns.transport.gcm.internal;
 
-import org.slf4j.Logger;
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushAffiliation;
-import com.openexchange.pns.PushNotification;
-import com.openexchange.pns.PushNotificationService;
-import com.openexchange.pns.PushNotificationTransport;
-import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.TransportAssociatedSubscription;
-import com.openexchange.pns.TransportAssociatedSubscriptions;
+import com.openexchange.pns.transport.gcm.GcmOptions;
+import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
+
 
 /**
- * {@link PushNotificationServiceImpl}
+ * {@link DefaultGcmOptionsProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class PushNotificationServiceImpl implements PushNotificationService {
+public class DefaultGcmOptionsProvider implements GcmOptionsProvider {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImpl.class);
-
-    private final PushSubscriptionRegistry subscriptionRegistry;
-    private final PushNotificationTransportRegistry transportRegistry;
+    private final GcmOptions options;
 
     /**
-     * Initializes a new {@link PushNotificationServiceImpl}.
-     *
-     * @param subscriptionRegistry The subscription registry to use
+     * Initializes a new {@link DefaultGcmOptionsProvider}.
      */
-    public PushNotificationServiceImpl(PushSubscriptionRegistry subscriptionRegistry, PushNotificationTransportRegistry transportRegistry) {
+    public DefaultGcmOptionsProvider(GcmOptions options) {
         super();
-        this.subscriptionRegistry = subscriptionRegistry;
-        this.transportRegistry = transportRegistry;
+        this.options = options;
     }
 
     @Override
-    public void handle(PushNotification notification) throws OXException {
-        // Query appropriate subscriptions
-        int contextId = notification.getContextId();
-        int userId = notification.getUserId();
-        PushAffiliation affiliation = notification.getAffiliation();
-        TransportAssociatedSubscriptions subscriptions = subscriptionRegistry.getSubscriptions(userId, contextId, affiliation);
-        if (null == subscriptions || subscriptions.isEmpty()) {
-            return;
-        }
-
-        // Transport each subscription using associated transport
-        for (TransportAssociatedSubscription transportSubscriptions : subscriptions) {
-            String transportId = transportSubscriptions.getTransportId();
-            PushNotificationTransport transport = transportRegistry.getTransportFor(transportId);
-            if (null == transport) {
-                LOG.warn("No such transport for '{}' to publish notification from user {} in context {} for affiliation {}", transportId, userId, contextId, affiliation.getAffiliationName());
-            } else {
-                transport.transport(notification, transportSubscriptions.getSubscriptions());
-            }
-        }
+    public GcmOptions getOptions() {
+        return options;
     }
 
 }

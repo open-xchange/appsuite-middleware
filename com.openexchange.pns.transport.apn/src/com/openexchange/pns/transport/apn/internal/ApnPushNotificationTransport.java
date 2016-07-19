@@ -160,7 +160,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         RankedService<ApnOptionsProvider> rankedService = trackedProviders.peek();
         if (null == rankedService) {
             // About to shut-down
-            throw PushExceptionCodes.NO_SUCH_TRANSPORT.create("'Drive' search driver is about to shut-down");
+            throw PushExceptionCodes.NO_SUCH_TRANSPORT.create(ID);
         }
         return rankedService.service;
     }

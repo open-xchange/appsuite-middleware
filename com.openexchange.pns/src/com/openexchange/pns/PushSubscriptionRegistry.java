@@ -50,7 +50,6 @@
 package com.openexchange.pns;
 
 import java.util.List;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -82,7 +81,7 @@ public interface PushSubscriptionRegistry {
      * @return All subscriptions for specified affiliation mapped to the associated transport
      * @throws OXException If subscriptions cannot be returned
      */
-    Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
+    TransportAssociatedSubscriptions getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
 
     /**
      * Registers specified subscription.
@@ -110,5 +109,15 @@ public interface PushSubscriptionRegistry {
      * @throws OXException If unregistration fails
      */
     int unregisterSubscription(String token, String transportId) throws OXException;
+
+   /**
+    * Updates specified subscription.
+    *
+    * @param subscription The subscription to update
+    * @param newToken The new token to set
+    * @return <code>true</code> if such a subscription has been updated; otherwise <code>false</code> if no such subscription existed
+    * @throws OXException If update fails
+    */
+   boolean updateToken(PushSubscriptionDescription subscription, String newToken) throws OXException;
 
 }

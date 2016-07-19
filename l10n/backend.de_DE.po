@@ -1,4 +1,4 @@
-# #-#-#-#-#  server.de_DE.po (server.de_DE)  #-#-#-#-#
+Le# #-#-#-#-#  server.de_DE.po (server.de_DE)  #-#-#-#-#
 # translation of server.de_DE.po to deutsch
 # translation of server.new.de_DE.po to
 # translation of server.de_DE.po to

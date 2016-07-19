@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -70,6 +71,8 @@ import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionDescription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.TransportAssociatedSubscription;
+import com.openexchange.pns.TransportAssociatedSubscriptions;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -161,7 +164,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     @Override
-    public Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException {
+    public TransportAssociatedSubscriptions getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException {
         Connection con = databaseService.getReadOnly(contextId);
         try {
             return getSubscriptions(userId, contextId, affiliation, con);
@@ -180,7 +183,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
      * @return All subscriptions for specified affiliation
      * @throws OXException If subscriptions cannot be returned
      */
-    public Map<String, List<PushSubscription>> getSubscriptions(int userId, int contextId, PushAffiliation affiliation, Connection con) throws OXException {
+    public TransportAssociatedSubscriptions getSubscriptions(int userId, int contextId, PushAffiliation affiliation, Connection con) throws OXException {
         if (null == con) {
             return getSubscriptions(userId, contextId, affiliation);
         }
@@ -195,7 +198,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             rs = stmt.executeQuery();
 
             if (false == rs.next()) {
-                return Collections.emptyMap();
+                return RdbTransportAssociatedSubscriptions.EMPTY;
             }
 
             Map<String, List<PushSubscription>> map = new LinkedHashMap<>(4);
@@ -208,7 +211,13 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 }
                 subscriptions.add(new RdbPushSubscription(userId, contextId, transportId, rs.getString(1), affiliation, new Date(rs.getLong(3))));
             } while (rs.next());
-            return map;
+
+            List<TransportAssociatedSubscription> associatedSubscriptions = new ArrayList<TransportAssociatedSubscription>(map.size());
+            for (Map.Entry<String,List<PushSubscription>> entry : map.entrySet()) {
+                associatedSubscriptions.add(new RdbTransportAssociatedSubscription(entry.getKey(), entry.getValue()));
+            }
+            map = null;
+            return new RdbTransportAssociatedSubscriptions(associatedSubscriptions);
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -218,6 +227,10 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
     @Override
     public void registerSubscription(PushSubscriptionDescription subscription) throws OXException {
+        if (null == subscription) {
+            return;
+        }
+
         int contextId = subscription.getContextId();
         Connection con = databaseService.getWritable(contextId);
         try {
@@ -259,6 +272,10 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
     @Override
     public boolean unregisterSubscription(PushSubscriptionDescription subscription) throws OXException {
+        if (null == subscription) {
+            return false;
+        }
+
         int contextId = subscription.getContextId();
         Connection con = databaseService.getWritable(contextId);
         try {
@@ -297,6 +314,10 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
     @Override
     public int unregisterSubscription(String token, String transportId) throws OXException {
+        if (null == token || null == transportId) {
+            return 0;
+        }
+
         int removed = 0;
         Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
         while (false == allContextIDs.isEmpty()) {
@@ -333,6 +354,51 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             return stmt.executeUpdate();
         } finally {
             DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public boolean updateToken(PushSubscriptionDescription subscription, String newToken) throws OXException {
+        if (null == subscription || null == newToken) {
+            return false;
+        }
+
+        int contextId = subscription.getContextId();
+        Connection con = databaseService.getWritable(contextId);
+        try {
+            return updateToken(subscription, newToken, con);
+        } finally {
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
+     * Updates specified subscription.
+     *
+     * @param subscription The subscription to update
+     * @param newToken The new token to set
+     * @param con The connection to use
+     * @return <code>true</code> if such a subscription has been updated; otherwise <code>false</code> if no such subscription existed
+     * @throws OXException If update fails
+     */
+    public boolean updateToken(PushSubscriptionDescription subscription, String newToken, Connection con) throws OXException {
+        if (null == con) {
+            return updateToken(subscription, newToken);
+        }
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE pns_subscriptions SET token=? WHERE cid=? AND user=? AND token=?");
+            stmt.setString(1, newToken);
+            stmt.setInt(2, subscription.getContextId());
+            stmt.setInt(3, subscription.getUserId());
+            stmt.setString(4, subscription.getToken());
+            int rows = stmt.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 

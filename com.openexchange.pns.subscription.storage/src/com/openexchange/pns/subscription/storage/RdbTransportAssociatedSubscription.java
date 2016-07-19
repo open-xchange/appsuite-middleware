@@ -47,63 +47,41 @@
  *
  */
 
-package com.openexchange.pns.impl;
+package com.openexchange.pns.subscription.storage;
 
-import org.slf4j.Logger;
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushAffiliation;
-import com.openexchange.pns.PushNotification;
-import com.openexchange.pns.PushNotificationService;
-import com.openexchange.pns.PushNotificationTransport;
-import com.openexchange.pns.PushSubscriptionRegistry;
+import java.util.List;
+import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.TransportAssociatedSubscription;
-import com.openexchange.pns.TransportAssociatedSubscriptions;
+
 
 /**
- * {@link PushNotificationServiceImpl}
+ * {@link RdbTransportAssociatedSubscription}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class PushNotificationServiceImpl implements PushNotificationService {
+public class RdbTransportAssociatedSubscription implements TransportAssociatedSubscription {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImpl.class);
-
-    private final PushSubscriptionRegistry subscriptionRegistry;
-    private final PushNotificationTransportRegistry transportRegistry;
+    private final String transportId;
+    private final List<PushSubscription> subscriptions;
 
     /**
-     * Initializes a new {@link PushNotificationServiceImpl}.
-     *
-     * @param subscriptionRegistry The subscription registry to use
+     * Initializes a new {@link RdbTransportAssociatedSubscription}.
      */
-    public PushNotificationServiceImpl(PushSubscriptionRegistry subscriptionRegistry, PushNotificationTransportRegistry transportRegistry) {
+    public RdbTransportAssociatedSubscription(String transportId, List<PushSubscription> subscriptions) {
         super();
-        this.subscriptionRegistry = subscriptionRegistry;
-        this.transportRegistry = transportRegistry;
+        this.transportId = transportId;
+        this.subscriptions = subscriptions;
     }
 
     @Override
-    public void handle(PushNotification notification) throws OXException {
-        // Query appropriate subscriptions
-        int contextId = notification.getContextId();
-        int userId = notification.getUserId();
-        PushAffiliation affiliation = notification.getAffiliation();
-        TransportAssociatedSubscriptions subscriptions = subscriptionRegistry.getSubscriptions(userId, contextId, affiliation);
-        if (null == subscriptions || subscriptions.isEmpty()) {
-            return;
-        }
+    public String getTransportId() {
+        return transportId;
+    }
 
-        // Transport each subscription using associated transport
-        for (TransportAssociatedSubscription transportSubscriptions : subscriptions) {
-            String transportId = transportSubscriptions.getTransportId();
-            PushNotificationTransport transport = transportRegistry.getTransportFor(transportId);
-            if (null == transport) {
-                LOG.warn("No such transport for '{}' to publish notification from user {} in context {} for affiliation {}", transportId, userId, contextId, affiliation.getAffiliationName());
-            } else {
-                transport.transport(notification, transportSubscriptions.getSubscriptions());
-            }
-        }
+    @Override
+    public List<PushSubscription> getSubscriptions() {
+        return subscriptions;
     }
 
 }
