@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.impl.CalendarUtils.getFields;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -78,13 +79,12 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException {
-        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        return new CalendarReader(session).readEvent(folderID, objectID, fields);
+        return new CalendarReader(session).readEvent(folderID, objectID, getFields(session));
     }
 
     @Override
     public List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException {
-        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        EventField[] fields = getFields(session);
         List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
         CalendarReader reader = new CalendarReader(session);
         for (EventID eventID : eventIDs) {
@@ -97,24 +97,21 @@ public class CalendarServiceImpl implements CalendarService {
     public List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException {
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        return new CalendarReader(session).readEventsInFolder(folderID, from, until, updatedSince, fields);
+        return new CalendarReader(session).readEventsInFolder(folderID, from, until, updatedSince, getFields(session));
     }
 
     @Override
     public List<UserizedEvent> getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException {
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), from, until, updatedSince, fields);
+        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), from, until, updatedSince, getFields(session));
     }
 
     @Override
     public List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, int folderID, Date deletedSince) throws OXException {
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        return new CalendarReader(session).readEventsInFolder(folderID, from, until, deletedSince, fields);
+        return new CalendarReader(session).readEventsInFolder(folderID, from, until, deletedSince, getFields(session));
     }
 
     @Override
@@ -128,16 +125,14 @@ public class CalendarServiceImpl implements CalendarService {
     public List<UserizedEvent> getEventsInFolder(CalendarSession session, int folderID) throws OXException {
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        return new CalendarReader(session).readEventsInFolder(folderID, from, until, null, fields);
+        return new CalendarReader(session).readEventsInFolder(folderID, from, until, null, getFields(session));
     }
 
     @Override
     public List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException {
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), from, until, null, fields);
+        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), from, until, null, getFields(session));
     }
 
     @Override

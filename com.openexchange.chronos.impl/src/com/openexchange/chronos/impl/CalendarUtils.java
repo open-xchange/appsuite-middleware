@@ -49,10 +49,16 @@
 
 package com.openexchange.chronos.impl;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
@@ -65,6 +71,41 @@ import com.openexchange.resource.Resource;
  * @since v7.10.0
  */
 public class CalendarUtils {
+
+    /** A collection of fields that are always included when querying events from the storage */
+    private static final Collection<EventField> MANDATORY_FIELDS = Arrays.asList(
+        EventField.ID, EventField.RECURRENCE_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.CLASSIFICATION,
+        EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE
+    );
+
+    /**
+     * Gets the event fields to include when querying events from the storage based on the client-requested fields defined in the
+     * supplied calendar parameters. <p/>
+     * Specific mandatory fields are included implicitly.
+     *
+     * @param parameters The calendar parameters to get the requested fields from
+     * @return The fields to use when querying events from the storage
+     */
+    static EventField[] getFields(CalendarParameters parameters) {
+        return getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
+    }
+
+    /**
+     * Gets the event fields to include when querying events from the storage based on the supplied client-requested fields. <p/>
+     * Specific mandatory fields are included implicitly.
+     *
+     * @param requestedFields The fields requested by the client, or <code>null</code> to retrieve all fields
+     * @return The fields to use when querying events from the storage
+     */
+    static EventField[] getFields(EventField[] requestedFields) {
+        if (null == requestedFields) {
+            return EventField.values();
+        }
+        Set<EventField> fields = new HashSet<EventField>();
+        fields.addAll(MANDATORY_FIELDS);
+        fields.addAll(Arrays.asList(requestedFields));
+        return fields.toArray(new EventField[fields.size()]);
+    }
 
     /**
      * Looks up a specific internal attendee in a collection of attendees, utilizing the

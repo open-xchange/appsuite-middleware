@@ -655,6 +655,14 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
+            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
+                // column is NOT NULL, so avoid setting SQL NULL here
+                Integer value = get(event);
+                statement.setInt(parameterIndex, null == value ? 0 : value.intValue());
+                return 1;
+            }
+
+            @Override
             public void remove(Event event) {
                 event.removeStatus();
             }

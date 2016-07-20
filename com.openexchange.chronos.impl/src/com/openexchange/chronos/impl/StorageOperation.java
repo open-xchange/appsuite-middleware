@@ -107,11 +107,12 @@ public abstract class StorageOperation<T> {
             if (null != writeConnection) {
                 if (false == committed) {
                     rollback(writeConnection);
+                    autocommit(writeConnection);
                     dbService.backWritable(session.getContext(), writeConnection);
                 } else {
+                    autocommit(writeConnection);
                     dbService.backWritableAfterReading(session.getContext(), writeConnection);
                 }
-                autocommit(writeConnection);
             }
         }
     }

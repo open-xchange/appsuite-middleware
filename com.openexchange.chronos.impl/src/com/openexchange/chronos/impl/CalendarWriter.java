@@ -165,6 +165,9 @@ public class CalendarWriter extends CalendarReader {
         requireCalendarContentType(folder);
         requireDeletePermission(folder, Permission.DELETE_OWN_OBJECTS);
         Event originalEvent = storage.loadEvent(objectID, null);
+        if (null == originalEvent) {
+            throw OXException.notFound(String.valueOf(objectID));//TODO
+        }
         requireUpToDateTimestamp(originalEvent, clientTimestamp);
         if (session.getUser().getId() != originalEvent.getCreatedBy()) {
             requireDeletePermission(folder, Permission.DELETE_ALL_OBJECTS);
@@ -292,6 +295,7 @@ public class CalendarWriter extends CalendarReader {
         Consistency.setCreatedNow(event, calendarUser.getId());
         Consistency.setModifiedNow(event, session.getUser().getId());
         Consistency.setOrganizer(event, calendarUser, getProxyUser(folder));
+        Consistency.setTimeZone(event, calendarUser);
         event.setUid(Strings.isEmpty(event.getUid()) ? UUID.randomUUID().toString() : event.getUid());
         event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? Integer.parseInt(folder.getID()) : 0);
         event.setAttendees(prepareAttendees(folder, event.getAttendees()));

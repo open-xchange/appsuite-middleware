@@ -870,7 +870,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         /*
          * adjust start & endtimes for recurrence master
          */
-        if (event.getId() == event.getRecurrenceId()) {
+        if ((event.containsStartDate() || event.containsEndDate()) && event.getId() == event.getRecurrenceId()) {
             //TODO: richtig machen
             Calendar calendar = Calendar.getInstance();
             if (null != event.getStartTimezone()) {

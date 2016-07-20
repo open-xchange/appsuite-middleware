@@ -120,6 +120,15 @@ public class Consistency {
         return organizer;
     }
 
+    public static void setTimeZone(Event event, User user) {
+        String startTimezone = event.getStartTimezone();
+        if (null == startTimezone) {
+            event.setStartTimezone(user.getTimeZone());
+        } else {
+            //TODO: validate timezone?
+        }
+    }
+
     public static void setModifiedNow(Event event, int modifiedBy) {
         event.setLastModified(new Date());
         event.setModifiedBy(modifiedBy);
