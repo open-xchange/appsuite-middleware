@@ -78,6 +78,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.context.ContextService;
@@ -548,7 +549,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            MAPPER.setParameters(stmt, parameterIndex, adjustDatesPriorSave(event), mappedFields);
+            MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(event), mappedFields);
             return logExecuteUpdate(stmt);
         }
     }
@@ -561,7 +562,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustDatesPriorSave(event), assignedfields);
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(event), assignedfields);
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, objectID);
             return logExecuteUpdate(stmt);
@@ -692,7 +693,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     private static Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
-        return adjustDatesAfterLoad(MAPPER.fromResultSet(resultSet, fields, columnLabelPrefix));
+        return adjustAfterLoad(MAPPER.fromResultSet(resultSet, fields, columnLabelPrefix));
     }
 
     private static Alarm selectReminder(Connection connection, int contextID, int objectID, int userID) throws SQLException {
@@ -849,8 +850,25 @@ public class RdbCalendarStorage implements CalendarStorage {
         }
     }
 
-    private static Event adjustDatesAfterLoad(Event event) {
+    /**
+     * Adjusts certain properties of an event after loading it from the database.
+     *
+     * @param event The event to adjust
+     * @return The (possibly adjusted) event reference
+     */
+    private static Event adjustAfterLoad(Event event) {
+        /*
+         * convert legacy series pattern into proper recurrence rule
+         */
         if (event.containsRecurrenceRule()) {
+
+            //            Appointment2Event.getRecurrenceRule(pattern)
+
+        }
+        /*
+         * adjust start & endtimes for recurrence master
+         */
+        if (event.getId() == event.getRecurrenceId()) {
             //TODO: richtig machen
             Calendar calendar = Calendar.getInstance();
             if (null != event.getStartTimezone()) {
@@ -869,10 +887,25 @@ public class RdbCalendarStorage implements CalendarStorage {
         return event;
     }
 
-    private static Event adjustDatesPriorSave(Event event) {
+    /**
+     * Adjusts certain properties of an event prior saving it in the database.
+     *
+     * @param event The event to adjust
+     * @return The (possibly adjusted) event reference
+     */
+    private static Event adjustPriorSave(Event event) {
+        /*
+         * convert recurrence rule into legacy series pattern
+         */
         if (event.containsRecurrenceRule()) {
-            //TODO: richtig machen
-
+            SeriesPattern seriesPattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartTimezone(), event.isAllDay());
+            event.setRecurrenceRule(seriesPattern.getDatabasePattern());
+        }
+        /*
+         * adjust start & endtimes for recurrence master
+         */
+        if (event.getId() == event.getRecurrenceId()) {
+            //TODO
         }
         return event;
     }

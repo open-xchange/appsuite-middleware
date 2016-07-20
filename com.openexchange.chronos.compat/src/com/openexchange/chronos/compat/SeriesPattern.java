@@ -128,6 +128,20 @@ public class SeriesPattern {
         super();
     }
 
+    /**
+     * Initializes a new {@link SeriesPattern}.
+     *
+     * @param type The recurrence type
+     * @param timeZone The timezone of the event series
+     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
+     */
+    public SeriesPattern(int type, String timeZone, boolean allDay) {
+        super();
+        this.type = type;
+        this.tz = TimeZone.getTimeZone(timeZone);
+        this.fullTime = Boolean.valueOf(allDay);
+    }
+
     private void deserialize(String pattern) throws IllegalArgumentException {
         String[] splitted = pattern.split("\\|");
         for (int i = 1; i < splitted.length; i += 2) {
@@ -308,7 +322,7 @@ public class SeriesPattern {
 
     /**
      * Gets the series start as Calendar with proper TimeZone.
-     * 
+     *
      * @return
      */
     public Calendar getSeriesStartCalendar() {
@@ -319,7 +333,7 @@ public class SeriesPattern {
 
     /**
      * Gets the series end as Calendar with proper TimeZone.
-     * 
+     *
      * @return
      */
     public Calendar getSeriesEndCalendar() {

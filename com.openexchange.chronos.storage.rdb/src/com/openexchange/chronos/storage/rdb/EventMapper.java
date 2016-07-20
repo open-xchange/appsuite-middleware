@@ -69,7 +69,6 @@ import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
-import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DateMapping;
@@ -97,7 +96,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
     /**
      * Gets all mapped fields.
-     * 
+     *
      * @return The mapped fields
      */
     public EventField[] getMappedFields() {
@@ -575,7 +574,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, String value) {
-                event.setRecurrenceRule(null == value ? null : Appointment2Event.getRecurrenceRule(SeriesPattern.parse(value, null, null)));
+                event.setRecurrenceRule(value);
             }
 
             @Override
@@ -585,8 +584,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public String get(Event event) {
-                String value = event.getRecurrenceRule();
-                return null == value ? null : Event2Appointment.getSeriesPattern(value).getDatabasePattern();
+                return event.getRecurrenceRule();
             }
 
             @Override

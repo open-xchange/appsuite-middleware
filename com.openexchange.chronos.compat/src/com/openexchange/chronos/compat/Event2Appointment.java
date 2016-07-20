@@ -272,9 +272,11 @@ public class Event2Appointment {
      * Gets the series pattern for the supplied recurrence rule.
      *
      * @param recurrenceRule The recurrence rule
-     * @return The series pattern, or <code>null</code> if not mappaple
+     * @param timeZone The timezone of the event series
+     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
+     * @return The series pattern, or <code>null</code> if not mappable
      */
-    public static SeriesPattern getSeriesPattern(String recurrenceRule) {
+    public static SeriesPattern getSeriesPattern(String recurrenceRule, String timeZone, boolean allDay) {
         if (Strings.isNotEmpty(recurrenceRule)) {
             RecurrenceRule rule;
             try {
@@ -286,13 +288,13 @@ public class Event2Appointment {
             }
             switch (rule.getFreq()) {
                 case DAILY:
-                    return getDailyPattern(rule);
+                    return getDailyPattern(rule, timeZone, allDay);
                 case WEEKLY:
-                    return getWeeklyPattern(rule);
+                    return getWeeklyPattern(rule, timeZone, allDay);
                 case MONTHLY:
-                    return getMonthlyPattern(rule);
+                    return getMonthlyPattern(rule, timeZone, allDay);
                 case YEARLY:
-                    return getYearlyPattern(rule);
+                    return getYearlyPattern(rule, timeZone, allDay);
                 default:
                     break;
             }
@@ -300,9 +302,8 @@ public class Event2Appointment {
         return null;
     }
 
-    private static SeriesPattern getDailyPattern(RecurrenceRule rule) {
-        SeriesPattern pattern = SeriesPattern.parse(null, null, null);
-        pattern.setType(I(1)); // com.openexchange.groupware.container.CalendarObject.DAILY
+    private static SeriesPattern getDailyPattern(RecurrenceRule rule, String timeZone, boolean allDay) {
+        SeriesPattern pattern = new SeriesPattern(1, timeZone, allDay); // com.openexchange.groupware.container.CalendarObject.DAILY
         pattern.setInterval(I(rule.getInterval()));
         if (null != rule.getCount()) {
             pattern.setOccurrences(I(rule.getCount()));
@@ -313,9 +314,8 @@ public class Event2Appointment {
         return pattern;
     }
 
-    private static SeriesPattern getWeeklyPattern(RecurrenceRule rule) {
-        SeriesPattern pattern = SeriesPattern.parse(null, null, null);
-        pattern.setType(I(2)); // com.openexchange.groupware.container.CalendarObject.WEEKLY
+    private static SeriesPattern getWeeklyPattern(RecurrenceRule rule, String timeZone, boolean allDay) {
+        SeriesPattern pattern = new SeriesPattern(2, timeZone, allDay); // com.openexchange.groupware.container.CalendarObject.WEEKLY
         pattern.setInterval(I(rule.getInterval()));
         pattern.setDaysOfWeek(I(getDaysOfWeek(rule.getByDayPart())));
         if (null != rule.getCount()) {
@@ -358,9 +358,8 @@ public class Event2Appointment {
         return daysOfWeek;
     }
 
-    private static SeriesPattern getMonthlyPattern(RecurrenceRule rule) {
-        SeriesPattern pattern = SeriesPattern.parse(null, null, null);
-        pattern.setType(I(3)); // com.openexchange.groupware.container.CalendarObject.MONTHLY
+    private static SeriesPattern getMonthlyPattern(RecurrenceRule rule, String timeZone, boolean allDay) {
+        SeriesPattern pattern = new SeriesPattern(3, timeZone, allDay); // com.openexchange.groupware.container.CalendarObject.MONTHLY
         pattern.setInterval(I(rule.getInterval()));
         List<Integer> byMonthDayParts = rule.getByPart(Part.BYMONTHDAY);
         if (null != byMonthDayParts && 0 < byMonthDayParts.size()) {
@@ -387,9 +386,8 @@ public class Event2Appointment {
         return pattern;
     }
 
-    private static SeriesPattern getYearlyPattern(RecurrenceRule rule) {
-        SeriesPattern pattern = SeriesPattern.parse(null, null, null);
-        pattern.setType(I(4)); // com.openexchange.groupware.container.CalendarObject.YEARLY
+    private static SeriesPattern getYearlyPattern(RecurrenceRule rule, String timeZone, boolean allDay) {
+        SeriesPattern pattern = new SeriesPattern(4, timeZone, allDay); // com.openexchange.groupware.container.CalendarObject.YEARLY
         pattern.setInterval(I(rule.getInterval()));
         List<Integer> byMonthParts = rule.getByPart(Part.BYMONTH);
         if (null != byMonthParts && 0 < byMonthParts.size()) {
