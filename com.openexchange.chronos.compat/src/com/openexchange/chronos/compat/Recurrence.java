@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.compat;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -62,16 +61,14 @@ import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
+import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
+import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
-import net.fortuna.ical4j.model.NumberList;
-import net.fortuna.ical4j.model.Recur;
-import net.fortuna.ical4j.model.WeekDay;
-import net.fortuna.ical4j.model.WeekDayList;
 
 /**
  * {@link Recurrence}
@@ -141,43 +138,50 @@ public class Recurrence {
     }
 
     public static String generatePattern(String recur, Calendar startDate) {
-        Recur rrule = null;
+        RecurrenceRule rrule = null;
         try {
-            rrule = new Recur(recur);
-        } catch (ParseException e) {
+            rrule = new RecurrenceRule(recur);
+        } catch (InvalidRecurrenceRuleException e) {
             // TODO:
         }
         CalendarDataObject cObj = new CalendarDataObject();
         cObj.setTimezone(startDate.getTimeZone().getID());
         cObj.setStartDate(startDate.getTime());
-        if ("DAILY".equalsIgnoreCase(rrule.getFrequency())) {
-            if (null != rrule.getDayList() && 0 < rrule.getDayList().size()) {
-                // used as "each weekday" by some clients: FREQ=DAILY;INTERVAL=1;WKST=SU;BYDAY=MO,TU,WE,TH,FR
-                // save as 'weekly' type with daymask
+        switch (rrule.getFreq()) {
+            case DAILY:
+                if (rrule.getByDayPart() != null && rrule.getByDayPart().size() > 0) {
+                    // used as "each weekday" by some clients: FREQ=DAILY;INTERVAL=1;WKST=SU;BYDAY=MO,TU,WE,TH,FR
+                    // save as 'weekly' type with daymask
+                    cObj.setRecurrenceType(CalendarObject.WEEKLY);
+                    setDays(cObj, rrule, startDate);
+                } else {
+                    cObj.setRecurrenceType(CalendarObject.DAILY);
+                }
+                if (rrule.getByPart(Part.BYMONTH) != null && !rrule.getByPart(Part.BYMONTH).isEmpty()) {
+                    // TODO:
+                }
+                break;
+            case WEEKLY:
                 cObj.setRecurrenceType(CalendarObject.WEEKLY);
                 setDays(cObj, rrule, startDate);
-            } else {
-                cObj.setRecurrenceType(CalendarObject.DAILY);
-            }
-            if (!rrule.getMonthList().isEmpty()) {
-                // TODO:
-            }
-        } else if ("WEEKLY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(CalendarObject.WEEKLY);
-            setDays(cObj, rrule, startDate);
-        } else if ("MONTHLY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(CalendarObject.MONTHLY);
-            setMonthDay(cObj, rrule, startDate);
-        } else if ("YEARLY".equalsIgnoreCase(rrule.getFrequency())) {
-            cObj.setRecurrenceType(CalendarObject.YEARLY);
-            final NumberList monthList = rrule.getMonthList();
-            if (!monthList.isEmpty()) {
-                cObj.setMonth(((Integer) monthList.get(0)).intValue() - 1);
+                break;
+            case MONTHLY:
+                cObj.setRecurrenceType(CalendarObject.MONTHLY);
                 setMonthDay(cObj, rrule, startDate);
-            } else {
-                cObj.setMonth(startDate.get(Calendar.MONTH));
-                setMonthDay(cObj, rrule, startDate);
-            }
+                break;
+            case YEARLY:
+                cObj.setRecurrenceType(CalendarObject.YEARLY);
+                List<Integer> monthList = rrule.getByPart(Part.BYMONTH);
+                if (!monthList.isEmpty()) {
+                    cObj.setMonth(((Integer) monthList.get(0)).intValue() - 1);
+                    setMonthDay(cObj, rrule, startDate);
+                } else {
+                    cObj.setMonth(startDate.get(Calendar.MONTH));
+                    setMonthDay(cObj, rrule, startDate);
+                }
+                break;
+            default:
+                break;
         }
 
         int interval = rrule.getInterval();
@@ -185,15 +189,15 @@ public class Recurrence {
             interval = 1;
         }
         cObj.setInterval(interval);
-        final int count = rrule.getCount();
-        if (-1 != count) {
+        Integer count = rrule.getCount();
+        if (count != null) {
             final int recurrenceCount = rrule.getCount();
             cObj.setRecurrenceCount(recurrenceCount);
             setOccurrenceIfNeededRecoveryFIXME(cObj, recurrenceCount);
-        } else if (null != rrule.getUntil()) {
+        } else if (rrule.getUntil() != null) {
             cObj.setUntil(getUntil(rrule, startDate.getTimeZone()));
         }
-        
+
         return createDSString(cObj, rrule);
     }
 
@@ -304,10 +308,10 @@ public class Recurrence {
         return dateTime;
     }
 
-    private static void setDays(CalendarObject cObj, Recur rrule, Calendar startDate) {
-        final WeekDayList weekdayList = rrule.getDayList();
+    private static void setDays(CalendarObject cObj, RecurrenceRule rrule, Calendar startDate) {
+        List<WeekdayNum> weekdayList = rrule.getByDayPart();
         if (weekdayList.isEmpty()) {
-            final int day_of_week = startDate.get(Calendar.DAY_OF_WEEK);
+            int day_of_week = startDate.get(Calendar.DAY_OF_WEEK);
             int days = -1;
             switch (day_of_week) {
                 case Calendar.MONDAY:
@@ -336,11 +340,8 @@ public class Recurrence {
             cObj.setDays(days);
         } else {
             int days = 0;
-            final int size = weekdayList.size();
-            for (int i = 0; i < size; i++) {
-                final WeekDay weekday = (WeekDay) weekdayList.get(i);
-
-                final Integer day = weekdays.get(weekday.getDay());
+            for (WeekdayNum weekday : weekdayList) {
+                Integer day = weekdays.get(weekday.weekday.name());
                 if (null == day) {
                     // TODO:
                 }
@@ -350,10 +351,10 @@ public class Recurrence {
         }
     }
 
-    private static void setMonthDay(CalendarObject cObj, Recur rrule, Calendar startDate) {
-        final NumberList monthDayList = rrule.getMonthDayList();
+    private static void setMonthDay(CalendarObject cObj, RecurrenceRule rrule, Calendar startDate) {
+        List<Integer> monthDayList = rrule.getByPart(Part.BYMONTHDAY);
         if (monthDayList.isEmpty()) {
-            final NumberList weekNoList = rrule.getWeekNoList();
+            List<Integer> weekNoList = rrule.getByPart(Part.BYWEEKNO);
             if (!weekNoList.isEmpty()) {
                 int week = ((Integer) weekNoList.get(0)).intValue();
                 if (week == -1) {
@@ -361,7 +362,7 @@ public class Recurrence {
                 }
                 cObj.setDayInMonth(week); // Day in month stores week
                 setDays(cObj, rrule, startDate);
-            } else if (!rrule.getDayList().isEmpty()) {
+            } else if (!rrule.getByDayPart().isEmpty()) {
                 setWeekdayInMonth(cObj, rrule);
                 setDayInMonthFromSetPos(cObj, rrule);
             } else {
@@ -373,9 +374,9 @@ public class Recurrence {
         }
     }
 
-    private static void setDayInMonthFromSetPos(CalendarObject obj, Recur rrule) {
-        if (!rrule.getSetPosList().isEmpty()) {
-            int firstPos = (Integer) rrule.getSetPosList().get(0);
+    private static void setDayInMonthFromSetPos(CalendarObject obj, RecurrenceRule rrule) {
+        if (!rrule.getByPart(Part.BYSETPOS).isEmpty()) {
+            int firstPos = (Integer) rrule.getByPart(Part.BYSETPOS).get(0);
             if (firstPos == -1) {
                 firstPos = 5;
             }
@@ -383,18 +384,16 @@ public class Recurrence {
         }
     }
 
-    private static void setWeekdayInMonth(CalendarObject cObj, Recur rrule) {
-        final WeekDayList weekdayList = rrule.getDayList();
+    private static void setWeekdayInMonth(CalendarObject cObj, RecurrenceRule rrule) {
+        List<WeekdayNum> weekdayList = rrule.getByDayPart();
         if (!weekdayList.isEmpty()) {
             int days = 0;
-            final int size = weekdayList.size();
-            for (int i = 0; i < size; i++) {
-                final WeekDay weekday = (WeekDay) weekdayList.get(i);
-                final Integer day = weekdays.get(weekday.getDay());
+            for (WeekdayNum weekday : weekdayList) {
+                Integer day = weekdays.get(weekday.weekday.name());
                 if (null == day) {
                     // TODO:
                 }
-                int offset = weekday.getOffset();
+                int offset = weekday.pos;
                 if (offset != 0) {
                     if (offset == -1) {
                         offset = 5;
@@ -413,16 +412,21 @@ public class Recurrence {
         }
     }
 
-    private static Date getUntil(Recur recur, TimeZone tz) {
-        if (null != recur && null != recur.getUntil()) {
-            net.fortuna.ical4j.model.Date until = recur.getUntil();
-            if (net.fortuna.ical4j.model.DateTime.class.isInstance(until)) {
+    private static Date getUntil(RecurrenceRule recur, TimeZone tz) {
+        if (recur != null && recur.getUntil() != null) {
+            DateTime until = recur.getUntil();
+            if (until.isAllDay()) {
+                /*
+                 * consider DATE value type - already in OX format
+                 */
+                return new Date(until.getTimestamp());
+            } else {
                 /*
                  * consider DATE-TIME value type with UTC time - determine date
                  * of the last occurrence in the appointment's timezone
                  */
                 Calendar effectiveUntilCalendar = Calendar.getInstance(tz);
-                effectiveUntilCalendar.setTime(until);
+                effectiveUntilCalendar.setTimeInMillis(until.getTimestamp());
                 /*
                  * determine OX until date based on the effective until date
                  */
@@ -430,17 +434,12 @@ public class Recurrence {
                 utcUntilCalendar.set(effectiveUntilCalendar.get(Calendar.YEAR), effectiveUntilCalendar.get(Calendar.MONTH), effectiveUntilCalendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
                 utcUntilCalendar.set(Calendar.MILLISECOND, 0);
                 return utcUntilCalendar.getTime();
-            } else {
-                /*
-                 * consider DATE value type - already in OX format
-                 */
-                return until;
             }
         }
         return null;
     }
 
-    private static String createDSString(CalendarDataObject cdao, Recur rrule) {
+    private static String createDSString(CalendarDataObject cdao, RecurrenceRule rrule) {
         if (cdao.containsStartDate()) {
             StringBuilder recStrBuilder = new StringBuilder(64);
             int recurrenceType = cdao.getRecurrenceType();
@@ -499,7 +498,7 @@ public class Recurrence {
                     }
                 } else {
                     if (monthday > 5) {
-                     // TODO:
+                        // TODO:
                     }
                     dsf(recStrBuilder, 5);
                     dsf(recStrBuilder, 'i', interval);
@@ -518,7 +517,7 @@ public class Recurrence {
             } else if (recurrenceType == CalendarObject.YEARLY) {
                 if (weekdays <= 0) {
                     if (monthday <= 0 || monthday > 31) {
-                     // TODO:
+                        // TODO:
                     }
                     dsf(recStrBuilder, 4);
                     dsf(recStrBuilder, 'i', interval);
@@ -535,7 +534,7 @@ public class Recurrence {
                     }
                 } else {
                     if (monthday < 1 || monthday > 5) {
-                     // TODO:
+                        // TODO:
                     }
                     dsf(recStrBuilder, 6);
                     dsf(recStrBuilder, 'i', interval);
@@ -561,18 +560,12 @@ public class Recurrence {
         return null;
     }
 
-    private static Date calculateUntilForUnlimited(CalendarDataObject cObj, Recur rrule) {
-        RecurrenceRule rRule = null;
-        try {
-            rRule = new RecurrenceRule(rrule.toString());
-        } catch (InvalidRecurrenceRuleException e) {
-            // TODO:
-        }
+    private static Date calculateUntilForUnlimited(CalendarDataObject cObj, RecurrenceRule rrule) {
         DateTime start = new DateTime(cObj.getRecurringStart());
-        RecurrenceRuleIterator iterator = rRule.iterator(start);
+        RecurrenceRuleIterator iterator = rrule.iterator(start);
         int count = 0;
         long millis = 0L;
-        while (iterator.hasNext() && count >= 999) {
+        while (iterator.hasNext() && count++ <= 999) { // TODO: implicit limit
             millis = iterator.nextMillis();
         }
         return new Date(millis);
