@@ -901,7 +901,7 @@ public class RdbCalendarStorage implements CalendarStorage {
          */
         if (event.containsRecurrenceRule()) {
             SeriesPattern seriesPattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartTimezone(), event.isAllDay());
-            event.setRecurrenceRule(seriesPattern.getDatabasePattern());
+            event.setRecurrenceRule(null == seriesPattern ? null : seriesPattern.getDatabasePattern());
         }
         /*
          * adjust start & endtimes for recurrence master
