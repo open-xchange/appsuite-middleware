@@ -50,6 +50,7 @@
 package com.openexchange.chronos.compat;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -59,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
@@ -121,20 +123,25 @@ public class Recurrence {
     }
 
     public static String generateRRule(SeriesPattern pattern) {
-        switch (pattern.getType()) {
-            case 1:
-                return daily(pattern);
-            case 2:
-                return weekly(pattern);
-            case 3:
-            case 5:
-                return monthly(pattern);
-            case 4:
-            case 6:
-                return yearly(pattern);
-            default:
-                return null;
+        try {
+            switch (pattern.getType()) {
+                case 1:
+                    return daily(pattern);
+                case 2:
+                    return weekly(pattern);
+                case 3:
+                case 5:
+                    return monthly(pattern);
+                case 4:
+                case 6:
+                    return yearly(pattern);
+                default:
+                    return null;
+            }
+        } catch (InvalidRecurrenceRuleException e) {
+            // TODO Auto-generated catch block
         }
+        return null;
     }
 
     public static String generatePattern(String recur, Calendar startDate) {
@@ -202,68 +209,69 @@ public class Recurrence {
     }
 
     private static String daily(SeriesPattern pattern) {
-        return getRecurBuilder("DAILY", pattern).toString();
+        return getRecurBuilder(Freq.DAILY, pattern).toString();
     }
 
-    private static String weekly(SeriesPattern pattern) {
-        StringBuilder recur = getRecurBuilder("WEEKLY", pattern);
+    private static String weekly(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
+        RecurrenceRule recur = getRecurBuilder(Freq.WEEKLY, pattern);
         int days = pattern.getDaysOfWeek();
         addDays(days, recur);
         return recur.toString();
     }
 
-    private static String monthly(SeriesPattern pattern) {
-        StringBuilder recur = getRecurBuilder("MONTHLY", pattern);
+    private static String monthly(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
+        RecurrenceRule recur = getRecurBuilder(Freq.MONTHLY, pattern);
         if (pattern.getType() == 5) {
             addDays(pattern.getDaysOfWeek(), recur);
             int weekNo = pattern.getDayOfMonth();
             if (5 == weekNo) {
                 weekNo = -1;
             }
-            recur.append(";BYSETPOS=").append(weekNo);
+            recur.setByPart(Part.BYSETPOS, weekNo);
         } else if (pattern.getType() == 3) {
-            recur.append(";BYMONTHDAY=").append(pattern.getDayOfMonth());
+            recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
             return null;
         }
         return recur.toString();
     }
 
-    private static String yearly(SeriesPattern pattern) {
-        StringBuilder recur = getRecurBuilder("YEARLY", pattern);
+    private static String yearly(SeriesPattern pattern) throws InvalidRecurrenceRuleException {
+        RecurrenceRule recur = getRecurBuilder(Freq.YEARLY, pattern);
         if (pattern.getType() == 6) {
             addDays(pattern.getDaysOfWeek(), recur);
-            recur.append(";BYMONTH=").append(pattern.getMonth() + 1);
+            recur.setByPart(Part.BYMONTH, pattern.getMonth());
             int weekNo = pattern.getDayOfMonth();
             if (5 == weekNo) {
                 weekNo = -1;
             }
-            recur.append(";BYSETPOS=").append(weekNo);
+            recur.setByPart(Part.BYSETPOS, weekNo);
         } else if (pattern.getType() == 4) {
-            recur.append(";BYMONTH=").append(pattern.getMonth() + 1);
-            recur.append(";BYMONTHDAY=").append(pattern.getDayOfMonth());
+            recur.setByPart(Part.BYMONTH, pattern.getMonth());
+            recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
             return null;
         }
         return recur.toString();
     }
 
-    private static void addDays(int days, final StringBuilder recur) {
-        recur.append(';').append("BYDAY").append('=');
+    private static void addDays(int days, final RecurrenceRule recur) throws InvalidRecurrenceRuleException {
+        List<WeekdayNum> weekdays = new ArrayList<WeekdayNum>();
         for (int day : allDays) {
             if (day == (day & days)) {
-                recur.append(reverseDays.get(Integer.valueOf(day))).append(',');
+                weekdays.add(WeekdayNum.valueOf(reverseDays.get(Integer.valueOf(day))));
             }
         }
-        recur.setLength(recur.length() - 1);
+        recur.setByDayPart(weekdays);
     }
 
-    private static StringBuilder getRecurBuilder(String frequency, SeriesPattern pattern) {
-        final StringBuilder recur = new StringBuilder("FREQ=").append(frequency).append(";INTERVAL=").append(pattern.getInterval());
+    private static RecurrenceRule getRecurBuilder(Freq frequency, SeriesPattern pattern) {
+        RecurrenceRule recur = new RecurrenceRule(frequency);
+        recur.setInterval(pattern.getInterval());
         if (pattern.getOccurrences() != null) {
-            recur.append(";COUNT=").append(pattern.getOccurrences());
+            recur.setCount(pattern.getOccurrences());
         } else if (pattern.getSeriesEnd() != null) {
-            recur.append(";UNTIL=").append(getUntil(pattern).toString());
+            recur.setUntil(getUntil(pattern));
         }
         return recur;
     }
@@ -280,13 +288,13 @@ public class Recurrence {
      * @return the calculated until date
      * @see http://tools.ietf.org/html/rfc5545#section-3.3.10
      */
-    private static net.fortuna.ical4j.model.Date getUntil(SeriesPattern pattern) {
+    private static DateTime getUntil(SeriesPattern pattern) {
         if (pattern.getSeriesEnd() == null) {
             return null;
         }
 
         if (pattern.isFullTime()) {
-            return new net.fortuna.ical4j.model.Date(pattern.getSeriesEnd());
+            return new DateTime(pattern.getSeriesEnd()).toAllDay();
         }
 
         /*
@@ -303,9 +311,8 @@ public class Recurrence {
         /*
          * finally, build an ical4j date-time
          */
-        net.fortuna.ical4j.model.DateTime dateTime = new net.fortuna.ical4j.model.DateTime(true);
-        dateTime.setTime(effectiveUntilCalendar.getTime().getTime());
-        return dateTime;
+        DateTime dt = new DateTime(effectiveUntilCalendar.getTimeInMillis());
+        return dt;
     }
 
     private static void setDays(CalendarObject cObj, RecurrenceRule rrule, Calendar startDate) {
