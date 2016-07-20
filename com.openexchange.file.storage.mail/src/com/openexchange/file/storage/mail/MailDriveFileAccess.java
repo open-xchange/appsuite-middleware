@@ -78,11 +78,13 @@ import com.openexchange.file.storage.FileStorageReadOnly;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.mail.accesscontrol.AccessControl;
 import com.openexchange.file.storage.mail.sort.MailDriveSortUtility;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.imap.IMAPMessageStorage;
 import com.openexchange.java.BoolReference;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -260,6 +262,19 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
 
         FullName fullName = checkFolderId(folderId);
 
+        AccessControl accessControl = AccessControl.getAccessControl(session);
+        try {
+            accessControl.acquireGrant();
+            return getResourceReleasingStream(folderId, id, fullName);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, new Object[0]);
+        } finally {
+            accessControl.close();
+        }
+    }
+
+    private InputStream getResourceReleasingStream(final String folderId, final String id, FullName fullName) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         IMAPFolder imapFolder = null;
         boolean error = true;
