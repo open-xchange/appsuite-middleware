@@ -8,31 +8,31 @@ title: Mail categories
 
 - [Prerequisites](#prerequisites)
 - [Quickstart guide](#quickstart-guide)
-	- [1. Install the open-xchange-mail-categories package.](#1-install-the-open-xchange-mail-categories-package)
-	- [2. Add 'mail_categories' capability](#2-add-mailcategories-capability)
-	- [3. Add category identifiers](#3-add-category-identifiers)
-	- [4. Add category configurations](#4-add-category-configurations)
-	- [5. Setup the initiale system category rules (optional)](#5-setup-the-initiale-system-category-rules-optional)
-	- [6. Check properties and restart the server](#6-check-properties-and-restart-the-server)
+    - [1. Install the open-xchange-mail-categories package.](#1-install-the-open-xchange-mail-categories-package)
+    - [2. Add 'mail_categories' capability](#2-add-mailcategories-capability)
+    - [3. Add category identifiers](#3-add-category-identifiers)
+    - [4. Add category configurations](#4-add-category-configurations)
+    - [5. Setup the initiale system category rules (optional)](#5-setup-the-initiale-system-category-rules-optional)
+    - [6. Check properties and restart the server](#6-check-properties-and-restart-the-server)
 - [Introduction](#introduction)
 - [Requirements](#requirements)
 - [Configuration](#configuration)
-	- [Server](#server)
-		- [com.openexchange.mail.categories](#comopenexchangemailcategories)
-		- [com.openexchange.mail.categories.enabled](#comopenexchangemailcategoriesenabled)
-		- [com.openexchange.mail.categories.forced](#comopenexchangemailcategoriesforced)
-		- [com.openexchange.mail.categories.general.name.fallback](#comopenexchangemailcategoriesgeneralnamefallback)
-		- [com.openexchange.mail.categories.general.name.[locale]](#comopenexchangemailcategoriesgeneralnamelocale)
-		- [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)
-		- [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)
-		- [com.openexchange.mail.categories.[category].flag](#comopenexchangemailcategoriescategoryflag)
-		- [com.openexchange.mail.categories.[category].active](#comopenexchangemailcategoriescategoryactive)
-		- [com.openexchange.mail.categories.[category].force](#comopenexchangemailcategoriescategoryforce)
-		- [com.openexchange.mail.categories.[category].name.fallback](#comopenexchangemailcategoriescategorynamefallback)
-		- [com.openexchange.mail.categories.[category].name.[locale]](#comopenexchangemailcategoriescategorynamelocale)
-		- [com.openexchange.mail.categories.apply.ox.rules](#comopenexchangemailcategoriesapplyoxrules)
-		- [com.openexchange.mail.categories.rules.[category]](#comopenexchangemailcategoriesrulescategory)
-	- [Client](#client)
+    - [Server](#server)
+        - [com.openexchange.mail.categories](#comopenexchangemailcategories)
+        - [com.openexchange.mail.categories.enabled](#comopenexchangemailcategoriesenabled)
+        - [com.openexchange.mail.categories.forced](#comopenexchangemailcategoriesforced)
+        - [com.openexchange.mail.categories.general.name.fallback](#comopenexchangemailcategoriesgeneralnamefallback)
+        - [com.openexchange.mail.categories.general.name.[locale]](#comopenexchangemailcategoriesgeneralnamelocale)
+        - [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)
+        - [com.openexchange.mail.categories.identifiers](#comopenexchangemailcategoriesidentifiers)
+        - [com.openexchange.mail.categories.[category].flag](#comopenexchangemailcategoriescategoryflag)
+        - [com.openexchange.mail.categories.[category].active](#comopenexchangemailcategoriescategoryactive)
+        - [com.openexchange.mail.categories.[category].force](#comopenexchangemailcategoriescategoryforce)
+        - [com.openexchange.mail.categories.[category].name.fallback](#comopenexchangemailcategoriescategorynamefallback)
+        - [com.openexchange.mail.categories.[category].name.[locale]](#comopenexchangemailcategoriescategorynamelocale)
+        - [com.openexchange.mail.categories.apply.ox.rules](#comopenexchangemailcategoriesapplyoxrules)
+        - [com.openexchange.mail.categories.rules.[category]](#comopenexchangemailcategoriesrulescategory)
+    - [Client](#client)
 
 <!-- /TOC -->
 
@@ -40,10 +40,10 @@ title: Mail categories
 
 The mail categorization feature has some requirements towards the used IMAP server for the primary mail accounts:
 
-1.	The server needs to fully support user flags, i.e.
-	*	SEARCH by KEYWORD and UNKEYWORD
-	*	STORE for user flags, e.g. `STORE 1:3 +FLAGS ($offers)`
-	*	providing fast results for keyword searches, otherwise responsiveness of the mail views might suffer
+1.  The server needs to fully support user flags, i.e.
+    *   SEARCH by KEYWORD and UNKEYWORD
+    *   STORE for user flags, e.g. `STORE 1:3 +FLAGS ($offers)`
+    *   providing fast results for keyword searches, otherwise responsiveness of the mail views might suffer
 2. A Sieve server supporting the [`imap4flags`](https://tools.ietf.org/html/rfc5232) extension.
 3. The App Suite middleware must have the `open-xchange-mailfilter` packaged installed and configured properly.
 
@@ -80,37 +80,37 @@ Add following properties:
     com.openexchange.mail.categories.promotion.flag=$promotion
     com.openexchange.mail.categories.promotion.force=false
     com.openexchange.mail.categories.promotion.active=true
-    com.openexchange.mail.categories.promotion.fallback=Promotions
+    com.openexchange.mail.categories.promotion.name.fallback=Promotions
     com.openexchange.mail.categories.promotion.name.de_DE=Angebote
 
     com.openexchange.mail.categories.social.flag=$social
     com.openexchange.mail.categories.social.force=false
     com.openexchange.mail.categories.social.active=true
-    com.openexchange.mail.categories.social.fallback=Social
+    com.openexchange.mail.categories.social.name.fallback=Social
     com.openexchange.mail.categories.social.name.de_DE=Social
 
     com.openexchange.mail.categories.purchases.flag=$purchases
     com.openexchange.mail.categories.purchases.force=false
     com.openexchange.mail.categories.purchases.active=true
-    com.openexchange.mail.categories.purchases.fallback=Purchases
+    com.openexchange.mail.categories.purchases.name.fallback=Purchases
     com.openexchange.mail.categories.purchases.name.de_DE=Eink\u00E4ufe
 
     com.openexchange.mail.categories.uc1.flag=$uc1
     com.openexchange.mail.categories.uc1.active=true
-    com.openexchange.mail.categories.uc1.fallback=Friends
+    com.openexchange.mail.categories.uc1.name.fallback=Friends
     com.openexchange.mail.categories.uc1.name.de_DE=Freunde
 
     com.openexchange.mail.categories.uc2.flag=$uc2
     com.openexchange.mail.categories.uc2.active=true
-    com.openexchange.mail.categories.uc2.fallback=Work
+    com.openexchange.mail.categories.uc2.name.fallback=Work
     com.openexchange.mail.categories.uc2.name.de_DE=Arbeit
 
 
-#### 5. Setup the initiale system category rules (optional)
+#### 5. Setup the initial system category rules (optional)
 
 Since the mails are currently not flagged at all, all categories except the general category will be empty. In order to prevent such a bad user experience you have the possibility to define predefined rules, which will be added to each user individually. But in order to improve the imap performance it is strongly recommended to use system wide rules instead! This also makes changes/improvements of the rules much easier.
 
-For example if you use dovecot with pigeonhole you can configure sieve scripts which will be run before the user scripts (see 'sieve_before' parameter: [Pigeonhole Configuration](http://wiki2.dovecot.org/Pigeonhole/Sieve/Configuration)). The sieve script for users in germany could look like this:
+For example if you use dovecot with pigeonhole you can configure sieve scripts which will be run before the user scripts (see 'sieve_before' parameter: [Pigeonhole Configuration](http://wiki2.dovecot.org/Pigeonhole/Sieve/Configuration)). The sieve script for users in Germany could look like this:
 
     require "imap4flags";
 
@@ -129,7 +129,7 @@ For example if you use dovecot with pigeonhole you can configure sieve scripts w
       addflag "$promotion";
     }
 
-In case you use a different imap server or dont want to use system wide rules you can define user rules by doing the following:
+In case you use a different imap server or don't want to use system wide rules you can define user rules by doing the following:
 
 Set com.openexchange.mail.categories.apply.ox.rules to true
 
@@ -139,7 +139,7 @@ and uncomment or add the example mail address lists:
     com.openexchange.mail.categories.rules.purchases=amazon.de,paypal.de,ebay.de,ebay-kleinanzeigen.de,zalando.de,immobilienscout24.de,autoscout24.de,notebooksbilliger.de,otto.de,tchibo.de,lidl.de,aldi.de,aliexpress.com,bonprix.de,conrad.de,reichelt.de,orders.apple.com,euro.apple.com,cyberport.de,alternate.de,audible.de,steampowered.com,mytoys.de,ikea.com,hm.com,mediamarkt.de,saturn.de
     com.openexchange.mail.categories.rules.promotion=netflix.com,dhl.de,unitymedia.de,finanztip.de
 
-The used lists in both variants are not complete and are only applicable for users in germany. Therefore you should always adapt this lists to you individual needs.
+The used lists in both variants are not complete and are only applicable for users in Germany. Therefore you should always adapt this lists to you individual needs.
 
 
 #### 6. Check properties and restart the server
@@ -190,29 +190,29 @@ Finally your ```mail-categories.properties``` file should look similar to this:
     com.openexchange.mail.categories.promotion.flag=$promotion
     com.openexchange.mail.categories.promotion.force=false
     com.openexchange.mail.categories.promotion.active=true
-    com.openexchange.mail.categories.promotion.fallback=Promotions
+    com.openexchange.mail.categories.promotion.name.fallback=Promotions
     com.openexchange.mail.categories.promotion.name.de_DE=Angebote
 
     com.openexchange.mail.categories.social.flag=$social
     com.openexchange.mail.categories.social.force=false
     com.openexchange.mail.categories.social.active=true
-    com.openexchange.mail.categories.social.fallback=Social
+    com.openexchange.mail.categories.social.name.fallback=Social
     com.openexchange.mail.categories.social.name.de_DE=Social
 
     com.openexchange.mail.categories.purchases.flag=$purchases
     com.openexchange.mail.categories.purchases.force=false
     com.openexchange.mail.categories.purchases.active=true
-    com.openexchange.mail.categories.purchases.fallback=Purchases
+    com.openexchange.mail.categories.purchases.name.fallback=Purchases
     com.openexchange.mail.categories.purchases.name.de_DE=Eink\u00E4ufe
 
     com.openexchange.mail.categories.uc1.flag=$uc1
     com.openexchange.mail.categories.uc1.active=true
-    com.openexchange.mail.categories.uc1.fallback=Friends
+    com.openexchange.mail.categories.uc1.name.fallback=Friends
     com.openexchange.mail.categories.uc1.name.de_DE=Freunde
 
     com.openexchange.mail.categories.uc2.flag=$uc2
     com.openexchange.mail.categories.uc2.active=true
-    com.openexchange.mail.categories.uc2.fallback=Work
+    com.openexchange.mail.categories.uc2.name.fallback=Work
     com.openexchange.mail.categories.uc2.name.de_DE=Arbeit
 
     # A flag indicating whether the rules should be applied or not
@@ -320,7 +320,7 @@ All configurations are config cascade aware and can therefore be overwritten on 
 
 This property defines whether the user capability is granted to use the mail categories feature. This is the main switch for an administrator to enable/disable that feature.
 
-**Note** The current mail categories implementatiuon also requires that the associated Sieve service advertises the `"imap4flags"` capability. Only if both conditions are met
+**Note** The current mail categories implementation also requires that the associated Sieve service advertises the `"imap4flags"` capability. Only if both conditions are met
 
 1.  `com.openexchange.mail.categories` is set to `true`
 2.  `"imap4flags"` capability announced by Sieve service
@@ -330,7 +330,7 @@ the mail categories feature becomes effectively available for a user.
 #### com.openexchange.mail.categories.enabled
 
 This property defines whether the mail categories feature should be enabled or not. This property only influence the starting value.
-For example set this property to 'true' if you want your users to see the mail features after their first login. If you rather want the same ui experience like before set this value to 'false' instead.
+For example set this property to 'true' if you want your users to see the mail features after their first login. If you rather want the same UI experience like before set this value to 'false' instead.
 Anyway users are able to show or hide the feature via configuration.
 
 #### com.openexchange.mail.categories.forced
