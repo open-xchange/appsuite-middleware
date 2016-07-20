@@ -69,18 +69,32 @@ public interface GuardAwareIDBasedFileAccessFactory {
      * @param session The session.
      * @param token The token used for authentication, or <code>null</code> for falling back to use
      *            {@link #createAccess(IDBasedFileAccess, Session)} in order to obtain the {@link GuardAuthenticationToken} from the Session.
-     * @return An OX Guard aware {@link IDBasedFileAccess} object.
+     * @return An OX Guard aware {@link IDBasedFileAccess} object which encrypts and decrypts files.
      */
-    public IDBasedFileAccess createAccess(IDBasedFileAccess fileAccess, Session session, GuardAuthenticationToken token) throws OXException;
+    public IDBasedFileAccess createAccess(IDBasedFileAccess fileAccess, Session session, GuardAuthenticationToken token);
 
     /**
      * Decorates an {@link IDBasedFileAccess} object in order to add OX Guard based encryption and decryption functionality.
      * <p>
      * The implementation needs to obtain the required {@link GuardAuthenticationToken} from the given session's parameters.
      * </p>
+     *
      * @param fileAccess The {@link IDBasedFileAccess} object to decorate.
      * @param session The session.
-     * @return An OX Guard aware {@link IDBasedFileAccess} object.
+     * @return An OX Guard aware {@link IDBasedFileAccess} object which encrypts and decrypts files.
      */
-    public IDBasedFileAccess createAccess(IDBasedFileAccess fileAccess, Session session) throws OXException;
+    public IDBasedFileAccess createAccess(IDBasedFileAccess fileAccess, Session session);
+
+    /**
+     * Decorates an {@link IDBasedFileAccess} object in order to add OX Guard based encryption functionality.
+     * <p>
+     * Decryption will NOT be performed when reading files. Instead the raw file obtained from the decorated {@link IDBasedFileAccess} object will be returned.
+     * </p>
+     *
+     * @param fileAccess The {@link IDBasedFileAccess} object to decorate.
+     * @param session The session.
+     * @returnAn OX Guard aware {@link IDBasedFileAccess} object which encrypts files but does NOT perform decryption.
+     * @throws OXException
+     */
+    public IDBasedFileAccess createEncryptionOnlyAccess(IDBasedFileAccess fileAccess, Session session);
 }
