@@ -55,11 +55,11 @@ import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CalendarService}
@@ -72,19 +72,19 @@ public class CalendarServiceImpl implements CalendarService {
     /**
      * Initializes a new {@link CalendarServiceImpl}.
      */
-    public CalendarServiceImpl() throws OXException {
+    public CalendarServiceImpl() {
         super();
     }
 
     @Override
-    public UserizedEvent getEvent(ServerSession session, int folderID, int objectID, CalendarParameters parameters) throws OXException {
-        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+    public UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException {
+        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         return new CalendarReader(session).readEvent(folderID, objectID, fields);
     }
 
     @Override
-    public List<UserizedEvent> getEvents(ServerSession session, List<EventID> eventIDs, CalendarParameters parameters) throws OXException {
-        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+    public List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException {
+        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
         CalendarReader reader = new CalendarReader(session);
         for (EventID eventID : eventIDs) {
@@ -94,54 +94,54 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<UserizedEvent> getUpdatedEventsInFolder(ServerSession session, int folderID, Date updatedSince, CalendarParameters parameters) throws OXException {
-        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+    public List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         return new CalendarReader(session).readEventsInFolder(folderID, from, until, updatedSince, fields);
     }
 
     @Override
-    public List<UserizedEvent> getUpdatedEventsOfUser(ServerSession session, Date updatedSince, CalendarParameters parameters) throws OXException {
-        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        return new CalendarReader(session).readEventsOfUser(session.getUserId(), from, until, updatedSince, fields);
+    public List<UserizedEvent> getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), from, until, updatedSince, fields);
     }
 
     @Override
-    public List<UserizedEvent> getDeletedEventsInFolder(ServerSession session, int folderID, Date deletedSince, CalendarParameters parameters) throws OXException {
-        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+    public List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, int folderID, Date deletedSince) throws OXException {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         return new CalendarReader(session).readEventsInFolder(folderID, from, until, deletedSince, fields);
     }
 
     @Override
-    public List<UserizedEvent> getDeletedEventsOfUser(ServerSession session, Date deletedSince, CalendarParameters parameters) throws OXException {
-        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return new CalendarReader(session).readDeletedEventsOfUser(session.getUserId(), from, until, deletedSince);
+    public List<UserizedEvent> getDeletedEventsOfUser(CalendarSession session, Date deletedSince) throws OXException {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        return new CalendarReader(session).readDeletedEventsOfUser(session.getUser().getId(), from, until, deletedSince);
     }
 
     @Override
-    public List<UserizedEvent> getEventsInFolder(ServerSession session, int folderID, CalendarParameters parameters) throws OXException {
-        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+    public List<UserizedEvent> getEventsInFolder(CalendarSession session, int folderID) throws OXException {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         return new CalendarReader(session).readEventsInFolder(folderID, from, until, null, fields);
     }
 
     @Override
-    public List<UserizedEvent> getEventsOfUser(ServerSession session, CalendarParameters parameters) throws OXException {
-        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        EventField[] fields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        return new CalendarReader(session).readEventsOfUser(session.getUserId(), from, until, null, fields);
+    public List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), from, until, null, fields);
     }
 
     @Override
-    public UserizedEvent createEvent(ServerSession session, final UserizedEvent event, CalendarParameters parameters) throws OXException {
+    public UserizedEvent createEvent(CalendarSession session, final UserizedEvent event) throws OXException {
         return new StorageOperation<UserizedEvent>(session) {
 
             @Override
@@ -152,8 +152,8 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UserizedEvent updateEvent(ServerSession session, final int folderID, final UserizedEvent event, CalendarParameters parameters) throws OXException {
-        Long clientTimestampValue = parameters.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
+    public UserizedEvent updateEvent(CalendarSession session, final int folderID, final UserizedEvent event) throws OXException {
+        Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
         return new StorageOperation<UserizedEvent>(session) {
 
@@ -165,7 +165,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UserizedEvent updateAttendee(ServerSession session, final int folderID, final int objectID, final Attendee attendee, CalendarParameters parameters) throws OXException {
+    public UserizedEvent updateAttendee(CalendarSession session, final int folderID, final int objectID, final Attendee attendee) throws OXException {
         return new StorageOperation<UserizedEvent>(session) {
 
             @Override
@@ -176,8 +176,8 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public void deleteEvents(ServerSession session, final List<EventID> eventIDs, CalendarParameters parameters) throws OXException {
-        Long clientTimestampValue = parameters.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
+    public void deleteEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
+        Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
         new StorageOperation<Void>(session) {
 

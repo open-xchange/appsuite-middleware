@@ -66,6 +66,11 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
@@ -88,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
 requestBody = "",
 responseDescription = "")
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class CopyAction extends AppointmentAction {
+public final class CopyAction extends ChronosAction {
 
     /**
      * Initializes a new {@link CopyAction}.
@@ -151,6 +156,27 @@ public final class CopyAction extends AppointmentAction {
         }
 
         return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
+    }
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarSession calendarSession = initSession(request);
+        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(request.getParameter(AppointmentFields.IGNORE_CONFLICTS)));
+        int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
+        int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        JSONObject jsonObject = request.getData();
+        int targetFolderID = DataParser.checkInt(jsonObject, FolderChildFields.FOLDER_ID);
+        UserizedEvent originalEvent = calendarService.getEvent(calendarSession, folderID, objectID);
+        originalEvent.getEvent().removeId();
+        originalEvent.getEvent().removeUid();
+        originalEvent.getEvent().removePublicFolderId();
+        UserizedEvent event = new UserizedEvent(request.getSession(), originalEvent.getEvent());
+        if (originalEvent.containsAlarms()) {
+            event.setAlarms(originalEvent.getAlarms());
+        }
+        event.setFolderId(targetFolderID);
+        UserizedEvent copiedEvent = calendarService.createEvent(calendarSession, event);
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, copiedEvent.getEvent().getId()), copiedEvent.getEvent().getLastModified(), "json");
     }
 
 }

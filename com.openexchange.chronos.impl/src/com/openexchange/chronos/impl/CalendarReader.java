@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.Event;
@@ -78,7 +79,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -89,7 +89,7 @@ import com.openexchange.user.UserService;
  */
 public class CalendarReader {
 
-    protected final ServerSession session;
+    protected final CalendarSession session;
     protected final CalendarStorage storage;
 
     /**
@@ -97,7 +97,7 @@ public class CalendarReader {
      *
      * @param session The session
      */
-    public CalendarReader(ServerSession session) throws OXException {
+    public CalendarReader(CalendarSession session) throws OXException {
         this(session, Services.getService(CalendarStorageFactory.class).create(session.getContext()));
     }
 
@@ -107,7 +107,7 @@ public class CalendarReader {
      * @param session The session
      * @param storage The storage
      */
-    public CalendarReader(ServerSession session, CalendarStorage storage) {
+    public CalendarReader(CalendarSession session, CalendarStorage storage) {
         super();
         this.session = session;
         this.storage = storage;
@@ -126,7 +126,7 @@ public class CalendarReader {
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
         Event event = storage.loadEvent(objectID, fields);
-        if (session.getUserId() != event.getCreatedBy()) {
+        if (session.getUser().getId() != event.getCreatedBy()) {
             requireReadPermission(folder, Permission.READ_ALL_OBJECTS);
         }
         return userize(event, folder);
@@ -140,7 +140,7 @@ public class CalendarReader {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
-        int createdBy = Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission() ? session.getUserId() : -1;
+        int createdBy = Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission() ? session.getUser().getId() : -1;
         List<Event> events = storage.loadEventsInFolder(Integer.parseInt(folder.getID()), from, until, createdBy, updatedSince, fields);
         return userize(events, folder);
     }
@@ -153,19 +153,19 @@ public class CalendarReader {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
-        int createdBy = Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission() ? session.getUserId() : -1;
+        int createdBy = Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission() ? session.getUser().getId() : -1;
         List<Event> events = storage.loadDeletedEventsInFolder(Integer.parseInt(folder.getID()), from, until, createdBy, deletedSince);
         return userize(events, folder);
     }
 
     List<UserizedEvent> readEventsOfUser(int userID, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException {
         List<Event> events = storage.loadEventsOfUser(userID, from, until, updatedSince, fields);
-        return userize(events, session.getUserId());
+        return userize(events, session.getUser().getId());
     }
 
     List<UserizedEvent> readDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince) throws OXException {
         List<Event> events = storage.loadDeletedEventsOfUser(userID, from, until, deletedSince);
-        return userize(events, session.getUserId());
+        return userize(events, session.getUser().getId());
     }
 
     private List<UserizedEvent> userize(List<Event> events, int forUser) throws OXException {
@@ -185,7 +185,7 @@ public class CalendarReader {
     }
 
     private UserizedEvent userize(Event event, UserizedFolder inFolder) throws OXException {
-        UserizedEvent userizedEvent = new UserizedEvent(session, event);
+        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
         User calendarUser = getCalendarUser(inFolder);
         if (isAttendee(event, calendarUser.getId())) {
             userizedEvent.setAlarms(storage.loadAlarms(event.getId(), calendarUser.getId()));
@@ -195,7 +195,7 @@ public class CalendarReader {
     }
 
     private UserizedEvent userize(Event event, int forUser) throws OXException {
-        UserizedEvent userizedEvent = new UserizedEvent(session, event);
+        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
         if (0 < event.getPublicFolderId()) {
             userizedEvent.setFolderId(event.getPublicFolderId());
         }
@@ -210,7 +210,7 @@ public class CalendarReader {
     }
 
     protected UserizedFolder getFolder(int folderID) throws OXException {
-        return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session, null);
+        return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), null);
     }
 
     /**

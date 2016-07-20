@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarStorage;
 import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -58,7 +59,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StorageOperation}
@@ -70,14 +70,14 @@ public abstract class StorageOperation<T> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StorageOperation.class);
 
-    private final ServerSession session;
+    private final CalendarSession session;
 
     /**
      * Initializes a new {@link StorageOperation}.
      *
      * @param session The server session
      */
-    public StorageOperation(ServerSession session) {
+    public StorageOperation(CalendarSession session) {
         super();
         this.session = session;
     }

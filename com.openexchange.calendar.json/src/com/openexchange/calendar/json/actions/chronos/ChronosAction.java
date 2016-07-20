@@ -66,6 +66,7 @@ import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
@@ -168,46 +169,54 @@ public abstract class ChronosAction extends AppointmentAction {
         return new EventID(DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_FOLDERID), DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID));
     }
 
-    protected static CalendarParameters parseParameters(AppointmentAJAXRequest request, String... requiredParameters) throws OXException {
-        CalendarParameters parameters = new CalendarParameters();
+    /**
+     * Initializes a calendar session for a request and parses all known parameters supplied by the client, throwing an appropriate
+     * exception in case a required parameters is missing.
+     *
+     * @param request The underlying appointment request
+     * @param requiredParameters The required parameters to check
+     * @return The calendar session
+     */
+    protected static CalendarSession initSession(AppointmentAJAXRequest request, String... requiredParameters) throws OXException {
+        CalendarSession session = new CalendarSession(request.getSession());
         String timestampParameter = request.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
         if (null != timestampParameter) {
             try {
-                parameters.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(timestampParameter));
+                session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(timestampParameter));
             } catch (NumberFormatException e) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TIMESTAMP, timestampParameter);
             }
         }
         Date start = request.optDate(AJAXServlet.PARAMETER_START);
         if (null != start) {
-            parameters.set(CalendarParameters.PARAMETER_RANGE_START, request.applyTimeZone2Date(start.getTime()));
+            session.set(CalendarParameters.PARAMETER_RANGE_START, request.applyTimeZone2Date(start.getTime()));
         }
         Date end = request.optDate(AJAXServlet.PARAMETER_END);
         if (null != end) {
-            parameters.set(CalendarParameters.PARAMETER_RANGE_END, request.applyTimeZone2Date(end.getTime()));
+            session.set(CalendarParameters.PARAMETER_RANGE_END, request.applyTimeZone2Date(end.getTime()));
         }
         EventField orderBy = EventConverter.getField(request.optInt(AJAXServlet.PARAMETER_SORT));
-        parameters.set(CalendarParameters.PARAMETER_ORDER_BY, null == orderBy ? EventField.START_DATE : orderBy);
+        session.set(CalendarParameters.PARAMETER_ORDER_BY, null == orderBy ? EventField.START_DATE : orderBy);
         String order = request.getParameter(AJAXServlet.PARAMETER_ORDER);
         if (null != order) {
-            parameters.set(CalendarParameters.PARAMETER_ORDER, "desc".equalsIgnoreCase(order) ? "DESC" : "ASC");
+            session.set(CalendarParameters.PARAMETER_ORDER, "desc".equalsIgnoreCase(order) ? "DESC" : "ASC");
         }
         String showPrivate = request.getParameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS);
         if (null != showPrivate) {
-            parameters.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(showPrivate));
+            session.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(showPrivate));
         }
         String recurrenceMaster = request.getParameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER);
         if (null != recurrenceMaster) {
-            parameters.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(recurrenceMaster));
+            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(recurrenceMaster));
         }
         String timeZoneID = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        parameters.set(CalendarParameters.PARAMETER_TIMEZONE, null == timeZoneID ? request.getTimeZone() : getTimeZone(timeZoneID));
+        session.set(CalendarParameters.PARAMETER_TIMEZONE, null == timeZoneID ? request.getTimeZone() : getTimeZone(timeZoneID));
 
         String columns = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
         if (null != columns) {
-            parameters.set(CalendarParameters.PARAMETER_FIELDS, parseColumns(columns));
+            session.set(CalendarParameters.PARAMETER_FIELDS, parseColumns(columns));
         }
-        return requireParameters(parameters, requiredParameters);
+        return requireParameters(session, requiredParameters);
     }
 
     private static EventField[] parseColumns(String columns) throws OXException {
@@ -233,15 +242,15 @@ public abstract class ChronosAction extends AppointmentAction {
         return EventConverter.getFields(columnIDs);
     }
 
-    private static CalendarParameters requireParameters(CalendarParameters parameters, String... requiredParameters) throws OXException {
+    private static CalendarSession requireParameters(CalendarSession session, String... requiredParameters) throws OXException {
         if (null != requiredParameters) {
             for (String requiredParameter : requiredParameters) {
-                if (false == parameters.contains(requiredParameter)) {
+                if (false == session.contains(requiredParameter)) {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create(requiredParameter);
                 }
             }
         }
-        return parameters;
+        return session;
     }
 
 }

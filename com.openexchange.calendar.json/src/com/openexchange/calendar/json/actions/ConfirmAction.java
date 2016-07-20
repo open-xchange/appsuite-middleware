@@ -60,6 +60,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.calendar.json.actions.chronos.EventConverter;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -88,7 +94,7 @@ import com.openexchange.tools.session.ServerSession;
 }, requestBody = "The appointment object to delete. The fields for the object are described in Full identifier for an appointment.",
     responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class ConfirmAction extends AppointmentAction {
+public final class ConfirmAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfirmAction.class);
     /**
@@ -151,4 +157,21 @@ public final class ConfirmAction extends AppointmentAction {
 
         return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
     }
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarSession calendarSession = initSession(request);
+        int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
+        int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        int recurrenceID = request.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
+        JSONObject jsonObject = request.getData();
+        ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jsonObject);
+        Attendee attendee = EventConverter.getAttendee(participant);
+        if ((0 == participant.getType() || Participant.USER == participant.getType()) && 0 == participant.getIdentifier()) {
+            attendee.setEntity(request.getSession().getUserId());
+        }
+        UserizedEvent updatedEvent = calendarService.updateAttendee(calendarSession, folderID, objectID, attendee);
+        return new AJAXRequestResult(new JSONObject(0), updatedEvent.getEvent().getLastModified(), "json");
+    }
+
 }

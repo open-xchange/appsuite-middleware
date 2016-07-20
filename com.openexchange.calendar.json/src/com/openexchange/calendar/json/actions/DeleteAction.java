@@ -66,6 +66,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.EventID;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -169,9 +170,9 @@ public final class DeleteAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
-        CalendarParameters parameters = parseParameters(request, REQUIRED_PARAMETERS);
+        CalendarSession calendarSession = initSession(request, REQUIRED_PARAMETERS);
         List<EventID> requestedIDs = parseRequestedIDs(request);
-        calendarService.deleteEvents(request.getSession(), requestedIDs, parameters);
+        calendarService.deleteEvents(calendarSession, requestedIDs);
         return new AJAXRequestResult(new JSONArray(0), new Date(), "json");
     }
 

@@ -62,6 +62,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -290,26 +291,26 @@ public final class UpdatesAction extends ChronosAction {
         List<UserizedEvent> newAndModifiedEvents;
         List<UserizedEvent> deletedEvents;
         if (0 < folderID) {
-            CalendarParameters parameters = parseParameters(request);
+            CalendarSession calendarSession = initSession(request);
             if (false == ignoreUpdated) {
-                newAndModifiedEvents = calendarService.getUpdatedEventsInFolder(request.getSession(), folderID, since, parameters);
+                newAndModifiedEvents = calendarService.getUpdatedEventsInFolder(calendarSession, folderID, since);
             } else {
                 newAndModifiedEvents = null;
             }
             if (false == ignoreDeleted) {
-                deletedEvents = calendarService.getDeletedEventsInFolder(request.getSession(), folderID, since, parameters);
+                deletedEvents = calendarService.getDeletedEventsInFolder(calendarSession, folderID, since);
             } else {
                 deletedEvents = null;
             }
         } else {
-            CalendarParameters parameters = parseParameters(request, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
+            CalendarSession calendarSession = initSession(request, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
             if (false == ignoreUpdated) {
-                newAndModifiedEvents = calendarService.getUpdatedEventsOfUser(request.getSession(), since, parameters);
+                newAndModifiedEvents = calendarService.getUpdatedEventsOfUser(calendarSession, since);
             } else {
                 newAndModifiedEvents = null;
             }
             if (false == ignoreDeleted) {
-                deletedEvents = calendarService.getDeletedEventsOfUser(request.getSession(), since, parameters);
+                deletedEvents = calendarService.getDeletedEventsOfUser(calendarSession, since);
             } else {
                 deletedEvents = null;
             }

@@ -67,6 +67,7 @@ import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -169,13 +170,13 @@ public final class UpdateAction extends ChronosAction {
         new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
         convertExternalToInternalUsersIfPossible(appointment, request.getSession().getContext(), LOG);
         int folderID = request.checkInt(AJAXServlet.PARAMETER_INFOLDER);
-        CalendarParameters parameters = parseParameters(request, REQUIRED_PARAMETERS);
+        CalendarSession calendarSession = initSession(request, REQUIRED_PARAMETERS);
         if (appointment.containsNotification()) {
-            parameters.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
+            calendarSession.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }
-        parameters.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
+        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
         UserizedEvent event = EventConverter.getEvent(appointment, request.getSession());
-        UserizedEvent updatedEvent = calendarService.updateEvent(request.getSession(), folderID, event, parameters);
+        UserizedEvent updatedEvent = calendarService.updateEvent(calendarSession, folderID, event);
         return new AJAXRequestResult(new JSONObject().put(DataFields.ID, updatedEvent.getEvent().getId()), updatedEvent.getEvent().getLastModified(), "json");
     }
 

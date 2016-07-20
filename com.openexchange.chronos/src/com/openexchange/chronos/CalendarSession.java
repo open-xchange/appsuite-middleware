@@ -49,40 +49,60 @@
 
 package com.openexchange.chronos;
 
-import java.util.Date;
-import java.util.List;
-import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CalendarService}
+ * {@link CalendarSession}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarService {
+public class CalendarSession extends CalendarParameters {
 
-    UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException;
+    private final ServerSession session;
 
-    List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
+    /**
+     * Initializes a new {@link CalendarSession}.
+     *
+     * @param session The underlying server session
+     */
+    public CalendarSession(ServerSession session) {
+        super();
+        this.session = session;
+    }
 
-    List<UserizedEvent> getEventsInFolder(CalendarSession session, int folderID) throws OXException;
+    /**
+     * Gets the underlying server session.
+     *
+     * @return The underlying server session
+     */
+    public ServerSession getSession() {
+        return session;
+    }
 
-    List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException;
+    /**
+     * Gets the session's user.
+     *
+     * @return The user
+     */
+    public User getUser() {
+        return session.getUser();
+    }
 
-    UserizedEvent createEvent(CalendarSession session, UserizedEvent event) throws OXException;
+    /**
+     * Gets the session's context.
+     *
+     * @return The context
+     */
+    public Context getContext() {
+        return session.getContext();
+    }
 
-    UserizedEvent updateEvent(CalendarSession session, int folderID, UserizedEvent event) throws OXException;
-
-    UserizedEvent updateAttendee(CalendarSession session, int folderID, int objectID, Attendee attendee) throws OXException;
-
-    void deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
-
-    List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
-
-    List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, int folderID, Date deletedSince) throws OXException;
-
-    List<UserizedEvent> getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
-
-    List<UserizedEvent> getDeletedEventsOfUser(CalendarSession session, Date deletedSince) throws OXException;
+    @Override
+    public String toString() {
+        return "CalendarSession [context=" + session.getContextId() + ", user=" + session.getUserId() + ", sessionId=" + session.getSessionID() + "]";
+    }
 
 }
