@@ -564,13 +564,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         OXToolStorageInterface oxtools = OXToolStorageInterface.getInstance();
         List<Database> unblockedDatabaseSchema = oxtools.unblockDatabaseSchema(db);
-
-        Database[] outdatedUpdating = new Database[unblockedDatabaseSchema.size()];
-        int i = 0;
-        for (Database database : unblockedDatabaseSchema) {
-            outdatedUpdating[i++] = database;
-        }
-        return outdatedUpdating;
+        return unblockedDatabaseSchema.toArray(new Database[unblockedDatabaseSchema.size()]);
     }
 
     @Override

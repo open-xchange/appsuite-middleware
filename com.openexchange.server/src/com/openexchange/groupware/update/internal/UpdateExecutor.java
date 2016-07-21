@@ -109,6 +109,7 @@ public final class UpdateExecutor {
      * Executes this update while storing failures in specified <code>failures</code> queue if not <code>null</code>.
      *
      * @param failures The optional failure queue for tracing
+     * @param throwExceptionOnFailure Whether a possible exception is supposed to abort process
      * @throws OXException If update fails
      */
     public void execute(final Queue<TaskInfo> failures, boolean throwExceptionOnFailure) throws OXException {

@@ -4,15 +4,15 @@ title: Update tasks
 
 # Introduction
 
-Updates for database are executed by so called update tasks. Each tasks applied one or more changes either to database schema (e.g. add another column to an existing table) or to data (e.g. insert a new default value for existing rows in a table).
+Updates for database are executed by so called update tasks. Each task applies one or more changes either to database schema (e.g. add another column to an existing table) or to data (e.g. insert a new default value for existing rows in a table).
 
 # Triggers
 
-Each new version of the Open-Xchange Middleware may ship with one or more such update tasks. The not yet applied update tasks are either triggered by
+Each new version of the Open-Xchange Middleware may ship with one or more such update tasks. The not yet applied update tasks are either triggered
 
  - Manually by invoking the ``runupdate`` or the ``runallupdate`` command-line interface
- - The first login of any user from any context that is hosted on the affecetd database schema
- - Provisioning calls
+ - By the first login of any user from any context that is hosted on the affecetd database schema
+ - By executing provisioning calls
    - On context deletion
    - On moving a context to another database
    - On context administrator login via RMI (accessing special ``com.openexchange.admin.rmi.OXLoginInterface`` RMI interface)
@@ -26,9 +26,9 @@ Furthermore, an administrator may (re-)execute certain update tasks through usin
 
 ## Unexpected termination
 
-A typical error scenario is when the JVM or the executing update task is terminated unexpectedly; e.g. killing the Java process. In that case the update task mechanism is not able to remove special markers on affected database schemas, which leaves those schemas unaccessible and useless.
+A typical error scenario is when the JVM or the executing update task is terminated unexpectedly; e.g. by killing the Java process. In that case, the update task mechanism is not able to remove special markers on affected database schemas, which leaves those schemas in an unaccessible state.
 
-To detect or remedy from such a situation, an administrator can execute the ``checkdatabase`` command-line interfacem which lists all database schemas that either need an update, are currently blocked by a running update or are considered as stale (updating for more than 24 hours).
+To detect or remedy from such a situation, an administrator can execute the ``checkdatabase`` command-line interface which lists all database schemas that either need an update, are currently blocked by a running update or are considered as stale (updating for more than 24 hours).
 
 Example:
 
@@ -59,7 +59,7 @@ unblocked the following schemas from database 1996:
 
 ## Ordinary failure
 
-Although, an update task is supposed to never fail, it may occur due to untested environments and/or database versions that an update task may fail. In contrast to the previous section, any markers are removed; meaning the database schema is still accessible. However, needed modifications were not applied, which might lead to error during runtime.
+Although an update task is supposed to never fail, it may occur due to untested environments and/or database versions that an update task may fail. In contrast to the previous section, any markers are removed; meaning the database schema is still accessible. However, needed modifications were not applied, which might lead to errors during runtime.
 
 To check the update tasks' status for a certain database schema the ``listExecutedUpdateTasks`` command-line interface is supposed to be used, which lists all executed update task for denoted schema along-side with each task's status (successful vs. failed)
 
@@ -165,7 +165,7 @@ com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsMakeUuidPrima
 
 ## Trigger all pending update tasks for a specific schema
 
-To apply all pending update tasks to a certain schema, the ``runupdate`` command-line interface is available, provided that specified schema is not yet marked as being updated. In case the schema is already blocked, the invoaction does nothing.
+To apply all pending update tasks to a certain schema, the ``runupdate`` command-line interface is available, provided that specified schema is not yet marked as being updated. In case the schema is already blocked, the invocation does nothing.
 
 Once the schema is updated, the tool lists those update tasks, that could not be successfully executed on denoted database schema.
 
@@ -199,9 +199,9 @@ The following update task(s) failed:
 
 ## Trigger all pending update tasks for all schemas
 
-To apply all pending update tasks to all available schemas, the ``runallupdate`` command-line interface is available. That tool supports two modes. The one is to ignore possible errors and/or conflicts on a certain schema and to continue with the next schema in line. The other does abort the invocation whenever an error and/or conflict occurs.
+To apply all pending update tasks to all available schemas, the ``runallupdate`` command-line interface is available. That tool supports two modes. The first one is to ignore possible errors and/or conflicts on a certain schema and to continue with the next schema in line. The other does abort the invocation whenever an error and/or conflict occurs.
 
-Moreover, that tool starts a task that performs the actual update asynchronously. Therefore the current status/progress is periodically printed to standard out.
+Moreover, that tool starts a task that performs the actual update asynchronously. Therefore, the current status/progress is periodically printed to standard out.
 
 ### Parameters
 
@@ -268,7 +268,7 @@ Processed 167 of 167 schemas.
 
 ## Checking for pending, blocked or stale schemas
 
-To check for pending, blocked or stale schemas, the ``checkdatabase`` command-line interface is supposed to be used. As mentioned in previous section that tool lists all database schemas that either need an update, are currently blocked by a running update or are considered as stale (updating for more than 24 hours).
+To check for pending, blocked or stale schemas, the ``checkdatabase`` command-line interface is supposed to be used. As mentioned in previous section, this tool lists all database schemas that either need an update, are currently blocked by a running update or are considered as stale (updating for more than 24 hours).
 
 ### Parameters
 
