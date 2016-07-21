@@ -8,23 +8,27 @@ With release 7.8.3 Open-Xchange starts to use predefined values for properties s
 
 All properties will be described by using the layout of the table below:
 
-| Key 		  	| `com.openexchange.foo` 	| 
-| :---        	|     :---      			|
-| Description 	| Defines the foo 			|
-| Default 		| true						|
-| Version 		| 7.8.3						|
-| Related 		| `com.openexchange.bar` 	|
-| File 			| 							|
+| Key 		  		  | `com.openexchange.foo` 	| 
+| :---        		  | :---      					|
+| Description 		  | Defines the foo 			|
+| Default 			  | true						|
+| Version 			  | 7.8.3						|
+| Reloadable          | true						|
+| Configcascade Aware | false						|
+| Related 			  | `com.openexchange.bar` 	|
+| File 			      | 							|
 
 ---
 
-| Key 		  	| `com.openexchange.bar` 	| 
-| :---        	|     :---      			|
-| Description 	| Defines the bar 			|
-| Default 		| false						|
-| Version 		| 7.8.0						|
-| Related 		| `com.openexchange.foo` 	|
-| File 			| foobar.properties			|
+| Key 		  		  | `com.openexchange.bar` 	| 
+| :---        		  | :---      					|
+| Description 		  | Defines the bar 			|
+| Default 			  | false						|
+| Version 			  | 7.8.0						|
+| Reloadable          | false						|
+| Configcascade Aware | true						|
+| Related 			  | `com.openexchange.foo` 	|
+| File 			      | foobar.properties			|
 
 These information are contained within the columns have the following meaning:
 
@@ -32,6 +36,8 @@ These information are contained within the columns have the following meaning:
   * **Description**: A short description of the property.
   * **Default**: The default value of the property (as defined within the code).
   * **Version**: The first version the property is available with.
+  * **Reloadable**: Defines whether the value is reloadable or not.
+  * **Configcascade Aware**: Defines whether the property is configcascade aware or not.
   * **Related**: Contains information about other properties that are related to the currently described one.
   * **File**: Describes the file where the property is defined. This column mainly exists for properties that have been available before 7.8.3 and are contained within a file.
 
@@ -50,6 +56,8 @@ array:
         line3
       Default: true
       Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: true
       Related: 
       File:
   - data:
@@ -59,6 +67,8 @@ array:
         line2
       Default: true
       Version: 7.8.0
+      Reloadable: false
+      Configcascade_Aware: false
       Related: c.o.some.property
       File: somefile.properties
 

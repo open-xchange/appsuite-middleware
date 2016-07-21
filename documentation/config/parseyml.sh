@@ -22,7 +22,9 @@ parse_yaml() {
             printf("| Key | ")
         } else {
             if(multiline!="true"){
-                printf("| __%s__ | ", $1)
+                stringWithSpaces=$1;
+                gsub(/_/," ",stringWithSpaces)
+                printf("| __%s__ | ", stringWithSpaces)
             }
         }
         
