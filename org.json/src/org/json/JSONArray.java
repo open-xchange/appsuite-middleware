@@ -38,10 +38,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.helpers.UnsynchronizedStringReader;
 import org.json.helpers.UnsynchronizedStringWriter;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 
 /**
  * A JSONArray is an ordered sequence of values. Its external text form is a string wrapped in square brackets with commas separating the
@@ -74,7 +70,7 @@ import com.fasterxml.jackson.core.JsonToken;
  * @author JSON.org
  * @version 2
  */
-public class JSONArray extends AbstractJSONValue {
+public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
 
     private static final long serialVersionUID = -3408431864592339725L;
 
@@ -315,6 +311,7 @@ public class JSONArray extends AbstractJSONValue {
      *
      * @return The iterator
      */
+    @Override
     public Iterator<Object> iterator() {
         return myArrayList.iterator();
     }
