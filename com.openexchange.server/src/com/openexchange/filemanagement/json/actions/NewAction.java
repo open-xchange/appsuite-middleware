@@ -131,8 +131,9 @@ public final class NewAction implements AJAXActionService {
             return result;
         } finally {
             if (error) {
-                for (Object id : jArray) {
-                    removeSafe(id, management);
+                int length = jArray.length();
+                for (int i = 0; i < length; i++) {
+                    removeSafe(jArray.opt(i), management);
                 }
             }
         }
