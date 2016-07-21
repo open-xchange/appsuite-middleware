@@ -52,6 +52,8 @@ package com.openexchange.pns.transport.gcm.internal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
@@ -64,19 +66,20 @@ import com.google.android.gcm.Message;
 import com.google.android.gcm.MulticastResult;
 import com.google.android.gcm.Result;
 import com.google.android.gcm.Sender;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.ConcurrentPriorityQueue;
-import com.openexchange.java.Strings;
+import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.osgi.util.RankedService;
+import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.DefaultPushSubscription.Builder;
 import com.openexchange.pns.PushExceptionCodes;
+import com.openexchange.pns.PushMatch;
+import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushNotifications;
-import com.openexchange.pns.PushSubscription;
-import com.openexchange.pns.PushSubscriptionDescription;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.PushSubscriptionDescription.Builder;
+import com.openexchange.pns.transport.gcm.GcmOptions;
 import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
 
 
@@ -99,16 +102,18 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     // ---------------------------------------------------------------------------------------------------------------
 
     private final PushSubscriptionRegistry subscriptionRegistry;
-    private final ConcurrentPriorityQueue<RankedService<GcmOptionsProvider>> trackedProviders;
+    private final PushMessageGeneratorRegistry generatorRegistry;
+    private final SortableConcurrentList<RankedService<GcmOptionsProvider>> trackedProviders;
     private ServiceRegistration<PushNotificationTransport> registration; // non-volatile, protected by synchronized blocks
 
     /**
      * Initializes a new {@link ApnPushNotificationTransport}.
      */
-    public GcmPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, BundleContext context) {
+    public GcmPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, BundleContext context) {
         super(context, GcmOptionsProvider.class, null);
-        this.trackedProviders = new ConcurrentPriorityQueue<RankedService<GcmOptionsProvider>>();
+        this.trackedProviders = new SortableConcurrentList<RankedService<GcmOptionsProvider>>();
         this.subscriptionRegistry = subscriptionRegistry;
+        this.generatorRegistry = generatorRegistry;
     }
 
     // ---------------------------------------------------------------------------------------------------------
@@ -118,7 +123,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
         int ranking = RankedService.getRanking(reference);
         GcmOptionsProvider provider = context.getService(reference);
 
-        trackedProviders.offer(new RankedService<GcmOptionsProvider>(provider, ranking));
+        trackedProviders.addAndSort(new RankedService<GcmOptionsProvider>(provider, ranking));
 
         if (null == registration) {
             registration = context.registerService(PushNotificationTransport.class, this, null);
@@ -144,22 +149,29 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
         context.ungetService(reference);
     }
 
-    /**
-     * Gets the currently available {@code GcmOptionsProvider} instance having the highest rank.
-     *
-     * @return The highest-ranked {@code GcmOptionsProvider} instance or <code>null</code>
-     * @throws OXException If no such provider is currently available
-     */
-    private GcmOptionsProvider provider() throws OXException {
-        RankedService<GcmOptionsProvider> rankedService = trackedProviders.peek();
-        if (null == rankedService) {
-            // About to shut-down
-            throw PushExceptionCodes.NO_SUCH_TRANSPORT.create(ID);
+    // ---------------------------------------------------------------------------------------------------------
+
+    private GcmOptions getHighestRankedGcmOptionsFor(String client) throws OXException {
+        List<RankedService<GcmOptionsProvider>> list = trackedProviders.getSnapshot();
+        for (RankedService<GcmOptionsProvider> rankedService : list) {
+            GcmOptions options = rankedService.service.getOptions(client);
+            if (null != options) {
+                return options;
+            }
         }
-        return rankedService.service;
+        throw PushExceptionCodes.UNEXPECTED_ERROR.create("No options found for client: " + client);
     }
 
-    // ---------------------------------------------------------------------------------------------------------
+    @Override
+    public boolean servesClient(String client) throws OXException {
+        try {
+            return null != getHighestRankedGcmOptionsFor(client);
+        } catch (OXException x) {
+            return false;
+        } catch (RuntimeException e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
 
     @Override
     public String getId() {
@@ -167,33 +179,41 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     }
 
     @Override
-    public void transport(PushNotification notification, Collection<PushSubscription> subscriptions) throws OXException {
-        if (null != subscriptions) {
-            int size = subscriptions.size();
+    public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
+        if (null != notification && null != matches) {
+            Map<String, List<PushMatch>> clientMatches = categorize(matches);
+            for (Map.Entry<String, List<com.openexchange.pns.PushMatch>> entry : clientMatches.entrySet()) {
+                transport(entry.getKey(), notification, entry.getValue());
+            }
+        }
+    }
+
+    private void transport(String client, PushNotification notification, List<PushMatch> matches) throws OXException {
+        if (null != notification && null != matches) {
+            int size = matches.size();
             if (size <= 0) {
                 return;
             }
 
-            Sender sender = optSender();
+            Sender sender = optSender(client);
             if (null == sender) {
                 return;
             }
 
-            List<PushSubscription> list = asList(subscriptions);
             List<String> registrationIDs = new ArrayList<String>(size);
             for (int i = 0; i < size; i += MULTICAST_LIMIT) {
                 // Prepare chunk
                 int length = Math.min(size, i + MULTICAST_LIMIT) - i;
                 registrationIDs.clear();
                 for (int j = 0; j < length; j++) {
-                    registrationIDs.add(list.get(i + j).getToken());
+                    registrationIDs.add(matches.get(i + j).getToken());
                 }
 
                 // Send chunk
                 if (!registrationIDs.isEmpty()) {
                     MulticastResult result = null;
                     try {
-                        result = sender.sendNoRetry(getMessage(notification), registrationIDs);
+                        result = sender.sendNoRetry(getMessage(client, notification), registrationIDs);
                     } catch (IOException e) {
                         LOG.warn("error publishing mobile notification event", e);
                     }
@@ -209,29 +229,58 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
         }
     }
 
-    private List<PushSubscription> asList(Collection<PushSubscription> col) {
-        return col instanceof List ? (List<PushSubscription>) col : new ArrayList<>(col);
+    private Map<String, List<PushMatch>> categorize(Collection<PushMatch> matches) throws OXException {
+        Map<String, List<PushMatch>> clientMatches = new LinkedHashMap<>(matches.size());
+        for (PushMatch match : matches) {
+            String client = match.getClient();
+
+            // Check generator availability
+            {
+                PushMessageGenerator generator = generatorRegistry.getGenerator(client);
+                if (null == generator) {
+                    throw PushExceptionCodes.NO_SUCH_GENERATOR.create(client);
+                }
+            }
+
+            List<PushMatch> l = clientMatches.get(client);
+            if (null == l) {
+                l = new LinkedList<>();
+                clientMatches.put(client, l);
+            }
+
+            l.add(match);
+        }
+        return clientMatches;
     }
 
-    private Message getMessage(PushNotification notification) {
-        Message.Builder message = new Message.Builder();
-        if (Strings.isNotEmpty(notification.getCollapseKey())) {
-            message.collapseKey(notification.getCollapseKey());
-        }
-        Map<String, Object> messageData = notification.getMessageData();
-        for (Map.Entry<String, Object> entry : messageData.entrySet()) {
-            // Cast to string because Google only allows strings..
-            String value = String.valueOf(entry.getValue());
-            message.addData(entry.getKey(), value);
+    private Message getMessage(String client, PushNotification notification) throws OXException {
+        PushMessageGenerator generator = generatorRegistry.getGenerator(client);
+        if (null == generator) {
+            throw PushExceptionCodes.NO_SUCH_GENERATOR.create(client);
         }
 
+        com.openexchange.pns.Message message = generator.generateMessageFor(ID, notification);
+        Object object = message.getMessage();
+        if (object instanceof Message) {
+            return checkMessage((Message) object);
+        } else if (object instanceof Map) {
+            return checkMessage(toMessage((Map<String, Object>) object));
+        } else {
+            throw PushExceptionCodes.UNSUPPORTED_MESSAGE_CLASS.create(null == object ? "null" : object.getClass().getName());
+        }
+    }
+
+    private Message checkMessage(Message message) throws OXException {
         int currentLength = PushNotifications.getPayloadLength(message.toString());
         if (currentLength > MAX_PAYLOAD_SIZE) {
-            int bytesToCut = currentLength - MAX_PAYLOAD_SIZE;
-            PushNotifications.cutNotification(notification, bytesToCut);
+            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(MAX_PAYLOAD_SIZE, currentLength);
         }
+        return message;
+    }
 
-        return message.build();
+    private Message toMessage(Map<String, Object> message) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /*
@@ -308,13 +357,14 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     }
 
     /**
-     * (Optionally) Gets a GCM sender based on the configured API key.
+     * (Optionally) Gets a GCM sender based on the configured API key for given client.
      *
+     * @param client The client
      * @return The GCM sender or <code>null</code>
      */
-    private Sender optSender() {
+    private Sender optSender(String client) {
         try {
-            return getSender();
+            return getSender(client);
         } catch (Exception e) {
             LOG.error("Error getting GCM sender", e);
         }
@@ -324,27 +374,24 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     /**
      * Gets a GCM sender based on the configured API key.
      *
+     * @param client The client
      * @return The GCM sender
      * @throws OXException If GCM sender cannot be returned
      */
-    private Sender getSender() throws OXException {
-        String key = provider().getOptions().getKey();
-        if (Strings.isEmpty(key)) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openxchange.pns.transport.gcm.key");
-        }
-        return new Sender(key);
+    private Sender getSender(String client) throws OXException {
+        GcmOptions gcmOptions = getHighestRankedGcmOptionsFor(client);
+        return new Sender(gcmOptions.getKey());
     }
 
     private void updateRegistrationIDs(PushNotification notification, String oldRegistrationID, String newRegistrationID) {
         try {
             Builder builder = new Builder()
-                .affiliation(notification.getAffiliation())
                 .contextId(notification.getContextId())
                 .token(oldRegistrationID)
                 .transportId(ID)
                 .userId(notification.getUserId());
 
-            PushSubscriptionDescription subscriptionDesc = builder.build();
+            DefaultPushSubscription subscriptionDesc = builder.build();
 
             boolean success = subscriptionRegistry.updateToken(subscriptionDesc, newRegistrationID);
             if (success) {
@@ -359,13 +406,12 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     private boolean removeRegistrations(PushNotification notification, String registrationID) {
         try {
             Builder builder = new Builder()
-                .affiliation(notification.getAffiliation())
                 .contextId(notification.getContextId())
                 .token(registrationID)
                 .transportId(ID)
                 .userId(notification.getUserId());
 
-            PushSubscriptionDescription subscriptionDesc = builder.build();
+            DefaultPushSubscription subscriptionDesc = builder.build();
 
             boolean success = subscriptionRegistry.unregisterSubscription(subscriptionDesc);
             if (success) {

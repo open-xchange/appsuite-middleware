@@ -49,6 +49,8 @@
 
 package com.openexchange.pns.transport.apn;
 
+import java.util.Collection;
+
 /**
  * {@link ApnOptionsProvider} - Provides the options to communicate with the Apple Push Notification System.
  *
@@ -57,10 +59,17 @@ package com.openexchange.pns.transport.apn;
 public interface ApnOptionsProvider {
 
     /**
-     * Gets the APN options containing the push certificate.
+     * Gets the APN options containing the push certificate for specified client.
      *
-     * @return The APN options
+     * @return The APN options or <code>null</code>
      */
-    ApnOptions getOptions();
+    ApnOptions getOptions(String client);
+
+    /**
+     * Gets available options from this provider
+     *
+     * @return The available options
+     */
+    Collection<ApnOptionsPerClient> getAvailableOptions();
 
 }

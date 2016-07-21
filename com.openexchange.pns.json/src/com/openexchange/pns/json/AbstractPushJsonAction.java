@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -82,15 +83,31 @@ public abstract class AbstractPushJsonAction implements AJAXActionService {
     }
 
     /**
-     * Gets the specified field's value.
+     * Gets the specified field's string value.
      *
      * @param field The field name
      * @param jObject The JSON object to read from
-     * @return The value
+     * @return The string value
      * @throws OXException If no such field is available
      */
-    protected String requireField(String field, JSONObject jObject) throws OXException {
+    protected String requireStringField(String field, JSONObject jObject) throws OXException {
         String value = jObject.optString(field, null);
+        if (null == value) {
+            throw AjaxExceptionCodes.MISSING_FIELD.create(field);
+        }
+        return value;
+    }
+
+    /**
+     * Gets the specified field's array value.
+     *
+     * @param field The field name
+     * @param jObject The JSON object to read from
+     * @return The array value
+     * @throws OXException If no such field is available
+     */
+    protected JSONArray requireArrayField(String field, JSONObject jObject) throws OXException {
+        JSONArray value = jObject.optJSONArray(field);
         if (null == value) {
             throw AjaxExceptionCodes.MISSING_FIELD.create(field);
         }

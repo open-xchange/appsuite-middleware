@@ -64,10 +64,10 @@ public interface PushNotificationTransport {
      * Transports a notification to the service provider
      *
      * @param notification The notification to transport
-     * @param subscriptions The associated subscriptions
+     * @param matches The associated matches
      * @throws OXException If given notification cannot be transported
      */
-    void transport(PushNotification notification, Collection<PushSubscription> subscriptions) throws OXException;
+    void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException;
 
     /**
      * Gets this service's identifier.
@@ -75,5 +75,14 @@ public interface PushNotificationTransport {
      * @return The identifier
      */
     String getId();
+
+    /**
+     * Checks if this transport serves the client denoted by given identifier
+     *
+     * @param client The client identifier
+     * @return <code>true</code> if this transport serves the client; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean servesClient(String client) throws OXException;
 
 }

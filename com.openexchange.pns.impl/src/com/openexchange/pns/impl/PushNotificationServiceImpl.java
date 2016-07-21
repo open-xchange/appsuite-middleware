@@ -51,13 +51,12 @@ package com.openexchange.pns.impl;
 
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushAffiliation;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.TransportAssociatedSubscription;
-import com.openexchange.pns.TransportAssociatedSubscriptions;
+import com.openexchange.pns.Hit;
+import com.openexchange.pns.Hits;
 
 /**
  * {@link PushNotificationServiceImpl}
@@ -88,20 +87,21 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         // Query appropriate subscriptions
         int contextId = notification.getContextId();
         int userId = notification.getUserId();
-        PushAffiliation affiliation = notification.getAffiliation();
-        TransportAssociatedSubscriptions subscriptions = subscriptionRegistry.getSubscriptions(userId, contextId, affiliation);
-        if (null == subscriptions || subscriptions.isEmpty()) {
+        String topic = notification.getTopic();
+        Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
+        if (null == hits || hits.isEmpty()) {
             return;
         }
 
         // Transport each subscription using associated transport
-        for (TransportAssociatedSubscription transportSubscriptions : subscriptions) {
-            String transportId = transportSubscriptions.getTransportId();
-            PushNotificationTransport transport = transportRegistry.getTransportFor(transportId);
+        for (Hit hit : hits) {
+            String client = hit.getClient();
+            String transportId = hit.getTransportId();
+            PushNotificationTransport transport = transportRegistry.getTransportFor(client, transportId);
             if (null == transport) {
-                LOG.warn("No such transport for '{}' to publish notification from user {} in context {} for affiliation {}", transportId, userId, contextId, affiliation.getAffiliationName());
+                LOG.warn("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, userId, contextId, topic);
             } else {
-                transport.transport(notification, transportSubscriptions.getSubscriptions());
+                transport.transport(notification, hit.getMatches());
             }
         }
     }

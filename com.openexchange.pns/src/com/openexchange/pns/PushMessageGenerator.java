@@ -47,41 +47,33 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage;
+package com.openexchange.pns;
 
-import java.util.List;
-import com.openexchange.pns.PushSubscription;
-import com.openexchange.pns.TransportAssociatedSubscription;
-
+import com.openexchange.exception.OXException;
 
 /**
- * {@link RdbTransportAssociatedSubscription}
+ * {@link PushMessageGenerator} - Generates a message for a specific client.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RdbTransportAssociatedSubscription implements TransportAssociatedSubscription {
-
-    private final String transportId;
-    private final List<PushSubscription> subscriptions;
+public interface PushMessageGenerator {
 
     /**
-     * Initializes a new {@link RdbTransportAssociatedSubscription}.
+     * Gets the identifier of the client this generator is bound to.
+     *
+     * @return The client identifier
      */
-    public RdbTransportAssociatedSubscription(String transportId, List<PushSubscription> subscriptions) {
-        super();
-        this.transportId = transportId;
-        this.subscriptions = subscriptions;
-    }
+    String getClient();
 
-    @Override
-    public String getTransportId() {
-        return transportId;
-    }
-
-    @Override
-    public List<PushSubscription> getSubscriptions() {
-        return subscriptions;
-    }
+    /**
+     * Generates the message suitable for given transport.
+     *
+     * @param transportId The identifier of the transport, with which the message is supposed to be published
+     * @param notification The notification from which to create the message
+     * @return The message
+     * @throws OXException If generating the message fails
+     */
+    Message generateMessageFor(String transportId, PushNotification notification) throws OXException;
 
 }

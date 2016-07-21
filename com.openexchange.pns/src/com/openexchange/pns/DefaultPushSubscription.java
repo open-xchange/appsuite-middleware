@@ -49,39 +49,41 @@
 
 package com.openexchange.pns;
 
+import java.util.List;
+
 /**
- * {@link PushSubscriptionDescription}
+ * {@link DefaultPushSubscription} - The default implementation for {@code PushSubscription}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class PushSubscriptionDescription implements PushSubscription {
+public class DefaultPushSubscription implements PushSubscription {
 
     /**
-     * Gets the appropriate {@link PushSubscriptionDescription} instance from specified subscription
+     * Gets the appropriate {@link DefaultPushSubscription} instance from specified subscription.
      *
      * @param subscription The subscription
-     * @return The appropriate {@link PushSubscriptionDescription} instance
+     * @return The appropriate {@link DefaultPushSubscription} instance
      */
-    public static PushSubscriptionDescription instanceFor(PushSubscription subscription) {
+    public static DefaultPushSubscription instanceFor(PushMatch match) {
         Builder builder = new Builder()
-            .affiliation(subscription.getAffiliation())
-            .contextId(subscription.getContextId())
-            .token(subscription.getToken())
-            .transportId(subscription.getTransportId())
-            .userId(subscription.getUserId());
+            .contextId(match.getContextId())
+            .token(match.getToken())
+            .transportId(match.getTransportId())
+            .userId(match.getUserId());
 
         return builder.build();
     }
 
-    /** The builder for a <code>PushSubscriptionDescription</code> instance */
+    /** The builder for a <code>DefaultPushSubscription</code> instance */
     public static class Builder {
 
         int userId;
         int contextId;
-        PushAffiliation affiliation;
+        List<String> topics;
         String transportId;
         String token;
+        String client;
 
         /** Creates a new builder */
         public Builder() {
@@ -89,7 +91,17 @@ public class PushSubscriptionDescription implements PushSubscription {
         }
 
         /**
-         * Set the user identifier
+         * Sets the client identifier
+         * @param client The client identifier
+         * @return This builder
+         */
+        public Builder client(String client) {
+            this.client = client;
+            return this;
+        }
+
+        /**
+         * Sets the user identifier
          * @param userId The user identifier
          * @return This builder
          */
@@ -99,7 +111,7 @@ public class PushSubscriptionDescription implements PushSubscription {
         }
 
         /**
-         * Set the context identifier
+         * Sets the context identifier
          * @param contextId The context identifier
          * @return This builder
          */
@@ -109,17 +121,23 @@ public class PushSubscriptionDescription implements PushSubscription {
         }
 
         /**
-         * Set the affiliation
-         * @param affiliation The affiliation
+         * Sets the topics
+         * @param topics The topics
          * @return This builder
+         * @throws IllegalArgumentException If a topic name is invalid.
          */
-        public Builder affiliation(PushAffiliation affiliation) {
-            this.affiliation = affiliation;
+        public Builder topics(List<String> topics) {
+            if (null != topics) {
+                for (String topic : topics) {
+                    PushNotifications.validateTopicName(topic);
+                }
+            }
+            this.topics = topics;
             return this;
         }
 
         /**
-         * Set the transport identifier
+         * Sets the transport identifier
          * @param transportId The transport identifier
          * @return This builder
          */
@@ -129,7 +147,7 @@ public class PushSubscriptionDescription implements PushSubscription {
         }
 
         /**
-         * Set the token
+         * Sets the token
          * @param token The token
          * @return This builder
          */
@@ -142,8 +160,8 @@ public class PushSubscriptionDescription implements PushSubscription {
          * Builds the <code>PushSubscriptionDescription</code> instance.
          * @return The resulting <code>PushSubscriptionDescription</code> instance
          */
-        public PushSubscriptionDescription build() {
-            return new PushSubscriptionDescription(this);
+        public DefaultPushSubscription build() {
+            return new DefaultPushSubscription(this);
         }
     }
 
@@ -151,20 +169,22 @@ public class PushSubscriptionDescription implements PushSubscription {
 
     private final int userId;
     private final int contextId;
-    private final PushAffiliation affiliation;
+    private final String client;
+    private final List<String> topics;
     private final String transportId;
     private final String token;
 
     /**
-     * Initializes a new {@link PushSubscriptionDescription}.
+     * Initializes a new {@link DefaultPushSubscription}.
      */
-    private PushSubscriptionDescription(Builder builder) {
+    private DefaultPushSubscription(Builder builder) {
         super();
-        this.affiliation = builder.affiliation;
+        this.topics = builder.topics;
         this.contextId = builder.contextId;
         this.token = builder.token;
         this.transportId = builder.transportId;
         this.userId = builder.userId;
+        this.client = builder.client;
     }
 
     @Override
@@ -178,8 +198,8 @@ public class PushSubscriptionDescription implements PushSubscription {
     }
 
     @Override
-    public PushAffiliation getAffiliation() {
-        return affiliation;
+    public List<String> getTopics() {
+        return topics;
     }
 
     @Override
@@ -190,6 +210,11 @@ public class PushSubscriptionDescription implements PushSubscription {
     @Override
     public String getToken() {
         return token;
+    }
+
+    @Override
+    public String getClient() {
+        return client;
     }
 
 }

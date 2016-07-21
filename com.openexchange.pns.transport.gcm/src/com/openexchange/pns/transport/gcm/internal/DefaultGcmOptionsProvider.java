@@ -49,7 +49,11 @@
 
 package com.openexchange.pns.transport.gcm.internal;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import com.openexchange.pns.transport.gcm.GcmOptions;
+import com.openexchange.pns.transport.gcm.GcmOptionsPerClient;
 import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
 
 
@@ -61,19 +65,28 @@ import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
  */
 public class DefaultGcmOptionsProvider implements GcmOptionsProvider {
 
-    private final GcmOptions options;
+    private final Map<String, GcmOptions> options;
 
     /**
      * Initializes a new {@link DefaultGcmOptionsProvider}.
      */
-    public DefaultGcmOptionsProvider(GcmOptions options) {
+    public DefaultGcmOptionsProvider(Map<String, GcmOptions> options) {
         super();
         this.options = options;
     }
 
     @Override
-    public GcmOptions getOptions() {
-        return options;
+    public GcmOptions getOptions(String client) {
+        return options.get(client);
+    }
+
+    @Override
+    public Collection<GcmOptionsPerClient> getAvailableOptions() {
+        Collection<GcmOptionsPerClient> col = new ArrayList<>(options.size());
+        for (Map.Entry<String, GcmOptions> entry : options.entrySet()) {
+            col.add(new GcmOptionsPerClient(entry.getKey(), entry.getValue()));
+        }
+        return col;
     }
 
 }

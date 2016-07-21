@@ -92,15 +92,27 @@ public class PnsCreateTableTask extends UpdateTaskAdapter {
         Connection writeCon = dbService.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
         try {
-            if (tableExists(writeCon, "pns_subscriptions")) {
-                return;
+            if (!tableExists(writeCon, "pns_subscriptions")) {
+                stmt = writeCon.prepareStatement(CreatePnsSubscriptionTable.getTableSubscription());
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
             }
-            stmt = writeCon.prepareStatement(CreatePnsSubscriptionTable.CREATE_TABLE_STATEMENT);
-            stmt.executeUpdate();
+            if (!tableExists(writeCon, "pns_subscription_topic_wildcard")) {
+                stmt = writeCon.prepareStatement(CreatePnsSubscriptionTable.getTableTopicWildcard());
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+            }
+            if (!tableExists(writeCon, "pns_subscription_topic_exact")) {
+                stmt = writeCon.prepareStatement(CreatePnsSubscriptionTable.getTableTopicExact());
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+            }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(null, stmt);
             dbService.backForUpdateTask(contextId, writeCon);
         }
     }

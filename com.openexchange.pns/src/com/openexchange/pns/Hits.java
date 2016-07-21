@@ -47,27 +47,22 @@
  *
  */
 
-package com.openexchange.pns.impl;
+package com.openexchange.pns;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushNotificationTransport;
 
 /**
- * {@link PushNotificationTransportRegistry}
+ * {@link Hits}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotificationTransportRegistry {
+public interface Hits extends Iterable<Hit> {
 
     /**
-     * Gets the transport for specified arguments.
+     * Checks if this instance is empty.
      *
-     * @param client The client identifier
-     * @param transportId The transport identifier
-     * @return The transport or <code>null</code> if no suitable transport is available
-     * @throws OXException If transport look-up fails
+     * @return <code>true</code> if empty; otherwise <code>false</code>
      */
-    PushNotificationTransport getTransportFor(String client, String transportId) throws OXException;
+    boolean isEmpty();
 
 }

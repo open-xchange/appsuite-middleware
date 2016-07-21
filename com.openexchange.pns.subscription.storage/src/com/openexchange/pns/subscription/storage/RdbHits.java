@@ -47,27 +47,82 @@
  *
  */
 
-package com.openexchange.pns.impl;
+package com.openexchange.pns.subscription.storage;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushNotificationTransport;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import com.openexchange.pns.Hit;
+import com.openexchange.pns.Hits;
+import com.openexchange.pns.PushMatch;
+
 
 /**
- * {@link PushNotificationTransportRegistry}
+ * {@link RdbHits}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotificationTransportRegistry {
+public class RdbHits implements Hits {
+
+    /** The empty instance */
+    public static final RdbHits EMPTY = new RdbHits(Collections.<Map.Entry<ClientAndTransport, List<PushMatch>>> emptySet());
+
+    // ----------------------------------------------------------------------------------
+
+    private final Set<Map.Entry<ClientAndTransport, List<PushMatch>>> entrySet;
 
     /**
-     * Gets the transport for specified arguments.
-     *
-     * @param client The client identifier
-     * @param transportId The transport identifier
-     * @return The transport or <code>null</code> if no suitable transport is available
-     * @throws OXException If transport look-up fails
+     * Initializes a new {@link RdbHits}.
      */
-    PushNotificationTransport getTransportFor(String client, String transportId) throws OXException;
+    public RdbHits(Set<Map.Entry<ClientAndTransport, List<PushMatch>>> entrySet) {
+        super();
+        this.entrySet = entrySet;
+    }
+
+    @Override
+    public Iterator<Hit> iterator() {
+        return new RdbHitsIterator(entrySet.iterator());
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return entrySet.isEmpty();
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    private static final class RdbHitsIterator implements Iterator<Hit> {
+
+        private final Iterator<Entry<ClientAndTransport, List<PushMatch>>> iterator;
+
+        /**
+         * Initializes a new {@link RdbHitsIterator}.
+         */
+        RdbHitsIterator(Iterator<Map.Entry<ClientAndTransport, List<PushMatch>>> iterator) {
+            super();
+            this.iterator = iterator;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public Hit next() {
+            Map.Entry<ClientAndTransport, List<PushMatch>> entry = iterator.next();
+            ClientAndTransport cat = entry.getKey();
+            return new RdbHit(cat.client, cat.transportId, entry.getValue());
+        }
+
+        @Override
+        public void remove() {
+            iterator.remove();
+        }
+    }
 
 }

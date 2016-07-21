@@ -14,6 +14,7 @@ Import-Package:
  com.openexchange.groupware.delete,
  com.openexchange.groupware.update,
  com.openexchange.java,
+ com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.pns,
  com.openexchange.server,

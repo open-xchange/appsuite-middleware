@@ -49,7 +49,6 @@
 
 package com.openexchange.pns;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
@@ -61,27 +60,15 @@ import com.openexchange.exception.OXException;
 public interface PushSubscriptionRegistry {
 
     /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
+     * Gets all subscriptions interested in specified topic belonging to given user.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param affiliation The affiliation
-     * @param transportId The identifier of the transport that is supposed to be used
-     * @return All subscriptions for specified affiliation and transport
-     * @throws OXException If subscriptions cannot be returned
-     */
-    List<PushSubscription> getSubscriptions(int userId, int contextId, PushAffiliation affiliation, String transportId) throws OXException;
-
-    /**
-     * Gets all subscriptions for specified affiliation belonging to given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param affiliation The affiliation
+     * @param topic The topic
      * @return All subscriptions for specified affiliation mapped to the associated transport
-     * @throws OXException If subscriptions cannot be returned
+     * @throws OXException If interested subscriptions cannot be returned
      */
-    TransportAssociatedSubscriptions getSubscriptions(int userId, int contextId, PushAffiliation affiliation) throws OXException;
+    Hits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException;
 
     /**
      * Registers specified subscription.
@@ -89,7 +76,7 @@ public interface PushSubscriptionRegistry {
      * @param subscription The subscription to register
      * @throws OXException If registration fails
      */
-    void registerSubscription(PushSubscriptionDescription subscription) throws OXException;
+    void registerSubscription(PushSubscription subscription) throws OXException;
 
     /**
      * Unregisters specified subscription.
@@ -98,7 +85,7 @@ public interface PushSubscriptionRegistry {
      * @return <code>true</code> if such a subscription has been deleted; otherwise <code>false</code> if no such subscription existed
      * @throws OXException If unregistration fails
      */
-    boolean unregisterSubscription(PushSubscriptionDescription subscription) throws OXException;
+    boolean unregisterSubscription(PushSubscription subscription) throws OXException;
 
     /**
      * Unregisters all subscriptions associated with specified token and transport.
@@ -118,6 +105,6 @@ public interface PushSubscriptionRegistry {
     * @return <code>true</code> if such a subscription has been updated; otherwise <code>false</code> if no such subscription existed
     * @throws OXException If update fails
     */
-   boolean updateToken(PushSubscriptionDescription subscription, String newToken) throws OXException;
+   boolean updateToken(DefaultPushSubscription subscription, String newToken) throws OXException;
 
 }

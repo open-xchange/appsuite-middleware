@@ -52,12 +52,19 @@ package com.openexchange.pns;
 import java.util.List;
 
 /**
- * {@link TransportAssociatedSubscription}
+ * {@link Hit} - A hit is the associated of certain matches to a client and transport pair.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface TransportAssociatedSubscription {
+public interface Hit {
+
+    /**
+     * Gets the client identifier
+     *
+     * @return The client identifier
+     */
+    String getClient();
 
     /**
      * Gets the transport identifier
@@ -71,5 +78,5 @@ public interface TransportAssociatedSubscription {
      *
      * @return The subscriptions
      */
-    List<PushSubscription> getSubscriptions();
+    List<PushMatch> getMatches();
 }

@@ -50,6 +50,7 @@
 package com.openexchange.pns.impl.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
@@ -85,6 +86,10 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
     protected void startBundle() throws Exception {
         PushNotificationTransportTracker transportTracker = new PushNotificationTransportTracker(context);
         track(PushNotificationTransport.class, transportTracker);
+
+        PushMessageGeneratorTracker generatorTracker = new PushMessageGeneratorTracker(context);
+        track(PushMessageGenerator.class, generatorTracker);
+
         openTrackers();
 
         PushNotificationServiceImpl serviceImpl = new PushNotificationServiceImpl(getService(PushSubscriptionRegistry.class), transportTracker);

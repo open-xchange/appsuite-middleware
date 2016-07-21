@@ -67,11 +67,13 @@ public interface PushNotification {
     Map<String, Object> getMessageData();
 
     /**
-     * The affiliation
+     * Gets the topic of this notification
+     * <p>
+     * The topic is a slash-delimited string; e.g. <code>"com/open-xchange/mail/new"</code>
      *
-     * @return The source of the subscription
+     * @return The topic
      */
-    PushAffiliation getAffiliation();
+    String getTopic();
 
     /**
      * The context identifier

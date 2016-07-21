@@ -47,27 +47,48 @@
  *
  */
 
-package com.openexchange.pns.impl;
+package com.openexchange.pns.transport.gcm;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushNotificationTransport;
 
 /**
- * {@link PushNotificationTransportRegistry}
+ * {@link GcmOptionsPerClient} - A pair of client identifier and associated GCM options.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotificationTransportRegistry {
+public class GcmOptionsPerClient {
+
+    private final String client;
+    private final GcmOptions options;
 
     /**
-     * Gets the transport for specified arguments.
+     * Initializes a new {@link GcmOptionsPerClient}.
      *
-     * @param client The client identifier
-     * @param transportId The transport identifier
-     * @return The transport or <code>null</code> if no suitable transport is available
-     * @throws OXException If transport look-up fails
+     * @param client The client
+     * @param options The associated GCM options
      */
-    PushNotificationTransport getTransportFor(String client, String transportId) throws OXException;
+    public GcmOptionsPerClient(String client, GcmOptions options) {
+        super();
+        this.client = client;
+        this.options = options;
+    }
+
+    /**
+     * Gets the client
+     *
+     * @return The client
+     */
+    public String getClient() {
+        return client;
+    }
+
+    /**
+     * Gets the options
+     *
+     * @return The options
+     */
+    public GcmOptions getOptions() {
+        return options;
+    }
 
 }

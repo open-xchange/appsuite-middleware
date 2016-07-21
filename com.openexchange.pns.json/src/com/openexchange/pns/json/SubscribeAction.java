@@ -49,17 +49,19 @@
 
 package com.openexchange.pns.json;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushAffiliation;
-import com.openexchange.pns.PushSubscriptionDescription;
+import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.PushSubscriptionDescription.Builder;
+import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -84,22 +86,30 @@ public class SubscribeAction extends AbstractPushJsonAction {
 
         PushSubscriptionRegistry subscriptionRegistry = services.getOptionalService(PushSubscriptionRegistry.class);
 
-        String token = requireField("token", jRequestBody);
-        String transportId = requireField("transport", jRequestBody);
-        String sAffiliation = requireField("affiliation", jRequestBody);
+        String client = requireStringField("client", jRequestBody);
+        String token = requireStringField("token", jRequestBody);
+        String transportId = requireStringField("transport", jRequestBody);
+        JSONArray jTopics = requireArrayField("topics", jRequestBody);
 
-        PushAffiliation affiliation = PushAffiliation.affiliationFor(sAffiliation);
-        if (null == affiliation) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        List<String> topics = new ArrayList<>(jTopics.length());
+        for (Object topicObj : jTopics) {
+            String topic = topicObj.toString();
+            try {
+                PushNotifications.validateTopicName(topic);
+            } catch (IllegalArgumentException e) {
+                throw PushExceptionCodes.INVALID_TOPIC.create(e, topic);
+            }
+            topics.add(topic);
         }
 
-        Builder builder = new Builder()
-            .affiliation(affiliation)
+        DefaultPushSubscription.Builder builder = new DefaultPushSubscription.Builder()
+            .client(client)
+            .topics(topics)
             .contextId(session.getContextId())
             .token(token)
             .transportId(transportId)
             .userId(session.getUserId());
-        PushSubscriptionDescription subscriptionDesc = builder.build();
+        DefaultPushSubscription subscriptionDesc = builder.build();
 
         subscriptionRegistry.registerSubscription(subscriptionDesc);
 

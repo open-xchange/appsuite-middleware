@@ -130,80 +130,42 @@ public class PushNotifications {
     // -----------------------------------------------------------------------------------------------------------
 
     /**
-     * Cuts given notification by specified number of bytes.
+     * Validates the topic name.
      *
-     * @param notification The notification
-     * @param numBytesToCut The number of bytes to cut by
+     * @param topic The topic name to validate.
+     * @throws IllegalArgumentException If the topic name is invalid.
      */
-    public static void cutNotification(PushNotification notification, int numBytesToCut) {
-        switch (notification.getAffiliation()) {
-            case MAIL:
-                cutMailNotification(notification, numBytesToCut, 10, 35);
-                break;
-            default:
-                break;
+    public static void validateTopicName(String topic) {
+        int length = topic.length();
+        if (length == 0) {
+            throw new IllegalArgumentException("empty topic");
         }
-    }
-
-    /**
-     * Cuts specified mail push notification by the specified number of bytes
-     *
-     * @param notification The push notification with mail affiliation
-     * @param numBytesToCut The number of bytes to cut by
-     * @param senderMin The minimum length to preserve for sender
-     * @param subjectMin The minimum length to preserve for subject
-     * @throws IllegalArgumentException If affiliation is not mail
-     */
-    public static void cutMailNotification(PushNotification notification, int numBytesToCut, int senderMin, int subjectMin) {
-        if (null == notification || numBytesToCut <= 0) {
-            return;
-        }
-
-        if (PushAffiliation.MAIL != notification.getAffiliation()) {
-            throw new IllegalArgumentException("Invalid affilitation: " + notification.getAffiliation());
-        }
-
-        Map<String, Object> messageData = notification.getMessageData();
-        int toCut = numBytesToCut;
-
-        // First, cut from subject
-        {
-            String subject = (String) messageData.get(PushNotificationField.MAIL_SUBJECT.getId());
-            if (null != subject) {
-                int lengthSubject = subject.length();
-                int allowedShrinkSubject = lengthSubject - subjectMin;
-                if (allowedShrinkSubject > 0) {
-                    if (allowedShrinkSubject < toCut) {
-                        subject = subject.substring(0, (lengthSubject - allowedShrinkSubject));
-                        toCut -= allowedShrinkSubject;
-                    } else {
-                        subject = subject.substring(0, (lengthSubject - toCut));
-                        toCut = 0;
-                    }
+        for (int i = 0; i < length; i++) {
+            char ch = topic.charAt(i);
+            if (ch == '/') {
+                // Can't start or end with a '/' but anywhere else is okay
+                if (i == 0 || (i == length - 1)) {
+                    throw new IllegalArgumentException("invalid topic: " + topic);
                 }
-
-                messageData.put(PushNotificationField.MAIL_SUBJECT.getId(), subject);
-            }
-        }
-
-        // Then from sender
-        if (toCut > 0) {
-            String sender = (String) messageData.get(PushNotificationField.MAIL_SENDER.getId());
-            if (null != sender) {
-                int lengthFrom = sender.length();
-                int allowedShrinkFrom = lengthFrom - senderMin;
-                if (allowedShrinkFrom > 0) {
-                    if (allowedShrinkFrom < toCut) {
-                        sender = sender.substring(0, lengthFrom - allowedShrinkFrom);
-                        toCut -= allowedShrinkFrom;
-                    } else {
-                        sender = sender.substring(0, lengthFrom - toCut);
-                        toCut = 0;
-                    }
+                // Can't have "//" as that implies empty token
+                if (topic.charAt(i - 1) == '/') {
+                    throw new IllegalArgumentException("invalid topic: " + topic);
                 }
-
-                messageData.put(PushNotificationField.MAIL_SENDER.getId(), sender);
+                continue;
             }
+            if (('A' <= ch) && (ch <= 'Z')) {
+                continue;
+            }
+            if (('a' <= ch) && (ch <= 'z')) {
+                continue;
+            }
+            if (('0' <= ch) && (ch <= '9')) {
+                continue;
+            }
+            if ((ch == '_') || (ch == '-')) {
+                continue;
+            }
+            throw new IllegalArgumentException("invalid topic: " + topic);
         }
     }
 

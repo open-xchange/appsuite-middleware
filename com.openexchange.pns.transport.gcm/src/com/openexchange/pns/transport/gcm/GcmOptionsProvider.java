@@ -49,6 +49,8 @@
 
 package com.openexchange.pns.transport.gcm;
 
+import java.util.Collection;
+
 /**
  * {@link GcmOptionsProvider} - Provides the options to communicate with Google Cloud Messaging (GCM).
  *
@@ -58,9 +60,18 @@ package com.openexchange.pns.transport.gcm;
 public interface GcmOptionsProvider {
 
     /**
-     * Gets the options to communicate with Google Cloud Messaging (GCM).
+     * Gets the options to communicate with Google Cloud Messaging (GCM) for given client.
      *
+     * @param client The client identifier
      * @return The options
      */
-    GcmOptions getOptions();
+    GcmOptions getOptions(String client);
+
+    /**
+     * Gets available options from this provider
+     *
+     * @return The available options
+     */
+    Collection<GcmOptionsPerClient> getAvailableOptions();
+
 }

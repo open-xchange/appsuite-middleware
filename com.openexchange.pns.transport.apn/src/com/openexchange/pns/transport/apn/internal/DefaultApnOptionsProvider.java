@@ -49,7 +49,11 @@
 
 package com.openexchange.pns.transport.apn.internal;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import com.openexchange.pns.transport.apn.ApnOptions;
+import com.openexchange.pns.transport.apn.ApnOptionsPerClient;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
 
 
@@ -61,19 +65,28 @@ import com.openexchange.pns.transport.apn.ApnOptionsProvider;
  */
 public class DefaultApnOptionsProvider implements ApnOptionsProvider {
 
-    private final ApnOptions options;
+    private final Map<String, ApnOptions> options;
 
     /**
      * Initializes a new {@link DefaultApnOptionsProvider}.
      */
-    public DefaultApnOptionsProvider(ApnOptions options) {
+    public DefaultApnOptionsProvider(Map<String, ApnOptions> options) {
         super();
         this.options = options;
     }
 
     @Override
-    public ApnOptions getOptions() {
-        return options;
+    public ApnOptions getOptions(String client) {
+        return options.get(client);
+    }
+
+    @Override
+    public Collection<ApnOptionsPerClient> getAvailableOptions() {
+        Collection<ApnOptionsPerClient> col = new ArrayList<>(options.size());
+        for (Map.Entry<String, ApnOptions> entry : options.entrySet()) {
+            col.add(new ApnOptionsPerClient(entry.getKey(), entry.getValue()));
+        }
+        return col;
     }
 
 }

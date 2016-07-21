@@ -47,22 +47,68 @@
  *
  */
 
-package com.openexchange.pns;
-
+package com.openexchange.pns.subscription.storage;
 
 /**
- * {@link TransportAssociatedSubscriptions}
+ * {@link ClientAndTransport}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface TransportAssociatedSubscriptions extends Iterable<TransportAssociatedSubscription> {
+public final class ClientAndTransport {
+
+    /** The client identifier */
+    public final String client;
+
+    /** The transport identifier */
+    public final String transportId;
+
+    private final int hash;
 
     /**
-     * Checks if this instance is empty.
+     * Initializes a new {@link ClientAndTransport}.
      *
-     * @return <code>true</code> if empty; otherwise <code>false</code>
+     * @param client The client identifier
+     * @param transportId The transport identifier
      */
-    boolean isEmpty();
+    public ClientAndTransport(String client, String transportId) {
+        super();
+        this.client = client;
+        this.transportId = transportId;
+        int prime = 31;
+        int result = prime * 1 + ((client == null) ? 0 : client.hashCode());
+        result = prime * result + ((transportId == null) ? 0 : transportId.hashCode());
+        hash = result;
+    }
 
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ClientAndTransport)) {
+            return false;
+        }
+        ClientAndTransport other = (ClientAndTransport) obj;
+        if (client == null) {
+            if (other.client != null) {
+                return false;
+            }
+        } else if (!client.equals(other.client)) {
+            return false;
+        }
+        if (transportId == null) {
+            if (other.transportId != null) {
+                return false;
+            }
+        } else if (!transportId.equals(other.transportId)) {
+            return false;
+        }
+        return true;
+    }
 }

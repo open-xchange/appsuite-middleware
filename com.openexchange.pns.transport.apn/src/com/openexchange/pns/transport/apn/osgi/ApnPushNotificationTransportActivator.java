@@ -56,6 +56,7 @@ import java.security.KeyStore;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.Constants;
@@ -63,9 +64,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushExceptionCodes;
+import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.apn.ApnOptions;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
@@ -84,6 +88,8 @@ import com.openexchange.tools.strings.TimeSpanParser;
 public class ApnPushNotificationTransportActivator extends HousekeepingActivator implements Reloadable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ApnPushNotificationTransportActivator.class);
+
+    private static final String CONFIGFILE_APN_OPTIONS = "pns-apn-options.yml";
 
     private ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration;
     private ApnPushNotificationTransport apnTransport;
@@ -118,7 +124,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class };
     }
 
     @Override
@@ -159,25 +165,57 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
             return;
         }
 
-        // Register default options provider if configuration option is available
-        {
-            String resourceName = configService.getProperty("com.openexchange.pns.transport.apn.ios.keystore");
-            if (Strings.isNotEmpty(resourceName)) {
-                String password = configService.getProperty("com.openexchange.pns.transport.apn.ios.password");
-                boolean production = configService.getBoolProperty("com.openexchange.pns.transport.apn.ios.production", false);
-                ApnOptions options = createOptions(resourceName, password, production);
-                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
-                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
-                optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, new DefaultApnOptionsProvider(options), dictionary);
+        Object yaml = configService.getYaml(CONFIGFILE_APN_OPTIONS);
+        if (null != yaml && Map.class.isInstance(yaml)) {
+            Map<String, Object> map = (Map<String, Object>) yaml;
+            if (!map.isEmpty()) {
+                Map<String, ApnOptions> options = parseApnOptions(map);
+                if (null != options && !options.isEmpty()) {
+                    Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+                    dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
+                    optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, new DefaultApnOptionsProvider(options), dictionary);
+                }
             }
         }
 
-        apnTransport = new ApnPushNotificationTransport(getService(PushSubscriptionRegistry.class), context);
+        apnTransport = new ApnPushNotificationTransport(getService(PushSubscriptionRegistry.class), getService(PushMessageGeneratorRegistry.class), context);
         apnTransport.open();
         this.apnTransport = apnTransport;
 
         String feedbackQueryInterval = configService.getProperty("com.openexchange.pns.transport.apn.ios.feedbackQueryInterval", (String)null);
         setupFeedbackQueries(apnTransport, feedbackQueryInterval);
+    }
+
+    private Map<String, ApnOptions> parseApnOptions(Map<String, Object> yaml) throws Exception {
+        Map<String, ApnOptions> options = new LinkedHashMap<String, ApnOptions>(yaml.size());
+        for (Map.Entry<String, Object> entry : yaml.entrySet()) {
+            String client = entry.getKey();
+
+            // Check for duplicate
+            if (options.containsKey(client)) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Duplicate APN options specified for client: " + client);
+            }
+
+            // Check values map
+            if (false == Map.class.isInstance(entry.getValue())) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Invalid APN options configuration specified for client: " + client);
+            }
+
+            // Parse values map
+            Map<String, Object> values = (Map<String, Object>) entry.getValue();
+
+            // Keystore name
+            String keystoreName = (String) values.get("keystore");
+
+            // Proceed if enabled for associated client
+            if (Strings.isNotEmpty(keystoreName)) {
+                String password = (String) values.get("password");
+                Boolean production = (Boolean) values.get("production");
+                ApnOptions apnOptions = createOptions(keystoreName, password, production);
+                options.put(client, apnOptions);
+            }
+        }
+        return options;
     }
 
     private void setupFeedbackQueries(ApnPushNotificationTransport apnTransport, String feedbackQueryInterval) {

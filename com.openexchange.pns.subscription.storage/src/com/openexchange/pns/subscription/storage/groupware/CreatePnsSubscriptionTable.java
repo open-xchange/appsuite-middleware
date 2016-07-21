@@ -58,17 +58,68 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public final class CreatePnsSubscriptionTable extends AbstractCreateTableImpl {
 
-    public static final String CREATE_TABLE_STATEMENT =
-        "CREATE TABLE pns_subscriptions (" +
-        "cid INT4 UNSIGNED NOT NULL," +
-        "user INT4 UNSIGNED NOT NULL," +
-        "token VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
-        "affiliation VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
-        "transport VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
-        "last_modified BIGINT(64) NOT NULL," +
-        "PRIMARY KEY (cid, user, token)," +
-        "INDEX `affiliationIndex` (cid, user, affiliation)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    public static void main(String[] args) {
+        System.out.println(getTableSubscription());
+
+        System.out.println("--------------------");
+
+        System.out.println(getTableTopicWildcard());
+
+        System.out.println("--------------------");
+
+        System.out.println(getTableTopicExact());
+    }
+
+    /**
+     * Gets the <code>CREATE TABLE</code> statement for <code>pns_subscription</code> table.
+     *
+     * @return The <code>CREATE TABLE</code> statement
+     */
+    public static String getTableSubscription() {
+        return "CREATE TABLE pns_subscription (" +
+            "id BINARY(16) NOT NULL," +
+            "cid INT4 UNSIGNED NOT NULL," +
+            "user INT4 UNSIGNED NOT NULL," +
+            "token VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
+            "client VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
+            "transport VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
+            "last_modified BIGINT(64) NOT NULL," +
+            "all_flag TINYINT UNSIGNED NOT NULL default '0'," +
+            "PRIMARY KEY (cid, user, token)," +
+            "UNIQUE KEY `subscription_id` (`id`)" +
+            // "INDEX `affiliationIndex` (cid, user, affiliation)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    }
+
+    /**
+     * Gets the <code>CREATE TABLE</code> statement for <code>pns_subscription_topic_wildcard</code> table.
+     *
+     * @return The <code>CREATE TABLE</code> statement
+     */
+    public static String getTableTopicWildcard() {
+        return "CREATE TABLE pns_subscription_topic_wildcard (" +
+            "id BINARY(16) NOT NULL," +
+            "cid INT4 UNSIGNED NOT NULL," +
+            "topic VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
+            "PRIMARY KEY (id, topic)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    }
+
+    /**
+     * Gets the <code>CREATE TABLE</code> statement for <code>pns_subscription_topic_exact</code> table.
+     *
+     * @return The <code>CREATE TABLE</code> statement
+     */
+    public static String getTableTopicExact() {
+        return "CREATE TABLE pns_subscription_topic_exact (" +
+            "id BINARY(16) NOT NULL," +
+            "cid INT4 UNSIGNED NOT NULL," +
+            "topic VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
+            "PRIMARY KEY (id, topic)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
 
     public CreatePnsSubscriptionTable() {
         super();
@@ -76,23 +127,17 @@ public final class CreatePnsSubscriptionTable extends AbstractCreateTableImpl {
 
     @Override
     public String[] getCreateStatements() {
-        return createStatements;
+        return new String[] { getTableSubscription(), getTableTopicWildcard(), getTableTopicExact() };
     }
 
     @Override
     public String[] requiredTables() {
-        return requiredTables;
+        return new String[] { "user" };
     }
 
     @Override
     public String[] tablesToCreate() {
-        return createdTables;
+        return new String[] { "pns_subscription", "pns_subscription_topic_wildcard", "pns_subscription_topic_exact" };
     }
-
-    private static final String[] requiredTables = { "user" };
-
-    private static final String[] createdTables = { "pns_subscriptions" };
-
-    private static final String[] createStatements = { CREATE_TABLE_STATEMENT };
 
 }

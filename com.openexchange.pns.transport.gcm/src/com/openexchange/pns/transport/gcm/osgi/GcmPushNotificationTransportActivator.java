@@ -52,6 +52,7 @@ package com.openexchange.pns.transport.gcm.osgi;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -60,6 +61,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushExceptionCodes;
+import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.gcm.GcmOptions;
 import com.openexchange.pns.transport.gcm.GcmOptionsProvider;
@@ -76,6 +79,8 @@ import com.openexchange.pns.transport.gcm.internal.GcmPushNotificationTransport;
 public class GcmPushNotificationTransportActivator extends HousekeepingActivator implements Reloadable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GcmPushNotificationTransportActivator.class);
+
+    private static final String CONFIGFILE_GCM_OPTIONS = "pns-gcm-options.yml";
 
     private ServiceRegistration<GcmOptionsProvider> optionsProviderRegistration;
     private GcmPushNotificationTransport gcmTransport;
@@ -110,7 +115,7 @@ public class GcmPushNotificationTransportActivator extends HousekeepingActivator
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class };
     }
 
     @Override
@@ -151,20 +156,52 @@ public class GcmPushNotificationTransportActivator extends HousekeepingActivator
             return;
         }
 
-        // Register default options provider if configuration option is available
-        {
-            String configuredKey = configService.getProperty("com.openxchange.pns.transport.gcm.key");
-            if (Strings.isNotEmpty(configuredKey)) {
-                GcmOptions options = new GcmOptions(configuredKey);
-                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
-                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
-                optionsProviderRegistration = context.registerService(GcmOptionsProvider.class, new DefaultGcmOptionsProvider(options), dictionary);
+        Object yaml = configService.getYaml(CONFIGFILE_GCM_OPTIONS);
+        if (null != yaml && Map.class.isInstance(yaml)) {
+            Map<String, Object> map = (Map<String, Object>) yaml;
+            if (!map.isEmpty()) {
+                Map<String, GcmOptions> options = parseGcmOptions(map);
+                if (null != options && !options.isEmpty()) {
+                    Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+                    dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
+                    optionsProviderRegistration = context.registerService(GcmOptionsProvider.class, new DefaultGcmOptionsProvider(options), dictionary);
+                }
             }
         }
 
-        gcmTransport = new GcmPushNotificationTransport(getService(PushSubscriptionRegistry.class), context);
+        gcmTransport = new GcmPushNotificationTransport(getService(PushSubscriptionRegistry.class), getService(PushMessageGeneratorRegistry.class), context);
         gcmTransport.open();
         this.gcmTransport = gcmTransport;
+    }
+
+    private Map<String, GcmOptions> parseGcmOptions(Map<String, Object> yaml) throws Exception {
+        Map<String, GcmOptions> options = new LinkedHashMap<String, GcmOptions>(yaml.size());
+        for (Map.Entry<String, Object> entry : yaml.entrySet()) {
+            String client = entry.getKey();
+
+            // Check for duplicate
+            if (options.containsKey(client)) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Duplicate APN options specified for client: " + client);
+            }
+
+            // Check values map
+            if (false == Map.class.isInstance(entry.getValue())) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Invalid APN options configuration specified for client: " + client);
+            }
+
+            // Parse values map
+            Map<String, Object> values = (Map<String, Object>) entry.getValue();
+
+            // Key
+            String key = (String) values.get("key");
+
+            // Proceed if enabled for associated client
+            if (Strings.isNotEmpty(key)) {
+                GcmOptions gcmOptions = new GcmOptions(key);
+                options.put(client, gcmOptions);
+            }
+        }
+        return options;
     }
 
 }

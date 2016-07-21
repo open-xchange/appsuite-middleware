@@ -47,46 +47,21 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage;
-
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import com.openexchange.pns.TransportAssociatedSubscription;
-import com.openexchange.pns.TransportAssociatedSubscriptions;
+package com.openexchange.pns;
 
 
 /**
- * {@link RdbTransportAssociatedSubscriptions}
+ * {@link Message} - A message for a specific transport.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RdbTransportAssociatedSubscriptions implements TransportAssociatedSubscriptions {
-
-    /** The empty instance */
-    public static final RdbTransportAssociatedSubscriptions EMPTY = new RdbTransportAssociatedSubscriptions(Collections.<TransportAssociatedSubscription> emptyList());
-
-    // ----------------------------------------------------------------------------------
-
-    private final List<TransportAssociatedSubscription> list;
+public interface Message {
 
     /**
-     * Initializes a new {@link RdbTransportAssociatedSubscriptions}.
+     * Gets the message object
+     *
+     * @return The message object
      */
-    public RdbTransportAssociatedSubscriptions(List<TransportAssociatedSubscription> list) {
-        super();
-        this.list = list;
-    }
-
-    @Override
-    public Iterator<TransportAssociatedSubscription> iterator() {
-        return list.iterator();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return list.isEmpty();
-    }
-
+    Object getMessage();
 }

@@ -47,27 +47,25 @@
  *
  */
 
-package com.openexchange.pns.impl;
+package com.openexchange.pns;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushNotificationTransport;
 
 /**
- * {@link PushNotificationTransportRegistry}
+ * {@link PushMessageGeneratorRegistry} - A registry for message generators.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotificationTransportRegistry {
+public interface PushMessageGeneratorRegistry {
 
     /**
-     * Gets the transport for specified arguments.
+     * Gets the message generator for specified client.
      *
      * @param client The client identifier
-     * @param transportId The transport identifier
-     * @return The transport or <code>null</code> if no suitable transport is available
-     * @throws OXException If transport look-up fails
+     * @return The suitable message generator or <code>null</code> if none available
+     * @throws OXException If message generator cannot be returned
      */
-    PushNotificationTransport getTransportFor(String client, String transportId) throws OXException;
+    PushMessageGenerator getGenerator(String client) throws OXException;
 
 }

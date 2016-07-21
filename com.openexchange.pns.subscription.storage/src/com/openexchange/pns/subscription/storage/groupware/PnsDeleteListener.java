@@ -51,11 +51,16 @@ package com.openexchange.pns.subscription.storage.groupware;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.pns.PushExceptionCodes;
+import com.openexchange.pns.subscription.storage.RdbPushSubscriptionRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -76,35 +81,48 @@ public final class PnsDeleteListener implements DeleteListener {
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             int contextId = event.getContext().getContextId();
-            PreparedStatement stmt = null;
-            try {
-                final int userId = event.getId();
-                stmt = writeCon.prepareStatement("DELETE FROM pns_subscriptions WHERE cid = ? AND user = ?");
-                int pos = 1;
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, userId);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
-                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
+            int userId = event.getId();
+            List<byte[]> ids = getSubscriptionIds(userId, contextId, writeCon);
+            if (!ids.isEmpty()) {
+                for (byte[] id : ids) {
+                    RdbPushSubscriptionRegistry.deleteById(id, writeCon);
+                }
             }
         } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
             int contextId = event.getContext().getContextId();
-            PreparedStatement stmt = null;
-            try {
-                stmt = writeCon.prepareStatement("DELETE FROM pns_subscriptions WHERE cid = ?");
-                stmt.setInt(1, contextId);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
-                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
+            List<byte[]> ids = getSubscriptionIds(0, contextId, writeCon);
+            if (!ids.isEmpty()) {
+                for (byte[] id : ids) {
+                    RdbPushSubscriptionRegistry.deleteById(id, writeCon);
+                }
             }
+        }
+    }
+
+    private List<byte[]> getSubscriptionIds(int userId, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(userId > 0 ? "SELECT id FROM pns_subscriptions WHERE cid=? AND user = ?" : "SELECT id FROM pns_subscriptions WHERE cid=?");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            if (userId > 0) {
+                stmt.setInt(pos++, userId);
+            }
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptyList();
+            }
+
+            List<byte[]> ids = new LinkedList<>();
+            do {
+                ids.add(rs.getBytes(1));
+            } while (rs.next());
+            return ids;
+        } catch (SQLException e) {
+            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 

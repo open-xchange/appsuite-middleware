@@ -83,6 +83,22 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
      * No such transport: %1$s
      */
     NO_SUCH_TRANSPORT("No such transport: %1$s", null, Category.CATEGORY_ERROR, 5),
+    /**
+     * Invalid topic: %1$s
+     */
+    INVALID_TOPIC("Invalid topic: %1$s", PushExceptionMessages.INVALID_TOPIC_MSG, Category.CATEGORY_USER_INPUT, 6),
+    /**
+     * No such generator for client: %1$s
+     */
+    NO_SUCH_GENERATOR("No such generator for client: %1$s", null, Category.CATEGORY_ERROR, 7),
+    /**
+     * Unsupported message class: %1$s
+     */
+    UNSUPPORTED_MESSAGE_CLASS("Unsupported message class: %1$s", null, Category.CATEGORY_ERROR, 8),
+    /**
+     * The message is too big. Allowed is %1$s, but is %2$s.
+     */
+    MESSAGE_TOO_BIG("The message is too big. Allowed is %1$s, but is %2$s.", null, Category.CATEGORY_ERROR, 9),
 
     ;
 

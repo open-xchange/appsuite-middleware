@@ -59,6 +59,9 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class PushExceptionMessages implements LocalizableStrings {
 
+    // The topic(s) of interest is/are invalid
+    public static final String INVALID_TOPIC_MSG = "One or more specified topics are invalid.";
+
     /**
      * Prevent instantiation.
      */

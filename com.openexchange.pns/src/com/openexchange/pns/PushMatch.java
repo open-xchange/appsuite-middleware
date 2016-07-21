@@ -47,27 +47,56 @@
  *
  */
 
-package com.openexchange.pns.impl;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushNotificationTransport;
+package com.openexchange.pns;
 
 /**
- * {@link PushNotificationTransportRegistry}
+ * {@link PushMatch} - Represents a push subscription.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotificationTransportRegistry {
+public interface PushMatch {
 
     /**
-     * Gets the transport for specified arguments.
+     * Gets the user identifier
      *
-     * @param client The client identifier
-     * @param transportId The transport identifier
-     * @return The transport or <code>null</code> if no suitable transport is available
-     * @throws OXException If transport look-up fails
+     * @return The user identifier
      */
-    PushNotificationTransport getTransportFor(String client, String transportId) throws OXException;
+    int getUserId();
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    int getContextId();
+
+    /**
+     * Gets the identifier of the client associated with this subscription.
+     *
+     * @return The client identifier
+     */
+    String getClient();
+
+    /**
+     * Gets the topic of this match.
+     *
+     * @return The topic
+     */
+    String getTopic();
+
+    /**
+     * Gets the identifier of the associated push transport.
+     *
+     * @return The transport identifier
+     */
+    String getTransportId();
+
+    /**
+     * Gets the subscription's token
+     *
+     * @return The token
+     */
+    String getToken();
 
 }

@@ -47,27 +47,87 @@
  *
  */
 
-package com.openexchange.pns.impl;
+package com.openexchange.pns.subscription.storage;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushNotificationTransport;
+import java.util.Date;
+import com.openexchange.pns.PushMatch;
+
 
 /**
- * {@link PushNotificationTransportRegistry}
+ * {@link RdbPushMatch}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushNotificationTransportRegistry {
+public class RdbPushMatch implements PushMatch {
+
+    private final int contextId;
+    private final int userId;
+    private final String client;
+    private final String transportId;
+    private final String token;
+    private final String topic;
+    private final Date lastModified;
 
     /**
-     * Gets the transport for specified arguments.
+     * Initializes a new {@link RdbPushMatch}.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param client The client identifier
      * @param transportId The transport identifier
-     * @return The transport or <code>null</code> if no suitable transport is available
-     * @throws OXException If transport look-up fails
+     * @param token The token
+     * @param topic The matching topic
+     * @param lastModified The last-modified date
      */
-    PushNotificationTransport getTransportFor(String client, String transportId) throws OXException;
+    public RdbPushMatch(int userId, int contextId, String client, String transportId, String token, String topic, Date lastModified) {
+        super();
+        this.userId = userId;
+        this.contextId = contextId;
+        this.client = client;
+        this.transportId = transportId;
+        this.token = token;
+        this.topic = topic;
+        this.lastModified = lastModified;
+    }
+
+    /**
+     * Gets the last-modified date
+     *
+     * @return The last-modified date or <code>null</code>
+     */
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    @Override
+    public String getClient() {
+        return client;
+    }
+
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public String getTransportId() {
+        return transportId;
+    }
+
+    @Override
+    public String getToken() {
+        return token;
+    }
+
+    @Override
+    public String getTopic() {
+        return topic;
+    }
 
 }

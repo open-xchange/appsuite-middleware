@@ -49,6 +49,8 @@
 
 package com.openexchange.pns;
 
+import java.util.List;
+
 /**
  * {@link PushSubscription} - Represents a push subscription.
  *
@@ -72,11 +74,27 @@ public interface PushSubscription {
     int getContextId();
 
     /**
-     * Gets the push affiliation for this subscription.
+     * Gets the identifier of the client associated with this subscription.
      *
-     * @return The affiliation
+     * @return The client identifier
      */
-    PushAffiliation getAffiliation();
+    String getClient();
+
+    /**
+     * Gets the topics of interest.
+     * <p>
+     * The returned listing describes the topics in which this subscription
+     * is interested. For each topic an asterisk ('*') may be used as a trailing wild-card.
+     * More precisely, the string value of each topic must conform to the following grammar:
+     *
+     * <pre>
+     *  topic-description := '*' | topic ( '/*' )?
+     *  topic := token ( '/' token )*
+     * </pre>
+     *
+     * @return The topics
+     */
+    List<String> getTopics();
 
     /**
      * Gets the identifier of the associated push transport.

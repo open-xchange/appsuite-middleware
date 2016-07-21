@@ -56,55 +56,55 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.PushNotificationTransport;
-import com.openexchange.pns.impl.PushNotificationTransportRegistry;
+import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.PushMessageGeneratorRegistry;
 
 /**
- * {@link PushNotificationTransportTracker} - The tracker for transports.
+ * {@link PushMessageGeneratorTracker} - The tracker for transports.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public final class PushNotificationTransportTracker implements ServiceTrackerCustomizer<PushNotificationTransport, PushNotificationTransport>, PushNotificationTransportRegistry {
+public final class PushMessageGeneratorTracker implements ServiceTrackerCustomizer<PushMessageGenerator, PushMessageGenerator>, PushMessageGeneratorRegistry {
 
-    private final ConcurrentMap<String, PushNotificationTransport> transportMap;
+    private final ConcurrentMap<String, PushMessageGenerator> generators;
     private final BundleContext context;
 
     /**
-     * Initializes a new {@link PushNotificationTransportTracker}.
+     * Initializes a new {@link PushMessageGeneratorTracker}.
      */
-    public PushNotificationTransportTracker(BundleContext context) {
+    public PushMessageGeneratorTracker(BundleContext context) {
         super();
-        this.transportMap = new ConcurrentHashMap<>(4, 0.9F, 1);;
+        this.generators = new ConcurrentHashMap<>(4, 0.9F, 1);;
         this.context = context;
     }
 
     @Override
-    public PushNotificationTransport addingService(ServiceReference<PushNotificationTransport> reference) {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationTransportTracker.class);
+    public PushMessageGenerator addingService(ServiceReference<PushMessageGenerator> reference) {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PushMessageGeneratorTracker.class);
 
-        PushNotificationTransport transport = context.getService(reference);
-        if (null == transportMap.putIfAbsent(transport.getId(), transport)) {
-            logger.info("Successfully registered '{}' push notification transport", transport.getId());
-            return transport;
+        PushMessageGenerator generator = context.getService(reference);
+        if (null == generators.putIfAbsent(generator.getClient(), generator)) {
+            logger.info("Successfully registered push message generator for client '{}'", generator.getClient());
+            return generator;
         }
 
-        logger.error("Failed to register '{}' push notification transport for class {}. There is already such a transport.", transport.getId(), transport.getClass().getName());
+        logger.error("Failed to register push message generator for class {}. There is already such a generator for client '{}'.", generator.getClass().getName(), generator.getClient());
         context.ungetService(reference);
         return null;
     }
 
     @Override
-    public void modifiedService(ServiceReference<PushNotificationTransport> reference, PushNotificationTransport service) {
+    public void modifiedService(ServiceReference<PushMessageGenerator> reference, PushMessageGenerator generator) {
         // Nothing
     }
 
     @Override
-    public void removedService(ServiceReference<PushNotificationTransport> reference, PushNotificationTransport transport) {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationTransportTracker.class);
+    public void removedService(ServiceReference<PushMessageGenerator> reference, PushMessageGenerator generator) {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PushMessageGeneratorTracker.class);
 
-        if (null != transportMap.remove(transport.getId())) {
-            logger.info("Successfully unregistered '{}' push notification transport", transport.getId());
+        if (null != generators.remove(generator.getClient())) {
+            logger.info("Successfully unregistered push message generator for client '{}'", generator.getClient());
             return;
         }
 
@@ -112,11 +112,11 @@ public final class PushNotificationTransportTracker implements ServiceTrackerCus
     }
 
     @Override
-    public PushNotificationTransport getTransportFor(String client, String transportId) throws OXException {
-        if (null == client || null == transportId) {
+    public PushMessageGenerator getGenerator(String client) throws OXException {
+        if (null == client) {
             return null;
         }
-        PushNotificationTransport transport = transportMap.get(transportId);
-        return transport.servesClient(client) ? transport : null;
+        return generators.get(client);
     }
+
 }

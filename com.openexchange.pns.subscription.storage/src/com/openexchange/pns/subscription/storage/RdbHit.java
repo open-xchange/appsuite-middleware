@@ -49,77 +49,36 @@
 
 package com.openexchange.pns.subscription.storage;
 
-import java.util.Date;
-import com.openexchange.pns.PushAffiliation;
-import com.openexchange.pns.PushSubscription;
+import java.util.List;
+import com.openexchange.pns.Hit;
+import com.openexchange.pns.PushMatch;
 
 
 /**
- * {@link RdbPushSubscription}
+ * {@link RdbHit}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RdbPushSubscription implements PushSubscription {
+public class RdbHit implements Hit {
 
-    private final int contextId;
-    private final int userId;
+    private final String client;
     private final String transportId;
-    private final String token;
-    private final PushAffiliation affiliation;
-    private final Date lastModified;
+    private final List<PushMatch> matches;
 
     /**
-     * Initializes a new {@link RdbPushSubscription}.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param transportId The transport identifier
-     * @param token The token
-     * @param affiliationName The affiliation name
-     * @param lastModified The last-modified date
+     * Initializes a new {@link RdbHit}.
      */
-    public RdbPushSubscription(int userId, int contextId, String transportId, String token, String affiliationName, Date lastModified) {
-        this(userId, contextId, transportId, token, PushAffiliation.affiliationFor(affiliationName), lastModified);
-    }
-
-    /**
-     * Initializes a new {@link RdbPushSubscription}.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param transportId The transport identifier
-     * @param token The token
-     * @param affiliation The affiliation
-     * @param lastModified The last-modified date
-     */
-    public RdbPushSubscription(int userId, int contextId, String transportId, String token, PushAffiliation affiliation, Date lastModified) {
+    public RdbHit(String client, String transportId, List<PushMatch> matches) {
         super();
-        this.userId = userId;
-        this.contextId = contextId;
+        this.client = client;
         this.transportId = transportId;
-        this.token = token;
-        this.affiliation = affiliation;
-        this.lastModified = lastModified;
-    }
-
-    /**
-     * Gets the last-modified date
-     *
-     * @return The last-modified date or <code>null</code>
-     */
-    public Date getLastModified() {
-        return lastModified;
+        this.matches = matches;
     }
 
     @Override
-    public int getUserId() {
-        return userId;
-    }
-
-    @Override
-    public int getContextId() {
-        return contextId;
+    public String getClient() {
+        return client;
     }
 
     @Override
@@ -128,13 +87,8 @@ public class RdbPushSubscription implements PushSubscription {
     }
 
     @Override
-    public String getToken() {
-        return token;
-    }
-
-    @Override
-    public PushAffiliation getAffiliation() {
-        return affiliation;
+    public List<PushMatch> getMatches() {
+        return matches;
     }
 
 }
