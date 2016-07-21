@@ -3809,6 +3809,11 @@ msgstr ""
 msgid "Password was not changed."
 msgstr ""
 
+#. The topic(s) of interest is/are invalid
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pns/src/com/openexchange/pns/PushExceptionMessages.java:63
+msgid "One or more specified topics are invalid."
+msgstr ""
+
 #. *
 #. * User %1$s has no mail module access due to user configuration
 #.
