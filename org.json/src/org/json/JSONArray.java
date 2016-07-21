@@ -38,6 +38,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.helpers.UnsynchronizedStringReader;
 import org.json.helpers.UnsynchronizedStringWriter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+
 
 /**
  * A JSONArray is an ordered sequence of values. Its external text form is a string wrapped in square brackets with commas separating the
