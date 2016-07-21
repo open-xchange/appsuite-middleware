@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -119,10 +120,16 @@ public class Recurrence {
      */
     public static String getRecurrenceRule(String seriesPattern, TimeZone tz, Boolean fullTime) {
         SeriesPattern pattern = SeriesPattern.parse(seriesPattern, tz, fullTime);
-        return generateRRule(pattern);
+        return getRecurrenceRule(pattern);
     }
 
-    public static String generateRRule(SeriesPattern pattern) {
+    public static String getRecurrenceRule(SeriesPattern pattern) {
+        if (pattern.isFullTime() == null) {
+            throw new IllegalArgumentException("Fulltime value must be set.");
+        }
+        if (pattern.getTimeZone() == null) {
+            throw new IllegalArgumentException("TimeZone must be set.");
+        }
         try {
             switch (pattern.getType()) {
                 case 1:
@@ -144,7 +151,7 @@ public class Recurrence {
         return null;
     }
 
-    public static String generatePattern(String recur, Calendar startDate) {
+    public static SeriesPattern generatePattern(String recur, Calendar startDate) {
         RecurrenceRule rrule = null;
         try {
             rrule = new RecurrenceRule(recur);
@@ -205,7 +212,7 @@ public class Recurrence {
             cObj.setUntil(getUntil(rrule, startDate.getTimeZone()));
         }
 
-        return createDSString(cObj, rrule);
+        return generatePattern(cObj, rrule);
     }
 
     private static String daily(SeriesPattern pattern) {
@@ -446,136 +453,93 @@ public class Recurrence {
         return null;
     }
 
-    private static String createDSString(CalendarDataObject cdao, RecurrenceRule rrule) {
-        if (cdao.containsStartDate()) {
-            StringBuilder recStrBuilder = new StringBuilder(64);
-            int recurrenceType = cdao.getRecurrenceType();
-            int interval = cdao.getInterval(); // i
-            int weekdays = cdao.getDays();
-            int monthday = cdao.getDayInMonth();
-            int month = cdao.getMonth();
-            int occurrences = cdao.getOccurrence();
-            if (!cdao.containsUntil() && !cdao.containsOccurrence()) {
-                occurrences = -1;
+    private static SeriesPattern generatePattern(CalendarDataObject cdao, RecurrenceRule rrule) {
+        if (!cdao.containsStartDate()) {
+            return null;
+        }
+
+        int recurrenceType = cdao.getRecurrenceType();
+        int interval = cdao.getInterval(); // i
+        int weekdays = cdao.getDays();
+        int monthday = cdao.getDayInMonth();
+        int month = cdao.getMonth();
+        int occurrences = cdao.getOccurrence();
+        if (!cdao.containsUntil() && !cdao.containsOccurrence()) {
+            occurrences = -1;
+        }
+
+        SeriesPattern pattern = new SeriesPattern(recurrenceType, cdao.getTimezone(), cdao.getFullTime());
+        pattern.setInterval(interval);
+        pattern.setSeriesStart(cdao.getStartDate().getTime());
+
+        if (recurrenceType == CalendarObject.DAILY) {
+            pattern.setType(SeriesPattern.DAILY);
+        } else if (recurrenceType == CalendarObject.WEEKLY) {
+            pattern.setType(SeriesPattern.WEEKLY);
+            pattern.setDaysOfWeek(weekdays);
+        } else if (recurrenceType == CalendarObject.MONTHLY) {
+            if (monthday <= 0) {
+                // TODO:
             }
-            if (recurrenceType == CalendarObject.DAILY) {
-                dsf(recStrBuilder, 1);
-                dsf(recStrBuilder, 'i', interval);
-                dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
-                cdao.setRecurringStart(cdao.getStartDate().getTime());
-                if (occurrences > 0) {
-                    cdao.setUntil(calculateUntilForUnlimited(cdao, rrule));
-                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    dsf(recStrBuilder, 'o', occurrences);
-                } else if (cdao.containsUntil() && cdao.getUntil() != null) {
-                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                }
-            } else if (recurrenceType == CalendarObject.WEEKLY) {
-                dsf(recStrBuilder, 2);
-                dsf(recStrBuilder, 'i', interval);
-                dsf(recStrBuilder, 'a', weekdays);
-                dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
-                cdao.setRecurringStart(cdao.getStartDate().getTime());
-                if (occurrences > 0) {
-                    cdao.setUntil(calculateUntilForUnlimited(cdao, rrule));
-                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    dsf(recStrBuilder, 'o', occurrences);
-                } else if (cdao.containsUntil() && cdao.getUntil() != null) {
-                    dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                }
-            } else if (recurrenceType == CalendarObject.MONTHLY) {
-                if (monthday <= 0) {
+            if (weekdays <= 0) {
+                if (monthday > 31) {
                     // TODO:
                 }
-                if (weekdays <= 0) {
-                    if (monthday > 31) {
-                        // TODO:
-                    }
-                    dsf(recStrBuilder, 3);
-                    dsf(recStrBuilder, 'i', interval);
-                    recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
-                    dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
-                    cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (occurrences > 0) {
-                        cdao.setUntil(calculateUntilForUnlimited(cdao, rrule));
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                        dsf(recStrBuilder, 'o', occurrences);
-                    } else if (cdao.containsUntil() && cdao.getUntil() != null) {
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    }
-                } else {
-                    if (monthday > 5) {
-                        // TODO:
-                    }
-                    dsf(recStrBuilder, 5);
-                    dsf(recStrBuilder, 'i', interval);
-                    recStrBuilder.append('a').append(DELIMITER_PIPE).append(weekdays).append(DELIMITER_PIPE);
-                    recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
-                    dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
-                    cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (occurrences > 0) {
-                        cdao.setUntil(calculateUntilForUnlimited(cdao, rrule));
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                        dsf(recStrBuilder, 'o', occurrences);
-                    } else if (cdao.containsUntil() && cdao.getUntil() != null) {
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    }
-                }
-            } else if (recurrenceType == CalendarObject.YEARLY) {
-                if (weekdays <= 0) {
-                    if (monthday <= 0 || monthday > 31) {
-                        // TODO:
-                    }
-                    dsf(recStrBuilder, 4);
-                    dsf(recStrBuilder, 'i', interval);
-                    recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
-                    dsf(recStrBuilder, 'c', month);
-                    dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
-                    cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (occurrences > 0) {
-                        cdao.setUntil(calculateUntilForUnlimited(cdao, rrule));
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                        dsf(recStrBuilder, 'o', occurrences);
-                    } else if (cdao.containsUntil() && cdao.getUntil() != null) {
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    }
-                } else {
-                    if (monthday < 1 || monthday > 5) {
-                        // TODO:
-                    }
-                    dsf(recStrBuilder, 6);
-                    dsf(recStrBuilder, 'i', interval);
-                    recStrBuilder.append('a').append(DELIMITER_PIPE).append(weekdays).append(DELIMITER_PIPE);
-                    recStrBuilder.append('b').append(DELIMITER_PIPE).append(monthday).append(DELIMITER_PIPE);
-                    dsf(recStrBuilder, 'c', month);
-                    dsf(recStrBuilder, 's', cdao.getStartDate().getTime());
-                    cdao.setRecurringStart(cdao.getStartDate().getTime());
-                    if (occurrences > 0) {
-                        cdao.setUntil(calculateUntilForUnlimited(cdao, rrule));
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                        dsf(recStrBuilder, 'o', occurrences);
-                    } else if (cdao.containsUntil() && cdao.getUntil() != null) {
-                        dsf(recStrBuilder, 'e', cdao.getUntil().getTime());
-                    }
-                }
+                pattern.setType(SeriesPattern.MONTHLY_1);
+                pattern.setDayOfMonth(monthday);
             } else {
-                recStrBuilder = null;
+                if (monthday > 5) {
+                    // TODO:
+                }
+                pattern.setType(SeriesPattern.MONTHLY_2);
+                pattern.setDaysOfWeek(weekdays);
+                pattern.setDayOfMonth(monthday);
             }
-            return recStrBuilder == null ? null : recStrBuilder.toString();
+        } else if (recurrenceType == CalendarObject.YEARLY) {
+            if (weekdays <= 0) {
+                if (monthday <= 0 || monthday > 31) {
+                    // TODO:
+                }
+                pattern.setType(SeriesPattern.YEARLY_1);
+                pattern.setDayOfMonth(monthday);
+                pattern.setMonth(month);
+            } else {
+                if (monthday < 1 || monthday > 5) {
+                    // TODO:
+                }
+                pattern.setType(SeriesPattern.YEARLY_2);
+                pattern.setDaysOfWeek(weekdays);
+                pattern.setDayOfMonth(monthday);
+                pattern.setMonth(month);
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid value for recurrence type: " + recurrenceType);
         }
-        // TODO:
-        return null;
+
+        if (occurrences > 0) {
+            pattern.setSeriesEnd(calculateUntilForUnlimited(cdao, rrule).getTime());
+            pattern.setOccurrences(occurrences);
+        } else if (cdao.containsUntil() && cdao.getUntil() != null) {
+            pattern.setSeriesEnd(cdao.getUntil().getTime());
+        }
+        return pattern;
     }
 
     private static Date calculateUntilForUnlimited(CalendarDataObject cObj, RecurrenceRule rrule) {
-        DateTime start = new DateTime(cObj.getRecurringStart());
+        DateTime start = new DateTime(cObj.getStartDate().getTime());
         RecurrenceRuleIterator iterator = rrule.iterator(start);
         int count = 0;
         long millis = 0L;
         while (iterator.hasNext() && count++ <= 999) { // TODO: implicit limit
             millis = iterator.nextMillis();
         }
-        return new Date(millis);
+        Calendar until = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+        until.setTimeInMillis(millis);
+        until.set(Calendar.HOUR_OF_DAY, 0);
+        until.set(Calendar.MINUTE, 0);
+        until.set(Calendar.SECOND, 0);
+        until.set(Calendar.MILLISECOND, 0);
+        return until.getTime();
     }
 
     private static void dsf(StringBuilder sb, char c, int v) {

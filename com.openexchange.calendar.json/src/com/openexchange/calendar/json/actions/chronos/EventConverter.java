@@ -351,7 +351,7 @@ public class EventConverter {
         }
         //appointment.setRecurrencePosition(0);
         //appointment.setRecurrenceDatePosition(null);
-        SeriesPattern pattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartTimezone(), event.isAllDay());
+        SeriesPattern pattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimezone(), event.isAllDay());
         if (null != pattern) {
             appointment.setRecurrenceType(pattern.getType());
             if (null != pattern.getSeriesStart()) {

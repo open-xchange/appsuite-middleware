@@ -72,6 +72,13 @@ public class SeriesPattern {
     private TimeZone tz;
     private Boolean fullTime;
 
+    public static final Integer DAILY = 1;
+    public static final Integer WEEKLY = 2;
+    public static final Integer MONTHLY_1 = 3;
+    public static final Integer YEARLY_1 = 4;
+    public static final Integer MONTHLY_2 = 5;
+    public static final Integer YEARLY_2 = 6;
+
     /**
      * Parses a series pattern from its database representation.
      *

@@ -80,7 +80,7 @@ public class RecurrenceRule implements Field<Event> {
     public void set(Event source, PreparedStatement stmt, int index) throws SQLException, OXException {
         Calendar start = GregorianCalendar.getInstance(TimeZone.getTimeZone(source.getStartTimezone()));
         start.setTime(source.getStartDate());
-        stmt.setString(index, Recurrence.generatePattern(source.getRecurrenceRule(), start));
+        stmt.setString(index, Recurrence.generatePattern(source.getRecurrenceRule(), start).toString());
     }
 
 }
