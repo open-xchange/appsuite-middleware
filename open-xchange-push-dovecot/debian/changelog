@@ -1,3 +1,9 @@
+open-xchange-push-dovecot (7.6.2-16) stable; urgency=medium
+
+  * Build for patch 2016-08-01 (3464)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 21 Jul 2016 17:12:30 +0200
+
 open-xchange-push-dovecot (7.6.2-15) stable; urgency=medium
 
   * Build for patch 2016-07-04 (3358)
