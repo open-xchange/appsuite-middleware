@@ -51,6 +51,7 @@ package com.openexchange.caldav.resources;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -110,6 +111,8 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     protected final GroupwareCaldavFactory factory;
     protected final int folderID;
 
+    private Date minDateTime;
+    private Date maxDateTime;
     private Date lastModified;
 
     /**
@@ -153,12 +156,64 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         return CalDAVResource.EXTENSION_ICS;
     }
 
+    /**
+     * Gets the start time of the configured synchronization timeframe for CalDAV.
+     *
+     * @return The start of the configured synchronization interval
+     */
     public Date getIntervalStart() {
-        return factory.getState().getMinDateTime();
+        if (null == minDateTime) {
+            String value = null;
+            try {
+                value = factory.getConfigValue("com.openexchange.caldav.interval.start", "one_month");
+            } catch (OXException e) {
+                LOG.warn("falling back to 'one_month' as interval start", e);
+                value = "one_month";
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            if ("one_year".equals(value)) {
+                calendar.add(Calendar.YEAR, -1);
+                calendar.set(Calendar.DAY_OF_YEAR, 1);
+            } else if ("six_months".equals(value)) {
+                calendar.add(Calendar.MONTH, -6);
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+            } else {
+                calendar.add(Calendar.MONTH, -1);
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+            }
+            minDateTime = calendar.getTime();
+        }
+        return minDateTime;
     }
 
+    /**
+     * Gets the end time of the configured synchronization timeframe for CalDAV.
+     *
+     * @return The end of the configured synchronization interval
+     */
     public Date getIntervalEnd() {
-        return factory.getState().getMaxDateTime();
+        if (null == maxDateTime) {
+            String value = null;
+            try {
+                value = factory.getConfigValue("com.openexchange.caldav.interval.end", "one_year");
+            } catch (OXException e) {
+                LOG.warn("falling back to 'one_year' as interval end", e);
+                value = "one_year";
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.YEAR, "two_years".equals(value) ? 3 : 2);
+            calendar.set(Calendar.DAY_OF_YEAR, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            maxDateTime = calendar.getTime();
+        }
+        return maxDateTime;
     }
 
     @Override

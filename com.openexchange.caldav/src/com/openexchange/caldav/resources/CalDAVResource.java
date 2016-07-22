@@ -212,9 +212,9 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
 
     @Override
     public CalDAVResource<T> move(WebdavPath dest, boolean noroot, boolean overwrite) throws WebdavProtocolException {
-        WebdavResource destinationResource = factory.getState().resolveResource(dest);
+        WebdavResource destinationResource = factory.resolveResource(dest);
         DAVCollection destinationCollection = destinationResource.isCollection() ?
-            (DAVCollection)destinationResource : factory.getState().resolveCollection(dest.parent());
+            (DAVCollection) destinationResource : factory.resolveCollection(dest.parent());
         if (false == parent.getClass().isInstance(destinationCollection)) {
             throw protocolException(HttpServletResponse.SC_FORBIDDEN);
         }
@@ -225,7 +225,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
             throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
         }
         try {
-            this.move(targetCollection);
+            move(targetCollection);
         } catch (OXException e) {
             if (handle(e)) {
                 return move(dest, noroot, overwrite);

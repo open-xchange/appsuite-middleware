@@ -67,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -99,6 +100,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
     private final GroupwareCaldavFactory factory;
     private String trashFolderID;
     private List<UserizedFolder> subfolders;
+    private String treeID;
 
     /**
      * Initializes a new {@link CalDAVRootCollection}.
@@ -145,7 +147,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
                 }
             }
             LOG.debug("{}: child collection '{}' not found, creating placeholder collection", this.getUrl(), name);
-            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), CalendarContentType.getInstance(), factory.getState().getTreeID());
+            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), CalendarContentType.getInstance(), getTreeID());
         } catch (OXException e) {
             throw protocolException(e);
         }
@@ -236,7 +238,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
     private List<UserizedFolder> getVisibleFolders(Type type, ContentType contentType) throws OXException {
         List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
         FolderResponse<UserizedFolder[]> visibleFoldersResponse = getFolderService().getVisibleFolders(
-                factory.getState().getTreeID(), contentType, type, false, factory.getSession(), null);
+                getTreeID(), contentType, type, false, factory.getSession(), null);
         UserizedFolder[] response = visibleFoldersResponse.getResponse();
         for (UserizedFolder folder : response) {
             if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == isTrashFolder(folder)) {
@@ -273,7 +275,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
      * @throws OXException
      */
     private boolean isTrashFolder(UserizedFolder folder) throws OXException {
-        if (OUTLOOK_TREE_ID.equals(factory.getState().getTreeID()) && PrivateType.getInstance().equals(folder.getType()) &&
+        if (OUTLOOK_TREE_ID.equals(getTreeID()) && PrivateType.getInstance().equals(folder.getType()) &&
             ServerSessionAdapter.valueOf(factory.getSession()).getUserPermissionBits().hasOLOX20()) {
             String trashFolderId = this.getTrashFolderID();
             if (null != trashFolderId) {
@@ -294,6 +296,23 @@ public class CalDAVRootCollection extends DAVRootCollection {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets the used folder tree identifier.
+     *
+     * @return the folder tree ID
+     */
+    private String getTreeID() {
+        if (null == this.treeID) {
+            try {
+                treeID = factory.getConfigValue("com.openexchange.caldav.tree", FolderStorage.REAL_TREE_ID);
+            } catch (OXException e) {
+                LOG.warn("falling back to tree id ''{}''.", FolderStorage.REAL_TREE_ID, e);
+                treeID = FolderStorage.REAL_TREE_ID;
+            }
+        }
+        return treeID;
     }
 
 }

@@ -52,6 +52,7 @@ package com.openexchange.caldav.mixins;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -80,8 +81,9 @@ public class ScheduleDefaultTasksURL extends SingleXMLPropertyMixin {
     protected String getValue() {
         String value = null;
         try {
+            String treeID = factory.getConfigValue("com.openexchange.caldav.tree", FolderStorage.REAL_TREE_ID);
             UserizedFolder defaultFolder = factory.getFolderService().getDefaultFolder(
-                factory.getUser(), factory.getState().getTreeID(), TaskContentType.getInstance(), factory.getSession(), null);
+                factory.getUser(), treeID, TaskContentType.getInstance(), factory.getSession(), null);
             if (null != defaultFolder) {
                 value = defaultFolder.getID();
             }
