@@ -296,6 +296,7 @@ public class CalendarWriter extends CalendarReader {
         Consistency.setModifiedNow(event, session.getUser().getId());
         Consistency.setOrganizer(event, calendarUser, getProxyUser(folder));
         Consistency.setTimeZone(event, calendarUser);
+        Consistency.adjustAllDayDates(event);
         event.setUid(Strings.isEmpty(event.getUid()) ? UUID.randomUUID().toString() : event.getUid());
         event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? Integer.parseInt(folder.getID()) : 0);
         event.setAttendees(prepareAttendees(folder, event.getAttendees()));

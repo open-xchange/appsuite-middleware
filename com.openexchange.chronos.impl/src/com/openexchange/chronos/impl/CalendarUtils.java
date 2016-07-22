@@ -50,10 +50,14 @@
 package com.openexchange.chronos.impl;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarUser;
@@ -260,6 +264,23 @@ public class CalendarUtils {
         calendarUser.setCommonName(user.getDisplayName());
         calendarUser.setUri(getCalAddress(user));
         return calendarUser;
+    }
+
+    /**
+     * Truncates the time part of the supplied date, i.e. sets the fields {@link Calendar#HOUR_OF_DAY}, {@link Calendar#MINUTE},
+     * {@link Calendar#SECOND} and {@link Calendar#MILLISECOND} to <code>0</code>.
+     *
+     * @param date The date to truncate the time part for
+     * @return A new date instance based on the supplied date with the time fraction truncated
+     */
+    public static Date truncateTime(Date date) {
+        Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 
 }

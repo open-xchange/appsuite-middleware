@@ -50,8 +50,11 @@
 package com.openexchange.chronos.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarUserType;
@@ -126,6 +129,30 @@ public class Consistency {
             event.setStartTimezone(user.getTimeZone());
         } else {
             //TODO: validate timezone?
+        }
+    }
+
+    /**
+     * Adjusts the start- and end-date of the supplied event in case it is marked as "all-day". This includes the truncation of the
+     * time-part for the start- and end-date, as well as ensuring that the end-date is at least 1 day after the start date.
+     *
+     * @param event The event to adjust
+     */
+    public static void adjustAllDayDates(Event event) {
+        if (event.isAllDay()) {
+            if (event.containsStartDate() && null != event.getStartDate()) {
+                event.setStartDate(CalendarUtils.truncateTime(event.getStartDate()));
+            }
+            if (event.containsEndDate() && null != event.getEndDate()) {
+                Date endDate = CalendarUtils.truncateTime(event.getEndDate());
+                if (endDate.equals(event.getStartDate())) {
+                    Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    calendar.setTime(endDate);
+                    calendar.add(Calendar.DAY_OF_YEAR, 1);
+                    endDate = calendar.getTime();
+                }
+                event.setEndDate(endDate);
+            }
         }
     }
 
