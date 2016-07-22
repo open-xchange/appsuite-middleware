@@ -126,7 +126,7 @@ public class EventConverter {
             case CalendarObject.TITLE:
                 return EventField.SUMMARY;
             case Appointment.SHOWN_AS:
-                return EventField.STATUS;
+                return EventField.TRANSP;
             case Appointment.LOCATION:
                 return EventField.LOCATION;
             case CalendarObject.NOTE:
@@ -267,7 +267,7 @@ public class EventConverter {
             event.setAllDay(appointment.getFullTime());
         }
         if (appointment.containsShownAs()) {
-            event.setStatus(Appointment2Event.getEventStatus(appointment.getShownAs()));
+            event.setTransp(Appointment2Event.getTransparency(appointment.getShownAs()));
         }
         if (appointment.containsTimezone()) {
             event.setStartTimezone(appointment.getTimezone());
@@ -419,8 +419,8 @@ public class EventConverter {
         if (event.containsAllDay()) {
             appointment.setFullTime(event.isAllDay());
         }
-        if (event.containsStatus()) {
-            appointment.setShownAs(Event2Appointment.getShownAs(event.getStatus()));
+        if (event.containsTransp()) {
+            appointment.setShownAs(Event2Appointment.getShownAs(event.getTransp()));
         }
         if (event.containsStartTimezone()) {
             appointment.setTimezone(event.getStartTimezone());

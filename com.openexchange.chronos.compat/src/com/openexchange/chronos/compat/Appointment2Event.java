@@ -49,24 +49,14 @@
 
 package com.openexchange.chronos.compat;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.java.Autoboxing.l;
-import java.util.ArrayList;
 import java.util.List;
-import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.Weekday;
-import org.dmfs.rfc5545.recur.Freq;
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
-import org.dmfs.rfc5545.recur.RecurrenceRule;
-import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
-import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.java.Strings;
 
@@ -80,7 +70,7 @@ public class Appointment2Event {
 
     /**
      * Gets the event classification appropriate for the supplied "private flag" value.
-     * 
+     *
      * @param privateFlag The legacy "private flag"
      * @return The classification
      */
@@ -100,6 +90,21 @@ public class Appointment2Event {
                 return EventStatus.TENTATIVE;
             default:
                 return EventStatus.CONFIRMED;
+        }
+    }
+
+    /**
+     * Gets the time transparency appropriate for the supplied "shown as" value.
+     *
+     * @param confirm The legacy "shown as" constant
+     * @return The time transparency, defaulting to {@value TimeTransparency#OPAQUE} if not mappable
+     */
+    public static TimeTransparency getTransparency(int shownAs) {
+        switch (shownAs) {
+            case 4: // com.openexchange.groupware.container.Appointment.FREE
+                return TimeTransparency.TRANSPARENT;
+            default:
+                return TimeTransparency.OPAQUE;
         }
     }
 
@@ -146,7 +151,7 @@ public class Appointment2Event {
 
     /**
      * Gets an <code>mailto</code>-URI for the supplied e-mail address.
-     * 
+     *
      * @param emailAddress The e-mail address to get the URI for
      * @return The <code>mailto</code>-URI, or <code>null</code> if no address was passed
      */
@@ -159,7 +164,7 @@ public class Appointment2Event {
 
     /**
      * Gets the CSS3 color appropriate for the supplied color label.
-     * 
+     *
      * @param colorLabel The legacy color label constant
      * @return The color, or <code>null</code> if not mappable
      */
@@ -170,13 +175,13 @@ public class Appointment2Event {
             case 2:
                 return "darkblue"; // #6ca0df ~ #00008B
             case 3:
-                return "purple"; // #a889d6 ~ #800080 
+                return "purple"; // #a889d6 ~ #800080
             case 4:
-                return "pink"; // #e2b3e2 ~ #FFC0CB 
+                return "pink"; // #e2b3e2 ~ #FFC0CB
             case 5:
                 return "red"; // #e7a9ab ~ #FF0000
             case 6:
-                return "orange"; // #ffb870 ~ FFA500 
+                return "orange"; // #ffb870 ~ FFA500
             case 7:
                 return "yellow"; // #f2de88 ~ #FFFF00
             case 8:
@@ -192,7 +197,7 @@ public class Appointment2Event {
 
     /**
      * Gets a list of categories for the supplied comma-separated categories string.
-     * 
+     *
      * @param categories The legacy categories string
      * @return The categories list
      */
@@ -206,7 +211,7 @@ public class Appointment2Event {
 
     /**
      * Gets an alarm appropriate for the supplied reminder minutes.
-     * 
+     *
      * @param reminder The legacy reminder value
      * @return The alarm
      */
@@ -222,7 +227,7 @@ public class Appointment2Event {
 
     /**
      * Gets the recurrence rule for the supplied series pattern.
-     * 
+     *
      * @param pattern The legacy series pattern
      * @return The recurrence rule, or <code>null</code> if not mappable
      */

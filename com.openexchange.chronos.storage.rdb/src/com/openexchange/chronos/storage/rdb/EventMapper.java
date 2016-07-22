@@ -65,8 +65,8 @@ import java.util.Set;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.exception.OXException;
@@ -547,7 +547,37 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeAllDay();
             }
         });
-        // EventField.TRANSP
+        mappings.put(EventField.TRANSP, new IntegerMapping<Event>("intfield06", "Transparency") {
+
+            @Override
+            public void set(Event event, Integer value) {
+                event.setTransp(null == value ? null : Appointment2Event.getTransparency(i(value)));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsTransp();
+            }
+
+            @Override
+            public Integer get(Event event) {
+                TimeTransparency value = event.getTransp();
+                return null == value ? null : I(Event2Appointment.getShownAs(value));
+            }
+
+            @Override
+            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
+                // column is NOT NULL, so avoid setting SQL NULL here
+                Integer value = get(event);
+                statement.setInt(parameterIndex, null == value ? 0 : value.intValue());
+                return 1;
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeStatus();
+            }
+        });
         mappings.put(EventField.RECURRENCE_ID, new IntegerMapping<Event>("intfield02", "Recurrence id") {
 
             @Override
@@ -684,37 +714,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeDeleteExceptionDates();
             }
         });
-        mappings.put(EventField.STATUS, new IntegerMapping<Event>("intfield06", "Status") {
-
-            @Override
-            public void set(Event event, Integer value) {
-                event.setStatus(null == value ? null : Appointment2Event.getEventStatus(i(value)));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsStatus();
-            }
-
-            @Override
-            public Integer get(Event event) {
-                EventStatus value = event.getStatus();
-                return null == value ? null : Event2Appointment.getShownAs(value);
-            }
-
-            @Override
-            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
-                // column is NOT NULL, so avoid setting SQL NULL here
-                Integer value = get(event);
-                statement.setInt(parameterIndex, null == value ? 0 : value.intValue());
-                return 1;
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeStatus();
-            }
-        });
+        // EventField.STATUS
         mappings.put(EventField.ORGANIZER, new DefaultDbMultiMapping<Organizer, Event>(
             new String[] { "organizer", "organizerId" }, "Organizer") {
 

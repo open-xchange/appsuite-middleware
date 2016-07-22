@@ -63,6 +63,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.java.Strings;
@@ -100,6 +101,21 @@ public class Event2Appointment {
         switch (eventStatus) {
             case TENTATIVE:
                 return 3; // com.openexchange.groupware.container.Appointment.TEMPORARY
+            default:
+                return 1; // com.openexchange.groupware.container.Appointment.RESERVED
+        }
+    }
+
+    /**
+     * Gets the "shown as" value based on the supplied time transparency.
+     *
+     * @param transparency The time transparency
+     * @return The legacy "shown as" constant
+     */
+    public static int getShownAs(TimeTransparency transparency) {
+        switch (transparency) {
+            case TRANSPARENT:
+                return 4; // com.openexchange.groupware.container.Appointment.FREE
             default:
                 return 1; // com.openexchange.groupware.container.Appointment.RESERVED
         }
@@ -239,7 +255,7 @@ public class Event2Appointment {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(categories.get(0));
         for (int i = 1; i < categories.size(); i++) {
-            stringBuilder.append(", ").append(categories.get(0));
+            stringBuilder.append(',').append(categories.get(i));
         }
         return stringBuilder.toString();
     }
