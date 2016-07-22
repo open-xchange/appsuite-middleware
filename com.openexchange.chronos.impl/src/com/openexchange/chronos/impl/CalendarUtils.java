@@ -75,7 +75,8 @@ public class CalendarUtils {
     /** A collection of fields that are always included when querying events from the storage */
     private static final Collection<EventField> MANDATORY_FIELDS = Arrays.asList(
         EventField.ID, EventField.RECURRENCE_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.CLASSIFICATION,
-        EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE
+        EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE,
+        EventField.RECURRENCE_RULE
     );
 
     /**

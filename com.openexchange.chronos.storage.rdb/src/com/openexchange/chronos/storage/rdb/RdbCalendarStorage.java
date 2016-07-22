@@ -62,6 +62,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,8 +77,10 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.Period;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
@@ -820,43 +823,52 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     /**
-     * Adjusts certain properties of an event after loading it from the database.
+     * Adjusts certain properties of an event after loading it from the database. <p/>
+     * <b>Note:</b> This method requires that the properties {@link EventField#ALL_DAY}, {@link EventField#RECURRENCE_RULE},
+     * {@link EventField#START_TIMEZONE}, {@link EventField#START_DATE} and {@link EventField#END_DATE} were loaded.
      *
      * @param event The event to adjust
      * @return The (possibly adjusted) event reference
      */
     private static Event adjustAfterLoad(Event event) {
-        /*
-         * convert legacy series pattern into proper recurrence rule
-         */
-        if (event.containsRecurrenceRule()) {
-            TimeZone timeZone = event.containsStartTimezone() && null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : null;
-            Boolean allDay = event.containsAllDay() ? Boolean.valueOf(event.getAllDay()) : null;
-            String databasePattern = event.getRecurrenceRule();
-            SeriesPattern seriesPattern = SeriesPattern.parse(databasePattern, timeZone, allDay);
-            event.setRecurrenceRule(Appointment2Event.getRecurrenceRule(seriesPattern));
-        }
-        /*
-         * adjust start & endtimes for recurrence master
-         */
-        if ((event.containsStartDate() || event.containsEndDate()) && event.getId() == event.getRecurrenceId()) {
-            //TODO: richtig machen
-            Calendar calendar = Calendar.getInstance();
-            if (null != event.getStartTimezone()) {
-                calendar.setTimeZone(TimeZone.getTimeZone(event.getStartTimezone()));
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+            /*
+             * extract series pattern and "absolute duration" / "recurrence calculator" field
+             */
+            String value = event.getRecurrenceRule();
+            int idx = value.indexOf('~');
+            int absoluteDuration = Integer.parseInt(value.substring(0, idx));
+            String databasePattern = value.substring(idx + 1);
+            TimeZone timeZone = null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : null;
+            Boolean allDay = Boolean.valueOf(event.isAllDay());
+            /*
+             * convert legacy series pattern into proper recurrence rule
+             */
+            String recurrenceRule = Recurrence.getRecurrenceRule(databasePattern, timeZone, allDay);
+            event.setRecurrenceRule(recurrenceRule);
+            if (event.getId() == event.getRecurrenceId()) {
+                /*
+                 * expand recurrence master start- and enddate to cover recurrence
+                 */
+                //TODO: richtig machen
+                Calendar calendar = Calendar.getInstance();
+                if (null != event.getStartTimezone()) {
+                    calendar.setTimeZone(TimeZone.getTimeZone(event.getStartTimezone()));
+                }
+                calendar.setTime(event.getStartDate());
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int date = calendar.get(Calendar.DATE);
+                calendar.setTime(event.getEndDate());
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, month);
+                calendar.set(Calendar.DATE, date);
+                event.setEndDate(calendar.getTime());
             }
-            calendar.setTime(event.getStartDate());
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int date = calendar.get(Calendar.DATE);
-            calendar.setTime(event.getEndDate());
-            calendar.set(Calendar.YEAR, year);
-            calendar.set(Calendar.MONTH, month);
-            calendar.set(Calendar.DATE, date);
-            event.setEndDate(calendar.getTime());
         }
         return event;
     }
+
 
     /**
      * Adjusts certain properties of an event prior saving it in the database.
@@ -866,17 +878,22 @@ public class RdbCalendarStorage implements CalendarStorage {
      */
     private static Event adjustPriorSave(Event event) {
         /*
-         * convert recurrence rule into legacy series pattern
+         * convert recurrence rule extract series pattern and "absolute duration" / "recurrence calculator" field
          */
-        if (event.containsRecurrenceRule()) {
-            SeriesPattern seriesPattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimezone(), event.isAllDay());
-            event.setRecurrenceRule(null == seriesPattern ? null : seriesPattern.getDatabasePattern());
-        }
-        /*
-         * adjust start & endtimes for recurrence master
-         */
-        if (event.getId() == event.getRecurrenceId()) {
-            //TODO
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+            long absoluteDuration = new Period(event).getTotalDays();
+            TimeZone timeZone = event.containsStartTimezone() && null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : null;
+            Calendar calendar = null != timeZone ? GregorianCalendar.getInstance(timeZone) : GregorianCalendar.getInstance();
+            calendar.setTime(event.getStartDate());
+            SeriesPattern seriesPattern = Recurrence.generatePattern(event.getRecurrenceRule(), calendar);
+            String value = absoluteDuration + '~' + seriesPattern.getDatabasePattern();
+            event.setRecurrenceRule(value);
+            /*
+             * expand recurrence master start- and enddate to cover the whole series period
+             */
+            if (event.getId() == event.getRecurrenceId()) {
+
+            }
         }
         return event;
     }

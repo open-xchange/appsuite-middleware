@@ -570,16 +570,64 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeRecurrenceId();
             }
         });
-        mappings.put(EventField.RECURRENCE_RULE, new VarCharMapping<Event>("field06", "Recurrence rule") {
+        //        mappings.put(EventField.RECURRENCE_RULE, new VarCharMapping<Event>("field06", "Recurrence rule") {
+        //
+        //            @Override
+        //            public void set(Event event, String value) {
+        //                event.setRecurrenceRule(value);
+        //            }
+        //
+        //            @Override
+        //            public boolean isSet(Event event) {
+        //                return event.containsRecurrenceRule();
+        //            }
+        //
+        //            @Override
+        //            public String get(Event event) {
+        //                return event.getRecurrenceRule();
+        //            }
+        //
+        //            @Override
+        //            public void remove(Event event) {
+        //                event.removeRecurrenceRule();
+        //            }
+        //        });
+        mappings.put(EventField.RECURRENCE_RULE, new DefaultDbMultiMapping<String, Event>(new String[] { "field06", "intfield04" }, "Recurrence rule") {
 
             @Override
-            public void set(Event event, String value) {
-                event.setRecurrenceRule(value);
+            public String get(ResultSet resultSet, String[] columnLabels) throws SQLException {
+                String value = resultSet.getString(columnLabels[0]);
+                if (null == value) {
+                    return null;
+                }
+                int absoluteDuration = resultSet.getInt(columnLabels[1]);
+                return absoluteDuration + "~" + value;
+            }
+
+            @Override
+            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
+                String value = isSet(event) ? get(event) : null;
+                if (null == value) {
+                    statement.setNull(parameterIndex, Types.VARCHAR);
+                    statement.setNull(1 + parameterIndex, Types.INTEGER);
+                } else {
+                    int idx = value.indexOf('~');
+                    int absoluteDuration = Integer.parseInt(value.substring(0, idx));
+                    String pattern = value.substring(idx + 1);
+                    statement.setString(parameterIndex, pattern);
+                    statement.setInt(1 + parameterIndex, absoluteDuration);
+                }
+                return 2;
             }
 
             @Override
             public boolean isSet(Event event) {
                 return event.containsRecurrenceRule();
+            }
+
+            @Override
+            public void set(Event event, String value) throws OXException {
+                event.setRecurrenceRule(value);
             }
 
             @Override
