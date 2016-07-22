@@ -1,3 +1,9 @@
+open-xchange-push-mailnotify (7.6.2-58) stable; urgency=medium
+
+  * Build for patch 2016-08-01 (3463)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 22 Jul 2016 12:09:13 +0200
+
 open-xchange-push-mailnotify (7.6.2-57) stable; urgency=medium
 
   * Build for patch 2016-07-07 (3398)

@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 33
+%define        ox_release 34
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -79,6 +79,8 @@ fi
 %defattr(-,root,root)
 
 %changelog
+* Fri Jul 22 2016 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2016-08-01 (3463)
 * Thu Jun 30 2016 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2016-07-07 (3398)
 * Thu Jun 16 2016 Steffen Templin <steffen.templin@open-xchange.com>
