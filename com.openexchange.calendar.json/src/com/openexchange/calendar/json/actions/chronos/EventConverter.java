@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -515,6 +516,8 @@ public class EventConverter {
         if (appointment.containsOccurrence()) {
             pattern.setOccurrences(appointment.getOccurrence());
         }
+        pattern.setFullTime(Boolean.valueOf(appointment.getFullTime()));
+        pattern.setTz(null != appointment.getTimezone() ? TimeZone.getTimeZone(appointment.getTimezone()) : null);
         return pattern;
     }
 

@@ -886,7 +886,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             Calendar calendar = null != timeZone ? GregorianCalendar.getInstance(timeZone) : GregorianCalendar.getInstance();
             calendar.setTime(event.getStartDate());
             SeriesPattern seriesPattern = Recurrence.generatePattern(event.getRecurrenceRule(), calendar);
-            String value = absoluteDuration + '~' + seriesPattern.getDatabasePattern();
+            String value = absoluteDuration + "~" + seriesPattern.getDatabasePattern();
             event.setRecurrenceRule(value);
             /*
              * expand recurrence master start- and enddate to cover the whole series period
