@@ -24,7 +24,7 @@
         <div class="participant-list">
             <#list mail.participants as participant>
             <div class="participant">
-                <span class="person">${participant.displayName}</span>
+                <span class="person">${participant.displayName?html}</span>
                 <#if (participant.confirmStatus??)>
                     <#if (participant.confirmStatus == "ACCEPT" )>
                     <span class="status accepted">&#10003</span>
@@ -47,7 +47,7 @@
         <div class="participant-list">
             <#list mail.resources as participant>
             <div class="participant">
-                <span class="resource">${participant.displayName}</span>
+                <span class="resource">${participant.displayName?html}</span>
             </div>
             </#list>
         </div>
