@@ -201,11 +201,11 @@ public final class POP3MessageStorage extends MailMessageStorage implements ISim
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields, String searchTerm) throws OXException {
         if (!(pop3MessageStorage instanceof ISimplifiedThreadStructure)) {
             throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
         }
-        return ((ISimplifiedThreadStructure) pop3MessageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields);
+        return ((ISimplifiedThreadStructure) pop3MessageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields, searchTerm);
     }
 
     @Override

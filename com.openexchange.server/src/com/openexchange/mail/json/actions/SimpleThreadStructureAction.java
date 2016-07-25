@@ -68,13 +68,23 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.json.utils.ColumnCollection;
+import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.FlagTerm;
+import com.openexchange.mail.search.ORTerm;
+import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
@@ -321,17 +331,68 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     throw MailExceptionCode.INVALID_INT_VALUE.create(AJAXServlet.PARAMETER_ORDER);
                 }
             }
+
+            /*
+             * Prepare search term for mail categories
+             */
+//            String searchTerm = null;
+
+            String category_filter = req.getParameter("categoryid");
+
+            SearchTerm<?> searchTerm = null;
+            if (filterApplied || category_filter != null) {
+                mailInterface.openFor(folderId);
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
+
+                {
+
+                    // Check if mail categories are enabled
+                    MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
+                    if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
+
+                        if (category_filter.equals("general")) {
+                            // Special case with unkeyword
+                            String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
+                            if (categoryNames.length != 0) {
+                                searchTerm = new UserFlagTerm(categoryNames, false);
+                            }
+                        } else {
+                            // Normal case with keyword
+                            String flag = categoriesService.getFlagByCategory(req.getSession(), category_filter);
+                            if (flag == null) {
+                                throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
+                            }
+
+                            // test if category is a system category
+                            if (categoriesService.isSystemCategory(category_filter, req.getSession())) {
+                                // Add active user categories as unkeywords
+                                String[] unkeywords = categoriesService.getAllFlags(req.getSession(), true, true);
+                                if (unkeywords.length != 0) {
+                                    searchTerm = new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false));
+                                } else {
+                                    searchTerm = new UserFlagTerm(flag, true);
+                                }
+                            } else {
+                                searchTerm = new UserFlagTerm(flag, true);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // -------
+
             /*
              * Start response
              */
             long start = System.currentTimeMillis();
             int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             if (!filterApplied) {
-                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead);
+                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead, searchTerm.toString());
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
 
-            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, headers, null, lookAhead);
+            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, headers, null, lookAhead, searchTerm.toString());
             boolean cached = false;
             int more = -1;
             if (mails instanceof PropertizedList) {

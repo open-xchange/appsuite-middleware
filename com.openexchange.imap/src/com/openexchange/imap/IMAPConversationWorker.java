@@ -188,7 +188,7 @@ public final class IMAPConversationWorker {
      * @return The message conversations
      * @throws OXException If message conversations cannot be returned
      */
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, String[] headerNames) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, String[] headerNames, String searchTerm) throws OXException {
         IMAPFolder sentFolder = null;
         try {
             final String sentFullName = imapFolderStorage.getSentFolder();
@@ -225,7 +225,7 @@ public final class IMAPConversationWorker {
                 throw MailExceptionCode.ILLEGAL_ARGUMENT.create();
             }
             if (useImapThreaderIfSupported() && imapMessageStorage.getImapConfig().getImapCapabilities().hasThreadReferences()) {
-                return doImapThreadSort(fullName, indexRange, sortField, order, sentFullName, messageCount, lookAhead, mergeWithSent, mailFields, headerNames);
+                return doImapThreadSort(fullName, indexRange, sortField, order, sentFullName, messageCount, lookAhead, mergeWithSent, mailFields, headerNames, searchTerm);
             }
             // Use built-in algorithm
             return doReferenceOnlyThreadSort(fullName, indexRange, sortField, order, sentFullName, lookAhead, mergeWithSent, mailFields, headerNames);
@@ -316,7 +316,7 @@ public final class IMAPConversationWorker {
                 if (false == sentMessages.isEmpty()) {
                     // Filter messages already contained in conversations
                     {
-                        Set<String> allMessageIds = new HashSet<String>(conversations.size());
+                        Set<String> allMessageIds = new HashSet<>(conversations.size());
                         for (final Conversation conversation : conversations) {
                             conversation.addMessageIdsTo(allMessageIds);
                         }
@@ -324,7 +324,7 @@ public final class IMAPConversationWorker {
                         for (MailMessage sentMessage : sentMessages) {
                             if (false == allMessageIds.contains(sentMessage.getMessageId())) {
                                 if (null == tmp) {
-                                    tmp = new LinkedList<MailMessage>();
+                                    tmp = new LinkedList<>();
                                 }
                                 tmp.add(sentMessage);
                             }
@@ -355,7 +355,7 @@ public final class IMAPConversationWorker {
         // Comparator
         MailMessageComparator threadComparator = COMPARATOR_DESC;
         // Sort
-        final List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
+        final List<List<MailMessage>> list = new LinkedList<>();
         for (final Conversation conversation : conversations) {
             list.add(conversation.getMessages(threadComparator));
         }
@@ -511,8 +511,8 @@ public final class IMAPConversationWorker {
         try {
             if (mergeWithSent) {
                 FetchProfile fetchProfile = IMAPMessageStorage.checkFetchProfile(getFetchProfile(usedFields.toArray(), headerNames, null, null, true));
-                List<MailMessage> msgs = new LinkedList<MailMessage>();
-                List<MailMessage> sentmsgs = new LinkedList<MailMessage>();
+                List<MailMessage> msgs = new LinkedList<>();
+                List<MailMessage> sentmsgs = new LinkedList<>();
                 for (List<MailMessage> conversation : list) {
                     for (MailMessage m : conversation) {
                         if (sentFullName.equals(m.getFolder())) {
@@ -531,7 +531,7 @@ public final class IMAPConversationWorker {
                     new MailMessageFillerIMAPCommand(sentmsgs, isRev1, fetchProfile, imapServerInfo, imapFolder).doCommand();
                 }
             } else {
-                List<MailMessage> msgs = new LinkedList<MailMessage>();
+                List<MailMessage> msgs = new LinkedList<>();
                 for (List<MailMessage> conversation : list) {
                     msgs.addAll(conversation);
                 }
@@ -550,8 +550,8 @@ public final class IMAPConversationWorker {
         // Fill messages
         if (mergeWithSent) {
             FetchProfile fetchProfile = IMAPMessageStorage.checkFetchProfile(getFetchProfile(usedFields.toArray(), headerNames, null, null, true));
-            List<MailMessage> msgs = new LinkedList<MailMessage>();
-            List<MailMessage> sentmsgs = new LinkedList<MailMessage>();
+            List<MailMessage> msgs = new LinkedList<>();
+            List<MailMessage> sentmsgs = new LinkedList<>();
             for (List<MailMessage> conversation : list) {
                 for (MailMessage m : conversation) {
                     if (sentFullName.equals(m.getFolder())) {
@@ -571,9 +571,9 @@ public final class IMAPConversationWorker {
             }
         } else {
             if (body) {
-                List<List<MailMessage>> newlist = new LinkedList<List<MailMessage>>();
+                List<List<MailMessage>> newlist = new LinkedList<>();
                 for (List<MailMessage> conversation : list) {
-                    List<MailMessage> newconversation = new LinkedList<MailMessage>();
+                    List<MailMessage> newconversation = new LinkedList<>();
                     for (MailMessage mailMessage : conversation) {
                         newconversation.add(imapMessageStorage.getMessage(mailMessage.getFolder(), mailMessage.getMailId(), false));
                     }
@@ -581,7 +581,7 @@ public final class IMAPConversationWorker {
                 }
                 list = newlist;
             } else {
-                List<MailMessage> msgs = new LinkedList<MailMessage>();
+                List<MailMessage> msgs = new LinkedList<>();
                 for (List<MailMessage> conversation : list) {
                     msgs.addAll(conversation);
                 }
@@ -594,7 +594,7 @@ public final class IMAPConversationWorker {
         imapMessageStorage.setAccountInfo2(list);
     }
 
-    private List<List<MailMessage>> doImapThreadSort(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, String sentFullName, int messageCount, int lookAhead, boolean mergeWithSent, MailField[] mailFields, String[] headerNames) throws OXException, MessagingException {
+    private List<List<MailMessage>> doImapThreadSort(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, String sentFullName, int messageCount, int lookAhead, boolean mergeWithSent, MailField[] mailFields, String[] headerNames, String searchTerm) throws OXException, MessagingException {
         // Parse THREAD response to a list structure
 
         final MailFields usedFields = new MailFields(mailFields);
@@ -616,7 +616,7 @@ public final class IMAPConversationWorker {
             } else {
                 fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             }
-            List<Conversation> conversations = ThreadSorts.getConversationList(imapMessageStorage.getImapFolder(), getSortRange(lookAhead, messageCount, order), isRev1, fp, imapMessageStorage.getImapServerInfo());
+            List<Conversation> conversations = ThreadSorts.getConversationList(imapMessageStorage.getImapFolder(), getSortRange(lookAhead, messageCount, order), isRev1, fp, imapMessageStorage.getImapServerInfo(), searchTerm);
             // Merge with sent folder
             {
                 // Switch folder
@@ -634,7 +634,7 @@ public final class IMAPConversationWorker {
             }
             final MailMessageComparator threadComparator = COMPARATOR_DESC;
             // Sort
-            list = new LinkedList<List<MailMessage>>();
+            list = new LinkedList<>();
             for (final Conversation conversation : conversations) {
                 list.add(conversation.getMessages(threadComparator));
             }
@@ -663,8 +663,8 @@ public final class IMAPConversationWorker {
             // Fill selected chunk
             if (!list.isEmpty()) {
                 FetchProfile fetchProfile = IMAPMessageStorage.checkFetchProfile(getFetchProfile(usedFields.toArray(), headerNames, null, null, true));
-                List<MailMessage> msgs = new LinkedList<MailMessage>();
-                List<MailMessage> sentmsgs = new LinkedList<MailMessage>();
+                List<MailMessage> msgs = new LinkedList<>();
+                List<MailMessage> sentmsgs = new LinkedList<>();
                 for (List<MailMessage> conversation : list) {
                     for (MailMessage m : conversation) {
                         if (mergeWithSent && sentFullName.equals(m.getFolder())) {
@@ -682,7 +682,7 @@ public final class IMAPConversationWorker {
                 }
             }
         } else {
-            list = ThreadSorts.getConversations(imapMessageStorage.getImapFolder(), getSortRange(lookAhead, messageCount, order), isRev1, imapMessageStorage.getImapServerInfo(), null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            list = ThreadSorts.getConversations(imapMessageStorage.getImapFolder(), getSortRange(lookAhead, messageCount, order), isRev1, imapMessageStorage.getImapServerInfo(), searchTerm, null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             // Sort root elements
             {
                 final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
@@ -706,9 +706,9 @@ public final class IMAPConversationWorker {
             }
             // Fill selected chunk
             if (body) {
-                List<List<MailMessage>> newlist = new LinkedList<List<MailMessage>>();
+                List<List<MailMessage>> newlist = new LinkedList<>();
                 for (List<MailMessage> conversation : list) {
-                    List<MailMessage> newconversation = new LinkedList<MailMessage>();
+                    List<MailMessage> newconversation = new LinkedList<>();
                     for (MailMessage mailMessage : conversation) {
                         newconversation.add(imapMessageStorage.getMessage(mailMessage.getFolder(), mailMessage.getMailId(), false));
                     }
@@ -716,7 +716,7 @@ public final class IMAPConversationWorker {
                 }
                 list = newlist;
             } else {
-                List<MailMessage> msgs = new LinkedList<MailMessage>();
+                List<MailMessage> msgs = new LinkedList<>();
                 for (List<MailMessage> conversation : list) {
                     msgs.addAll(conversation);
                 }
@@ -848,7 +848,7 @@ public final class IMAPConversationWorker {
                 return imapMessageStorage.getAllMessages(fullName, indexRange, sortField, order, mailFields);
             }
             final List<MessageInfo> messageIds = ThreadSortUtil.fromThreadResponse(threadList);
-            final TIntObjectMap<MessageInfo> seqNum2MessageId = new TIntObjectHashMap<MessageInfo>(messageIds.size());
+            final TIntObjectMap<MessageInfo> seqNum2MessageId = new TIntObjectHashMap<>(messageIds.size());
             for (final MessageInfo messageId : messageIds) {
                 seqNum2MessageId.put(messageId.getMessageNumber(), messageId);
             }
@@ -868,7 +868,7 @@ public final class IMAPConversationWorker {
                 final Map<MessageInfo, MailMessage> mapping;
                 {
                     TLongObjectMap<MailMessage> messages = new SimpleFetchIMAPCommand(imapMessageStorage.getImapFolder(), imapMessageStorage.getImapConfig().getImapCapabilities().hasIMAP4rev1(), MessageInfo.toSeqNums(messageIds).toArray(), fetchProfile, imapMessageStorage.getImapServerInfo()).doCommand();
-                    mapping = new HashMap<MessageInfo, MailMessage>(messages.size());
+                    mapping = new HashMap<>(messages.size());
                     messages.forEachEntry(new TLongObjectProcedure<MailMessage>() {
 
                         @Override
@@ -886,7 +886,7 @@ public final class IMAPConversationWorker {
                 /*
                  * Output as flat list
                  */
-                final List<MailMessage> flatList = new LinkedList<MailMessage>();
+                final List<MailMessage> flatList = new LinkedList<>();
                 if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
                     for (final MailMessage mail : flatList) {
                         imapMessageStorage.setAccountInfo(mail);
@@ -949,7 +949,7 @@ public final class IMAPConversationWorker {
             /*
              * Output as flat list
              */
-            final List<MailMessage> flatList = new LinkedList<MailMessage>();
+            final List<MailMessage> flatList = new LinkedList<>();
             ThreadSortUtil.toFlatList(structuredList, flatList);
             return flatList.toArray(new MailMessage[flatList.size()]);
         } catch (final MessagingException e) {

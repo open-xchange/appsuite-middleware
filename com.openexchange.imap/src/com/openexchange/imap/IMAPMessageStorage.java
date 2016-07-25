@@ -906,7 +906,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (null == imapFolder || !imapFolder.checkOpen()) {
             openReadOnly(fullName);
         }
-        final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<MailMessage>(len);
+        final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<>(len);
         // final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false,
         // false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
         final MailMessageFetchIMAPCommand command;
@@ -1988,7 +1988,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 list = fetchMessages(seqnums, fetchProfile);
             } else {
                 MailMessage[] tmp = fetchMessages(seqnums, fetchProfile, hasIMAP4rev1);
-                list = new ArrayList<MailMessage>(tmp.length);
+                list = new ArrayList<>(tmp.length);
                 for (MailMessage mailMessage : tmp) {
                     if (null != mailMessage) {
                         list.add(mailMessage);
@@ -2014,7 +2014,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch);
             MailMessage[] mailMessages = fetchMessages(seqnums, fp, hasIMAP4rev1);
 
-            list = new ArrayList<MailMessage>(mailMessages.length);
+            list = new ArrayList<>(mailMessages.length);
             for (MailMessage mailMessage : mailMessages) {
                 if (null != mailMessage) {
                     list.add(mailMessage);
@@ -2067,7 +2067,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             // Chunk-wise
-            List<MailMessage> l = new LinkedList<MailMessage>();
+            List<MailMessage> l = new LinkedList<>();
             int length = uids.length;
             int chunkSize = 25;
 
@@ -2121,7 +2121,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             // Chunk-wise
-            List<MailMessage> l = new LinkedList<MailMessage>();
+            List<MailMessage> l = new LinkedList<>();
             int length = null == seqnums ? imapFolder.getMessageCount() : seqnums.length;
             int chunkSize = 25;
 
@@ -2206,7 +2206,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             // Chunk-wise
-            List<Message> l = new LinkedList<Message>();
+            List<Message> l = new LinkedList<>();
             int length = msgs.length;
             int chunkSize = 25;
 
@@ -2247,7 +2247,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         int unreadMessages = IMAPCommandsCollection.getUnread(imapFolder);
-        List<MailMessage> list = new ArrayList<MailMessage>(msgs.length);
+        List<MailMessage> list = new ArrayList<>(msgs.length);
         for (Message message : msgs) {
             if (message != null && !message.isExpunged()) {
                 MailMessage mailMessage = toMailMessage(getMailAccount(), imapFolder.getFullName(), message, unreadMessages);
@@ -2392,15 +2392,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(String fullName, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] mailFields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(String fullName, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] mailFields, String searchTerm) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
-        return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, null);
+        return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, null, searchTerm);
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(String fullName, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] mailFields, String[] headerNames) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(String fullName, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] mailFields, String[] headerNames, String searchTerm) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
-        return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, headerNames);
+        return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, headerNames, searchTerm);
     }
 
     @Override
@@ -4346,7 +4346,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (0 == length || (length % 2) != 0) {
             return null;
         }
-        Map<String, Object> map = new HashMap<String, Object>(length >> 1);
+        Map<String, Object> map = new HashMap<>(length >> 1);
         for (int i = 0; i < length; i+=2) {
             map.put(pairs[i], pairs[i+1]);
         }
@@ -4359,7 +4359,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         int length = elements.length;
-        List<E> list = new ArrayList<E>(length);
+        List<E> list = new ArrayList<>(length);
         for (int i = 0, k = length; k-- > 0; i++) {
             E elem = elements[i];
             if (null != elem) {

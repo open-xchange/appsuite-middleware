@@ -101,13 +101,19 @@ public final class ThreadSorts {
      * @return The thread-sort string.
      * @throws MessagingException If a messaging error occurs
      */
-    public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange, final boolean uid) throws MessagingException {
+    public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange, final boolean uid, final String searchTerm) throws MessagingException {
         final org.slf4j.Logger log = LOG;
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final String command = new StringBuilder(32).append(uid ? "UID THREAD" : "THREAD").append(" REFERENCES UTF-8 ").append(sortRange).toString();
+                StringBuilder commandBuilder = new StringBuilder(32).append(uid ? "UID THREAD" : "THREAD").append(" REFERENCES UTF-8 ");
+
+                if (searchTerm != null) {
+                    commandBuilder.append(searchTerm);
+                }
+                commandBuilder.append(sortRange);
+                final String command = commandBuilder.toString();
                 final Response[] r;
                 {
                     final long start = System.currentTimeMillis();
@@ -161,9 +167,9 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, IMAPServerInfo serverInfo, MailField... fields) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, IMAPServerInfo serverInfo, String searchTerm, MailField... fields) throws OXException, MessagingException {
         if (null == fields || fields.length == 0 || (fields.length == 1 && MailField.RECEIVED_DATE.equals(fields[0]))) {
-            return parseConversations(getThreadResponse(imapFolder, sortRange, true), imapFolder.getFullName());
+            return parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         }
 
         // Its fetch profile...
@@ -171,7 +177,7 @@ public final class ThreadSorts {
         for (MailField field : fields) {
             MimeStorageUtility.addFetchItem(fp, field);
         }
-        return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo);
+        return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo, searchTerm);
     }
 
     /**
@@ -188,16 +194,16 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, String searchTerm) throws OXException, MessagingException {
         if (null == fetchProfile) {
-            return parseConversations(getThreadResponse(imapFolder, sortRange, true), imapFolder.getFullName());
+            return parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         }
 
-        List<List<MailMessage>> conversations = parseConversations(getThreadResponse(imapFolder, sortRange, true), imapFolder.getFullName());
+        List<List<MailMessage>> conversations = parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
 
         {
             // Turn conversations to a flat list
-            List<MailMessage> msgs = new ArrayList<MailMessage>(conversations.size() << 2);
+            List<MailMessage> msgs = new ArrayList<>(conversations.size() << 2);
             for (List<MailMessage> conversation : conversations) {
                 for (MailMessage m : conversation) {
                     msgs.add(m);
@@ -224,11 +230,11 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo) throws OXException, MessagingException {
-        List<List<MailMessage>> conversations = parseConversations(getThreadResponse(imapFolder, sortRange, true), imapFolder.getFullName());
+    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, String searchTerm) throws OXException, MessagingException {
+        List<List<MailMessage>> conversations = parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         {
             // Turn conversations to a flat list
-            List<MailMessage> msgs = new ArrayList<MailMessage>(conversations.size() << 2);
+            List<MailMessage> msgs = new ArrayList<>(conversations.size() << 2);
             for (List<MailMessage> conversation : conversations) {
                 for (MailMessage m : conversation) {
                     msgs.add(m);
@@ -238,7 +244,7 @@ public final class ThreadSorts {
             new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, imapFolder).doCommand();
         }
 
-        List<Conversation> retval = new ArrayList<Conversation>(conversations.size());
+        List<Conversation> retval = new ArrayList<>(conversations.size());
         for (List<MailMessage> conversationMessages : conversations) {
             retval.add(new Conversation(conversationMessages));
         }
@@ -256,7 +262,7 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      */
     public static List<List<MailMessage>> parseConversations(String threadList, String fullName) throws OXException {
-        List<List<MailMessage>> conversations = new LinkedList<List<MailMessage>>();
+        List<List<MailMessage>> conversations = new LinkedList<>();
 
         int length = threadList.length();
         int off = threadList.indexOf('(');
@@ -313,7 +319,7 @@ public final class ThreadSorts {
         int off = 0;
 
         StringBuilder digits = new StringBuilder(8);
-        List<IDMailMessage> list = new LinkedList<IDMailMessage>();
+        List<IDMailMessage> list = new LinkedList<>();
 
         while (off < length) {
             char c = conversation.charAt(off++);
