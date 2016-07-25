@@ -138,6 +138,20 @@ public class SeriesPattern {
     /**
      * Initializes a new {@link SeriesPattern}.
      *
+     * @param seriesPattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
+     * @param timeZone The timezone of the event series
+     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
+     */
+    public SeriesPattern(String databasePattern, String timeZone, boolean allDay) {
+        super();
+        this.tz = TimeZone.getTimeZone(timeZone);
+        this.fullTime = Boolean.valueOf(allDay);
+        deserialize(databasePattern);
+    }
+
+    /**
+     * Initializes a new {@link SeriesPattern}.
+     *
      * @param type The recurrence type
      * @param timeZone The timezone of the event series
      * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise

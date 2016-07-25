@@ -69,6 +69,7 @@ import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.Period;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -110,6 +111,46 @@ public class Recurrence {
         Collections.sort(allDays); // nicer order in BYDAYS
         date = new SimpleDateFormat("yyyyMMdd");
         date.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    public Period getSeriesPeriod() {
+        return null;
+    }
+
+    /**
+     * Calculates the actual start- and end-date of the "master" recurrence for a specific series pattern, i.e. the start- and end-date of
+     * a serie's first occurrence.
+     *
+     * @param pattern The series pattern
+     * @param absoluteDuration The absolute duration of one occurrence in days (the legacy "recurrence calculator" value)
+     * @return The actual start- and end-date of the recurrence master, wrapped into a {@link Period} structure
+     */
+    public static Period getRecurrenceMasterPeriod(SeriesPattern pattern, int absoluteDuration) {
+        // TODO: garantiert falsch.
+        Calendar startCalendar = pattern.getSeriesStartCalendar();
+        int year = startCalendar.get(Calendar.YEAR);
+        int month = startCalendar.get(Calendar.MONTH);
+        int date = startCalendar.get(Calendar.DATE);
+        Date startDate = startCalendar.getTime();
+        Calendar endCalendar = pattern.getSeriesEndCalendar();
+        endCalendar.set(year, month, date);
+        endCalendar.add(Calendar.DAY_OF_YEAR, absoluteDuration);
+        Date endDate = endCalendar.getTime();
+        return new Period(startDate, endDate, pattern.isFullTime().booleanValue());
+    }
+
+    /**
+     * Calculates the implicit start- and end-date of a recurring event series, i.e. the period spanning from the first until the "last"
+     * occurrence.
+     *
+     * @param pattern The series pattern
+     * @return The implicit period of a recurring event series
+     */
+    public static Period getImplicitSeriesPeriod(SeriesPattern pattern) {
+        // TODO: garantiert auch falsch.
+        Date startDate = pattern.getSeriesStartCalendar().getTime();
+        Date endDate = pattern.getSeriesEndCalendar().getTime();
+        return new Period(startDate, endDate, pattern.isFullTime().booleanValue());
     }
 
     /**
@@ -187,7 +228,7 @@ public class Recurrence {
                 cObj.setRecurrenceType(CalendarObject.YEARLY);
                 List<Integer> monthList = rrule.getByPart(Part.BYMONTH);
                 if (!monthList.isEmpty()) {
-                    cObj.setMonth(((Integer) monthList.get(0)).intValue() - 1);
+                    cObj.setMonth(monthList.get(0).intValue() - 1);
                     setMonthDay(cObj, rrule, startDate);
                 } else {
                     cObj.setMonth(startDate.get(Calendar.MONTH));
@@ -370,7 +411,7 @@ public class Recurrence {
         if (monthDayList.isEmpty()) {
             List<Integer> weekNoList = rrule.getByPart(Part.BYWEEKNO);
             if (!weekNoList.isEmpty()) {
-                int week = ((Integer) weekNoList.get(0)).intValue();
+                int week = weekNoList.get(0).intValue();
                 if (week == -1) {
                     week = 5;
                 }
@@ -384,13 +425,13 @@ public class Recurrence {
                 cObj.setDayInMonth(startDate.get(Calendar.DAY_OF_MONTH));
             }
         } else {
-            cObj.setDayInMonth(((Integer) monthDayList.get(0)).intValue());
+            cObj.setDayInMonth(monthDayList.get(0).intValue());
         }
     }
 
     private static void setDayInMonthFromSetPos(CalendarObject obj, RecurrenceRule rrule) {
         if (!rrule.getByPart(Part.BYSETPOS).isEmpty()) {
-            int firstPos = (Integer) rrule.getByPart(Part.BYSETPOS).get(0);
+            int firstPos = rrule.getByPart(Part.BYSETPOS).get(0);
             if (firstPos == -1) {
                 firstPos = 5;
             }

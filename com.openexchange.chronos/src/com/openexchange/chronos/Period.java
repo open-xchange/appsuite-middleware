@@ -53,11 +53,10 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link Event2}
+ * {@link Period}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
- * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.6.1">RFC 5545, section 3.6.1</a>
  */
 public class Period {
 

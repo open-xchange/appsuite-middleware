@@ -207,6 +207,9 @@ public class RdbCalendarStorage implements CalendarStorage {
             txPolicy.setAutoCommit(connection, false);
             int objectID = IDGenerator.getId(context, Types.APPOINTMENT, connection);
             event.setId(objectID);
+            if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+                event.setRecurrenceId(objectID);
+            }
             updated = insertEvent(connection, context.getContextId(), event);
             if (event.containsAttendees() && null != event.getAttendees()) {
                 updated += insertAttendees(connection, context.getContextId(), objectID, event.getAttendees());
@@ -839,31 +842,21 @@ public class RdbCalendarStorage implements CalendarStorage {
             int idx = value.indexOf('~');
             int absoluteDuration = Integer.parseInt(value.substring(0, idx));
             String databasePattern = value.substring(idx + 1);
-            TimeZone timeZone = null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : null;
-            Boolean allDay = Boolean.valueOf(event.isAllDay());
+            String timeZone = null != event.getStartTimezone() ? event.getStartTimezone() : "UTC";
+            boolean allDay = event.isAllDay();
             /*
              * convert legacy series pattern into proper recurrence rule
              */
-            String recurrenceRule = Recurrence.getRecurrenceRule(databasePattern, timeZone, allDay);
+            SeriesPattern seriesPattern = new SeriesPattern(databasePattern, timeZone, allDay);
+            String recurrenceRule = Recurrence.getRecurrenceRule(seriesPattern);
             event.setRecurrenceRule(recurrenceRule);
+            /*
+             * adjust the recurrence master's actual start- and enddate
+             */
             if (event.getId() == event.getRecurrenceId()) {
-                /*
-                 * expand recurrence master start- and enddate to cover recurrence
-                 */
-                //TODO: richtig machen
-                Calendar calendar = Calendar.getInstance();
-                if (null != event.getStartTimezone()) {
-                    calendar.setTimeZone(TimeZone.getTimeZone(event.getStartTimezone()));
-                }
-                calendar.setTime(event.getStartDate());
-                int year = calendar.get(Calendar.YEAR);
-                int month = calendar.get(Calendar.MONTH);
-                int date = calendar.get(Calendar.DATE);
-                calendar.setTime(event.getEndDate());
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, month);
-                calendar.set(Calendar.DATE, date);
-                event.setEndDate(calendar.getTime());
+                Period masterPeriod = Recurrence.getRecurrenceMasterPeriod(seriesPattern, absoluteDuration);
+                event.setStartDate(masterPeriod.getStartDate());
+                event.setEndDate(masterPeriod.getEndDate());
             }
         }
         return event;
@@ -892,7 +885,9 @@ public class RdbCalendarStorage implements CalendarStorage {
              * expand recurrence master start- and enddate to cover the whole series period
              */
             if (event.getId() == event.getRecurrenceId()) {
-
+                Period seriesPeriod = Recurrence.getImplicitSeriesPeriod(seriesPattern);
+                event.setStartDate(seriesPeriod.getStartDate());
+                event.setEndDate(seriesPeriod.getEndDate());
             }
         }
         return event;
