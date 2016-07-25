@@ -47,82 +47,87 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage;
+package com.openexchange.pns.subscription.storage.rdb;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import com.openexchange.pns.Hit;
-import com.openexchange.pns.Hits;
+import java.util.Date;
 import com.openexchange.pns.PushMatch;
 
 
 /**
- * {@link RdbHits}
+ * {@link RdbPushMatch}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RdbHits implements Hits {
+public class RdbPushMatch implements PushMatch {
 
-    /** The empty instance */
-    public static final RdbHits EMPTY = new RdbHits(Collections.<Map.Entry<ClientAndTransport, List<PushMatch>>> emptySet());
-
-    // ----------------------------------------------------------------------------------
-
-    private final Set<Map.Entry<ClientAndTransport, List<PushMatch>>> entrySet;
+    private final int contextId;
+    private final int userId;
+    private final String client;
+    private final String transportId;
+    private final String token;
+    private final String topic;
+    private final Date lastModified;
 
     /**
-     * Initializes a new {@link RdbHits}.
+     * Initializes a new {@link RdbPushMatch}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param client The client identifier
+     * @param transportId The transport identifier
+     * @param token The token
+     * @param topic The matching topic
+     * @param lastModified The last-modified date
      */
-    public RdbHits(Set<Map.Entry<ClientAndTransport, List<PushMatch>>> entrySet) {
+    public RdbPushMatch(int userId, int contextId, String client, String transportId, String token, String topic, Date lastModified) {
         super();
-        this.entrySet = entrySet;
+        this.userId = userId;
+        this.contextId = contextId;
+        this.client = client;
+        this.transportId = transportId;
+        this.token = token;
+        this.topic = topic;
+        this.lastModified = lastModified;
+    }
+
+    /**
+     * Gets the last-modified date
+     *
+     * @return The last-modified date or <code>null</code>
+     */
+    public Date getLastModified() {
+        return lastModified;
     }
 
     @Override
-    public Iterator<Hit> iterator() {
-        return new RdbHitsIterator(entrySet.iterator());
+    public String getClient() {
+        return client;
     }
 
     @Override
-    public boolean isEmpty() {
-        return entrySet.isEmpty();
+    public int getUserId() {
+        return userId;
     }
 
-    // --------------------------------------------------------------------------------------------
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
 
-    private static final class RdbHitsIterator implements Iterator<Hit> {
+    @Override
+    public String getTransportId() {
+        return transportId;
+    }
 
-        private final Iterator<Entry<ClientAndTransport, List<PushMatch>>> iterator;
+    @Override
+    public String getToken() {
+        return token;
+    }
 
-        /**
-         * Initializes a new {@link RdbHitsIterator}.
-         */
-        RdbHitsIterator(Iterator<Map.Entry<ClientAndTransport, List<PushMatch>>> iterator) {
-            super();
-            this.iterator = iterator;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return iterator.hasNext();
-        }
-
-        @Override
-        public Hit next() {
-            Map.Entry<ClientAndTransport, List<PushMatch>> entry = iterator.next();
-            ClientAndTransport cat = entry.getKey();
-            return new RdbHit(cat.client, cat.transportId, entry.getValue());
-        }
-
-        @Override
-        public void remove() {
-            iterator.remove();
-        }
+    @Override
+    public String getTopic() {
+        return topic;
     }
 
 }

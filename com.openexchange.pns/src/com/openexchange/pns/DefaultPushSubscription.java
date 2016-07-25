@@ -84,6 +84,7 @@ public class DefaultPushSubscription implements PushSubscription {
         String transportId;
         String token;
         String client;
+        Nature nature;
 
         /** Creates a new builder */
         public Builder() {
@@ -157,6 +158,16 @@ public class DefaultPushSubscription implements PushSubscription {
         }
 
         /**
+         * Sets the nature
+         * @param nature The nature
+         * @return This builder
+         */
+        public Builder nature(Nature nature) {
+            this.nature = nature;
+            return this;
+        }
+
+        /**
          * Builds the <code>PushSubscriptionDescription</code> instance.
          * @return The resulting <code>PushSubscriptionDescription</code> instance
          */
@@ -173,6 +184,7 @@ public class DefaultPushSubscription implements PushSubscription {
     private final List<String> topics;
     private final String transportId;
     private final String token;
+    private final Nature nature;
 
     /**
      * Initializes a new {@link DefaultPushSubscription}.
@@ -185,6 +197,7 @@ public class DefaultPushSubscription implements PushSubscription {
         this.transportId = builder.transportId;
         this.userId = builder.userId;
         this.client = builder.client;
+        this.nature = builder.nature;
     }
 
     @Override
@@ -215,6 +228,11 @@ public class DefaultPushSubscription implements PushSubscription {
     @Override
     public String getClient() {
         return client;
+    }
+
+    @Override
+    public Nature getNature() {
+        return nature;
     }
 
 }

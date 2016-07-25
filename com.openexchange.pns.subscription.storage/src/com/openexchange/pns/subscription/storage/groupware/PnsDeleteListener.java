@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.pns.PushExceptionCodes;
-import com.openexchange.pns.subscription.storage.RdbPushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**

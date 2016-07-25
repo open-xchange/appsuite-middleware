@@ -105,6 +105,6 @@ public interface PushSubscriptionRegistry {
     * @return <code>true</code> if such a subscription has been updated; otherwise <code>false</code> if no such subscription existed
     * @throws OXException If update fails
     */
-   boolean updateToken(DefaultPushSubscription subscription, String newToken) throws OXException;
+   boolean updateToken(PushSubscription subscription, String newToken) throws OXException;
 
 }

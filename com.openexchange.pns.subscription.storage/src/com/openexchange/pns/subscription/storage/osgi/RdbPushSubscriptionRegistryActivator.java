@@ -57,10 +57,12 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.subscription.storage.RdbPushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.CompositePushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.groupware.CreatePnsSubscriptionTable;
 import com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsDeleteListener;
+import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 
 
 /**
@@ -99,8 +101,9 @@ public class RdbPushSubscriptionRegistryActivator extends HousekeepingActivator 
         }
 
         // Register service
-        RdbPushSubscriptionRegistry pushSubscriptionRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class), getService(ContextService.class));
-        registerService(PushSubscriptionRegistry.class, pushSubscriptionRegistry);
+        PushSubscriptionRegistry persistentRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class), getService(ContextService.class));
+        PushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
+        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry));
     }
 
 }

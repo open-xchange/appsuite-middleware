@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage;
+package com.openexchange.pns.subscription.storage.rdb;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -72,9 +72,9 @@ import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscription;
-import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.Hits;
+import com.openexchange.pns.subscription.storage.ClientAndTransport;
+import com.openexchange.pns.subscription.storage.MapBackedHits;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -101,7 +101,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     @Override
-    public Hits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+    public MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
         Connection con = databaseService.getReadOnly(contextId);
         try {
             return getSubscriptions(userId, contextId, topic, con);
@@ -120,7 +120,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
      * @return All subscriptions for specified affiliation
      * @throws OXException If subscriptions cannot be returned
      */
-    public Hits getSubscriptions(int userId, int contextId, String topic, Connection con) throws OXException {
+    public MapBackedHits getSubscriptions(int userId, int contextId, String topic, Connection con) throws OXException {
         if (null == con) {
             return getInterestedSubscriptions(userId, contextId, topic);
         }
@@ -140,7 +140,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             rs = stmt.executeQuery();
 
             if (false == rs.next()) {
-                return RdbHits.EMPTY;
+                return MapBackedHits.EMPTY;
             }
 
             Map<ClientAndTransport, List<PushMatch>> map = new LinkedHashMap<>(6);
@@ -178,7 +178,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 matches.add(new RdbPushMatch(userId, contextId, client, transportId, token, matchingTopic, lastModified));
             } while (rs.next());
 
-            return new RdbHits(map.entrySet());
+            return new MapBackedHits(map);
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -518,7 +518,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     @Override
-    public boolean updateToken(DefaultPushSubscription subscription, String newToken) throws OXException {
+    public boolean updateToken(PushSubscription subscription, String newToken) throws OXException {
         if (null == subscription || null == newToken) {
             return false;
         }
@@ -541,7 +541,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
      * @return <code>true</code> if such a subscription has been updated; otherwise <code>false</code> if no such subscription existed
      * @throws OXException If update fails
      */
-    public boolean updateToken(DefaultPushSubscription subscription, String newToken, Connection con) throws OXException {
+    public boolean updateToken(PushSubscription subscription, String newToken, Connection con) throws OXException {
         if (null == con) {
             return updateToken(subscription, newToken);
         }

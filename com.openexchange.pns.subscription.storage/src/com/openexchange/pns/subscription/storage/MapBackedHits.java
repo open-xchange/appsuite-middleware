@@ -47,90 +47,91 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.subscription.storage;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import com.openexchange.pns.Hit;
+import com.openexchange.pns.Hits;
+import com.openexchange.pns.PushMatch;
+import com.openexchange.pns.subscription.storage.rdb.RdbHit;
+
 
 /**
- * {@link PushSubscription} - Represents a push subscription.
+ * {@link MapBackedHits}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushSubscription {
+public class MapBackedHits implements Hits {
 
-    /** A subscription's nature */
-    public static enum Nature {
-        /**
-         * Volatile nature. Not stored, but only held in memory.
-         * <p>
-         * If JVM shuts-down volatile subscriptions are gone.
-         */
-        VOLATILE,
-        /**
-         * Persistent nature. Permanently stored.
-         */
-        PERSISTENT;
+    /** The empty instance */
+    public static final MapBackedHits EMPTY = new MapBackedHits(Collections.<ClientAndTransport, List<PushMatch>> emptyMap());
+
+    // ----------------------------------------------------------------------------------
+
+    private final Map<ClientAndTransport, List<PushMatch>> map;
+
+    /**
+     * Initializes a new {@link MapBackedHits}.
+     */
+    public MapBackedHits(Map<ClientAndTransport, List<PushMatch>> map) {
+        super();
+        this.map = map;
     }
 
-    // ---------------------------------------------------------------------------------------------------------
-
     /**
-     * Gets the user identifier
+     * Gets the backing map.
      *
-     * @return The user identifier
+     * @return The map
      */
-    int getUserId();
+    public Map<ClientAndTransport, List<PushMatch>> getMap() {
+        return map;
+    }
 
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    int getContextId();
+    @Override
+    public Iterator<Hit> iterator() {
+        return new RdbHitsIterator(map.entrySet().iterator());
+    }
 
-    /**
-     * Gets the identifier of the client associated with this subscription.
-     *
-     * @return The client identifier
-     */
-    String getClient();
+    @Override
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
 
-    /**
-     * Gets the topics of interest.
-     * <p>
-     * The returned listing describes the topics in which this subscription
-     * is interested. For each topic an asterisk ('*') may be used as a trailing wild-card.
-     * More precisely, the string value of each topic must conform to the following grammar:
-     *
-     * <pre>
-     *  topic-description := '*' | topic ( '/*' )?
-     *  topic := token ( '/' token )*
-     * </pre>
-     *
-     * @return The topics
-     */
-    List<String> getTopics();
+    // --------------------------------------------------------------------------------------------
 
-    /**
-     * Gets the identifier of the associated push transport.
-     *
-     * @return The transport identifier
-     */
-    String getTransportId();
+    private static final class RdbHitsIterator implements Iterator<Hit> {
 
-    /**
-     * Gets the subscription's token
-     *
-     * @return The token
-     */
-    String getToken();
+        private final Iterator<Entry<ClientAndTransport, List<PushMatch>>> iterator;
 
-    /**
-     * Checks if this subscription is of {@link Nature#PERSISTENT persistent} or {@link Nature#PERSISTENT volatile} nature
-     *
-     * @return The nature
-     */
-    Nature getNature();
+        /**
+         * Initializes a new {@link RdbHitsIterator}.
+         */
+        RdbHitsIterator(Iterator<Map.Entry<ClientAndTransport, List<PushMatch>>> iterator) {
+            super();
+            this.iterator = iterator;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public Hit next() {
+            Map.Entry<ClientAndTransport, List<PushMatch>> entry = iterator.next();
+            ClientAndTransport cat = entry.getKey();
+            return new RdbHit(cat.client, cat.transportId, entry.getValue());
+        }
+
+        @Override
+        public void remove() {
+            iterator.remove();
+        }
+    }
 
 }

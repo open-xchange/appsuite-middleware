@@ -47,33 +47,44 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage;
+package com.openexchange.pns.subscription.storage.inmemory;
 
-import java.util.List;
-import com.openexchange.pns.Hit;
 import com.openexchange.pns.PushMatch;
 
 
 /**
- * {@link RdbHit}
+ * {@link InMemoryPushMatch}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RdbHit implements Hit {
+public class InMemoryPushMatch implements PushMatch {
 
+    private final int contextId;
+    private final int userId;
     private final String client;
     private final String transportId;
-    private final List<PushMatch> matches;
+    private final String token;
+    private final String topic;
 
     /**
-     * Initializes a new {@link RdbHit}.
+     * Initializes a new {@link InMemoryPushMatch}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param client The client identifier
+     * @param transportId The transport identifier
+     * @param token The token
+     * @param topic The matching topic
      */
-    public RdbHit(String client, String transportId, List<PushMatch> matches) {
+    public InMemoryPushMatch(int userId, int contextId, String client, String transportId, String token, String topic) {
         super();
+        this.userId = userId;
+        this.contextId = contextId;
         this.client = client;
         this.transportId = transportId;
-        this.matches = matches;
+        this.token = token;
+        this.topic = topic;
     }
 
     @Override
@@ -82,13 +93,28 @@ public class RdbHit implements Hit {
     }
 
     @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
     public String getTransportId() {
         return transportId;
     }
 
     @Override
-    public List<PushMatch> getMatches() {
-        return matches;
+    public String getToken() {
+        return token;
+    }
+
+    @Override
+    public String getTopic() {
+        return topic;
     }
 
 }

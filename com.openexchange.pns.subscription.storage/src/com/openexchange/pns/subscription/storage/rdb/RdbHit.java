@@ -47,57 +47,33 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage;
+package com.openexchange.pns.subscription.storage.rdb;
 
-import java.util.Date;
+import java.util.List;
+import com.openexchange.pns.Hit;
 import com.openexchange.pns.PushMatch;
 
 
 /**
- * {@link RdbPushMatch}
+ * {@link RdbHit}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RdbPushMatch implements PushMatch {
+public class RdbHit implements Hit {
 
-    private final int contextId;
-    private final int userId;
     private final String client;
     private final String transportId;
-    private final String token;
-    private final String topic;
-    private final Date lastModified;
+    private final List<PushMatch> matches;
 
     /**
-     * Initializes a new {@link RdbPushMatch}.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param client The client identifier
-     * @param transportId The transport identifier
-     * @param token The token
-     * @param topic The matching topic
-     * @param lastModified The last-modified date
+     * Initializes a new {@link RdbHit}.
      */
-    public RdbPushMatch(int userId, int contextId, String client, String transportId, String token, String topic, Date lastModified) {
+    public RdbHit(String client, String transportId, List<PushMatch> matches) {
         super();
-        this.userId = userId;
-        this.contextId = contextId;
         this.client = client;
         this.transportId = transportId;
-        this.token = token;
-        this.topic = topic;
-        this.lastModified = lastModified;
-    }
-
-    /**
-     * Gets the last-modified date
-     *
-     * @return The last-modified date or <code>null</code>
-     */
-    public Date getLastModified() {
-        return lastModified;
+        this.matches = matches;
     }
 
     @Override
@@ -106,28 +82,13 @@ public class RdbPushMatch implements PushMatch {
     }
 
     @Override
-    public int getUserId() {
-        return userId;
-    }
-
-    @Override
-    public int getContextId() {
-        return contextId;
-    }
-
-    @Override
     public String getTransportId() {
         return transportId;
     }
 
     @Override
-    public String getToken() {
-        return token;
-    }
-
-    @Override
-    public String getTopic() {
-        return topic;
+    public List<PushMatch> getMatches() {
+        return matches;
     }
 
 }
