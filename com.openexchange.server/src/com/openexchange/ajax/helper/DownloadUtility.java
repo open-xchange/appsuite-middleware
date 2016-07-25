@@ -82,6 +82,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.encoding.URLCoder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
