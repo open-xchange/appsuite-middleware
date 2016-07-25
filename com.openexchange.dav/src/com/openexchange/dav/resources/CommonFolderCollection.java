@@ -59,6 +59,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.internal.Tools;
 import com.openexchange.dav.mixins.ACL;
@@ -318,6 +319,12 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     protected void internalDelete() throws WebdavProtocolException {
         if (null == folder) {
             throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        }
+        if (null != folder.getOwnPermission() && false == folder.getOwnPermission().isAdmin() && DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
+            // Client will continue to show an exclamation mark if responding with 403 on an "unsubscribe" request,
+            // so pretend a successful deletion here
+            LOG.info("{}: Ignoring delete/unsubscribe request for folder {} due to missing admin permissions of user {}.", getUrl(), folder, factory.getUser().getId());
+            return;
         }
         if (folder.isDefault()) {
             throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
