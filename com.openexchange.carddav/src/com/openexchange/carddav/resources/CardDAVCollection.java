@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -295,7 +296,7 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
                 }
             }
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -418,7 +419,7 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
             }
             return lastModified;
 	    } catch (OXException e) {
-	        throw protocolException(e);
+	        throw protocolException(getUrl(), e);
 	    }
 	}
 

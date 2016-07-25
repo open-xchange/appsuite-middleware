@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -164,11 +165,11 @@ public class ContactResource extends CommonResource<Contact> {
                 try {
                     return vCardResource.getClosingStream();
                 } catch (OXException e) {
-                    throw protocolException(e);
+                    throw protocolException(getUrl(), e);
                 }
             }
         }
-        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+        throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
     }
 
     @Override
@@ -179,9 +180,9 @@ public class ContactResource extends CommonResource<Contact> {
         boolean saved = false;
         try {
             if (false == exists()) {
-                throw protocolException(HttpServletResponse.SC_CONFLICT);
+                throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
             } else if (null == vCardImport || null == vCardImport.getContact()) {
-                throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+                throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
             }
             /*
              * store original vCard if possible
@@ -211,7 +212,7 @@ public class ContactResource extends CommonResource<Contact> {
              */
             handleAttachments(object, contact);
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             Streams.close(vCardFileHolder);
             closeVCardImport();
@@ -229,7 +230,7 @@ public class ContactResource extends CommonResource<Contact> {
         String vCardID = null != object ? object.getVCardId() : null;
         try {
             if (false == exists()) {
-                throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+                throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
             }
             /*
              * delete contact, trying again in case of recoverable errors
@@ -261,9 +262,9 @@ public class ContactResource extends CommonResource<Contact> {
         boolean created = false;
         try {
             if (exists()) {
-                throw protocolException(HttpServletResponse.SC_CONFLICT);
+                throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
             } else if (null == vCardImport || null == vCardImport.getContact()) {
-                throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+                throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
             }
             /*
              * import vCard as new contact
@@ -298,7 +299,7 @@ public class ContactResource extends CommonResource<Contact> {
                     contactService.createContact(factory.getSession(), parentFolderID, contact);
                     contactService.deleteContact(factory.getSession(), parentFolderID, Integer.toString(contact.getObjectID()), contact.getLastModified());
                 } catch (OXException e) {
-                    throw protocolException(e);
+                    throw protocolException(getUrl(), e);
                 }
                 return;
             }
@@ -328,7 +329,7 @@ public class ContactResource extends CommonResource<Contact> {
              */
             handleAttachments(null, object);
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             Streams.close(vCardFileHolder);
             closeVCardImport();
@@ -380,13 +381,13 @@ public class ContactResource extends CommonResource<Contact> {
                 try (VCardExport vCardExport = generateVCardResource(propertyNames); InputStream inputStream = vCardExport.getClosingStream()) {
                     result.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
                 } catch (IOException | OXException e) {
-                    throw protocolException(e);
+                    throw protocolException(getUrl(), e);
                 }
             } else {
                 try (InputStream inputStream = getBody()) {
                     result.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
                 } catch (IOException e) {
-                    throw protocolException(e);
+                    throw protocolException(getUrl(), e);
                 }
             }
             return result;
@@ -443,14 +444,14 @@ public class ContactResource extends CommonResource<Contact> {
             LOG.debug("{}: overriding next sync token for client recovery.", this.getUrl());
             this.factory.overrideNextSyncToken();
         } else if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
-            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_CONFLICT);
         } else if (Category.CATEGORY_SERVICE_DOWN.equals(e.getCategory())) {
             /*
              * throw appropriate protocol exception
              */
-            throw protocolException(e, HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         } else {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
         return false;
     }
@@ -479,7 +480,7 @@ public class ContactResource extends CommonResource<Contact> {
             try {
                 vCardResource = generateVCardResource(null);
             } catch (OXException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
         this.vCardExport = reset ? null : vCardResource;

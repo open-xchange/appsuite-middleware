@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -201,7 +202,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     String timeZone = null != object.getTimezone() ? object.getTimezone() : factory.getUser().getTimeZone();
                     List<CalendarDataObject> appointments = factory.getIcalParser().parseAppointments(exceptionICal, TimeZone.getTimeZone(timeZone), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
                     if (null == appointments || 1 != appointments.size() || null == appointments.get(0).getRecurrenceDatePosition()) {
-                        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+                        throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
                     }
                     /*
                      * get matching change exception
@@ -210,7 +211,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(object, false);
                     CalendarDataObject targetedException = getMatchingException(originalExceptions, recurrenceDatePosition);
                     if (null == targetedException) {
-                        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+                        throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
                     }
                     objects.add(targetedException);
                 }
@@ -232,7 +233,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             getAppointmentInterface().deleteAppointmentObject(
                 (CalendarDataObject) this.object, object.getParentFolderID(), object.getLastModified());
         } catch (final SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -249,7 +250,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             CalendarDataObject originalAppointment = parent.load(this.object, false);
             Date clientLastModified = this.object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
-                throw WebdavProtocolException.Code.EDIT_CONFLICT.create(getUrl(), HttpServletResponse.SC_CONFLICT);
+                throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
             }
             /*
              * check folder permissions beforehand
@@ -257,7 +258,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             int ownPermissions = parent.getFolder().getOwnPermission().getWritePermission();
             if (Permission.WRITE_OWN_OBJECTS > ownPermissions ||
                 Permission.WRITE_OWN_OBJECTS == ownPermissions && originalAppointment.getCreatedBy() != factory.getSession().getUserId()) {
-                throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
             /*
              * handle private comments & reminders
@@ -302,7 +303,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             if (null != nextReminder) {
                 if (null != originalAppointment && null == ParticipantTools.findUser(originalAppointment, factory.getUser().getId())) {
-                    throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                    throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }
                 insertOrUpdateReminder(nextReminder);
             }
@@ -391,7 +392,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                  */
                 if (null != nextExceptionReminder) {
                     if (null != originalException && null == ParticipantTools.findUser(originalException, factory.getUser().getId())) {
-                        throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                        throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
                     }
                     ReminderObject reminder = optReminder(exceptionToSave);
                     if (null != reminder) {
@@ -429,7 +430,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 }
             }
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -504,7 +505,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 clientLastModified = exception.getLastModified();
             }
         } catch (final SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -675,7 +676,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             iCal = Patches.Outgoing.removeEmptyRDates(iCal);
             return iCal;
         } catch (UnsupportedEncodingException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 

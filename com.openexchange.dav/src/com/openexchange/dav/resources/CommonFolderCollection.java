@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -71,7 +72,6 @@ import com.openexchange.dav.mixins.ShareResourceURI;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.reports.SyncStatus;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -197,7 +197,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
             LOG.debug("{}: added {} child resources.", this.getUrl(), children.size());
             return children;
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -222,7 +222,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
                 return createResource(null, constructPathForChildResource(name));
             }
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -247,7 +247,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
              */
             return getSyncStatus(new Date(since));
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -271,7 +271,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     @Override
     public void setDisplayName(String displayName) throws WebdavProtocolException {
         if (folder.isDefault() || false == PrivateType.getInstance().equals(folder.getType())) {
-            throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+            throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
         getFolderToUpdate().setName(displayName);
     }
@@ -279,7 +279,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     @Override
     public void save() throws WebdavProtocolException {
         if (false == exists() || null == folder) {
-            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
         if (null == folderToUpdate) {
             return; // no changes
@@ -304,10 +304,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
                         }
                     }
                 }
-                if (e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
-                    throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
-                }
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
     }
@@ -320,16 +317,16 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     @Override
     protected void internalDelete() throws WebdavProtocolException {
         if (null == folder) {
-            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
         if (folder.isDefault()) {
-            throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+            throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
         String treeID = null != folder.getTreeID() ? folder.getTreeID() : FolderStorage.REAL_TREE_ID;
         try {
             factory.getService(FolderService.class).deleteFolder(treeID, folder.getID(), folder.getLastModifiedUTC(), factory.getSession(), null);
         } catch (OXException e) {
-            throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+            throw protocolException(getUrl(), e);
         }
     }
 

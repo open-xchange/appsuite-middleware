@@ -58,6 +58,7 @@ import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.caldav.mixins.SupportedReportSet;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.Privilege;
 import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.resources.DAVCollection;
@@ -149,7 +150,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
             LOG.debug("{}: child collection '{}' not found, creating placeholder collection", this.getUrl(), name);
             return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), CalendarContentType.getInstance(), getTreeID());
         } catch (OXException e) {
-            throw protocolException(e);
+            throw DAVProtocol.protocolException(getUrl(), e);
         }
     }
 
@@ -183,7 +184,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
                 LOG.debug("{}: adding folder collection for folder '{}' as child resource.", getUrl(), folder.getName());
             }
         } catch (OXException e) {
-            throw protocolException(e);
+            throw DAVProtocol.protocolException(getUrl(), e);
         }
         children.add(new ScheduleOutboxCollection(factory));
         children.add(new ScheduleInboxCollection(factory));

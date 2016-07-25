@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -236,7 +237,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                     lastModified = Tools.getLatestModified(lastModified, object);
                 }
             } catch (OXException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
         return lastModified;
@@ -246,7 +247,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
         if (CalendarColor.NAMESPACE.getURI().equals(prop.getNamespace()) && CalendarColor.NAME.equals(prop.getName())) {
             if (false == PrivateType.getInstance().equals(folder.getType())) {
-                throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
             /*
              * apply color to meta field
@@ -386,10 +387,10 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                     return resources;
                 }
             } catch (OXException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         } else {
-            throw protocolException(HttpServletResponse.SC_NOT_IMPLEMENTED);
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_IMPLEMENTED);
         }
     }
 
