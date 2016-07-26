@@ -242,22 +242,23 @@ public class ShareJSONParser {
     }
 
     private static InternetAddress parseAddress(JSONArray jRecipient) throws JSONException, OXException {
+        String address = null;
         try {
             if (jRecipient.length() == 1) {
-                String address = jRecipient.getString(0);
-                if (EmailValidator.getInstance().isValid(address)) {
+                address = jRecipient.getString(0);
+                if (EmailValidator.getInstance(true).isValid(address)) {
                     return new QuotedInternetAddress(address);
                 }
             } else if (jRecipient.length() == 2) {
-                String address = jRecipient.getString(1);
-                if (EmailValidator.getInstance().isValid(address)) {
+                address = jRecipient.getString(1);
+                if (EmailValidator.getInstance(true).isValid(address)) {
                     return new QuotedInternetAddress(address, jRecipient.getString(0), "UTF-8");
                 }
             }
 
-            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(jRecipient.get(0));
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(null != address ? address : jRecipient.get(0));
         } catch (AddressException | UnsupportedEncodingException e) {
-            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(jRecipient.get(0));
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(null != address ? address : jRecipient.get(0));
         }
     }
 
