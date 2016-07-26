@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.advertisement.services.AccessCombinationAdvertisementConfigService;
 import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
 import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
 import com.openexchange.config.ConfigurationService;
@@ -140,7 +141,7 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
                 
                 switch(scheme){
                     case AccessCombinations:
-                        //TODO add AccessCombination
+                        adsService = AccessCombinationAdvertisementConfigService.getInstance();
                         break;
                     case TaxonomyTypes:
                         adsService = TaxonomyTypesAdvertisementConfigService.getInstance();

@@ -53,7 +53,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -63,7 +65,9 @@ import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.session.Session;
 
 /**
- * {@link TaxonomyTypesAdvertisementConfigService}
+ * {@link TaxonomyTypesAdvertisementConfigService} is an implementation of the {@link AdvertisementConfigService} based on taxonomy/types.
+ * 
+ * It compares the taxonomy/types of the given context with a configured list of packages (com.openexchange.advertisement.taxonomy.types) and returns the first matching item.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
@@ -71,6 +75,7 @@ import com.openexchange.session.Session;
 public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
     private static final String TAXONOMY_TYPES = "taxonomy/types";
+    private static final String TAXONOMY_TYPE_CONFIGURATION = "com.openexchange.advertisement.taxonomy.types";
     private static TaxonomyTypesAdvertisementConfigService instance = null;
 
     /**
@@ -91,7 +96,7 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
     }
 
     @Override
-    List<String> getPackages(Session session) throws OXException {
+    String getPackages(Session session) throws OXException {
         ContextService ctxService = Services.getService(ContextService.class);
         Context ctx = ctxService.getContext(session.getContextId());
         Map<String, List<String>> attributes = ctx.getAttributes();
@@ -102,7 +107,21 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
                 packs.addAll(Arrays.asList(Strings.splitByComma(types)));
             }
         }
-        return packs;
+
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        String types = configurationService.getProperty(TAXONOMY_TYPE_CONFIGURATION);
+        if (Strings.isEmpty(types)) {
+            return PACKAGE_ALL;
+        }
+        String[] typesArray = Strings.splitByComma(types);
+
+        for (String type : typesArray) {
+            if (packs.contains(type)) {
+                return type;
+            }
+        }
+
+        return PACKAGE_ALL;
     }
 
 }

@@ -23,6 +23,7 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.user,
+ com.openexchange.userconf,
  org.json,
  org.osgi.framework,
  org.slf4j;version="1.7.5"

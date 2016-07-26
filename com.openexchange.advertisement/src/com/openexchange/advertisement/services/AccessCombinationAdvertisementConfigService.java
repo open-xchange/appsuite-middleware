@@ -49,34 +49,47 @@
 
 package com.openexchange.advertisement.services;
 
-import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.reseller.ResellerService;
+import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.session.Session;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link GlobalAdvertisementConfigService} is the default implementation of the {@link AdvertisementConfigService}.
- * 
- * It returns always the default reseller and the default package.
+ * {@link AccessCombinationAdvertisementConfigService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfigService {
+public class AccessCombinationAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
-    private static final GlobalAdvertisementConfigService INSTANCE = new GlobalAdvertisementConfigService();
+    private static AccessCombinationAdvertisementConfigService instance = null;
 
-    public static GlobalAdvertisementConfigService getInstance() {
-        return INSTANCE;
+    /**
+     * @return
+     */
+    public static AccessCombinationAdvertisementConfigService getInstance() {
+        if (instance == null) {
+            instance = new AccessCombinationAdvertisementConfigService();
+        }
+        return instance;
     }
 
     @Override
     String getReseller(Session session) throws OXException {
-        return RESELLER_ALL;
+        ResellerService resellerService = Services.getService(ResellerService.class);
+        ResellerAdmin resellerAdmin = resellerService.getReseller(session.getContextId());
+        return resellerAdmin.getName();
     }
 
     @Override
     String getPackages(Session session) throws OXException {
-        return PACKAGE_ALL;
+        UserPermissionService permissionService = Services.getService(UserPermissionService.class);
+        ContextService contextService = Services.getService(ContextService.class);
+        Context ctx = contextService.getContext(session.getContextId());
+        return permissionService.getAccessCombinationName(ctx, session.getUserId());
     }
-
 }

@@ -70,6 +70,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link Activator}
@@ -81,7 +82,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { CapabilityService.class, DatabaseService.class, ContextService.class, ResellerService.class, ConfigViewFactory.class, ConfigurationService.class, UserService.class };
+        return new Class[] {    CapabilityService.class, DatabaseService.class, ContextService.class, ResellerService.class, 
+                                ConfigViewFactory.class, ConfigurationService.class, UserService.class, UserPermissionService.class };
     }
 
     @Override

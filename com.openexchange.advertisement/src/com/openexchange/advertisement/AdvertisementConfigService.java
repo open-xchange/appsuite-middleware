@@ -79,41 +79,45 @@ public interface AdvertisementConfigService {
 
     /**
      * Sets an advertisement config for a given user by name. This is for testing purpose only.
+     * Setting the config parameter to null will delete the current configuration for the user.
      * 
      * @param name The login name of the user
      * @param ctxId The context id
      * @param config The advertisement config
      * @throws OXException
      */
-    public void putConfigByName(String name, int ctxId, String config) throws OXException;
+    public void setConfigByName(String name, int ctxId, String config) throws OXException;
 
     /**
      * Sets an advertisement config for a given user. This is for testing purpose only.
+     * Setting the config parameter to null will delete the current configuration for the user.
      * 
      * @param userId
      * @param ctxId
      * @param config The advertisement config
      * @throws OXException
      */
-    public void putConfig(int userId, int ctxId, String config) throws OXException;
+    public void setConfig(int userId, int ctxId, String config) throws OXException;
 
     /**
      * Sets an advertisement config for a given package of a given reseller
+     * Setting the config parameter to null will delete the current configuration.
      * 
      * @param reseller
      * @param pack
      * @param config The advertisement config
      * @throws OXException
      */
-    public void putConfig(String reseller, String pack, String config) throws OXException;
+    public void setConfig(String reseller, String pack, String config) throws OXException;
 
     /**
      * Sets an advertisement config for a given reseller
+     * Setting the config parameter to null will delete the current configuration for the reseller.
      * 
      * @param reseller
      * @param config The advertisement config
      * @throws OXException
      */
-    public void putConfig(String reseller, String config) throws OXException;
+    public void setConfig(String reseller, String config) throws OXException;
 
 }
