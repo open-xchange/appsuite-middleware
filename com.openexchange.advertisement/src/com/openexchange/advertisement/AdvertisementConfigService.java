@@ -73,8 +73,9 @@ public interface AdvertisementConfigService {
      * 
      * @param session The user session
      * @return The config in json form
+     * @throws OXException
      */
-    public JSONObject getConfig(Session session);
+    public JSONObject getConfig(Session session) throws OXException;
 
     /**
      * Sets an advertisement config for a given user by name. This is for testing purpose only.

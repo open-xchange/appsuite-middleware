@@ -47,36 +47,23 @@
  *
  */
 
-package com.openexchange.reseller;
+package com.openexchange.advertisement;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.reseller.data.ResellerAdmin;
 
 /**
- * {@link ResellerService}
+ * {@link AdvertisementPackageService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public interface ResellerService {
+public interface AdvertisementPackageService {
 
-    /**
-     * Retrieves the ResellerAdmin for the given context
-     * 
-     * @param cid The context id
-     * @return The ResellerAdmin
-     * @throws OXException if it was unable to retrieve the ResellerAdmin
-     */
-    public ResellerAdmin getReseller(int cid) throws OXException;
+    public enum PackageScheme {
+        Global,
+        AccessCombinations,
+        TaxonomyTypes
+    }
 
-    /**
-     * Retrieves the ResellerAdmin for the given context
-     * 
-     * @param cid The context id
-     * @return The ResellerAdmin
-     * @throws OXException if it was unable to retrieve the ResellerAdmin
-     */
-    public List<ResellerAdmin> getAll() throws OXException;
+    public AdvertisementConfigService getScheme(String reseller);
 
 }

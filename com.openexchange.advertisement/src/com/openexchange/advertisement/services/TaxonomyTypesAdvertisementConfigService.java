@@ -47,36 +47,62 @@
  *
  */
 
-package com.openexchange.reseller;
+package com.openexchange.advertisement.services;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
+import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
+import com.openexchange.session.Session;
 
 /**
- * {@link ResellerService}
+ * {@link TaxonomyTypesAdvertisementConfigService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public interface ResellerService {
+public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertisementConfigService {
+
+    private static final String TAXONOMY_TYPES = "taxonomy/types";
+    private static TaxonomyTypesAdvertisementConfigService instance = null;
 
     /**
-     * Retrieves the ResellerAdmin for the given context
-     * 
-     * @param cid The context id
-     * @return The ResellerAdmin
-     * @throws OXException if it was unable to retrieve the ResellerAdmin
+     * @return
      */
-    public ResellerAdmin getReseller(int cid) throws OXException;
+    public static TaxonomyTypesAdvertisementConfigService getInstance() {
+        if (instance == null) {
+            instance = new TaxonomyTypesAdvertisementConfigService();
+        }
+        return instance;
+    }
 
-    /**
-     * Retrieves the ResellerAdmin for the given context
-     * 
-     * @param cid The context id
-     * @return The ResellerAdmin
-     * @throws OXException if it was unable to retrieve the ResellerAdmin
-     */
-    public List<ResellerAdmin> getAll() throws OXException;
+    @Override
+    String getReseller(Session session) throws OXException {
+        ResellerService resellerService = Services.getService(ResellerService.class);
+        ResellerAdmin resellerAdmin = resellerService.getReseller(session.getContextId());
+        return resellerAdmin.getName();
+    }
+
+    @Override
+    List<String> getPackages(Session session) throws OXException {
+        ContextService ctxService = Services.getService(ContextService.class);
+        Context ctx = ctxService.getContext(session.getContextId());
+        Map<String, List<String>> attributes = ctx.getAttributes();
+        List<String> packs = new ArrayList<>();
+        if (attributes.containsKey(TAXONOMY_TYPES)) {
+            List<String> taxonomyTypes = attributes.get(TAXONOMY_TYPES);
+            for (String types : taxonomyTypes) {
+                packs.addAll(Arrays.asList(Strings.splitByComma(types)));
+            }
+        }
+        return packs;
+    }
 
 }
