@@ -47,92 +47,32 @@
  *
  */
 
-package com.openexchange.guard.api.authentication;
+package com.openexchange.file.storage.json.crypto;
 
-import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 
 /**
- * {@link GuardAuthenticationToken} represents a token used for authenticating a user against OX Guard.
+ * {@link CryptographicServiceAuthenticationFactory} parses authentication for cryptographic services from HTTP requests.
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.8.3
  */
-public class GuardAuthenticationToken {
-
-    private final String tokenValue;
-    private final String guardSessionId;
-    private final Date createdOn;
-    private final int minutesValid;
-    private volatile boolean used;
+public interface CryptographicServiceAuthenticationFactory {
 
     /**
-     * Initializes a new {@link GuardAuthenticationToken}.
+     * Parses authentication information from the given request.
      *
-     * @param guardSessionId A secret random value which represents a guard session.
-     * @param tokenValue The value of the authentication token.
+     * @param request The request to parse the authentication information from.
+     * @return The authentication information obtained from the request, or null if the request does not contain all necessary information.
      */
-    public GuardAuthenticationToken(String guardSessionId, String tokenValue) {
-        this.guardSessionId = guardSessionId;
-        this.tokenValue = tokenValue;
-        this.minutesValid = 0;
-        this.createdOn = new Date();
-        this.used = false;
-    }
+    public String createAuthenticationFrom(HttpServletRequest request);
 
     /**
-     * Initializes a new {@link GuardAuthenticationToken}.
+     * Parses authentication information from the given {@link AJAXRequestData}.
      *
-     * @param guardSessionId A secret random value which represents a Guard session.
-     * @param tokenValue The value of the authentication token.
-     * @paran minutesValid The amount of time (in minutes) the authentication token should be valid.
+     * @param requestData The {@link AJAXRequestData} to parse the authentication information from.
+     * @return The authentication information obtained from {@link AJAXRequestData}, or null if the request does not contain all necessary information.
      */
-    public GuardAuthenticationToken(String guardSessionId, String tokenValue, int minutesValid) {
-        this.guardSessionId = guardSessionId;
-        this.tokenValue = tokenValue;
-        this.minutesValid = minutesValid;
-        this.createdOn = new Date();
-        this.used = false;
-    }
-
-    /**
-     * @return A secret random value which represents a Guard session
-     */
-    public String getGuardSessionId() {
-        return this.guardSessionId;
-    }
-
-    /**
-     * @return The token value
-     */
-    public String getValue() {
-        return this.tokenValue;
-    }
-
-    /**
-     * @return The amount of minutes the authentication token should be valid.
-     */
-    public int getMinutesValid() {
-        return this.minutesValid;
-    }
-
-    /**
-     * @return The creation time stamp of the token.
-     */
-    public Date getCreatedOn() {
-        return this.createdOn;
-    }
-
-    /**
-     * @return True, if the token has been used at least once for authentication, false otherwise.
-     */
-    public boolean isUsed() {
-        return this.used;
-    }
-
-    /**
-     * Marks the token as used
-     */
-    public void setUsed() {
-        this.used = true;
-    }
+    public String createAuthenticationFrom(AJAXRequestData requestData);
 }

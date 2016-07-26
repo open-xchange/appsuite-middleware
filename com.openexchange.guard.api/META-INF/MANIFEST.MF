@@ -26,6 +26,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.guard.api,
- com.openexchange.guard.api.authentication,
- com.openexchange.guard.api.filestorage
+Export-Package: com.openexchange.guard.api

@@ -52,8 +52,10 @@ package com.openexchange.file.storage.json.services;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.file.storage.composition.CryptographicAwareIDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.file.storage.json.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -114,6 +116,16 @@ public class Services {
     public static IDBasedFileAccessFactory getFileAccessFactory() {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(IDBasedFileAccessFactory.class);
+    }
+
+    public static CryptographicAwareIDBasedFileAccessFactory getCryptographicFileAccessFactory() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(CryptographicAwareIDBasedFileAccessFactory.class);
+    }
+
+    public static CryptographicServiceAuthenticationFactory getCryptographicServiceAuthenticationFactory() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(CryptographicServiceAuthenticationFactory.class);
     }
 
     public static IDBasedFolderAccessFactory getFolderAccessFactory() {
