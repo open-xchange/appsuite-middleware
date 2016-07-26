@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -486,12 +487,21 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
      * @throws IllegalArgumentException If search term cannot be returned
      */
     public SearchTerm<?> getSearchTerm(final String attributeName, final SingleOperation operation, final Object constant) {
-        final AttributeGetter getter = GETTERS.get(attributeName);
-        if (null == getter) {
-            LOG.info("No getter for field: {}", attributeName);
-            return null;
+        AttributeGetter getter = GETTERS.get(attributeName);
+        if (null != getter) {
+            // Mapped to a known field
+            return getter.getSearchTerm(operation, constant);
         }
-        return getter.getSearchTerm(operation, constant);
+
+        if (attributeName.startsWith("header:") && attributeName.length() > 7) {
+            String hdrName = attributeName.substring(7);
+            if (false == Strings.isEmpty(hdrName)) {
+                return new HeaderTerm(hdrName, constant.toString());
+            }
+        }
+
+        LOG.info("No getter for field: {}", attributeName);
+        return null;
     }
 
 }
