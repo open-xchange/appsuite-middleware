@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CardDAV
+Bundle-SymbolicName: com.openexchange.ssl
+Bundle-Version: 7.8.2
+Bundle-Activator: com.openexchange.ssl.osgi.SSLActivator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.tools.ssl,
+ javax.net,
+ javax.net.ssl,
+ org.apache.commons.lang,
+ org.apache.commons.net.util,
+ org.apache.http.conn.ssl,
+ org.apache.http.params,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-ClassPath: .
+Export-Package: com.openexchange.ssl

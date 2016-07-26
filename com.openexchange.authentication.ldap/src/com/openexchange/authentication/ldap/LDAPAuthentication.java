@@ -71,7 +71,7 @@ import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.ssl.SSLSocketFactoryProvider;
 
 /**
  * This class implements the login by using an LDAP for authentication.
@@ -345,7 +345,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         if (null == url) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(Context.PROVIDER_URL);
         } else if (url.startsWith("ldaps")) {
-            props.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
+            props.put("java.naming.ldap.factory.socket", SSLSocketFactoryProvider.getDefault().getClass().getName());
         }
 
         this.ldapReturnField = props.getProperty(PropertyNames.LDAP_RETURN_FIELD.name);

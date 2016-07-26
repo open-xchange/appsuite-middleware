@@ -62,6 +62,7 @@ import com.openexchange.ews.EWSExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.publisher.ews.Tools;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.ssl.SSLSocketFactoryProvider;
 
 /**
  * {@link LdapLookup}
@@ -181,7 +182,7 @@ public class LdapLookup extends Lookup {
         environment.put(Context.PROVIDER_URL, uri);
         environment.put(Context.REFERRAL, "follow");
         if (trustAllCerts && uri.startsWith("ldaps://")) {
-            environment.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
+            environment.put("java.naming.ldap.factory.socket", SSLSocketFactoryProvider.getDefault().getClass().getName());
         }
         if (null != bindDN) {
             environment.put(Context.SECURITY_AUTHENTICATION, "simple");

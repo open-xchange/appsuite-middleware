@@ -122,9 +122,9 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
+import com.openexchange.ssl.SSLSocketFactoryProvider;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.StarttlsRequiredException;
 import com.sun.mail.imap.IMAPFolder;
@@ -146,8 +146,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     /**
      * The logger instance for {@link IMAPAccess} class.
      */
-    private static final transient org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(IMAPAccess.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPAccess.class);
 
     /**
      * The max. temporary-down value; 5 Minutes.
@@ -183,6 +182,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static volatile ScheduledTimerTask cleanUpTimerTask;
 
     private static volatile Boolean checkConnectivityIfPolled;
+
     private static boolean checkConnectivityIfPolled() {
         Boolean b = checkConnectivityIfPolled;
         if (null == b) {
@@ -201,7 +201,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         return b.booleanValue();
     }
-
 
     /*-
      * Member section
@@ -420,7 +419,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 LOG.error("Error while closing IMAP message storage: {}", e.getMessage()).toString(), e));
             } finally {
                 messageStorage = null;
-
+        
             }
         }
         if (logicTools != null) {
@@ -1365,7 +1364,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Check if a secure IMAP connection should be established
          */
         final String sPort = String.valueOf(config.getPort());
-        final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+        final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
         if (config.isSecure()) {
             /*
              * Enables the use of the STARTTLS command.

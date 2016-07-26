@@ -64,7 +64,7 @@ import javax.mail.Store;
 import javax.mail.Transport;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.ssl.SSLSocketFactoryProvider;
 import com.sun.mail.smtp.SMTPTransport;
 
 /**
@@ -92,7 +92,7 @@ public class MailValidator {
     public static boolean validateImap(String host, int port, boolean secure, boolean requireTls, boolean isOAuth, String user, String pwd) {
         Store store = null;
         try {
-            String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+            String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
             Properties props = new Properties();
             if (secure) {
                 props.put("mail.imap.socketFactory.class", socketFactoryClass);
@@ -155,7 +155,7 @@ public class MailValidator {
         Store store = null;
         try {
             Properties props = new Properties();
-            String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+            String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
             if (secure) {
                 props.put("mail.pop3.socketFactory.class", socketFactoryClass);
             } else if (requireTls) {
@@ -233,7 +233,7 @@ public class MailValidator {
     public static boolean validateSmtp(String host, int port, boolean secure, boolean requireTls, boolean isOAuth, String user, String pwd, Map<String, Object> optProperties) {
         Transport transport = null;
         try {
-            String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+            String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
             Properties props = new Properties();
             if (secure) {
                 props.put("mail.smtp.socketFactory.class", socketFactoryClass);
@@ -296,7 +296,7 @@ public class MailValidator {
         String greeting = null;
         try {
             if (secure) {
-                s = TrustAllSSLSocketFactory.getDefault().createSocket();
+                s = SSLSocketFactoryProvider.getDefault().createSocket();
             } else {
                 s = new Socket();
             }
@@ -352,7 +352,7 @@ public class MailValidator {
         String greeting = null;
         try {
             if (secure) {
-                s = TrustAllSSLSocketFactory.getDefault().createSocket();
+                s = SSLSocketFactoryProvider.getDefault().createSocket();
             } else {
                 s = new Socket();
             }
@@ -407,7 +407,7 @@ public class MailValidator {
         String greeting = null;
         try {
             if (secure) {
-                s = TrustAllSSLSocketFactory.getDefault().createSocket();
+                s = SSLSocketFactoryProvider.getDefault().createSocket();
             } else {
                 s = new Socket();
             }
