@@ -49,14 +49,16 @@
 
 package com.openexchange.secret.recovery.impl;
 
-import java.security.GeneralSecurityException;
 import java.util.Set;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.secret.SecretExceptionCodes;
-import com.openexchange.secret.SecretService;
+import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.SecretEncryptionService;
+import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
@@ -70,93 +72,127 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FastSecretInconsistencyDetector implements SecretInconsistencyDetector, SecretMigrator, EncryptedItemCleanUpService {
+public class FastSecretInconsistencyDetector implements SecretInconsistencyDetector, SecretMigrator, EncryptedItemCleanUpService, SecretEncryptionStrategy<UserAndContext> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FastSecretInconsistencyDetector.class);
 
-    private static final String PROPERTY = "com.openexchange.secret.recovery.fast.token";
+    private static final String PROPERTY_TOKEN = "com.openexchange.secret.recovery.fast.token";
+    private static final String PROPERTY_ENABLED = "com.openexchange.secret.recovery.fast.enabled";
 
-    private final SecretService secretService;
+    private final SecretEncryptionFactoryService secretEncryptionFactory;
     private final CryptoService cryptoService;
     private final UserService userService;
     private final EncryptedItemDetectorService detector;
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link FastSecretInconsistencyDetector}.
      */
-    public FastSecretInconsistencyDetector(final SecretService secretService, final CryptoService cryptoService, final UserService userService, final EncryptedItemDetectorService detector) {
+    public FastSecretInconsistencyDetector(SecretEncryptionFactoryService secretEncryptionFactory, CryptoService cryptoService, UserService userService, EncryptedItemDetectorService detector, ConfigViewFactory configViewFactory) {
         super();
-        this.secretService = secretService;
+        this.secretEncryptionFactory = secretEncryptionFactory;
         this.cryptoService = cryptoService;
         this.userService = userService;
         this.detector = detector;
+        this.configViewFactory = configViewFactory;
     }
 
-    private static final String TEST_STRING = "supercalifragilisticexplialidocious";
+    @Override
+    public void update(String recrypted, UserAndContext userAndContext) throws OXException {
+        doSaveNewToken(recrypted, userAndContext.getUserId(), userAndContext.getContext());
+    }
 
     @Override
     public String isSecretWorking(final ServerSession session) throws OXException {
-        final String secret = secretService.getSecret(session);
-        if (com.openexchange.java.Strings.isEmpty(secret)) {
-            throw SecretExceptionCodes.EMPTY_SECRET.create();
-        }
-
-        // Continue with non-empty secret
-        final User user = session.getUser();
-        final Set<String> token = user.getAttributes().get(PROPERTY);
-        if (token == null || token.isEmpty()) {
-            saveNewToken(user, secret, session.getContext());
+        if (!isEnabled(session)) {
+            LOG.debug("Fast-crypt token not enabled for user {} in context {}", session.getUserId(), session.getContextId());
             return null;
         }
 
-        if (canDecrypt(token.iterator().next(), secret)) {
+        Set<String> token = session.getUser().getAttributes().get(PROPERTY_TOKEN);
+        if (token == null || token.isEmpty()) {
+            saveNewToken(session);
+            return null;
+        }
+
+        if (canDecrypt(token.iterator().next(), session)) {
             return null;
         }
 
         if (detector.hasEncryptedItems(session)) {
             return "Could not decrypt token";
         }
-        saveNewToken(user, secret, session.getContext());
+
+        saveNewToken(session);
         return null;
     }
 
-    private boolean canDecrypt(final String next, final String secret) {
+    private boolean isEnabled(ServerSession session) {
+        boolean def = true;
+
         try {
-            return cryptoService.decrypt(next, secret).equals(TEST_STRING);
-        } catch (final OXException e) {
-            try {
-                return OldStyleDecrypt.decrypt(next, secret).equals(TEST_STRING);
-            } catch (final GeneralSecurityException inner) {
-                // Ignore
+            ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+            ComposedConfigProperty<Boolean> property = view.property(PROPERTY_ENABLED, boolean.class);
+            if (null == property || !property.isDefined()) {
+                return def;
             }
-            LOG.debug("Could not decrypt fast-crypt token from user's attributes.", new Throwable());
+
+            return property.get().booleanValue();
+        } catch (OXException e) {
+            LOG.error("Failed to checked if fast-crypt token is enabled for user {} in context {}", session.getUserId(), session.getContextId(), e);
+            return def;
+        }
+    }
+
+    private static final String TEST_STRING = "supercalifragilisticexplialidocious";
+
+    private boolean canDecrypt(String encryptedToken, ServerSession session) {
+        SecretEncryptionService<UserAndContext> encryptionService = secretEncryptionFactory.createService(this);
+        try {
+            return TEST_STRING.equals(encryptionService.decrypt(session, encryptedToken, new UserAndContext(session.getUserId(), session.getContext())));
+        } catch (final OXException e) {
+            LOG.debug("Could not decrypt fast-crypt token from user's attributes.", e);
             return false;
         }
     }
 
-    private void saveNewToken(final User user, final String secret, final Context context) {
+    private void saveNewToken(ServerSession session) {
         try {
-            final String encrypted = cryptoService.encrypt(TEST_STRING, secret);
-            userService.setAttribute(PROPERTY, encrypted, user.getId(), context);
-            LOG.debug("Saved fast-crypt token in user''s attributes: {}", encrypted, new Throwable());
+            SecretEncryptionService<UserAndContext> encryptionService = secretEncryptionFactory.createService(this);
+            String encrypted = encryptionService.encrypt(session, TEST_STRING);
+            doSaveNewToken(encrypted, session.getUserId(), session.getContext());
         } catch (final OXException e) {
             LOG.error("", e);
         }
     }
 
+    private void saveNewTokenUsingSecret(String secret, ServerSession session) {
+        try {
+            String newEncryptedToken = cryptoService.encrypt(TEST_STRING, secret);
+            doSaveNewToken(newEncryptedToken, session.getUserId(), session.getContext());
+        } catch (final OXException e) {
+            LOG.error("", e);
+        }
+    }
+
+    private void doSaveNewToken(String toStore, int userId, Context context) throws OXException {
+        userService.setAttribute(PROPERTY_TOKEN, toStore, userId, context);
+        LOG.debug("Saved fast-crypt token in user's attributes: {}", toStore, new Throwable("Saved fast-crypt token"));
+    }
+
     @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-        saveNewToken(session.getUser(), newSecret, session.getContext());
+        saveNewTokenUsingSecret(newSecret, session);
     }
 
     @Override
     public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
-        userService.setAttribute(PROPERTY, null, session.getUserId(), session.getContext());
+        userService.setAttribute(PROPERTY_TOKEN, null, session.getUserId(), session.getContext());
     }
 
     @Override
     public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
-        saveNewToken(session.getUser(), secret, session.getContext());
+        saveNewTokenUsingSecret(secret, session);
     }
 
 }

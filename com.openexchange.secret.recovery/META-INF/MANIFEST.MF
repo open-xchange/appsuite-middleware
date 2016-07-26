@@ -6,7 +6,8 @@ Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.secret.recovery.osgi.SecretRecoveryActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.crypto,
+Import-Package: com.openexchange.config.cascade,
+ com.openexchange.crypto,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
