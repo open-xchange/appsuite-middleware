@@ -161,8 +161,8 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
             if (footerImage != null) {
                 if (!mailConfig.embedFooterImage()) {
                     MimeBodyPart imagePart = new MimeBodyPart();
-                    imagePart.setDisposition("inline; filename=\"" + footerImage.getFileName() + "\"");
-                    imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, footerImage.getContentType() + "; name=\"" + footerImage.getFileName() + "\"");
+                    imagePart.setDisposition("inline");
+                    imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, footerImage.getContentType());
                     imagePart.setContentID("<" + footerImage.getContentId() + ">");
                     imagePart.setHeader("X-Attachment-Id", footerImage.getContentId());
                     imagePart.setDataHandler(new DataHandler(new MessageDataSource(footerImage.getData(), footerImage.getContentType())));
