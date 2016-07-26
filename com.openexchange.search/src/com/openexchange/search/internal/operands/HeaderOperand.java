@@ -47,24 +47,41 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.search.internal.operands;
+
+import com.openexchange.search.Operand;
 
 /**
- * {@link SearchTermFields}
+ * {@link HeaderOperand} - The header operand.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SearchTermFields {
+public final class HeaderOperand implements Operand<String> {
 
-    public static final String FIELD = "field";
-    public static final String ATTACHMENT = "attachment";
-    public static final String HEADER = "header";
+    private final String name;
 
     /**
-     * Initializes a new {@link SearchTermFields}.
+     * Initializes a new {@link HeaderOperand}.
+     *
+     * @param name The column name
      */
-    private SearchTermFields() {
+    public HeaderOperand(final String name) {
         super();
+        this.name = name;
     }
 
+    @Override
+    public com.openexchange.search.Operand.Type getType() {
+        return Type.HEADER;
+    }
+
+    @Override
+    public String getValue() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder(Type.HEADER.getType()).append(':').append(name).toString();
+    }
 }
