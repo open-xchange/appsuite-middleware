@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
 import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
@@ -70,7 +70,7 @@ import com.openexchange.reseller.data.ResellerAdmin;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class AdvertisementPackageServiceImpl implements AdvertisementPackageService, Reloadable {
+public class AdvertisementPackageServiceImpl implements AdvertisementPackageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AdvertisementConfigService.class);
     private static final String CONFIG_PREFIX = "com.openexchange.advertisement.";
@@ -89,11 +89,32 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
     }
 
     @Override
-    public AdvertisementConfigService getScheme(String reseller) {
+    public AdvertisementConfigService getScheme(int contextId) {
         if (map == null) {
             return null;
         }
-        return map.get(reseller);
+        String reseller;
+        ResellerService resellerService = Services.getService(ResellerService.class);
+        try {
+            ResellerAdmin admin = resellerService.getReseller(contextId);
+            reseller = admin.getName();
+        } catch (OXException e) {
+            return GlobalAdvertisementConfigService.getInstance();
+        }
+
+        AdvertisementConfigService result = map.get(reseller);
+        if (result == null) {
+            result = GlobalAdvertisementConfigService.getInstance();
+        }
+        return result;
+    }
+
+    @Override
+    public AdvertisementConfigService getDefaultScheme() {
+        if (map == null) {
+            return null;
+        }
+        return GlobalAdvertisementConfigService.getInstance();
     }
 
     @Override
@@ -119,11 +140,15 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
                 
                 switch(scheme){
                     case AccessCombinations:
+                        //TODO add AccessCombination
+                        break;
                     case TaxonomyTypes:
                         adsService = TaxonomyTypesAdvertisementConfigService.getInstance();
+                        break;
                     case Global:
                     default:
-                        
+                        adsService = GlobalAdvertisementConfigService.getInstance();
+                        break;
                 }
                 map.put(res.getName(), adsService);
             }

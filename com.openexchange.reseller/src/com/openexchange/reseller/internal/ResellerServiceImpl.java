@@ -111,17 +111,21 @@ public class ResellerServiceImpl implements ResellerService {
             log.error("", e);
             throw new OXException(e);
         } finally {
-            dbService.backReadOnly(con);
-            try {
-                if (rs != null) {
+            if (rs != null) {
+                try {
                     rs.close();
+                } catch (SQLException e) {
+                    // ignore
                 }
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (SQLException e) {
-                //ignore
             }
+            if (prep != null) {
+                try {
+                    prep.close();
+                } catch (SQLException e) {
+                    // ignore
+                }
+            }
+            dbService.backReadOnly(con);
         }
     }
 
@@ -204,14 +208,10 @@ public class ResellerServiceImpl implements ResellerService {
             try {
                 final ArrayList<ResellerAdmin> ret = new ArrayList<>();
                 con = dbService.getReadOnly();
-                String query = "SELECT * FROM subadmin";
+                String query = "SELECT * FROM subadmin;";
                 prep = con.prepareStatement(query);
 
                 rs = prep.executeQuery();
-                if (!rs.next()) {
-                    return ret;
-                }
-
                 while (rs.next()) {
                     ResellerAdmin newadm = new ResellerAdmin();
                     newadm.setName(rs.getString(DATABASE_COLUMN_NAME));
@@ -226,13 +226,13 @@ public class ResellerServiceImpl implements ResellerService {
                 }
                 return ret;
             } finally {
-                dbService.backReadOnly(con);
                 if (rs != null) {
                     rs.close();
                 }
                 if (prep != null) {
                     prep.close();
                 }
+                dbService.backReadOnly(con);
             }
         } catch (SQLException e) {
             log.error("", e);

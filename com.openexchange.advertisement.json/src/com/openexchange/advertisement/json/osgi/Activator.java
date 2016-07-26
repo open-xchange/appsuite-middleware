@@ -49,7 +49,7 @@
 
 package com.openexchange.advertisement.json.osgi;
 
-import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.json.AdvertisementActionFactory;
 import com.openexchange.advertisement.json.OCPRestService;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
@@ -66,7 +66,7 @@ public class Activator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { AdvertisementConfigService.class };
+        return new Class[] { AdvertisementPackageService.class };
     }
 
     @Override

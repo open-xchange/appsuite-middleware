@@ -47,26 +47,35 @@
  *
  */
 
-package com.openexchange.advertisement;
+package com.openexchange.advertisement.services;
 
-import com.openexchange.config.Reloadable;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link AdvertisementPackageService}
+ * {@link GlobalAdvertisementConfigService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public interface AdvertisementPackageService extends Reloadable {
+public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
-    public enum PackageScheme {
-        Global,
-        AccessCombinations,
-        TaxonomyTypes
+    private static final GlobalAdvertisementConfigService INSTANCE = new GlobalAdvertisementConfigService();
+
+    public static GlobalAdvertisementConfigService getInstance() {
+        return INSTANCE;
     }
 
-    public AdvertisementConfigService getScheme(int contextId);
+    @Override
+    String getReseller(Session session) throws OXException {
+        return RESELLER_ALL;
+    }
 
-    public AdvertisementConfigService getDefaultScheme();
+    @Override
+    List<String> getPackages(Session session) throws OXException {
+        return Collections.singletonList(PACKAGE_ALL);
+    }
 
 }

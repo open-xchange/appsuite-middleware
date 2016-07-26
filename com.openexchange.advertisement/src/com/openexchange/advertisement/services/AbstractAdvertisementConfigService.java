@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,13 +63,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractAdvertisementConfigService}
@@ -86,16 +91,19 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     private static final String SQL_SELECT_MAPPING_SIMPLE = "Select * from advertisement_mapping where reseller=? AND package=?;";
     private static final String SQL_SELECT_MAPPING = "Select * from advertisement_mapping where (reseller=? OR reseller=?) AND (package";
     private static final String SQL_SELECT_CONFIG = "Select * from advertisement_config where configId=?;";
-    private static final String RESELLER_ALL = "OX_ALL";
-    private static final String PACKAGE_ALL = "OX_ALL";
+    protected static final String RESELLER_ALL = "OX_ALL";
+    protected static final String PACKAGE_ALL = "OX_ALL";
     private static final String PREVIEW_CONFIG = "com.openexchange.advertisement.preview";
 
 
 
     @Override
     public boolean isAvailable(Session session) {
-        // TODO Check if a config is available
-        return true;
+        try {
+            return getConfig(session) != null;
+        } catch (OXException e) {
+            return false;
+        }
     }
 
     abstract String getReseller(Session session) throws OXException;
@@ -223,9 +231,58 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     }
 
     @Override
-    public void putConfig(int userId, int ctxId, String config) throws OXException {
-        // TODO put config
+    public void putConfigByName(String name, int contextId, String config) throws OXException {
+        ContextService contextService = Services.getService(ContextService.class);
+        Context ctx = contextService.getContext(contextId);
+        UserService userService = Services.getService(UserService.class);
+        int userId = userService.getUserId(name, ctx);
+        putConfig(userId, contextId, config);
+    }
 
+    @Override
+    public void putConfig(int userId, int ctxId, String config) throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(userId, ctxId);
+        ConfigProperty<String> property = view.property("user", PREVIEW_CONFIG, String.class);
+
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        Connection con = dbService.getWritable();
+        PreparedStatement stmt = null;
+
+        try {
+            if (property.isDefined()) {
+                String value = property.get();
+                int configId = Integer.valueOf(value);
+
+                stmt = con.prepareStatement(SQL_UPDATE_CONFIG);
+                stmt.setString(1, config);
+                stmt.setInt(2, configId);
+                stmt.execute();
+            } else {
+                stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
+                stmt.setString(1, config);
+                stmt.execute();
+                ResultSet result = stmt.getGeneratedKeys();
+                if (!result.next()) {
+                    // some error
+                    result.close();
+                    throw new OXException();
+                }
+                int resultConfigId = result.getInt(1);
+                property.set(String.valueOf(resultConfigId));
+            }
+        } catch (SQLException e) {
+            throw new OXException(e);
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    // ignore
+                }
+            }
+            dbService.backWritable(con);
+        }
     }
 
     @Override
@@ -263,15 +320,16 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 result.close();
                 stmt.close();
 
-                stmt = con.prepareStatement(SQL_INSERT_CONFIG);
+                stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
                 stmt.setString(1, config);
                 stmt.execute();
                 result = stmt.getGeneratedKeys();
                 if (!result.next()) {
                     // some error
+                    throw new OXException();
                 }
                 int resultConfigId = result.getInt(1);
-
+                stmt.close();
                 stmt = con.prepareStatement(SQL_INSERT_MAPPING);
                 stmt.setString(1, reseller);
                 stmt.setString(2, pack);
@@ -309,12 +367,6 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         putConfig(reseller, null, config);
     }
 
-    @Override
-    public void putConfigByName(String name, String config) throws OXException {
-        // TODO put config
-
-    }
-
     private class AdvertisementConfig implements Comparable<AdvertisementConfig> {
 
         String reseller;
@@ -338,20 +390,20 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         @Override
         public int compareTo(AdvertisementConfig o) {
 
-            if (this.reseller != RESELLER_ALL && o.reseller == RESELLER_ALL) {
-                return 1;
-            }
-
-            if (this.reseller == RESELLER_ALL && o.reseller != RESELLER_ALL) {
+            if (!this.reseller.equals(RESELLER_ALL) && o.reseller.equals(RESELLER_ALL)) {
                 return -1;
             }
 
-            if (this.pack != PACKAGE_ALL && o.pack == PACKAGE_ALL) {
+            if (this.reseller.equals(RESELLER_ALL) && !o.reseller.equals(RESELLER_ALL)) {
                 return 1;
             }
 
-            if (this.pack == PACKAGE_ALL && o.pack != PACKAGE_ALL) {
+            if (!this.pack.equals(PACKAGE_ALL) && o.pack.equals(PACKAGE_ALL)) {
                 return -1;
+            }
+
+            if (this.pack.equals(PACKAGE_ALL) && !o.pack.equals(PACKAGE_ALL)) {
+                return 1;
             }
 
             return 0;

@@ -58,6 +58,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import org.json.JSONObject;
 import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.json.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.annotation.Role;
@@ -78,7 +79,8 @@ public class OCPRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/user")
     public Response putConfig(@QueryParam("ctxId") int ctxId, @QueryParam("userId") int userId, JSONObject body) throws OXException {
-        AdvertisementConfigService configService = Services.getService(AdvertisementConfigService.class);
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getScheme(ctxId);
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
@@ -91,7 +93,8 @@ public class OCPRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/package")
     public Response putConfig(@QueryParam("reseller") String reseller, @QueryParam("package") String pack, JSONObject body) throws OXException {
-        AdvertisementConfigService configService = Services.getService(AdvertisementConfigService.class);
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
@@ -104,7 +107,8 @@ public class OCPRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/reseller")
     public Response putConfig(@QueryParam("reseller") String reseller, JSONObject body) throws OXException {
-        AdvertisementConfigService configService = Services.getService(AdvertisementConfigService.class);
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
@@ -116,12 +120,13 @@ public class OCPRestService {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/name")
-    public Response putConfigByName(@QueryParam("name") String name, JSONObject body) throws OXException {
-        AdvertisementConfigService configService = Services.getService(AdvertisementConfigService.class);
+    public Response putConfigByName(@QueryParam("name") String name, @QueryParam("ctxId") int ctxId, JSONObject body) throws OXException {
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.putConfigByName(name, body.toString());
+        configService.putConfigByName(name, ctxId, body.toString());
         ResponseBuilder builder = Response.status(200);
         return builder.build();
     }

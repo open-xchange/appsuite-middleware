@@ -80,16 +80,19 @@ public interface AdvertisementConfigService {
     /**
      * Sets an advertisement config for a given user by name. This is for testing purpose only.
      * 
-     * @param name
+     * @param name The login name of the user
+     * @param ctxId The context id
+     * @param config The advertisement config
      * @throws OXException
      */
-    public void putConfigByName(String name, String config) throws OXException;
+    public void putConfigByName(String name, int ctxId, String config) throws OXException;
 
     /**
      * Sets an advertisement config for a given user. This is for testing purpose only.
      * 
      * @param userId
      * @param ctxId
+     * @param config The advertisement config
      * @throws OXException
      */
     public void putConfig(int userId, int ctxId, String config) throws OXException;
@@ -99,6 +102,7 @@ public interface AdvertisementConfigService {
      * 
      * @param reseller
      * @param pack
+     * @param config The advertisement config
      * @throws OXException
      */
     public void putConfig(String reseller, String pack, String config) throws OXException;
@@ -107,6 +111,7 @@ public interface AdvertisementConfigService {
      * Sets an advertisement config for a given reseller
      * 
      * @param reseller
+     * @param config The advertisement config
      * @throws OXException
      */
     public void putConfig(String reseller, String config) throws OXException;
