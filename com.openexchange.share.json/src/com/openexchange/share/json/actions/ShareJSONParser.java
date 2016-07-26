@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -243,9 +244,15 @@ public class ShareJSONParser {
     private static InternetAddress parseAddress(JSONArray jRecipient) throws JSONException, OXException {
         try {
             if (jRecipient.length() == 1) {
-                return new QuotedInternetAddress(jRecipient.getString(0));
+                String address = jRecipient.getString(0);
+                if (EmailValidator.getInstance().isValid(address)) {
+                    return new QuotedInternetAddress(address);
+                }
             } else if (jRecipient.length() == 2) {
-                return new QuotedInternetAddress(jRecipient.getString(1), jRecipient.getString(0), "UTF-8");
+                String address = jRecipient.getString(1);
+                if (EmailValidator.getInstance().isValid(address)) {
+                    return new QuotedInternetAddress(address, jRecipient.getString(0), "UTF-8");
+                }
             }
 
             throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(jRecipient.get(0));
