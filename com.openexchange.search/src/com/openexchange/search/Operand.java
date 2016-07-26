@@ -71,7 +71,12 @@ public interface Operand<V> {
         /**
          * A attachment operand.
          */
-        ATTACHMENT("attachment");
+        ATTACHMENT("attachment"),
+        /**
+         * A header within a data object.
+         */
+        HEADER("header"),
+        ;
 
         private final String str;
 
