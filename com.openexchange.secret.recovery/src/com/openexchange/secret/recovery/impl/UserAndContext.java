@@ -47,61 +47,48 @@
  *
  */
 
-package com.openexchange.secret.recovery.json.action;
+package com.openexchange.secret.recovery.impl;
 
-import static com.openexchange.java.Autoboxing.I;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.secret.recovery.SecretInconsistencyDetector;
-import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link CheckAction}
+ * {@link UserAndContext} - A pair of user identifier and associated context.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CheckAction extends AbstractSecretRecoveryAction {
+class UserAndContext {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CheckAction.class);
+    private final int userId;
+    private final Context context;
 
     /**
-     * Initializes a new {@link CheckAction}.
+     * Initializes a new {@link UserAndContext}.
      *
-     * @param services
+     * @param userId The user identifier
+     * @param context The associated context
      */
-    public CheckAction(final ServiceLookup services) {
-        super(services);
+    UserAndContext(int userId, Context context) {
+        super();
+        this.userId = userId;
+        this.context = context;
     }
 
-    @Override
-    protected AJAXRequestResult perform(final SecretRecoveryAJAXRequest req) throws OXException, JSONException {
-        final SecretInconsistencyDetector secretInconsistencyDetector = getService(SecretInconsistencyDetector.class);
-        if (null == secretInconsistencyDetector) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretInconsistencyDetector.class.getName());
-        }
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
 
-        // Check...
-        ServerSession session = req.getSession();
-        String diagnosis = secretInconsistencyDetector.isSecretWorking(session);
-
-        // Compose JSON response
-        JSONObject object;
-        if (diagnosis == null) {
-            // Works...
-            object = new JSONObject(2);
-            object.put("secretWorks", true);
-        } else {
-            LOG.info("Secrets in session {} (user={}, context={}) seem to need migration: {}", session.getSessionID(), I(session.getUserId()), I(session.getContextId()), diagnosis);
-            object = new JSONObject(4);
-            object.put("secretWorks", false);
-            object.put("diagnosis", diagnosis);
-        }
-        return new AJAXRequestResult(object, "json");
+    /**
+     * Gets the context
+     *
+     * @return The context
+     */
+    public Context getContext() {
+        return context;
     }
 
 }
