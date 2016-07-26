@@ -141,7 +141,7 @@ public class SearchTermParser {
     }
 
     protected Operand<?> parseOperand(final JSONObject operand) throws OXException {
-        if (!operand.hasAndNotNull(SearchTermFields.FIELD) && !operand.hasAndNotNull(SearchTermFields.ATTACHMENT)) {
+        if (!operand.hasAndNotNull(SearchTermFields.FIELD) && !operand.hasAndNotNull(SearchTermFields.ATTACHMENT) && !operand.hasAndNotNull(SearchTermFields.HEADER)) {
             throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create();
         }
 
