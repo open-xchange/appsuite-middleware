@@ -298,7 +298,7 @@ public class LocalReportService extends AbstractReportService {
             EXECUTOR_SERVICE_REF.set(newFixedThreadPool);
         }
         ArrayList<Integer> contextsToProcess = new ArrayList<>(allContextIds);
-        LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
+        LOG.debug("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
             Integer firstRemainingContext = contextsToProcess.get(0);
             Integer[] contextsInSameSchema = ArrayUtils.toObject(databaseService.getContextsInSameSchema(firstRemainingContext.intValue()));
@@ -314,9 +314,9 @@ public class LocalReportService extends AbstractReportService {
                 EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, report, Arrays.asList(contextsInSameSchema)));
             } else
                 EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)));
-            LOG.info("{} assigned. {} contexts still to assign.", contextsInSameSchema.length, contextsToProcess.size());
+            LOG.debug("{} assigned. {} contexts still to assign.", contextsInSameSchema.length, contextsToProcess.size());
         }
-        LOG.info("All {} contexts assigned.", allContextIds.size());
+        LOG.debug("All {} contexts assigned.", allContextIds.size());
     }
 
     private static String getThreadName(int threadNumber) {

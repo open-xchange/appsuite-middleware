@@ -374,13 +374,13 @@ public class HazelcastReportService extends AbstractReportService {
 
         ArrayList<Integer> contextsToProcess = new ArrayList<>(allContextIds);
 
-        LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
+        LOG.debug("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
             Integer firstRemainingContext = contextsToProcess.get(0);
             Integer[] contextsInSameSchema = ArrayUtils.toObject(databaseService.getContextsInSameSchema(firstRemainingContext.intValue()));
 
             Member member = getRandomMember(hazelcast);
-            LOG.info("{} will get assigned to new thread on hazelcast member {}", contextsInSameSchema.length, member.getSocketAddress().toString());
+            LOG.debug("{} will get assigned to new thread on hazelcast member {}", contextsInSameSchema.length, member.getSocketAddress().toString());
 
             if (report != null) {
                 executorService.submitToMember(new AnalyzeContextBatch(uuid, report, Arrays.asList(contextsInSameSchema)), member);
@@ -390,7 +390,7 @@ public class HazelcastReportService extends AbstractReportService {
             for (int i = 0; i < contextsInSameSchema.length; i++) {
                 contextsToProcess.remove(Integer.valueOf(contextsInSameSchema[i]));
             }
-            LOG.info("{} contexts still to assign.", contextsToProcess.size());
+            LOG.debug("{} contexts still to assign.", contextsToProcess.size());
         }
     }
 
