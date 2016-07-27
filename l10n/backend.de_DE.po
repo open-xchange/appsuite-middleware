@@ -1,4 +1,4 @@
-Le# #-#-#-#-#  server.de_DE.po (server.de_DE)  #-#-#-#-#
+# #-#-#-#-#  server.de_DE.po (server.de_DE)  #-#-#-#-#
 # translation of server.de_DE.po to deutsch
 # translation of server.new.de_DE.po to
 # translation of server.de_DE.po to
@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-07-19 13:01+0100\n"
+"PO-Revision-Date: 2016-07-27 10:05+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3541,6 +3541,11 @@ msgstr "Das Passwort wurde erfolgreich geändert. Bitte melden Sie sich ab und w
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:70
 msgid "Password was not changed."
 msgstr "Das Passwort wurde nicht geändert."
+
+#. The topic(s) of interest is/are invalid
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pns/src/com/openexchange/pns/PushExceptionMessages.java:63
+msgid "One or more specified topics are invalid."
+msgstr "Mindestens ein angegebenes Thema ist ungültig."
 
 #. *
 #. * User %1$s has no mail module access due to user configuration
