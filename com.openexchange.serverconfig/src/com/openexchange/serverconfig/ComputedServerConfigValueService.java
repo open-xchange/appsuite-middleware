@@ -54,7 +54,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link ComputedServerConfigValueService} - Services implementing this interface are able to add computed values to the server config object that is being generated.
+ * {@link ComputedServerConfigValueService}
+ * <p/>
+ * Services implementing this interface are able to add computed values to the server config object that is being generated.
+ * <p/>
+ * <b>Note:</b> When modifying this interface, mind that there is also an external implementations at
+ * <code>open-xchange-mailapp-backend</code> that follows a different release-cycle.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
