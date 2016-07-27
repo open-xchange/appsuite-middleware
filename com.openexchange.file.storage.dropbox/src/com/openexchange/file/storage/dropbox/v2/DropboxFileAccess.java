@@ -63,6 +63,9 @@ import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.ListRevisionsResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.ThumbnailErrorException;
+import com.dropbox.core.v2.files.ThumbnailFormat;
+import com.dropbox.core.v2.files.ThumbnailSize;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -108,6 +111,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public boolean exists(String folderId, String id, String version) throws OXException {
+        //TODO: double check whether the 'version' parameter has to be used
         try {
             Metadata metadata = getMetadata(folderId + id);
             return metadata instanceof FileMetadata;
@@ -126,6 +130,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
+        //TODO: double check whether the 'version' parameter has to be used
         try {
             //TODO: Use a method for creating the full path of 'folderId' and 'id' 
             Metadata metadata = getMetadata(folderId + id);
@@ -525,8 +530,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            DbxDownloader<FileMetadata> dbxDownloader = client.files().getThumbnailBuilder(folderId + id).withFormat(ThumbnailFormat.JPEG).withSize(ThumbnailSize.W128H128).start();
+            return dbxDownloader.getInputStream();
+        } catch (ThumbnailErrorException e) {
+            // TODO: Maybe introduce new exception codes?
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /**
