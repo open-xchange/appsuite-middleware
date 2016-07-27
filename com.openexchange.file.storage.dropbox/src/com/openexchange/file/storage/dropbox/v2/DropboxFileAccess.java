@@ -432,8 +432,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void startTransaction() throws OXException {
-        // TODO Auto-generated method stub
-
+        // no op
     }
 
     /*
@@ -443,8 +442,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void commit() throws OXException {
-        // TODO Auto-generated method stub
-
+        // no op
     }
 
     /*
@@ -454,8 +452,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void rollback() throws OXException {
-        // TODO Auto-generated method stub
-
+        // no op
     }
 
     /*
@@ -465,8 +462,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void finish() throws OXException {
-        // TODO Auto-generated method stub
-
+        // no op
     }
 
     /*
@@ -476,8 +472,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void setTransactional(boolean transactional) {
-        // TODO Auto-generated method stub
-
+        // no op
     }
 
     /*
@@ -487,8 +482,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void setRequestTransactional(boolean transactional) {
-        // TODO Auto-generated method stub
-
+        // no op
     }
 
     /*
@@ -498,8 +492,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void setCommitsTransaction(boolean commits) {
-        // TODO Auto-generated method stub
-
+        // no op
     }
 
     /*
