@@ -79,6 +79,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
@@ -189,8 +190,38 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (version != CURRENT_VERSION) {
+            // can only copy the current revision
+            throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(DropboxConstants.ID);
+        }
+
+        String path = source.getFolder() + source.getId();
+        String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
+
+        // Ensure filename uniqueness in target folder
+        for (int i = 1; exists(destFolder, destName, CURRENT_VERSION); i++) {
+            destName = FileStorageUtility.enhance(destName, i);
+        }
+
+        try {
+            String destPath = destFolder + destName;
+
+            // Copy
+            Metadata metadata = client.files().copy(path, destPath);
+            if (!(metadata instanceof FileMetadata)) {
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, destPath);
+            }
+            DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+            if (update != null) {
+                update.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+            }
+            return dbxFile.getIDTuple();
+        } catch (RelocationErrorException e) {
+            // TODO Auto-generated catch block
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
