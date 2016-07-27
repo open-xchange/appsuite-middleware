@@ -62,6 +62,7 @@ import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.ListRevisionsErrorException;
 import com.dropbox.core.v2.files.ListRevisionsResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.ThumbnailErrorException;
@@ -530,8 +531,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return getVersions(folderId, id, null);
     }
 
     /*
@@ -541,8 +541,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
     }
 
     /*
@@ -552,8 +551,30 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            // Fetch all revisions
+            ListRevisionsResult revisions = client.files().listRevisions(folderId + id, 100);
+            int numberOfVersions = revisions.getEntries().size();
+            List<File> files = new ArrayList<File>(numberOfVersions);
+
+            // Convert to DropboxFiles
+            int i = 0;
+            for (FileMetadata fileMetadata : revisions.getEntries()) {
+                DropboxFile dbxFile = new DropboxFile(fileMetadata, userId);
+                dbxFile.setNumberOfVersions(numberOfVersions);
+                dbxFile.setIsCurrentVersion(0 == i++);
+                files.add(dbxFile);
+            }
+
+            // Sort & return
+            sort(files, sort, order);
+            return new FileTimedResult(files);
+        } catch (ListRevisionsErrorException e) {
+            // TODO: Maybe introduce new exception codes?
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
