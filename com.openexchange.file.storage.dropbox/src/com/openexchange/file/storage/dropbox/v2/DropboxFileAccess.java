@@ -72,8 +72,8 @@ import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -313,8 +313,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void touch(String folderId, String id) throws OXException {
-        // TODO Auto-generated method stub
-
+        exists(folderId, id, CURRENT_VERSION);
     }
 
     /*
@@ -374,7 +373,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -392,8 +391,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
     }
 
     /*
