@@ -39,5 +39,6 @@ Import-Package: com.openexchange.config,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.file.storage.composition
+Export-Package: com.openexchange.file.storage.composition,
+ com.openexchange.file.storage.composition.crypto
 Bundle-Activator: com.openexchange.file.storage.composition.osgi.FileStorageCompositionActivator

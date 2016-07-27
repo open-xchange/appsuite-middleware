@@ -47,32 +47,46 @@
  *
  */
 
-package com.openexchange.file.storage.json.crypto;
+package com.openexchange.file.storage.composition.crypto;
 
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import java.util.EnumSet;
 
 /**
- * {@link CryptographicServiceAuthenticationFactory} parses authentication for cryptographic services from HTTP requests.
+ * {@link CryptographyMode} specifies a group of cryptographic "actions".
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.8.3
  */
-public interface CryptographicServiceAuthenticationFactory {
+public enum CryptographyMode {
+
+    ENCRYPT,
+    DECRYPT,
+    SIGN,
+    VERIFY;
 
     /**
-     * Parses authentication information from the given request.
+     * Simple factory method to create an EnumSet from a given string.
      *
-     * @param request The request to parse the authentication information from.
-     * @return The authentication information obtained from the request, or null if the request does not contain all necessary information.
+     * @param string The case insensitive string to create the EnumSet for. For example <code>"Encrypt"</code> or <code>"EncryptDecrypt"</code>.
+     * @return The enum set parsed from the given string.
      */
-    public String createAuthenticationFrom(HttpServletRequest request);
-
-    /**
-     * Parses authentication information from the given {@link AJAXRequestData}.
-     *
-     * @param requestData The {@link AJAXRequestData} to parse the authentication information from.
-     * @return The authentication information obtained from {@link AJAXRequestData}, or null if the request does not contain all necessary information.
-     */
-    public String createAuthenticationFrom(AJAXRequestData requestData);
+    public static EnumSet<CryptographyMode> createSet(String string) {
+        EnumSet<CryptographyMode> cryptMode = EnumSet.noneOf(CryptographyMode.class);
+        if (string != null) {
+            string = string.toUpperCase();
+            if (string.contains(CryptographyMode.ENCRYPT.name())) {
+                cryptMode.add(ENCRYPT);
+            }
+            if (string.contains(CryptographyMode.DECRYPT.name())) {
+                cryptMode.add(DECRYPT);
+            }
+            if (string.contains(CryptographyMode.SIGN.name())) {
+                cryptMode.add(SIGN);
+            }
+            if (string.contains(CryptographyMode.VERIFY.name())) {
+                cryptMode.add(VERIFY);
+            }
+        }
+        return cryptMode;
+    }
 }

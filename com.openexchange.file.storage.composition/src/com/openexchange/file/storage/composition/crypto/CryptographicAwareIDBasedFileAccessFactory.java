@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage.composition.crypto;
 
 import java.util.EnumSet;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -60,45 +61,6 @@ import com.openexchange.session.Session;
  * @since v7.8.3
  */
 public interface CryptographicAwareIDBasedFileAccessFactory {
-
-    /**
-     * {@link CryptographyMode} specifies a group of cryptographic "actions".
-     *
-     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
-     * @since v7.8.3
-     */
-    public enum CryptographyMode{
-
-        Encrypt,
-        Decrypt,
-        Sign,
-        Verify;
-
-        /**
-         * Simple factory method to create an EnumSet from a given string.
-         *
-         * @param string The case insensitive string to create the EnumSet for. For example <code>"Encrypt"</code> or <code>"EncryptDecrypt"</code>.
-         * @return The enum set parsed from the given string.
-         */
-        public static EnumSet<CryptographyMode> createSet(String string) {
-            EnumSet<CryptographyMode> cryptMode = EnumSet.noneOf(CryptographyMode.class);
-            if(string != null) {
-                if(string.toLowerCase().contains(CryptographyMode.Encrypt.name().toLowerCase())){
-                    cryptMode.add(Encrypt);
-                }
-                if(string.toLowerCase().contains(CryptographyMode.Decrypt.name().toLowerCase())){
-                    cryptMode.add(Decrypt);
-                }
-                if(string.toLowerCase().contains(CryptographyMode.Sign.name().toLowerCase())){
-                    cryptMode.add(Sign);
-                }
-                if(string.toLowerCase().contains(CryptographyMode.Verify.name().toLowerCase())){
-                    cryptMode.add(Verify);
-                }
-            }
-            return cryptMode;
-        }
-    };
 
     /**
      * Decorates an {@link IDBasedFileAccess} object in order to add cryptographic functionality.
@@ -111,17 +73,18 @@ public interface CryptographicAwareIDBasedFileAccessFactory {
      * @return An {@link IDBasedFileAccess} object with cryptographic functionality.
      * @throws OXException
      */
-    public IDBasedFileAccess createAccess(IDBasedFileAccess fileAccess, EnumSet<CryptographyMode> modes, Session session, String authentication) throws OXException;
+    IDBasedFileAccess createAccess(IDBasedFileAccess fileAccess, EnumSet<CryptographyMode> modes, Session session, String authentication) throws OXException;
 
     /**
      * Decorates an {@link IDBasedFileAccess} object in order to add cryptographic functionality.
      * <p>
      * The implementation has to obtain authentication information from the given session, if necessary.
      * </p>
+     *
      * @param fileAccess The {@link IDBasedFileAccess} object to decorate.
      * @param modes The cryptographic modes which should be supported.
      * @param session The session identifying a user.
      * @return An {@link IDBasedFileAccess} object with cryptographic functionality.
      */
-    public IDBasedFileAccess createAccess(IDBasedFileAccess fileAccess, EnumSet<CryptographyMode> modes, Session session) throws OXException;
+    IDBasedFileAccess createAccess(IDBasedFileAccess fileAccess, EnumSet<CryptographyMode> modes, Session session) throws OXException;
 }
