@@ -1,4 +1,4 @@
-# #-#-#-#-#  server.de_DE.po (server.de_DE)  #-#-#-#-#
+Le# #-#-#-#-#  server.de_DE.po (server.de_DE)  #-#-#-#-#
 # translation of server.de_DE.po to deutsch
 # translation of server.new.de_DE.po to
 # translation of server.de_DE.po to
@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-06-22 14:56+0100\n"
+"PO-Revision-Date: 2016-07-19 13:01+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -2668,43 +2668,48 @@ msgstr "Auf dem Server trat ein vorübergehender Fehler auf. Die Anfrage konnte 
 msgid "A temporary error occurred inside the server which prevented it from fulfilling the request. Please try again later."
 msgstr "Auf dem Server trat ein vorübergehender Fehler auf. Die Anfrage konnte nicht verarbeitet werden. Bitte versuchen Sie es später erneut."
 
-#. The general message for a conflicting update operation.
+#. The default message displayed to user when processing was intentionally denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:72
+msgid "The server is refusing to process the request."
+msgstr "Der Server verweigert die Verarbeitung der Anfrage."
+
+#. The general message for a conflicting update operation.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
 msgid "The object has been changed in the meantime."
 msgstr "Das Objekt hat sich mittlerweile geändert."
 
 #. The general message for a missing object.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
 msgid "Object not found. %1$s"
 msgstr "Objekt nicht gefunden. %1$s"
 
 #. The general message if a user has no access to a certain module (e.g. calendar)
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:81
 msgid "No permission for module: %1$s."
 msgstr "Keine Berechtigung für das Modul: %1$s."
 
 #. The general message if a user has no permission to access a certain folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:84
 msgid "No folder permission."
 msgstr "Keine Ordnerberechtigung"
 
 #. The general message for a missing field.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
 msgid "Missing field: %s"
 msgstr "Fehlendes Feld: %s"
 
 #. The general message if an error occurred while reading or writing to the database
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
 msgid "Error while reading/writing data from/to the database."
 msgstr "Fehler beim Lesen oder Schreiben aus bzw. in die Datenbank."
 
 #. General message if a setting cannot be put into database because it exceeds a column's capacity constraints
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
 msgid "Data cannot be stored into the database because it is too big"
 msgstr "Die Daten können nicht in der Datenbank gespeichert werden, da sie zu umfangreich sind"
 
 #. The request sent by the client was syntactically incorrect
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:96
 msgid "The request sent by the client was syntactically incorrect"
 msgstr "Die vom Client gesendete Anfrage ist syntaktisch falsch"
 
@@ -6976,28 +6981,34 @@ msgstr "Die Upload-Datei mit der ID \"%1$s\" konnte nicht gefunden werden."
 msgid "Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"."
 msgstr "Der Inhaltstyp \"%1$s\" der Upload-Datei passt nicht zu angegebenem Dateifilter \"%2$s\"."
 
+#. Upload file is invalid or illegal
+#. Thrown to indicate that currently uploaded file is not accepted for being saved due to illegal and/or harmful content
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:105
+msgid "Upload file is invalid or illegal."
+msgstr "Hochgeladene Datei ist ungültig oder unzulässig"
+
 #. Request rejected because its size exceeds the maximum configured size of %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:108
 msgid "Request rejected because its size exceeds the maximum configured size of %1$s."
 msgstr "Anfrage abgelehnt. Die Größe übersteigt die maximal konfigurierte Größe von %1$s."
 
 #. Connection has been closed unexpectedly. Please try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:111
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "Verbindung wurde geschlossen. Bitte erneut versuchen."
 
 #. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:114
 msgid "Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s."
 msgstr "Anfrage abgelehnt. Die Dateigröße (%1$s) übersteigt die konfigurierte maximale Dateigröße von %2$s."
 
 #. Request rejected because file size exceeds the maximum configured file size of %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:117
 msgid "Request rejected because file size exceeds the maximum configured file size of %1$s."
 msgstr "Anfrage abgelehnt. Die Dateigröße übersteigt die konfigurierte maximale Dateigröße von %1$s."
 
 #. Read timed out. Waited too long for incoming data from client.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:120
 msgid "Read timed out. Waited too long for incoming data from client."
 msgstr "Zeitlimit überschritten. Das Warten auf eingehende Daten vom Client dauerte zu lange."
 

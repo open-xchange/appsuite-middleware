@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.RawProperty;
@@ -71,9 +72,10 @@ public class ExtendedStringPropertyMapping extends ExtendedPropertyMapping {
      * @param field The contact field
      * @param propertyName The vCard property name
      * @param alternativeNames Optional alternative property names that should be used during mapping
+     * @param contactField The corresponding contact field
      */
-    public ExtendedStringPropertyMapping(int field, String propertyName, String...alternativeNames) {
-        super(field, propertyName);
+    public ExtendedStringPropertyMapping(int field, String propertyName, ContactField contactField, String...alternativeNames) {
+        super(field, propertyName, contactField);
         this.alternativeNames = alternativeNames;
     }
 

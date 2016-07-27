@@ -34,6 +34,11 @@
         type: integer
         description: The last index (inclusive) from the ordered search, that is requested.
         required: false
+      - in: query
+        name: includeSubfolders
+        type: boolean
+        description: If set to \"true\" and a \"folder\" is specified, this folder and all of its subfolders are considered by the search.
+        required: false
       - in: body
         name: body
         description: A JSON object containing search parameters.

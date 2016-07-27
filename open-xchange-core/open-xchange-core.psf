@@ -196,6 +196,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.apache.felix.eventadmin.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.codehaus.stax2"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.fishwife.jrugged"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.ho.jyaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.javasimon"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.json"/>

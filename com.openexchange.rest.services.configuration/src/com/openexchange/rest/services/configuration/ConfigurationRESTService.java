@@ -79,14 +79,14 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.0
  */
-@Path("/configuration/v1")
+@Path("/preliminary/configuration/v1")
 public class ConfigurationRESTService {
 
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link ConfigurationRESTService}.
-     * 
+     *
      * @param services
      */
     public ConfigurationRESTService(ServiceLookup services) {
@@ -176,7 +176,7 @@ public class ConfigurationRESTService {
 
     /**
      * Get the ConfigViewFactory
-     * 
+     *
      * @return the ConfigViewFactory
      */
     private ConfigViewFactory getConfigViewFactory() {
@@ -190,7 +190,7 @@ public class ConfigurationRESTService {
 
     /**
      * Handle the UserNotFound or the ContextNotFound exceptions.
-     * 
+     *
      * @param The OXException
      * @return NotFoundException or InternalServerExcetpion
      */

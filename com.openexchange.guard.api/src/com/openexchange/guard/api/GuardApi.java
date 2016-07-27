@@ -98,6 +98,18 @@ public interface GuardApi {
     <R> R doCallGet(Map<String, String> parameters, Class<? extends R> clazz) throws OXException;
 
     /**
+     * Performs a POST using given parameters.
+     * 
+     * @param parameters
+     * @param bodyParameters
+     * @param clazz The return type
+     * @return The data
+     * @throws OXException
+     * @see GuardApis#mapFor(String...)
+     */
+    public <R> R doCallPost(Map<String, String> parameters, Map<String, String> bodyParameters, Class<? extends R> clazz) throws OXException;
+
+    /**
      * Performs the PUT using given parameters.
      *
      * @param parameters
@@ -129,6 +141,18 @@ public interface GuardApi {
      * @see GuardApis#mapFor(String...)
      */
     InputStream processResource(Map<String, String> parameters, InputStream resource, String contentType, String name) throws OXException;
+    
+    /**
+     * Requests Guard end-point to process multiply resources.
+     *
+     * @param parameters The request parameters
+     * @param resources The resources
+     * @param contentType The resources' content type (optional)
+     * @return The processed resource data
+     * @throws OXException If resource data cannot be returned
+     * @see GuardApis#mapFor(String...)
+     */
+    InputStream processResources(Map<String, String> parameters, Map<String, InputStream> resources, String contentType) throws OXException;
 
     /**
      * Performs the GET using given parameters.

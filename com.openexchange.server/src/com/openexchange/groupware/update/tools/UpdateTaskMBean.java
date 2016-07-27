@@ -56,7 +56,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -83,7 +82,6 @@ import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.CanceledTimerTaskException;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -102,7 +100,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
     private final MBeanInfo mbeanInfo;
 
     private final String[] taskTypeNames = { "taskName", "successful", "lastModified" };
-    private final ConcurrentMap<String, JobInfo<?>> jobs;
+    private final ConcurrentMap<String, UpdateTaskToolkitJob<?>> jobs;
     private CompositeType taskType;
     private TabularType taskListType;
     private ScheduledTimerTask timerTask; // Guarded by synchronized
@@ -113,12 +111,12 @@ public final class UpdateTaskMBean implements DynamicMBean {
     public UpdateTaskMBean() {
         super();
         mbeanInfo = buildMBeanInfo();
-        jobs = new ConcurrentHashMap<String, JobInfo<?>>(10, 0.9F, 1);
+        jobs = new ConcurrentHashMap<String, UpdateTaskToolkitJob<?>>(10, 0.9F, 1);
     }
 
-    private void addJobInfo(String jobId, JobInfo<Void> jobInfo) {
+    private void addJob(UpdateTaskToolkitJob<Void> job) {
         synchronized (this) {
-            jobs.put(jobId, jobInfo);
+            jobs.put(job.getId(), job);
 
             if (null == timerTask) {
                 TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
@@ -134,19 +132,19 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 }
             }
 
-            jobInfo.start();
+            job.start();
         }
     }
 
     private String getJobStatusText(final Object[] params) {
         String key = params[0].toString();
-        JobInfo<?> jobInfo = jobs.get(key);
-        if (null == jobInfo) {
+        UpdateTaskToolkitJob<?> job = jobs.get(key);
+        if (null == job) {
             return null;
         }
 
-        String stText = jobInfo.getStatusText();
-        if (jobInfo.isDone()) {
+        String stText = job.getStatusText();
+        if (job.isDone()) {
             if (null != jobs.remove(key)) {
                 synchronized (this) {
                     dropTimerTaskIfEmpty();
@@ -166,9 +164,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
     void cleanUp() {
         synchronized (this) {
             boolean somethingRemoved = false;
-            for (Iterator<JobInfo<?>> it = jobs.values().iterator(); it.hasNext();) {
-                JobInfo<?> jobInfo = it.next();
-                if (null == jobInfo || jobInfo.isDone()) {
+            for (Iterator<UpdateTaskToolkitJob<?>> it = jobs.values().iterator(); it.hasNext();) {
+                UpdateTaskToolkitJob<?> job = it.next();
+                if (null == job || job.isDone()) {
                     it.remove();
                     somethingRemoved = true;
                 }
@@ -335,10 +333,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
                     }
                 }
 
-                String jobId = UUIDs.getUnformattedString(UUID.randomUUID());
-                JobInfo<Void> jobInfo = UpdateTaskToolkit.runUpdateOnAllSchemas(jobId, throwExceptionOnFailure);
-                addJobInfo(jobId, jobInfo);
-                return jobId;
+                UpdateTaskToolkitJob<Void> job = UpdateTaskToolkit.runUpdateOnAllSchemas(throwExceptionOnFailure);
+                addJob(job);
+                return job.getId();
             } catch (final OXException e) {
                 LOG.error("", e);
                 final Exception wrapMe = new Exception(e.getPlainLogMessage());

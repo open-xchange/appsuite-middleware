@@ -134,6 +134,12 @@ case "${BNAME}" in
     "unregisterdatabase")
     ACTION="util.database.UnregisterDatabase"
     ;;
+    "checkdatabase")
+    ACTION="util.database.CheckDatabase"
+    ;;
+    "unblockdatabase")
+    ACTION="util.database.UnblockDatabase"
+    ;;
     "unregisterfilestore")
     ACTION="util.filestore.UnregisterFilestore"
     ;;

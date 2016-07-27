@@ -142,8 +142,9 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
             return Collections.emptyList();
         }
 
-        List<S> ret = new ArrayList<S>(services.size());
-        for (RankedService<S> rs : services) {
+        List<RankedService<S>> snapshot = services.getSnapshot();
+        List<S> ret = new ArrayList<S>(snapshot.size());
+        for (RankedService<S> rs : snapshot) {
             ret.add(rs.service);
         }
         return ret;

@@ -54,6 +54,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
@@ -66,6 +67,13 @@ import ezvcard.property.Email;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class EMailMapping extends AbstractMapping {
+
+    /**
+     * Initializes a new {@link EMailMapping}.
+     */
+    public EMailMapping() {
+        super("EMAIL", ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3);
+    }
 
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {

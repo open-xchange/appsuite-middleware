@@ -684,7 +684,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("", e);
                 }
             }
-            boolean certainPassword = "openstack-200.open-xchange.com".equals(config.getServer());
+            boolean certainPassword = false;
             if (certainPassword) {
                 tmpPass = "secret";
             }

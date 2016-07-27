@@ -7,6 +7,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.openexchange.ajax.fileholder,
  com.openexchange.ajax.response,
+ com.openexchange.antiabuse,
  com.openexchange.auth,
  com.openexchange.auth.mbean,
  com.openexchange.auth.rmi,

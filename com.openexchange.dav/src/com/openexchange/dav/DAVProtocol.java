@@ -49,10 +49,15 @@
 
 package com.openexchange.dav;
 
+import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Namespace;
 import com.openexchange.dav.reports.PrinicpalPropertySearchReport;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link DAVProtocol}
@@ -77,12 +82,117 @@ public abstract class DAVProtocol extends Protocol {
     /** HTTP/1.1 507 Insufficient Storage */
     public static final int SC_INSUFFICIENT_STORAGE = 507;
 
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVProtocol.class);
+
     @Override
     public WebdavAction getReportAction(String namespace, String name) {
         if (PrinicpalPropertySearchReport.NAMESPACE.equals(namespace) && PrinicpalPropertySearchReport.NAME.equals(name)) {
             return new PrinicpalPropertySearchReport(this);
         }
         return super.getReportAction(namespace, name);
+    }
+
+    /**
+     * Generates a {@link WebdavProtocolException} with a generic error message signaling the specified HTTP status code.
+     *
+     * @param url The WebDAV path of the underlying resource, or <code>null</code> if unknown
+     * @param statusCode The HTTP status code
+     * @return The appropriate {@link WebdavProtocolException}
+     */
+    public static WebdavProtocolException protocolException(WebdavPath url, int statusCode) {
+        return protocolException(url, WebdavProtocolException.generalError(url, statusCode), statusCode);
+    }
+
+    /**
+     * Generates a {@link WebdavProtocolException} with a generic error message signaling the specified HTTP status code, using the
+     * supplied exception as root cause.
+     *
+     * @param url The WebDAV path of the underlying resource, or <code>null</code> if unknown
+     * @param e The exception to get the protocol exception for
+     * @param statusCode The HTTP status code
+     * @return The appropriate {@link WebdavProtocolException}
+     */
+    public static WebdavProtocolException protocolException(WebdavPath url, Exception e, int statusCode) {
+        if (WebdavProtocolException.class.isInstance(e)) {
+            return protocolException(url, (WebdavProtocolException) e, statusCode);
+        }
+        if (OXException.class.isInstance(e)) {
+            return protocolException(url, (OXException) e, statusCode);
+        }
+        return protocolException(url, WebdavProtocolException.generalError(e, url, statusCode), statusCode);
+    }
+
+    /**
+     * Generates a {@link WebdavProtocolException} with a generic error message signaling the specified HTTP status code, using the
+     * supplied exception as root cause. Appropriate logging is performed implicitly based on the exception's category.
+     *
+     * @param url The WebDAV path of the underlying resource, or <code>null</code> if unknown
+     * @param e The exception to get the protocol exception for
+     * @param statusCode The HTTP status code
+     * @return The appropriate {@link WebdavProtocolException}
+     */
+    public static WebdavProtocolException protocolException(WebdavPath url, OXException e, int statusCode) {
+        switch (e.getCategory().getLogLevel()) {
+            case TRACE:
+                LOG.trace("{}", url, e);
+                break;
+            case DEBUG:
+                LOG.debug("{}", url, e);
+                break;
+            case INFO:
+                LOG.info("{}", url, e);
+                break;
+            case WARNING:
+                LOG.warn("{}", url, e);
+                break;
+            case ERROR:
+                LOG.error("{}", url, e);
+                break;
+            default:
+                break;
+        }
+        return WebdavProtocolException.class.isInstance(e) ? (WebdavProtocolException) e : WebdavProtocolException.generalError(e, url, statusCode);
+    }
+
+    /**
+     * Generates a {@link WebdavProtocolException} with a generic error message signaling an appropriate HTTP status code, using the
+     * supplied exception as root cause.
+     *
+     * @param url The WebDAV path of the underlying resource, or <code>null</code> if unknown
+     * @param e The exception to get the protocol exception for
+     * @return The appropriate {@link WebdavProtocolException}
+     */
+    public static WebdavProtocolException protocolException(WebdavPath url, Exception e) {
+        if (OXException.class.isInstance(e)) {
+            return protocolException(url, e, getStatusCode(((OXException) e).getCategory()));
+        } else {
+            return protocolException(url, e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Gets an HTTP status code appropriate for the supplied exception category.
+     *
+     * @param category the exception category to get the status code for
+     * @return The status code, or {@link HttpServletResponse#SC_INTERNAL_SERVER_ERROR} if no suitable code available
+     */
+    private static int getStatusCode(Category category) {
+        if (Category.CATEGORY_USER_INPUT.equals(category) || Category.CATEGORY_TRUNCATED.equals(category)) {
+            return HttpServletResponse.SC_BAD_REQUEST;
+        }
+        if (Category.CATEGORY_PERMISSION_DENIED.equals(category)) {
+            return HttpServletResponse.SC_FORBIDDEN;
+        }
+        if (Category.CATEGORY_CONFLICT.equals(category)) {
+            return HttpServletResponse.SC_CONFLICT;
+        }
+        if (Category.CATEGORY_SERVICE_DOWN.equals(category)) {
+            return HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+        }
+        if (Category.CATEGORY_CAPACITY.equals(category)) {
+            return SC_INSUFFICIENT_STORAGE;
+        }
+        return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     }
 
 }

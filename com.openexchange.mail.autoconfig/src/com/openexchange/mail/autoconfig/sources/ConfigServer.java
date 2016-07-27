@@ -155,7 +155,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             }
             
             Header contentType = rsp.getFirstHeader("Content-Type");
-            if (!contentType.getValue().equals("text/xml")) {
+            if (!contentType.getValue().contains("text/xml")) {
                 LOG.warn("Could not retrieve config XML from autoconfig server. The response's content type is not of 'text/xml'.");
                 return null;
             }

@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 3
+%define         ox_release 4
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -27,7 +27,6 @@ Summary:        The Open Xchange backend Virtual Mail Attachment file storage ex
 Autoreqprov:   no
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-imap >= @OXVERSION@
-Provides:       open-xchange-file-storage-mail = %{version}
 
 %description
 Adds a file storage service for the Virtual Mail Attachments to the backend installation.
@@ -46,6 +45,19 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    PFILE=/opt/open-xchange/etc/filestorage-maildrive.properties
+
+    # SoftwareChange_Request-3470
+    ox_add_property com.openexchange.file.storage.mail.maxAccessesPerUser 4 $PFILE
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -61,6 +73,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jul 12 2016 Thorben Betten <thorben.betten@open-xchange.com>
+Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Thorben Betten <thorben.betten@open-xchange.com>
 First candidate for 7.8.2 release
 * Wed Jun 29 2016 Thorben Betten <thorben.betten@open-xchange.com>

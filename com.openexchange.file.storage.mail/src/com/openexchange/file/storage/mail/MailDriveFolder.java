@@ -165,7 +165,14 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
         }
     }
 
-    private static Locale getSessionUserLocale(Session session) throws OXException {
+    /**
+     * Extracts the locale from specified session
+     *
+     * @param session The session
+     * @return The locale
+     * @throws OXException If extracting the locale fails
+     */
+    public static Locale getSessionUserLocale(Session session) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser().getLocale();
         }

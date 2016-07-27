@@ -102,3 +102,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.file.storage.json.osgi.FileStorageJSONActivator
+Export-Package: com.openexchange.file.storage.json.crypto

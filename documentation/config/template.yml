@@ -1,0 +1,24 @@
+array:
+  - data:
+      Key: c.o.some.property
+      Description: >
+        line1
+        line2
+        line3
+      Default: true
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related: 
+      File:
+  - data:
+      Key: c.o.some.property2
+      Description: >
+        line1
+        line2
+      Default: true
+      Version: 7.8.0
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: c.o.some.property
+      File: somefile.properties

@@ -1,3 +1,9 @@
+open-xchange-file-storage-googledrive (7.8.2-4) stable; urgency=medium
+
+  * Second candidate for 7.8.2 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 12 Jul 2016 09:20:37 +0200
+
 open-xchange-file-storage-googledrive (7.8.2-3) stable; urgency=medium
 
   * First candidate for 7.8.2 release

@@ -178,20 +178,23 @@ public abstract class AbstractResource implements WebdavResource {
 		internalPutProperty(prop);
 	}
 
+    @Override
+    public WebdavProperty getProperty(WebdavProperty property) throws WebdavProtocolException {
+        WebdavProperty prop = handleSpecialGet(property.getNamespace(), property.getName());
+        if(prop != null) {
+            return prop;
+        }
+        prop = getFromMixin(property.getNamespace(), property.getName());
+        if (prop != null) {
+            return prop;
+        }
+        return internalGetProperty(property);
+    }
 
 	@Override
     public WebdavProperty getProperty(final String namespace, final String name) throws WebdavProtocolException {
-		WebdavProperty prop = handleSpecialGet(namespace, name);
-		if(prop != null) {
-			return prop;
-		}
-		prop = getFromMixin(namespace, name);
-		if (prop != null) {
-		    return prop;
-		}
-		return internalGetProperty(namespace, name);
+	    return getProperty(new WebdavProperty(namespace, name));
 	}
-
 
     @Override
     public List<WebdavProperty> getAllProps() throws WebdavProtocolException{
@@ -381,7 +384,11 @@ public abstract class AbstractResource implements WebdavResource {
 
 	protected abstract void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException;
 
-	protected abstract WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException;
+    protected abstract WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException;
+
+    protected WebdavProperty internalGetProperty(WebdavProperty property) throws WebdavProtocolException {
+        return internalGetProperty(property.getNamespace(), property.getName());
+    }
 
 	protected abstract boolean isset(Property p);
 

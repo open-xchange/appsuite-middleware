@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.contact.vcard.VCardImport;
@@ -62,14 +63,15 @@ import com.openexchange.contact.vcard.VCardParametersFactory;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.VCardVersion;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import ezvcard.Ezvcard;
-import ezvcard.Ezvcard.WriterChainText;
 import ezvcard.VCard;
+import ezvcard.io.chain.ChainingTextWriter;
 import ezvcard.util.IOUtils;
 
 /**
@@ -151,6 +153,11 @@ public class DefaultVCardService implements VCardService {
         return new VCardImportIterator(vCards, mapper, vCardParameters);
     }
 
+    @Override
+    public ContactField[] getContactFields(Set<String> propertyNames) {
+        return mapper.getContactFields(propertyNames);
+    }
+
     /**
      * Gets the vCard parameters, or the default parameters if passed instance is <code>null</code>.
      *
@@ -170,7 +177,7 @@ public class DefaultVCardService implements VCardService {
      */
     private ThresholdFileHolder exportVCards(List<VCard> vCards, VCardParameters parameters) throws OXException {
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-        WriterChainText writerChain = Ezvcard.write(vCards);
+        ChainingTextWriter writerChain = Ezvcard.write(vCards);
         applyOptions(getParametersOrDefault(parameters), writerChain);
         try {
             if(parameters.isEnforceUtf8()) {
@@ -185,7 +192,7 @@ public class DefaultVCardService implements VCardService {
         }
     }
 
-    private static WriterChainText applyOptions(VCardParameters parameters, WriterChainText writerChain) {
+    private static ChainingTextWriter applyOptions(VCardParameters parameters, ChainingTextWriter writerChain) {
         writerChain.prodId(false);
         if (null != parameters) {
             writerChain.version(getVCardVersion(parameters.getVersion()));

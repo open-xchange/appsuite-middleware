@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
@@ -375,6 +376,24 @@ public abstract class OXToolStorageInterface {
     public abstract int getDatabaseIDByDatabaseSchema(String schemaName) throws StorageException, NoSuchObjectException;
 
     /**
+     * Gets the database schema for specified context.
+     *
+     * @param contextId The context identifier
+     * @return The database schema
+     * @throws StorageException If database cannot be loaded
+     * @throws NoSuchObjectException If there is no such database schema
+     */
+    public abstract Database getSchemaByContextId(int contextId) throws StorageException, NoSuchObjectException;
+
+    /**
+     * Generates an appropriate {@link DatabaseUpdateException} for specified context.
+     *
+     * @param contextId The context identifier
+     * @return The <code>DatabaseUpdateException</code> instance
+     */
+    public abstract DatabaseUpdateException generateDatabaseUpdateException(int contextId);
+
+    /**
      * Checks whether all contexts of the given db share the same write pool ID or not.
      *
      * @param schema the schema name
@@ -469,12 +488,20 @@ public abstract class OXToolStorageInterface {
     public abstract boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException;
 
     /**
-     * Lists all schemas in databases that need an update.
+     * Lists all schemas in databases that are either locked (currently marked as being updated) or needing an update.
      *
-     * @return All schema that need an update
+     * @return All such schemas as a list with length of 3; first element contains schemas needing an update, the second those schemas currently marked for being updated, and the third providing outdated updating schemas
      * @throws StorageException If such schemas cannot be returned
      */
-    public abstract List<Database> listSchemasNeedingUpdate() throws StorageException;
+    public abstract List<List<Database>> listSchemasBeingLockedOrNeedsUpdate() throws StorageException;
+
+    /**
+     * Unblocks specified database schema or all schemas associated with specified database inc ase no schema name is given.
+     *
+     * @return The list of unblocked database schemas
+     * @throws StorageException If unblocking fails
+     */
+    public abstract List<Database> unblockDatabaseSchema(Database db) throws StorageException;
 
     public abstract boolean serverInUse(final int server_id) throws StorageException;
 

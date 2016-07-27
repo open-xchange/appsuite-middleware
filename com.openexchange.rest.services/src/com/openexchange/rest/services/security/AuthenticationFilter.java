@@ -88,11 +88,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
-    private boolean doFail;
-
-    private String authLogin;
-
-    private String authPassword;
+    private final boolean doFail;
+    private final String authLogin;
+    private final String authPassword;
 
     public AuthenticationFilter(String authLogin, String authPassword) {
         super();

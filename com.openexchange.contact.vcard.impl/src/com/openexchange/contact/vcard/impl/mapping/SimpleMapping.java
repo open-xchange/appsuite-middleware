@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.VCardProperty;
@@ -71,11 +72,25 @@ public abstract class SimpleMapping<T extends VCardProperty> extends AbstractMap
      *
      * @param field The mapped contact column identifier
      * @param propertyClass The vCard property class
+     * @param propertyNames The affected vCard property names
+     * @param contactFields The affected contact fields
      */
-    protected SimpleMapping(int field, Class<T> propertyClass) {
-        super();
+    protected SimpleMapping(int field, Class<T> propertyClass, String[] propertyNames, ContactField...contactFields) {
+        super(propertyNames, contactFields);
         this.field = field;
         this.propertyClass = propertyClass;
+    }
+
+    /**
+     * Initializes a new {@link SimpleMapping}.
+     *
+     * @param field The mapped contact column identifier
+     * @param propertyClass The vCard property class
+     * @param propertyName The affected vCard property name
+     * @param contactFields The affected contact fields
+     */
+    protected SimpleMapping(int field, Class<T> propertyClass, String propertyName, ContactField...contactFields) {
+        this(field, propertyClass, new String[] { propertyName }, contactFields);
     }
 
     protected abstract void exportProperty(Contact contact, T property, List<OXException> warnings);

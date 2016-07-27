@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,6 +83,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -102,6 +105,12 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CardDAVCollection extends CommonFolderCollection<Contact> {
+
+    /** A list of basic contact fields that are fetched when getting contacts from the storage */
+    protected static final ContactField[] BASIC_FIELDS = {
+        ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.UID,
+        ContactField.FILENAME, ContactField.FOLDER_ID, ContactField.VCARD_ID
+    };
 
     protected final GroupwareCarddavFactory factory;
 
@@ -177,7 +186,7 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
 
     /**
      * Tests if the given contact is too similar to another contact in the same folder
-     * 
+     *
      * @param maxSimilarity The maximum accepted similarity
      * @param contact The contact to test
      * @param result The result object
@@ -222,46 +231,9 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
      * @throws PreconditionException <code>(CARDDAV:no-uid-conflict)</code> if the UID conflicts with an existing resource
      */
     private void checkUidConflict(String uid) throws OXException, PreconditionException {
-        /*
-         * prepare search term
-         */
-        List<UserizedFolder> folders = getFolders();
-        if (0 == folders.size()) {
-            return;
-        }
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        if (1 == folders.size()) {
-            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-            term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-            term.addOperand(new ConstantOperand<String>(folders.get(0).getID()));
-            searchTerm.addSearchTerm(term);
-        } else {
-            CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            for (UserizedFolder folder : folders) {
-                SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
-                term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-                term.addOperand(new ConstantOperand<String>(folder.getID()));
-                orTerm.addSearchTerm(term);
-            }
-            searchTerm.addSearchTerm(orTerm);
-        }
-        SingleSearchTerm uidTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-        uidTerm.addOperand(new ContactFieldOperand(ContactField.UID));
-        uidTerm.addOperand(new ConstantOperand<String>(uid));
-        searchTerm.addSearchTerm(uidTerm);
-        /*
-         * lookup conflicting contacts
-         */
-        ContactField[] fields = new ContactField[] { ContactField.FILENAME, ContactField.UID };
-        SearchIterator<Contact> iterator = null;
-        try {
-            iterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm, fields, SortOptions.EMPTY);
-            if (iterator.hasNext()) {
-                Contact contact = iterator.next();
-                throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "no-uid-conflict", constructPathForChildResource(contact), HttpServletResponse.SC_FORBIDDEN);
-            }
-        } finally {
-            SearchIterators.close(iterator);
+        Contact existingContact = getObject(uid);
+        if (null != existingContact) {
+            throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "no-uid-conflict", constructPathForChildResource(existingContact), HttpServletResponse.SC_FORBIDDEN);
         }
     }
 
@@ -302,45 +274,45 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
         return super.getResourceType() + CarddavProtocol.ADDRESSBOOK;
     }
 
+    /**
+     * Gets a list of contact resources matching the supplied search term.
+     *
+     * @param term The search term to use
+     * @return The contact resources, or an empty list if no contacts were found
+     */
     public List<WebdavResource> getFilteredObjects(SearchTerm<?> term) throws WebdavProtocolException {
         List<WebdavResource> resources = new ArrayList<WebdavResource>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator  = searchContacts(term, getFolders());
+            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+            searchTerm.addSearchTerm(getFolderTerm(getFolders()));
+            searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+            searchTerm.addSearchTerm(term);
+            searchIterator = factory.getContactService().searchContacts(factory.getSession(), term);
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
-                resources.add(createResource(contact, constructPathForChildResource(contact)));
+                if (isSynchronized(contact)) {
+                    resources.add(createResource(contact, constructPathForChildResource(contact)));
+                }
             }
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
         return resources;
     }
 
-    protected SearchIterator<Contact> searchContacts(SearchTerm<?> term, List<UserizedFolder> folders) throws OXException {
-        if (null != folders && 0 < folders.size()) {
-            CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.AND);
-            for (UserizedFolder folder : folders) {
-                SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-                folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-                folderIDTerm.addOperand(new ConstantOperand<String>(folder.getID()));
-                compositeTerm.addSearchTerm(folderIDTerm);
-            }
-            compositeTerm.addSearchTerm(term);
-            term = compositeTerm;
-        }
-        return factory.getContactService().searchContacts(factory.getSession(), term);
-    }
-
     @Override
     protected Collection<Contact> getModifiedObjects(Date since) throws OXException {
-        Collection<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new ArrayList<Contact>();
         for (UserizedFolder folder : getFolders()) {
-            Collection<Contact> modifiedContacts = factory.getState().getModifiedContacts(since, folder.getID());
-            if (null != modifiedContacts) {
-                contacts.addAll(modifiedContacts);
+            SearchIterator<Contact> searchIterator = null;
+            try {
+                searchIterator = factory.getContactService().getModifiedContacts(factory.getSession(), folder.getID(), since, BASIC_FIELDS);
+                addSynchronizedContacts(searchIterator, contacts);
+            } finally {
+                SearchIterators.close(searchIterator);
             }
         }
         return contacts;
@@ -348,31 +320,56 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
 
     @Override
     protected Collection<Contact> getDeletedObjects(Date since) throws OXException {
-        Collection<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new ArrayList<Contact>();
         for (UserizedFolder folder : getFolders()) {
-            Collection<Contact> contactList = factory.getState().getDeletedContacts(since, folder.getID());
-            if (null != contactList) {
-                contacts.addAll(contactList);
-            }
+            contacts.addAll(getDeletedContacts(since, folder.getID()));
         }
         return contacts;
     }
 
     @Override
     protected Collection<Contact> getObjects() throws OXException {
-        Collection<Contact> contacts = new ArrayList<Contact>();
-        for (UserizedFolder folder : getFolders()) {
-            Collection<Contact> contactList = factory.getState().getContacts(folder.getID());
-            if (null != contactList) {
-                contacts.addAll(contactList);
-            }
+        /*
+         * prepare search term
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        searchTerm.addSearchTerm(getFolderTerm(getFolders()));
+        searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+        SortOptions sortOptions = new SortOptions(ContactField.OBJECT_ID, Order.ASCENDING);
+        sortOptions.setLimit(factory.getState().getContactLimit());
+        /*
+         * get contacts
+         */
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm, BASIC_FIELDS, sortOptions);
+            return addSynchronizedContacts(searchIterator, new ArrayList<Contact>());
+        } finally {
+            SearchIterators.close(searchIterator);
         }
-        return contacts;
     }
 
     @Override
     protected Contact getObject(String resourceName) throws OXException {
-        return factory.getState().load(resourceName);
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        searchTerm.addSearchTerm(getFolderTerm(getFolders()));
+        searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+        searchTerm.addSearchTerm(getResourceNameTerm(resourceName));
+        SortOptions sortOptions = new SortOptions(ContactField.OBJECT_ID, Order.ASCENDING);
+        sortOptions.setLimit(1);
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm, BASIC_FIELDS, sortOptions);
+            if (searchIterator.hasNext()) {
+                Contact contact = searchIterator.next();
+                if (isSynchronized(contact)) {
+                    return contact;
+                }
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return null;
     }
 
     @Override
@@ -387,15 +384,43 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
 
 	@Override
 	public Date getLastModified() throws WebdavProtocolException {
-       try {
-            Date lastModified = new Date(0);
-            for (UserizedFolder folder : getFolders()) {
-                lastModified = Tools.getLatestModified(lastModified, factory.getState().getLastModified(folder));
+	    try {
+    	    Date lastModified = new Date(0);
+            List<UserizedFolder> folders = getFolders();
+    	    for (UserizedFolder folder : folders) {
+    	        lastModified = Tools.getLatestModified(lastModified, folder);
+    	    }
+            SortOptions sortOptions = new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING);
+            sortOptions.setLimit(1);
+            for (UserizedFolder folder : folders) {
+                SearchIterator<Contact> searchIterator = null;
+                try {
+                    searchIterator = factory.getContactService().getModifiedContacts(factory.getSession(), folder.getID(), lastModified, BASIC_FIELDS, sortOptions);
+                    if (searchIterator.hasNext()) {
+                        Contact contact = searchIterator.next();
+                        if (isSynchronized(contact)) {
+                            lastModified = Tools.getLatestModified(lastModified, contact);
+                        }
+                    }
+                } finally {
+                    SearchIterators.close(searchIterator);
+                }
+                try {
+                    searchIterator = factory.getContactService().getDeletedContacts(factory.getSession(), folder.getID(), lastModified, BASIC_FIELDS, sortOptions);
+                    if (searchIterator.hasNext()) {
+                        Contact contact = searchIterator.next();
+                        if (isSynchronized(contact)) {
+                            lastModified = Tools.getLatestModified(lastModified, contact);
+                        }
+                    }
+                } finally {
+                    SearchIterators.close(searchIterator);
+                }
             }
             return lastModified;
-        } catch (OXException e) {
-            throw protocolException(e);
-        }
+	    } catch (OXException e) {
+	        throw protocolException(getUrl(), e);
+	    }
 	}
 
     @Override
@@ -427,6 +452,124 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
             return value;
         }
         return super.getCTag();
+    }
+
+    /**
+     * Gets a value indicating whether a contact is synchronized via CardDAV or not.
+     *
+     * @param contact The contact to check
+     * @return <code>true</code> if the contact is synchronized, <code>false</code>, otherwise
+     */
+    protected static boolean isSynchronized(Contact contact) {
+        if (contact.getMarkAsDistribtuionlist()) {
+            return false;
+        }
+        if (Strings.isEmpty(contact.getUid())) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Gets a list of contacts that have been deleted after a specific date
+     *
+     * @param since The date after which the contacts have been deleted
+     * @param folderID The identifier of the folder where the deleted contacts have been in
+     * @return The deleted contacts, or an empty list if there are none
+     */
+    protected List<Contact> getDeletedContacts(Date since, String folderID) throws OXException {
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = factory.getContactService().getDeletedContacts(factory.getSession(), folderID, since, BASIC_FIELDS);
+            return addSynchronizedContacts(searchIterator, new ArrayList<Contact>());
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+    }
+
+    /**
+     * Reads contacts from a search iterator and stores the synchronized contacts into the supplied list.
+     *
+     * @param searchIterator The search iterator to read the contacts from
+     * @param contacts The list where to add the read contacts to
+     * @return The passed contact list reference
+     * @throws OXException
+     */
+    protected static List<Contact> addSynchronizedContacts(SearchIterator<Contact> searchIterator, List<Contact> contacts) throws OXException {
+        if (null != searchIterator) {
+            while (searchIterator.hasNext()) {
+                Contact contact = searchIterator.next();
+                if (isSynchronized(contact)) {
+                    contacts.add(contact);
+                }
+            }
+        }
+        return contacts;
+    }
+
+    /**
+     * Gets a search term restricting the contacts to the supplied list of parent folders.
+     *
+     * @param folders The parent folders to restrict the results to
+     * @return The search term
+     */
+    protected static SearchTerm<?> getFolderTerm(List<UserizedFolder> folders) {
+        if (null == folders || 0 == folders.size()) {
+            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.ISNULL);
+            term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+            return term;
+        } else if (1 == folders.size()) {
+            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+            term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+            term.addOperand(new ConstantOperand<String>(folders.get(0).getID()));
+            return term;
+        } else {
+            CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            for (UserizedFolder folder : folders) {
+                SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+                term.addOperand(new ConstantOperand<String>(folder.getID()));
+                orTerm.addSearchTerm(term);
+            }
+            return orTerm;
+        }
+    }
+
+    /**
+     * Gets a search term to exclude contacts marked as distribution list from the results.
+     *
+     * @return The search term
+     */
+    protected static SearchTerm<?> getExcludeDistributionlistTerm() {
+        CompositeSearchTerm noDistListTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        SingleSearchTerm term1 = new SingleSearchTerm(SingleOperation.EQUALS);
+        term1.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
+        term1.addOperand(new ConstantOperand<Integer>(Integer.valueOf(0)));
+        noDistListTerm.addSearchTerm(term1);
+        SingleSearchTerm term2 = new SingleSearchTerm(SingleOperation.ISNULL);
+        term2.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
+        noDistListTerm.addSearchTerm(term2);
+        return noDistListTerm;
+    }
+
+    /**
+     * Gets a search term restricting the contacts to the supplied resource name, matching either the {@link ContactField#UID} or
+     * {@link ContactField#FILENAME} properties.
+     *
+     * @param resourceName The resource name to get the search term for
+     * @return The search term
+     */
+    protected static SearchTerm<?> getResourceNameTerm(String resourceName) {
+        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        SingleSearchTerm uidTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        uidTerm.addOperand(new ContactFieldOperand(ContactField.UID));
+        uidTerm.addOperand(new ConstantOperand<String>(resourceName));
+        orTerm.addSearchTerm(uidTerm);
+        SingleSearchTerm filenameTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        filenameTerm.addOperand(new ContactFieldOperand(ContactField.FILENAME));
+        filenameTerm.addOperand(new ConstantOperand<String>(resourceName));
+        orTerm.addSearchTerm(filenameTerm);
+        return orTerm;
     }
 
 }

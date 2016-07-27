@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,7 +70,6 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
-import com.openexchange.caldav.CalDAVAgent;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.ParticipantTools;
 import com.openexchange.caldav.Patches;
@@ -83,6 +83,7 @@ import com.openexchange.data.conversion.ical.SimpleMode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
@@ -201,7 +202,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     String timeZone = null != object.getTimezone() ? object.getTimezone() : factory.getUser().getTimeZone();
                     List<CalendarDataObject> appointments = factory.getIcalParser().parseAppointments(exceptionICal, TimeZone.getTimeZone(timeZone), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
                     if (null == appointments || 1 != appointments.size() || null == appointments.get(0).getRecurrenceDatePosition()) {
-                        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+                        throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
                     }
                     /*
                      * get matching change exception
@@ -210,7 +211,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(object, false);
                     CalendarDataObject targetedException = getMatchingException(originalExceptions, recurrenceDatePosition);
                     if (null == targetedException) {
-                        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+                        throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
                     }
                     objects.add(targetedException);
                 }
@@ -232,7 +233,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             getAppointmentInterface().deleteAppointmentObject(
                 (CalendarDataObject) this.object, object.getParentFolderID(), object.getLastModified());
         } catch (final SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -249,7 +250,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             CalendarDataObject originalAppointment = parent.load(this.object, false);
             Date clientLastModified = this.object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
-                throw WebdavProtocolException.Code.EDIT_CONFLICT.create(getUrl(), HttpServletResponse.SC_CONFLICT);
+                throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
             }
             /*
              * check folder permissions beforehand
@@ -257,7 +258,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             int ownPermissions = parent.getFolder().getOwnPermission().getWritePermission();
             if (Permission.WRITE_OWN_OBJECTS > ownPermissions ||
                 Permission.WRITE_OWN_OBJECTS == ownPermissions && originalAppointment.getCreatedBy() != factory.getSession().getUserId()) {
-                throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
             /*
              * handle private comments & reminders
@@ -302,7 +303,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             if (null != nextReminder) {
                 if (null != originalAppointment && null == ParticipantTools.findUser(originalAppointment, factory.getUser().getId())) {
-                    throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                    throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }
                 insertOrUpdateReminder(nextReminder);
             }
@@ -380,7 +381,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 /*
                  * process attachments in exceptions (but not for the mac client who can't)
                  */
-                if (false == CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent())) {
+                if (false == DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
                     lastModified = handleAttachments(originalException, exceptionToSave);
                     if (null != lastModified && lastModified.after(clientLastModified)) {
                         clientLastModified = lastModified;
@@ -391,7 +392,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                  */
                 if (null != nextExceptionReminder) {
                     if (null != originalException && null == ParticipantTools.findUser(originalException, factory.getUser().getId())) {
-                        throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                        throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
                     }
                     ReminderObject reminder = optReminder(exceptionToSave);
                     if (null != reminder) {
@@ -429,7 +430,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 }
             }
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -488,7 +489,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 /*
                  * process attachments in exceptions (but not for the mac client who can't)
                  */
-                if (false == CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent())) {
+                if (false == DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
                     lastModified = handleAttachments(null, exception);
                     if (null != lastModified && lastModified.after(clientLastModified)) {
                         clientLastModified = lastModified;
@@ -504,7 +505,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 clientLastModified = exception.getLastModified();
             }
         } catch (final SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -556,7 +557,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * insert a dummy alarm to prevent Apple clients from adding their own default alarms
              */
-            if (CalDAVAgent.IOS_CALENDAR.equals(factory.getState().getUserAgent()) || CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent())) {
+            if (DAVUserAgent.IOS.equals(getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
                 appointment.setProperty("com.openexchange.data.conversion.ical.alarm.emptyDefaultAlarm", Boolean.TRUE);
             }
         } else {
@@ -582,7 +583,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 /*
                  * consider reminder as 'snoozed', store parameter for client-specific serialization
                  */
-                switch (factory.getState().getUserAgent()) {
+                switch (getUserAgent()) {
                     case THUNDERBIRD_LIGHTNING:
                         /*
                          * Thunderbird/Lightning likes to have a custom "X-MOZ-SNOOZE-TIME-<timestamp_of_recurrence>" property for recurring
@@ -596,7 +597,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                             appointment.setProperty("com.openexchange.data.conversion.ical.alarm.mozSnoozeTimestamp", recurrenceID);
                         }
                         break;
-                    case IOS_CALENDAR:
+                    case IOS:
                     case MAC_CALENDAR:
                         /*
                          * Apple clients prefer a relative snooze time duration in the trigger of appointment series
@@ -627,7 +628,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     protected String generateICal() throws OXException {
         ICalEmitter icalEmitter = factory.getIcalEmitter();
         ICalSession session;
-        if (CalDAVAgent.WINDOWS.equals(factory.getState().getUserAgent()) || CalDAVAgent.WINDOWS_PHONE.equals(factory.getState().getUserAgent())) {
+        if (DAVUserAgent.WINDOWS.equals(getUserAgent()) || DAVUserAgent.WINDOWS_PHONE.equals(getUserAgent())) {
             session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
         } else {
             session = icalEmitter.createSession();
@@ -660,7 +661,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 for (CalendarDataObject changeException : changeExceptions) {
                     applyReminderProperties(changeException);
                     applyPrivateComments(changeException);
-                    if (false == CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent())) {
+                    if (false == DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
                         applyAttachments(changeException);
                     }
                     icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
@@ -675,7 +676,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             iCal = Patches.Outgoing.removeEmptyRDates(iCal);
             return iCal;
         } catch (UnsupportedEncodingException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -994,7 +995,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         /*
          * detect and adjust an exception creation for a snoozed alarm in a recurring appointment as performed by the Mac OS client
          */
-        if (recurring && null != originalAppointment && CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent()) &&
+        if (recurring && null != originalAppointment && DAVUserAgent.MAC_CALENDAR.equals(getUserAgent()) &&
             null != exceptionsToSave && 0 < exceptionsToSave.size()) {
             List<CalendarDataObject> newExceptions = getNewExceptions(originalAppointment, exceptionsToSave);
             if (1 == newExceptions.size()) {
@@ -1022,7 +1023,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
          * detect and adjust an acknowledged alarm in a change exception as indicated in the recurring appointment master by the Lightning client
          */
         if (recurring && null != acknowledgedDate && null != exceptionsToSave && 0 < exceptionsToSave.size() &&
-            CalDAVAgent.THUNDERBIRD_LIGHTNING.equals(factory.getState().getUserAgent())) {
+            DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(getUserAgent())) {
             for (CalendarDataObject changeException : exceptionsToSave) {
                 Date exceptionAcknowledged = changeException.getProperty("com.openexchange.data.conversion.ical.alarm.acknowledged");
                 if (null == exceptionAcknowledged) {

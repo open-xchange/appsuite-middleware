@@ -18,7 +18,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-@Path("/htmlproc/v1/")
+@Path("/preliminary/htmlproc/v1/")
 public class RESTHtmlService {
 
     private final HtmlService htmlService;

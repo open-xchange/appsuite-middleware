@@ -50,6 +50,7 @@
 package com.openexchange.contact.vcard.impl.mapping;
 
 import java.util.Date;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Birthday;
 
@@ -64,7 +65,7 @@ public class BirthdayMapping extends AbstractDateMapping<Birthday> {
      * Initializes a new {@link BirthdayMapping}.
      */
     public BirthdayMapping() {
-        super(Contact.BIRTHDAY, Birthday.class);
+        super(Contact.BIRTHDAY, Birthday.class, "BIRTHDAY", ContactField.BIRTHDAY);
     }
 
     @Override

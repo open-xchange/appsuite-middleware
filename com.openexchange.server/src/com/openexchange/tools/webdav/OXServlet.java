@@ -49,8 +49,7 @@
 
 package com.openexchange.tools.webdav;
 
-import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
-import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
+import static com.openexchange.tools.servlet.http.Tools.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -328,6 +327,7 @@ public abstract class OXServlet extends WebDavServlet {
         HostData hostData = Tools.createHostData(req, contextId, userId, false);
         DefaultRequestContext context = new DefaultRequestContext();
         context.setHostData(hostData);
+        context.setUserAgent(req.getHeader("user-agent"));
         return context;
     }
 

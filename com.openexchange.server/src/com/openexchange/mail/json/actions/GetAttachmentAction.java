@@ -73,7 +73,6 @@ import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -90,12 +89,10 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -107,7 +104,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
-import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeStructureFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -308,20 +304,13 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     MailMessage nestedMailMessage = MailMessageParser.getMessageContentFrom(mailPart);
                     if (null != nestedMailMessage) {
                         nestedMailMessage.setAccountId(mailInterface.getAccountID());
-
+                        nestedMailMessage.setSequenceId(nestedMailMessage.getSequenceId() == null ? sequenceId : sequenceId + "." + nestedMailMessage.getSequenceId());
                         // Prepare request/result objects
                         AJAXRequestData requestData = req.getRequest();
                         requestData.putParameter("embedded", "true");
                         requestData.putParameter(Mail.PARAMETER_ALLOW_NESTED_MESSAGES, "false");
                         AJAXRequestResult requestResult = new AJAXRequestResult(nestedMailMessage, "mail");
 
-                        // Generate JSON reperesentation
-                        JSONObject jNestedMail = MailConverter.getInstance().convertSingle4Get(nestedMailMessage, ParamContainer.getInstance(requestData), req.getSession(), mailInterface);
-                        jNestedMail.remove(MailJSONField.UNREAD.getKey());
-                        jNestedMail.remove(MailJSONField.FLAGS.getKey());
-                        jNestedMail.remove(MailJSONField.USER.getKey());
-                        jNestedMail.remove(MailJSONField.COLOR_LABEL.getKey());
-                        jNestedMail.remove(MailJSONField.MODIFIED.getKey());
                         return requestResult;
                     }
                 }
@@ -505,10 +494,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
         String lc = Strings.asciiLowerCase(mimeTypeByFileName);
         return lc.startsWith("text/htm") || lc.startsWith("text/xhtm");
-    }
-
-    private boolean seemsToBeHtmlContent(InputStream in) throws IOException {
-        return HTMLDetector.containsHTMLTags(in, true, true);
     }
 
     private String getFileName(String fileNameFromRequest, String mailPartFileName, String baseType) {

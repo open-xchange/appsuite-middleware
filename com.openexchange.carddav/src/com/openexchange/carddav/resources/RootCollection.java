@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -120,7 +121,7 @@ public class RootCollection extends DAVRootCollection {
 					LOG.debug("{}: adding folder collection for folder '{}' as child resource.", getUrl(), folder.getName());
 				}
 			} catch (OXException e) {
-				throw protocolException(e);
+				throw protocolException(getUrl(), e);
 			}
 		}
 		LOG.debug("{}: got {} child resources.", getUrl(), children.size());
@@ -162,10 +163,10 @@ public class RootCollection extends DAVRootCollection {
 	            LOG.debug("{}: child collection '{}' not found, creating placeholder collection", getUrl(), name);
 	            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), ContactContentType.getInstance(), FolderStorage.REAL_TREE_ID);
 	        } catch (OXException e) {
-	            throw protocolException(e);
+	            throw protocolException(getUrl(), e);
 	        }
 		}
-		throw protocolException(new Throwable("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
+		throw protocolException(getUrl(), new Exception("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
 	}
 
     private String getExposedCollections() {
@@ -225,7 +226,7 @@ public class RootCollection extends DAVRootCollection {
         try {
             return new CardDAVCollection(factory, constructPathForChildResource(folder.getID()), folder);
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -233,7 +234,7 @@ public class RootCollection extends DAVRootCollection {
         try {
             return new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -241,7 +242,7 @@ public class RootCollection extends DAVRootCollection {
         try {
             return new ReducedAggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 

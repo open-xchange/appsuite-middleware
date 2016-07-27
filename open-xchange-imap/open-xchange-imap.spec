@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -97,12 +97,18 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3343
     ox_add_property com.openexchange.imap.rootSubfoldersAllowed "" $PFILE
-    
+
     # SoftwareChange_Request-3345
     ox_add_property com.openexchange.imap.auditLog.enabled false $PFILE
 
     # SoftwareChange_Request-3413
     ox_add_property com.openexchange.imap.initWithSpecialUse false $PFILE
+
+    # SoftwareChange_Request-3447
+    VALUE=$(ox_read_property com.openexchange.imap.imapSearch $PFILE)
+    if [ "imap" = "$VALUE" ]; then
+        ox_set_property com.openexchange.imap.imapSearch force-imap $PFILE
+    fi
 fi
 
 %clean
@@ -118,6 +124,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.2 release
 * Wed Jun 29 2016 Marcus Klein <marcus.klein@open-xchange.com>

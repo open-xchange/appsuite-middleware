@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -151,7 +152,7 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
             } else if (SupportedCalendarComponentSet.VEVENT.equalsIgnoreCase(value)) {
                 contentType = CalendarContentType.getInstance();
             } else {
-                throw protocolException(HttpServletResponse.SC_BAD_REQUEST);
+                throw protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
             }
         } else if (DAVProtocol.DAV_NS.getURI().equals(property.getNamespace()) && "resourcetype".equals(property.getName()) && null != element) {
             if (null != element.getChild("addressbook", DAVProtocol.CARD_NS)) {
@@ -204,7 +205,7 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
                     }
                 }
             }
-            throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -235,7 +236,7 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
 
     @Override
     protected AbstractResource createResource(T object, WebdavPath url) throws OXException {
-        throw protocolException(HttpServletResponse.SC_CONFLICT); // https://tools.ietf.org/html/rfc2518#section-8.7.1
+        throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT); // https://tools.ietf.org/html/rfc2518#section-8.7.1
     }
 
     @Override

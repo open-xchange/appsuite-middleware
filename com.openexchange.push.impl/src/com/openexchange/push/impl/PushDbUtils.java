@@ -387,14 +387,14 @@ public class PushDbUtils {
     }
 
     private static boolean markContextForPush(int contextId, DatabaseService service) throws OXException {
+        int updated = 0;
         Connection con = service.getWritable();
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO context2push_registration (cid) VALUES (?)");
             stmt.setInt(1, contextId);
             try {
-                stmt.executeUpdate();
-                return true;
+                updated = stmt.executeUpdate();
             } catch (SQLException e) {
                 if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                     return false;
@@ -407,8 +407,13 @@ public class PushDbUtils {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            service.backWritable(con);
+            if (0 < updated) {
+                service.backWritable(con);
+            } else {
+                service.backWritableAfterReading(con);
+            }
         }
+        return 0 < updated;
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
