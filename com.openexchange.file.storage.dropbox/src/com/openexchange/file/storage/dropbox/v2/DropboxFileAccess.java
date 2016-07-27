@@ -52,6 +52,7 @@ package com.openexchange.file.storage.dropbox.v2;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.DeleteErrorException;
 import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.ListRevisionsErrorException;
@@ -584,8 +586,22 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
+        for (String folderId : folderIds) {
+            try {
+                Metadata metadata = getMetadata(folderId);
+                if (!(metadata instanceof FolderMetadata)) {
+                    throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
+                }
+                sequenceNumbers.put(folderId, getSequenceNumber((FolderMetadata) metadata));
+            } catch (GetMetadataErrorException e) {
+                // TODO: Maybe introduce new exception codes?
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e);
+            }
+        }
+        return sequenceNumbers;
     }
 
     /*
@@ -619,4 +635,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
     }
 
+    /**
+     * Generates a mostly unique sequence number for the supplied folder entry, based on the contained {@link FolderMetadata#hashCode()}.
+     *
+     * @param FolderMetadata The {@link FolderMetadata}
+     * @return The sequence number
+     */
+    private long getSequenceNumber(FolderMetadata metadata) {
+        long hashCode = metadata.hashCode();
+        return Math.abs(hashCode);
+    }
 }
