@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.DeleteErrorException;
@@ -68,9 +69,11 @@ import com.dropbox.core.v2.files.ListRevisionsErrorException;
 import com.dropbox.core.v2.files.ListRevisionsResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
+import com.dropbox.core.v2.files.RestoreErrorException;
 import com.dropbox.core.v2.files.ThumbnailErrorException;
 import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
+import com.dropbox.core.v2.files.UploadUploader;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -78,6 +81,7 @@ import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
@@ -88,6 +92,7 @@ import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.SizeKnowingInputStream;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -168,8 +173,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return saveFileMetadata(file, sequenceNumber, null);
     }
 
     /*
@@ -179,8 +183,59 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (file.getId() == FileStorageFileAccess.NEW) {
+            // Create new, empty file ("touch")
+            try {
+                UploadUploader upload = client.files().upload(file.getFolderId() + file.getFileName());
+                FileMetadata metadata = upload.finish();
+                DropboxFile dbxFile = new DropboxFile(metadata, userId);
+                file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                return dbxFile.getIDTuple();
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e);
+            }
+        } else {
+            String path = file.getFolderId() + file.getId();
+
+            // Rename
+            if (modifiedFields == null || modifiedFields.contains(Field.FILENAME)) {
+                String toPath = file.getFolderId() + file.getFileName();
+                if (!path.equals(toPath)) {
+                    if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
+                        try {
+                            Metadata metadata = client.files().move(path, file.getFolderId() + UUID.randomUUID().toString() + ' ' + file.getFileName());
+                            DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+                            file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                            return dbxFile.getIDTuple();
+                        } catch (RelocationErrorException e) {
+                            // TODO: Maybe introduce new exception codes?
+                            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        } catch (DbxException e) {
+                            throw DropboxExceptionHandler.handle(e);
+                        }
+                    }
+                }
+            }
+
+            // Restore version
+            if (modifiedFields == null || modifiedFields.contains(Field.VERSION)) {
+                if (file.getVersion() != null) {
+                    try {
+                        FileMetadata metadata = client.files().restore(path, file.getVersion());
+                        DropboxFile dbxFile = new DropboxFile(metadata, userId);
+                        file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                        return dbxFile.getIDTuple();
+                    } catch (RestoreErrorException e) {
+                        // TODO: Maybe introduce new exception codes?
+                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    } catch (DbxException e) {
+                        throw DropboxExceptionHandler.handle(e);
+                    }
+                }
+            }
+
+            return new IDTuple(file.getFolderId(), file.getId());
+        }
     }
 
     /*
