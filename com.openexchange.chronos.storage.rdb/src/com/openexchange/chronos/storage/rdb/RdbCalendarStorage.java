@@ -199,26 +199,36 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     @Override
-    public int insertEvent(Event event) throws OXException {
+    public int nextObjectID() throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            if (connection.getAutoCommit()) {
+                throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
+            }
+            return IDGenerator.getId(context, Types.APPOINTMENT, connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, 1);
+        }
+    }
+
+    @Override
+    public void insertEvent(Event event) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            int objectID = IDGenerator.getId(context, Types.APPOINTMENT, connection);
-            event.setId(objectID);
-            if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
-                event.setRecurrenceId(objectID);
-            }
             updated = insertEvent(connection, context.getContextId(), event);
             if (event.containsAttendees() && null != event.getAttendees()) {
-                updated += insertAttendees(connection, context.getContextId(), objectID, event.getAttendees());
+                updated += insertAttendees(connection, context.getContextId(), event.getId(), event.getAttendees());
             }
             if (event.containsAttachments() && null != event.getAttachments()) {
                 //TODO
             }
             txPolicy.commit(connection);
-            return objectID;
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {

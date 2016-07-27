@@ -297,13 +297,22 @@ public class CalendarWriter extends CalendarReader {
         Consistency.setOrganizer(event, calendarUser, getProxyUser(folder));
         Consistency.setTimeZone(event, calendarUser);
         Consistency.adjustAllDayDates(event);
+        event.setSequence(0);
         event.setUid(Strings.isEmpty(event.getUid()) ? UUID.randomUUID().toString() : event.getUid());
         event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? Integer.parseInt(folder.getID()) : 0);
         event.setAttendees(prepareAttendees(folder, event.getAttendees()));
         /*
+         * assign new object identifier
+         */
+        int objectID = storage.nextObjectID();
+        event.setId(objectID);
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+            event.setRecurrenceId(objectID);
+        }
+        /*
          * insert event & alarms of user
          */
-        int objectID = storage.insertEvent(event);
+        storage.insertEvent(event);
         if (userizedEvent.containsAlarms() && null != userizedEvent.getAlarms() && 0 < userizedEvent.getAlarms().size()) {
             storage.insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
         }

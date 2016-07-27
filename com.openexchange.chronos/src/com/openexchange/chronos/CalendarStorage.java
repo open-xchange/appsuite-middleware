@@ -51,6 +51,7 @@ package com.openexchange.chronos;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
 /**
@@ -99,10 +100,24 @@ public interface CalendarStorage {
 
     List<Event> loadDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince) throws OXException;
 
+    /**
+     * Generates the next object unique identifier for inserting new event data.
+     * <p/>
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS}.
+     *
+     * @return The next object identifier
+     */
+    int nextObjectID() throws OXException;
+
+    /**
+     * Inserts a new event into the database.
+     *
+     * @param event The event to insert
+     */
+    void insertEvent(Event event) throws OXException;
 
     void updateEvent(Event event) throws OXException;
-
-    int insertEvent(Event event) throws OXException;
 
     void deleteEvent(int objectID) throws OXException;
 

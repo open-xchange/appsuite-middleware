@@ -117,7 +117,7 @@ public class Consistency {
             event.setOrganizer(organizer);
         }
         organizer = CalendarUtils.applyProperties(organizer, user);
-        if (null != sentBy) {
+        if (null != sentBy && sentBy.getId() != user.getId()) {
             organizer.setSentBy(CalendarUtils.getCalAddress(sentBy));
         }
         return organizer;
