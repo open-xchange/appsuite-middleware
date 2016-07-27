@@ -93,23 +93,27 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory {
     }
 
     @Override
-    public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
-        try {
+    public Socket createSocket() throws IOException {
+        Socket createSocket = this.socketFactory.createSocket();
+        logProtocols(createSocket);
+        return createSocket;
+    }
 
-            Socket createSocket = this.socketFactory.createSocket(s, host, port, autoClose);
-            logProtocols(createSocket);
-            return createSocket;
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            // TODO: handle exception
-        }
-        return null;
+    @Override
+    public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
+        Socket createSocket = this.socketFactory.createSocket(s, host, port, autoClose);
+        logProtocols(createSocket);
+        return createSocket;
     }
 
     private static void logProtocols(Socket socket) {
         if (socket instanceof SSLSocket) {
             final SSLSocket sslSocket = (SSLSocket) socket;
-            LOG.debug("Supported protocols for socket {}: {}", sslSocket.getInetAddress().toString(), Strings.join(sslSocket.getEnabledProtocols(), ", "));
+            String url = "unknown";
+            if (sslSocket.getInetAddress() != null) {
+                url = sslSocket.getInetAddress().toString();
+            }
+            LOG.debug("Supported protocols for socket {}: {}", url, Strings.join(sslSocket.getEnabledProtocols(), ", "));
         }
     }
 
