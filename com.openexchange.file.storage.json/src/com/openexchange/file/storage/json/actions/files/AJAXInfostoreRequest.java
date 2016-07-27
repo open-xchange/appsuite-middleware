@@ -72,20 +72,20 @@ import org.json.JSONObject;
 import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.composition.CryptographicAwareIDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
-import com.openexchange.file.storage.composition.CryptographicAwareIDBasedFileAccessFactory.CryptographyMode;
+import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.crypto.CryptographyMode;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
-import com.openexchange.file.storage.json.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -247,7 +247,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             String authentication = null;
             CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = Services.getCryptographicServiceAuthenticationFactory();
             if(encryptionAuthenticationFactory != null) {
-                authentication = encryptionAuthenticationFactory.createAuthenticationFrom(data);
+                if(data.optHttpServletRequest() != null) {
+                    authentication = encryptionAuthenticationFactory.createAuthenticationFrom(data.optHttpServletRequest());
+                }
             }
 
             //Creating file access with crypto functionalities

@@ -51,11 +51,11 @@ package com.openexchange.file.storage.json.services;
 
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.file.storage.composition.CryptographicAwareIDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
-import com.openexchange.file.storage.json.crypto.CryptographicServiceAuthenticationFactory;
+import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
 import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
