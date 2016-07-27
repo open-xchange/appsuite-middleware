@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
+import com.dropbox.core.v2.files.DeleteErrorException;
 import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
@@ -69,6 +70,7 @@ import com.dropbox.core.v2.files.ThumbnailSize;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -244,8 +246,26 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void removeDocument(String folderId, long sequenceNumber) throws OXException {
-        // TODO Auto-generated method stub
+        try {
+            Metadata metadata = getMetadata(folderId);
+            // Ensure that we are emptying a folder
+            if (metadata instanceof FileMetadata) {
+                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
+            }
 
+            // Empty the folder
+            ListFolderResult listFolder = client.files().listFolder(folderId);
+            for (Metadata entry : listFolder.getEntries()) {
+                if (entry instanceof FileMetadata) {
+                    client.files().delete(entry.getPathDisplay());
+                }
+            }
+        } catch (DeleteErrorException e) {
+            // TODO Auto-generated catch block
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
@@ -255,8 +275,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return removeDocument(ids, sequenceNumber, false);
     }
 
     /*
@@ -266,8 +285,21 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
+            for (IDTuple id : ids) {
+                try {
+                    client.files().delete(id.getFolder() + id.getId());
+                } catch (DeleteErrorException e) {
+                    //TODO: maybe log this exception for further analysis
+                    //LOG.error("{}", e.getMessage(), e);
+                    ret.add(id);
+                }
+            }
+            return ret;
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
