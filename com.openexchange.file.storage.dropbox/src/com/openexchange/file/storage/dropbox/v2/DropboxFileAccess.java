@@ -199,7 +199,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public InputStream getDocument(String folderId, String id, String version) throws OXException {
-        // TODO Auto-generated method stub
         try {
             DbxDownloader<FileMetadata> download = client.files().download(folderId + id, version);
             return new SizeKnowingInputStream(download.getInputStream(), download.getResult().getSize());
