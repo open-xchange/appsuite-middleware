@@ -373,8 +373,25 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public TimedResult<File> getDocuments(String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            ListFolderResult listFolder = client.files().listFolder(folderId);
+
+            int numberOfFiles = listFolder.getEntries().size();
+            List<File> files = new ArrayList<>(numberOfFiles);
+
+            for (Metadata metadata : listFolder.getEntries()) {
+                if (metadata instanceof FileMetadata) {
+                    files.add(new DropboxFile((FileMetadata) metadata, userId));
+                }
+            }
+
+            return new FileTimedResult(files);
+        } catch (GetMetadataErrorException e) {
+            // TODO: Maybe introduce new exception codes?
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
@@ -633,11 +650,8 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
         for (String folderId : folderIds) {
             try {
-                Metadata metadata = getMetadata(folderId);
-                if (!(metadata instanceof FolderMetadata)) {
-                    throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
-                }
-                sequenceNumbers.put(folderId, getSequenceNumber((FolderMetadata) metadata));
+                FolderMetadata metadata = getFolderMetadata(folderId);
+                sequenceNumbers.put(folderId, getSequenceNumber(metadata));
             } catch (GetMetadataErrorException e) {
                 // TODO: Maybe introduce new exception codes?
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
