@@ -70,7 +70,6 @@ import com.dropbox.core.v2.files.ThumbnailSize;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -507,8 +506,21 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        // The Dropbox API does not support removing revisions of a file
+        for (final String version : versions) {
+            if (version != CURRENT_VERSION) {
+                throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(DropboxConstants.ID);
+            }
+        }
+        try {
+            client.files().delete(folderId + id);
+            return new String[0];
+        } catch (DeleteErrorException e) {
+            // TODO: Maybe introduce new exception codes?
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
