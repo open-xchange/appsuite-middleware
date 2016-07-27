@@ -61,6 +61,7 @@ import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.ListRevisionsResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -108,7 +109,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public boolean exists(String folderId, String id, String version) throws OXException {
         try {
-            Metadata metadata = client.files().getMetadata(folderId + id);
+            Metadata metadata = getMetadata(folderId + id);
             return metadata instanceof FileMetadata;
         } catch (GetMetadataErrorException e) {
             // TODO: Maybe introduce new exception codes?
@@ -127,11 +128,18 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
         try {
             //TODO: Use a method for creating the full path of 'folderId' and 'id' 
-            Metadata metadata = client.files().getMetadata(folderId + id);
+            Metadata metadata = getMetadata(folderId + id);
             if (!(metadata instanceof FileMetadata)) {
                 throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, folderId);
             }
-            return new DropboxFile((FileMetadata) metadata, userId);
+            DropboxFile dropboxFile = new DropboxFile((FileMetadata) metadata, userId);
+            //TODO: fetching all revisions just to get the number of versions is quite expensive;
+            //      maybe we can introduce something like "-1" for "unknown number of versions"
+            ListRevisionsResult revisions = client.files().listRevisions(folderId + id, 100);
+            if (revisions != null) {
+                dropboxFile.setNumberOfVersions(revisions.getEntries().size());
+            }
+            return dropboxFile;
         } catch (GetMetadataErrorException e) {
             // TODO: Maybe introduce new exception codes?
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
