@@ -94,7 +94,7 @@ abstract class AbstractDropboxAccess {
      * @param folderId The folder identifier
      * @return true if the specified folder identifier denotes a root folder; false otherwise
      */
-    protected boolean isRoot(String folderId) {
+    boolean isRoot(String folderId) {
         return FileStorageFolder.ROOT_FULLNAME.equals(folderId) || "/".equals(folderId);
     }
 
@@ -107,11 +107,28 @@ abstract class AbstractDropboxAccess {
      * @throws GetMetadataErrorException If a metadata error is occurred
      * @throws DbxException if a generic Dropbox error is occurred
      */
-    protected Metadata getMetadata(String id) throws OXException, GetMetadataErrorException, DbxException {
+    Metadata getMetadata(String id) throws OXException, GetMetadataErrorException, DbxException {
         Metadata metadata = client.files().getMetadata(id);
         if (metadata instanceof DeletedMetadata) {
             throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, id);
         }
         return metadata;
+    }
+    
+    /**
+     * Gets the {@link FolderMetadata} of the specified folder.
+     * 
+     * @param folderId The folder identifier
+     * @return The {@link FolderMetadata}
+     * @throws GetMetadataErrorException If a metadata error is occurred
+     * @throws DbxException If a generic Dropbox error is occurred
+     * @throws OXException if the specified identifier does not denote a folder
+     */
+    FolderMetadata getFolderMetadata(String folderId) throws GetMetadataErrorException, DbxException, OXException {
+        Metadata metadata = getMetadata(folderId);
+        if (metadata instanceof FolderMetadata) {
+            return (FolderMetadata) metadata;
+        }
+        throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
     }
 }

@@ -515,21 +515,4 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         builder.append(folder);
         return builder.toString();
     }
-
-    /**
-     * Gets the {@link FolderMetadata} of the specified folder.
-     * 
-     * @param folderId The folder identifier
-     * @return The {@link FolderMetadata}
-     * @throws GetMetadataErrorException If a metadata error is occurred
-     * @throws DbxException If a generic Dropbox error is occurred
-     * @throws OXException if the specified identifier does not denote a folder
-     */
-    private FolderMetadata getFolderMetadata(String folderId) throws GetMetadataErrorException, DbxException, OXException {
-        Metadata metadata = getMetadata(folderId);
-        if (metadata instanceof FolderMetadata) {
-            return (FolderMetadata) metadata;
-        }
-        throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
-    }
 }
