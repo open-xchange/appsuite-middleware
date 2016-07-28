@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.dropbox.v2;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +74,11 @@ import com.dropbox.core.v2.files.RestoreErrorException;
 import com.dropbox.core.v2.files.ThumbnailErrorException;
 import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
+import com.dropbox.core.v2.files.UploadBuilder;
+import com.dropbox.core.v2.files.UploadErrorException;
 import com.dropbox.core.v2.files.UploadUploader;
+import com.dropbox.core.v2.files.WriteMode;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -92,6 +97,7 @@ import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.SizeKnowingInputStream;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -146,14 +152,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         //TODO: double check whether the 'version' parameter has to be used
         try {
             //TODO: Use a method for creating the full path of 'folderId' and 'id' 
-            Metadata metadata = getMetadata(folderId + id);
+            Metadata metadata = getMetadata(folderId + "/" + id);
             if (!(metadata instanceof FileMetadata)) {
                 throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, folderId);
             }
             DropboxFile dropboxFile = new DropboxFile((FileMetadata) metadata, userId);
             //TODO: fetching all revisions just to get the number of versions is quite expensive;
             //      maybe we can introduce something like "-1" for "unknown number of versions"
-            ListRevisionsResult revisions = client.files().listRevisions(folderId + id, 100);
+            ListRevisionsResult revisions = client.files().listRevisions(folderId + "/" + id, 100);
             if (revisions != null) {
                 dropboxFile.setNumberOfVersions(revisions.getEntries().size());
             }
@@ -333,8 +339,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return saveDocument(file, data, sequenceNumber, null);
     }
 
     /*
@@ -344,8 +349,54 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        String path = FileStorageFileAccess.NEW == file.getId() ? null : file.getFolderId() + file.getId();
+        long fileSize = file.getFileSize();
+        long length = fileSize > 0 ? fileSize : -1L;
+
+        if (Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION)) {
+            // Create file
+            if (fileSize > 150 * 1048576) { //TODO constants
+                return sessionUpload();
+            } else {
+                //return singleUpload();
+                ThresholdFileHolder sink = null;
+                sink = new ThresholdFileHolder();
+                sink.write(data);
+
+                String name = file.getFileName();
+                String fileName = name;
+                try {
+                    FileMetadata metadata = client.files().upload(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString()).uploadAndFinish(sink.getStream());
+                    DropboxFile dbxFile = new DropboxFile(metadata, userId);
+                    file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                    return dbxFile.getIDTuple();
+                } catch (UploadErrorException e) {
+                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } catch (DbxException e) {
+                    throw DropboxExceptionHandler.handle(e);
+                } catch (IOException e) {
+                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                } finally {
+                    Streams.close(sink);
+                }
+            }
+        } else {
+            // Update, adjust metadata as needed
+            try {
+                UploadBuilder uploadBuilder = client.files().uploadBuilder(path);
+                //TODO: use session if the file size is greater than 150MB
+                FileMetadata fileMetadata = uploadBuilder.withMode(WriteMode.OVERWRITE).start().uploadAndFinish(data);
+                file.setId(fileMetadata.getId());
+                file.setVersion(fileMetadata.getRev());
+                return saveFileMetadata(file, sequenceNumber);
+            } catch (UploadErrorException e) {
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e);
+            } catch (IOException e) {
+                throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+        }
     }
 
     /*
@@ -671,7 +722,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
         try {
             // Fetch all revisions
-            ListRevisionsResult revisions = client.files().listRevisions(folderId + id, 100);
+            ListRevisionsResult revisions = client.files().listRevisions(folderId + "/" + id, 100);
             int numberOfVersions = revisions.getEntries().size();
             List<File> files = new ArrayList<File>(numberOfVersions);
 
@@ -757,5 +808,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     private long getSequenceNumber(FolderMetadata metadata) {
         long hashCode = metadata.hashCode();
         return Math.abs(hashCode);
+    }
+
+    private IDTuple sessionUpload() {
+        return null;
+    }
+
+    private IDTuple singleUpload() {
+        return null;
     }
 }
