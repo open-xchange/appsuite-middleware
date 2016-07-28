@@ -57,7 +57,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -65,10 +64,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.Request;
-import com.amazonaws.handlers.RequestHandler;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.internal.BucketNameUtils;
 import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
@@ -86,7 +82,6 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.UploadPartResult;
-import com.amazonaws.util.TimingInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
@@ -108,11 +103,13 @@ public class S3FileStorage implements FileStorage {
      */
     private static final String DELIMITER = "/";
 
+
     private final AmazonS3Client amazonS3;
     private final boolean encrypted;
     private final String bucketName;
     private final String prefix;
     private final long chunkSize;
+
 
     /**
      * Initializes a new {@link S3FileStorage}.
@@ -122,7 +119,6 @@ public class S3FileStorage implements FileStorage {
      * @param bucketName The bucket name to use
      * @param prefix The prefix to use; e.g. <code>"1337ctxstore"</code>
      * @param chunkSize The chunk size in bytes to use for multipart uploads
-     * @throws OXException
      */
     public S3FileStorage(AmazonS3Client amazonS3, boolean encrypted, String bucketName, String prefix, long chunkSize) {
         super();
@@ -135,31 +131,7 @@ public class S3FileStorage implements FileStorage {
         this.bucketName = bucketName;
         this.prefix = prefix;
         this.chunkSize = chunkSize;
-        amazonS3.addRequestHandler(new RequestHandler() {
-
-			@Override
-			public void beforeRequest(Request<?> request) {
-				// nothing to do
-			}
-
-			@Override
-			public void afterResponse(Request<?> request, Object response,
-					TimingInfo timingInfo) {
-				if (response instanceof ObjectMetadata) {
-					Map<String, Object> headers = ((ObjectMetadata)response).getRawMetadata();
-					if (headers.containsKey("Etag")) {
-						String etag = (String) headers.get("Etag");
-						etag = etag.replace("\"", "");
-						((ObjectMetadata)response).setHeader(Headers.ETAG, etag);
-					}
-				}
-			}
-
-			@Override
-			public void afterError(Request<?> request, Exception e) {
-				// nothing to do
-			}
-		});
+        this.amazonS3.addRequestHandler(ETagCorrectionHandler.getInstance());
         LOG.info("S3 file storage initialized for \"{}/{}{}\"", bucketName, prefix, DELIMITER);
     }
 
