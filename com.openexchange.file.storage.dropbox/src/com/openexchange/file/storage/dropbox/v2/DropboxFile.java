@@ -76,7 +76,7 @@ public class DropboxFile extends DefaultFile {
     public DropboxFile(FileMetadata metadata, int userid) {
         super();
         setId(metadata.getName());
-        setFolderId(metadata.getPathDisplay());
+        setFolderId(extractFolderId(metadata.getPathDisplay()));
         setCreatedBy(userid);
         setModifiedBy(userid);
         Date clientModified = metadata.getClientModified();
@@ -121,5 +121,14 @@ public class DropboxFile extends DefaultFile {
     public String toString() {
         String folder = normalizeFolderId(getFolderId());
         return null == folder ? '/' + getId() : folder + '/' + getId();
+    }
+
+    private String extractFolderId(String path) {
+        int lastIndex = path.lastIndexOf('/');
+        String folderId = path.substring(0, lastIndex);
+        if (folderId.equals("")) {
+            folderId = "/";
+        }
+        return folderId;
     }
 }
