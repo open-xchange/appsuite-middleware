@@ -54,8 +54,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.Mapping;
@@ -147,6 +149,14 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 		return mapping;
 	}
 
+    @Override
+    public DbMapping<? extends Object, O> opt(E field) {
+        if (null == field) {
+            throw new IllegalArgumentException("field");
+        }
+        return mappings.get(field);
+    }
+
 	@Override
     public E getMappedField(String columnLabel) {
 		if (null == columnLabel) {
@@ -202,6 +212,37 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
             }
         }
         return stringBuilder.toString();
+    }
+
+    /**
+     * Gets all mapped fields.
+     *
+     * @return The mapped fields
+     */
+    public E[] getMappedFields() {
+        return getMappedFields(null);
+    }
+
+    /**
+     * Gets the mapped fields out of the supplied requested fields, ignoring unmapped fields.
+     *
+     * @param requestedFields The requested fields, or <code>null</code> to get all mapped fields
+     * @return The mapped fields
+     */
+    public E[] getMappedFields(E[] requestedFields) {
+        Set<E> knownFields = getMappings().keySet();
+        Set<E> mappedFields;
+        if (null == requestedFields) {
+            mappedFields = knownFields;
+        } else {
+            mappedFields = new HashSet<E>(requestedFields.length);
+            for (E field : requestedFields) {
+                if (knownFields.contains(field)) {
+                    mappedFields.add(field);
+                }
+            }
+        }
+        return mappedFields.toArray(newArray(mappedFields.size()));
     }
 
     /**
