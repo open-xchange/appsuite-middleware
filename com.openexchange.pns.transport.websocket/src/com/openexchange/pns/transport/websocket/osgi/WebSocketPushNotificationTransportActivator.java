@@ -80,7 +80,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketPushNotificationTransportActivator.class);
 
-    private static final String CONFIGFILE_APN_OPTIONS = "pns-websocket-options.yml";
+    private static final String CONFIGFILE_WEBSOCKET_OPTIONS = "pns-websocket-options.yml";
 
     private ServiceRegistration<WebSocketOptionsProvider> optionsProviderRegistration;
     private WebSocketPushNotificationTransport webSocketTransport;
@@ -156,7 +156,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
             return;
         }
 
-        Object yaml = configService.getYaml(CONFIGFILE_APN_OPTIONS);
+        Object yaml = configService.getYaml(CONFIGFILE_WEBSOCKET_OPTIONS);
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;
             if (!map.isEmpty()) {

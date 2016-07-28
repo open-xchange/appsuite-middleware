@@ -143,7 +143,7 @@ public class WebSocketPushNotificationTransport extends ServiceTracker<WebSocket
 
     // ---------------------------------------------------------------------------------------------------------
 
-    private WebSocketOptions getHighestRankedApnOptionsFor(String client) throws OXException {
+    private WebSocketOptions getHighestRankedWebSocketOptionsFor(String client) throws OXException {
         List<RankedService<WebSocketOptionsProvider>> list = trackedProviders.getSnapshot();
         for (RankedService<WebSocketOptionsProvider> rankedService : list) {
             WebSocketOptions options = rankedService.service.getOptions(client);
@@ -154,7 +154,7 @@ public class WebSocketPushNotificationTransport extends ServiceTracker<WebSocket
         throw PushExceptionCodes.UNEXPECTED_ERROR.create("No options found for client: " + client);
     }
 
-    private Map<String, WebSocketOptions> getAllHighestRankedApnOptions() {
+    private Map<String, WebSocketOptions> getAllHighestRankedWebSocketOptions() {
         List<RankedService<WebSocketOptionsProvider>> list = trackedProviders.getSnapshot();
         Collections.reverse(list);
         Map<String, WebSocketOptions> options = new LinkedHashMap<>();
@@ -170,7 +170,7 @@ public class WebSocketPushNotificationTransport extends ServiceTracker<WebSocket
     @Override
     public boolean servesClient(String client) throws OXException {
         try {
-            return null != getHighestRankedApnOptionsFor(client);
+            return null != getHighestRankedWebSocketOptionsFor(client);
         } catch (OXException x) {
             return false;
         } catch (RuntimeException e) {
