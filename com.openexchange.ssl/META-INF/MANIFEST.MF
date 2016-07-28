@@ -6,16 +6,20 @@ Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.ssl.osgi.SSLActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
+Import-Package: com.googlecode.ipv6,
+ com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.tools.ssl,
+ edazdarevic.commons.net,
  javax.net,
  javax.net.ssl,
  org.apache.commons.lang,
+ org.apache.commons.lang.math,
  org.apache.commons.net.util,
+ org.apache.commons.validator.routines,
  org.apache.http.conn.ssl,
  org.apache.http.params,
  org.osgi.framework,

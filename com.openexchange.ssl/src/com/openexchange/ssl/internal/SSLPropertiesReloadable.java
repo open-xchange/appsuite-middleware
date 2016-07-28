@@ -47,52 +47,29 @@
  *
  */
 
-package com.openexchange.ssl.osgi;
+package com.openexchange.ssl.internal;
 
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.ssl.internal.SSLProperties;
-import com.openexchange.ssl.internal.SSLPropertiesReloadable;
 
 /**
- * 
- * {@link SSLActivator}
+ * {@link SSLPropertiesReloadable}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLActivator extends HousekeepingActivator {
+public class SSLPropertiesReloadable implements Reloadable {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
+    public void reloadConfiguration(ConfigurationService configService) {
+        SSLProperties.reload();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("starting bundle: \"com.openexchange.ssl\"");
-            Services.setBundleContext(this.context);
-
-            ConfigurationService configService = getService(ConfigurationService.class);
-            if (configService.getBoolProperty(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getName(), SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getDefaultBoolean())) {
-                System.setProperty("javax.net.debug", "ssl:record");
-                org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("Enabeld SSL debug logging.");
-            }
-
-            registerService(Reloadable.class, new SSLPropertiesReloadable());
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
-            throw e;
-        }
+    public Map<String, String[]> getConfigFileNames() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("stopping bundle: \"com.openexchange.ssl\"");
-
-        Services.setBundleContext(null);
-        super.stopBundle();
-    }
 }

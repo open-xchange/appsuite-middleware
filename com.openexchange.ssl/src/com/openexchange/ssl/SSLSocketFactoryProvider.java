@@ -50,9 +50,7 @@
 package com.openexchange.ssl;
 
 import javax.net.SocketFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.ssl.internal.SSLProperty;
-import com.openexchange.ssl.osgi.Services;
+import com.openexchange.ssl.internal.SSLProperties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -66,15 +64,13 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 public class SSLSocketFactoryProvider {
 
     /**
-     * Required to obtain factory by reflection
+     * Returns the configured {@link SocketFactory}. This method is invoked by by reflection
      * 
-     * @return
-     *         FIXME add caching
+     * @return {@link TrustedSSLSocketFactory} or {@link TrustAllSSLSocketFactory} based on the configuration
      */
     public static SocketFactory getDefault() {
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
 
-        if (!configService.getBoolProperty(SSLProperty.SECURE_CONNECTIONS_ENABLED.getName(), SSLProperty.SECURE_CONNECTIONS_ENABLED.getDefaultBoolean())) {
+        if (!SSLProperties.isSecureEnabled()) {
             return TrustAllSSLSocketFactory.getDefault();
         }
         return TrustedSSLSocketFactory.getDefault();

@@ -47,52 +47,72 @@
  *
  */
 
-package com.openexchange.ssl.osgi;
+package com.openexchange.ssl.internal;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.ssl.internal.SSLProperties;
-import com.openexchange.ssl.internal.SSLPropertiesReloadable;
+import java.net.Socket;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.X509ExtendedTrustManager;
 
 /**
- * 
- * {@link SSLActivator}
+ * {@link AbstractTrustManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLActivator extends HousekeepingActivator {
+public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
+    protected X509ExtendedTrustManager trustManager;
+
+    public boolean isInitialized() {
+        return this.trustManager != null;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("starting bundle: \"com.openexchange.ssl\"");
-            Services.setBundleContext(this.context);
+    public X509Certificate[] getAcceptedIssuers() {
+        return this.trustManager.getAcceptedIssuers();
+    }
 
-            ConfigurationService configService = getService(ConfigurationService.class);
-            if (configService.getBoolProperty(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getName(), SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getDefaultBoolean())) {
-                System.setProperty("javax.net.debug", "ssl:record");
-                org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("Enabeld SSL debug logging.");
-            }
+    @Override
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        X509Certificate x509Certificate = chain[0];
+        //        SSLProperties.isWhitelisted(hostName)
+        //        //TODO correct exception handling when certificate isn't trusted
+        //        //TODO introduce check for whitelisted hosts 
+        //            for (int j = 0; j < chain.length; j++) {
+        //                chain[j].get
+        //            }
+        this.trustManager.checkServerTrusted(chain, authType);
+    }
 
-            registerService(Reloadable.class, new SSLPropertiesReloadable());
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
-            throw e;
+    @Override
+    public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+        X509Certificate x509Certificate = chain[0];
+        if (SSLProperties.isWhitelisted(socket.getInetAddress().getHostName())) {
+            return;
         }
+
+        this.trustManager.checkServerTrusted(chain, authType, socket);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("stopping bundle: \"com.openexchange.ssl\"");
+    public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+        this.trustManager.checkClientTrusted(chain, authType, engine);
+    }
 
-        Services.setBundleContext(null);
-        super.stopBundle();
+    @Override
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // do not check client
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+        // do not check client
+    }
+
+    @Override
+    public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+        // do not check client
     }
 }

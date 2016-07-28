@@ -49,9 +49,14 @@
 
 package com.openexchange.ssl.internal;
 
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.X509TrustManager;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509ExtendedTrustManager;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.ssl.osgi.Services;
 
 /**
  * {@link DefaultTrustManager}
@@ -59,27 +64,40 @@ import javax.net.ssl.X509TrustManager;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class DefaultTrustManager implements X509TrustManager {
+public class DefaultTrustManager extends AbstractTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTrustManager.class);
-    private X509TrustManager defaultTrustManager;
 
-    public DefaultTrustManager(X509TrustManager defaultTrustManager) {
-        this.defaultTrustManager = defaultTrustManager;
+    public DefaultTrustManager() {
+        this.trustManager = initDefaultTrustManager();
     }
 
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-        return this.defaultTrustManager.getAcceptedIssuers();
-    }
+    private X509ExtendedTrustManager initDefaultTrustManager() {
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
 
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        defaultTrustManager.checkServerTrusted(chain, authType);
-    }
+        boolean useDefaultTruststore = configService.getBoolProperty(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getName(), SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getDefaultBoolean());
 
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // trust client every time
+        if (useDefaultTruststore) {
+            try {
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
+
+                for (TrustManager tm : tmf.getTrustManagers()) {
+                    if (tm instanceof X509ExtendedTrustManager) {
+                        return (X509ExtendedTrustManager) tm;
+                    }
+                }
+            } catch (KeyStoreException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else {
+            LOG.info("Using default JVM truststore is disabled by configuration.");
+        }
+
+        return null;
     }
 }

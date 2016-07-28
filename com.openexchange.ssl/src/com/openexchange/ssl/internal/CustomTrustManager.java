@@ -49,12 +49,20 @@
 
 package com.openexchange.ssl.internal;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509ExtendedTrustManager;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
+import com.openexchange.ssl.osgi.Services;
 
 /**
  * {@link CustomTrustManager}
@@ -62,37 +70,59 @@ import javax.net.ssl.X509TrustManager;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class CustomTrustManager implements X509TrustManager {
+public class CustomTrustManager extends AbstractTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomTrustManager.class);
-    private X509TrustManager[] customTrustManager;
 
-    public CustomTrustManager(X509TrustManager... customTrustManager) {
-        this.customTrustManager = customTrustManager;
+    public CustomTrustManager() {
+        this.trustManager = initCustomTrustManager();
     }
 
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-        List<X509Certificate> allAcceptedIssuers = new ArrayList<>();
+    private X509ExtendedTrustManager initCustomTrustManager() {
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
 
-        for (int i = 0; i < this.customTrustManager.length; i++) {
-            X509Certificate[] acceptedIssuers = this.customTrustManager[i].getAcceptedIssuers();
-            allAcceptedIssuers.addAll(Arrays.asList(acceptedIssuers));
+        boolean useCustomTruststore = configService.getBoolProperty(SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getName(), SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getDefaultBoolean());
+        if (useCustomTruststore) {
+            String trustStoreFile = configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getName(), SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getDefault());
+            if (Strings.isEmpty(trustStoreFile)) {
+                LOG.error("Cannot load custom truststore file from location " + trustStoreFile + ". Adapt " + SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getName() + " to be able to use trusted connections only.");
+                return null;
+            }
+
+            File file = new File(trustStoreFile);
+            if (!file.exists()) {
+                LOG.error("Cannot find custom truststore file from location " + trustStoreFile + ". The file does not exist.");
+                return null;
+            }
+            String password = configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getName(), SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getDefault());
+            try (InputStream in = new FileInputStream(file)) {
+                KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                ks.load(in, password.toCharArray());
+
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(ks);
+
+                for (TrustManager tm : tmf.getTrustManagers()) {
+                    if (tm instanceof X509ExtendedTrustManager) {
+                        return (X509ExtendedTrustManager) tm;
+                    }
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (KeyStoreException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (CertificateException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else {
+            LOG.info("Using custom truststore is disabled by configuration.");
         }
-        X509Certificate[] allAcceptedIssuersArray = new X509Certificate[allAcceptedIssuers.size()];
-        allAcceptedIssuers.toArray(allAcceptedIssuersArray);
-        return allAcceptedIssuersArray;
-    }
-
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        for (int i = 0; i < this.customTrustManager.length; i++) {
-            this.customTrustManager[i].checkServerTrusted(chain, authType);
-        }
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // trust client every time
+        return null;
     }
 }

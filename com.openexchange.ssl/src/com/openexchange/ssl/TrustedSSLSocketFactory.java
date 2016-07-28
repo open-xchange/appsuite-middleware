@@ -53,12 +53,19 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import com.openexchange.java.Strings;
+import com.openexchange.ssl.internal.CustomTrustManager;
+import com.openexchange.ssl.internal.DefaultTrustManager;
 
 /**
  * {@link TrustedSSLSocketFactory}
@@ -72,36 +79,82 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TrustedSSLSocketFactory.class);
 
-    private SSLSocketFactory socketFactory;
+    /** String-array of trusted hosts */
+    private String[] trustedHosts = null;
 
-    /**
-     * Required to obtain factory by reflection
-     * 
-     * @return
-     */
-    public static SocketFactory getDefault() {
-        return new TrustedSSLSocketFactory();
-    }
+    /** Holds a SSLContext to get SSLSocketFactories from */
+    private SSLContext sslcontext;
 
-    protected TrustedSSLSocketFactory() {
+    /** Holds the TrustManager array to use */
+    private TrustManager[] trustManagers;
+
+    /** Holds a SSLSocketFactory to pass all API-method-calls to */
+    private SSLSocketFactory adapteeFactory = null;
+
+    private TrustedSSLSocketFactory() {
+        this.trustManagers = initTrustManagers();
+
         try {
-            this.socketFactory = SSLContext.getDefault().getSocketFactory();
+            this.sslcontext = SSLContext.getInstance("TLS");
+            // Assemble a default SSLSocketFactory to delegate all API-calls to.
+            newAdapteeFactory();
         } catch (NoSuchAlgorithmException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
+    private TrustManager[] initTrustManagers() {
+        List<X509TrustManager> lTrustManagers = new ArrayList<>();
+        DefaultTrustManager defaultTrustManager = new DefaultTrustManager();
+        if (defaultTrustManager.isInitialized()) {
+            lTrustManagers.add(defaultTrustManager);
+        }
+
+        CustomTrustManager customTrustManager = new CustomTrustManager();
+        if (customTrustManager.isInitialized()) {
+            lTrustManagers.add(customTrustManager);
+        }
+        TrustManager[] trustManagersArray = new TrustManager[lTrustManagers.size()];
+        lTrustManagers.toArray(trustManagersArray);
+        return trustManagersArray;
+    }
+
+    /**
+     * Gets an SSLSocketFactory based on the given (or default)
+     * KeyManager array, TrustManager array and SecureRandom and
+     * sets it to the instance var adapteeFactory.
+     *
+     * @throws KeyManagementException for key manager errors
+     */
+    private synchronized void newAdapteeFactory() throws KeyManagementException {
+        this.sslcontext.init(null, this.trustManagers, null);
+
+        this.adapteeFactory = this.sslcontext.getSocketFactory();
+    }
+
+    /**
+     * Returns the {@link TrustedSSLSocketFactory} if desired to use only trusted connections
+     * 
+     * @return an instance of {@link TrustedSSLSocketFactory}
+     */
+    public static SocketFactory getDefault() {
+        return new TrustedSSLSocketFactory();
+    }
+
     @Override
     public Socket createSocket() throws IOException {
-        Socket createSocket = this.socketFactory.createSocket();
+        Socket createSocket = this.adapteeFactory.createSocket();
         logProtocols(createSocket);
         return createSocket;
     }
 
     @Override
     public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
-        Socket createSocket = this.socketFactory.createSocket(s, host, port, autoClose);
+        Socket createSocket = this.adapteeFactory.createSocket(s, host, port, autoClose);
         logProtocols(createSocket);
         return createSocket;
     }
@@ -119,31 +172,31 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory {
 
     @Override
     public String[] getDefaultCipherSuites() {
-        return this.socketFactory.getDefaultCipherSuites();
+        return this.adapteeFactory.getDefaultCipherSuites();
     }
 
     @Override
     public String[] getSupportedCipherSuites() {
-        return this.socketFactory.getSupportedCipherSuites();
+        return this.adapteeFactory.getSupportedCipherSuites();
     }
 
     @Override
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-        return this.socketFactory.createSocket(host, port);
+        return this.adapteeFactory.createSocket(host, port);
     }
 
     @Override
     public Socket createSocket(InetAddress host, int port) throws IOException {
-        return this.socketFactory.createSocket(host, port);
+        return this.adapteeFactory.createSocket(host, port);
     }
 
     @Override
     public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
-        return this.socketFactory.createSocket(host, port, localHost, localPort);
+        return this.adapteeFactory.createSocket(host, port, localHost, localPort);
     }
 
     @Override
     public Socket createSocket(InetAddress address, int port, InetAddress localHost, int localPort) throws IOException {
-        return this.socketFactory.createSocket(address, port, localHost, localPort);
+        return this.adapteeFactory.createSocket(address, port, localHost, localPort);
     }
 }
