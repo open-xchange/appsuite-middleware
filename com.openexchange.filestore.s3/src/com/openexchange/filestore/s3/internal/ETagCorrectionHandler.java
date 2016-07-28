@@ -49,43 +49,64 @@
 
 package com.openexchange.filestore.s3.internal;
 
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.filestore.utils.UploadChunk;
-import com.openexchange.tools.encoding.Base64;
-
+import java.util.Map;
+import com.amazonaws.Request;
+import com.amazonaws.Response;
+import com.amazonaws.handlers.RequestHandler2;
+import com.amazonaws.services.s3.Headers;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 
 /**
- * {@link S3UploadChunk} - An AWS upload chunk.
+ * {@link ETagCorrectionHandler}
+ *
+ * Request handler to correct misspelled ETags in responses.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.3
  */
-public class S3UploadChunk extends UploadChunk {
+public class ETagCorrectionHandler extends RequestHandler2 {
 
-    private final String md5digest;
+    private static final ETagCorrectionHandler INSTANCE = new ETagCorrectionHandler();
 
     /**
-     * Initializes a new {@link S3UploadChunk} served by the supplied file holder.
+     * Gets the handler instance to correct misspelled ETag headers in responses.
      *
-     * @param fileHolder The underlying file holder
-     * @param md5digest The message digest
+     * @return The handler
      */
-    public S3UploadChunk(ThresholdFileHolder fileHolder, byte[] md5digest) {
-        super(fileHolder);
-        this.md5digest = null == md5digest ? null : Base64.encode(md5digest);
+    static ETagCorrectionHandler getInstance() {
+        return INSTANCE;
     }
 
     /**
-     * Gets the MD5 digest,
-     *
-     * @return The MD5 digest or <code>null</code>
+     * Initializes a new {@link ETagCorrectionHandler}.
      */
-    public String getMD5Digest() {
-        return md5digest;
+    private ETagCorrectionHandler() {
+        super();
     }
 
     @Override
-    public String toString() {
-        return "S3UploadChunk [md5=" + md5digest + ", size=" + getSize() + "]";
+    public void beforeRequest(Request<?> request) {
+        // nothing to do
+    }
+
+    @Override
+    public void afterResponse(Request<?> request, Response<?> response) {
+        Object awsResponse = response.getAwsResponse();
+        if (null != awsResponse && ObjectMetadata.class.isInstance(awsResponse)) {
+            ObjectMetadata metadata = (ObjectMetadata) awsResponse;
+            Map<String, Object> headers = metadata.getRawMetadata();
+            if (null != headers && headers.containsKey("Etag")) {
+                String etag = (String) headers.get("Etag");
+                if (null != etag) {
+                    metadata.setHeader(Headers.ETAG, etag.replace("\"", ""));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void afterError(Request<?> request, Response<?> response, Exception e) {
+        // nothing to do
     }
 
 }

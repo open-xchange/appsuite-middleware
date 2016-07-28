@@ -47,45 +47,34 @@
  *
  */
 
-package com.openexchange.filestore.s3.internal;
-
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.filestore.utils.UploadChunk;
-import com.openexchange.tools.encoding.Base64;
-
+package com.openexchange.pns.transport.websocket;
 
 /**
- * {@link S3UploadChunk} - An AWS upload chunk.
+ * {@link WebSocketOptions} - Holds the (immutable) options to communicate with the Web Socket.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class S3UploadChunk extends UploadChunk {
+public class WebSocketOptions {
 
-    private final String md5digest;
+    private final String url;
 
     /**
-     * Initializes a new {@link S3UploadChunk} served by the supplied file holder.
+     * Initializes a new immutable {@link WebSocketOptions} instance.
      *
-     * @param fileHolder The underlying file holder
-     * @param md5digest The message digest
+     * @param url The Web Socket URL
      */
-    public S3UploadChunk(ThresholdFileHolder fileHolder, byte[] md5digest) {
-        super(fileHolder);
-        this.md5digest = null == md5digest ? null : Base64.encode(md5digest);
+    public WebSocketOptions(String url) {
+        super();
+        this.url = url;
     }
 
     /**
-     * Gets the MD5 digest,
+     * Gets the URL
      *
-     * @return The MD5 digest or <code>null</code>
+     * @return The URL
      */
-    public String getMD5Digest() {
-        return md5digest;
-    }
-
-    @Override
-    public String toString() {
-        return "S3UploadChunk [md5=" + md5digest + ", size=" + getSize() + "]";
+    public String getUrl() {
+        return url;
     }
 
 }

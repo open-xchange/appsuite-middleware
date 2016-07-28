@@ -102,25 +102,33 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
         Map<ClientAndTransport, List<PushMatch>> map = null;
 
         // Add subscriptions matching everything
-        map = checkAndAddMatches(userId, contextId, matchingAllSubscriptions, map);
+        map = checkAndAddMatches(userId, contextId, matchingAllSubscriptions, "*", map);
 
         // Now check for prefix matches
-        if (!this.matchingPrefixTopic.isEmpty()) {
+        if (!matchingPrefixTopic.isEmpty()) {
             int pos = topic.lastIndexOf('/');
             while (pos > 0) {
                 String prefix = topic.substring(0, pos);
-                map = checkAndAddMatches(userId, contextId, matchingPrefixTopic.get(prefix), map);
+                List<PushSubscriptionWrapper> wrappers = matchingPrefixTopic.get(prefix);
+                if (null != wrappers) {
+                    map = checkAndAddMatches(userId, contextId, wrappers, prefix + "/*", map);
+                }
                 pos = prefix.lastIndexOf('/');
             }
         }
 
         // Add the subscriptions for matching topic names
-        map = checkAndAddMatches(userId, contextId, matchingTopic.get(topic), map);
+        {
+            List<PushSubscriptionWrapper> wrappers = matchingTopic.get(topic);
+            if (null != wrappers) {
+                map = checkAndAddMatches(userId, contextId, wrappers, topic, map);
+            }
+        }
 
         return null == map ? MapBackedHits.EMPTY : new MapBackedHits(map);
     }
 
-    private Map<ClientAndTransport, List<PushMatch>> checkAndAddMatches(int userId, int contextId, List<PushSubscriptionWrapper> wrappers, Map<ClientAndTransport, List<PushMatch>> map) {
+    private Map<ClientAndTransport, List<PushMatch>> checkAndAddMatches(int userId, int contextId, List<PushSubscriptionWrapper> wrappers, String matchingTopic, Map<ClientAndTransport, List<PushMatch>> map) {
         if (null == wrappers) {
             return map;
         }
@@ -143,7 +151,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
                     matches = new LinkedList<PushMatch>();
                     toFill.put(cat, matches);
                 }
-                matches.add(new InMemoryPushMatch(userId, contextId, client, transportId, token, "*"));
+                matches.add(new InMemoryPushMatch(userId, contextId, client, transportId, token, matchingTopic));
             }
         }
 
@@ -172,10 +180,8 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
                     List<PushSubscriptionWrapper> list = matchingPrefixTopic.get(prefix);
                     if (null == list) {
                         List<PushSubscriptionWrapper> newList = new CopyOnWriteArrayList<>();
-                        list = matchingPrefixTopic.putIfAbsent(prefix, newList);
-                        if (null == list) {
-                            list = newList;
-                        }
+                        matchingPrefixTopic.put(prefix, newList);
+                        list = newList;
                     }
                     list.add(new PushSubscriptionWrapper(subscription));
                 } else {
@@ -183,10 +189,8 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
                     List<PushSubscriptionWrapper> list = matchingTopic.get(topic);
                     if (null == list) {
                         List<PushSubscriptionWrapper> newList = new CopyOnWriteArrayList<>();
-                        list = matchingTopic.putIfAbsent(topic, newList);
-                        if (null == list) {
-                            list = newList;
-                        }
+                        matchingTopic.put(topic, newList);
+                        list = newList;
                     }
                     list.add(new PushSubscriptionWrapper(subscription));
                 }
@@ -203,12 +207,24 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
         PushSubscriptionWrapper toRemove = new PushSubscriptionWrapper(subscription);
         boolean removed = matchingAllSubscriptions.remove(toRemove);
 
-        for (List<PushSubscriptionWrapper> wrappers : matchingPrefixTopic.values()) {
-            removed |= wrappers.remove(toRemove);
+        for (Iterator<List<PushSubscriptionWrapper>> it = matchingPrefixTopic.values().iterator(); it.hasNext();) {
+            List<PushSubscriptionWrapper> wrappers = it.next();
+            if (wrappers.remove(toRemove)) {
+                removed = true;
+                if (wrappers.isEmpty()) {
+                    it.remove();
+                }
+            }
         }
 
-        for (List<PushSubscriptionWrapper> wrappers : matchingTopic.values()) {
-            removed |= wrappers.remove(toRemove);
+        for (Iterator<List<PushSubscriptionWrapper>> it = matchingTopic.values().iterator(); it.hasNext();) {
+            List<PushSubscriptionWrapper> wrappers = it.next();
+            if (wrappers.remove(toRemove)) {
+                removed = true;
+                if (wrappers.isEmpty()) {
+                    it.remove();
+                }
+            }
         }
 
         return removed;
@@ -227,15 +243,23 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
             numRemoved++;
         }
 
-        for (List<PushSubscriptionWrapper> wrappers : matchingPrefixTopic.values()) {
+        for (Iterator<List<PushSubscriptionWrapper>> it = matchingPrefixTopic.values().iterator(); it.hasNext();) {
+            List<PushSubscriptionWrapper> wrappers = it.next();
             if (wrappers.remove(toRemove)) {
                 numRemoved++;
+                if (wrappers.isEmpty()) {
+                    it.remove();
+                }
             }
         }
 
-        for (List<PushSubscriptionWrapper> wrappers : matchingTopic.values()) {
+        for (Iterator<List<PushSubscriptionWrapper>> it = matchingTopic.values().iterator(); it.hasNext();) {
+            List<PushSubscriptionWrapper> wrappers = it.next();
             if (wrappers.remove(toRemove)) {
                 numRemoved++;
+                if (wrappers.isEmpty()) {
+                    it.remove();
+                }
             }
         }
 

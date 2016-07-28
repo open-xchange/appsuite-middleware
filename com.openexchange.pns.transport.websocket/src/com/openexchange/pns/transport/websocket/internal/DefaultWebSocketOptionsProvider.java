@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,45 +47,46 @@
  *
  */
 
-package com.openexchange.filestore.s3.internal;
+package com.openexchange.pns.transport.websocket.internal;
 
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.filestore.utils.UploadChunk;
-import com.openexchange.tools.encoding.Base64;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import com.openexchange.pns.transport.websocket.WebSocketOptions;
+import com.openexchange.pns.transport.websocket.WebSocketOptionsPerClient;
+import com.openexchange.pns.transport.websocket.WebSocketOptionsProvider;
 
 
 /**
- * {@link S3UploadChunk} - An AWS upload chunk.
+ * {@link DefaultWebSocketOptionsProvider}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class S3UploadChunk extends UploadChunk {
+public class DefaultWebSocketOptionsProvider implements WebSocketOptionsProvider {
 
-    private final String md5digest;
-
-    /**
-     * Initializes a new {@link S3UploadChunk} served by the supplied file holder.
-     *
-     * @param fileHolder The underlying file holder
-     * @param md5digest The message digest
-     */
-    public S3UploadChunk(ThresholdFileHolder fileHolder, byte[] md5digest) {
-        super(fileHolder);
-        this.md5digest = null == md5digest ? null : Base64.encode(md5digest);
-    }
+    private final Map<String, WebSocketOptions> options;
 
     /**
-     * Gets the MD5 digest,
-     *
-     * @return The MD5 digest or <code>null</code>
+     * Initializes a new {@link DefaultWebSocketOptionsProvider}.
      */
-    public String getMD5Digest() {
-        return md5digest;
+    public DefaultWebSocketOptionsProvider(Map<String, WebSocketOptions> options) {
+        super();
+        this.options = options;
     }
 
     @Override
-    public String toString() {
-        return "S3UploadChunk [md5=" + md5digest + ", size=" + getSize() + "]";
+    public WebSocketOptions getOptions(String client) {
+        return options.get(client);
+    }
+
+    @Override
+    public Collection<WebSocketOptionsPerClient> getAvailableOptions() {
+        Collection<WebSocketOptionsPerClient> col = new ArrayList<>(options.size());
+        for (Map.Entry<String, WebSocketOptions> entry : options.entrySet()) {
+            col.add(new WebSocketOptionsPerClient(entry.getKey(), entry.getValue()));
+        }
+        return col;
     }
 
 }
