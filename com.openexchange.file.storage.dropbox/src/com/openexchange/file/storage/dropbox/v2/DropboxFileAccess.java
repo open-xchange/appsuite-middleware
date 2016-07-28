@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.UUID;
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
+import com.dropbox.core.v2.files.CommitInfo;
 import com.dropbox.core.v2.files.DeleteErrorException;
 import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
@@ -68,6 +69,7 @@ import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.ListRevisionsErrorException;
 import com.dropbox.core.v2.files.ListRevisionsResult;
+import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
 import com.dropbox.core.v2.files.RestoreErrorException;
@@ -76,6 +78,11 @@ import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
 import com.dropbox.core.v2.files.UploadBuilder;
 import com.dropbox.core.v2.files.UploadErrorException;
+import com.dropbox.core.v2.files.UploadSessionAppendV2Uploader;
+import com.dropbox.core.v2.files.UploadSessionCursor;
+import com.dropbox.core.v2.files.UploadSessionFinishUploader;
+import com.dropbox.core.v2.files.UploadSessionStartResult;
+import com.dropbox.core.v2.files.UploadSessionStartUploader;
 import com.dropbox.core.v2.files.UploadUploader;
 import com.dropbox.core.v2.files.WriteMode;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -113,6 +120,8 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     private final DropboxAccountAccess accountAccess;
     private final int userId;
+    
+    private static final int LIMIT = 150 * 1;
 
     /**
      * Initializes a new {@link DropboxFileAccess}.
@@ -136,6 +145,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             return metadata instanceof FileMetadata;
         } catch (GetMetadataErrorException e) {
             // TODO: Maybe introduce new exception codes?
+            if (LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
+                return false;
+            }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
@@ -353,34 +365,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
         long fileSize = file.getFileSize();
-        long length = fileSize > 0 ? fileSize : -1L;
 
         if (Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION)) {
             // Create file
-            if (fileSize > 150 * 1048576) { //TODO constants
-                return sessionUpload();
+            if (fileSize > LIMIT) { //TODO constants
+                return sessionUpload(file, data);
             } else {
-                //return singleUpload();
-                ThresholdFileHolder sink = null;
-                sink = new ThresholdFileHolder();
-                sink.write(data);
-
-                String name = file.getFileName();
-                String fileName = name;
-                try {
-                    FileMetadata metadata = client.files().upload(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString()).uploadAndFinish(sink.getStream());
-                    DropboxFile dbxFile = new DropboxFile(metadata, userId);
-                    file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
-                    return dbxFile.getIDTuple();
-                } catch (UploadErrorException e) {
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                } catch (DbxException e) {
-                    throw DropboxExceptionHandler.handle(e);
-                } catch (IOException e) {
-                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                } finally {
-                    Streams.close(sink);
-                }
+                return singleUpload(file, data);
             }
         } else {
             // Update, adjust metadata as needed
@@ -812,11 +803,89 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         return Math.abs(hashCode);
     }
 
-    private IDTuple sessionUpload() {
-        return null;
+    /**
+     * 
+     * @return
+     * @throws OXException
+     */
+    private IDTuple sessionUpload(File file, InputStream data) throws OXException {
+        //TODO: implement session upload
+        ThresholdFileHolder sink = null;
+        try {
+            sink = new ThresholdFileHolder();
+            sink.write(data);
+
+            UploadSessionStartUploader uploadSession = client.files().uploadSessionStart(false);
+            int offset = LIMIT;
+            UploadSessionStartResult result = uploadSession.uploadAndFinish(sink.getStream(), offset);
+            String sessionId = result.getSessionId();
+            UploadSessionCursor cursor;
+            do {
+                cursor = new UploadSessionCursor(sessionId, offset);
+                client.files().uploadSessionAppendV2(cursor);
+                offset += LIMIT;
+            } while (offset < sink.getCount());
+            UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, new CommitInfo(toPath(file.getFolderId(), file.getFileName())));
+            FileMetadata metadata = sessionFinish.finish();
+            
+            DropboxFile dbxFile = new DropboxFile(metadata, userId);
+            file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+            return dbxFile.getIDTuple();
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        } catch (IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(sink);
+        }
     }
 
-    private IDTuple singleUpload() {
-        return null;
+    /**
+     * 
+     * @param file
+     * @param data
+     * @return
+     * @throws OXException
+     */
+    private IDTuple singleUpload(File file, InputStream data) throws OXException {
+        ThresholdFileHolder sink = null;
+        sink = new ThresholdFileHolder();
+        sink.write(data);
+
+        String name = file.getFileName();
+        String fileName = name;
+        try {
+            FileMetadata metadata = client.files().upload(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString()).uploadAndFinish(sink.getStream());
+            DropboxFile dbxFile = new DropboxFile(metadata, userId);
+            file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+            return dbxFile.getIDTuple();
+        } catch (UploadErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        } catch (IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(sink);
+        }
+    }
+
+    /**
+     * Maps the file identifiers of the supplied ID tuples to their parent folder identifiers.
+     *
+     * @param ids The ID tuples to map
+     * @return The mapped identifiers
+     */
+    private Map<String, List<String>> getFilesPerFolder(List<IDTuple> ids) {
+        Map<String, List<String>> filesPerFolder = new HashMap<String, List<String>>();
+        for (IDTuple id : ids) {
+            List<String> files = filesPerFolder.get(id.getFolder());
+            if (null == files) {
+                files = new ArrayList<String>();
+                filesPerFolder.put(id.getFolder(), files);
+            }
+            files.add(id.getId());
+        }
+        return filesPerFolder;
     }
 }
