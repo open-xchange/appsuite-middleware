@@ -112,6 +112,7 @@ public class S3FileStorage implements FileStorage {
     private final boolean encrypted;
     private final String bucketName;
     private final String prefix;
+    private final long chunkSize;
 
     /**
      * Initializes a new {@link S3FileStorage}.
@@ -120,9 +121,10 @@ public class S3FileStorage implements FileStorage {
      * @param encrypted Whether S3 client has encryption enabled or not
      * @param bucketName The bucket name to use
      * @param prefix The prefix to use; e.g. <code>"1337ctxstore"</code>
+     * @param chunkSize The chunk size in bytes to use for multipart uploads
      * @throws OXException
      */
-    public S3FileStorage(AmazonS3Client amazonS3, boolean encrypted, String bucketName, String prefix) {
+    public S3FileStorage(AmazonS3Client amazonS3, boolean encrypted, String bucketName, String prefix, long chunkSize) {
         super();
         BucketNameUtils.validateBucketName(bucketName);
         if (Strings.isEmpty(prefix) || prefix.contains(DELIMITER)) {
@@ -132,6 +134,7 @@ public class S3FileStorage implements FileStorage {
         this.encrypted = encrypted;
         this.bucketName = bucketName;
         this.prefix = prefix;
+        this.chunkSize = chunkSize;
         amazonS3.addRequestHandler(new RequestHandler() {
 
 			@Override
@@ -169,7 +172,7 @@ public class S3FileStorage implements FileStorage {
         S3ChunkedUpload chunkedUpload = null;
         S3UploadChunk chunk = null;
         try {
-            chunkedUpload = new S3ChunkedUpload(file, encrypted);
+            chunkedUpload = new S3ChunkedUpload(file, encrypted, chunkSize);
             chunk = chunkedUpload.next();
             if (false == chunkedUpload.hasNext()) {
                 /*
