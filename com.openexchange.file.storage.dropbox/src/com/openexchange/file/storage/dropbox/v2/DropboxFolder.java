@@ -118,11 +118,11 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
         String path = metadata.getPathDisplay();
         id = path;
 
-        if ("/".equals(path)) {
+        if ("".equals(path)) {
             rootFolder = true;
             id = FileStorageFolder.ROOT_FULLNAME;
             setParentId(null);
-            setName(null == accountDisplayName ? "/" : accountDisplayName); //FIXME: '/' is not correct
+            setName(null == accountDisplayName ? "" : accountDisplayName);
         } else {
             rootFolder = false;
             final int pos = path.lastIndexOf('/');
@@ -130,11 +130,6 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
             setName(pos < 0 ? path : path.substring(pos + 1));
         }
         b_rootFolder = true;
-
-        // FIXME: no modified value for folders?
-        // FIXME: check after the creation of this object if it has any sub-folders and set the following accordingly 
-        // setSubfolders(hasSubfolders);
-        // setSubscribedSubfolders(hasSubfolders);
     }
 
     /*
@@ -167,5 +162,4 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
     public String toString() {
         return id == null ? super.toString() : id;
     }
-
 }
