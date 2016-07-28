@@ -123,6 +123,12 @@ public class DropboxFile extends DefaultFile {
         return null == folder ? '/' + getId() : folder + '/' + getId();
     }
 
+    /**
+     * Extracts the folder from the specified full path
+     * 
+     * @param path The full path to extract the parent folder
+     * @return The extracted parent folder
+     */
     private String extractFolderId(String path) {
         int lastIndex = path.lastIndexOf('/');
         return path.substring(0, lastIndex);
