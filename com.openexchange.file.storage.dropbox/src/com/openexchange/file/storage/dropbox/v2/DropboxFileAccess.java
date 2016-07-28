@@ -132,7 +132,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public boolean exists(String folderId, String id, String version) throws OXException {
         //TODO: double check whether the 'version' parameter has to be used
         try {
-            Metadata metadata = getMetadata(folderId + id);
+            Metadata metadata = getMetadata(toPath(folderId, id));
             return metadata instanceof FileMetadata;
         } catch (GetMetadataErrorException e) {
             // TODO: Maybe introduce new exception codes?
@@ -151,15 +151,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
         //TODO: double check whether the 'version' parameter has to be used
         try {
-            //TODO: Use a method for creating the full path of 'folderId' and 'id' 
-            Metadata metadata = getMetadata(folderId + "/" + id);
+            String path = toPath(folderId, id);
+            Metadata metadata = getMetadata(path);
             if (!(metadata instanceof FileMetadata)) {
                 throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, folderId);
             }
             DropboxFile dropboxFile = new DropboxFile((FileMetadata) metadata, userId);
             //TODO: fetching all revisions just to get the number of versions is quite expensive;
             //      maybe we can introduce something like "-1" for "unknown number of versions"
-            ListRevisionsResult revisions = client.files().listRevisions(folderId + "/" + id, 100);
+            ListRevisionsResult revisions = client.files().listRevisions(path, 100);
             if (revisions != null) {
                 dropboxFile.setNumberOfVersions(revisions.getEntries().size());
             }
@@ -192,7 +192,8 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         if (file.getId() == FileStorageFileAccess.NEW) {
             // Create new, empty file ("touch")
             try {
-                UploadUploader upload = client.files().upload(file.getFolderId() + file.getFileName());
+                String path = toPath(file.getFolderId(), file.getFileName());
+                UploadUploader upload = client.files().upload(path);
                 FileMetadata metadata = upload.finish();
                 DropboxFile dbxFile = new DropboxFile(metadata, userId);
                 file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
@@ -201,15 +202,16 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 throw DropboxExceptionHandler.handle(e);
             }
         } else {
-            String path = file.getFolderId() + file.getId();
+            String path = toPath(file.getFolderId(), file.getId());
 
             // Rename
             if (modifiedFields == null || modifiedFields.contains(Field.FILENAME)) {
-                String toPath = file.getFolderId() + file.getFileName();
+                String toPath = toPath(file.getFolderId(), file.getFileName());
                 if (!path.equals(toPath)) {
                     if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
                         try {
-                            Metadata metadata = client.files().move(path, file.getFolderId() + UUID.randomUUID().toString() + ' ' + file.getFileName());
+                            String filePath = toPath(file.getFolderId(), UUID.randomUUID().toString() + ' ' + file.getFileName());
+                            Metadata metadata = client.files().move(path, filePath);
                             DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
                             file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
                             return dbxFile.getIDTuple();
@@ -256,7 +258,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(DropboxConstants.ID);
         }
 
-        String path = source.getFolder() + source.getId();
+        String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
 
         // Ensure filename uniqueness in target folder
@@ -292,7 +294,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
-        String path = source.getFolder() + source.getId();
+        String path = toPath(source.getFolder(), source.getId());
         String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
         String destPath = destFolder + destName;
 
@@ -322,7 +324,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public InputStream getDocument(String folderId, String id, String version) throws OXException {
         try {
-            DbxDownloader<FileMetadata> download = client.files().download(folderId + id, version);
+            DbxDownloader<FileMetadata> download = client.files().download(toPath(folderId, id), version);
             return new SizeKnowingInputStream(download.getInputStream(), download.getResult().getSize());
         } catch (DownloadErrorException e) {
             // TODO Auto-generated catch block
@@ -349,7 +351,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        String path = FileStorageFileAccess.NEW == file.getId() ? null : file.getFolderId() + file.getId();
+        String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
         long fileSize = file.getFileSize();
         long length = fileSize > 0 ? fileSize : -1L;
 
@@ -449,7 +451,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (IDTuple id : ids) {
                 try {
-                    client.files().delete(id.getFolder() + id.getId());
+                    client.files().delete(toPath(id.getFolder(), id.getId()));
                 } catch (DeleteErrorException e) {
                     //TODO: maybe log this exception for further analysis
                     //LOG.error("{}", e.getMessage(), e);
@@ -683,7 +685,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
         }
         try {
-            client.files().delete(folderId + id);
+            client.files().delete(toPath(folderId, id));
             return new String[0];
         } catch (DeleteErrorException e) {
             // TODO: Maybe introduce new exception codes?
@@ -722,7 +724,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
         try {
             // Fetch all revisions
-            ListRevisionsResult revisions = client.files().listRevisions(folderId + "/" + id, 100);
+            ListRevisionsResult revisions = client.files().listRevisions(toPath(folderId, id), 100);
             int numberOfVersions = revisions.getEntries().size();
             List<File> files = new ArrayList<File>(numberOfVersions);
 
@@ -776,7 +778,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
         try {
-            DbxDownloader<FileMetadata> dbxDownloader = client.files().getThumbnailBuilder(folderId + id).withFormat(ThumbnailFormat.JPEG).withSize(ThumbnailSize.W128H128).start();
+            DbxDownloader<FileMetadata> dbxDownloader = client.files().getThumbnailBuilder(toPath(folderId, id)).withFormat(ThumbnailFormat.JPEG).withSize(ThumbnailSize.W128H128).start();
             return dbxDownloader.getInputStream();
         } catch (ThumbnailErrorException e) {
             // TODO: Maybe introduce new exception codes?
