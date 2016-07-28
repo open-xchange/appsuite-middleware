@@ -99,6 +99,29 @@ abstract class AbstractDropboxAccess {
     }
 
     /**
+     * Gets the (dropbox-)path for specified folder identifier.
+     *
+     * @param folderId The folder identifier
+     * @return The associated path
+     */
+    String toPath(String folderId) {
+        //TODO: Check for null?
+        return isRoot(folderId) ? "/" : folderId;
+    }
+
+    /**
+     * Gets the (dropbox-)path for the specified folder- and file-identifier.
+     *
+     * @param folderId The folder identifier
+     * @param fileId The file identifier
+     * @return The associated path
+     */
+    String toPath(String folderId, String fileId) {
+        String parentPath = isRoot(folderId) ? "/" : folderId;
+        return parentPath.endsWith("/") ? parentPath + fileId : parentPath + '/' + fileId;
+    }
+
+    /**
      * Returns the metadata for a file ({@link FileMetadata}) or a folder ({@link FolderMetadata})
      * 
      * @param id The resource identifier
@@ -114,7 +137,7 @@ abstract class AbstractDropboxAccess {
         }
         return metadata;
     }
-    
+
     /**
      * Gets the {@link FolderMetadata} of the specified folder.
      * 
