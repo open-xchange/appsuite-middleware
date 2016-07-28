@@ -125,10 +125,6 @@ public class DropboxFile extends DefaultFile {
 
     private String extractFolderId(String path) {
         int lastIndex = path.lastIndexOf('/');
-        String folderId = path.substring(0, lastIndex);
-        if (folderId.equals("")) {
-            folderId = "/";
-        }
-        return folderId;
+        return path.substring(0, lastIndex);
     }
 }
