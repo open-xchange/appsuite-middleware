@@ -55,11 +55,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.java.Streams;
 
@@ -123,13 +126,31 @@ public final class Collections {
 
     /**
      * Creates a set containing the supplied elements, and returns an unmodifiable view to this set.
-     * 
+     *
      * @param elements The elements to include in the unmodifiable set
      * @return The unmodifiable set
      */
     @SafeVarargs
     public static <T> Set<T> unmodifiableSet(T...elements) {
-        return null == elements ? null : java.util.Collections.unmodifiableSet(new HashSet<T>(Arrays.asList(elements)));        
+        return null == elements ? null : java.util.Collections.unmodifiableSet(new HashSet<T>(Arrays.asList(elements)));
+    }
+
+    /**
+     * Puts a key-value-pair into a "multi-map", i.e. a map associating a key with multiple values. New lists for the key are created
+     * automatically as needed.
+     *
+     * @param multiMap The multi-map to put the value into
+     * @param key The key to add the value for
+     * @param value the value to add
+     * @return <code>true</code> (as specified by {@link Collection#add})
+     */
+    public static <K, V> boolean put(Map<K, List<V>> multiMap, K key, V value) {
+        List<V> values = multiMap.get(key);
+        if (null == values) {
+            values = new ArrayList<V>();
+            multiMap.put(key, values);
+        }
+        return values.add(value);
     }
 
     /**
