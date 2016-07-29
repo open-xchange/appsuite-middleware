@@ -78,7 +78,6 @@ import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
 import com.dropbox.core.v2.files.UploadBuilder;
 import com.dropbox.core.v2.files.UploadErrorException;
-import com.dropbox.core.v2.files.UploadSessionAppendV2Uploader;
 import com.dropbox.core.v2.files.UploadSessionCursor;
 import com.dropbox.core.v2.files.UploadSessionFinishUploader;
 import com.dropbox.core.v2.files.UploadSessionStartResult;
@@ -120,8 +119,8 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     private final DropboxAccountAccess accountAccess;
     private final int userId;
-    
-    private static final int LIMIT = 150 * 1;
+
+    private static final int CHUNK_SIZE = 512000 * 1;
 
     /**
      * Initializes a new {@link DropboxFileAccess}.
@@ -368,7 +367,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
         if (Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION)) {
             // Create file
-            if (fileSize > LIMIT) { //TODO constants
+            if (fileSize > CHUNK_SIZE) {
                 return sessionUpload(file, data);
             } else {
                 return singleUpload(file, data);
@@ -815,19 +814,31 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             sink = new ThresholdFileHolder();
             sink.write(data);
 
-            UploadSessionStartUploader uploadSession = client.files().uploadSessionStart(false);
-            int offset = LIMIT;
-            UploadSessionStartResult result = uploadSession.uploadAndFinish(sink.getStream(), offset);
+            InputStream stream = sink.getStream();
+
+            // Start an upload session and get the session id
+            UploadSessionStartUploader uploadSession = client.files().uploadSessionStart();
+            UploadSessionStartResult result = uploadSession.uploadAndFinish(stream, CHUNK_SIZE);
             String sessionId = result.getSessionId();
-            UploadSessionCursor cursor;
-            do {
+            long offset = CHUNK_SIZE;
+
+            System.out.println("Uploaded " + offset + " out of " + sink.getCount());
+
+            UploadSessionCursor cursor = new UploadSessionCursor(sessionId, offset);
+            while (sink.getCount() - offset > CHUNK_SIZE) {
+                client.files().uploadSessionAppendV2(cursor).uploadAndFinish(stream, CHUNK_SIZE);
+                offset += CHUNK_SIZE;
                 cursor = new UploadSessionCursor(sessionId, offset);
-                client.files().uploadSessionAppendV2(cursor);
-                offset += LIMIT;
-            } while (offset < sink.getCount());
-            UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, new CommitInfo(toPath(file.getFolderId(), file.getFileName())));
-            FileMetadata metadata = sessionFinish.finish();
-            
+                System.out.println("Uploaded " + offset + " out of " + sink.getCount());
+            }
+
+            long remaining = sink.getCount() - offset;
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()));
+            UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
+            FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
+
+            System.out.println("Uploaded " + (remaining + offset) + " out of " + sink.getCount());
+
             DropboxFile dbxFile = new DropboxFile(metadata, userId);
             file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
             return dbxFile.getIDTuple();
@@ -848,14 +859,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @throws OXException
      */
     private IDTuple singleUpload(File file, InputStream data) throws OXException {
-        ThresholdFileHolder sink = null;
-        sink = new ThresholdFileHolder();
-        sink.write(data);
-
         String name = file.getFileName();
         String fileName = name;
         try {
-            FileMetadata metadata = client.files().upload(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString()).uploadAndFinish(sink.getStream());
+            FileMetadata metadata = client.files().upload(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString()).uploadAndFinish(data);
             DropboxFile dbxFile = new DropboxFile(metadata, userId);
             file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
             return dbxFile.getIDTuple();
@@ -865,8 +872,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             throw DropboxExceptionHandler.handle(e);
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(sink);
         }
     }
 
