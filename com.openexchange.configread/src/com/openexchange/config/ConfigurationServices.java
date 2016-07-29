@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,60 +47,53 @@
  *
  */
 
-package com.openexchange.configjump.generic;
+package com.openexchange.config;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Properties;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Streams;
 
 /**
- * This customizer handles an appearing Configuration service and activates then this bundles service.
+ * {@link ConfigurationServices} - A utility class for {@link ConfigurationService}.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class ConfigurationTracker implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
-
-    private final BundleContext context;
-    private final Services services;
+public class ConfigurationServices {
 
     /**
-     * Default constructor.
-     *
-     * @param services
+     * Initializes a new {@link ConfigurationServices}.
      */
-    public ConfigurationTracker(final BundleContext context, final Services services) {
+    private ConfigurationServices() {
         super();
-        this.context = context;
-        this.services = services;
     }
 
     /**
-     * {@inheritDoc}
+     * Loads the properties from specified file.
+     *
+     * @param file The file to read from
+     * @return The properties or <code>null</code> (if no such file exists)
+     * @throws IOException If reading from file yields an I/O error
      */
-    @Override
-    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
-        final ConfigurationService configuration = context.getService(reference);
-        final Properties props = configuration.getFile("configjump.properties");
-        context.ungetService(reference);
-        services.registerService(props);
-        return null;
+    public static Properties loadPropertiesFrom(File file) throws IOException {
+        if (null == file) {
+            return null;
+        }
+
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            Properties properties = new Properties();
+            properties.load(fis);
+            return properties;
+        } catch (FileNotFoundException e) {
+            return null;
+        } finally {
+            Streams.close(fis);
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        // Nothing to do.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        // Nothing to do.
-    }
 }
