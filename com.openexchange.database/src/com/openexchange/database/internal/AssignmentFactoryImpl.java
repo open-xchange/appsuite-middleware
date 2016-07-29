@@ -54,13 +54,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 
@@ -74,16 +76,19 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AssignmentFactoryImpl.class);
 
-    private static final String GET_POOL_MAPPING = "SELECT dc.write_db_pool_id, dc.read_db_pool_id, dp.name FROM db_cluster dc INNER JOIN db_pool dp ON dc.write_db_pool_id = dp.db_pool_id;";
+    private final AtomicReference<Assignments> assignmentsRef;
 
-    private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
+    private final DatabaseServiceImpl databaseService;
 
-    private final List<Assignment> assignments = new CopyOnWriteArrayList<>();
-
-    private final DatabaseService databaseService;
-
-    public AssignmentFactoryImpl(DatabaseService databaseService) {
+    /**
+     * Initializes a new {@link AssignmentFactoryImpl}.
+     *
+     * @param databaseService The database service to use
+     */
+    public AssignmentFactoryImpl(DatabaseServiceImpl databaseService) {
+        super();
         this.databaseService = databaseService;
+        assignmentsRef = new AtomicReference<Assignments>(new Assignments(null));
     }
 
     /**
@@ -93,16 +98,14 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
      */
     @Override
     public void reload() throws OXException {
-        List<Assignment> readPools = readPools();
-        if (readPools.size() == 0) {
+        List<Assignment> pools = readPools();
+        if (pools.isEmpty()) {
             LOG.info("Cannot find any database assignment. Services that make use of the AssignmentFactory won't work!");
         }
-        assignments.clear();
-        assignments.addAll(readPools);
+        assignmentsRef.set(new Assignments(pools));
     }
 
     private List<Assignment> readPools() throws OXException {
-        List<Assignment> lAssignments = new ArrayList<>();
         Connection readOnly = this.databaseService.getReadOnly();
 
         int readPoolId = 0;
@@ -111,48 +114,75 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = readOnly.prepareStatement(GET_POOL_MAPPING);
+            stmt = readOnly.prepareStatement("SELECT dc.write_db_pool_id, dc.read_db_pool_id, dp.name FROM db_cluster dc INNER JOIN db_pool dp ON dc.write_db_pool_id = dp.db_pool_id");
             result = stmt.executeQuery();
+            if (false == result.next()) {
+                return Collections.emptyList();
+            }
 
+            List<Assignment> lAssignments = new LinkedList<>();
             int serverId = Server.getServerId();
-
-            while (result.next()) {
-                writePoolId = result.getInt("write_db_pool_id");
-                readPoolId = result.getInt("read_db_pool_id");
-                String schema = result.getString("name");
+            do {
+                writePoolId = result.getInt(1);
+                readPoolId = result.getInt(2);
+                String databaseName = result.getString(3);
                 if (readPoolId == 0) {
                     readPoolId = writePoolId;
                 }
-                int context = get(readOnly, writePoolId, serverId);
-                AssignmentImpl assignmentImpl = new AssignmentImpl(context, serverId, readPoolId, writePoolId, schema);
-                lAssignments.add(assignmentImpl);
-                LOG.debug("Found assignment and added to pool: {}", assignmentImpl.toString());
-            }
-            stmt.close();
+
+                List<SchemaAndContext> list = get(writePoolId, serverId, readOnly);
+                if (null == list) {
+                    // This is an assignment w/o a context_server2db_pool affiliation.
+                    // Expect the database name to be the actual schema name
+                    AssignmentImpl assignmentImpl = new AssignmentImpl(0, serverId, readPoolId, writePoolId, databaseName);
+                    lAssignments.add(assignmentImpl);
+                    LOG.debug("Found assignment and added to pool: {}", assignmentImpl);
+                } else {
+                    // An assignment with one or more context_server2db_pool affiliations.
+                    for (SchemaAndContext schemaAndContext : list) {
+                        AssignmentImpl assignmentImpl = new AssignmentImpl(schemaAndContext.contextId, serverId, readPoolId, writePoolId, schemaAndContext.schemaName);
+                        lAssignments.add(assignmentImpl);
+                        LOG.debug("Found assignment and added to pool: {}", assignmentImpl);
+                    }
+                }
+            } while (result.next());
+            return lAssignments;
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, stmt);
             databaseService.backReadOnly(readOnly);
         }
-        return lAssignments;
     }
 
-    private int get(Connection con, int poolId, int serverId) throws OXException {
+    /**
+     * Gets the list of schemas (accompanied by the identifier of any context in that schema).
+     *
+     * @param poolId The pool identifier
+     * @param serverId The server identifier
+     * @param con The connection to use
+     * @return The list of schemas or <code>null</code>
+     * @throws OXException If schemas cannot be listed
+     */
+    private List<SchemaAndContext> get(int poolId, int serverId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-
-            // SELECT db_schema, cid FROM context_server2db_pool where server_id = ? AND context_server2db_pool.write_db_pool_id = ? GROUP BY db_schema
-
-            stmt = con.prepareStatement(CONTEXTS_IN_DATABASE);
-            stmt.setInt(1, poolId);
+            stmt = con.prepareStatement("SELECT db_schema, cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? GROUP BY db_schema");
+            stmt.setInt(1, serverId);
             stmt.setInt(2, poolId);
             result = stmt.executeQuery();
-            if (result.next()) {
-                return result.getInt(1);
+
+            if (false == result.next()) {
+                // Not context related DBs like: global, guard and shard
+                return null;
             }
-            return 0; // non context related dbs like: global, guard and shard
+
+            List<SchemaAndContext> list = new LinkedList<>();
+            do {
+                list.add(new SchemaAndContext(result.getString(1), result.getInt(2)));
+            } while (result.next());
+            return list;
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -165,13 +195,12 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
      */
     @Override
     public Assignment get(int contextId) {
-        for (Assignment assignment : assignments) {
-            if (assignment.getContextId() == contextId) {
-                return assignment;
-            }
+        try {
+            return databaseService.getAssignment(contextId);
+        } catch (OXException e) {
+            LOG.warn("Found no assignment for context {}", contextId, e);
+            return null;
         }
-        LOG.warn("Found no assignment for context id {}", contextId);
-        return null;
     }
 
     /**
@@ -179,14 +208,21 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
      */
     @Override
     public Assignment get(String schemaName) {
-        for (Assignment assignment : assignments) {
-            if (assignment.getSchema().equalsIgnoreCase(schemaName)) {
-                LOG.debug("Found the following assignment for schema name {}: {}", schemaName, assignment.toString());
-                return assignment;
-            }
+        if (null == schemaName) {
+            // Garbage in, garbage out...
+            return null;
         }
-        LOG.warn("Found no assignment for schema name {}", schemaName);
-        return null;
+
+        Assignments assignments = assignmentsRef.get();
+        List<Assignment> candidates = assignments.getForSchema(schemaName);
+        if (null == candidates) {
+            LOG.warn("Found no assignment for schema name {}", schemaName);
+            return null;
+        }
+        if (candidates.size() > 1) {
+            LOG.warn("Found duplicate assignments for schema name {}", schemaName, new Throwable("Found duplicate assignments"));
+        }
+        return candidates.get(0);
     }
 
     /**
@@ -194,20 +230,95 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
      */
     @Override
     public Assignment get(int poolId, boolean write) {
-        for (Assignment assignment : assignments) {
-            if (write) {
-                if (assignment.getWritePoolId() == poolId) {
-                    LOG.debug("Found the following assignment for 'write' identified by poolId {}: {}", poolId, assignment.toString());
-                    return assignment;
-                }
+        Assignments assignments = assignmentsRef.get();
+        List<Assignment> candidates = assignments.getForPoolId(poolId, write);
+        if (null == candidates) {
+            LOG.warn("Found no assignment for {} pool {}.", write ? "read-write" : "read-only", poolId);
+            return null;
+        }
+        if (candidates.size() > 1) {
+            LOG.warn("Found duplicate assignments for {} pool {}.", write ? "read-write" : "read-only", poolId, new Throwable("Found duplicate assignments"));
+        }
+        return candidates.get(0);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    private static final class SchemaAndContext {
+
+        final int contextId;
+        final String schemaName;
+
+        SchemaAndContext(String schemaName, int contextId) {
+            super();
+            this.schemaName = schemaName;
+            this.contextId = contextId;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(32);
+            builder.append('{');
+            if (schemaName != null) {
+                builder.append("schemaName=").append(schemaName).append(", ");
+            }
+            builder.append("contextId=").append(contextId);
+            builder.append('}');
+            return builder.toString();
+        }
+    }
+
+    private static final class Assignments {
+
+        private final Map<String, List<Assignment>> assignmentsPerSchema;
+        private final Map<Integer, List<Assignment>> assignmentsPerWritePool;
+        private final Map<Integer, List<Assignment>> assignmentsPerReadPool;
+
+        Assignments(List<Assignment> assignments) {
+            super();
+            int size;
+            if (null == assignments || (size = assignments.size()) <= 0) {
+                assignmentsPerSchema = Collections.emptyMap();
+                assignmentsPerWritePool = Collections.emptyMap();
+                assignmentsPerReadPool = Collections.emptyMap();
             } else {
-                if (assignment.getReadPoolId() == poolId) {
-                    LOG.debug("Found the following assignment for identified by poolId {}: {}", poolId, assignment.toString());
-                    return assignment;
+                assignmentsPerSchema = new HashMap<>(size);
+                assignmentsPerWritePool = new HashMap<>(size);
+                assignmentsPerReadPool = new HashMap<>(size);
+                for (Assignment assignment : assignments) {
+                    List<Assignment> list = assignmentsPerSchema.get(assignment.getSchema());
+                    if (null == list) {
+                        list = new LinkedList<>();
+                        assignmentsPerSchema.put(assignment.getSchema(), list);
+                    }
+                    list.add(assignment);
+
+                    Integer key = Integer.valueOf(assignment.getWritePoolId());
+                    list = assignmentsPerWritePool.get(key);
+                    if (null == list) {
+                        list = new LinkedList<>();
+                        assignmentsPerWritePool.put(key, list);
+                    }
+                    list.add(assignment);
+
+                    key = Integer.valueOf(assignment.getReadPoolId());
+                    list = assignmentsPerReadPool.get(key);
+                    if (null == list) {
+                        list = new LinkedList<>();
+                        assignmentsPerReadPool.put(key, list);
+                    }
+                    list.add(assignment);
                 }
             }
         }
-        LOG.warn("Found no assignment for pool id {} in pool write {}.", poolId, Boolean.toString(write));
-        return null;
+
+        List<Assignment> getForSchema(String schema) {
+            return assignmentsPerSchema.get(schema);
+        }
+
+        List<Assignment> getForPoolId(int poolId, boolean write) {
+            return write ? assignmentsPerWritePool.get(Integer.valueOf(poolId)) : assignmentsPerReadPool.get(Integer.valueOf(poolId));
+        }
     }
+
 }
