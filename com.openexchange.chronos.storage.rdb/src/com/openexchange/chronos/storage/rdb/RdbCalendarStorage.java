@@ -56,12 +56,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,6 +92,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.search.SearchTerm;
 
 /**
  * {@link CalendarStorage}
@@ -104,7 +103,7 @@ import com.openexchange.java.Autoboxing;
  */
 public class RdbCalendarStorage implements CalendarStorage {
 
-    private static final EventMapper MAPPER = new EventMapper();
+    private static final EventMapper MAPPER = EventMapper.getInstance();
 
     private final Context context;
     private final DBProvider dbProvider;
@@ -122,6 +121,33 @@ public class RdbCalendarStorage implements CalendarStorage {
         this.context = context;
         this.dbProvider = dbProvider;
         this.txPolicy = txPolicy;
+    }
+
+    @Override
+    public List<Event> searchEvents(SearchTerm<?> searchTerm, EventField[] fields) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            List<Event> events = selectEvents(connection, false, context.getContextId(), searchTerm, fields);
+            return selectAdditionalEventData(connection, context.getContextId(), events, fields);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, EventField[] fields) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectEvents(connection, true, context.getContextId(), searchTerm, fields);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
     }
 
     @Override
@@ -296,58 +322,6 @@ public class RdbCalendarStorage implements CalendarStorage {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
             release(connection, updated);
-        }
-    }
-
-    @Override
-    public List<Event> loadEventsInFolder(int folderID, Date from, Date until, int createdBy, Date updatedSince, EventField[] fields) throws OXException {
-        return loadEventsInFolder(folderID, false, from, until, createdBy, updatedSince, fields);
-    }
-
-    @Override
-    public List<Event> loadDeletedEventsInFolder(int folderID, Date from, Date until, int createdBy, Date deletedSince) throws OXException {
-        return loadEventsInFolder(folderID, true, from, until, createdBy, deletedSince, null);
-    }
-
-    @Override
-    public List<Event> loadEventsOfUser(int userID, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException {
-        return loadEventsOfUser(userID, false, from, until, updatedSince, fields);
-    }
-
-    @Override
-    public List<Event> loadDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince) throws OXException {
-        return loadEventsOfUser(userID, true, from, until, deletedSince, null);
-    }
-
-    private List<Event> loadEventsInFolder(int folderID, boolean deleted, Date from, Date until, int createdBy, Date updatedSince, EventField[] fields) throws OXException {
-        Connection connection = null;
-        try {
-            connection = dbProvider.getReadConnection(context);
-            List<Event> events = selectEventsInFolder(connection, deleted, context.getContextId(), folderID, from, until, createdBy, updatedSince, fields);
-            if (false == deleted) {
-                events = selectAdditionalEventData(connection, context.getContextId(), events, fields);
-            }
-            return events;
-        } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
-        } finally {
-            dbProvider.releaseReadConnection(context, connection);
-        }
-    }
-
-    private List<Event> loadEventsOfUser(int userID, boolean deleted, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException {
-        Connection connection = null;
-        try {
-            connection = dbProvider.getReadConnection(context);
-            List<Event> events = selectEventsOfUser(connection, deleted, context.getContextId(), userID, from, until, updatedSince, fields);
-            if (false == deleted) {
-                events = selectAdditionalEventData(connection, context.getContextId(), events, fields);
-            }
-            return events;
-        } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
-        } finally {
-            dbProvider.releaseReadConnection(context, connection);
         }
     }
 
@@ -735,73 +709,25 @@ public class RdbCalendarStorage implements CalendarStorage {
         }
     }
 
-    private static List<Event> selectEventsInFolder(Connection connection, boolean deleted, int contextID, int folderID, Date from, Date until, int createdBy, Date updatedSince, EventField[] fields) throws SQLException, OXException {
+    private static List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = MAPPER.getMappedFields(fields);
-        StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(MAPPER.getColumns(mappedFields, "d.")).append(' ').append("FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ").append("LEFT JOIN ").append(deleted ? "del_dates_members" : "prg_dates_members").append(" AS m ").append("ON d.cid=m.cid AND d.intfield01=m.object_id ").append("WHERE d.cid=? AND (d.fid=? OR m.pfid=?) ");
-        if (null != from) {
-            stringBuilder.append("AND ").append(MAPPER.get(EventField.END_DATE).getColumnLabel("d.")).append(">=? ");
+        SearchTermAdapter adapter = new SearchTermAdapter(searchTerm, null, "d.", "m.", "e.");
+        StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(MAPPER.getColumns(mappedFields, "d.")).append(' ')
+            .append("FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ");
+        if (adapter.usesInternalAttendees()) {
+            stringBuilder.append("LEFT JOIN ").append(deleted ? "del_dates_members" : "prg_dates_members").append(" AS m ")
+                .append("ON d.cid=m.cid AND d.intfield01=m.object_id ");
         }
-        if (null != until) {
-            stringBuilder.append("AND d.timestampfield01<? ");
+        if (adapter.usesExternalAttendees()) {
+            stringBuilder.append("LEFT JOIN ").append(deleted ? "deldateexternal" : "dateexternal").append(" AS e ")
+                .append("ON d.cid=e.cid AND d.intfield01=e.objectId ");
         }
-        if (null != updatedSince) {
-            stringBuilder.append("AND d.changing_date>? ");
-        }
-        if (0 < createdBy) {
-            stringBuilder.append("AND d.created_from=? ");
-        }
-        List<Event> events = new ArrayList<Event>();
-        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.append(';').toString())) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, contextID);
-            stmt.setInt(parameterIndex++, folderID);
-            stmt.setInt(parameterIndex++, folderID);
-            if (null != from) {
-                stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
-            }
-            if (null != until) {
-                stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
-            }
-            if (null != updatedSince) {
-                stmt.setLong(parameterIndex++, updatedSince.getTime());
-            }
-            if (0 < createdBy) {
-                stmt.setInt(parameterIndex++, createdBy);
-            }
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                events.add(readEvent(resultSet, mappedFields, "d."));
-            }
-        }
-        return events;
-    }
+        stringBuilder.append("WHERE d.cid=? AND ").append(adapter.getClause()).append(';');
 
-    private static List<Event> selectEventsOfUser(Connection connection, boolean deleted, int contextID, int userID, Date from, Date until, Date updatedSince, EventField[] fields) throws SQLException, OXException {
-        EventField[] mappedFields = MAPPER.getMappedFields(fields);
-        StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(MAPPER.getColumns(mappedFields, "d.")).append(' ').append("FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ").append("LEFT JOIN ").append(deleted ? "del_dates_members" : "prg_dates_members").append(" AS m ").append("ON d.cid=m.cid AND d.intfield01=m.object_id ").append("WHERE d.cid=? AND m.member_uid=? ");
-        if (null != from) {
-            stringBuilder.append("AND d.timestampfield02>=? ");
-        }
-        if (null != until) {
-            stringBuilder.append("AND d.timestampfield01<=? ");
-        }
-        if (null != updatedSince) {
-            stringBuilder.append("AND d.changing_date>? ");
-        }
         List<Event> events = new ArrayList<Event>();
-        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.append(';').toString())) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, contextID);
-            stmt.setInt(parameterIndex++, userID);
-            if (null != from) {
-                stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
-            }
-            if (null != until) {
-                stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
-            }
-            if (null != updatedSince) {
-                stmt.setLong(parameterIndex++, updatedSince.getTime());
-            }
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            stmt.setInt(1, contextID);
+            adapter.setParameters(stmt, 2);
             ResultSet resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
                 events.add(readEvent(resultSet, mappedFields, "d."));

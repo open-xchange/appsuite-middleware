@@ -61,6 +61,8 @@ import com.openexchange.exception.OXException;
  */
 public interface CalendarService {
 
+    int resolveByUID(CalendarSession session, String uid) throws OXException;
+
     UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException;
 
     List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;

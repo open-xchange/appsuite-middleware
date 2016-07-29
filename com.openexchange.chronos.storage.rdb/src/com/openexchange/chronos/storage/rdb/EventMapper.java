@@ -87,18 +87,30 @@ import com.openexchange.java.Strings;
  */
 public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
+    private static final EventMapper INSTANCE = new EventMapper();
+
+    /**
+     * Gets the mapper instance.
+     *
+     * @return The instance.
+     */
+    public static EventMapper getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Initializes a new {@link EventMapper}.
      */
-	public EventMapper() {
-		super();
-	}
+    private EventMapper() {
+        super();
+    }
 
     /**
      * Gets all mapped fields.
      *
      * @return The mapped fields
      */
+    @Override
     public EventField[] getMappedFields() {
         return getMappedFields(null);
     }
@@ -109,6 +121,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
      * @param requestedFields The requested fields, or <code>null</code> to get all mapped fields
      * @return The mapped fields
      */
+    @Override
     public EventField[] getMappedFields(EventField[] requestedFields) {
         Set<EventField> knownFields = getMappings().keySet();
         Set<EventField> mappedFields;

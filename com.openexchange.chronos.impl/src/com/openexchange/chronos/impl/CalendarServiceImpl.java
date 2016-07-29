@@ -78,6 +78,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    public int resolveByUID(CalendarSession session, String uid) throws OXException {
+        return new CalendarReader(session).resolveUid(uid);
+    }
+
+    @Override
     public UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException {
         return new CalendarReader(session).readEvent(folderID, objectID, getFields(session));
     }
@@ -118,7 +123,7 @@ public class CalendarServiceImpl implements CalendarService {
     public List<UserizedEvent> getDeletedEventsOfUser(CalendarSession session, Date deletedSince) throws OXException {
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return new CalendarReader(session).readDeletedEventsOfUser(session.getUser().getId(), from, until, deletedSince);
+        return new CalendarReader(session).readDeletedEventsOfUser(session.getUser().getId(), from, until, deletedSince, getFields(session));
     }
 
     @Override

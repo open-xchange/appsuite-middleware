@@ -67,6 +67,12 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.Operand;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
  * {@link CalendarUtils}
@@ -281,6 +287,66 @@ public class CalendarUtils {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
+    }
+
+    /**
+     * Appends search terms for commonly used restriction.
+     *
+     * @param searchTerm The search term to append the search terms for
+     * @param from The minimum (inclusive) end time of the events, or <code>null</code> for no restrictions
+     * @param until The maximum (exclusive) start time of the events, or <code>null</code> for no restrictions
+     * @param updatedSince The minimum (exclusive) last modification time of the events, or <code>null</code> for no restrictions
+     * @return The passed search term reference
+     */
+    static CompositeSearchTerm appendCommonTerms(CompositeSearchTerm searchTerm, Date from, Date until, Date updatedSince) {
+        if (null != from) {
+            searchTerm.addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from));
+        }
+        if (null != until) {
+            searchTerm.addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, until));
+        }
+        if (null != updatedSince) {
+            searchTerm.addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, updatedSince));
+        }
+        return searchTerm;
+    }
+
+    /**
+     * Gets a single search term using the field itself as column operand and a second operand.
+     *
+     * @param <V> The operand's type
+     * @param <E> The field type
+     * @param operation The operation to use
+     * @param operand The second operand
+     * @return A single search term
+     */
+    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, Operand<V> operand) {
+        return getSearchTerm(field, operation).addOperand(operand);
+    }
+
+    /**
+     * Gets a single search term using the field itself as column operand and adds the supplied value as constant operand.
+     *
+     * @param <V> The operand's type
+     * @param <E> The field type
+     * @param operation The operation to use
+     * @param operand The value to use as constant operand
+     * @return A single search term
+     */
+    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, V operand) {
+        return getSearchTerm(field, operation, new ConstantOperand<V>(operand));
+    }
+
+    /**
+     * Gets a single search term using the field itself as single column operand.
+     *
+     * @param <E> The field type
+     * @param operation The operation to use
+     * @param operand The value to use as constant operand
+     * @return A single search term
+     */
+    public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
+        return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
     }
 
 }

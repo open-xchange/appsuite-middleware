@@ -51,7 +51,6 @@ package com.openexchange.chronos.compat;
 
 import java.util.Calendar;
 import java.util.TimeZone;
-import com.openexchange.java.Strings;
 
 /**
  * {@link SeriesPattern}
@@ -80,55 +79,6 @@ public class SeriesPattern {
     public static final Integer YEARLY_2 = 6;
 
     /**
-     * Parses a series pattern from its database representation.
-     *
-     * @param databasePattern The database pattern string
-     * @return The parsed series pattern, or <code>null</code> if the supplied pattern is empty
-     */
-    public static SeriesPattern parse(String databasePattern, TimeZone tz, Boolean fullTime) {
-        if (Strings.isEmpty(databasePattern)) {
-            return null;
-        }
-        SeriesPattern pattern = new SeriesPattern();
-        String[] splitted = databasePattern.split("\\|");
-        for (int i = 1; i < splitted.length; i += 2) {
-            String key = splitted[i - 1];
-            String value = splitted[i];
-            switch (key) {
-                case "t":
-                    pattern.type = Integer.valueOf(value);
-                    break;
-                case "i":
-                    pattern.interval = Integer.valueOf(value);
-                    break;
-                case "a":
-                    pattern.daysOfWeek = Integer.valueOf(value);
-                    break;
-                case "b":
-                    pattern.dayOfMonth = Integer.valueOf(value);
-                    break;
-                case "c":
-                    pattern.month = Integer.valueOf(value);
-                    break;
-                case "o":
-                    pattern.occurrences = Integer.valueOf(value);
-                    break;
-                case "s":
-                    pattern.seriesStart = Long.valueOf(value);
-                    break;
-                case "e":
-                    pattern.seriesEnd = Long.valueOf(value);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unexpected key: " + key);
-            }
-        }
-        pattern.tz = tz;
-        pattern.fullTime = fullTime;
-        return pattern;
-    }
-
-    /**
      * Initializes a new, empty {@link SeriesPattern}.
      */
     public SeriesPattern() {
@@ -138,7 +88,7 @@ public class SeriesPattern {
     /**
      * Initializes a new {@link SeriesPattern}.
      *
-     * @param seriesPattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
+     * @param databasePattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
      * @param timeZone The timezone of the event series
      * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
      */
@@ -358,8 +308,12 @@ public class SeriesPattern {
      * @return
      */
     public Calendar getSeriesEndCalendar() {
+        Long seriesEnd = getSeriesEnd();
+        if (null == seriesEnd) {
+            return null;
+        }
         Calendar retval = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        retval.setTimeInMillis(getSeriesEnd());
+        retval.setTimeInMillis(seriesEnd.longValue());
         return retval;
     }
 
@@ -382,14 +336,14 @@ public class SeriesPattern {
         if (null != month) {
             stringBuilder.append("|c|").append(month);
         }
-        if (null != occurrences) {
-            stringBuilder.append("|o|").append(occurrences);
-        }
         if (null != seriesStart) {
             stringBuilder.append("|s|").append(seriesStart);
         }
         if (null != seriesEnd) {
             stringBuilder.append("|e|").append(seriesEnd);
+        }
+        if (null != occurrences) {
+            stringBuilder.append("|o|").append(occurrences);
         }
         return stringBuilder.toString();
     }

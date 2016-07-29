@@ -73,6 +73,7 @@ import com.openexchange.chronos.Period;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link Recurrence}
@@ -127,15 +128,22 @@ public class Recurrence {
      */
     public static Period getRecurrenceMasterPeriod(SeriesPattern pattern, int absoluteDuration) {
         // TODO: garantiert falsch.
-        Calendar startCalendar = pattern.getSeriesStartCalendar();
-        int year = startCalendar.get(Calendar.YEAR);
-        int month = startCalendar.get(Calendar.MONTH);
-        int date = startCalendar.get(Calendar.DATE);
-        Date startDate = startCalendar.getTime();
-        Calendar endCalendar = pattern.getSeriesEndCalendar();
-        endCalendar.set(year, month, date);
-        endCalendar.add(Calendar.DAY_OF_YEAR, absoluteDuration);
-        Date endDate = endCalendar.getTime();
+        Calendar calendar = GregorianCalendar.getInstance(TimeZones.UTC);
+        calendar.setTimeInMillis(pattern.getSeriesStart().longValue());
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int date = calendar.get(Calendar.DATE);
+        Date startDate = calendar.getTime();
+
+        Long seriesEnd = pattern.getSeriesEnd();
+        if (null == seriesEnd) {
+            // ja, was dann?
+        } else {
+            calendar.setTimeInMillis(seriesEnd.longValue());
+            calendar.set(year, month, date);
+            calendar.add(Calendar.DAY_OF_YEAR, absoluteDuration);
+        }
+        Date endDate = calendar.getTime();
         return new Period(startDate, endDate, pattern.isFullTime().booleanValue());
     }
 
@@ -160,8 +168,7 @@ public class Recurrence {
      * @return The corresponding recurrence rule
      */
     public static String getRecurrenceRule(String seriesPattern, TimeZone tz, Boolean fullTime) {
-        SeriesPattern pattern = SeriesPattern.parse(seriesPattern, tz, fullTime);
-        return getRecurrenceRule(pattern);
+        return getRecurrenceRule(new SeriesPattern(seriesPattern, tz.getID(), fullTime.booleanValue()));
     }
 
     public static String getRecurrenceRule(SeriesPattern pattern) {
@@ -408,16 +415,16 @@ public class Recurrence {
 
     private static void setMonthDay(CalendarObject cObj, RecurrenceRule rrule, Calendar startDate) {
         List<Integer> monthDayList = rrule.getByPart(Part.BYMONTHDAY);
-        if (monthDayList.isEmpty()) {
+        if (null == monthDayList || monthDayList.isEmpty()) {
             List<Integer> weekNoList = rrule.getByPart(Part.BYWEEKNO);
-            if (!weekNoList.isEmpty()) {
+            if (null != weekNoList && !weekNoList.isEmpty()) {
                 int week = weekNoList.get(0).intValue();
                 if (week == -1) {
                     week = 5;
                 }
                 cObj.setDayInMonth(week); // Day in month stores week
                 setDays(cObj, rrule, startDate);
-            } else if (!rrule.getByDayPart().isEmpty()) {
+            } else if (null != rrule.getByDayPart() && !rrule.getByDayPart().isEmpty()) {
                 setWeekdayInMonth(cObj, rrule);
                 setDayInMonthFromSetPos(cObj, rrule);
             } else {

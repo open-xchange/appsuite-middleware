@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,45 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.search.internal.operands;
+
+import com.openexchange.search.Operand;
 
 /**
- * {@link TimeTransparency}
+ * {@link ColumnFieldOperand}
+ *
+ * A column operand for a field.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
- * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.2.7">RFC 5545, section 3.8.2.7</a>
  */
-public enum TimeTransparency {
+public class ColumnFieldOperand<E extends Enum<?>> implements Operand<E> {
+
+    private final E field;
 
     /**
-     * Blocks or opaque on busy time searches.
+     * Initializes a new {@link ColumnFieldOperand}.
+     *
+     * @param field The field
      */
-    OPAQUE,
+    public ColumnFieldOperand(E field) {
+        super();
+        this.field = field;
+    }
 
-    /**
-     * Transparent on busy time searches.
-     */
-    TRANSPARENT,
+    @Override
+    public com.openexchange.search.Operand.Type getType() {
+        return Type.COLUMN;
+    }
 
-    ;
+    @Override
+    public E getValue() {
+        return field;
+    }
+
+    @Override
+    public String toString() {
+        return Type.COLUMN.getType() + ':' + getValue();
+    }
+
 }

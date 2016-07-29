@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.search.internal.terms.AndTerm;
 import com.openexchange.search.internal.terms.NotTerm;
 import com.openexchange.search.internal.terms.OrTerm;
@@ -272,9 +271,11 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
      * Adds specified search term.
      *
      * @param searchTerm The search term to add.
+     * @return A self reference
      */
-    public void addSearchTerm(final SearchTerm<?> searchTerm) {
+    public CompositeSearchTerm addSearchTerm(final SearchTerm<?> searchTerm) {
         operands.add(searchTerm);
+        return this;
     }
 
     @Override

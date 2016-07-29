@@ -271,4 +271,9 @@ public class Alarm {
         this.acknowledged = acknowledged;
     }
 
+    @Override
+    public String toString() {
+        return "Alarm [action=" + action + ", trigger=" + trigger + "]";
+    }
+
 }

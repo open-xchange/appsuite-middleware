@@ -49,10 +49,10 @@
 
 package com.openexchange.chronos;
 
-import java.util.Date;
 import java.util.List;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
+import com.openexchange.search.SearchTerm;
 
 /**
  * {@link CalendarStorage}
@@ -72,6 +72,24 @@ public interface CalendarStorage {
     Event loadEvent(int objectID, EventField[] fields) throws OXException;
 
     /**
+     * Searches for events.
+     *
+     * @param searchTerm The search term to use
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The found events
+     */
+    List<Event> searchEvents(SearchTerm<?> searchTerm, EventField[] fields) throws OXException;
+
+    /**
+     * Searches for previously deleted events.
+     *
+     * @param searchTerm The search term to use
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The found events
+     */
+    List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, EventField[] fields) throws OXException;
+
+    /**
      * Loads events located in a specific folder.
      *
      * @param folderID The identifier of the folder to load the events from
@@ -82,7 +100,7 @@ public interface CalendarStorage {
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The events
      */
-    List<Event> loadEventsInFolder(int folderID, Date from, Date until, int createdBy, Date updatedSince, EventField[] fields) throws OXException;
+    //    List<Event> loadEventsInFolder(int folderID, Date from, Date until, int createdBy, Date updatedSince, EventField[] fields) throws OXException;
 
     /**
      * Loads deleted events previously located in a specific folder.
@@ -94,11 +112,11 @@ public interface CalendarStorage {
      * @param deletedSince The minimum (exclusive) last modification time of the events, or <code>null</code> for no restrictions
      * @return The events
      */
-    List<Event> loadDeletedEventsInFolder(int folderID, Date from, Date until, int createdBy, Date deletedSince) throws OXException;
+    //    List<Event> loadDeletedEventsInFolder(int folderID, Date from, Date until, int createdBy, Date deletedSince) throws OXException;
 
-    List<Event> loadEventsOfUser(int userID, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException;
+    //    List<Event> loadEventsOfUser(int userID, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException;
 
-    List<Event> loadDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince) throws OXException;
+    //    List<Event> loadDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince) throws OXException;
 
     /**
      * Generates the next object unique identifier for inserting new event data.

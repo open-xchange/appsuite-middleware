@@ -123,10 +123,22 @@ public class Consistency {
         return organizer;
     }
 
+    /**
+     * Sets the event's start- and end-timezones if not yet specified, falling back to the supplied user's default timezone.
+     *
+     * @param event The event to set the timezones in
+     * @param user The user to get the fallback timezone from
+     */
     public static void setTimeZone(Event event, User user) {
         String startTimezone = event.getStartTimezone();
         if (null == startTimezone) {
             event.setStartTimezone(user.getTimeZone());
+        } else {
+            //TODO: validate timezone?
+        }
+        String endTimezone = event.getEndTimezone();
+        if (null == endTimezone) {
+            event.setEndTimezone(event.getStartTimezone());
         } else {
             //TODO: validate timezone?
         }

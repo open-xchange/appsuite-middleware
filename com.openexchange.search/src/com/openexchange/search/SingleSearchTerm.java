@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.search.internal.terms.EqualsTerm;
 import com.openexchange.search.internal.terms.GreaterOrEqualTerm;
 import com.openexchange.search.internal.terms.GreaterThanTerm;
@@ -308,9 +307,11 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
      * Adds specified operand to this search term.
      *
      * @param operand The operand to add.
+     * @return A self reference
      */
-    public void addOperand(final Operand<?> operand) {
+    public SingleSearchTerm addOperand(final Operand<?> operand) {
         operands.add(operand);
+        return this;
     }
 
     @Override
