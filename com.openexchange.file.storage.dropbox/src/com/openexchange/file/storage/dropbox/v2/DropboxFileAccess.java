@@ -279,7 +279,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
 
         try {
-            String destPath = destFolder + destName;
+            String destPath = toPath(destFolder, destName);
 
             // Copy
             Metadata metadata = client.files().copy(path, destPath);
