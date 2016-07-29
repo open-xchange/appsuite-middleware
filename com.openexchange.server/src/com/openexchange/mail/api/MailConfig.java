@@ -63,7 +63,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -628,8 +630,8 @@ public abstract class MailConfig {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.partModifierImpl");
             }
         });
     }
@@ -918,7 +920,7 @@ public abstract class MailConfig {
 
     /**
      * Checks if STARTTLS is required
-     * 
+     *
      * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
      */
     public boolean isStartTls() {
@@ -927,7 +929,7 @@ public abstract class MailConfig {
 
     /**
      * Sets whether STARTTLS is required
-     * 
+     *
      * @param startTls <code>true</code> if STARTTLS is required; otherwise <code>false</code>
      */
     public void setStartTls(boolean startTls) {

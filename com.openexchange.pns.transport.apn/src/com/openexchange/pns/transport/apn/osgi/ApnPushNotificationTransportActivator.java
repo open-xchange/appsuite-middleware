@@ -54,7 +54,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -63,8 +62,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.exception.OXException;
+import com.openexchange.config.Reloadables;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -111,10 +111,8 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("pns-apn-transport.properties", new String[] {"all properties in file"});
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("pns-apn-transport.properties");
     }
 
     @Override

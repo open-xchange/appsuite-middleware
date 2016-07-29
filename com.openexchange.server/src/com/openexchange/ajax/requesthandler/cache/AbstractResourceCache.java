@@ -52,18 +52,17 @@ package com.openexchange.ajax.requesthandler.cache;
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.DOCUMENT_QUOTA;
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.ENABLED;
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.GLOBAL_QUOTA;
-import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.PROP_FILE;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -149,11 +148,8 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return Collections.singletonMap(PROP_FILE, new String[] {
-            GLOBAL_QUOTA,
-            DOCUMENT_QUOTA
-        });
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(GLOBAL_QUOTA, DOCUMENT_QUOTA);
     }
 
     private void initQuotas(ConfigurationService configService) {

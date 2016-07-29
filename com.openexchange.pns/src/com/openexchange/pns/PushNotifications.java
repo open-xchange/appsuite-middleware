@@ -136,6 +136,18 @@ public class PushNotifications {
      * @throws IllegalArgumentException If the topic name is invalid.
      */
     public static void validateTopicName(String topic) {
+        if (null == topic) {
+            throw new IllegalArgumentException("topic is null");
+        }
+
+        if ("*".equals(topic)) {
+            return;
+        }
+
+        if (topic.endsWith("/*")) {
+            topic = topic.substring(0, topic.length() - 2);
+        }
+
         int length = topic.length();
         if (length == 0) {
             throw new IllegalArgumentException("empty topic");

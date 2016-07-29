@@ -52,7 +52,6 @@ package com.openexchange.caching.events.internal;
 import static com.openexchange.caching.events.internal.StampedCacheEvent.POISON;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -66,6 +65,8 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.caching.events.monitoring.CacheEventMonitor;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -298,8 +299,8 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest("com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders").build();
     }
 
 }

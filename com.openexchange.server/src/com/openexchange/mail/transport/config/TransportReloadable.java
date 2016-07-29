@@ -49,13 +49,13 @@
 
 package com.openexchange.mail.transport.config;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 
 /**
  * {@link TransportReloadable} - Collects reloadables for transport module.
@@ -68,10 +68,6 @@ public final class TransportReloadable implements Reloadable {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TransportReloadable.class);
 
     private static final TransportReloadable INSTANCE = new TransportReloadable();
-
-    private static final String CONFIGFILE = "transport.properties";
-
-    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
     /**
      * Gets the instance.
@@ -121,10 +117,8 @@ public final class TransportReloadable implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("transport.properties");
     }
 
 }

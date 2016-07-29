@@ -52,14 +52,15 @@ package com.openexchange.imap.storecache;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.config.IMAPReloadable;
@@ -131,8 +132,8 @@ public final class IMAPStoreCache {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.checkConnected", "com.openexchange.imap.storeContainerType", "com.openexchange.imap.maxNumConnections");
             }
         });
     }

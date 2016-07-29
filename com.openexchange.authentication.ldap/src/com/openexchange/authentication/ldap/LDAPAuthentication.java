@@ -49,8 +49,6 @@
 
 package com.openexchange.authentication.ldap;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
@@ -69,6 +67,8 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
@@ -78,9 +78,6 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LDAPAuthentication implements AuthenticationService, Reloadable {
-
-    private static final String CONFIGFILE = "ldapauth.properties";
-    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
     private static final class AuthenticatedImpl implements Authenticated {
 
@@ -431,7 +428,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        Properties properties = configService.getFile(CONFIGFILE);
+        Properties properties = configService.getFile("ldapauth.properties");
         this.props = properties;
         try {
             init();
@@ -441,10 +438,8 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return DefaultInterests.builder().configFileNames("ldapauth.properties").build();
     }
 
     /**

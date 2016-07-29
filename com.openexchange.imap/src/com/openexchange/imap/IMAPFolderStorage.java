@@ -81,7 +81,9 @@ import javax.mail.Quota.Resource;
 import javax.mail.StoreClosedException;
 import javax.mail.search.FlagTerm;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -186,8 +188,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.maxMailboxNameLength", "com.openexchange.imap.invalidMailboxNameCharacters");
             }
         });
     }
@@ -338,12 +340,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         return separator.charValue();
     }
-    
+
     @Override
     public boolean isValiditySupported() throws OXException {
     	return true;
     }
-    
+
     @Override
     public String getFolderValidity(String fullName) throws OXException {
     	try {

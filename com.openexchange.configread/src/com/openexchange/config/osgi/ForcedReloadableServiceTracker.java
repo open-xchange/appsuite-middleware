@@ -50,8 +50,6 @@
 package com.openexchange.config.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.internal.ConfigurationImpl;
 
@@ -62,40 +60,33 @@ import com.openexchange.config.internal.ConfigurationImpl;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.8.0
  */
-public class ForcedReloadableServiceTracker implements ServiceTrackerCustomizer<ForcedReloadable, ForcedReloadable> {
+public class ForcedReloadableServiceTracker extends AbstractReloadableServiceTracker<ForcedReloadable> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ForcedReloadableServiceTracker.class);
 
     private final ConfigurationImpl configService;
-    private final BundleContext context;
 
+    /**
+     * Initializes a new {@link ForcedReloadableServiceTracker}.
+     */
     public ForcedReloadableServiceTracker(BundleContext context, ConfigurationImpl configService) {
-        this.context = context;
+        super(context);
         this.configService = configService;
     }
 
     @Override
-    public ForcedReloadable addingService(ServiceReference<ForcedReloadable> serviceRef) {
-        ForcedReloadable service = context.getService(serviceRef);
-        if (configService.addReloadable(service)) {
-            LOG.debug("Reloadable service added: {}", service.getClass().getName());
-            return service;
+    protected boolean handleTrackedReloadable(ForcedReloadable reloadable) {
+        if (configService.addReloadable(reloadable)) {
+            LOG.debug("Reloadable service added: {}", reloadable.getClass().getName());
+            return true;
         }
-        // Already present
-        context.ungetService(serviceRef);
-        return null;
+        return false;
     }
 
     @Override
-    public void modifiedService(ServiceReference<ForcedReloadable> serviceRef, ForcedReloadable reloadable) {
-        // nothing to do
-    }
-
-    @Override
-    public void removedService(ServiceReference<ForcedReloadable> serviceRef, ForcedReloadable reloadable) {
+    protected void handleUntrackedReloadable(ForcedReloadable reloadable) {
         configService.removeReloadable(reloadable);
         LOG.debug("Reloadable service removed: {}", reloadable.getClass().getName());
-        context.ungetService(serviceRef);
     }
 
 }

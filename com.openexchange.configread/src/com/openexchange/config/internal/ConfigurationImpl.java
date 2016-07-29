@@ -68,22 +68,25 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.ho.yaml.Yaml;
 import org.ho.yaml.exception.YamlException;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
@@ -165,8 +168,29 @@ public final class ConfigurationImpl implements ConfigurationService {
      * -------------------------------------------------- Member stuff ---------------------------------------------------------
      */
 
-    /** Holds tracked <code>Reloadable</code> services */
-    private final ConcurrentMap<String, Reloadable> reloadableServices;
+    /** The <code>ForcedReloadable</code> services. */
+    private final List<ForcedReloadable> forcedReloadables;
+
+    /** The <code>Reloadable</code> services in this list match all properties. */
+    private final List<Reloadable> matchingAllProperties;
+
+    /**
+     * This is a map for exact property name matches. The key is the topic,
+     * the value is a list of <code>Reloadable</code> services.
+     */
+    private final Map<String, List<Reloadable>> matchingProperty;
+
+    /**
+     * This is a map for wild-card property names. The key is the prefix of the property name,
+     * the value is a list of <code>Reloadable</code> services
+     */
+    private final Map<String, List<Reloadable>> matchingPrefixProperty;
+
+    /**
+     * This is a map for file names. The key is the file name,
+     * the value is a list of <code>Reloadable</code> services
+     */
+    private final Map<String, List<Reloadable>> matchingFile;
 
     private final Map<String, String> texts;
 
@@ -209,7 +233,14 @@ public final class ConfigurationImpl implements ConfigurationService {
     public ConfigurationImpl(String[] directories, Collection<ReinitializableConfigProviderService> reinitQueue) {
         super();
         this.reinitQueue = null == reinitQueue ? Collections.<ReinitializableConfigProviderService> emptyList() : reinitQueue;
-        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128, 0.9f, 1);
+
+        // Start with empty collections
+        this.forcedReloadables = new CopyOnWriteArrayList<ForcedReloadable>();
+        this.matchingAllProperties = new CopyOnWriteArrayList<Reloadable>();
+        this.matchingProperty = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
+        this.matchingPrefixProperty = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
+        this.matchingFile = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
+
         propertiesByFile = new HashMap<File, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
         properties = new HashMap<String, String>(2048);
@@ -830,51 +861,64 @@ public final class ConfigurationImpl implements ConfigurationService {
         reinitConfigCascade();
 
         // Check if properties have been changed, execute only forced ones if not
-        Set<File> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml);
-        if (changes.isEmpty()) {
-            LOG.info("No changes in *.properties, *.xml, *.yaml configuration files detected");
+        Set<String> namesOfChangedProperties = new HashSet<>(512);
+        Set<File> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml, namesOfChangedProperties);
 
-            // Trigger only forced ones
-            for (Reloadable reloadable : reloadableServices.values()) {
-                try {
-                    if (ForcedReloadable.class.isInstance(reloadable)) {
-                        reloadable.reloadConfiguration(this);
+        Set<Reloadable> toTrigger = new LinkedHashSet<>(32);
+
+        // Collect forced ones
+        for (ForcedReloadable reloadable : forcedReloadables) {
+            toTrigger.add(reloadable);
+        }
+
+        if (!changes.isEmpty()) {
+            // Continue to reload
+            LOG.info("Detected changes in the following configuration files: {}", changes);
+
+            // Collect the ones interested in all
+            for (Reloadable reloadable : matchingAllProperties) {
+                toTrigger.add(reloadable);
+            }
+
+            // Collect the ones interested in properties
+            for (String nameOfChangedProperties : namesOfChangedProperties) {
+                // Now check for prefix matches
+                if (!matchingPrefixProperty.isEmpty()) {
+                    int pos = nameOfChangedProperties.lastIndexOf('/');
+                    while (pos > 0) {
+                        String prefix = nameOfChangedProperties.substring(0, pos);
+                        List<Reloadable> interestedReloadables = matchingPrefixProperty.get(prefix);
+                        if (null != interestedReloadables) {
+                            toTrigger.addAll(interestedReloadables);
+                        }
+                        pos = prefix.lastIndexOf('/');
                     }
-                } catch (Exception e) {
-                    LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
+                }
+
+                // Add the subscriptions for matching topic names
+                {
+                    List<Reloadable> interestedReloadables = matchingProperty.get(nameOfChangedProperties);
+                    if (null != interestedReloadables) {
+                        toTrigger.addAll(interestedReloadables);
+                    }
                 }
             }
 
-            return;
+            // Collect the ones interested in files
+            for (File file : changes) {
+                List<Reloadable> interestedReloadables = matchingFile.get(file.getName());
+                if (null != interestedReloadables) {
+                    toTrigger.addAll(interestedReloadables);
+                }
+            }
+        } else {
+            LOG.info("No changes in *.properties, *.xml, or *.yaml configuration files detected");
         }
 
-        // Continue to reload
-        LOG.info("Detected changes in the following configuration files: {}", changes);
-
-        // Propagate reloaded configuration among Reloadables
-        for (Reloadable reloadable : reloadableServices.values()) {
+        // Trigger collected ones
+        for (Reloadable reloadable : toTrigger) {
             try {
-                Map<String, String[]> configFileNames = reloadable.getConfigFileNames();
-                if (null == configFileNames || configFileNames.isEmpty()) {
-                    // Reloadable does not indicate the files of interest
-
-                    reloadable.reloadConfiguration(this);
-                } else {
-                    // Reloadable does indicate the files of interest; thus check against changed ones
-
-                    boolean doReload = false;
-                    for (Iterator<String> it = configFileNames.keySet().iterator(); !doReload && it.hasNext();) {
-                        String fileName = it.next();
-                        for (File changedFilePath : changes) {
-                            if (changedFilePath.getName().equals(fileName)) {
-                                doReload = true;
-                            }
-                        }
-                    }
-                    if (doReload) {
-                        reloadable.reloadConfiguration(this);
-                    }
-                }
+                reloadable.reloadConfiguration(this);
             } catch (Exception e) {
                 LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
             }
@@ -895,6 +939,21 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
          *
          */
+    }
+
+    private boolean isInterestedInAll(String[] propertiesOfInterest) {
+        if (null == propertiesOfInterest || 0 == propertiesOfInterest.length) {
+            // Reloadable does not indicate the properties of interest
+            return true;
+        }
+
+        for (String poi : propertiesOfInterest) {
+            if ("*".equals(poi)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void reinitConfigCascade() {
@@ -929,12 +988,72 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @param service The instance to add
      * @return <code>true</code> if successfully added; otherwise <code>false</code> if already present
      */
-    public boolean addReloadable(Reloadable service) {
-        if (null != service) {
-            return null == reloadableServices.putIfAbsent(service.getClass().getName(), service);
+    public synchronized boolean addReloadable(Reloadable service) {
+        if (ForcedReloadable.class.isInstance(service)) {
+            forcedReloadables.add((ForcedReloadable) service);
+            return true;
         }
-        LOG.warn("Tried to add null to reloadable services");
-        return false;
+
+        Interests interests = service.getInterests();
+        String[] propertiesOfInterest = null == interests ? null : interests.getPropertiesOfInterest();
+        String[] configFileNames = null == interests ? null : interests.getConfigFileNames();
+
+        boolean hasInterestForProperties = (null != propertiesOfInterest && propertiesOfInterest.length > 0);
+        boolean hasInterestForFiles = (null != configFileNames && configFileNames.length > 0);
+
+        // No interests at all?
+        if (!hasInterestForProperties && !hasInterestForFiles) {
+            // A Reloadable w/o any interests... Assume all
+            matchingAllProperties.add(service);
+            return true;
+        }
+
+        // Check interest for concrete properties
+        if (hasInterestForProperties) {
+            if (isInterestedInAll(propertiesOfInterest)) {
+                matchingAllProperties.add(service);
+            } else {
+                for (String propertyName : propertiesOfInterest) {
+                    Reloadables.validatePropertyName(propertyName);
+                    if (propertyName.endsWith(".*")) {
+                        // Wild-card property name: we remove the .*
+                        String prefix = propertyName.substring(0, propertyName.length() - 2);
+                        List<Reloadable> list = matchingPrefixProperty.get(prefix);
+                        if (null == list) {
+                            List<Reloadable> newList = new CopyOnWriteArrayList<>();
+                            matchingPrefixProperty.put(prefix, newList);
+                            list = newList;
+                        }
+                        list.add(service);
+                    } else {
+                        // Exact match
+                        List<Reloadable> list = matchingProperty.get(propertyName);
+                        if (null == list) {
+                            List<Reloadable> newList = new CopyOnWriteArrayList<>();
+                            matchingProperty.put(propertyName, newList);
+                            list = newList;
+                        }
+                        list.add(service);
+                    }
+                }
+            }
+        }
+
+        // Check interest for files
+        if (hasInterestForFiles) {
+            for (String configFileName : configFileNames) {
+                Reloadables.validateFileName(configFileName);
+                List<Reloadable> list = matchingFile.get(configFileName);
+                if (null == list) {
+                    List<Reloadable> newList = new CopyOnWriteArrayList<>();
+                    matchingFile.put(configFileName, newList);
+                    list = newList;
+                }
+                list.add(service);
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -942,11 +1061,34 @@ public final class ConfigurationImpl implements ConfigurationService {
      *
      * @param service The instance to remove
      */
-    public void removeReloadable(Reloadable service) {
-        if (null != service) {
-            reloadableServices.remove(service.getClass().getName());
-        } else {
-            LOG.warn("Tried to remove null from reloadable services");
+    public synchronized void removeReloadable(Reloadable service) {
+        matchingAllProperties.remove(service);
+
+        for (Iterator<List<Reloadable>> it = matchingPrefixProperty.values().iterator(); it.hasNext();) {
+            List<Reloadable> reloadables = it.next();
+            if (reloadables.remove(service)) {
+                if (reloadables.isEmpty()) {
+                    it.remove();
+                }
+            }
+        }
+
+        for (Iterator<List<Reloadable>> it = matchingProperty.values().iterator(); it.hasNext();) {
+            List<Reloadable> reloadables = it.next();
+            if (reloadables.remove(service)) {
+                if (reloadables.isEmpty()) {
+                    it.remove();
+                }
+            }
+        }
+
+        for (Iterator<List<Reloadable>> it = matchingFile.values().iterator(); it.hasNext();) {
+            List<Reloadable> reloadables = it.next();
+            if (reloadables.remove(service)) {
+                if (reloadables.isEmpty()) {
+                    it.remove();
+                }
+            }
         }
     }
 
@@ -960,7 +1102,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @NonNull
-    private Set<File> getChanges(Map<File, Properties> oldPropertiesByFile, Map<File, byte[]> oldXml, Map<File, byte[]> oldYaml) {
+    private Set<File> getChanges(Map<File, Properties> oldPropertiesByFile, Map<File, byte[]> oldXml, Map<File, byte[]> oldYaml, Set<String> namesOfChangedProperties) {
         Set<File> result = new HashSet<File>(oldPropertiesByFile.size());
 
         // Check for changes in .properties files
@@ -968,9 +1110,41 @@ public final class ConfigurationImpl implements ConfigurationService {
             File pathname = newEntry.getKey();
             Properties newProperties = newEntry.getValue();
             Properties oldProperties = oldPropertiesByFile.get(pathname);
-            if (null == oldProperties || !newProperties.equals(oldProperties)) {
-                // New or changed .properties file
+            if (null == oldProperties) {
+                // New .properties file
                 result.add(pathname);
+                for (Object propertyName : newProperties.keySet()) {
+                    namesOfChangedProperties.add(propertyName.toString());
+                }
+            } else if (!newProperties.equals(oldProperties)) {
+                // Changed .properties file
+                result.add(pathname);
+
+                // Removed ones
+                {
+                    Set<Object> removedKeys = new HashSet<>(oldProperties.keySet());
+                    removedKeys.removeAll(newProperties.keySet());
+                    for (Object removedKey : removedKeys) {
+                        namesOfChangedProperties.add(removedKey.toString());
+                    }
+                }
+
+                // New ones or changed value
+                Iterator<Map.Entry<Object, Object>> i = newProperties.entrySet().iterator();
+                while (i.hasNext()) {
+                    Map.Entry<Object, Object> e = i.next();
+                    Object key = e.getKey();
+                    Object value = e.getValue();
+                    if (value == null) {
+                        if (oldProperties.get(key) != null || !oldProperties.containsKey(key)) {
+                            namesOfChangedProperties.add(key.toString());
+                        }
+                    } else {
+                        if (!value.equals(oldProperties.get(key))) {
+                            namesOfChangedProperties.add(key.toString());
+                        }
+                    }
+                }
             }
         }
         {
@@ -1018,7 +1192,19 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @return The <code>Reloadable</code> instances
      */
     public Collection<Reloadable> getReloadables() {
-        return reloadableServices.values();
+        Set<Reloadable> tracked = new LinkedHashSet<>(32);
+        tracked.addAll(forcedReloadables);
+        tracked.addAll(matchingAllProperties);
+        for (List<Reloadable> reloadables : matchingPrefixProperty.values()) {
+            tracked.addAll(reloadables);
+        }
+        for (List<Reloadable> reloadables : matchingProperty.values()) {
+            tracked.addAll(reloadables);
+        }
+        for (List<Reloadable> reloadables : matchingFile.values()) {
+            tracked.addAll(reloadables);
+        }
+        return tracked;
     }
 
     byte[] getHash(File file) {

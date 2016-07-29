@@ -51,11 +51,12 @@ package com.openexchange.file.storage;
 
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.internal.FileStorageConfigReloadable;
@@ -305,8 +306,12 @@ public final class FileStorageUtility {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return DefaultInterests.builder().propertiesOfInterest(
+                    "com.openexchange.file.storage.numberOfPregeneratedPreviews",
+                    "com.openexchange.file.storage.zipFolderThreshold",
+                    "com.openexchange.infostore.zipDocumentsCompressionLevel"
+                    ).build();
             }
         });
     }

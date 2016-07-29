@@ -50,15 +50,15 @@
 package com.openexchange.imagetransformation.imagemagick.osgi;
 
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.imagetransformation.imagemagick.ImageMagickImageTransformationProvider;
@@ -199,10 +199,8 @@ public class ImageMagickRegisterer implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("imagemagick.properties", new String[] {"all properties in file"});
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("imagemagick.properties");
     }
 
 }

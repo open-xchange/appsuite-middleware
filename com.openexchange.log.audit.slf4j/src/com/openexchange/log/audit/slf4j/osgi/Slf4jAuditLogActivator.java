@@ -49,13 +49,13 @@
 
 package com.openexchange.log.audit.slf4j.osgi;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.log.audit.AuditLogFilter;
@@ -108,10 +108,8 @@ public class Slf4jAuditLogActivator extends HousekeepingActivator {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                Map<String, String[]> m = new HashMap<String, String[]>(2);
-                m.put("slf4j-auditlog.properties", new String[] { "all properties in file" });
-                return m;
+            public Interests getInterests() {
+                return Reloadables.interestsForFiles("slf4j-auditlog.properties");
             }
         };
 

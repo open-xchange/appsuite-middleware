@@ -51,13 +51,13 @@ package com.openexchange.hazelcast.configuration.internal;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.TcpIpConfig;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
 
 /**
@@ -119,10 +119,8 @@ public class HazelcastReloadable implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> fns = new HashMap<String, String[]>(2);
-        fns.put("hazelcast.properties", new String[] { propertyName });
-        return fns;
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(propertyName);
     }
 
 }

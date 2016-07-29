@@ -72,7 +72,9 @@ import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
@@ -295,8 +297,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.maxNumConnections");
             }
         });
     }

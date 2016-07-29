@@ -65,7 +65,9 @@ import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.command.MailMessageFillerIMAPCommand;
 import com.openexchange.imap.command.MessageFetchIMAPCommand;
@@ -142,8 +144,8 @@ public final class IMAPConversationWorker {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.useImapThreaderIfSupported");
             }
         });
     }

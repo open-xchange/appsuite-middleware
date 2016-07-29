@@ -49,9 +49,10 @@
 
 package com.openexchange.capabilities.internal;
 
-import java.util.Map;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 
 
 /**
@@ -78,8 +79,8 @@ public class CapabilityReloadable implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
+    public Interests getInterests() {
+        return Reloadables.getInterestsForAll();
     }
 
 }

@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.osgi;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -62,6 +60,8 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.Credentials;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 
@@ -170,11 +170,8 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(2);
-        map.put("mpasswd", new String[] {"all properties in file"});
-        map.put("ModuleAccessDefinitions.properties", new String[] {"all properties in file"});
-        return map;
+    public Interests getInterests() {
+        return DefaultInterests.builder().configFileNames("mpasswd", "ModuleAccessDefinitions.properties").build();
     }
 
 }
