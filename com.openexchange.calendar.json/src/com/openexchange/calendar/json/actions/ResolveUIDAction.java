@@ -56,6 +56,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -75,7 +78,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "uid", description = "The UID to be resolved.")
 }, responseDescription = "An object object with the field \"id\" containing the ox-object id, if existing, an error message otherwise.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class ResolveUIDAction extends AppointmentAction {
+public final class ResolveUIDAction extends ChronosAction {
 
     /**
      * Initializes a new {@link ResolveUIDAction}.
@@ -101,6 +104,17 @@ public final class ResolveUIDAction extends AppointmentAction {
         }
         json.put("id", id);
         return new AJAXRequestResult(json, "json");
+    }
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarSession calendarSession = initSession(request);
+        String uid = request.checkParameter(AJAXServlet.PARAMETER_UID);
+        int objectID = calendarService.resolveByUID(calendarSession, uid);
+        if (0 == objectID) {
+            throw OXException.notFound("");
+        }
+        return new AJAXRequestResult(new JSONObject().put("id", objectID), "json");
     }
 
 }
