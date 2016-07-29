@@ -49,24 +49,47 @@
 
 package com.openexchange.grizzly;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+import com.openexchange.ajax.simple.AbstractSimpleClientTest;
+import com.openexchange.ajax.simple.SimpleOXClient;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.Test;
 
 /**
- * {@link GrizzlyTestSuite}
+ * {@link OmitUserInputTest} - Check that user input via request url isn't echoed to the client.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since v7.8.3
  */
-public class GrizzlyTestSuite {
+public class OmitUserInputTest extends AbstractSimpleClientTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.grizzly.GrizzlyTestSuite");
-        suite.addTestSuite(ProcessingTest.class);
-        suite.addTestSuite(GetWithBodyTest.class);
-        suite.addTestSuite(MaxHttpHeaderSizeTest.class);
-        suite.addTestSuite(OmitUserInputTest.class);
-        return suite;
+    private static String TITLE="404 Not found";
+    private static String HEADING="Not found";
+    private static String PARAGRAPH="Resource does not exist.";
+    private static String USER_INPUT="i_do_not_exist_at_all";
+    
+    @Test
+    public void test() throws Exception {
+        SimpleOXClient oxClient = createClient();
+        HttpClient httpClient = oxClient.getClient();
+        HttpMethod getMissing = new GetMethod("/servlet/" + USER_INPUT);
+        int status = httpClient.executeMethod(getMissing);
+
+        assertEquals(404, status);
+
+        String bodyAsString = getMissing.getResponseBodyAsString();
+        assertFalse(bodyAsString.contains(USER_INPUT));
+
+        Document document = Jsoup.parse(bodyAsString);
+        String title = document.getElementsByTag("title").first().text();
+        String heading = document.getElementsByTag("h1").first().text();
+        String paragraph = document.getElementsByTag("p").first().text();
+
+        assertEquals(TITLE, title);
+        assertEquals(HEADING, heading);
+        assertEquals(PARAGRAPH, paragraph);
     }
-
 }
