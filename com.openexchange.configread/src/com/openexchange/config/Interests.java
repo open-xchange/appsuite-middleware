@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,40 +47,38 @@
  *
  */
 
-package com.openexchange.capabilities.internal;
-
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
-
+package com.openexchange.config;
 
 /**
- * {@link CapabilityReloadable}
+ * {@link Interests}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.3
  */
-public class CapabilityReloadable implements Reloadable {
-
-    private final CapabilityServiceImpl capabilityService;
+public interface Interests {
 
     /**
-     * Initializes a new {@link CapabilityReloadable}.
+     * Gets the names of the properties of interest.
+     * <p>
+     * Each value of the returned string array describes the properties in which this <code>Reloadable</code> is interested.
+     * An asterisk ('*') may be used as a trailing wild-card.
+     * <p>
+     * More precisely, the value of each string must conform to the following grammar:
+     *
+     * <pre>
+     *  properties-description := '*' | property-name ( '.*' )?
+     *  property-name := token ( '.' token )*
+     * </pre>
+     *
+     * @return An array of property names or <code>null</code> (interested in no properties)
      */
-    public CapabilityReloadable(CapabilityServiceImpl capabilityService) {
-        super();
-        this.capabilityService = capabilityService;
-    }
+    String[] getPropertiesOfInterest();
 
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        capabilityService.onReloadConfiguration();
-    }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.getInterestsForAll();
-    }
+    /**
+     * Gets an array of configuration names for files of interest.
+     *
+     * @return An array of configuration file names or <code>null</code> (interested in no files)
+     */
+    String[] getConfigFileNames();
 
 }

@@ -49,9 +49,9 @@
 
 package com.openexchange.download.limit.util;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.download.limit.internal.Services;
 
@@ -252,8 +252,6 @@ public class LimitConfig implements Reloadable {
         this.timeFrameLinks = null;
     }
 
-    private static final String CONFIGFILE = "download.properties";
-
     private static final String[] PROPERTIES = new String[] {
         "com.openexchange.download.limit.enabled",
         "com.openexchange.download.limit.timeFrame.guests",
@@ -265,9 +263,7 @@ public class LimitConfig implements Reloadable {
     };
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest(PROPERTIES).build();
     }
 }

@@ -49,10 +49,11 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail.folder;
 
-import java.util.Map;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -105,8 +106,8 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.settings.mail.failOnError");
             }
         });
     }

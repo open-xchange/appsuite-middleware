@@ -51,7 +51,6 @@ package com.openexchange.imap.search;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import java.util.Map;
 import javax.mail.FetchProfile;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
@@ -60,7 +59,9 @@ import javax.mail.StoreClosedException;
 import javax.mail.search.SearchException;
 import javax.mail.search.SearchTerm;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPFolderWorker;
 import com.openexchange.imap.config.IMAPConfig;
@@ -212,9 +213,10 @@ public final class IMAPSearch {
                 umlautFilterThreshold = null;
             }
 
+
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.umlautFilterThreshold");
             }
         });
     }

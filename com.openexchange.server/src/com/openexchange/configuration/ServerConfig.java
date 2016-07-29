@@ -52,13 +52,13 @@ package com.openexchange.configuration;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.calendar.CalendarConfig;
@@ -93,8 +93,6 @@ public final class ServerConfig implements Reloadable {
      * Name of the properties file.
      */
     private static final String FILENAME = "server.properties";
-
-    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
     // ------------------------------------------------------------------------------ //
 
@@ -632,9 +630,7 @@ public final class ServerConfig implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(FILENAME, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("server.properties");
     }
 }

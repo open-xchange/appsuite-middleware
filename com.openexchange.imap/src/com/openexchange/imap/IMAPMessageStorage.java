@@ -87,7 +87,9 @@ import org.apache.commons.lang.ArrayUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -346,8 +348,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.useImapThreaderIfSupported", "com.openexchange.imap.allowESORT");
             }
         });
     }

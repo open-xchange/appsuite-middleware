@@ -88,7 +88,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
 
     /**
      * Initializes the db assignments
-     * 
+     *
      * @throws OXException
      */
     @Override
@@ -123,7 +123,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
                 if (readPoolId == 0) {
                     readPoolId = writePoolId;
                 }
-                int context = get(readOnly, writePoolId);
+                int context = get(readOnly, writePoolId, serverId);
                 AssignmentImpl assignmentImpl = new AssignmentImpl(context, serverId, readPoolId, writePoolId, schema);
                 lAssignments.add(assignmentImpl);
                 LOG.debug("Found assignment and added to pool: {}", assignmentImpl.toString());
@@ -138,10 +138,13 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
         return lAssignments;
     }
 
-    private int get(Connection con, int poolId) throws OXException {
+    private int get(Connection con, int poolId, int serverId) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
+
+            // SELECT db_schema, cid FROM context_server2db_pool where server_id = ? AND context_server2db_pool.write_db_pool_id = ? GROUP BY db_schema
+
             stmt = con.prepareStatement(CONTEXTS_IN_DATABASE);
             stmt.setInt(1, poolId);
             stmt.setInt(2, poolId);

@@ -54,7 +54,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
@@ -62,7 +61,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.mail.config.MailProperties;
@@ -131,8 +132,8 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.preferSimpleAddressParsing");
             }
         });
     }

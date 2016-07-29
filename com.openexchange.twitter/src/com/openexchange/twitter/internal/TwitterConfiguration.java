@@ -49,11 +49,11 @@
 
 package com.openexchange.twitter.internal;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 
 /**
  * {@link TwitterConfiguration} - Configuration of twitter bundle.
@@ -140,10 +140,8 @@ public final class TwitterConfiguration implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("twitter.properties", new String[] {"com.openexchange.oauth.twitter.apiKey", "com.openexchange.oauth.twitter.apiSecret"});
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties("com.openexchange.oauth.twitter.apiKey", "com.openexchange.oauth.twitter.apiSecret");
     }
 
 }
