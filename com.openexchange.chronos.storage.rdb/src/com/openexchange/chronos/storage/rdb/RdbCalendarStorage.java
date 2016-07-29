@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.chronos.storage.rdb.SQL.logExecuteQuery;
 import static com.openexchange.chronos.storage.rdb.SQL.logExecuteUpdate;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -325,14 +326,19 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     private static List<Event> selectAdditionalEventData(Connection connection, int contextID, List<Event> events, EventField[] fields) throws OXException, SQLException {
-        if (null == fields || contains(fields, EventField.ATTENDEES)) {
-            for (Event event : events) {
-                event.setAttendees(selectAttendees(connection, contextID, event.getId(), AttendeeField.values()));
+        if (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS)) {
+            int[] objectIDs = getObjectIDs(events);
+            if (null == fields || contains(fields, EventField.ATTENDEES)) {
+                Map<Integer, List<Attendee>> attendeesById = selectAttendees(connection, contextID, objectIDs, AttendeeField.values());
+                for (Event event : events) {
+                    event.setAttendees(attendeesById.get(I(event.getId())));
+                }
             }
-        }
-        if (null == fields || contains(fields, EventField.ATTACHMENTS)) {
-            for (Event event : events) {
-                event.setAttachments(selectAttachments(connection, contextID, event.getId()));
+            if (null == fields || contains(fields, EventField.ATTACHMENTS)) {
+                Map<Integer, List<Attachment>> attachmentsById = selectAttachments(connection, contextID, objectIDs);
+                for (Event event : events) {
+                    event.setAttachments(attachmentsById.get(I(event.getId())));
+                }
             }
         }
         return events;
@@ -438,7 +444,7 @@ public class RdbCalendarStorage implements CalendarStorage {
                  */
                 int entity = determineEntity(attendee, usedEntities);
                 updated += insertOrReplaceDateRights(connection, "del_date_rights", true, contextID, objectID, entity, attendee);
-                usedEntities.add(Integer.valueOf(entity));
+                usedEntities.add(I(entity));
             }
         }
         return updated;
@@ -559,102 +565,109 @@ public class RdbCalendarStorage implements CalendarStorage {
         return null;
     }
 
-    private static List<Attendee> selectAttendees(Connection connection, int contextID, int objectID, AttendeeField[] fields) throws SQLException, OXException {
-        List<Attendee> attendees = new ArrayList<Attendee>();
-        attendees.addAll(selectExternalAttendees(connection, contextID, objectID, fields));
-        attendees.addAll(selectInternalUserAttendees(connection, contextID, objectID, fields));
-        attendees.addAll(selectInternalNonUserAttendees(connection, contextID, objectID));
-        return attendees;
+    private static Map<Integer, List<Attendee>> selectAttendees(Connection connection, int contextID, int objectIDs[], AttendeeField[] fields) throws SQLException, OXException {
+        Map<Integer, List<Attendee>> attendeesById = new HashMap<Integer, List<Attendee>>();
+        selectAndAddInternalUserAttendees(attendeesById, connection, contextID, objectIDs, fields);
+        selectAndAddExternalAttendees(attendeesById, connection, contextID, objectIDs, fields);
+        selectAndAddInternalNonUserAttendees(attendeesById, connection, contextID, objectIDs);
+        return attendeesById;
     }
 
-    private static List<Attendee> selectInternalUserAttendees(Connection connection, int contextID, int objectID, AttendeeField[] fields) throws SQLException, OXException {
+    private static void selectAndAddInternalUserAttendees(Map<Integer, List<Attendee>> attendeesById, Connection connection, int contextID, int objectIDs[], AttendeeField[] fields) throws SQLException, OXException {
         AttendeeField[] mappedFields = InternalAttendeeMapper.getInstance().getMappedFields(fields);
         String sql = new StringBuilder()
-            .append("SELECT ").append(InternalAttendeeMapper.getInstance().getColumns(mappedFields)).append(" FROM prg_dates_members ")
-            .append("WHERE cid=? AND object_id=?;")
+            .append("SELECT object_id,").append(InternalAttendeeMapper.getInstance().getColumns(mappedFields)).append(" FROM prg_dates_members ")
+            .append("WHERE cid=? AND object_id IN (").append(InternalAttendeeMapper.getInstance().getParameters(objectIDs.length)).append(");")
         .toString();
-        List<Attendee> attendees = new ArrayList<Attendee>();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (int objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, objectID);
+            }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
                     Attendee attendee = InternalAttendeeMapper.getInstance().fromResultSet(resultSet, mappedFields);
                     attendee.setCuType(CalendarUserType.INDIVIDUAL);
-                    attendees.add(attendee);
+                    put(attendeesById, resultSet.getInt("object_id"), attendee);
                 }
             }
         }
-        return attendees;
     }
 
-    private static List<Attendee> selectExternalAttendees(Connection connection, int contextID, int objectID, AttendeeField[] fields) throws SQLException, OXException {
+    private static void selectAndAddExternalAttendees(Map<Integer, List<Attendee>> attendeesById, Connection connection, int contextID, int objectIDs[], AttendeeField[] fields) throws SQLException, OXException {
         AttendeeField[] mappedFields = ExternalAttendeeMapper.getInstance().getMappedFields(fields);
         String sql = new StringBuilder()
-            .append("SELECT ").append(ExternalAttendeeMapper.getInstance().getColumns(mappedFields)).append(" FROM dateexternal ")
-            .append("WHERE cid=? AND objectId=?;")
+            .append("SELECT objectId,").append(ExternalAttendeeMapper.getInstance().getColumns(mappedFields)).append(" FROM dateexternal ")
+            .append("WHERE cid=? AND objectId IN (").append(InternalAttendeeMapper.getInstance().getParameters(objectIDs.length)).append(");")
         .toString();
-        List<Attendee> attendees = new ArrayList<Attendee>();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (int objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, objectID);
+            }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
                     Attendee attendee = ExternalAttendeeMapper.getInstance().fromResultSet(resultSet, mappedFields);
                     attendee.setCuType(CalendarUserType.INDIVIDUAL);
-                    attendees.add(attendee);
+                    put(attendeesById, resultSet.getInt("objectId"), attendee);
                 }
             }
         }
-        return attendees;
     }
 
-    private static List<Attendee> selectInternalNonUserAttendees(Connection connection, int contextID, int objectID) throws SQLException {
-        List<Attendee> attendees = new ArrayList<Attendee>();
-        try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM prg_date_rights WHERE cid=? AND object_id=? AND type in (2,3);")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
+    private static void selectAndAddInternalNonUserAttendees(Map<Integer, List<Attendee>> attendeesById, Connection connection, int contextID, int[] objectIDs) throws SQLException {
+        String sql = new StringBuilder()
+            .append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ")
+            .append("WHERE cid=? AND object_id IN (").append(InternalAttendeeMapper.getInstance().getParameters(objectIDs.length)).append(") ")
+            .append("AND type IN (2,3);")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (int objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, objectID);
+            }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    attendees.add(readInternalNonUserAttendee(resultSet));
+                    Attendee attendee = new Attendee();
+                    attendee.setEntity(resultSet.getInt("id"));
+                    attendee.setCuType(Appointment2Event.getCalendarUserType(resultSet.getInt("type")));
+                    attendee.setUri(Appointment2Event.getURI(resultSet.getString("ma")));
+                    attendee.setCommonName(resultSet.getString("dn"));
+                    put(attendeesById, resultSet.getInt("object_id"), attendee);
                 }
             }
         }
-        return attendees;
     }
 
-    private static List<Attachment> selectAttachments(Connection connection, int contextID, int objectID) throws SQLException {
-        List<Attachment> attachments = new ArrayList<Attachment>();
-        try (PreparedStatement stmt = connection.prepareStatement("SELECT id,file_mimetype,file_size,filename,file_id FROM prg_attachment WHERE cid=? AND attached=? AND module=?;")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
-            stmt.setInt(3, com.openexchange.groupware.Types.APPOINTMENT);
+    private static Map<Integer, List<Attachment>> selectAttachments(Connection connection, int contextID, int[] objectIDs) throws SQLException {
+        Map<Integer, List<Attachment>> attachmentsById = new HashMap<Integer, List<Attachment>>();
+        String sql = new StringBuilder()
+            .append("SELECT attached,id,file_mimetype,file_size,filename,file_id FROM prg_attachment ")
+            .append("WHERE cid=? AND attached IN (").append(EventMapper.getInstance().getParameters(objectIDs.length)).append(") AND module=?;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (int objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, objectID);
+            }
+            stmt.setInt(parameterIndex++, com.openexchange.groupware.Types.APPOINTMENT);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    attachments.add(readAttachment(resultSet));
+                    Attachment attachment = new Attachment();
+                    attachment.setManagedId(String.valueOf(resultSet.getInt("id")));
+                    attachment.setFormatType(resultSet.getString("file_mimetype"));
+                    attachment.setSize(Long.valueOf(resultSet.getString("file_size")));
+                    attachment.setManagedId(resultSet.getString("filename"));
+                    attachment.setContentId(resultSet.getString("file_id"));
+                    put(attachmentsById, resultSet.getInt("attached"), attachment);
                 }
             }
         }
-        return attachments;
-    }
-
-    private static Attendee readInternalNonUserAttendee(ResultSet resultSet) throws SQLException {
-        Attendee attendee = new Attendee();
-        attendee.setEntity(resultSet.getInt("id"));
-        attendee.setCuType(Appointment2Event.getCalendarUserType(resultSet.getInt("type")));
-        attendee.setUri(Appointment2Event.getURI(resultSet.getString("ma")));
-        attendee.setCommonName(resultSet.getString("dn"));
-        return attendee;
-    }
-
-    private static Attachment readAttachment(ResultSet resultSet) throws SQLException {
-        Attachment attachment = new Attachment();
-        attachment.setManagedId(String.valueOf(resultSet.getInt("id")));
-        attachment.setFormatType(resultSet.getString("file_mimetype"));
-        attachment.setSize(Long.valueOf(resultSet.getString("file_size")));
-        attachment.setManagedId(resultSet.getString("filename"));
-        attachment.setContentId(resultSet.getString("file_id"));
-        return attachment;
+        return attachmentsById;
     }
 
     private static Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
@@ -730,6 +743,24 @@ public class RdbCalendarStorage implements CalendarStorage {
             }
         }
         return events;
+    }
+
+    private static int[] getObjectIDs(List<Event> events) {
+        int[] objectIDs = new int[events.size()];
+        for (int i = 0; i < events.size(); i++) {
+            objectIDs[i] = events.get(i).getId();
+        }
+        return objectIDs;
+    }
+
+    private static <T> boolean put(Map<Integer, List<T>> itemsById, int id, T item) {
+        Integer key = I(id);
+        List<T> attendees = itemsById.get(key);
+        if (null == attendees) {
+            attendees = new ArrayList<T>();
+            itemsById.put(key, attendees);
+        }
+        return attendees.add(item);
     }
 
     /**
