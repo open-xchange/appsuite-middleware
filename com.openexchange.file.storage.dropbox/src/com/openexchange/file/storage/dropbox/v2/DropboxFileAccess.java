@@ -803,12 +803,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     /**
+     * Uploads the specified file in chunks
      * 
-     * @return
-     * @throws OXException
+     * @param file The {@link File} to upload
+     * @param data The {@link InputStream} containing the actual data
+     * @return The {@link IDTuple} of the uploaded file
+     * @throws OXException If an error is occured
      */
     private IDTuple sessionUpload(File file, InputStream data) throws OXException {
-        //TODO: implement session upload
         ThresholdFileHolder sink = null;
         try {
             sink = new ThresholdFileHolder();
@@ -822,22 +824,17 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             String sessionId = result.getSessionId();
             long offset = CHUNK_SIZE;
 
-            System.out.println("Uploaded " + offset + " out of " + sink.getCount());
-
             UploadSessionCursor cursor = new UploadSessionCursor(sessionId, offset);
             while (sink.getCount() - offset > CHUNK_SIZE) {
                 client.files().uploadSessionAppendV2(cursor).uploadAndFinish(stream, CHUNK_SIZE);
                 offset += CHUNK_SIZE;
                 cursor = new UploadSessionCursor(sessionId, offset);
-                System.out.println("Uploaded " + offset + " out of " + sink.getCount());
             }
 
             long remaining = sink.getCount() - offset;
             CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()));
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
-
-            System.out.println("Uploaded " + (remaining + offset) + " out of " + sink.getCount());
 
             DropboxFile dbxFile = new DropboxFile(metadata, userId);
             file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
@@ -852,11 +849,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     /**
+     * Uploads the specified file in a single request
      * 
-     * @param file
-     * @param data
-     * @return
-     * @throws OXException
+     * @param file The {@link File} to upload
+     * @param data The {@link InputStream} containing the actual data
+     * @return The {@link IDTuple} of the uploaded file
+     * @throws OXException if an error is occured
      */
     private IDTuple singleUpload(File file, InputStream data) throws OXException {
         String name = file.getFileName();
