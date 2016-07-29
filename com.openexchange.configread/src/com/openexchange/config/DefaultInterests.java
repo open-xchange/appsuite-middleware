@@ -51,6 +51,14 @@ package com.openexchange.config;
 
 /**
  * {@link DefaultInterests} - The default implementation of {@link Interests}.
+ * <p>
+ * Example
+ * <pre>
+ *   Interests interests = DefaultInterests.builder()
+ *      .propertiesOfInterest("c.o.modOne.*", "c.o.modTwo.attrFive")
+ *      .configFileNames("myconf.yml")
+ *      .build();
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
