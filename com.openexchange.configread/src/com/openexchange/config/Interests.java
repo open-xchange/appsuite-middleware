@@ -81,7 +81,7 @@ public interface Interests {
     String[] getPropertiesOfInterest();
 
     /**
-     * Gets an array of configuration names for files of interest.
+     * Gets an array of names for configuration files of interest.
      *
      * @return An array of configuration file names or <code>null</code> (interested in no files)
      */
