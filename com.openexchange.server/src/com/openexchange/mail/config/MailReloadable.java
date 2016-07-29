@@ -61,7 +61,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.config.DefaultInterests.Builder;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -145,20 +144,19 @@ public final class MailReloadable implements Reloadable {
         Set<String> properties = new TreeSet<>();
         properties.addAll(Arrays.asList(PROPERTIES));
         Set<String> fileNames = new TreeSet<>();
+        fileNames.add("mail.properties");
 
         for (Reloadable reloadable : reloadables) {
             Interests interests = reloadable.getInterests();
-            if (null == interests) {
-                return Reloadables.getInterestsForAll();
-            }
-
-            String[] propertiesOfInterest = interests.getPropertiesOfInterest();
-            if (null != propertiesOfInterest) {
-                properties.addAll(Arrays.asList(propertiesOfInterest));
-            }
-            String[] configFileNames = interests.getConfigFileNames();
-            if (null != configFileNames) {
-                fileNames.addAll(Arrays.asList(configFileNames));
+            if (null != interests) {
+                String[] propertiesOfInterest = interests.getPropertiesOfInterest();
+                if (null != propertiesOfInterest) {
+                    properties.addAll(Arrays.asList(propertiesOfInterest));
+                }
+                String[] configFileNames = interests.getConfigFileNames();
+                if (null != configFileNames) {
+                    fileNames.addAll(Arrays.asList(configFileNames));
+                }
             }
         }
 
