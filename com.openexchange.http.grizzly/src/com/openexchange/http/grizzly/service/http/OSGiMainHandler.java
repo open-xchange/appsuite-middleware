@@ -91,6 +91,11 @@
 
 package com.openexchange.http.grizzly.service.http;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -105,18 +110,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
+import org.glassfish.grizzly.http.server.io.OutputBuffer;
 import org.glassfish.grizzly.http.server.util.MappingData;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
@@ -142,6 +151,10 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiMainHandler.class);
 
     private static final AtomicBoolean SHUTDOWN_REQUESTED = new AtomicBoolean(false);
+
+	private static CharBuffer reponseBuffer = CharBuffer.allocate(4096);
+
+	private static CharsetEncoder encoder = Charset.forName("UTF-8").newEncoder();
 
     /**
      * Sets the "shut-down requested" marker.
@@ -602,4 +615,35 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
         updatePaths(request, mappingData);
     }
+
+	@Override
+	protected void customizedErrorPage(Request req, Response res)
+			throws Exception {
+
+		res.setStatus(HttpStatus.NOT_FOUND_404);
+		final ByteBuffer bb = getErrorPage(404, "Not found", "Resource does not exist.");
+		res.setContentLength(bb.limit());
+		res.setContentType("text/html");
+		OutputBuffer out = res.getOutputBuffer();
+		out.prepareCharacterEncoder();
+		out.write(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining());
+		out.close();
+	}
+
+	/**
+	 * Generate an error page based on our servlet defaults.
+	 *
+	 * @return A {@link ByteBuffer} containing the HTTP response.
+	 */
+	public synchronized static ByteBuffer getErrorPage(int code,
+			String message, String description) throws IOException {
+
+		String body = com.openexchange.tools.servlet.http.Tools.getErrorPage(
+				code, message, description);
+		reponseBuffer.clear();
+		reponseBuffer.put(body);
+		reponseBuffer.flip();
+		return encoder.encode(reponseBuffer);
+
+	}
 }
