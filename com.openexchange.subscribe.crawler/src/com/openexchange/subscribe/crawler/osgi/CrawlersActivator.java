@@ -72,11 +72,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.java.Streams;
+import com.openexchange.ssl.SSLSocketFactoryProvider;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link CrawlersActivator}
@@ -122,7 +122,7 @@ public class CrawlersActivator implements BundleActivator {
             tracker.open();
         }
 
-        HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
+        HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
     }
 
     @Override

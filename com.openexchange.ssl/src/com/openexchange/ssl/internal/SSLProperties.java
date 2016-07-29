@@ -85,8 +85,6 @@ public enum SSLProperties {
 
     static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.ssl.custom.truststore.password";
 
-    static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.ssl.hostname.verification.enabled";
-
     static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.ssl.default.truststore.enabled";
 
     static final String CUSTOM_TRUSTSTORE_ENABLED_KEY = "com.openexchange.ssl.custom.truststore.enabled";
@@ -108,6 +106,79 @@ public enum SSLProperties {
                     boolean prop = service.getBoolProperty(SECURE_CONNECTIONS_KEY, true);
                     tmp = new Boolean(prop);
                     isSecureEnabled = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    static final String PROTOCOLS_KEY = "com.openexchange.ssl.protocols";
+
+    static final String PROTOCOLS_DEFAULTS = "SSLv3, TLSv1.2";
+
+    private static volatile String[] protocols;
+
+    public static String[] supportedProtocols() {
+        String[] tmp = protocols;
+        if (null == tmp) {
+            synchronized (SSLProperties.class) {
+                tmp = protocols;
+                if (null == tmp) {
+                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return Strings.splitByComma(PROTOCOLS_DEFAULTS);
+                    }
+                    String prop = service.getProperty(PROTOCOLS_KEY, PROTOCOLS_DEFAULTS);
+                    tmp = Strings.splitByComma(prop);
+                    protocols = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    static final String CIPHERS_KEY = "com.openexchange.ssl.ciphers";
+
+    static final String CIPHERS_DEFAULTS = "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA, SSL_RSA_WITH_RC4_128_SHA, TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TLS_ECDH_RSA_WITH_RC4_128_SHA, TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_RC4_128_MD5, TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
+
+    private static volatile String[] ciphers;
+
+    public static String[] supportedCiphers() {
+        String[] tmp = ciphers;
+        if (null == tmp) {
+            synchronized (SSLProperties.class) {
+                tmp = ciphers;
+                if (null == tmp) {
+                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return Strings.splitByComma(CIPHERS_DEFAULTS);
+                    }
+                    String prop = service.getProperty(CIPHERS_KEY, CIPHERS_DEFAULTS);
+                    tmp = Strings.splitByComma(prop);
+                    ciphers = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.ssl.hostname.verification.enabled";
+
+    private static volatile Boolean verifyHostname;
+
+    public static boolean isVerifyHostname() {
+        Boolean tmp = verifyHostname;
+        if (null == tmp) {
+            synchronized (SSLProperties.class) {
+                tmp = verifyHostname;
+                if (null == tmp) {
+                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return true;
+                    }
+                    boolean prop = service.getBoolProperty(HOSTNAME_VERIFICATION_ENABLED_KEY, true);
+                    tmp = new Boolean(prop);
+                    verifyHostname = tmp;
                 }
             }
         }

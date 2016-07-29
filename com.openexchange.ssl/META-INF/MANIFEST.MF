@@ -14,17 +14,22 @@ Import-Package: com.googlecode.ipv6,
  com.openexchange.osgi.annotation,
  com.openexchange.tools.ssl,
  edazdarevic.commons.net,
+ javax.naming,
  javax.net,
  javax.net.ssl,
+ javax.security.auth.x500,
  org.apache.commons.lang,
  org.apache.commons.lang.math,
  org.apache.commons.net.util,
  org.apache.commons.validator.routines,
+ org.apache.http.annotation,
  org.apache.http.conn.ssl,
+ org.apache.http.conn.util,
  org.apache.http.params,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker,
- org.slf4j
+ org.slf4j,
+ sun.security.util
 Bundle-ClassPath: .
 Export-Package: com.openexchange.ssl

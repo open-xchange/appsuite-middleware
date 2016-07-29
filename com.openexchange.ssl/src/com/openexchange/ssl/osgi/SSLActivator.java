@@ -49,9 +49,11 @@
 
 package com.openexchange.ssl.osgi;
 
+import javax.net.ssl.HttpsURLConnection;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.ssl.apache.DefaultHostnameVerifier;
 import com.openexchange.ssl.internal.SSLProperties;
 import com.openexchange.ssl.internal.SSLPropertiesReloadable;
 
@@ -79,6 +81,10 @@ public class SSLActivator extends HousekeepingActivator {
             if (configService.getBoolProperty(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getName(), SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getDefaultBoolean())) {
                 System.setProperty("javax.net.debug", "ssl:record");
                 org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("Enabeld SSL debug logging.");
+            }
+
+            if (SSLProperties.isVerifyHostname()) {
+                HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
             }
 
             registerService(Reloadable.class, new SSLPropertiesReloadable());

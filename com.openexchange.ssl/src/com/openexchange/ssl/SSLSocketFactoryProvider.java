@@ -49,7 +49,7 @@
 
 package com.openexchange.ssl;
 
-import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import com.openexchange.ssl.internal.SSLProperties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -64,12 +64,11 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 public class SSLSocketFactoryProvider {
 
     /**
-     * Returns the configured {@link SocketFactory}. This method is invoked by by reflection
+     * Returns the configured {@link SSLSocketFactory}. This method is invoked by by reflection
      * 
      * @return {@link TrustedSSLSocketFactory} or {@link TrustAllSSLSocketFactory} based on the configuration
      */
-    public static SocketFactory getDefault() {
-
+    public static SSLSocketFactory getDefault() {
         if (!SSLProperties.isSecureEnabled()) {
             return TrustAllSSLSocketFactory.getDefault();
         }

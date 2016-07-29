@@ -76,19 +76,12 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        X509Certificate x509Certificate = chain[0];
-        //        SSLProperties.isWhitelisted(hostName)
-        //        //TODO correct exception handling when certificate isn't trusted
-        //        //TODO introduce check for whitelisted hosts 
-        //            for (int j = 0; j < chain.length; j++) {
-        //                chain[j].get
-        //            }
+        // no whitelist check possible at this point
         this.trustManager.checkServerTrusted(chain, authType);
     }
 
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
-        X509Certificate x509Certificate = chain[0];
         if (SSLProperties.isWhitelisted(socket.getInetAddress().getHostName())) {
             return;
         }
@@ -98,6 +91,10 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+        if (SSLProperties.isWhitelisted(engine.getSession().getPeerHost())) {
+            return;
+        }
+        
         this.trustManager.checkClientTrusted(chain, authType, engine);
     }
 

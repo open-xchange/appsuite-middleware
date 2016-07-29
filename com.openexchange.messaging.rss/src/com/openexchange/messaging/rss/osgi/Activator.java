@@ -55,7 +55,7 @@ import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.ssl.SSLSocketFactoryProvider;
 
 /**
  * {@link Activator}
@@ -79,7 +79,7 @@ public class Activator extends HousekeepingActivator {
             track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
             openTrackers();
             registerService(MessagingService.class, new RSSMessagingService(), null);
-            HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
+            HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
         } catch (final Exception x) {
             LOG.error("", x);
             throw x;

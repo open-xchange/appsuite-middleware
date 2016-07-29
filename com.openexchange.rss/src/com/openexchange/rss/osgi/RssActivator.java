@@ -64,9 +64,9 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssJsonConverter;
 import com.openexchange.rss.actions.RssActionFactory;
 import com.openexchange.session.Session;
+import com.openexchange.ssl.SSLSocketFactoryProvider;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 public class RssActivator extends AJAXModuleActivator {
 
@@ -77,7 +77,7 @@ public class RssActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() {
-        HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
+        HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
         Services.setServiceLookup(this);
         registerModule(new RssActionFactory(), "rss");
         registerService(ResultConverter.class, new RssJsonConverter());
