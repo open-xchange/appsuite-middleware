@@ -62,13 +62,9 @@ import com.openexchange.configjump.ConfigJumpService;
  */
 public final class Services {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Services.class);
-
     private final BundleContext context;
-
-    private ServiceRegistration<ConfigJumpService> configJump;
-
     private final Lock registrationLock = new ReentrantLock();
+    private ServiceRegistration<ConfigJumpService> configJump;
 
     /**
      * Default constructor.
@@ -81,7 +77,7 @@ public final class Services {
     public void registerService(final Properties props) {
         final String url = props.getProperty("URL");
         if (null == url) {
-            LOG.error("Missing URL property in configjump.properties.");
+            org.slf4j.LoggerFactory.getLogger(Services.class).error("Missing URL property in configjump.properties.");
             return;
         }
         registrationLock.lock();
