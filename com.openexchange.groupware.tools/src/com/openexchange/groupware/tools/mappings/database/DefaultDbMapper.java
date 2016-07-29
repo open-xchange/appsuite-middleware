@@ -268,14 +268,12 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
     }
 
     /**
-     * Gets a string to be used as parameter values in <code>INSERT</code>- or
-     * <code>UPDATE</code>-statements.
+     * Gets a string to be used as parameter values in <code>INSERT</code>- or <code>UPDATE</code>-statements.
      *
-     * @param count the number of parameters
-     * @return the parameter string without surrounding parentheses, e.g.
-     * "?,?,?,?"
+     * @param count The number of parameters
+     * @return The parameter string without surrounding parentheses, e.g.<code>?,?,?,?</code>
      */
-    public String getParameters(int count) {
+    public static String getParameters(int count) {
         StringBuilder stringBuilder = new StringBuilder(2 * count);
         if (0 < count) {
             stringBuilder.append('?');
