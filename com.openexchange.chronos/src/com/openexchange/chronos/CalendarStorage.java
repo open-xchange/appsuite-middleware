@@ -50,6 +50,7 @@
 package com.openexchange.chronos;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;
@@ -144,6 +145,8 @@ public interface CalendarStorage {
     void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
 
     List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
+
+    Map<Integer, List<Alarm>> loadAlarms(int[] objectIDs, int userID) throws OXException;
 
     void deleteAlarms(int objectID, int userID) throws OXException;
 

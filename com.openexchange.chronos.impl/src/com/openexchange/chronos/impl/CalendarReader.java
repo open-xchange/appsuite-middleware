@@ -60,6 +60,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarService;
@@ -82,6 +84,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.CompositeSearchTerm;
@@ -221,8 +224,20 @@ public class CalendarReader {
 
     private List<UserizedEvent> userize(List<Event> events, int forUser) throws OXException {
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
+        Map<Integer, List<Alarm>> alarmsById = readAlarms(events, forUser);
         for (Event event : events) {
-            userizedEvents.add(userize(event, forUser));
+            UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
+            if (0 < event.getPublicFolderId()) {
+                userizedEvent.setFolderId(event.getPublicFolderId());
+            }
+            Attendee userAttendee = CalendarUtils.find(event.getAttendees(), forUser);
+            if (null != userAttendee) {
+                userizedEvent.setAlarms(alarmsById.get(I(event.getId())));
+                if (0 < userAttendee.getFolderID()) {
+                    userizedEvent.setFolderId(userAttendee.getFolderID());
+                }
+            }
+            userizedEvents.add(userizedEvent);
         }
         return userizedEvents;
     }
@@ -231,39 +246,40 @@ public class CalendarReader {
         return userize(Collections.singletonList(event), inFolder).get(0);
     }
 
+    private Map<Integer, List<Alarm>> readAlarms(List<Event> events, int userID) throws OXException {
+        List<Integer> objectIDs = new ArrayList<Integer>(events.size());
+        for (Event event : events) {
+            if (isAttendee(event, userID)) {
+                objectIDs.add(I(event.getId()));
+            }
+        }
+        return 0 < objectIDs.size() ? storage.loadAlarms(Autoboxing.I2i(objectIDs), userID) : Collections.<Integer, List<Alarm>> emptyMap();
+    }
+
     private List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder) throws OXException {
         User calendarUser = getCalendarUser(inFolder);
         int folderID = Integer.parseInt(inFolder.getID());
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
+        Map<Integer, List<Alarm>> alarmsById = readAlarms(events, calendarUser.getId());
         for (Event event : events) {
             UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
             userizedEvent.setFolderId(folderID);
-            if (isAttendee(event, calendarUser.getId())) {
-                //                userizedEvent.setAlarms(storage.loadAlarms(event.getId(), calendarUser.getId()));
-            }
+            userizedEvent.setAlarms(alarmsById.get(I(event.getId())));
             userizedEvents.add(userizedEvent);
         }
         return userizedEvents;
     }
 
-    private UserizedEvent userize(Event event, int forUser) throws OXException {
-        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
-        if (0 < event.getPublicFolderId()) {
-            userizedEvent.setFolderId(event.getPublicFolderId());
-        }
-        Attendee userAttendee = CalendarUtils.find(event.getAttendees(), forUser);
-        if (null != userAttendee) {
-            userizedEvent.setAlarms(storage.loadAlarms(event.getId(), userAttendee.getEntity()));
-            if (0 < userAttendee.getFolderID()) {
-                userizedEvent.setFolderId(userAttendee.getFolderID());
-            }
-        }
-        return userizedEvent;
-    }
-
     protected UserizedFolder getFolder(int folderID) throws OXException {
         return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), null);
     }
+
+    //    protected List<UserizedFolder> getVisibleFolders() throws OXException {
+    //        FolderService folderService = Services.getService(FolderService.class);
+    //        FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), PrivateType.getInstance(), false, session.getSession(), null);
+    //
+    //        return null;
+    //    }
 
     /**
      * Gets the actual target calendar user for a specific folder. This is either the current session's user for "private" or "public"

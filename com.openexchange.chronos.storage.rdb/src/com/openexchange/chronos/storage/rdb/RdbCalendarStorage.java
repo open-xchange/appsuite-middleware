@@ -51,8 +51,10 @@ package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.chronos.storage.rdb.SQL.logExecuteQuery;
 import static com.openexchange.chronos.storage.rdb.SQL.logExecuteUpdate;
+import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
+import static com.openexchange.tools.arrays.Collections.put;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -153,11 +155,15 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     @Override
     public List<Alarm> loadAlarms(int objectID, int userID) throws OXException {
+        return loadAlarms(new int[] { objectID }, userID).get(I(objectID));
+    }
+
+    @Override
+    public Map<Integer, List<Alarm>> loadAlarms(int[] objectIDs, int userID) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            Alarm alarm = selectReminder(connection, context.getContextId(), objectID, userID);
-            return null != alarm ? Collections.singletonList(alarm) : null;
+            return selectAlarms(connection, context.getContextId(), objectIDs, userID);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
@@ -527,7 +533,10 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     private static int insertOrReplaceEvent(Connection connection, String tableName, boolean replace, int contextID, Event event) throws SQLException, OXException {
         EventField[] mappedFields = MAPPER.getMappedFields();
-        String sql = new StringBuilder().append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ').append("(cid,").append(MAPPER.getColumns(mappedFields)).append(") ").append("VALUES (?,").append(MAPPER.getParameters(mappedFields)).append(");").toString();
+        String sql = new StringBuilder()
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ').append("(cid,").append(MAPPER.getColumns(mappedFields)).append(") ")
+            .append("VALUES (?,").append(MAPPER.getParameters(mappedFields)).append(");")
+        .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -538,7 +547,10 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     private static int updateEvent(Connection connection, int contextID, int objectID, Event event) throws SQLException, OXException {
         EventField[] assignedfields = MAPPER.getAssignedFields(event);
-        String sql = new StringBuilder().append("UPDATE prg_dates SET ").append(MAPPER.getAssignments(assignedfields)).append(' ').append("WHERE cid=? AND intfield01=?;").toString();
+        String sql = new StringBuilder()
+            .append("UPDATE prg_dates SET ").append(MAPPER.getAssignments(assignedfields)).append(' ')
+            .append("WHERE cid=? AND intfield01=?;")
+        .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(event), assignedfields);
@@ -577,7 +589,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         AttendeeField[] mappedFields = InternalAttendeeMapper.getInstance().getMappedFields(fields);
         String sql = new StringBuilder()
             .append("SELECT object_id,").append(InternalAttendeeMapper.getInstance().getColumns(mappedFields)).append(" FROM prg_dates_members ")
-            .append("WHERE cid=? AND object_id IN (").append(InternalAttendeeMapper.getInstance().getParameters(objectIDs.length)).append(");")
+            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
@@ -589,7 +601,7 @@ public class RdbCalendarStorage implements CalendarStorage {
                 while (resultSet.next()) {
                     Attendee attendee = InternalAttendeeMapper.getInstance().fromResultSet(resultSet, mappedFields);
                     attendee.setCuType(CalendarUserType.INDIVIDUAL);
-                    put(attendeesById, resultSet.getInt("object_id"), attendee);
+                    put(attendeesById, I(resultSet.getInt("object_id")), attendee);
                 }
             }
         }
@@ -599,7 +611,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         AttendeeField[] mappedFields = ExternalAttendeeMapper.getInstance().getMappedFields(fields);
         String sql = new StringBuilder()
             .append("SELECT objectId,").append(ExternalAttendeeMapper.getInstance().getColumns(mappedFields)).append(" FROM dateexternal ")
-            .append("WHERE cid=? AND objectId IN (").append(InternalAttendeeMapper.getInstance().getParameters(objectIDs.length)).append(");")
+            .append("WHERE cid=? AND objectId IN (").append(getParameters(objectIDs.length)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
@@ -611,7 +623,7 @@ public class RdbCalendarStorage implements CalendarStorage {
                 while (resultSet.next()) {
                     Attendee attendee = ExternalAttendeeMapper.getInstance().fromResultSet(resultSet, mappedFields);
                     attendee.setCuType(CalendarUserType.INDIVIDUAL);
-                    put(attendeesById, resultSet.getInt("objectId"), attendee);
+                    put(attendeesById, I(resultSet.getInt("objectId")), attendee);
                 }
             }
         }
@@ -620,7 +632,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private static void selectAndAddInternalNonUserAttendees(Map<Integer, List<Attendee>> attendeesById, Connection connection, int contextID, int[] objectIDs) throws SQLException {
         String sql = new StringBuilder()
             .append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ")
-            .append("WHERE cid=? AND object_id IN (").append(InternalAttendeeMapper.getInstance().getParameters(objectIDs.length)).append(") ")
+            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(") ")
             .append("AND type IN (2,3);")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -636,7 +648,7 @@ public class RdbCalendarStorage implements CalendarStorage {
                     attendee.setCuType(Appointment2Event.getCalendarUserType(resultSet.getInt("type")));
                     attendee.setUri(Appointment2Event.getURI(resultSet.getString("ma")));
                     attendee.setCommonName(resultSet.getString("dn"));
-                    put(attendeesById, resultSet.getInt("object_id"), attendee);
+                    put(attendeesById, I(resultSet.getInt("object_id")), attendee);
                 }
             }
         }
@@ -646,7 +658,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         Map<Integer, List<Attachment>> attachmentsById = new HashMap<Integer, List<Attachment>>();
         String sql = new StringBuilder()
             .append("SELECT attached,id,file_mimetype,file_size,filename,file_id FROM prg_attachment ")
-            .append("WHERE cid=? AND attached IN (").append(EventMapper.getInstance().getParameters(objectIDs.length)).append(") AND module=?;")
+            .append("WHERE cid=? AND attached IN (").append(getParameters(objectIDs.length)).append(") AND module=?;")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
@@ -663,7 +675,7 @@ public class RdbCalendarStorage implements CalendarStorage {
                     attachment.setSize(Long.valueOf(resultSet.getString("file_size")));
                     attachment.setManagedId(resultSet.getString("filename"));
                     attachment.setContentId(resultSet.getString("file_id"));
-                    put(attachmentsById, resultSet.getInt("attached"), attachment);
+                    put(attachmentsById, I(resultSet.getInt("attached")), attachment);
                 }
             }
         }
@@ -674,21 +686,29 @@ public class RdbCalendarStorage implements CalendarStorage {
         return adjustAfterLoad(MAPPER.fromResultSet(resultSet, fields, columnLabelPrefix));
     }
 
-    private static Alarm selectReminder(Connection connection, int contextID, int objectID, int userID) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("SELECT reminder FROM prg_dates_members WHERE cid=? AND object_id=? AND member_uid=?;")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
-            stmt.setInt(3, userID);
+    private static Map<Integer, List<Alarm>> selectAlarms(Connection connection, int contextID, int[] objectIDs, int userID) throws SQLException {
+        Map<Integer, List<Alarm>> alarmsById = new HashMap<Integer, List<Alarm>>();
+        String sql = new StringBuilder()
+            .append("SELECT object_id,reminder FROM prg_dates_members ")
+            .append("WHERE cid=? AND member_uid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, userID);
+            for (int objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, objectID);
+            }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 if (resultSet.next()) {
                     int reminder = resultSet.getInt("reminder");
                     if (false == resultSet.wasNull()) {
-                        return Appointment2Event.getAlarm(reminder);
+                        alarmsById.put(I(resultSet.getInt("object_id")), Collections.singletonList(Appointment2Event.getAlarm(reminder)));
                     }
                 }
             }
         }
-        return null;
+        return alarmsById;
     }
 
     private static int updateReminder(Connection connection, int contextID, int objectID, int userID, Integer reminder) throws SQLException {
@@ -751,16 +771,6 @@ public class RdbCalendarStorage implements CalendarStorage {
             objectIDs[i] = events.get(i).getId();
         }
         return objectIDs;
-    }
-
-    private static <T> boolean put(Map<Integer, List<T>> itemsById, int id, T item) {
-        Integer key = I(id);
-        List<T> attendees = itemsById.get(key);
-        if (null == attendees) {
-            attendees = new ArrayList<T>();
-            itemsById.put(key, attendees);
-        }
-        return attendees.add(item);
     }
 
     /**

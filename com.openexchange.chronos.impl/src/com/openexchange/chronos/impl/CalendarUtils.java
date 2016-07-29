@@ -349,4 +349,18 @@ public class CalendarUtils {
         return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
     }
 
+    /**
+     * Gets the identifiers of the supplied events in an array.
+     *
+     * @param events The events to get the identifiers for
+     * @return The object identifiers
+     */
+    static int[] getObjectIDs(List<Event> events) {
+        int[] objectIDs = new int[events.size()];
+        for (int i = 0; i < events.size(); i++) {
+            objectIDs[i] = events.get(i).getId();
+        }
+        return objectIDs;
+    }
+
 }
