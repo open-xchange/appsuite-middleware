@@ -60,6 +60,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.AssignmentFactoryImpl;
+import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.database.internal.Initialization;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 
@@ -106,7 +107,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
             lock.unlock();
         }
         if (needsRegistration && !Initialization.getInstance().isStarted()) {
-            DatabaseService databaseService = null;
+            DatabaseServiceImpl databaseService = null;
             try {
                 Initialization.setConfigurationService(configService);
                 databaseService = Initialization.getInstance().start(configService, configViewFactory, migrationService);
