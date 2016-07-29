@@ -220,19 +220,22 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (modifiedFields == null || modifiedFields.contains(Field.FILENAME)) {
                 String toPath = toPath(file.getFolderId(), file.getFileName());
                 if (!path.equals(toPath)) {
-                    if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
-                        try {
+                    try {
+                        if (Strings.equalsNormalizedIgnoreCase(path, toPath)) {
                             String filePath = toPath(file.getFolderId(), UUID.randomUUID().toString() + ' ' + file.getFileName());
                             Metadata metadata = client.files().move(path, filePath);
-                            DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
-                            file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
-                            return dbxFile.getIDTuple();
-                        } catch (RelocationErrorException e) {
-                            // TODO: Maybe introduce new exception codes?
-                            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        } catch (DbxException e) {
-                            throw DropboxExceptionHandler.handle(e);
+                            path = metadata.getPathDisplay();
                         }
+                        
+                        Metadata metadata = client.files().move(path, toPath);
+                        DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
+                        file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                        return dbxFile.getIDTuple();
+                    } catch (RelocationErrorException e) {
+                        // TODO: Maybe introduce new exception codes?
+                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    } catch (DbxException e) {
+                        throw DropboxExceptionHandler.handle(e);
                     }
                 }
             }
@@ -256,6 +259,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             return new IDTuple(file.getFolderId(), file.getId());
         }
+
     }
 
     /*
