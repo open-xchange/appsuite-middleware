@@ -50,7 +50,7 @@
 package com.openexchange.config;
 
 /**
- * {@link Interests}
+ * {@link Interests} - Signals the interests of a {@link Reloadable} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
@@ -68,6 +68,12 @@ public interface Interests {
      * <pre>
      *  properties-description := '*' | property-name ( '.*' )?
      *  property-name := token ( '.' token )*
+     * </pre>
+     *
+     * Examples
+     * <pre>
+     *  ["com.openexchange.moduleOne.*", "com.openexchange.moduleTwo.attributeFive"]
+     *  ["*"]
      * </pre>
      *
      * @return An array of property names or <code>null</code> (interested in no properties)
