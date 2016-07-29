@@ -57,6 +57,7 @@ import static com.openexchange.chronos.impl.Check.requireFolderPermission;
 import static com.openexchange.chronos.impl.Check.requireReadPermission;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
@@ -226,22 +227,23 @@ public class CalendarReader {
         return userizedEvents;
     }
 
-    private List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder) throws OXException {
-        List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
-        for (Event event : events) {
-            userizedEvents.add(userize(event, inFolder));
-        }
-        return userizedEvents;
+    private UserizedEvent userize(Event event, UserizedFolder inFolder) throws OXException {
+        return userize(Collections.singletonList(event), inFolder).get(0);
     }
 
-    private UserizedEvent userize(Event event, UserizedFolder inFolder) throws OXException {
-        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
+    private List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder) throws OXException {
         User calendarUser = getCalendarUser(inFolder);
-        if (isAttendee(event, calendarUser.getId())) {
-            userizedEvent.setAlarms(storage.loadAlarms(event.getId(), calendarUser.getId()));
+        int folderID = Integer.parseInt(inFolder.getID());
+        List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
+        for (Event event : events) {
+            UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
+            userizedEvent.setFolderId(folderID);
+            if (isAttendee(event, calendarUser.getId())) {
+                //                userizedEvent.setAlarms(storage.loadAlarms(event.getId(), calendarUser.getId()));
+            }
+            userizedEvents.add(userizedEvent);
         }
-        userizedEvent.setFolderId(Integer.parseInt(inFolder.getID()));
-        return userizedEvent;
+        return userizedEvents;
     }
 
     private UserizedEvent userize(Event event, int forUser) throws OXException {

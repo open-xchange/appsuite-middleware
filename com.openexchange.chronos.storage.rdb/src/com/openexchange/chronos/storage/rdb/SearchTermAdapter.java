@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Pattern;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.EventField;
@@ -86,9 +85,6 @@ import com.openexchange.tools.StringCollection;
  * @since v7.10.0
  */
 public class SearchTermAdapter {
-
-    /** Pattern to check whether a string contains SQL wildcards or not */
-    private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
 
     private final StringBuilder stringBuilder;
     private final List<Object> parameters;
@@ -163,10 +159,6 @@ public class SearchTermAdapter {
         return parameterIndex;
     }
 
-    private static boolean containsWildcards(String pattern) {
-        return WILDCARD_PATTERN.matcher(pattern).find();
-    }
-
     private void append(SearchTerm<?> term) throws OXException {
         if (SingleSearchTerm.class.isInstance(term)) {
             append((SingleSearchTerm) term);
@@ -207,7 +199,7 @@ public class SearchTermAdapter {
     }
 
     private void appendOperation(Operation operation, Operand<?>[] operands, DbMapping<? extends Object, ?> mapping, String prefix) throws OXException {
-        stringBuilder.append(" ( ");
+        stringBuilder.append('(');
         for (int i = 0; i < operands.length; i++) {
             if (OperationPosition.BEFORE.equals(operation.getSqlPosition())) {
                 stringBuilder.append(operation.getSqlRepresentation());
@@ -227,7 +219,7 @@ public class SearchTermAdapter {
                 stringBuilder.append(' ').append(operation.getSqlRepresentation()).append(' ');
             }
         }
-        stringBuilder.append(" ) ");
+        stringBuilder.append(')');
     }
 
     private void append(CompositeSearchTerm term) throws OXException {
@@ -252,41 +244,31 @@ public class SearchTermAdapter {
     }
 
     /**
-     * Tries to interpret and append a composite term as <code>IN</code>-
-     * clause, so that a composite 'OR' term where each nested 'EQUALS'
-     * operation targets the same column gets optimized to a suitable
-     * <code>column IN (value1,value2,...)</code>.
+     * Tries to interpret and append a composite term as <code>IN</code>-clause, so that a composite 'OR' term where each nested 'EQUALS'
+     * operation targets the same column gets optimized to a suitable <code>column IN (value1,value2,...)</code>.
      *
-     * @param compositeTerm the composite term
+     * @param compositeTerm The composite term
      * @return <code>true</code>, if the term was appended as 'IN' clause, <code>false</code>, otherwise
-     * @throws OXException
      */
     private boolean appendAsInClause(CompositeSearchTerm compositeTerm) throws OXException {
         /*
-         * check operation
+         * check if operation & operands are applicable
          */
         if (false == CompositeOperation.OR.equals(compositeTerm.getOperation())) {
             return false; // only 'OR' composite operations
         }
-        /*
-         * check operands
-         */
         if (null == compositeTerm.getOperands() || 2 > compositeTerm.getOperands().length) {
             return false; // at least 2 operands
         }
         List<Object> constantValues = new ArrayList<Object>();
         Object commonColumnValue = null;
         for (SearchTerm<?> term : compositeTerm.getOperands()) {
-            if (false == SingleSearchTerm.class.isInstance(term)) {
-                return false; // only nested single search terms
-            }
-            SingleSearchTerm singleSearchTerm = (SingleSearchTerm) term;
-            if (false == SingleOperation.EQUALS.equals(singleSearchTerm.getOperation())) {
-                return false; // only 'EQUALS' operations in nested terms
+            if (false == SingleSearchTerm.class.isInstance(term) || false == SingleOperation.EQUALS.equals(term.getOperation())) {
+                return false; // only nested single search terms with 'EQUALS' operations
             }
             Object columnValue = null;
             Object constantValue = null;
-            for (Operand<?> operand : singleSearchTerm.getOperands()) {
+            for (Operand<?> operand : ((SingleSearchTerm) term).getOperands()) {
                 if (Type.COLUMN.equals(operand.getType())) {
                     columnValue = operand.getValue();
                 } else if (Type.CONSTANT.equals(operand.getType())) {
@@ -298,16 +280,13 @@ public class SearchTermAdapter {
             if (null == columnValue || null == constantValue) {
                 return false; // only 'COLUMN' = 'CONSTANT' operations
             }
+            if (String.class.isInstance(constantValue) && StringCollection.containsWildcards((String) constantValue)) {
+                return false; // no wildcard comparisons
+            }
             if (null == commonColumnValue) {
                 commonColumnValue = columnValue; // first column value
             } else if (false == commonColumnValue.equals(columnValue)) {
                 return false; // only equal column value
-            }
-            if (String.class.isInstance(constantValue)) {
-                String preparedPattern = StringCollection.prepareForSearch((String) constantValue, false, true);
-                if (containsWildcards(preparedPattern)) {
-                    return false; // no wildcards
-                }
             }
             constantValues.add(constantValue);
         }
@@ -345,39 +324,12 @@ public class SearchTermAdapter {
         stringBuilder.append(") ");
     }
 
-//    private void appendConstantOperand(Object value, DbMapping<? extends Object, ?> mapping) throws OXException {
-//        appendConstantOperand(value, null != mapping ? mapping.getSqlType() : Integer.MIN_VALUE);
-//    }
-//
     private void appendConstantOperand(Object value, int sqlType) throws OXException {
         if (String.class.isInstance(value)) {
-            String stringValue = (String) value;
-            if (Types.INTEGER == sqlType) {
-                if ("true".equalsIgnoreCase(stringValue)) {
-                    // special handling for "true" string
-                    parameters.add(Integer.valueOf(1));
-                } else if ("false".equalsIgnoreCase(stringValue)) {
-                    // special handling for "false" string
-                    parameters.add(Integer.valueOf(0));
-                } else {
-                    // try to parse
-                    parameters.add(Integer.valueOf(stringValue));
-                }
-            } else {
-                String preparedPattern;
-                if (StringCollection.containsWildcards(stringValue)) {
-                    // use "LIKE" search
-                    preparedPattern = StringCollection.prepareForSearch(stringValue, false, true);
-                    final int index = stringBuilder.lastIndexOf("=");
-                    stringBuilder.replace(index, index + 1, "LIKE");
-                } else {
-                    // use "EQUALS" search
-                    preparedPattern = stringValue;
-                }
-                parameters.add(preparedPattern);
-            }
-        } else if (Boolean.class.isInstance(value) && Types.INTEGER == sqlType) {
-            // special handling for Booleans
+            appendConstantOperand((String) value, sqlType);
+            return;
+        }
+        if (Boolean.class.isInstance(value) && Types.INTEGER == sqlType) {
             parameters.add(Integer.valueOf(Boolean.TRUE.equals(value) ? 1 : 0));
         } else if (Long.class.isInstance(value) && Types.TIMESTAMP == sqlType) {
             parameters.add(new Timestamp(((Long) value).longValue()));
@@ -388,6 +340,32 @@ public class SearchTermAdapter {
         } else {
             // default
             parameters.add(value);
+        }
+        stringBuilder.append('?');
+    }
+
+    private void appendConstantOperand(String value, int sqlType) throws OXException {
+        if (Types.INTEGER == sqlType) {
+            if ("true".equalsIgnoreCase(value)) {
+                // special handling for "true" string
+                parameters.add(Integer.valueOf(1));
+            } else if ("false".equalsIgnoreCase(value)) {
+                // special handling for "false" string
+                parameters.add(Integer.valueOf(0));
+            } else {
+                // try to parse
+                parameters.add(Integer.valueOf(value));
+            }
+        } else {
+            if (StringCollection.containsWildcards(value)) {
+                // use "LIKE" search
+                parameters.add(StringCollection.prepareForSearch(value, false, true));
+                int index = stringBuilder.lastIndexOf("=");
+                stringBuilder.replace(index, index + 1, "LIKE");
+            } else {
+                // use "EQUALS" search
+                parameters.add(value);
+            }
         }
         stringBuilder.append('?');
     }
