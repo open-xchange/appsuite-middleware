@@ -139,6 +139,25 @@ abstract class AbstractDropboxAccess {
     }
 
     /**
+     * Returns the {@link FileMetadata} of the specified file
+     * 
+     * @param folderId The folder identifier
+     * @param fileId The file identifier
+     * @return The {@link FileMetadata}
+     * @throws GetMetadataErrorException If a metadata error is occured
+     * @throws OXException If the resource is not found
+     * @throws DbxException if a generic Dropbox error is occured
+     */
+    FileMetadata getFileMetadata(String folderId, String fileId) throws GetMetadataErrorException, OXException, DbxException {
+        String path = toPath(folderId, fileId);
+        Metadata metadata = getMetadata(path);
+        if (metadata instanceof FileMetadata) {
+            return (FileMetadata) metadata;
+        }
+        throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, path);
+    }
+
+    /**
      * Gets the {@link FolderMetadata} of the specified folder.
      * 
      * @param folderId The folder identifier
