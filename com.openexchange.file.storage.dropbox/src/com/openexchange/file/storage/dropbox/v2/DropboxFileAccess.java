@@ -66,6 +66,7 @@ import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
+import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.ListRevisionsErrorException;
 import com.dropbox.core.v2.files.ListRevisionsResult;
@@ -533,8 +534,49 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        List<File> files = new ArrayList<>(ids.size());
+        Map<String, List<String>> filesPerFolder = getFilesPerFolder(ids);
+        if (filesPerFolder.size() == 1 && filesPerFolder.values().iterator().next().size() > 2) {
+            // Seems like a 'list' request for multiple items from one folder
+            String folderId = filesPerFolder.keySet().iterator().next();
+            String path = toPath(folderId);
+            try {
+                ListFolderResult listFolder = client.files().listFolder(path);
+                for (IDTuple id : ids) {
+                    for (Metadata metadata : listFolder.getEntries()) {
+                        if (id.getId().equals(metadata.getName()) && metadata instanceof FileMetadata) {
+                            files.add(new DropboxFile((FileMetadata) metadata, userId));
+                            break;
+                        }
+                    }
+                }
+            } catch (ListFolderErrorException e) {
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e);
+            }
+        } else {
+            // Load metadata one-by-one
+            for (IDTuple id : ids) {
+                try {
+                    FileMetadata metadata = getFileMetadata(id.getFolder(), id.getId());
+                    files.add(new DropboxFile(metadata, userId));
+                } catch (OXException e) {
+                    // Skip non-existing files
+                    if (!FileStorageExceptionCodes.NOT_A_FILE.equals(e)) {
+                        throw e;
+                    }
+                } catch (GetMetadataErrorException e) {
+                    // Skip non-existing files
+                    if (!LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
+                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    }
+                } catch (DbxException e) {
+                    throw DropboxExceptionHandler.handle(e);
+                }
+            }
+        }
+        return new FileTimedResult(files);
     }
 
     private static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
