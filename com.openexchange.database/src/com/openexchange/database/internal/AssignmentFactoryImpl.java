@@ -60,6 +60,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -278,13 +281,13 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
             super();
             int size;
             if (null == assignments || (size = assignments.size()) <= 0) {
-                assignmentsPerSchema = Collections.emptyMap();
+                assignmentsPerSchema    = Collections.emptyMap();
                 assignmentsPerWritePool = Collections.emptyMap();
-                assignmentsPerReadPool = Collections.emptyMap();
+                assignmentsPerReadPool  = Collections.emptyMap();
             } else {
-                assignmentsPerSchema = new HashMap<>(size);
-                assignmentsPerWritePool = new HashMap<>(size);
-                assignmentsPerReadPool = new HashMap<>(size);
+                Map<String, List<Assignment>> assignmentsPerSchema = new HashMap<>(size);
+                Map<Integer, List<Assignment>> assignmentsPerWritePool = new HashMap<>(size);
+                Map<Integer, List<Assignment>> assignmentsPerReadPool = new HashMap<>(size);
                 for (Assignment assignment : assignments) {
                     List<Assignment> list = assignmentsPerSchema.get(assignment.getSchema());
                     if (null == list) {
@@ -309,7 +312,24 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
                     }
                     list.add(assignment);
                 }
+
+                // Yield appropriate immutable collections for thread-safe read-only access
+                this.assignmentsPerSchema       = asImmutableMap(assignmentsPerSchema);
+                this.assignmentsPerWritePool    = asImmutableMap(assignmentsPerWritePool);
+                this.assignmentsPerReadPool     = asImmutableMap(assignmentsPerReadPool);
             }
+        }
+
+        private <K, V> Map<K, List<V>> asImmutableMap(Map<K, List<V>> source) {
+            Builder<K, List<V>> builder = ImmutableMap.<K, List<V>> builder();
+            for (Map.Entry<K, List<V>> entry : source.entrySet()) {
+                builder.put(entry.getKey(), asImmutableList(entry.getValue()));
+            }
+            return builder.build();
+        }
+
+        private <V> List<V> asImmutableList(List<V> source) {
+            return ImmutableList.<V> builder().addAll(source).build();
         }
 
         List<Assignment> getForSchema(String schema) {
