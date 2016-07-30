@@ -6,7 +6,7 @@ Bundle-Version: 18.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: lib/guava-18.0.jar
+Bundle-ClassPath: lib/guava-19.0.jar
 Export-Package: com.google.common.annotations;version="18.0.0",
  com.google.common.base;version="18.0.0",
  com.google.common.base.internal;version="18.0.0",
