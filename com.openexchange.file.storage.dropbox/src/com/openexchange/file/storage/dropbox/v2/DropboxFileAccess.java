@@ -74,6 +74,9 @@ import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
 import com.dropbox.core.v2.files.RestoreErrorException;
+import com.dropbox.core.v2.files.SearchErrorException;
+import com.dropbox.core.v2.files.SearchMatch;
+import com.dropbox.core.v2.files.SearchResult;
 import com.dropbox.core.v2.files.ThumbnailErrorException;
 import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
@@ -226,7 +229,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                             Metadata metadata = client.files().move(path, filePath);
                             path = metadata.getPathDisplay();
                         }
-                        
+
                         Metadata metadata = client.files().move(path, toPath);
                         DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
                         file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
@@ -612,8 +615,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return search(pattern, fields, folderId, false, sort, order, start, end);
     }
 
     /*
@@ -623,8 +625,37 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (folderId == null) {
+            folderId = "";
+        }
+        
+        //TODO: '*' wildcard case; return everything, no need for search request
+        
+        try {
+            // Search
+            SearchResult searchResult = client.files().searchBuilder(folderId, pattern).withMaxResults(1000L).start();
+            List<SearchMatch> matches = searchResult.getMatches();
+            List<File> results = new ArrayList<File>(matches.size());
+
+            for (SearchMatch match : matches) {
+                Metadata metadata = match.getMetadata();
+                if (metadata instanceof FileMetadata) {
+                    //FIXME: Does the path need normalisation?
+                    results.add(new DropboxFile((FileMetadata) metadata, userId));
+                }
+            }
+
+            // Sort results
+            sort(results, sort, order);
+            
+            //TODO: Utilise the start-end range
+
+            return new SearchIteratorAdapter<File>(results.iterator(), results.size());
+        } catch (SearchErrorException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
     }
 
     /*
@@ -854,7 +885,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @param file The {@link File} to upload
      * @param data The {@link InputStream} containing the actual data
      * @return The {@link IDTuple} of the uploaded file
-     * @throws OXException If an error is occured
+     * @throws OXException If an error is occurred
      */
     private IDTuple sessionUpload(File file, InputStream data) throws OXException {
         ThresholdFileHolder sink = null;
@@ -900,7 +931,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @param file The {@link File} to upload
      * @param data The {@link InputStream} containing the actual data
      * @return The {@link IDTuple} of the uploaded file
-     * @throws OXException if an error is occured
+     * @throws OXException if an error is occurred
      */
     private IDTuple singleUpload(File file, InputStream data) throws OXException {
         String name = file.getFileName();
