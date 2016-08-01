@@ -995,10 +995,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     private List<File> getAllFiles(String folderId, boolean recursive) throws ListFolderErrorException, DbxException {
         List<File> results = new ArrayList<File>();
         ListFolderResult listFolderResult = client.files().listFolderBuilder(folderId).withRecursive(recursive).start();
-        boolean hasMore = listFolderResult.getHasMore();
+        boolean hasMore = false;
         do {
+            hasMore = listFolderResult.getHasMore();
+            
             List<Metadata> entries = listFolderResult.getEntries();
-
             for (Metadata metadata : entries) {
                 if (metadata instanceof FileMetadata) {
                     results.add(new DropboxFile((FileMetadata) metadata, userId));
@@ -1025,7 +1026,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     private List<File> fireSearch(String folderId, String pattern, boolean includeSubfolders) throws SearchErrorException, DbxException {
         SearchResult searchResult = client.files().searchBuilder(folderId, pattern).start();
-        
+
         List<File> results = new ArrayList<File>();
         boolean hasMore = false;
         do {
