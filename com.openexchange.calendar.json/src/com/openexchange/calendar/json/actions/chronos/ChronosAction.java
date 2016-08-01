@@ -102,7 +102,12 @@ public abstract class ChronosAction extends AppointmentAction {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
         }
         AppointmentAJAXRequest request = AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(requestData, session);
+
         boolean performNew = true;
+        String legacyValue = request.getParameter("legacy");
+        if (null != legacyValue) {
+            performNew = false == Boolean.parseBoolean(legacyValue);
+        }
         try {
             return performNew ? perform(getService(CalendarService.class), request) : perform(request);
         } catch (final JSONException e) {
