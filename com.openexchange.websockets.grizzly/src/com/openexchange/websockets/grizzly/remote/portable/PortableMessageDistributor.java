@@ -110,6 +110,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
         this.userId = userId;
         this.contextId = contextId;
         this.message = message;
+        this.async = async;
     }
 
     @Override
