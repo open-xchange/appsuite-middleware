@@ -51,7 +51,6 @@ package com.openexchange.rss.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.net.ssl.HttpsURLConnection;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -64,7 +63,6 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssJsonConverter;
 import com.openexchange.rss.actions.RssActionFactory;
 import com.openexchange.session.Session;
-import com.openexchange.ssl.SSLSocketFactoryProvider;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -77,7 +75,6 @@ public class RssActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() {
-        HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
         Services.setServiceLookup(this);
         registerModule(new RssActionFactory(), "rss");
         registerService(ResultConverter.class, new RssJsonConverter());

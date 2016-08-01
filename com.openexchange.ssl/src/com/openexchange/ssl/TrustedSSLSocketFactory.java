@@ -58,6 +58,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -76,12 +78,9 @@ import com.openexchange.ssl.internal.SSLProperties;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class TrustedSSLSocketFactory extends SSLSocketFactory {
+public class TrustedSSLSocketFactory extends SSLSocketFactory implements HandshakeCompletedListener {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TrustedSSLSocketFactory.class);
-
-    /** String-array of trusted hosts */
-    private String[] trustedHosts = null;
 
     /** Holds a SSLContext to get SSLSocketFactories from */
     private SSLContext sslcontext;
@@ -158,15 +157,17 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory {
     @Override
     public Socket createSocket() throws IOException {
         Socket socket = this.adapteeFactory.createSocket();
-        enrich(socket);
+        setProperties(socket);
         return socket;
     }
 
-    private void enrich(Socket socket) {
+    private void setProperties(Socket socket) {
         if (socket instanceof SSLSocket) {
             SSLSocket sslSocket = (SSLSocket) socket;
             sslSocket.setEnabledProtocols(SSLProperties.supportedProtocols());
             sslSocket.setEnabledCipherSuites(SSLProperties.supportedCiphers());
+            sslSocket.setUseClientMode(true);
+            sslSocket.addHandshakeCompletedListener(this);
             socket = sslSocket;
         }
     }
@@ -174,7 +175,7 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory {
     @Override
     public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
         Socket socket = this.adapteeFactory.createSocket(s, host, port, autoClose);
-        enrich(socket);
+        setProperties(socket);
         return socket;
     }
 
@@ -191,28 +192,33 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory {
     @Override
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
         Socket socket = this.adapteeFactory.createSocket(host, port);
-        enrich(socket);
+        setProperties(socket);
         return socket;
     }
 
     @Override
     public Socket createSocket(InetAddress host, int port) throws IOException {
         Socket socket = this.adapteeFactory.createSocket(host, port);
-        enrich(socket);
+        setProperties(socket);
         return socket;
     }
 
     @Override
     public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
         Socket socket = this.adapteeFactory.createSocket(host, port, localHost, localPort);
-        enrich(socket);
+        setProperties(socket);
         return socket;
     }
 
     @Override
     public Socket createSocket(InetAddress address, int port, InetAddress localHost, int localPort) throws IOException {
         Socket socket = this.adapteeFactory.createSocket(address, port, localHost, localPort);
-        enrich(socket);
+        setProperties(socket);
         return socket;
+    }
+
+    @Override
+    public void handshakeCompleted(HandshakeCompletedEvent event) {
+        LOG.debug("Successfully handshaked with host {}", event.getSocket().getInetAddress().getHostAddress());
     }
 }

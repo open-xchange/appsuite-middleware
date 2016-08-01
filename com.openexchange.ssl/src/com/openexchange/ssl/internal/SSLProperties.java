@@ -99,8 +99,9 @@ public enum SSLProperties {
             synchronized (SSLProperties.class) {
                 tmp = isSecureEnabled;
                 if (null == tmp) {
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.only'.");
                         return true;
                     }
                     boolean prop = service.getBoolProperty(SECURE_CONNECTIONS_KEY, true);
@@ -124,8 +125,9 @@ public enum SSLProperties {
             synchronized (SSLProperties.class) {
                 tmp = protocols;
                 if (null == tmp) {
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.protocols'.");
                         return Strings.splitByComma(PROTOCOLS_DEFAULTS);
                     }
                     String prop = service.getProperty(PROTOCOLS_KEY, PROTOCOLS_DEFAULTS);
@@ -149,8 +151,9 @@ public enum SSLProperties {
             synchronized (SSLProperties.class) {
                 tmp = ciphers;
                 if (null == tmp) {
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.ciphers'.");
                         return Strings.splitByComma(CIPHERS_DEFAULTS);
                     }
                     String prop = service.getProperty(CIPHERS_KEY, CIPHERS_DEFAULTS);
@@ -172,8 +175,9 @@ public enum SSLProperties {
             synchronized (SSLProperties.class) {
                 tmp = verifyHostname;
                 if (null == tmp) {
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.hostname.verification.enabled'.");
                         return true;
                     }
                     boolean prop = service.getBoolProperty(HOSTNAME_VERIFICATION_ENABLED_KEY, true);
@@ -185,7 +189,7 @@ public enum SSLProperties {
         return tmp.booleanValue();
     }
 
-    static final String TRUSTSTORE_WHITELIST_KEY = "com.openexchange.ssl.truststore.whitelist";
+    static final String TRUSTSTORE_WHITELIST_KEY = "com.openexchange.ssl.whitelist";
 
     static final String TRUSTSTORE_WHITELIST_DEFAULT = "127.0.0.1-127.255.255.255,localhost";
 
@@ -197,8 +201,9 @@ public enum SSLProperties {
             synchronized (SSLProperties.class) {
                 tmp = whitelistedHosts;
                 if (null == tmp) {
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.whitelist'.");
                         return HostList.valueOf(TRUSTSTORE_WHITELIST_DEFAULT);
                     }
                     String prop = service.getProperty(TRUSTSTORE_WHITELIST_KEY, TRUSTSTORE_WHITELIST_DEFAULT);
@@ -231,6 +236,9 @@ public enum SSLProperties {
     public static void reload() {
         whitelistedHosts = null;
         isSecureEnabled = null;
+        verifyHostname = null;
+        ciphers = null;
+        protocols = null;
     }
 
     //***************************************/

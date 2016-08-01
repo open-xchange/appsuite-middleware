@@ -53,6 +53,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+/**
+ * 
+ * {@link Services}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.3
+ */
 public final class Services {
 
     /**
@@ -78,7 +85,7 @@ public final class Services {
      *
      * @return The service lookup or <code>null</code>
      */
-    public static BundleContext BundleContext() {
+    public static BundleContext getBundleContext() {
         return REF.get();
     }
 
