@@ -74,7 +74,7 @@ import com.fasterxml.jackson.core.JsonToken;
  * @author JSON.org
  * @version 2
  */
-public class JSONArray extends AbstractJSONValue {
+public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
 
     private static final long serialVersionUID = -3408431864592339725L;
 
