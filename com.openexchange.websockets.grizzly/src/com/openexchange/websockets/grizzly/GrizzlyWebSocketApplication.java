@@ -49,18 +49,24 @@
 
 package com.openexchange.websockets.grizzly;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import org.glassfish.grizzly.http.HttpRequestPacket;
+import org.glassfish.grizzly.websockets.DataFrame;
+import org.glassfish.grizzly.websockets.ProtocolError;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketListener;
+import com.openexchange.session.Session;
 
 
 /**
  * {@link GrizzlyWebSocketApplication}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.8.3
  */
 public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
@@ -71,9 +77,91 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         super();
     }
 
+    /**
+     * Gets a listing of identifiers for sessions currently bound to an active Web Socket connection.
+     *
+     * @return The session identifier listing
+     */
+    public Map<String, WebSocket> getActiveSessions() {
+        Map<String, WebSocket> sessions = new HashMap<>(32, 0.9F);
+        Set<WebSocket> webSockets = getWebSockets();
+        for (WebSocket socket : webSockets) {
+            if (socket instanceof SessionBoundWebSocket) {
+                String sessionId = ((SessionBoundWebSocket) socket).getSessionId();
+                if (null != sessionId) {
+                    sessions.put(sessionId, socket);
+                }
+            }
+        }
+        return sessions;
+    }
+
+    /**
+     * Closes specified Web Socket connection.
+     *
+     * @param socket The Web Socket
+     */
+    public void close(WebSocket socket) {
+        remove(socket);
+        socket.close();
+    }
+
     @Override
     public WebSocket createSocket(ProtocolHandler handler, HttpRequestPacket requestPacket, WebSocketListener... listeners) {
-        return super.createSocket(handler, requestPacket, listeners);
+        return new SessionBoundWebSocket(handler, requestPacket, listeners);
+    }
+
+    @Override
+    public void onConnect(WebSocket socket) {
+        // Override this method to take control over socket collection
+    }
+
+    @Override
+    public void onClose(WebSocket socket, DataFrame frame) {
+        super.onClose(socket, frame);
+    }
+
+    @Override
+    public void onMessage(WebSocket socket, String message) {
+        if (!(socket instanceof SessionBoundWebSocket)) {
+            throw new ProtocolError("Invalid socket: " + (null == socket ? "null" : socket.getClass().getName()));
+        }
+
+        SessionBoundWebSocket sessionBoundWebSocket = (SessionBoundWebSocket) socket;
+        if (isLoginMessage(message)) {
+            Session session = login(message);
+            if (null == session || false == sessionBoundWebSocket.bindSession(session) || false == add(sessionBoundWebSocket)) {
+                throw new ProtocolError("Invalid login message");
+            }
+        } else {
+            String sessionId = sessionBoundWebSocket.getSessionId();
+            if (null == sessionId) {
+                throw new ProtocolError("Not logged-in");
+            }
+
+            // Hm... No broadcast support in current Grizzly version
+        }
+    }
+
+    /**
+     * Performs a login using given login message.
+     *
+     * @param message The login message
+     * @return The resulting session or <code>null</code>
+     */
+    private Session login(String loginMessage) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * Checks if specified message attempts to perform a login
+     *
+     * @param message The message to examine
+     * @return <code>true</code> if message attempts to perform a login; otherwise <code>false</code>
+     */
+    private boolean isLoginMessage(String message) {
+        return false;
     }
 
 }

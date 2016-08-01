@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +47,59 @@
  *
  */
 
-package com.openexchange.data.conversion.ical;
+package com.openexchange.websockets.grizzly;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.concurrent.atomic.AtomicReference;
+import org.glassfish.grizzly.http.HttpRequestPacket;
+import org.glassfish.grizzly.websockets.DefaultWebSocket;
+import org.glassfish.grizzly.websockets.ProtocolHandler;
+import org.glassfish.grizzly.websockets.WebSocketListener;
+import com.openexchange.session.Session;
 
 /**
- * {@link ConversionWarningMessage}
+ * {@link SessionBoundWebSocket} - The Web Socket bound to a certain session.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class ConversionWarningMessage implements LocalizableStrings {
+public class SessionBoundWebSocket extends DefaultWebSocket {
+
+    private final AtomicReference<String> sessionIdReference;
 
     /**
-     * Initializes a new {@link ConversionWarningMessage}.
+     * Initializes a new {@link SessionBoundWebSocket}.
      */
-    private ConversionWarningMessage() {
-        super();
+    public SessionBoundWebSocket(ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
+        super(protocolHandler, request, listeners);
+        this.sessionIdReference = new AtomicReference<String>(null);
     }
 
-    // Unable to convert task status "%1$s".
-    public final static String INVALID_STATUS_MSG = "Unable to convert task status \"%1$s\".";
+    /**
+     * Gets the identifier of the session currently associated with this Web Socket.
+     *
+     * @return The session identifier or <code>null</code>
+     */
+    public String getSessionId() {
+        return sessionIdReference.get();
+    }
 
-    // Unable to convert task priority %1$d.
-    public final static String INVALID_PRIORITY_MSG = "Unable to convert task priority %d.";
-
-    // Parsing error parsing ical: %s
-    public final static String PARSE_EXCEPTION_MSG = "Parsing error parsing ical: %s";
-
-    // Unknown Class: %1$s
-    public final static String UNKNOWN_CLASS_MSG = "Unknown Class: %1$s";
-
-    // Cowardly refusing to convert confidential classified objects.
-    public final static String CLASS_CONFIDENTIAL_MSG = "Cowardly refusing to convert confidential classified objects.";
-
-    // Missing DTStart in appointment
-    public final static String MISSING_DTSTART_MSG = "Missing DTSTART";
-
-    // Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
-    public final static String PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS_MSG = "Private appointments can not have attendees. Removing attendees and accepting appointment anyway.";
-
-    // Not supported recurrence pattern: BYMONTH
-    public final static String BYMONTH_NOT_SUPPORTED_MSG = "Not supported recurrence pattern: BYMONTH";
-
-    // This does not look like an iCal file. Please check the file.
-    public final static String DOES_NOT_LOOK_LIKE_ICAL_FILE_MSG = "This does not look like an iCal file. Please check the file.";
-
-    // Empty "CLASS" element.
-    public final static String EMPTY_CLASS_MSG = "Empty \"CLASS\" element.";
-
-    public final static String TRUNCATION_WARNING_MSG = "Element truncated: %s";
-    
-    public final static String INVALID_MAIL_ADDRESS_MSG = "Invalid mail address for external participant: %1$s";
+    /**
+     * (Atomically) Binds the specified session to this Web Socket if not already bound to another session.
+     *
+     * @param session The session to bind to
+     * @return <code>true</code> if session could be successfully bounded to this Web Socket; otherwise <code>false</code>
+     */
+    public boolean bindSession(Session session) {
+        String sessionID = session.getSessionID();
+        String state;
+        do {
+            state = sessionIdReference.get();
+            if (null != state) {
+                // Already set
+                return false;
+            }
+        } while (!sessionIdReference.compareAndSet(state, sessionID));
+        return true;
+    }
 
 }

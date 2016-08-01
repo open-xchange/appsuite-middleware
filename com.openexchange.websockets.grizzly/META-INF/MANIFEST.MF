@@ -5,14 +5,20 @@ Bundle-SymbolicName: com.openexchange.websockets.grizzly
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.http.grizzly.service.websocket,
  com.openexchange.i18n,
  com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.timer,
  com.openexchange.websockets,
  org.glassfish.grizzly,
  org.glassfish.grizzly.http,
  org.glassfish.grizzly.websockets,
  org.glassfish.grizzly.websockets.frametypes,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j

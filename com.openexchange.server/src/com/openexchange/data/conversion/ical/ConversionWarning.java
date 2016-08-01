@@ -208,6 +208,10 @@ public class ConversionWarning extends OXException {
          * Can not resolve group: %d
          */
         CANT_RESOLVE_GROUP("Can not resolve group: %1$s", CATEGORY_ERROR, 21, null),
+        /**
+         * Invalid mail address for external participant: %1$s
+         */
+        INVALID_MAIL_ADDRESS("Invalid mail address for external participant: %1$s", CATEGORY_USER_INPUT, 22, ConversionWarningMessage.INVALID_MAIL_ADDRESS_MSG),
 
         ;
 

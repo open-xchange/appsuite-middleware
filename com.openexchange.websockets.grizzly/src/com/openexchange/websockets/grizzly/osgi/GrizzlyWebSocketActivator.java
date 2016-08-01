@@ -49,11 +49,16 @@
 
 package com.openexchange.websockets.grizzly.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketService;
+import com.openexchange.websockets.grizzly.GrizzlyWebSocketSessionToucher;
 
 /**
  * {@link GrizzlyWebSocketActivator}
@@ -64,6 +69,7 @@ import com.openexchange.websockets.grizzly.GrizzlyWebSocketService;
 public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     private GrizzlyWebSocketApplication app;
+    private ScheduledTimerTask sessionToucherTask;
 
     /**
      * Initializes a new {@link GrizzlyWebSocketActivator}.
@@ -74,7 +80,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { WebApplicationService.class };
+        return new Class<?>[] { ConfigurationService.class, WebApplicationService.class, SessiondService.class, TimerService.class };
     }
 
     @Override
@@ -91,6 +97,9 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
             this.app = app;
             webApplicationService.registerWebSocketApplication("", "/websockets", app, null);
             registerService(WebSocketService.class, new GrizzlyWebSocketService(app));
+
+            long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(getService(ConfigurationService.class));
+            sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher(app), period, period);
         }
     }
 
@@ -99,6 +108,17 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         GrizzlyWebSocketApplication app = this.app;
         if (null != app) {
             this.app = null;
+
+            ScheduledTimerTask sessionToucherTask = this.sessionToucherTask;
+            if (null != sessionToucherTask) {
+                this.sessionToucherTask = null;
+                sessionToucherTask.cancel();
+                TimerService timerService = getService(TimerService.class);
+                if (null != timerService) {
+                    timerService.purge();
+                }
+            }
+
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
             if (null != webApplicationService) {
                 webApplicationService.unregisterWebSocketApplication(app);
