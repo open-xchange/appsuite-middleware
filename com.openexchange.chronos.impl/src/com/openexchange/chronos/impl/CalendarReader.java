@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.CalendarUtils.appendCommonTerms;
+import static com.openexchange.chronos.impl.CalendarUtils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
@@ -57,6 +58,7 @@ import static com.openexchange.chronos.impl.Check.requireFolderPermission;
 import static com.openexchange.chronos.impl.Check.requireReadPermission;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -74,10 +76,14 @@ import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.group.Group;
@@ -144,6 +150,43 @@ public class CalendarReader {
         return 0 < events.size() ? events.get(0).getId() : 0;
     }
 
+    public List<UserizedEvent> searchEvents(int[] folderIDs, String pattern, EventField[] fields) throws OXException {
+        List<UserizedFolder> folders;
+        if (null == folderIDs || 0 == folderIDs.length) {
+            folders = getVisibleFolders();
+        } else {
+            folders = new ArrayList<UserizedFolder>(folderIDs.length);
+            for (int folderID : folderIDs) {
+                folders.add(getFolder(folderID));
+            }
+        }
+        return searchEvents(folders, pattern, fields);
+    }
+
+    protected List<UserizedEvent> searchEvents(List<UserizedFolder> folders, String pattern, EventField[] fields) throws OXException {
+        if (null == folders || 0 == folders.size()) {
+            return Collections.emptyList();
+        }
+        Check.requireMinimumSearchPatternLength(pattern);
+        CompositeSearchTerm parentFolderTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        for (UserizedFolder folder : folders) {
+            requireCalendarContentType(folder);
+            requireFolderPermission(folder, Permission.READ_FOLDER);
+            requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
+            parentFolderTerm.addSearchTerm(getFolderIdTerm(folder));
+        }
+        String wildcardPattern = pattern.startsWith("*") ? pattern : '*' + pattern;
+        wildcardPattern = wildcardPattern.endsWith("*") ? wildcardPattern : wildcardPattern + '*';
+        CompositeSearchTerm patternTerm = new CompositeSearchTerm(CompositeOperation.OR)
+            .addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, wildcardPattern))
+            .addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, wildcardPattern))
+        ;
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(parentFolderTerm).addSearchTerm(patternTerm);
+        List<Event> events = storage.searchEvents(searchTerm, fields);
+        return userize(events, session.getUser().getId());
+    }
+
     public UserizedEvent readEvent(EventID eventID, EventField[] fields) throws OXException {
         return readEvent(eventID.getFolderID(), eventID.getObjectID(), fields);
     }
@@ -188,15 +231,7 @@ public class CalendarReader {
          * construct search term
          */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        if (PublicType.getInstance().equals(folder.getType())) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
-        } else {
-            searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0)))
-                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
-                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()))
-            );
-        }
+        searchTerm.addSearchTerm(getFolderIdTerm(folder));
         if (Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission()) {
             searchTerm.addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, I(session.getUser().getId())));
         }
@@ -274,12 +309,22 @@ public class CalendarReader {
         return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), null);
     }
 
-    //    protected List<UserizedFolder> getVisibleFolders() throws OXException {
-    //        FolderService folderService = Services.getService(FolderService.class);
-    //        FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), PrivateType.getInstance(), false, session.getSession(), null);
-    //
-    //        return null;
-    //    }
+    protected List<UserizedFolder> getVisibleFolders() throws OXException {
+        return getVisibleFolders(PrivateType.getInstance(), SharedType.getInstance(), PublicType.getInstance());
+    }
+
+    protected List<UserizedFolder> getVisibleFolders(Type... types) throws OXException {
+        List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
+        FolderService folderService = Services.getService(FolderService.class);
+        for (Type type : types) {
+            FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session.getSession(), null);
+            UserizedFolder[] folders = response.getResponse();
+            if (null != folders && 0 < folders.length) {
+                visibleFolders.addAll(Arrays.asList(folders));
+            }
+        }
+        return visibleFolders;
+    }
 
     /**
      * Gets the actual target calendar user for a specific folder. This is either the current session's user for "private" or "public"

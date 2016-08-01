@@ -63,6 +63,8 @@ public interface CalendarService {
 
     int resolveByUID(CalendarSession session, String uid) throws OXException;
 
+    List<UserizedEvent> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException;
+
     UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException;
 
     List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;

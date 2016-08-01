@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -59,16 +60,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
@@ -287,6 +296,42 @@ public class CalendarUtils {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
+    }
+
+    /**
+     * Constructs a search term to match events located in a specific folder. Depending on the folder's type, either a search term for
+     * the {@link EventField#PUBLIC_FOLDER_ID} or for the {@link AttendeeField#FOLDER_ID} is built.
+     *
+     * @param folder The folder to construct the search term for
+     * @return The search term
+     */
+    static SearchTerm<?> getFolderIdTerm(UserizedFolder folder) {
+        if (PublicType.getInstance().equals(folder.getType())) {
+            if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
+                return new CompositeSearchTerm(CompositeOperation.AND)
+                    .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folder.getID()))
+                    .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, folder.getSession().getUserId()));
+            }
+            return getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, folder.getID());
+        }
+        if (PrivateType.getInstance().equals(folder.getType())) {
+            return new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0)))
+                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
+                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
+        }
+        if (SharedType.getInstance().equals(folder.getType())) {
+            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(getSearchTerm(EventField.PUBLIC_FOLDER_ID, SingleOperation.EQUALS, I(0)))
+                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
+                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
+            if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
+                searchTerm.addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, folder.getSession().getUserId()));
+            }
+            return searchTerm;
+        }
+        throw new UnsupportedOperationException("Unknown folder type: " + folder.getType());
+
     }
 
     /**

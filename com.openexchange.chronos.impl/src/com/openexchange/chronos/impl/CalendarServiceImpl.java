@@ -83,6 +83,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    public List<UserizedEvent> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException {
+        return new CalendarReader(session).searchEvents(folderIDs, pattern, getFields(session));
+    }
+
+    @Override
     public UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException {
         return new CalendarReader(session).readEvent(folderID, objectID, getFields(session));
     }

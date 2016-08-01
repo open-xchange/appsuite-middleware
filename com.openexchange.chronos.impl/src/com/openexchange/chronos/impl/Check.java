@@ -101,6 +101,10 @@ public class Check {
 
     }
 
+    public static void requireMinimumSearchPatternLength(String pattern) throws OXException {
+
+    }
+
     /**
      * Checks that the supplied client timestamp is equal to or greater than the last modification time of the event.
      *

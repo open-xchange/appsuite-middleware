@@ -63,6 +63,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -92,7 +96,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 }, requestBody = "An Object as described in Search appointments.",
 responseDescription = "An array with appointment data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class SearchAction extends AppointmentAction {
+public final class SearchAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(SearchAction.class);
@@ -197,6 +201,16 @@ public final class SearchAction extends AppointmentAction {
                 it.close();
             }
         }
+    }
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarSession calendarSession = initSession(request);
+        JSONObject jsonObject = request.getData();
+        int[] folderIDs = jsonObject.has(AJAXServlet.PARAMETER_INFOLDER) ? new int[] { jsonObject.getInt(AJAXServlet.PARAMETER_INFOLDER) } : null;
+        String pattern = jsonObject.optString(SearchFields.PATTERN);
+        List<UserizedEvent> events = calendarService.searchEvents(calendarSession, folderIDs, pattern);
+        return getAppointmentResultWithTimestamp(events);
     }
 
 }
