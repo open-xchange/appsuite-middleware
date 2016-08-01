@@ -236,8 +236,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
                         return dbxFile.getIDTuple();
                     } catch (RelocationErrorException e) {
-                        // TODO: Maybe introduce new exception codes?
-                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        throw DropboxExceptionHandler.handleRelocationErrorException(e, true, file.getFolderId(), file.getId());
                     } catch (DbxException e) {
                         throw DropboxExceptionHandler.handle(e);
                     }
@@ -300,8 +299,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
-            // TODO Auto-generated catch block
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, true, source.getFolder(), source.getId());
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -329,8 +327,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
-            // TODO Auto-generated catch block
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, true, source.getFolder(), source.getId());
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
