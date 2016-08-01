@@ -81,13 +81,13 @@ public enum SSLProperties {
 
     static final String SECURE_CONNECTIONS_DEBUG_LOGS_KEY = "com.openexchange.ssl.debug.logs";
 
+    static final String CUSTOM_TRUSTSTORE_ENABLED_KEY = "com.openexchange.ssl.custom.truststore.enabled";
+
     static final String CUSTOM_TRUSTSTORE_PATH_KEY = "com.openexchange.ssl.custom.truststore.path";
 
     static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.ssl.custom.truststore.password";
 
     static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.ssl.default.truststore.enabled";
-
-    static final String CUSTOM_TRUSTSTORE_ENABLED_KEY = "com.openexchange.ssl.custom.truststore.enabled";
 
     static final String SECURE_CONNECTIONS_KEY = "com.openexchange.ssl.only";
 
@@ -139,13 +139,13 @@ public enum SSLProperties {
         return tmp;
     }
 
-    static final String CIPHERS_KEY = "com.openexchange.ssl.ciphers";
+    static final String CIPHERS_KEY = "com.openexchange.ssl.ciphersuites";
 
     static final String CIPHERS_DEFAULTS = "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA, SSL_RSA_WITH_RC4_128_SHA, TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TLS_ECDH_RSA_WITH_RC4_128_SHA, TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_RC4_128_MD5, TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
 
     private static volatile String[] ciphers;
 
-    public static String[] supportedCiphers() {
+    public static String[] supportedCipherSuites() {
         String[] tmp = ciphers;
         if (null == tmp) {
             synchronized (SSLProperties.class) {
@@ -153,7 +153,7 @@ public enum SSLProperties {
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.ciphers'.");
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.ciphersuites'.");
                         return Strings.splitByComma(CIPHERS_DEFAULTS);
                     }
                     String prop = service.getProperty(CIPHERS_KEY, CIPHERS_DEFAULTS);

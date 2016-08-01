@@ -50,9 +50,11 @@
 package com.openexchange.ssl.osgi;
 
 import javax.net.ssl.HttpsURLConnection;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.ssl.SSLSocketFactoryProvider;
 import com.openexchange.ssl.apache.DefaultHostnameVerifier;
 import com.openexchange.ssl.internal.SSLProperties;
 import com.openexchange.ssl.internal.SSLPropertiesReloadable;
@@ -85,7 +87,11 @@ public class SSLActivator extends HousekeepingActivator {
 
             if (SSLProperties.isVerifyHostname()) {
                 HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
+            } else {
+                HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
             }
+
+            HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
 
             registerService(Reloadable.class, new SSLPropertiesReloadable());
         } catch (Exception e) {

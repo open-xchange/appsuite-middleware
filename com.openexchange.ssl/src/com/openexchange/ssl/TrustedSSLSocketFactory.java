@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -97,8 +96,6 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
         try {
             this.sslcontext = SSLContext.getInstance("TLS");
             newAdapteeFactory();
-
-            HttpsURLConnection.setDefaultSSLSocketFactory(this);
         } catch (NoSuchAlgorithmException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -140,7 +137,14 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
      * @throws KeyManagementException for key manager errors
      */
     private void newAdapteeFactory() throws KeyManagementException {
-        this.sslcontext.init(null, TRUST_MANAGERS.get(), null);
+        TrustManager[] trustManagers = TRUST_MANAGERS.get();
+        if (trustManagers.length == 0) {
+            LOG.error("No trustmanager configured. Going to use default for now. Please enable default or custom truststore.");
+            this.sslcontext.init(null, null, null);
+            this.adapteeFactory = this.sslcontext.getSocketFactory();
+            return;
+        }
+        this.sslcontext.init(null, trustManagers, null);
 
         this.adapteeFactory = this.sslcontext.getSocketFactory();
     }
@@ -165,18 +169,11 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
         if (socket instanceof SSLSocket) {
             SSLSocket sslSocket = (SSLSocket) socket;
             sslSocket.setEnabledProtocols(SSLProperties.supportedProtocols());
-            sslSocket.setEnabledCipherSuites(SSLProperties.supportedCiphers());
+            sslSocket.setEnabledCipherSuites(SSLProperties.supportedCipherSuites());
             sslSocket.setUseClientMode(true);
             sslSocket.addHandshakeCompletedListener(this);
             socket = sslSocket;
         }
-    }
-
-    @Override
-    public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
-        Socket socket = this.adapteeFactory.createSocket(s, host, port, autoClose);
-        setProperties(socket);
-        return socket;
     }
 
     @Override
@@ -186,7 +183,15 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
 
     @Override
     public String[] getSupportedCipherSuites() {
-        return this.adapteeFactory.getSupportedCipherSuites();
+        return SSLProperties.supportedCipherSuites();
+        //        return this.adapteeFactory.getSupportedCipherSuites();
+    }
+
+    @Override
+    public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
+        Socket socket = this.adapteeFactory.createSocket(s, host, port, autoClose);
+        setProperties(socket);
+        return socket;
     }
 
     @Override

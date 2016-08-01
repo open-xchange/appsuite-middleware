@@ -87,7 +87,7 @@ public class DefaultHostnameVerifier implements HostnameVerifier {
         }
     }
 
-    public final void verify(final String host, final X509Certificate cert) throws SSLException {
+    final void verify(final String host, final X509Certificate cert) throws SSLException {
         final boolean ipv4 = InetAddressUtils.isIPv4Address(host);
         final boolean ipv6 = InetAddressUtils.isIPv6Address(host);
         final int subjectType = ipv4 || ipv6 ? IP_ADDRESS_TYPE : DNS_NAME_TYPE;
