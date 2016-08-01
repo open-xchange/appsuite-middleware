@@ -124,10 +124,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     private final DropboxAccountAccess accountAccess;
     private final int userId;
 
-    private static final int CHUNK_SIZE = 512000 * 1;
+    // 8 MB chunks
+    private static final int CHUNK_SIZE = 8 * (int) Math.pow(1024, 2);
 
     /**
-     * Initializes a new {@link DropboxFileAccess}.
+     * Initialises a new {@link DropboxFileAccess}.
      */
     public DropboxFileAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) {
         super(dropboxOAuthAccess, account, session);
@@ -998,7 +999,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         boolean hasMore = false;
         do {
             hasMore = listFolderResult.getHasMore();
-            
+
             List<Metadata> entries = listFolderResult.getEntries();
             for (Metadata metadata : entries) {
                 if (metadata instanceof FileMetadata) {
