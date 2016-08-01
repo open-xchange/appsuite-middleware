@@ -114,7 +114,9 @@ public interface OXUserServicePortType {
         @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.user.dataobjects.Context ctx,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth,
+        @WebParam(name = "includeGuests", targetNamespace = "http://soap.admin.openexchange.com") Boolean includeGuests, 
+        @WebParam(name = "excludeUsers", targetNamespace = "http://soap.admin.openexchange.com") Boolean excludeUsers
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
@@ -300,18 +302,17 @@ public interface OXUserServicePortType {
         ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
-    @Action(input = "urn:list", output = "urn:listResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listRemoteException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:listDatabaseUpdateException")})
+    @Action(input = "urn:list", output = "urn:listResponse", fault = { @FaultAction(className = StorageException_Exception.class, value = "urn:listStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listRemoteException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:listDatabaseUpdateException") })
     @RequestWrapper(localName = "list", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.List")
     @WebMethod(action = "urn:list")
     @ResponseWrapper(localName = "listResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.ListResponse")
     public java.util.List<com.openexchange.admin.soap.user.dataobjects.User> list(
-        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.user.dataobjects.Context ctx,
-        @WebParam(name = "search_pattern", targetNamespace = "http://soap.admin.openexchange.com")
-        java.lang.String searchPattern,
-        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.user.dataobjects.Credentials auth
-    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.user.dataobjects.Context ctx, 
+        @WebParam(name = "search_pattern", targetNamespace = "http://soap.admin.openexchange.com") java.lang.String searchPattern, 
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.user.dataobjects.Credentials auth, 
+        @WebParam(name = "include_guests", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Boolean includeGuests, 
+        @WebParam(name = "exclude_users", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Boolean excludeUsers
+        ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
     @Action(input = "urn:listCaseInsensitive", output = "urn:listCaseInsensitiveResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listCaseInsensitiveStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listCaseInsensitiveInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listCaseInsensitiveInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listCaseInsensitiveNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listCaseInsensitiveRemoteException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:listCaseInsensitiveDatabaseUpdateException")})

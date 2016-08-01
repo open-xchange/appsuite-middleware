@@ -58,7 +58,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OXResellerUserServicePortTypeImpl.class);
 
-    public static final AtomicReference<OXUserInterface> RMI_REFERENCE = new AtomicReference<OXUserInterface>();
+    public static final AtomicReference<OXUserInterface> RMI_REFERENCE = new AtomicReference<>();
 
     private static OXUserInterface getUserInterface() throws RemoteException_Exception {
         final OXUserInterface userInterface = RMI_REFERENCE.get();
@@ -437,14 +437,21 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> list(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final java.lang.String searchPattern,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> list(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final java.lang.String searchPattern, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth, Boolean includeGuests, Boolean excludeUsers) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
+        if (null == includeGuests) {
+            includeGuests = Boolean.FALSE;
+        }
+
+        if (null == excludeUsers) {
+            excludeUsers = Boolean.FALSE;
+        }
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth), includeGuests, excludeUsers);
             if (null == list) {
                 return null;
             }
-            final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User>(list.length);
+            final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<>(list.length);
             for (final com.openexchange.admin.rmi.dataobjects.User user : list) {
                 l.add(user2Soap(user));
             }
@@ -653,14 +660,21 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listAll(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listAll(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth, Boolean includeGuests, Boolean excludeUsers) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
+        if (null == includeGuests) {
+            includeGuests = Boolean.FALSE;
+        }
+
+        if (null == excludeUsers) {
+            excludeUsers = Boolean.FALSE;
+        }
         try {
-            final User[] listAll = iface.listAll(soap2Context(ctx), soap2Credentials(auth));
+            final User[] listAll = iface.listAll(soap2Context(ctx), soap2Credentials(auth), includeGuests, excludeUsers);
             if (null == listAll) {
                 return null;
             }
-            final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User>(listAll.length);
+            final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<>(listAll.length);
             for (final User user2 : listAll) {
                 l.add(user2Soap(user2));
             }
@@ -709,7 +723,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
                 userArr[pos++] = soap2User(user);
             }
             final User[] data = iface.getData(soap2Context(ctx), userArr, soap2Credentials(auth));
-            final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User>(data.length);
+            final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<>(data.length);
             for (final User user : data) {
                 l.add(user2Soap(user));
             }
@@ -893,7 +907,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         final OXUserInterface iface = getUserInterface();
         try {
             final User[] listCaseInsensitive = iface.listCaseInsensitive(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
-            final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User>(listCaseInsensitive.length);
+            final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<>(listCaseInsensitive.length);
             for (final User user : listCaseInsensitive) {
                 l.add(user2Soap(user));
             }
@@ -1238,7 +1252,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             return null;
         }
         final List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry> entries = soapStringMapMap.getEntries();
-        final Map<String, Map<String, String>> map = new HashMap<String, Map<String,String>>(entries.size());
+        final Map<String, Map<String, String>> map = new HashMap<>(entries.size());
         for (final com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry soapMapEntry : entries) {
             if (null != soapMapEntry) {
                 map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
@@ -1252,7 +1266,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             return null;
         }
         final List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry> entries = soapStringMap.getEntries();
-        final Map<String, String> map = new HashMap<String, String>(entries.size());
+        final Map<String, String> map = new HashMap<>(entries.size());
         for (final com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry entry : entries) {
             if (null != entry) {
                 map.put(entry.getKey(), entry.getValue());
@@ -2203,7 +2217,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             return null;
         }
         final com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPStringMapMap soapMapMap = new com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPStringMapMap();
-        final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry> entries = new ArrayList<com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry>(mapmap.size());
+        final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry> entries = new ArrayList<>(mapmap.size());
         for (final Map.Entry<String, Map<String, String>> mapmapEntry : mapmap.entrySet()) {
             final com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry mapEntry = new com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry();
             mapEntry.setKey(mapmapEntry.getKey());
@@ -2219,7 +2233,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             return null;
         }
         final com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPStringMap soapMap = new com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPStringMap();
-        final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry> entries = new ArrayList<com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry>(map.size());
+        final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry> entries = new ArrayList<>(map.size());
         for (final Map.Entry<String, String> mapEntry : map.entrySet()) {
             final com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry entry = new com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry();
             entry.setKey(mapEntry.getKey());

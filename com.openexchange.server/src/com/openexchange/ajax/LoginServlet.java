@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -63,13 +64,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.helper.Send;
@@ -206,7 +210,7 @@ public class LoginServlet extends AJAXServlet {
     }
 
     /** The ramp-up services reference */
-    private static final AtomicReference<Set<LoginRampUpService>> RAMP_UP_REF = new AtomicReference<Set<LoginRampUpService>>();
+    private static final AtomicReference<Set<LoginRampUpService>> RAMP_UP_REF = new AtomicReference<>();
 
     /**
      * Sets the ramp-up services.
@@ -218,10 +222,10 @@ public class LoginServlet extends AJAXServlet {
     }
 
     /** The login configuration reference */
-    static final AtomicReference<LoginConfiguration> confReference = new AtomicReference<LoginConfiguration>();
+    static final AtomicReference<LoginConfiguration> confReference = new AtomicReference<>();
 
     /** The login configuration reference */
-    static final AtomicReference<ShareLoginConfiguration> shareConfReference = new AtomicReference<ShareLoginConfiguration>();
+    static final AtomicReference<ShareLoginConfiguration> shareConfReference = new AtomicReference<>();
 
     /**
      * Gets the login configuration.
@@ -265,6 +269,20 @@ public class LoginServlet extends AJAXServlet {
      * @param req The HTTP request
      * @return The name of the public session cookie
      */
+    public static String getPublicSessionCookieName(final HttpServletRequest req, String[] additionals) {
+        return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getHash(req, HashCalculator.getUserAgent(req), null, additionals)).toString();
+    }
+
+    /**
+     * Gets the name of the public session cookie for specified HTTP request.
+     *
+     * <pre>
+     * "open-xchange-public-session-" + &lt;hash(req.userAgent)&gt;
+     * </pre>
+     *
+     * @param req The HTTP request
+     * @return The name of the public session cookie
+     */
     public static String getPublicSessionCookieName(final HttpServletRequest req) {
         return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(req)).toString();
     }
@@ -288,7 +306,7 @@ public class LoginServlet extends AJAXServlet {
 
     public LoginServlet() {
         super();
-        handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16, 0.9f, 1);
+        handlerMap = new ConcurrentHashMap<>(16, 0.9f, 1);
         handlerMap.put(ACTION_STORE, new LoginRequestHandler() {
 
             @Override
@@ -654,7 +672,7 @@ public class LoginServlet extends AJAXServlet {
         final boolean ipCheck = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
         final ClientWhitelist ipCheckWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
         final boolean redirectIPChangeAllowed = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.REDIRECT_IP_CHANGE_ALLOWED.getPropertyName()));
-        final List<IPRange> ranges = new LinkedList<IPRange>();
+        final List<IPRange> ranges = new LinkedList<>();
         final String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
         if (tmp != null) {
             final String[] lines = Strings.splitByCRLF(tmp);

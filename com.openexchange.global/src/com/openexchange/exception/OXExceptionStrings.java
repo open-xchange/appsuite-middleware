@@ -68,6 +68,9 @@ public final class OXExceptionStrings implements LocalizableStrings {
     // The default message displayed to user when a re-try is recommended
     public static final String MESSAGE_RETRY = "A temporary error occurred inside the server which prevented it from fulfilling the request. Please try again later.";
 
+    // The default message displayed to user when processing was intentionally denied.
+    public static final String MESSAGE_DENIED = "The server is refusing to process the request.";
+
     // The general message for a conflicting update operation.
     public static final String MESSAGE_CONFLICT = "The object has been changed in the meantime.";
 

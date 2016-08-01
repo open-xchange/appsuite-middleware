@@ -52,6 +52,7 @@ package com.openexchange.apps.manifests.json.values;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
+import com.openexchange.session.Session;
 
 /**
  * {@link UIVersion}
@@ -64,7 +65,7 @@ public class UIVersion implements ComputedServerConfigValueService {
     public static final AtomicReference<String> UIVERSION = new AtomicReference<String>("");
 
     @Override
-    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID, Session optSession) {
 
         if (!serverConfig.containsKey("version")) {
             serverConfig.put("version", UIVERSION.get());

@@ -178,7 +178,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
          * Add computed values after configview values
          */
         for (ComputedServerConfigValueService computed : serverConfigServicesLookup.getComputed()) {
-            computed.addValue(serverConfiguration, hostName, userID, contextID);
+            computed.addValue(serverConfiguration, hostName, userID, contextID, null);
         }
 
         serverConfiguration = correctLanguageConfiguration(serverConfiguration);
