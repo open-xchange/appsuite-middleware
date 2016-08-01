@@ -628,9 +628,38 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         if (folderId == null) {
             folderId = "";
         }
-        
-        //TODO: '*' wildcard case; return everything, no need for search request
-        
+
+        // Return everything
+        if (Strings.isEmpty(pattern) || pattern.equals("*")) {
+            try {
+                List<File> results = new ArrayList<File>();
+                ListFolderResult listFolderResult = client.files().listFolderBuilder(folderId).withRecursive(true).start();
+                boolean hasMore = listFolderResult.getHasMore();
+                do {
+                    List<Metadata> entries = listFolderResult.getEntries();
+
+                    for (Metadata metadata : entries) {
+                        if (metadata instanceof FileMetadata) {
+                            results.add(new DropboxFile((FileMetadata) metadata, userId));
+                        }
+                    }
+                    if (hasMore) {
+                        String cursor = listFolderResult.getCursor();
+                        listFolderResult = client.files().listFolderContinue(cursor);
+                    }
+                } while (hasMore);
+
+                // Sort results
+                sort(results, sort, order);
+
+                return new SearchIteratorAdapter<File>(results.iterator(), results.size());
+            } catch (ListFolderErrorException e) {
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e);
+            }
+        }
+
         try {
             // Search
             SearchResult searchResult = client.files().searchBuilder(folderId, pattern).withMaxResults(1000L).start();
@@ -639,15 +668,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             for (SearchMatch match : matches) {
                 Metadata metadata = match.getMetadata();
+                // TODO: Check for recursive search?
                 if (metadata instanceof FileMetadata) {
-                    //FIXME: Does the path need normalisation?
                     results.add(new DropboxFile((FileMetadata) metadata, userId));
                 }
             }
 
             // Sort results
             sort(results, sort, order);
-            
+
             //TODO: Utilise the start-end range
 
             return new SearchIteratorAdapter<File>(results.iterator(), results.size());
