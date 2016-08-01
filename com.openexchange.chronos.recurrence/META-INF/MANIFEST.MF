@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Recurrence Service Bundle
+Bundle-SymbolicName: com.openexchange.chronos.recurrence
+Bundle-Version: 7.10.0
+Bundle-Activator: com.openexchange.chronos.recurrence.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.chronos,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework,
+ org.slf4j
+Bundle-ActivationPolicy: lazy
