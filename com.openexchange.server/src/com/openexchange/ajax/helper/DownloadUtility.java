@@ -51,8 +51,8 @@ package com.openexchange.ajax.helper;
 
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -61,13 +61,14 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.activation.MimetypesFileTypeMap;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.ByteArrayRandomAccess;
 import com.openexchange.ajax.container.IFileHolder.RandomAccess;
-import com.openexchange.ajax.container.InputStreamReadable;
 import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.java.CharsetDetector;
@@ -505,6 +506,10 @@ public final class DownloadUtility {
         return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("flash") >= 0;
     }
 
+    private static boolean fileNameImpliesSvg(final String fileName) {
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("svg") >= 0;
+    }
+
     /**
      * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
      *
@@ -727,23 +732,101 @@ public final class DownloadUtility {
         }
     }
 
-    private static byte[] stream2bytes(final Readable r) throws IOException {
-        if (null == r) {
-            return new byte[0];
-        }
-        if (r instanceof InputStreamReadable) {
-            return Streams.stream2bytes(((InputStreamReadable) r).getInputStream());
-        }
+    /**
+     * Checks if specified uploaded file is a illegal and/or possibly harmful.
+     *
+     * @param file The file to check
+     * @return <code>true</code> if specified uploaded file is illegal/harmful; otherwise <code>false</code>
+     * @throws OXException If uploaded file cannot be checked
+     */
+    public static boolean isIllegalUpload(UploadFile file) throws OXException {
         try {
-            final ByteArrayOutputStream bos = Streams.newByteArrayOutputStream(4096);
-            final int buflen = 2048;
-            final byte[] buf = new byte[buflen];
-            for (int read; (read = r.read(buf, 0, buflen)) > 0;) {
-                bos.write(buf, 0, read);
+            ContentType contentType = new ContentType(file.getContentType());
+            String fileName = file.getPreparedFileName();
+            if ((null != fileName) && contentType.startsWith(MIME_APPL_OCTET)) {
+                /*
+                 * Try to determine MIME type
+                 */
+                final String ct = MimeType2ExtMap.getContentType(fileName);
+                final int pos = ct.indexOf('/');
+                contentType.setPrimaryType(ct.substring(0, pos));
+                contentType.setSubType(ct.substring(pos + 1));
             }
-            return bos.toByteArray();
+
+            if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
+                if (HTMLDetector.containsHTMLTags(file.openStream(), false)) {
+                    // Illegal
+                    return true;
+                }
+                return false;
+            }
+
+            if (isIllegalImage(file)) {
+                return true;
+            }
+
+            if (contentType.containsAny("shockwave", "flash") || fileNameImpliesFlash(fileName)) {
+                return true;
+            }
+            if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "htm", "xhtm", "xml") || fileNameImpliesHtml(fileName)) {
+                return true;
+            }
+            return false;
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if specified uploaded file is an illegal image.
+     *
+     * @param file The file to check
+     * @return <code>true</code> if specified uploaded file is an illegal image; otherwise <code>false</code>
+     * @throws IOException If uploaded file cannot be checked
+     */
+    private static boolean isIllegalImage(UploadFile file) throws IOException {
+        String contentType = file.getContentType();
+        if (isImageContentType(contentType)) {
+            return isIllegalImageData(file);
+        }
+        if (null != file.getPreparedFileName()) {
+            contentType = new MimetypesFileTypeMap().getContentType(file.getPreparedFileName());
+            if (isImageContentType(contentType)) {
+                return isIllegalImageData(file);
+            }
+        }
+        contentType = com.openexchange.java.ImageTypeDetector.getMimeType(file.openStream());
+        if (com.openexchange.java.Strings.toLowerCase(contentType).startsWith("image/")) {
+            return isIllegalImageData(file);
+        }
+        return false;
+    }
+
+    private static boolean isImageContentType(final String contentType) {
+        return null != contentType && com.openexchange.java.Strings.toLowerCase(contentType).startsWith("image/");
+    }
+
+    private static boolean isIllegalImageData(UploadFile imageFile) throws IOException {
+        if (!isValidImage(imageFile.openStream())) {
+            // Invalid
+            return true;
+        }
+
+        if (HTMLDetector.containsHTMLTags(imageFile.openStream(), false)) {
+            // Illegal
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isValidImage(final InputStream data) {
+        try {
+            final java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(data);
+            return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
+        } catch (final Exception e) {
+            return false;
         } finally {
-            Streams.close(r);
+            Streams.close(data);
         }
     }
 

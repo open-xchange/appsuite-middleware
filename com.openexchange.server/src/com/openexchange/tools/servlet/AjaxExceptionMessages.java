@@ -68,6 +68,7 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     public static final String MISSING_FIELD_MSG = "Missing the following field in JSON data: %1$s";
     public static final String HTML_TOO_BIG_MSG = "The HTML content is too big and therefore cannot be safely displayed. Please select to download its content if you want to see it.";
     public static final String INVALID_JSON_REQUEST_BODY = "Invalid JSON data received from client";
+    public static final String NOT_ALLOWED_URI_PARAM_MSG = "Client sent not allowed request parameter \"%1$s\" within the URI.";
 
     /**
      * Initializes a new {@link AjaxExceptionMessages}

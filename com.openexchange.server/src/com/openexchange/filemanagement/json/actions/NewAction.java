@@ -53,6 +53,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -108,21 +109,42 @@ public final class NewAction implements AJAXActionService {
             throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_TYPE);
         }
         /*
-         * Iterate uploaded files
+         * Iterate & store uploaded files
          */
-        final JSONArray jArray = new JSONArray();
-        final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-        for (final UploadFile uploadFile : upload.getUploadFiles()) {
-            /*
-             * Check file item's content type
-             */
-            final ContentType ct = new ContentType(uploadFile.getContentType());
-            if (!checkFileType(fileTypeFilter, ct)) {
-                throw UploadException.UploadCode.INVALID_FILE_TYPE.create(uploadFile.getContentType(), fileTypeFilter);
+        ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+        JSONArray jArray = new JSONArray();
+        boolean error = true;
+        try {
+            for (UploadFile uploadFile : upload.getUploadFiles()) {
+                // Check file item
+                ContentType ct = new ContentType(uploadFile.getContentType());
+                if (!checkFileType(fileTypeFilter, ct)) {
+                    throw UploadException.UploadCode.INVALID_FILE_TYPE.create(uploadFile.getContentType(), fileTypeFilter);
+                }
+                if (DownloadUtility.isIllegalUpload(uploadFile)) {
+                    throw UploadException.UploadCode.INVALID_FILE.create();
+                }
+                jArray.put(processFileItem(uploadFile, session, management));
             }
-            jArray.put(processFileItem(uploadFile, management));
+            AJAXRequestResult result = new AJAXRequestResult(jArray, "json");
+            error = false;
+            return result;
+        } finally {
+            if (error) {
+                int length = jArray.length();
+                for (int i = 0; i < length; i++) {
+                    removeSafe(jArray.opt(i), management);
+                }
+            }
         }
-        return new AJAXRequestResult(jArray, "json");
+    }
+
+    private void removeSafe(Object id, ManagedFileManagement management) {
+        try {
+            management.removeByID(id.toString());
+        } catch (Exception e) {
+            // Ignore...
+        }
     }
 
     private static long sysconfMaxUpload() {
@@ -133,12 +155,13 @@ public final class NewAction implements AJAXActionService {
         return Long.parseLong(sizeS);
     }
 
-    private static String processFileItem(final UploadFile fileItem, final ManagedFileManagement management) throws OXException {
+    private static String processFileItem(UploadFile fileItem, ServerSession session, ManagedFileManagement management) throws OXException {
         try {
             final ManagedFile managedFile = management.createManagedFile(new FileInputStream(fileItem.getTmpFile()));
             managedFile.setFileName(fileItem.getPreparedFileName());
             managedFile.setContentType(fileItem.getContentType());
             managedFile.setSize(fileItem.getSize());
+            managedFile.setAffiliation(session.getSessionID());
             return managedFile.getID();
         } catch (final FileNotFoundException e) {
             throw ManagedFileExceptionErrorMessage.FILE_NOT_FOUND.create(e, e.getMessage());

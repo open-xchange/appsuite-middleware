@@ -129,6 +129,20 @@ public interface ManagedFile {
     public void setSize(long size);
 
     /**
+     * Gets the (optional) affiliation identifier.
+     *
+     * @return The affiliation identifier or <code>null</code>
+     */
+    public String getAffiliation();
+
+    /**
+     * Sets the (optional) affiliation identifier.
+     *
+     * @param affiliation The affiliation identifier
+     */
+    public void setAffiliation(String affiliation);
+
+    /**
      * Gets the backed file.
      *
      * @return The backed file or <code>null</code> if already deleted.
