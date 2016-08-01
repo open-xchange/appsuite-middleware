@@ -52,9 +52,14 @@ package com.openexchange.file.storage.dropbox.v2;
 import com.dropbox.core.InvalidAccessTokenException;
 import com.dropbox.core.ProtocolException;
 import com.dropbox.core.RateLimitException;
+import com.dropbox.core.v2.files.GetMetadataErrorException;
+import com.dropbox.core.v2.files.LookupError;
+import com.dropbox.core.v2.files.RelocationErrorException;
+import com.dropbox.core.v2.files.WriteError;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
+import com.openexchange.quota.QuotaExceptionCodes;
 
 /**
  * {@link DropboxExceptionHandler}
@@ -80,7 +85,7 @@ final class DropboxExceptionHandler {
         if (RateLimitException.class.isInstance(e)) {
             return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create();
         }
-        
+
         // Invalid token or account was unlinked
         if (InvalidAccessTokenException.class.isInstance(e)) {
             return FileStorageExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
@@ -90,8 +95,95 @@ final class DropboxExceptionHandler {
         if (ProtocolException.class.isInstance(e)) {
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());
         }
-        
+
         // Fall-back
         return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+    }
+
+    /**
+     * Handles the {@link GetMetadataErrorException}
+     * 
+     * @param e The {@link GetMetadataErrorException}
+     * @param folderId The folder identifier used to trigger the {@link GetMetadataErrorException}
+     * @param fileId The file identifier used to trigger the {@link GetMetadataErrorException}
+     * @return An {@link OXException}
+     */
+    static final OXException handleGetMetadataErrorException(GetMetadataErrorException e, boolean isFile, String folderId, String fileId) {
+        return mapLookupError(e.errorValue.getPathValue(), isFile, folderId, fileId, e);
+    }
+
+    /**
+     * Handles the {@link RelocationErrorException}
+     * 
+     * @param e The {@link RelocationErrorException}
+     * @param isFile set to <code>true</code> if the exception was originated by a file lookup
+     * @param folderId The folder identifier used to trigger the error
+     * @param fileId The file identifier used to trigger the error
+     * @return The {@link OXException}
+     */
+    static final OXException handleRelocationErrorException(RelocationErrorException e, boolean isFile, String folderId, String fileId) {
+        switch (e.errorValue.tag()) {
+            case FROM_LOOKUP:
+                return mapLookupError(e.errorValue.getFromLookupValue(), isFile, folderId, fileId, e);
+            case FROM_WRITE:
+                return mapWriteError(e.errorValue.getFromWriteValue(), folderId, e);
+            case CANT_COPY_SHARED_FOLDER:
+            case CANT_MOVE_FOLDER_INTO_ITSELF:
+            case CANT_NEST_SHARED_FOLDER:
+            case OTHER:
+            case TO:
+            case TOO_MANY_FILES:
+            default:
+                // Everything else falls through to 'unexpected error' 
+                return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Maps the specified {@link LookupError} to a valid {@link FileStorageExceptionCodes}
+     * 
+     * @param error The {@link LookupError}
+     * @param isFile set to <code>true</code> if the exception was originated by a file lookup
+     * @param folderId The folder identifier used to trigger the error
+     * @param fileId The file identifier used to trigger the error
+     * @param e The nested {@link Exception}
+     * @return An {@link OXException}
+     */
+    private static final OXException mapLookupError(LookupError error, boolean isFile, String folderId, String fileId, Exception e) {
+        switch (error.tag()) {
+            case NOT_FILE:
+                return FileStorageExceptionCodes.NOT_A_FILE.create(e, DropboxConstants.ID, folderId + "/" + fileId);
+            case NOT_FOLDER:
+                return FileStorageExceptionCodes.NOT_A_FOLDER.create(e, DropboxConstants.ID, folderId);
+            case NOT_FOUND:
+                return FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, fileId, folderId);
+            default:
+                return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Maps the specified {@link WriteError} to a valid {@link FileStorageExceptionCodes} or {@link QuotaExceptionCodes}
+     * 
+     * @param error The {@link WriteError}
+     * @param folderId The folder identifier used to trigger the error
+     * @param e The next {@link Exception}
+     * @return An {@link OXException}
+     */
+    private static final OXException mapWriteError(WriteError error, String folderId, Exception e) {
+        switch (error.tag()) {
+            case DISALLOWED_NAME:
+                return FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(e, folderId);
+            case INSUFFICIENT_SPACE:
+                //FIXME: Is this useful or should we simply return an unexpected exception?
+                return QuotaExceptionCodes.QUOTA_EXCEEDED.create(e);
+            case NO_WRITE_PERMISSION:
+                return FileStorageExceptionCodes.NO_CREATE_ACCESS.create(e, folderId);
+            case CONFLICT:
+                // Fall-through to 'unexpected error'
+                // TODO: Maybe introduce a conflict exception
+            default:
+                return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 }

@@ -143,16 +143,16 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public boolean exists(String folderId, String id, String version) throws OXException {
-        //TODO: double check whether the 'version' parameter has to be used
+        // Dropbox V2 API does not support metadata fetching for a specific version, thus it is being ignored
+        // More information https://www.dropbox.com/developers/documentation/http/documentation#files-get_metadata
         try {
             Metadata metadata = getMetadata(toPath(folderId, id));
             return metadata instanceof FileMetadata;
         } catch (GetMetadataErrorException e) {
-            // TODO: Maybe introduce new exception codes?
             if (LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
                 return false;
             }
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, true, folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -165,12 +165,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
-        //TODO: double check whether the 'version' parameter has to be used
+        // Dropbox V2 API does not support metadata fetching for a specific version, thus it is being ignored
+        // More information https://www.dropbox.com/developers/documentation/http/documentation#files-get_metadata
         try {
             String path = toPath(folderId, id);
             Metadata metadata = getMetadata(path);
             if (!(metadata instanceof FileMetadata)) {
-                throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, folderId);
+                throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, path);
             }
             DropboxFile dropboxFile = new DropboxFile((FileMetadata) metadata, userId);
             //TODO: fetching all revisions just to get the number of versions is quite expensive;
@@ -181,8 +182,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dropboxFile;
         } catch (GetMetadataErrorException e) {
-            // TODO: Maybe introduce new exception codes?
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, true, folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
