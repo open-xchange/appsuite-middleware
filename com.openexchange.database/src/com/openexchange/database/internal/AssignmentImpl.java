@@ -54,7 +54,7 @@ import com.openexchange.database.Assignment;
 
 /**
  * Assignment of context and server to read and write databases.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AssignmentImpl implements Serializable, Assignment {
@@ -69,12 +69,13 @@ public class AssignmentImpl implements Serializable, Assignment {
 
     private final String schema;
 
-    private boolean transactionInitialized;
-    private long transaction;
+    private volatile Long transaction;
+
+    private final int hash;
 
     /**
      * Default constructor.
-     * 
+     *
      * @param contextId
      * @param serverId
      * @param readPoolId
@@ -88,6 +89,15 @@ public class AssignmentImpl implements Serializable, Assignment {
         this.readPoolId = readPoolId;
         this.writePoolId = writePoolId;
         this.schema = schema;
+
+        int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + serverId;
+        result = prime * result + readPoolId;
+        result = prime * result + writePoolId;
+        result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+        this.hash = result;
     }
 
     public AssignmentImpl(Assignment assign) {
@@ -120,33 +130,36 @@ public class AssignmentImpl implements Serializable, Assignment {
     }
 
     /**
-     * Returns true if the transaction counter has been initialized
-     * 
-     * @return
+     * Returns <code>true</code> if the transaction counter has been initialized
+     *
+     * @return <code>true</code> if the transaction counter has been initialized; otherwise <code>false</code>
      */
     boolean isTransactionInitialized() {
-        return transactionInitialized;
+        return null != this.transaction;
     }
 
+    /**
+     * Gets the previously assigned transaction counter or <code>0</code> (zero)
+     *
+     * @return The transaction counter or <code>0</code> (zero)
+     */
     long getTransaction() {
-        return transaction;
+        Long transaction = this.transaction;
+        return null == transaction ? 0L : transaction.longValue();
     }
 
+    /**
+     * Sets the transaction counter and thus marks this assignment having an initialized transaction
+     *
+     * @param transaction The transaction counter to set
+     */
     public void setTransaction(long transaction) {
-        this.transaction = transaction;
-        transactionInitialized = true;
+        this.transaction = Long.valueOf(transaction);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + contextId;
-        result = prime * result + serverId;
-        result = prime * result + readPoolId;
-        result = prime * result + writePoolId;
-        result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-        return result;
+        return hash;
     }
 
     @Override
@@ -154,10 +167,7 @@ public class AssignmentImpl implements Serializable, Assignment {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof AssignmentImpl)) {
             return false;
         }
         AssignmentImpl other = (AssignmentImpl) obj;
