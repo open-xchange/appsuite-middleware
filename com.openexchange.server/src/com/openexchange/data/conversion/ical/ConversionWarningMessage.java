@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical;
 
 import com.openexchange.i18n.LocalizableStrings;
 
-
 /**
  * {@link ConversionWarningMessage}
  *
@@ -97,5 +96,7 @@ public class ConversionWarningMessage implements LocalizableStrings {
     public final static String EMPTY_CLASS_MSG = "Empty \"CLASS\" element.";
 
     public final static String TRUNCATION_WARNING_MSG = "Element truncated: %s";
+    
+    public final static String INVALID_MAIL_ADDRESS_MSG = "Invalid mail address for external participant: %1$s";
 
 }
