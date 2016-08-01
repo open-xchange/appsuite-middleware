@@ -1,0 +1,12 @@
+array:
+  - data:
+      Key: com.openexchange.mail.useStaticDefaultFolders
+      Description: >
+        Defines whether standard folder names should be initialized with the default values or not.
+        The default values can be configured within the Adminuser.properties file.
+      Default: false
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: 
+      File: mail.properties
