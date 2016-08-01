@@ -59,6 +59,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -80,7 +84,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "end", description = "Upper exclusive limit of the queried range as a Date. Only appointments which start before this date are returned.")
 }, responseDescription = "Response is an array of booleans. Array length is the number of days. Each entry in the array corresponds with one day in the range that was queried, explaining whether there is an appointment on this day or not.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class HasAction extends AppointmentAction {
+public final class HasAction extends ChronosAction {
 
     /**
      * Initializes a new {@link HasAction}.
@@ -114,6 +118,23 @@ public final class HasAction extends AppointmentAction {
         }
 
         return new AJAXRequestResult(jsonResponseArray, "json");
+    }
+
+    private static final String[] REQUIRED_PARAMETERS = {
+        CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END
+    };
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarSession calendarSession = initSession(request, REQUIRED_PARAMETERS);
+        Date from = calendarSession.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = calendarSession.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        boolean[] hasEventsArray = calendarService.hasEventsBetween(calendarSession, from, until);
+        JSONArray jsonArray = new JSONArray(hasEventsArray.length);
+        for (int i = 0; i < hasEventsArray.length; i++) {
+            jsonArray.put(hasEventsArray[i]);
+        }
+        return new AJAXRequestResult(jsonArray, "json");
     }
 
 }

@@ -146,17 +146,19 @@ public class Consistency {
 
     /**
      * Adjusts the start- and end-date of the supplied event in case it is marked as "all-day". This includes the truncation of the
-     * time-part for the start- and end-date, as well as ensuring that the end-date is at least 1 day after the start date.
+     * time-part in <code>UTC</code>-timezone for the start- and end-date, as well as ensuring that the end-date is at least 1 day after
+     * the start-date.
      *
      * @param event The event to adjust
      */
     public static void adjustAllDayDates(Event event) {
+        //TODO: non-floating all-day events (with timezone specified?)
         if (event.isAllDay()) {
             if (event.containsStartDate() && null != event.getStartDate()) {
-                event.setStartDate(CalendarUtils.truncateTime(event.getStartDate()));
+                event.setStartDate(CalendarUtils.truncateTime(event.getStartDate(), TimeZone.getTimeZone("UTC")));
             }
             if (event.containsEndDate() && null != event.getEndDate()) {
-                Date endDate = CalendarUtils.truncateTime(event.getEndDate());
+                Date endDate = CalendarUtils.truncateTime(event.getEndDate(), TimeZone.getTimeZone("UTC"));
                 if (endDate.equals(event.getStartDate())) {
                     Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
                     calendar.setTime(endDate);

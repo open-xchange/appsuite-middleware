@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -92,7 +91,7 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 public class CalendarUtils {
 
     /** A collection of fields that are always included when querying events from the storage */
-    private static final Collection<EventField> MANDATORY_FIELDS = Arrays.asList(
+    static final List<EventField> MANDATORY_FIELDS = Arrays.asList(
         EventField.ID, EventField.RECURRENCE_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.CLASSIFICATION,
         EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE,
         EventField.RECURRENCE_RULE
@@ -286,10 +285,11 @@ public class CalendarUtils {
      * {@link Calendar#SECOND} and {@link Calendar#MILLISECOND} to <code>0</code>.
      *
      * @param date The date to truncate the time part for
+     * @param timeZone The timezone to consider
      * @return A new date instance based on the supplied date with the time fraction truncated
      */
-    public static Date truncateTime(Date date) {
-        Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+    public static Date truncateTime(Date date, TimeZone timeZone) {
+        Calendar calendar = GregorianCalendar.getInstance(timeZone);
         calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
@@ -301,6 +301,9 @@ public class CalendarUtils {
     /**
      * Constructs a search term to match events located in a specific folder. Depending on the folder's type, either a search term for
      * the {@link EventField#PUBLIC_FOLDER_ID} or for the {@link AttendeeField#FOLDER_ID} is built.
+     * <p/>
+     * The session user's read permissions in the folder ("own" vs "all") are considered automatically, too, by restricting via
+     * {@link EventField#CREATED_BY} if needed.
      *
      * @param folder The folder to construct the search term for
      * @return The search term
@@ -392,6 +395,17 @@ public class CalendarUtils {
      */
     public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
         return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
+    }
+
+    /**
+     * Converts a so-called <i>floating</i> date into a date in a concrete timezone by applying the actual timezone offset on that date.
+     *
+     * @param floatingDate The floating date to convert (usually the raw date in <code>UTC</code>)
+     * @param timeZone The target timezone
+     * @return The date in the target timezone, with the corresponding timezone offset applied
+     */
+    static Date getDateInTimeZone(Date floatingDate, TimeZone timeZone) {
+        return new Date(floatingDate.getTime() - timeZone.getOffset(floatingDate.getTime()));
     }
 
     /**

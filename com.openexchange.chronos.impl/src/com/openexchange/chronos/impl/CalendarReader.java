@@ -59,10 +59,13 @@ import static com.openexchange.chronos.impl.Check.requireReadPermission;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -73,6 +76,7 @@ import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.exception.OXException;
@@ -132,6 +136,51 @@ public class CalendarReader {
         this.storage = storage;
     }
 
+    public boolean[] hasEventsBetween(int userID, Date from, Date until, TimeZone timeZone) throws OXException {
+        List<Boolean> hasEventsList = new ArrayList<Boolean>();
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from))
+            .addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, until))
+            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(userID)))
+            //TODO .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.NOT_EQUALS, ParticipationStatus.DECLINED))
+        ;
+        List<Event> events = storage.searchEvents(searchTerm, null);
+        Calendar calendar = GregorianCalendar.getInstance(timeZone);
+        calendar.setTime(from);
+        Date minimumEndTime = calendar.getTime();
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date maximumStartTime = calendar.getTime();
+        while (maximumStartTime.before(until)) {
+            Boolean hasEvents = Boolean.FALSE;
+            for (Event event : events) {
+                Attendee attendee = CalendarUtils.find(event.getAttendees(), userID);
+                if (null == attendee || ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
+                    continue; // skip
+                }
+                if (event.getRecurrenceId() == event.getId()) {
+                    //TODO recurring: Services.getService(RecurrenceService.class).calculateInstances(event, start, end, -1); ...
+                    continue;
+                } else {
+                    Date startDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
+                    Date endDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
+                    if (startDate.before(maximumStartTime) && endDate.after(minimumEndTime)) {
+                        hasEvents = Boolean.TRUE;
+                        break;
+                    }
+                }
+            }
+            hasEventsList.add(hasEvents);
+            minimumEndTime = maximumStartTime;
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+            maximumStartTime = calendar.getTime();
+        }
+        boolean[] hasEventsArray = new boolean[hasEventsList.size()];
+        for (int i = 0; i < hasEventsArray.length; i++) {
+            hasEventsArray[i] = hasEventsList.get(i).booleanValue();
+        }
+        return hasEventsArray;
+    }
+
     public int resolveUid(String uid) throws OXException {
         /*
          * construct search term
@@ -148,6 +197,10 @@ public class CalendarReader {
          */
         List<Event> events = storage.searchEvents(searchTerm, new EventField[] { EventField.ID });
         return 0 < events.size() ? events.get(0).getId() : 0;
+    }
+
+    public List<UserizedEvent> getChangeExceptions(int folderID, int objectID, EventField[] fields) throws OXException {
+        return getChangeExceptions(getFolder(folderID), objectID, fields);
     }
 
     public List<UserizedEvent> searchEvents(int[] folderIDs, String pattern, EventField[] fields) throws OXException {
@@ -223,6 +276,25 @@ public class CalendarReader {
         return userize(event, folder);
     }
 
+    protected List<UserizedEvent> getChangeExceptions(UserizedFolder folder, int objectID, EventField[] fields) throws OXException {
+        requireCalendarContentType(folder);
+        requireFolderPermission(folder, Permission.READ_FOLDER);
+        requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
+        /*
+         * construct search term
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getFolderIdTerm(folder))
+            .addSearchTerm(getSearchTerm(EventField.RECURRENCE_ID, SingleOperation.EQUALS, I(objectID)))
+            .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.RECURRENCE_ID)))
+        ;
+        /*
+         * perform search & userize the results
+         */
+        List<Event> events = storage.searchEvents(searchTerm, fields);
+        return userize(events, folder);
+    }
+
     protected List<UserizedEvent> readEventsInFolder(UserizedFolder folder, boolean deleted, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
@@ -230,11 +302,7 @@ public class CalendarReader {
         /*
          * construct search term
          */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        searchTerm.addSearchTerm(getFolderIdTerm(folder));
-        if (Permission.READ_ALL_OBJECTS > folder.getOwnPermission().getReadPermission()) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, I(session.getUser().getId())));
-        }
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(folder));
         appendCommonTerms(searchTerm, from, until, updatedSince);
         /*
          * perform search & userize the results

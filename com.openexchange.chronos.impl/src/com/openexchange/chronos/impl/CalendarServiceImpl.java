@@ -53,6 +53,7 @@ import static com.openexchange.chronos.impl.CalendarUtils.getFields;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
@@ -75,6 +76,20 @@ public class CalendarServiceImpl implements CalendarService {
      */
     public CalendarServiceImpl() {
         super();
+    }
+
+    @Override
+    public boolean[] hasEventsBetween(CalendarSession session, Date from, Date until) throws OXException {
+        TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
+        if (null == timeZone) {
+            timeZone = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
+        return new CalendarReader(session).hasEventsBetween(session.getUser().getId(), from, until, timeZone);
+    }
+
+    @Override
+    public List<UserizedEvent> getChangeExceptions(CalendarSession session, int folderID, int objectID) throws OXException {
+        return new CalendarReader(session).getChangeExceptions(folderID, objectID, getFields(session));
     }
 
     @Override
