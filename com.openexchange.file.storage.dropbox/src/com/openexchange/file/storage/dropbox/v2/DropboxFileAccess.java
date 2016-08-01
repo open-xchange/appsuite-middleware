@@ -626,72 +626,18 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
         if (folderId == null) {
+            // Fall-back to root folder
             folderId = "";
         }
 
-        // Return everything
-        List<File> results;
-        if (Strings.isEmpty(pattern) || pattern.equals("*")) {
-            try {
-                results = new ArrayList<File>();
-                ListFolderResult listFolderResult = client.files().listFolderBuilder(folderId).withRecursive(true).start();
-                boolean hasMore = listFolderResult.getHasMore();
-                do {
-                    List<Metadata> entries = listFolderResult.getEntries();
-
-                    for (Metadata metadata : entries) {
-                        if (metadata instanceof FileMetadata) {
-                            results.add(new DropboxFile((FileMetadata) metadata, userId));
-                        }
-                    }
-                    if (hasMore) {
-                        String cursor = listFolderResult.getCursor();
-                        listFolderResult = client.files().listFolderContinue(cursor);
-                    }
-                } while (hasMore);
-            } catch (ListFolderErrorException e) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (DbxException e) {
-                throw DropboxExceptionHandler.handle(e);
-            }
-        } else {
-            try {
-                // Search
-                SearchResult searchResult = client.files().searchBuilder(folderId, pattern).withMaxResults(1000L).start();
-                List<SearchMatch> matches = searchResult.getMatches();
-
-                results = new ArrayList<File>(matches.size());
-
-                for (SearchMatch match : matches) {
-                    Metadata metadata = match.getMetadata();
-                    String parent = getParent(metadata.getPathDisplay());
-                    if (metadata instanceof FileMetadata && (includeSubfolders || folderId.equals(parent))) {
-                        results.add(new DropboxFile((FileMetadata) metadata, userId));
-                    }
-                }
-            } catch (SearchErrorException e) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (DbxException e) {
-                throw DropboxExceptionHandler.handle(e);
-            }
-        }
+        // Search
+        List<File> results = search(pattern, folderId, includeSubfolders);
 
         // Sort results
         sort(results, sort, order);
 
-        // Range
-        if (start != NOT_SET && end != NOT_SET) {
-            if (start > results.size()) {
-                return SearchIteratorAdapter.emptyIterator();
-            }
-            int endIndex = end;
-            if (endIndex > results.size()) {
-                endIndex = results.size();
-            }
-
-            results = results.subList(start, endIndex);
-        }
-        
+        // Range (if needed)
+        results = range(results, start, end);
         return new SearchIteratorAdapter<File>(results.iterator(), results.size());
     }
 
@@ -1004,5 +950,113 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             files.add(id.getId());
         }
         return filesPerFolder;
+    }
+
+    /**
+     * Search under the specified folder for the specified pattern
+     * 
+     * @param pattern The pattern to search for
+     * @param folderId The folder identifier (full path)
+     * @param includeSubfolders If the sub-folders will be included in the search
+     * @return A list with {@link File}s matching the specified pattern
+     * @throws OXException if an error is occurred
+     */
+    private List<File> search(String pattern, String folderId, boolean includeSubfolders) throws OXException {
+        try {
+            if (Strings.isEmpty(pattern) || pattern.equals("*")) {
+                // Return everything
+                try {
+                    return getAllFiles(folderId, true);
+                } catch (ListFolderErrorException e) {
+                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            } else {
+                // Search
+                try {
+                    return fireSearch(folderId, pattern, includeSubfolders);
+                } catch (SearchErrorException e) {
+                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
+        }
+    }
+
+    /**
+     * Retrieves all files from the specified folder.
+     * 
+     * @param folderId The folder path
+     * @param recursive If set to true then it retrieves all files recursively from all folders under the specified folder
+     * @return A list with {@link File}s
+     * @throws ListFolderErrorException if a list error is occurred
+     * @throws DbxException if a generic Dropbox error is occurred
+     */
+    private List<File> getAllFiles(String folderId, boolean recursive) throws ListFolderErrorException, DbxException {
+        List<File> results = new ArrayList<File>();
+        ListFolderResult listFolderResult = client.files().listFolderBuilder(folderId).withRecursive(recursive).start();
+        boolean hasMore = listFolderResult.getHasMore();
+        do {
+            List<Metadata> entries = listFolderResult.getEntries();
+
+            for (Metadata metadata : entries) {
+                if (metadata instanceof FileMetadata) {
+                    results.add(new DropboxFile((FileMetadata) metadata, userId));
+                }
+            }
+            if (hasMore) {
+                String cursor = listFolderResult.getCursor();
+                listFolderResult = client.files().listFolderContinue(cursor);
+            }
+        } while (hasMore);
+
+        return results;
+    }
+
+    /**
+     * Searches in the specified folder for the specified pattern (fires the actual search request to Dropbox.
+     * 
+     * @param folderId The folder identifier (full path)
+     * @param pattern The pattern to search for
+     * @param includeSubfolders If the sub-folders will be included in the search
+     * @return A list with {@link File}s matching the specified pattern
+     * @throws SearchErrorException if a search error is occurred
+     * @throws DbxException if a generic Dropbox error is occurred
+     */
+    private List<File> fireSearch(String folderId, String pattern, boolean includeSubfolders) throws SearchErrorException, DbxException {
+        // Search
+        SearchResult searchResult = client.files().searchBuilder(folderId, pattern).withMaxResults(1000L).start();
+        List<SearchMatch> matches = searchResult.getMatches();
+
+        List<File> results = new ArrayList<File>(matches.size());
+
+        for (SearchMatch match : matches) {
+            Metadata metadata = match.getMetadata();
+            String parent = getParent(metadata.getPathDisplay());
+            if (metadata instanceof FileMetadata && (includeSubfolders || folderId.equals(parent))) {
+                results.add(new DropboxFile((FileMetadata) metadata, userId));
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Returns a sub-list starting from the specified index and ending to the specified index
+     * @param files The {@link List} of {@link File}s 
+     * @param startIndex The start index
+     * @param endIndex The end index
+     * @return The sub-list
+     */
+    private List<File> range(List<File> files, int startIndex, int endIndex) {
+        if (startIndex == NOT_SET && endIndex == NOT_SET) {
+            return files;
+        }
+        if (startIndex > files.size()) {
+            return Collections.emptyList();
+        }
+        if (endIndex > files.size()) {
+            endIndex = files.size();
+        }
+        return files.subList(startIndex, endIndex);
     }
 }
