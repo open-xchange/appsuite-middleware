@@ -630,9 +630,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
 
         // Return everything
+        List<File> results;
         if (Strings.isEmpty(pattern) || pattern.equals("*")) {
             try {
-                List<File> results = new ArrayList<File>();
+                results = new ArrayList<File>();
                 ListFolderResult listFolderResult = client.files().listFolderBuilder(folderId).withRecursive(true).start();
                 boolean hasMore = listFolderResult.getHasMore();
                 do {
@@ -648,43 +649,50 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         listFolderResult = client.files().listFolderContinue(cursor);
                     }
                 } while (hasMore);
-
-                // Sort results
-                sort(results, sort, order);
-
-                return new SearchIteratorAdapter<File>(results.iterator(), results.size());
             } catch (ListFolderErrorException e) {
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e);
+            }
+        } else {
+            try {
+                // Search
+                SearchResult searchResult = client.files().searchBuilder(folderId, pattern).withMaxResults(1000L).start();
+                List<SearchMatch> matches = searchResult.getMatches();
+
+                results = new ArrayList<File>(matches.size());
+
+                for (SearchMatch match : matches) {
+                    Metadata metadata = match.getMetadata();
+                    String parent = getParent(metadata.getPathDisplay());
+                    if (metadata instanceof FileMetadata && (includeSubfolders || folderId.equals(parent))) {
+                        results.add(new DropboxFile((FileMetadata) metadata, userId));
+                    }
+                }
+            } catch (SearchErrorException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } catch (DbxException e) {
                 throw DropboxExceptionHandler.handle(e);
             }
         }
 
-        try {
-            // Search
-            SearchResult searchResult = client.files().searchBuilder(folderId, pattern).withMaxResults(1000L).start();
-            List<SearchMatch> matches = searchResult.getMatches();
-            List<File> results = new ArrayList<File>(matches.size());
+        // Sort results
+        sort(results, sort, order);
 
-            for (SearchMatch match : matches) {
-                Metadata metadata = match.getMetadata();
-                // TODO: Check for recursive search?
-                if (metadata instanceof FileMetadata) {
-                    results.add(new DropboxFile((FileMetadata) metadata, userId));
-                }
+        // Range
+        if (start != NOT_SET && end != NOT_SET) {
+            if (start > results.size()) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
+            int endIndex = end;
+            if (endIndex > results.size()) {
+                endIndex = results.size();
             }
 
-            // Sort results
-            sort(results, sort, order);
-
-            //TODO: Utilise the start-end range
-
-            return new SearchIteratorAdapter<File>(results.iterator(), results.size());
-        } catch (SearchErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            results = results.subList(start, endIndex);
         }
+        
+        return new SearchIteratorAdapter<File>(results.iterator(), results.size());
     }
 
     /*
