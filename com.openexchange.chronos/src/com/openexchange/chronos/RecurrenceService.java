@@ -88,6 +88,6 @@ public interface RecurrenceService {
      * @param datePosition
      * @return
      */
-    public Calendar calculateRecurrencePosition(Event master, Calendar datePosition);
+    public int calculateRecurrencePosition(Event master, Calendar datePosition);
 
 }
