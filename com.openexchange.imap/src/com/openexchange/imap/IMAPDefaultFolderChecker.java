@@ -56,6 +56,7 @@ import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +66,7 @@ import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import org.slf4j.Logger;
-import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.Category;
@@ -511,7 +512,7 @@ public class IMAPDefaultFolderChecker {
      */
     protected TIntObjectMap<String> getSpecialUseInfo(String[] names, String[] fullNames) throws OXException {
         try {
-            TIntObjectMap<String> indexes = new TIntObjectHashMap<String>(6);
+            TIntObjectMap<String> indexes = new TIntObjectHashMap<>(6);
             IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
             boolean isPrimary = MailAccount.DEFAULT_ID == accountId;
 
@@ -589,7 +590,9 @@ public class IMAPDefaultFolderChecker {
         // Get default folders names and full names
         DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(accountId, session.getUserId(), session.getContextId());
         String[] fullNames = defaultFolderNamesProvider.getDefaultFolderFullnames(imapConfig, isSpamOptionEnabled);
-        String[] names = defaultFolderNamesProvider.getDefaultFolderNames(imapConfig, isSpamOptionEnabled);
+        String[] names = Arrays.copyOfRange(imapConfig.getStandardNames(), 0, isSpamOptionEnabled ? 6 : 4);
+        UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
+        String[] defaultNames = defaultFolderNamesProvider.getDefaultFolderNames(usm.getStdTrashName(), usm.getStdSentName(), usm.getStdDraftsName(), usm.getStdSpamName(), usm.getConfirmedSpam(), usm.getConfirmedHam(), isSpamOptionEnabled);
         SpamHandler spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
 
         // Collect SPECIAL-USE information
@@ -602,11 +605,10 @@ public class IMAPDefaultFolderChecker {
             ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
             if (viewFactory != null) {
                 ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-                ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                ComposedConfigProperty<Boolean> prop = view.property("com.openexchange.imap.initWithSpecialUse", Boolean.class);
                 if (prop.isDefined()) {
                     Boolean b = prop.get();
                     checkSpecialUseFolder = null != b && b.booleanValue();
-                    prop.set(null);
                 }
             }
 
@@ -617,7 +619,7 @@ public class IMAPDefaultFolderChecker {
         }
 
         // Sanitize given names and full-names against mail account settings
-        sanitizeAgainstMailAccount(names, fullNames, namespace, sep, indexes, accountChanged);
+        sanitizeAgainstMailAccount(names, fullNames, defaultNames, namespace, sep, indexes, accountChanged);
 
         // Check folders
         TIntObjectMap<String> toSet = (MailAccount.DEFAULT_ID == accountId) ? null : new TIntObjectHashMap<String>(6);
@@ -685,7 +687,7 @@ public class IMAPDefaultFolderChecker {
      * @param checkedIndexes The checked indexes according to SPECIAL-USE flags advertised by IMAP server (if any)
      * @param accountChanged The boolean reference to signal whether mail account has been changed
      */
-    protected void sanitizeAgainstMailAccount(String[] names, String[] fullNames, String namespace, char sep, TIntObjectMap<String> checkedIndexes, BoolReference accountChanged) {
+    protected void sanitizeAgainstMailAccount(String[] names, String[] fullNames, String[] defaultNames, String namespace, char sep, TIntObjectMap<String> checkedIndexes, BoolReference accountChanged) {
         // Special handling for full names in case of primary mail account
         if (MailAccount.DEFAULT_ID == accountId) {
             /*-
@@ -694,11 +696,14 @@ public class IMAPDefaultFolderChecker {
              * Null'ify full name if not on root level OR not equal to name; meaning not intended to create default folders next to INBOX
              * In that case create them with respect to determined prefix
              */
-            TIntObjectMap<String> namesToSet = new TIntObjectHashMap<String>(6);
+            TIntObjectMap<String> namesToSet = new TIntObjectHashMap<>(6);
             TIntList indexes = new TIntLinkedList();
             for (int i = 0; i < fullNames.length; i++) {
                 String fullName = fullNames[i];
                 if (isEmpty(fullName)) {
+                    if (!isEmpty(names[i])) {
+                        continue;
+                    }
                     // No full name given
                     if (null != checkedIndexes) {
                         String expectedFullName = checkedIndexes.get(i);
@@ -710,6 +715,16 @@ public class IMAPDefaultFolderChecker {
                                 names[i] = expectedName;
                                 namesToSet.put(i, expectedName);
                             }
+                        } else {
+                            if (Strings.isEmpty(names[i])) {
+                                names[i] = defaultNames[i];
+                                namesToSet.put(i, names[i]);
+                            }
+                        }
+                    } else {
+                        if (Strings.isEmpty(names[i])) {
+                            names[i] = defaultNames[i];
+                            namesToSet.put(i, names[i]);
                         }
                     }
                     fullNames[i] = null;
@@ -764,8 +779,8 @@ public class IMAPDefaultFolderChecker {
             }
         } else {
             if (null != checkedIndexes && !checkedIndexes.isEmpty()) {
-                TIntObjectMap<String> fullNamesToSet = new TIntObjectHashMap<String>(6);
-                TIntObjectMap<String> namesToSet = new TIntObjectHashMap<String>(6);
+                TIntObjectMap<String> fullNamesToSet = new TIntObjectHashMap<>(6);
+                TIntObjectMap<String> namesToSet = new TIntObjectHashMap<>(6);
                 for (int i = 0; i < fullNames.length; i++) {
                     String expectedFullName = checkedIndexes.get(i);
                     if (null != expectedFullName) {
@@ -972,7 +987,7 @@ public class IMAPDefaultFolderChecker {
         if (!f.exists()) {
             // Check against siblings
             IMAPFolder parent = (IMAPFolder) f.getParent();
-            List<Folder> candidates = new ArrayList<Folder>(2);
+            List<Folder> candidates = new ArrayList<>(2);
             {
                 Folder[] folders = parent.list();
                 String mName = f.getName();
@@ -1220,7 +1235,7 @@ public class IMAPDefaultFolderChecker {
         if (null != mass) {
             try {
                 TIntList indexes = new TIntArrayList(map.size());
-                List<String> fullNames = new ArrayList<String>(map.size());
+                List<String> fullNames = new ArrayList<>(map.size());
                 for (int index : map.keys()) {
                     indexes.add(index);
                     fullNames.add(map.get(index));
@@ -1246,7 +1261,7 @@ public class IMAPDefaultFolderChecker {
         if (null != mass) {
             try {
                 TIntList indexes = new TIntArrayList(map.size());
-                List<String> names = new ArrayList<String>(map.size());
+                List<String> names = new ArrayList<>(map.size());
                 for (int index : map.keys()) {
                     indexes.add(index);
                     names.add(map.get(index));

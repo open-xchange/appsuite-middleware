@@ -1765,21 +1765,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (viewFactory != null) {
-            ConfigView view;
-            try {
-                view = viewFactory.getView(usr.getId(), ctx.getId());
-                Boolean check = view.get("com.openexchange.imap.initWithSpecialUse", Boolean.class);
-                if (check != null && check) {
-                    ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
-                    prop.set(Boolean.TRUE);
-                }
-            } catch (OXException e) {
-                LOGGER.error("Unable to set special use check property!");
-            }
-        }
-
         // Return created user
         return usr;
     }

@@ -49,9 +49,7 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
-import static com.openexchange.groupware.infostore.InfostoreSearchEngine.ASC;
-import static com.openexchange.groupware.infostore.InfostoreSearchEngine.DESC;
-import static com.openexchange.groupware.infostore.InfostoreSearchEngine.NOT_SET;
+import static com.openexchange.groupware.infostore.InfostoreSearchEngine.*;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -465,64 +463,70 @@ public class SearchEngineImpl extends DBService {
     }
 
     private SearchIterator<DocumentMetadata> get(ServerSession session, List<Integer> readAllFolders, List<Integer> readOwnFolders, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
-        /*
-         * get matching object IDs first
-         */
-        StringBuilder sqlQuery = new StringBuilder();
-        sqlQuery.append("SELECT infostore.id FROM infostore WHERE infostore.cid=").append(session.getContextId());
-        appendFolders(sqlQuery, session.getContextId(), session.getUserId(), readAllFolders, readOwnFolders);
-        appendOrderBy(sqlQuery, sortedBy, dir);
-        appendLimit(sqlQuery, start, end);
+        Connection connection = null;
+        boolean closeResources = true;
+        try {
+            connection = getReadConnection(session.getContext());
+            /*
+             * get matching object IDs first
+             */
+            StringBuilder sqlQuery = new StringBuilder();
+            sqlQuery.append("SELECT infostore.id FROM infostore WHERE infostore.cid=").append(session.getContextId());
+            appendFolders(sqlQuery, session.getContextId(), session.getUserId(), readAllFolders, readOwnFolders);
+            appendOrderBy(sqlQuery, sortedBy, dir);
+            appendLimit(sqlQuery, start, end);
 
-        Connection connection = getReadConnection(session.getContext());
-        List<Integer> objectIDs = new ArrayList<Integer>();
-        PreparedStatement statement = null;
-        ResultSet results = null;
-        try {
-            statement = connection.prepareStatement(sqlQuery.toString());
-            results = statement.executeQuery();
-            while (results.next()) {
-                objectIDs.add(results.getInt(1));
-            }
-        } catch (SQLException e) {
-            LOG.error("", e);
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
-        } finally {
-            DBUtils.closeSQLStuff(results, statement);
-        }
-        if (0 == objectIDs.size()) {
-            return SearchIteratorAdapter.emptyIterator();
-        }
-        /*
-         * get requested metadata in a second step
-         */
-        sqlQuery = new StringBuilder();
-        sqlQuery.append(getResultFieldsSelect(cols));
-        sqlQuery.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(session.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
-        appendOrderBy(sqlQuery, sortedBy, dir);
-        boolean successful = false;
-        PreparedStatement stmt = null;
-        InfostoreSearchIterator iter = null;
-        try {
-            stmt = connection.prepareStatement(sqlQuery.toString());
-            iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), connection, stmt);
-            // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
-            successful = true;
-            return iter;
-        } catch (final SQLException e) {
-            LOG.error("", e);
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
-        } catch (final OXException e) {
-            LOG.error("", e);
-            throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
-        } finally {
-            if (!successful) {
-                if (iter != null) {
-                    SearchIterators.close(iter);
-                } else if (connection != null) {
-                    releaseReadConnection(session.getContext(), connection);
-                    DBUtils.closeSQLStuff(stmt);
+            List<Integer> objectIDs = new ArrayList<Integer>();
+            PreparedStatement statement = null;
+            ResultSet results = null;
+            try {
+                statement = connection.prepareStatement(sqlQuery.toString());
+                results = statement.executeQuery();
+                while (results.next()) {
+                    objectIDs.add(results.getInt(1));
                 }
+            } catch (SQLException e) {
+                LOG.error("", e);
+                throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
+            } finally {
+                DBUtils.closeSQLStuff(results, statement);
+            }
+            if (0 == objectIDs.size()) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
+            /*
+             * get requested metadata in a second step
+             */
+            sqlQuery = new StringBuilder();
+            sqlQuery.append(getResultFieldsSelect(cols));
+            sqlQuery.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(session.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
+            appendOrderBy(sqlQuery, sortedBy, dir);
+            PreparedStatement stmt = null;
+            InfostoreSearchIterator iter = null;
+            try {
+                stmt = connection.prepareStatement(sqlQuery.toString());
+                iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), connection, stmt);
+                // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
+                closeResources = false;
+                return iter;
+            } catch (final SQLException e) {
+                LOG.error("", e);
+                throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
+            } catch (final OXException e) {
+                LOG.error("", e);
+                throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
+            } finally {
+                if (closeResources) {
+                    if (iter != null) {
+                        SearchIterators.close(iter);
+                    } else if (connection != null) {
+                        DBUtils.closeSQLStuff(stmt);
+                    }
+                }
+            }
+        } finally {
+            if (closeResources && null != connection) {
+                releaseReadConnection(session.getContext(), connection);
             }
         }
     }

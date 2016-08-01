@@ -62,6 +62,7 @@ import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.AddUUIDForUserAttributeTable;
+import com.openexchange.groupware.update.tasks.AllowNullValuesForStandardFolderNamesUpdateTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
@@ -614,6 +615,10 @@ public final class InternalList {
 
         // Applies MEDIUM TEXT to "user_setting" table.
         list.add(new com.openexchange.groupware.update.tasks.UserSettingMediumTextTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.8.3 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new AllowNullValuesForStandardFolderNamesUpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
