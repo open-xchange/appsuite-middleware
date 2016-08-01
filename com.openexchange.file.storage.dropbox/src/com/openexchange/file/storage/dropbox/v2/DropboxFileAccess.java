@@ -1024,25 +1024,33 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @throws DbxException if a generic Dropbox error is occurred
      */
     private List<File> fireSearch(String folderId, String pattern, boolean includeSubfolders) throws SearchErrorException, DbxException {
-        // Search
-        SearchResult searchResult = client.files().searchBuilder(folderId, pattern).withMaxResults(1000L).start();
-        List<SearchMatch> matches = searchResult.getMatches();
-
-        List<File> results = new ArrayList<File>(matches.size());
-
-        for (SearchMatch match : matches) {
-            Metadata metadata = match.getMetadata();
-            String parent = getParent(metadata.getPathDisplay());
-            if (metadata instanceof FileMetadata && (includeSubfolders || folderId.equals(parent))) {
-                results.add(new DropboxFile((FileMetadata) metadata, userId));
+        SearchResult searchResult = client.files().searchBuilder(folderId, pattern).start();
+        
+        List<File> results = new ArrayList<File>();
+        boolean hasMore = false;
+        do {
+            hasMore = searchResult.getMore();
+            List<SearchMatch> matches = searchResult.getMatches();
+            for (SearchMatch match : matches) {
+                Metadata metadata = match.getMetadata();
+                String parent = getParent(metadata.getPathDisplay());
+                if (metadata instanceof FileMetadata && (includeSubfolders || folderId.equals(parent))) {
+                    results.add(new DropboxFile((FileMetadata) metadata, userId));
+                }
             }
-        }
+            if (hasMore) {
+                long start = searchResult.getStart();
+                searchResult = client.files().searchBuilder(folderId, pattern).withStart(start).start();
+            }
+        } while (hasMore);
+
         return results;
     }
 
     /**
      * Returns a sub-list starting from the specified index and ending to the specified index
-     * @param files The {@link List} of {@link File}s 
+     * 
+     * @param files The {@link List} of {@link File}s
      * @param startIndex The start index
      * @param endIndex The end index
      * @return The sub-list
