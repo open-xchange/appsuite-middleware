@@ -47,31 +47,35 @@
  *
  */
 
-package com.openexchange.reseller.internal;
+package com.openexchange.advertisement;
 
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
-import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
+
 /**
- * {@link ResellerExceptionCodes}
+ * {@link AdvertisementExceptionCodes}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public enum ResellerExceptionCodes implements DisplayableOXExceptionCode {
+public enum AdvertisementExceptionCodes implements DisplayableOXExceptionCode {
     /**
-     * Unable to retrieve ResellerAdmin with id %s
+     * Unexpected database error: %s
      */
-    NO_RESELLER_FOUND("Unable to retrieve ResellerAdmin with id %s", MESSAGE, Category.CATEGORY_ERROR, 1),
-    /**
-     * Unable to retrieve ResellerAdmin for ctx %s
-     */
-    NO_RESELLER_FOUND_FOR_CTX("Unable to retrieve ResellerAdmin for ctx %s", MESSAGE, Category.CATEGORY_ERROR, 2);
+    UNEXPECTED_DATABASE_ERROR("Unexpected database error: %s", MESSAGE, Category.CATEGORY_ERROR, 1),
 
-    public static final String PREFIX = "RESELL";
+    /**
+     * No valid configurations available for user %s in context %s
+     */
+    CONFIG_NOT_FOUND("No valid configurations available for user %s in context %s", MESSAGE, Category.CATEGORY_WARNING, 2),
+
+    ;
+
+    public static final String PREFIX = "ADVERTISEMENT";
 
     /**
      * (Log) Message of the exception.
@@ -101,7 +105,7 @@ public enum ResellerExceptionCodes implements DisplayableOXExceptionCode {
      * @param category category.
      * @param detailNumber detail number.
      */
-    private ResellerExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
+    private AdvertisementExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
         this.category = category;

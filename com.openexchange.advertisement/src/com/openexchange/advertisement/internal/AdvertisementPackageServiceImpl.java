@@ -62,6 +62,7 @@ import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
 import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.reseller.ResellerExceptionCodes;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 
@@ -100,7 +101,11 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
             ResellerAdmin admin = resellerService.getReseller(contextId);
             reseller = admin.getName();
         } catch (OXException e) {
-            return GlobalAdvertisementConfigService.getInstance();
+            if (ResellerExceptionCodes.NO_RESELLER_FOUND.equals(e) || ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.equals(e)) {
+                reseller = "OX_ALL";
+            } else {
+                return GlobalAdvertisementConfigService.getInstance();
+            }
         }
 
         AdvertisementConfigService result = map.get(reseller);

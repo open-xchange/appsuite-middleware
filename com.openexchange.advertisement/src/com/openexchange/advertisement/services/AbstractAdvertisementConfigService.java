@@ -62,6 +62,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.AdvertisementExceptionCodes;
 import com.openexchange.advertisement.osgi.Services;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -132,7 +133,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     return new JSONObject(result.getString(2));
                 }
             } catch (SQLException e) {
-                throw new OXException(e);
+                throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
             } catch (JSONException e) {
                 LOG.warn("Invalid advertisement configuration data with id %s", configId);
                 // Invalid advertisement data. Fallback to reseller and package
@@ -215,10 +216,10 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     LOG.error("Invalid advertisement configuration data for reseller %s and package %s", reseller, config.getPackage());
                 }
             }
-            throw new OXException(1, "No valid configurations available for user %s in context %s", session.getUserId(), session.getContextId());
+            throw AdvertisementExceptionCodes.CONFIG_NOT_FOUND.create(session.getUserId(), session.getContextId());
 
         } catch (SQLException e) {
-            throw new OXException(e);
+            throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
         } finally {
             if (stmt != null) {
                 try {
@@ -289,7 +290,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 property.set(String.valueOf(resultConfigId));
             }
         } catch (SQLException e) {
-            throw new OXException(e);
+            throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
         } finally {
             if (stmt != null) {
                 try {
@@ -368,11 +369,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 stmt.execute();
             }
         } catch (SQLException e) {
-            try {
-                con.rollback();
-            } catch (SQLException e1) {
-                // ignore
-            }
+            throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
         } finally {
             if (stmt != null) {
                 try {

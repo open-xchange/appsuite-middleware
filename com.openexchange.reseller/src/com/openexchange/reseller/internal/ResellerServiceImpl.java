@@ -60,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.reseller.ResellerExceptionCodes;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.reseller.data.Restriction;
