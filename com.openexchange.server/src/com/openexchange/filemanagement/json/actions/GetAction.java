@@ -105,6 +105,13 @@ public final class GetAction implements AJAXActionService {
             ManagedFile file;
             try {
                 file = management.getByID(id);
+                // Check affiliation
+                {
+                    String affiliation = file.getAffiliation();
+                    if (null != affiliation && !affiliation.equals(session.getSessionID())) {
+                        throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
+                    }
+                }
             } catch (OXException e) {
                 if (requestData.setResponseHeader("Content-Type", "text/html; charset=UTF-8")) {
                     if (ManagedFileExceptionErrorMessage.NOT_FOUND.equals(e) || ManagedFileExceptionErrorMessage.FILE_NOT_FOUND.equals(e)) {
