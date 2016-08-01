@@ -52,7 +52,7 @@ package com.openexchange.websockets;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link WebSocketService} - The Web Socket service to obtain a Web Socket for a certain user.
+ * {@link WebSocketService} - The service for sending/receiving data to/from established Web Socket connections.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
@@ -60,13 +60,27 @@ import com.openexchange.exception.OXException;
 public interface WebSocketService {
 
     /**
-     * Gets the Web Socket for specified user.
+     * Sends a text message to denoted user's remote end-points, blocking until all of the message has been transmitted.
      *
+     * @param message The message to be sent
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return The Web Socket associated with given user or <code>null</code> if there is no such Web Socket
-     * @throws OXException If an error occurs while looking-up the appropriate Web Socket
+     * @throws OXException If there is a problem delivering the message.
      */
-    WebSocket getWebSocketFor(int userId, int contextId) throws OXException;
+    void sendMessage(String message, int userId, int contextId) throws OXException;
+
+    /**
+     * Initiates the asynchronous transmission of a text message to denoted user's remote end-points.
+     * <p>
+     * This method returns before the message is transmitted.
+     *
+     * @param message The message being sent.
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The handler which will be notified of progress.
+     */
+    MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException;
+
+    // void registerListener(int userId, int contextId) throws OXException;
 
 }

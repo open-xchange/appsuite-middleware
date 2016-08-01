@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,43 +49,83 @@
 
 package com.openexchange.websockets.grizzly;
 
-import java.util.concurrent.Future;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import org.glassfish.grizzly.GrizzlyFuture;
+import org.glassfish.grizzly.websockets.DataFrame;
+import org.glassfish.grizzly.websockets.WebSocketException;
 import com.openexchange.exception.OXException;
 import com.openexchange.websockets.MessageHandler;
-import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSocketExceptionCodes;
+
 
 /**
- * {@link GrizzlyWebSocketService}
+ * {@link WebSocketImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class GrizzlyWebSocketService implements WebSocketService {
+public class WebSocketImpl implements WebSocket {
 
-    private final GrizzlyWebSocketApplication localApp;
-    private final RemoteWebSocketDistributor remoteDistributor;
+    private final SessionBoundWebSocket grizzlySocket;
 
     /**
-     * Initializes a new {@link GrizzlyWebSocketService}.
+     * Initializes a new {@link WebSocketImpl}.
      */
-    public GrizzlyWebSocketService(GrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
+    public WebSocketImpl(SessionBoundWebSocket grizzlySocket) {
         super();
-        this.localApp = app;
-        this.remoteDistributor = remoteDistributor;
+        this.grizzlySocket = grizzlySocket;
     }
 
     @Override
-    public void sendMessage(String message, int userId, int contextId) throws OXException {
-        localApp.sendToUser(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, false);
+    public String getSessionId() {
+        return grizzlySocket.getSessionId();
     }
 
     @Override
-    public MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException {
-        Future<Void> f = localApp.sendToUserAsync(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, true);
-        return new MessageHandlerImpl<Void>(f);
+    public int getUserId() {
+        return grizzlySocket.getUserId();
+    }
+
+    @Override
+    public int getContextId() {
+        return grizzlySocket.getContextId();
+    }
+
+    @Override
+    public void sendMessage(String message) throws OXException {
+        GrizzlyFuture<DataFrame> grizzlyFuture = grizzlySocket.send(message);
+        try {
+            grizzlyFuture.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(e, "Interrupted");
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            if (cause instanceof IOException) {
+                throw WebSocketExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
+            }
+            if (cause instanceof WebSocketException) {
+                throw WebSocketExceptionCodes.PROTOCOL_ERROR.create(cause, cause.getMessage());
+            }
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+        }
+    }
+
+    @Override
+    public MessageHandler sendMessageAsync(String message) throws OXException {
+        grizzlySocket.send(message);
+        return null;
+    }
+
+    @Override
+    public void onMessage(String text) {
+        // TODO Auto-generated method stub
+
     }
 
 }

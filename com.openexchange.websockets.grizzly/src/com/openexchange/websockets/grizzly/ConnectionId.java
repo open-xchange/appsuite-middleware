@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,43 +49,71 @@
 
 package com.openexchange.websockets.grizzly;
 
-import java.util.concurrent.Future;
-import com.openexchange.exception.OXException;
-import com.openexchange.websockets.MessageHandler;
-import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
 
 /**
- * {@link GrizzlyWebSocketService}
+ * {@link ConnectionId} - An identifier for a certain session-bound Web Socket connection.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class GrizzlyWebSocketService implements WebSocketService {
-
-    private final GrizzlyWebSocketApplication localApp;
-    private final RemoteWebSocketDistributor remoteDistributor;
+public class ConnectionId {
 
     /**
-     * Initializes a new {@link GrizzlyWebSocketService}.
+     * Creates a new instance.
+     *
+     * @param id The identifier
+     * @return The new instance
      */
-    public GrizzlyWebSocketService(GrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
+    public static ConnectionId newInstance(String id) {
+        return new ConnectionId(id);
+    }
+
+    // ---------------------------------------------------------
+
+    private final String id;
+    private final int hash;
+
+    /**
+     * Initializes a new {@link ConnectionId}.
+     */
+    private ConnectionId(String id) {
         super();
-        this.localApp = app;
-        this.remoteDistributor = remoteDistributor;
+        this.id = id;
+        this.hash = 31 * 1 + ((id == null) ? 0 : id.hashCode());
+    }
+
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
     }
 
     @Override
-    public void sendMessage(String message, int userId, int contextId) throws OXException {
-        localApp.sendToUser(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, false);
+    public int hashCode() {
+        return hash;
     }
 
     @Override
-    public MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException {
-        Future<Void> f = localApp.sendToUserAsync(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, true);
-        return new MessageHandlerImpl<Void>(f);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ConnectionId)) {
+            return false;
+        }
+        ConnectionId other = (ConnectionId) obj;
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        return true;
     }
+
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,73 +49,80 @@
 
 package com.openexchange.websockets.grizzly;
 
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 
 /**
- * {@link GrizzlyWebSocketSessionToucher}
+ * {@link SessionInfo} - Provides basic session information.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class GrizzlyWebSocketSessionToucher implements Runnable {
-
-    private final GrizzlyWebSocketApplication app;
+public class SessionInfo {
 
     /**
-     * Initializes a new {@link GrizzlyWebSocketSessionToucher}.
+     * Creates a new instance
      *
-     * @param app The Web Socket application
+     * @param session The session to create for
+     * @return The new instance
      */
-    public GrizzlyWebSocketSessionToucher(GrizzlyWebSocketApplication app) {
+    public static SessionInfo newInstance(Session session) {
+        return new SessionInfo(session.getSessionID(), session.getUserId(), session.getContextId());
+    }
+
+
+    /**
+     * Creates a new instance
+     *
+     * @param sessionId The session identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The new instance
+     */
+    public static SessionInfo newInstance(String sessionId, int userId, int contextId) {
+        return new SessionInfo(sessionId, userId, contextId);
+    }
+
+    // ---------------------------------------------------------------------------------
+
+    private final String sessionId;
+    private final int userId;
+    private final int contextId;
+
+    /**
+     * Initializes a new {@link SessionInfo}.
+     */
+    private SessionInfo(String sessionId, int userId, int contextId) {
         super();
-        this.app = app;
-    }
-
-    @Override
-    public void run() {
-        // Acquire needed service
-        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-        if (null == sessiondService) {
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketSessionToucher.class);
-            logger.warn("", ServiceExceptionCode.absentService(SessiondServiceExtended.class));
-            return;
-        }
-
-        // Get a list of currently active sessions bound to a Web Socket
-        Map<String, SessionBoundWebSocket> sessions = app.getActiveSessions();
-
-        // Touch them
-        for (Map.Entry<String, SessionBoundWebSocket> sessionEntry : sessions.entrySet()) {
-            Session session = sessiondService.getSession(sessionEntry.getKey());
-            if (null == session) {
-                // No such session
-                app.close(sessionEntry.getValue(), session);
-            }
-        }
+        this.sessionId = sessionId;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
     /**
-     * Gets the required touch period for sessions in the distributed storage based on the configured session default lifetime.
+     * Gets the session identifier
      *
-     * @param configService A reference to the configuration service
-     * @return The touch period in milliseconds
+     * @return The session identifier
      */
-    public static int getTouchPeriod(ConfigurationService configService) {
-        int defaultValue = 60 * 60 * 1000;
-        int value;
-        if (null == configService) {
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketSessionToucher.class);
-            logger.warn("Unable to determine \"com.openexchange.sessiond.sessionDefaultLifeTime\", falling back to {}.", defaultValue);
-            value = defaultValue;
-        } else {
-            value = configService.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", defaultValue);
-        }
-        return value;
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
     }
 
 }

@@ -52,12 +52,33 @@ package com.openexchange.websockets;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link WebSocket} - The representation of a Web Socket to send and receive data.
+ * {@link WebSocket} - The representation of a session-bound Web Socket to send and receive data.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
 public interface WebSocket {
+
+    /**
+     * Gets the identifier of the session currently associated with this Web Socket.
+     *
+     * @return The session identifier
+     */
+    String getSessionId();
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    int getUserId();
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    int getContextId();
 
     /**
      * Sends a message to the remote end-point, blocking until all of the message has been transmitted.

@@ -49,18 +49,32 @@
 
 package com.openexchange.websockets.grizzly;
 
+import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
+import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.HttpRequestPacket;
+import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DataFrame;
-import org.glassfish.grizzly.websockets.ProtocolError;
+import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketListener;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-
+import com.openexchange.session.UserAndContext;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link GrizzlyWebSocketApplication}
@@ -70,11 +84,60 @@ import com.openexchange.session.Session;
  */
 public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
+    private final ConcurrentMap<UserAndContext, ConcurrentMap<ConnectionId, SessionBoundWebSocket>> openSockets;
+    private final ServiceLookup services;
+    private final WebSocketListenerRegistry listenerRegistry;
+
     /**
      * Initializes a new {@link GrizzlyWebSocketApplication}.
      */
-    public GrizzlyWebSocketApplication() {
+    public GrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, ServiceLookup services) {
         super();
+        this.listenerRegistry = listenerRegistry;
+        this.services = services;
+        openSockets = new ConcurrentHashMap<>(265, 0.9F, 1);
+    }
+
+    /**
+     * Shuts-down this application.
+     */
+    public void shutDown() {
+        for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); i.hasNext();) {
+            for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); iter.hasNext();) {
+                SessionBoundWebSocket sessionBoundSocket = iter.next();
+                sessionBoundSocket.close();
+                iter.remove();
+            }
+            i.remove();
+        }
+    }
+
+    /**
+     * Asynchronously sends specified text message to all locally managed Web Socket connections.
+     *
+     * @param message The text message to send
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public Future<Void> sendToUserAsync(String message, int userId, int contextId) {
+        SendToUserTask task = new SendToUserTask(message, userId, contextId, this);
+        return ThreadPools.submitElseExecute(task);
+    }
+
+    /**
+     * Sends specified text message to all locally managed Web Socket connections.
+     *
+     * @param message The text message to send
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public void sendToUser(String message, int userId, int contextId) {
+        ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
+        if (null != userSockets) {
+            for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+                sessionBoundSocket.send(message);
+            }
+        }
     }
 
     /**
@@ -82,12 +145,11 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      *
      * @return The session identifier listing
      */
-    public Map<String, WebSocket> getActiveSessions() {
-        Map<String, WebSocket> sessions = new HashMap<>(32, 0.9F);
-        Set<WebSocket> webSockets = getWebSockets();
-        for (WebSocket socket : webSockets) {
-            if (socket instanceof SessionBoundWebSocket) {
-                String sessionId = ((SessionBoundWebSocket) socket).getSessionId();
+    public Map<String, SessionBoundWebSocket> getActiveSessions() {
+        Map<String, SessionBoundWebSocket> sessions = new HashMap<>(32, 0.9F);
+        for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
+            for (SessionBoundWebSocket socket : userSockets.values()) {
+                String sessionId = socket.getSessionId();
                 if (null != sessionId) {
                     sessions.put(sessionId, socket);
                 }
@@ -100,68 +162,170 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * Closes specified Web Socket connection.
      *
      * @param socket The Web Socket
+     * @param optSession The optional session associated with the socket to close
      */
-    public void close(WebSocket socket) {
-        remove(socket);
-        socket.close();
+    public void close(WebSocket socket, Session optSession) {
+        try {
+            if (socket instanceof SessionBoundWebSocket) {
+                boolean found = false;
+                if (null != optSession) {
+                    ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(optSession));
+                    if (null != userSockets) {
+                        for (Iterator<SessionBoundWebSocket> iter = userSockets.values().iterator(); !found && iter.hasNext();) {
+                            if (socket.equals(iter.next())) {
+                                iter.remove();
+                                found = true;
+                            }
+                        }
+                    }
+                } else {
+                    for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); !found && i.hasNext();) {
+                        for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); !found && iter.hasNext();) {
+                            if (socket.equals(iter.next())) {
+                                iter.remove();
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            } else {
+                remove(socket);
+            }
+        } finally {
+            socket.close();
+        }
     }
+
+    // ------------------------------------------------------ Methods from WebSocketApplication ------------------------------------------------------
 
     @Override
     public WebSocket createSocket(ProtocolHandler handler, HttpRequestPacket requestPacket, WebSocketListener... listeners) {
-        return new SessionBoundWebSocket(handler, requestPacket, listeners);
+        // Parse request packet
+        Cookies cookies = new Cookies();
+        cookies.setHeaders(requestPacket.getHeaders());
+        Parameters parameters = new Parameters();
+        parameters.setQueryStringEncoding(Charset.forName("UTF-8"));
+        parameters.setQuery(requestPacket.getQueryStringDC());
+
+        String sessionId = parameters.getParameter("session");
+        if (sessionId == null) {
+            throw new HandshakeException("Missing parameter 'session'");
+        }
+
+        String conId = parameters.getParameter("connection");
+        if (conId == null) {
+            conId = com.openexchange.java.util.UUIDs.getUnformattedStringFromRandom();
+        }
+
+        // Acquire needed service
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (null == sessiondService) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketSessionToucher.class);
+            logger.warn("", ServiceExceptionCode.absentService(SessiondServiceExtended.class));
+            throw new HandshakeException("Missing parameter Sessiond service.");
+        }
+
+        Session session = sessiondService.getSession(sessionId);
+        if (null == session) {
+            throw new HandshakeException("No such session: " + sessionId);
+        }
+
+        // TODO:
+
+        List<WebSocketListener> listenersToUse = new LinkedList<>();
+        if (null != listeners) {
+            for (WebSocketListener listener : listeners) {
+                if (null != listener) {
+                    listenersToUse.add(listener);
+                }
+            }
+        }
+        listenersToUse.addAll(listenerRegistry.getListeners());
+        return new SessionBoundWebSocket(SessionInfo.newInstance(session), ConnectionId.newInstance(conId), handler, requestPacket, listenersToUse.toArray(new WebSocketListener[listenersToUse.size()]));
     }
 
     @Override
     public void onConnect(WebSocket socket) {
         // Override this method to take control over socket collection
+        if (socket instanceof SessionBoundWebSocket) {
+            SessionBoundWebSocket sessionBoundSocket = (SessionBoundWebSocket) socket;
+
+            UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
+            ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
+            if (sockets == null) {
+                sockets = new ConcurrentHashMap<>(8, 0.9F, 1);
+                ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, sockets);
+                if (existing != null) {
+                    sockets = existing;
+                }
+            }
+
+            if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
+                throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+            }
+
+            synchronized (sessionBoundSocket) {
+                Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
+                for (WebSocketListener listener : listenerRegistry.getListeners()) {
+                    if (!listeners.contains(listener)) {
+                        listeners.add(listener);
+                    }
+                }
+            }
+        } else {
+            super.onConnect(socket);
+        }
     }
 
     @Override
     public void onClose(WebSocket socket, DataFrame frame) {
-        super.onClose(socket, frame);
-    }
+        // Override this method to take control over socket collection
+        if (socket instanceof SessionBoundWebSocket) {
+            SessionBoundWebSocket sessionBoundSocket = (SessionBoundWebSocket) socket;
 
-    @Override
-    public void onMessage(WebSocket socket, String message) {
-        if (!(socket instanceof SessionBoundWebSocket)) {
-            throw new ProtocolError("Invalid socket: " + (null == socket ? "null" : socket.getClass().getName()));
-        }
-
-        SessionBoundWebSocket sessionBoundWebSocket = (SessionBoundWebSocket) socket;
-        if (isLoginMessage(message)) {
-            Session session = login(message);
-            if (null == session || false == sessionBoundWebSocket.bindSession(session) || false == add(sessionBoundWebSocket)) {
-                throw new ProtocolError("Invalid login message");
+            UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
+            ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
+            if (sockets != null) {
+                sockets.remove(sessionBoundSocket.getConnectionId());
             }
+
+            socket.close();
         } else {
-            String sessionId = sessionBoundWebSocket.getSessionId();
-            if (null == sessionId) {
-                throw new ProtocolError("Not logged-in");
-            }
+            super.onClose(socket, frame);
+        }
+    }
 
-            // Hm... No broadcast support in current Grizzly version
+    // ----------------------------------------------- Listener management -------------------------------------------------
+
+    /**
+     * Adds specified listener to existing Web Sockets
+     *
+     * @param listener The listener to add
+     */
+    public void addWebSocketListener(WebSocketListener listener) {
+        for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
+            for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+                synchronized (sessionBoundSocket) {
+                    Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
+                    if (!listeners.contains(listener)) {
+                        listeners.add(listener);
+                    }
+                }
+            }
         }
     }
 
     /**
-     * Performs a login using given login message.
+     * Removes specified listener to existing Web Sockets
      *
-     * @param message The login message
-     * @return The resulting session or <code>null</code>
+     * @param listener The listener to remove
      */
-    private Session login(String loginMessage) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * Checks if specified message attempts to perform a login
-     *
-     * @param message The message to examine
-     * @return <code>true</code> if message attempts to perform a login; otherwise <code>false</code>
-     */
-    private boolean isLoginMessage(String message) {
-        return false;
+    public void removeWebSocketListener(WebSocketListener listener) {
+        for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
+            for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+                sessionBoundSocket.remove(listener);
+            }
+        }
     }
 
 }
