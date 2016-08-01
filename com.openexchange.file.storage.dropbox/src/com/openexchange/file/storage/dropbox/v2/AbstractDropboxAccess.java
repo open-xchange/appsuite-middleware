@@ -99,6 +99,22 @@ abstract class AbstractDropboxAccess {
     }
 
     /**
+     * Retrieves the parent folder path from the specified full path.
+     * 
+     * @param path The path
+     * @return The parent folder path
+     */
+    String getParent(String path) {
+        String workingPath = path;
+        // If the path ends with a '/' trim it
+        if (path.endsWith("/")) {
+            workingPath = path.substring(0, path.length() - 1);
+        }
+        int index = workingPath.lastIndexOf('/');
+        return workingPath.substring(0, index);
+    }
+
+    /**
      * Gets the (dropbox-)path for specified folder identifier.
      *
      * @param folderId The folder identifier
