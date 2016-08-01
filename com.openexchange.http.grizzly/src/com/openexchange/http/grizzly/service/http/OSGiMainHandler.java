@@ -152,9 +152,9 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     private static final AtomicBoolean SHUTDOWN_REQUESTED = new AtomicBoolean(false);
 
-	private static CharBuffer reponseBuffer = CharBuffer.allocate(4096);
+    private static CharBuffer reponseBuffer = CharBuffer.allocate(4096);
 
-	private static CharsetEncoder encoder = Charset.forName("UTF-8").newEncoder();
+    private static CharsetEncoder encoder = Charset.forName("UTF-8").newEncoder();
 
     /**
      * Sets the "shut-down requested" marker.
@@ -616,34 +616,34 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         updatePaths(request, mappingData);
     }
 
-	@Override
-	protected void customizedErrorPage(Request req, Response res)
-			throws Exception {
+    @Override
+    protected void customizedErrorPage(Request req, Response res)
+        throws Exception {
 
-		res.setStatus(HttpStatus.NOT_FOUND_404);
-		final ByteBuffer bb = getErrorPage(404, "Not found", "Resource does not exist.");
-		res.setContentLength(bb.limit());
-		res.setContentType("text/html");
-		OutputBuffer out = res.getOutputBuffer();
-		out.prepareCharacterEncoder();
-		out.write(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining());
-		out.close();
-	}
+        res.setStatus(HttpStatus.NOT_FOUND_404);
+        final ByteBuffer bb = getErrorPage(404, "Not found", "Resource does not exist.");
+        res.setContentLength(bb.limit());
+        res.setContentType("text/html");
+        OutputBuffer out = res.getOutputBuffer();
+        out.prepareCharacterEncoder();
+        out.write(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining());
+        out.close();
+    }
 
-	/**
-	 * Generate an error page based on our servlet defaults.
-	 *
-	 * @return A {@link ByteBuffer} containing the HTTP response.
-	 */
-	public synchronized static ByteBuffer getErrorPage(int code,
-			String message, String description) throws IOException {
+    /**
+     * Generate an error page based on our servlet defaults.
+     *
+     * @return A {@link ByteBuffer} containing the HTTP response.
+     */
+    public synchronized static ByteBuffer getErrorPage(int code,
+        String message, String description) throws IOException {
 
-		String body = com.openexchange.tools.servlet.http.Tools.getErrorPage(
-				code, message, description);
-		reponseBuffer.clear();
-		reponseBuffer.put(body);
-		reponseBuffer.flip();
-		return encoder.encode(reponseBuffer);
+        String body = com.openexchange.tools.servlet.http.Tools.getErrorPage(
+            code, message, description);
+        reponseBuffer.clear();
+        reponseBuffer.put(body);
+        reponseBuffer.flip();
+        return encoder.encode(reponseBuffer);
 
-	}
+    }
 }
