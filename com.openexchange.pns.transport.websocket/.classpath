@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/javax.websocket-api-1.1.jar" sourcepath="lib/source/javax.websocket-api-1.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tyrus-container-grizzly-1.2.1.jar" sourcepath="lib/source/tyrus-container-grizzly-1.2.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tyrus-server-1.13.jar" sourcepath="lib/source/tyrus-server-1.13-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>

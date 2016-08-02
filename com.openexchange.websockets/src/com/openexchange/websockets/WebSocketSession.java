@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,29 +47,54 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket;
+package com.openexchange.websockets;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
- * {@link WebSocketOptionsProvider} - Provides the options to communicate with the Web Socket end-point.
+ * {@link WebSocketSession} - A session associated with a Web Socket.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public interface WebSocketOptionsProvider {
+public interface WebSocketSession {
 
     /**
-     * Gets the Web Socket options.
+     * Gets the object bound with the specified name in this session, or
+     * <code>null</code> if no object is bound under the name.
      *
-     * @return The Web Socket options or <code>null</code>
+     * @param name The string specifying the name of the object
+     * @return The object bound to the specified name or <code>null</code>
      */
-    WebSocketOptions getOptions(String client);
+    Object getAttribute(String name);
 
     /**
-     * Gets available options from this provider
+     * Gets the set view for the names of all the objects bound to this session.
      *
-     * @return The available options
+     * @return The set view for attribute names
      */
-    Collection<WebSocketOptionsPerClient> getAvailableOptions();
+    Set<String> getAttributeNames();
+
+    /**
+     * Binds an object to this session, using the name specified.
+     * <p>
+     * If an object of the same name is already bound to the session, the object is replaced.
+     * <p>
+     * If the value passed in is null, this has the same effect as calling <code>removeAttribute()<code>.
+     *
+     *
+     * @param name The name to which the object is bound
+     * @param value The object to be bound
+     */
+    void setAttribute(String name, Object value);
+
+    /**
+     * Removes the object bound with the specified name from this session.
+     * <p>
+     * If the session does not have an object bound with the specified name, this method does nothing.
+     *
+     * @param name The name of the object to remove from this session
+     */
+    void removeAttribute(String name);
 
 }

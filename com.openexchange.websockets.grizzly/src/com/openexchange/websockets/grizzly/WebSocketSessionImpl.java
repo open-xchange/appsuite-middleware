@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,60 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket;
+package com.openexchange.websockets.grizzly;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.websockets.WebSocketSession;
 
 /**
- * {@link WebSocketOptions} - Holds the (immutable) options to communicate with the Web Socket.
+ * {@link WebSocketSessionImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class WebSocketOptions {
+public class WebSocketSessionImpl implements WebSocketSession {
 
-    private final String url;
+    private final ConcurrentMap<String, Object> attributes;
 
     /**
-     * Initializes a new immutable {@link WebSocketOptions} instance.
-     *
-     * @param url The Web Socket URL
+     * Initializes a new {@link WebSocketSessionImpl}.
      */
-    public WebSocketOptions(String url) {
+    public WebSocketSessionImpl() {
         super();
-        this.url = url;
+        attributes = new ConcurrentHashMap<>(8, 0.9F, 1);
     }
 
-    /**
-     * Gets the URL
-     *
-     * @return The URL
-     */
-    public String getUrl() {
-        return url;
+    @Override
+    public Object getAttribute(String name) {
+        return null == name ? null : attributes.get(name);
+    }
+
+    @Override
+    public Set<String> getAttributeNames() {
+        return new LinkedHashSet<>(attributes.keySet());
+    }
+
+    @Override
+    public void setAttribute(String name, Object value) {
+        if (null == name) {
+            return;
+        }
+        if (null == value) {
+            attributes.remove(name);
+        } else {
+            attributes.put(name, value);
+        }
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+        if (null == name) {
+            return;
+        }
+        attributes.remove(name);
     }
 
 }

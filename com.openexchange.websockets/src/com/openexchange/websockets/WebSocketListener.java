@@ -50,7 +50,9 @@
 package com.openexchange.websockets;
 
 /**
- * {@link WebSocketListener}
+ * {@link WebSocketListener} - A Web Socket listener for receiving various call-backs on certain Web Socket events.
+ * <p>
+ * Listeners simply need to be OSGi-wise registered.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3

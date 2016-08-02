@@ -50,6 +50,7 @@
 package com.openexchange.pns;
 
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 
 /**
  * {@link DefaultPushSubscription} - The default implementation for {@code PushSubscription}.
@@ -191,7 +192,7 @@ public class DefaultPushSubscription implements PushSubscription {
      */
     private DefaultPushSubscription(Builder builder) {
         super();
-        this.topics = builder.topics;
+        this.topics = ImmutableList.copyOf(builder.topics);
         this.contextId = builder.contextId;
         this.token = builder.token;
         this.transportId = builder.transportId;

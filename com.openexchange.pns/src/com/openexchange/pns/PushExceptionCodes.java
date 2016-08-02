@@ -99,6 +99,10 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
      * The message is too big. Allowed is %1$s, but is %2$s.
      */
     MESSAGE_TOO_BIG("The message is too big. Allowed is %1$s, but is %2$s.", null, Category.CATEGORY_ERROR, 9),
+    /**
+     * Message generation failed: %1$s
+     */
+    MESSAGE_GENERATION_FAILED("Message generation failed: %1$s", null, Category.CATEGORY_ERROR, 10),
 
     ;
 

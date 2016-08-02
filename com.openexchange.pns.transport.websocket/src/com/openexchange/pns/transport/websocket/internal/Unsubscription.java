@@ -47,79 +47,56 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.pns.transport.websocket.internal;
 
-import org.glassfish.grizzly.http.HttpRequestPacket;
-import org.glassfish.grizzly.websockets.DefaultWebSocket;
-import org.glassfish.grizzly.websockets.ProtocolHandler;
-import org.glassfish.grizzly.websockets.WebSocketListener;
-import com.openexchange.websockets.WebSocketSession;
+import java.util.List;
+import com.openexchange.pns.PushSubscription;
 
 /**
- * {@link SessionBoundWebSocket} - The Web Socket bound to a certain session.
+ * {@link Unsubscription} - An unsubscription from a Web Socket transport.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class SessionBoundWebSocket extends DefaultWebSocket {
+final class Unsubscription {
 
-    private final SessionInfo sessionInfo;
-    private final ConnectionId connectionId;
-    private final WebSocketSession webSocketSession;
+    private final int userId;
+    private final int contextId;
+    private final String client;
+    private final List<String> topics;
+    private final PushSubscription subscription;
+    private volatile Integer hash;
 
     /**
-     * Initializes a new {@link SessionBoundWebSocket}.
+     * Initializes a new {@link Unsubscription}.
+     *
+     * @param subscription The subscription to unsubscribe
      */
-    public SessionBoundWebSocket(SessionInfo sessionInfo, ConnectionId connectionId, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
-        super(protocolHandler, request, listeners);
-        this.sessionInfo = sessionInfo;
-        this.connectionId = connectionId;
-        webSocketSession = new WebSocketSessionImpl();
+    public Unsubscription(PushSubscription subscription) {
+        super();
+        this.subscription = subscription;
+        this.userId = subscription.getUserId();
+        this.contextId = subscription.getContextId();
+        this.client = subscription.getClient();
+        this.topics = subscription.getTopics();
     }
 
     /**
-     * Gets the Web Socket session
+     * Gets the subscription
      *
-     * @return The Web Socket session
+     * @return The subscription
      */
-    public WebSocketSession getWebSocketSession() {
-        return webSocketSession;
+    public PushSubscription getSubscription() {
+        return subscription;
     }
 
     /**
-     * Gets the basic information for the session currently associated with this Web Socket.
+     * Gets the client
      *
-     * @return The session information
+     * @return The client
      */
-    public SessionInfo getSessionInfo() {
-        return sessionInfo;
-    }
-
-    /**
-     * Gets the connection identifier
-     *
-     * @return The connection identifier
-     */
-    public ConnectionId getConnectionId() {
-        return connectionId;
-    }
-
-    /**
-     * Gets the identifier of the session currently associated with this Web Socket.
-     *
-     * @return The session identifier
-     */
-    public String getSessionId() {
-        return sessionInfo.getSessionId();
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return sessionInfo.getUserId();
+    public String getClient() {
+        return client;
     }
 
     /**
@@ -128,16 +105,64 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
      * @return The context identifier
      */
     public int getContextId() {
-        return sessionInfo.getContextId();
+        return contextId;
     }
 
     /**
-     * Gets the path that was used while this Web Socket was created; e.g. <code>"/websockets/foo/bar"</code>.
+     * Gets the user identifier
      *
-     * @return The path
+     * @return The user identifier
      */
-    public String getPath() {
-        return request.getRequestURI();
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int hashCode() {
+        Integer tmp = hash;
+        if (null == tmp) {
+            int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            result = prime * result + ((client == null) ? 0 : client.hashCode());
+            result = prime * result + ((topics == null) ? 0 : topics.hashCode());
+            tmp = Integer.valueOf(result);
+            hash = tmp;
+        }
+        return tmp.intValue();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Unsubscription)) {
+            return false;
+        }
+        Unsubscription other = (Unsubscription) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (client == null) {
+            if (other.client != null) {
+                return false;
+            }
+        } else if (!client.equals(other.client)) {
+            return false;
+        }
+        if (topics == null) {
+            if (other.topics != null) {
+                return false;
+            }
+        } else if (!topics.equals(other.topics)) {
+            return false;
+        }
+        return true;
     }
 
 }
