@@ -208,7 +208,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             // Create new, empty file ("touch")
             try {
                 String path = toPath(file.getFolderId(), file.getFileName());
-                //TODO: Use session upload?
                 UploadUploader upload = client.files().upload(path);
                 FileMetadata metadata = upload.finish();
                 DropboxFile dbxFile = new DropboxFile(metadata, userId);
