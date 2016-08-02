@@ -83,7 +83,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-//TODO: Better exception handling
 public class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess {
 
     private final int userId;
@@ -198,7 +197,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             String cursor = null;
             do {
                 listFolder = (cursor != null) ? client.files().listFolderContinue(cursor) : client.files().listFolder(parentIdentifier);
-                listFolder = client.files().listFolder(parentIdentifier);
                 List<Metadata> entries = listFolder.getEntries();
 
                 for (Metadata entry : entries) {
@@ -475,6 +473,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      * @throws DbxException
      */
     private boolean hasSubFolders(String folderId) throws ListFolderErrorException, DbxException {
+        // TODO: Use pagination
         ListFolderResult listFolder = client.files().listFolder(folderId);
         List<Metadata> entries = listFolder.getEntries();
         boolean hasSubFolders = false;
