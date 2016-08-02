@@ -117,7 +117,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             if (LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
                 return false;
             }
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -143,12 +143,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             // Parse metadata
             return new DropboxFolder(metadata, userId, accountDisplayName, hasSubFolders);
         } catch (ListFolderErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (GetMetadataErrorException e) {
-            if (LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
-                throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, folderId);
-            }
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -215,9 +212,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
             return folders.toArray(new FileStorageFolder[0]);
         } catch (ListFolderContinueErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleListFolderContinueErrorException(e, parentIdentifier);
         } catch (ListFolderErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleListFolderErrorException(e, parentIdentifier);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -257,12 +254,12 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
+        String fullpath = constructPath(toCreate.getParentId(), toCreate.getName());
         try {
-            String fullpath = constructPath(toCreate.getParentId(), toCreate.getName());
             FolderMetadata folderMetadata = client.files().createFolder(fullpath);
             return folderMetadata.getPathDisplay();
         } catch (CreateFolderErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleCreateFolderErrorException(e, fullpath);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -308,7 +305,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             Metadata metadata = client.files().move(folderId, newParentId);
             return metadata.getPathDisplay();
         } catch (RelocationErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "");
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -328,7 +325,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             Metadata metadata = client.files().move(folderId, newPath);
             return metadata.getPathDisplay();
         } catch (RelocationErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "");
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -345,7 +342,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             Metadata metadata = client.files().delete(folderId);
             return metadata.getName();
         } catch (DeleteErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "");
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -369,6 +366,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public void clearFolder(String folderId) throws OXException {
         try {
+            // TODO: Use cursor and page the list
             ListFolderResult listFolder = client.files().listFolder(folderId);
             for (Metadata entry : listFolder.getEntries()) {
                 if (entry instanceof FolderMetadata) {
@@ -376,9 +374,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
                 }
             }
         } catch (DeleteErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "");
         } catch (ListFolderErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -467,7 +465,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     }
 
     ///////////////////////////////////////////// HELPERS //////////////////////////////////////////////
-    
+
     /**
      * Check for sub folders
      * 

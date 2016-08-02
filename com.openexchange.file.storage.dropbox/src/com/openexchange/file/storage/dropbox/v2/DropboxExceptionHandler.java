@@ -52,9 +52,11 @@ package com.openexchange.file.storage.dropbox.v2;
 import com.dropbox.core.InvalidAccessTokenException;
 import com.dropbox.core.ProtocolException;
 import com.dropbox.core.RateLimitException;
+import com.dropbox.core.v2.files.CreateFolderErrorException;
 import com.dropbox.core.v2.files.DeleteErrorException;
 import com.dropbox.core.v2.files.DownloadErrorException;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
+import com.dropbox.core.v2.files.ListFolderContinueErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListRevisionsErrorException;
 import com.dropbox.core.v2.files.LookupError;
@@ -125,13 +127,31 @@ final class DropboxExceptionHandler {
      * 
      * @param e The {@link ListFolderErrorException}
      * @param folderId The folder identifier used to trigger the error
-     * @param fileId The file identifier used to trigger the error
      * @return The {@link OXException}
      */
     static final OXException handleListFolderErrorException(ListFolderErrorException e, String folderId) {
         switch (e.errorValue.tag()) {
             case PATH:
                 return mapLookupError(e.errorValue.getPathValue(), folderId, "", e);
+            case OTHER:
+            default:
+                // Everything else falls through to 'unexpected error' 
+                return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Handles the {@link ListFolderContinueErrorException}
+     * 
+     * @param e The {@link ListFolderContinueErrorException}
+     * @param folderId The folder identifier used to trigger the error
+     * @return The {@link OXException}
+     */
+    static final OXException handleListFolderContinueErrorException(ListFolderContinueErrorException e, String folderId) {
+        switch (e.errorValue.tag()) {
+            case PATH:
+                return mapLookupError(e.errorValue.getPathValue(), folderId, "", e);
+            case RESET:
             case OTHER:
             default:
                 // Everything else falls through to 'unexpected error' 
@@ -298,6 +318,23 @@ final class DropboxExceptionHandler {
             case UNSUPPORTED_EXTENSION:
             case UNSUPPORTED_IMAGE:
             case CONVERSION_ERROR:
+            default:
+                // Everything else falls through to 'unexpected error' 
+                return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Handles the {@link CreateFolderErrorException}
+     * 
+     * @param e The {@link CreateFolderErrorException}
+     * @param folderId The folder identifier used to trigger the error
+     * @return The {@link OXException}
+     */
+    static final OXException handleCreateFolderErrorException(CreateFolderErrorException e, String folderId) {
+        switch (e.errorValue.tag()) {
+            case PATH:
+                return mapWriteError(e.errorValue.getPathValue(), folderId, e);
             default:
                 // Everything else falls through to 'unexpected error' 
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
