@@ -872,6 +872,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             sink = new ThresholdFileHolder();
             sink.write(data);
 
+            // Work with local stream
             InputStream stream = sink.getStream();
 
             // Start an upload session and get the session id
@@ -880,6 +881,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             String sessionId = result.getSessionId();
             long offset = CHUNK_SIZE;
 
+            // Start uploading chunks of data
             UploadSessionCursor cursor = new UploadSessionCursor(sessionId, offset);
             while (sink.getCount() - offset > CHUNK_SIZE) {
                 client.files().uploadSessionAppendV2(cursor).uploadAndFinish(stream, CHUNK_SIZE);
@@ -887,11 +889,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 cursor = new UploadSessionCursor(sessionId, offset);
             }
 
+            // Upload the remaining chunk
             long remaining = sink.getCount() - offset;
             CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()));
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
+            // Return
             return new DropboxFile(metadata, userId);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
