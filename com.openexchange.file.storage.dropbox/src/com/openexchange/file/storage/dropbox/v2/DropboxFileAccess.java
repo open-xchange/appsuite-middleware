@@ -152,7 +152,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (LookupError.NOT_FOUND.equals(e.errorValue.getPathValue())) {
                 return false;
             }
-            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, true, folderId, id);
+            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -182,7 +182,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dropboxFile;
         } catch (GetMetadataErrorException e) {
-            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, true, folderId, id);
+            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -236,7 +236,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
                         return dbxFile.getIDTuple();
                     } catch (RelocationErrorException e) {
-                        throw DropboxExceptionHandler.handleRelocationErrorException(e, true, file.getFolderId(), file.getId());
+                        throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId());
                     } catch (DbxException e) {
                         throw DropboxExceptionHandler.handle(e);
                     }
@@ -252,8 +252,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
                         return dbxFile.getIDTuple();
                     } catch (RestoreErrorException e) {
-                        // TODO: Maybe introduce new exception codes?
-                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        throw DropboxExceptionHandler.handleRestoreErrorException(e, file.getFolderId(), file.getId());
                     } catch (DbxException e) {
                         throw DropboxExceptionHandler.handle(e);
                     }
@@ -262,7 +261,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             return new IDTuple(file.getFolderId(), file.getId());
         }
-
     }
 
     /*
@@ -299,7 +297,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, true, source.getFolder(), source.getId());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId());
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -327,7 +325,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, true, source.getFolder(), source.getId());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId());
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -344,8 +342,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             DbxDownloader<FileMetadata> download = client.files().download(toPath(folderId, id), version);
             return new SizeKnowingInputStream(download.getInputStream(), download.getResult().getSize());
         } catch (DownloadErrorException e) {
-            // TODO Auto-generated catch block
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleDownloadErrorException(e, folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -388,7 +385,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 file.setVersion(fileMetadata.getRev());
                 return saveFileMetadata(file, sequenceNumber);
             } catch (UploadErrorException e) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw DropboxExceptionHandler.handleUploadErrorException(e, path);
             } catch (DbxException e) {
                 throw DropboxExceptionHandler.handle(e);
             } catch (IOException e) {
@@ -404,6 +401,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void removeDocument(String folderId, long sequenceNumber) throws OXException {
+        String fileId = null;
         try {
             Metadata metadata = getMetadata(folderId);
             // Ensure that we are emptying a folder
@@ -415,12 +413,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             ListFolderResult listFolder = client.files().listFolder(folderId);
             for (Metadata entry : listFolder.getEntries()) {
                 if (entry instanceof FileMetadata) {
+                    fileId = entry.getName();
                     client.files().delete(entry.getPathDisplay());
                 }
             }
         } catch (DeleteErrorException e) {
-            // TODO Auto-generated catch block
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            // TODO: Fail the entire operation if one file cannot be deleted or add a warning instead?
+            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, fileId);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -490,9 +489,8 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
 
             return new FileTimedResult(files);
-        } catch (GetMetadataErrorException e) {
-            // TODO: Maybe introduce new exception codes?
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (ListFolderErrorException e) {
+            throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -527,9 +525,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             sort(files, sort, order);
             return new FileTimedResult(files);
-        } catch (Exception e) {
+        } catch (ListFolderErrorException e) {
+            throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
+        } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
+
     }
 
     /*
@@ -556,7 +557,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     }
                 }
             } catch (ListFolderErrorException e) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw DropboxExceptionHandler.handleListFolderErrorException(e, path);
             } catch (DbxException e) {
                 throw DropboxExceptionHandler.handle(e);
             }
@@ -736,8 +737,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             client.files().delete(toPath(folderId, id));
             return new String[0];
         } catch (DeleteErrorException e) {
-            // TODO: Maybe introduce new exception codes?
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -789,8 +789,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             sort(files, sort, order);
             return new FileTimedResult(files);
         } catch (ListRevisionsErrorException e) {
-            // TODO: Maybe introduce new exception codes?
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleListRevisionsErrorException(e, folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -809,8 +808,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 FolderMetadata metadata = getFolderMetadata(folderId);
                 sequenceNumbers.put(folderId, getSequenceNumber(metadata));
             } catch (GetMetadataErrorException e) {
-                // TODO: Maybe introduce new exception codes?
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
             } catch (DbxException e) {
                 throw DropboxExceptionHandler.handle(e);
             }
@@ -829,8 +827,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             DbxDownloader<FileMetadata> dbxDownloader = client.files().getThumbnailBuilder(toPath(folderId, id)).withFormat(ThumbnailFormat.JPEG).withSize(ThumbnailSize.W128H128).start();
             return dbxDownloader.getInputStream();
         } catch (ThumbnailErrorException e) {
-            // TODO: Maybe introduce new exception codes?
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleThumbnailErrorException(e, folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -917,13 +914,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     private IDTuple singleUpload(File file, InputStream data) throws OXException {
         String name = file.getFileName();
         String fileName = name;
+        String path = new StringBuilder(file.getFolderId()).append('/').append(fileName).toString();
         try {
-            FileMetadata metadata = client.files().upload(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString()).uploadAndFinish(data);
+            FileMetadata metadata = client.files().upload(path).uploadAndFinish(data);
             DropboxFile dbxFile = new DropboxFile(metadata, userId);
             file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
             return dbxFile.getIDTuple();
         } catch (UploadErrorException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DropboxExceptionHandler.handleUploadErrorException(e, path);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         } catch (IOException e) {
@@ -966,14 +964,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 try {
                     return getAllFiles(folderId, true);
                 } catch (ListFolderErrorException e) {
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
                 }
             } else {
                 // Search
                 try {
                     return fireSearch(folderId, pattern, includeSubfolders);
                 } catch (SearchErrorException e) {
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    throw DropboxExceptionHandler.handleSearchErrorException(e, folderId, pattern);
                 }
             }
         } catch (DbxException e) {
