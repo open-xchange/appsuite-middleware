@@ -51,6 +51,10 @@ package com.openexchange.pns.transport.websocket.internal;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
@@ -58,13 +62,16 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.BufferingQueue;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
+import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.pns.PushSubscription.Nature;
@@ -125,64 +132,12 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         return tmp.longValue();
     }
 
-    private static final class Unsubscription {
-
-        final int userId;
-        final int contextId;
-        final String client;
-        private final int hash;
-
-        Unsubscription(int userId, int contextId, String client) {
-            super();
-            this.userId = userId;
-            this.contextId = contextId;
-            this.client = client;
-
-            int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            result = prime * result + ((client == null) ? 0 : client.hashCode());
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Unsubscription)) {
-                return false;
-            }
-            Unsubscription other = (Unsubscription) obj;
-            if (contextId != other.contextId) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            if (client == null) {
-                if (other.client != null) {
-                    return false;
-                }
-            } else if (!client.equals(other.client)) {
-                return false;
-            }
-            return true;
-        }
-    }
-
     // ---------------------------------------------------------------------------------------------------------------
 
     private final ServiceLookup services;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
-    private final ConcurrentMap<WebSocket, String> sockets;
+    private final ConcurrentMap<UserAndContext, ConcurrentMap<WebSocket, String>> socketsPerUser;
     private final BufferingQueue<Unsubscription> scheduledUnsubscriptions;
     private ScheduledTimerTask scheduledTimerTask; // Accessed synchronized
     private boolean stopped; // Accessed synchronized
@@ -196,8 +151,25 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         this.subscriptionRegistry = subscriptionRegistry;
         this.services = services;
 
-        sockets = new ConcurrentHashMap<>(32, 0.9F, 1);
+        socketsPerUser = new ConcurrentHashMap<>(256);
         scheduledUnsubscriptions = new BufferingQueue<>(delayDuration(services));
+    }
+
+    private ConcurrentMap<WebSocket, String> requireUserSockets(WebSocket socket) {
+        UserAndContext uac = UserAndContext.newInstance(socket.getUserId(), socket.getContextId());
+        ConcurrentMap<WebSocket, String> sockets = socketsPerUser.get(uac);
+        if (null == sockets) {
+            sockets = new ConcurrentHashMap<>(32);
+            ConcurrentMap<WebSocket, String> existing = socketsPerUser.putIfAbsent(uac, sockets);
+            if (null != existing) {
+                sockets = existing;
+            }
+        }
+        return sockets;
+    }
+
+    private ConcurrentMap<WebSocket, String> optUserSockets(WebSocket socket) {
+        return socketsPerUser.get(UserAndContext.newInstance(socket.getUserId(), socket.getContextId()));
     }
 
     /**
@@ -222,23 +194,33 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     public void onWebSocketConnect(WebSocket socket) {
         String path = socket.getPath();
         if (null != path && path.startsWith("/websockets/push")) {
+            ConcurrentMap<WebSocket, String> sockets = requireUserSockets(socket);
             String client = "open-xchange-appsuite";
             if (null == sockets.putIfAbsent(socket, client)) {
-                // Subscribe...
-                boolean removed = scheduledUnsubscriptions.remove(new Unsubscription(socket.getUserId(), socket.getContextId(), "open-xchange-appsuite"));
-                if (removed) {
-                    // Already subscribed...
-                } else {
-                    DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
-                        .client(client)
-                        .contextId(socket.getContextId())
-                        .nature(Nature.VOLATILE)
-                        .token("")
-                        .topics(Collections.singletonList("*"))
-                        .transportId(ID)
-                        .userId(socket.getUserId())
-                        .build();
+                synchronized (this) {
+                    // Stopped
+                    if (stopped) {
+                        return;
+                    }
+                }
 
+                // Create subscription instance
+                DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
+                    .client(client)
+                    .contextId(socket.getContextId())
+                    .nature(Nature.VOLATILE)
+                    .token("")
+                    .topics(Collections.singletonList("*"))
+                    .transportId(ID)
+                    .userId(socket.getUserId())
+                    .build();
+
+                // Check if there is a queued unsubscription for it
+                boolean removed = scheduledUnsubscriptions.remove(new Unsubscription(subscription));
+                if (removed) {
+                    // Already/still subscribed...
+                } else {
+                    // Subscribe...
                     try {
                         subscriptionRegistry.registerSubscription(subscription);
                     } catch (OXException e) {
@@ -253,27 +235,44 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     public void onWebSocketClose(WebSocket socket) {
         String path = socket.getPath();
         if (null != path && path.startsWith("/websockets/push")) {
-            if (null != sockets.remove(socket)) {
-                // Check time task is alive
-                ScheduledTimerTask scheduledTimerTask = this.scheduledTimerTask;
-                if (null == scheduledTimerTask) {
-                    // Initialize timer task
-                    TimerService timerService = services.getService(TimerService.class);
-                    Runnable timerTask = new Runnable() {
+            ConcurrentMap<WebSocket, String> sockets = optUserSockets(socket);
+            if (null != sockets && null != sockets.remove(socket)) {
+                synchronized (this) {
+                    // Stopped
+                    if (stopped) {
+                        return;
+                    }
 
-                        @Override
-                        public void run() {
-                            checkUnsubscription();
-                        }
-                    };
-                    long delay = timerFrequency(services); // 2sec delay
-                    this.scheduledTimerTask = timerService.scheduleWithFixedDelay(timerTask, delay, delay);
-                    LOG.info("Initialized new timer task for unsubscribing Web Socket push subscriptions");
+                    // Check time task is alive
+                    ScheduledTimerTask scheduledTimerTask = this.scheduledTimerTask;
+                    if (null == scheduledTimerTask) {
+                        // Initialize timer task
+                        TimerService timerService = services.getService(TimerService.class);
+                        Runnable timerTask = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                checkUnsubscription();
+                            }
+                        };
+                        long delay = timerFrequency(services); // 2sec delay
+                        this.scheduledTimerTask = timerService.scheduleWithFixedDelay(timerTask, delay, delay);
+                        LOG.info("Initialized new timer task for unsubscribing Web Socket push subscriptions");
+                    }
+
+                    String client = "open-xchange-appsuite";
+                    DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
+                        .client(client)
+                        .contextId(socket.getContextId())
+                        .nature(Nature.VOLATILE)
+                        .token("")
+                        .topics(Collections.singletonList("*"))
+                        .transportId(ID)
+                        .userId(socket.getUserId())
+                        .build();
+                    scheduledUnsubscriptions.offerOrReplace(new Unsubscription(subscription));
+                    LOG.info("Scheduled unsubscribing Web Socket push subscription for client {} from user {} in context", client, socket.getUserId(), socket.getContextId());
                 }
-
-                String client = "open-xchange-appsuite";
-                scheduledUnsubscriptions.offerOrReplace(new Unsubscription(socket.getUserId(), socket.getContextId(), client));
-                LOG.info("Scheduled unsubscribing Web Socket push subscription for client {} from user {} in context", client, socket.getUserId(), socket.getContextId());
             }
         }
     }
@@ -287,27 +286,19 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
             if (stopped) {
                 return;
             }
+        }
 
-            Unsubscription unsubscription = scheduledUnsubscriptions.poll();
-            if (null != unsubscription) {
-                DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
-                    .client(unsubscription.client)
-                    .contextId(unsubscription.contextId)
-                    .nature(Nature.VOLATILE)
-                    .token("")
-                    .topics(Collections.singletonList("*"))
-                    .transportId(ID)
-                    .userId(unsubscription.userId)
-                    .build();
-
-                try {
-                    subscriptionRegistry.unregisterSubscription(subscription);
-                    LOG.info("Unsubscribed Web Socket push for client {} from user {} in context", unsubscription.client, unsubscription.userId, unsubscription.contextId);
-                } catch (OXException e) {
-                    LOG.info("Failed to unsubscribe Web Socket push for client {} from user {} in context", unsubscription.client, unsubscription.userId, unsubscription.contextId);
-                }
+        Unsubscription unsubscription = scheduledUnsubscriptions.poll();
+        if (null != unsubscription) {
+            try {
+                subscriptionRegistry.unregisterSubscription(unsubscription.getSubscription());
+                LOG.info("Unsubscribed Web Socket push for client {} from user {} in context", unsubscription.getClient(), unsubscription.getUserId(), unsubscription.getContextId());
+            } catch (OXException e) {
+                LOG.info("Failed to unsubscribe Web Socket push for client {} from user {} in context", unsubscription.getClient(), unsubscription.getUserId(), unsubscription.getContextId(), e);
             }
+        }
 
+        synchronized (this) {
             if (scheduledUnsubscriptions.isEmpty()) {
                 // No more planned rescheduling operations
                 cancelTimerTask();
@@ -332,9 +323,11 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     @Override
     public boolean servesClient(String client) throws OXException {
         try {
-            for (String c : sockets.values()) {
-                if (client.equals(c)) {
-                    return true;
+            for (ConcurrentMap<WebSocket, String> sockets : socketsPerUser.values()) {
+                for (String c : sockets.values()) {
+                    if (client.equals(c)) {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -350,9 +343,89 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     @Override
     public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
-        if (null != notification && null != matches) {
-
+        if (null != notification && null != matches && !matches.isEmpty()) {
+            // Sort incoming matches by user-context pairs
+            for (Map.Entry<UserAndContext, List<PushMatch>> userAssociatedMatches : sortByUser(matches).entrySet()) {
+                // Check if there are any open Web Socket connections for current user-context pair
+                ConcurrentMap<WebSocket, String> userSockets = socketsPerUser.get(userAssociatedMatches.getKey());
+                if (null != userSockets) {
+                    // User has open Web Socket connections. Now filter by client as indicated by user-associated matches
+                    Map<String, List<WebSocket>> socketsPerClient = matchingSocketsPerClient(userAssociatedMatches.getValue(), socketsPerClient(userSockets));
+                    for (Map.Entry<String, List<WebSocket>> socketsPerClientEntry : socketsPerClient.entrySet()) {
+                        transport(notification, socketsPerClientEntry.getKey(), socketsPerClientEntry.getValue());
+                    }
+                }
+            }
         }
+    }
+
+    private void transport(PushNotification notification, String client, List<WebSocket> sockets) throws OXException {
+        PushMessageGenerator generator = generatorRegistry.getGenerator(client);
+        if (null == generator) {
+            throw PushExceptionCodes.NO_SUCH_GENERATOR.create(client);
+        }
+
+        Message message = generator.generateMessageFor(ID, notification);
+        String textMessage = (String) message.getMessage();
+
+        for (WebSocket socket : sockets) {
+            try {
+                socket.sendMessage(textMessage);
+            } catch (Exception e) {
+                LOG.error("Failed to send text message to Web Socket for client {} from user {} in context {}.", client, socket.getUserId(), socket.getContextId(), e);
+            }
+        }
+    }
+
+    private Map<String, List<WebSocket>> matchingSocketsPerClient(List<PushMatch> userAssociatedMatches, Map<String, List<WebSocket>> socketsPerClient) {
+        Map<String, List<WebSocket>> clientAssociatedSockets = new LinkedHashMap<>(socketsPerClient.size());
+
+        for (PushMatch match : userAssociatedMatches) {
+            String client = match.getClient();
+            if (!clientAssociatedSockets.containsKey(client)) {
+                List<WebSocket> sockets = socketsPerClient.get(client);
+                if (null != sockets) {
+                    clientAssociatedSockets.put(client, sockets);
+                }
+            }
+        }
+
+        return clientAssociatedSockets;
+    }
+
+    private Map<String, List<WebSocket>> socketsPerClient(Map<WebSocket, String> sockets) {
+        if (null == sockets) {
+            return null;
+        }
+
+        Map<String, List<WebSocket>> socketsPerClient = new LinkedHashMap<>(sockets.size());
+        for (Map.Entry<WebSocket, String> socketEntry : sockets.entrySet()) {
+            String client = socketEntry.getValue();
+            List<WebSocket> list = socketsPerClient.get(client);
+            if (null == list) {
+                list = new LinkedList<>();
+                socketsPerClient.put(client, list);
+            }
+            list.add(socketEntry.getKey());
+        }
+        return socketsPerClient;
+    }
+
+    private Map<UserAndContext, List<PushMatch>> sortByUser(Collection<PushMatch> matches) {
+        Map<UserAndContext, List<PushMatch>> byUser = new LinkedHashMap<>();
+
+        // Only one match is needed as there is no difference per match
+        for (PushMatch match : matches) {
+            UserAndContext uac = UserAndContext.newInstance(match.getUserId(), match.getContextId());
+            List<PushMatch> matchList = byUser.get(uac);
+            if (null == matchList) {
+                matchList = new LinkedList<>();
+                byUser.put(uac, matchList);
+            }
+            matchList.add(match);
+        }
+
+        return byUser;
     }
 
 }

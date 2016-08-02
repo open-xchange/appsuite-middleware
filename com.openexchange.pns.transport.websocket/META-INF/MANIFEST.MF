@@ -14,6 +14,7 @@ Import-Package:
  com.openexchange.osgi.util,
  com.openexchange.pns,
  com.openexchange.server,
+ com.openexchange.session,
  com.openexchange.timer,
  com.openexchange.websockets,
  javax.crypto,
