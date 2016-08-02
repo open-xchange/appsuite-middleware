@@ -80,7 +80,6 @@ import com.dropbox.core.v2.files.SearchResult;
 import com.dropbox.core.v2.files.ThumbnailErrorException;
 import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
-import com.dropbox.core.v2.files.UploadBuilder;
 import com.dropbox.core.v2.files.UploadErrorException;
 import com.dropbox.core.v2.files.UploadSessionCursor;
 import com.dropbox.core.v2.files.UploadSessionFinishUploader;
@@ -371,30 +370,17 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
         long fileSize = file.getFileSize();
 
-        if (Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION)) {
-            // Create file
-            if (fileSize > CHUNK_SIZE) {
-                return sessionUpload(file, data);
-            } else {
-                return singleUpload(file, data);
-            }
-        } else {
-            // Update, adjust metadata as needed
-            try {
-                UploadBuilder uploadBuilder = client.files().uploadBuilder(path);
-                //TODO: use session if the file size is greater than 150MB
-                FileMetadata fileMetadata = uploadBuilder.withMode(WriteMode.OVERWRITE).start().uploadAndFinish(data);
-                file.setId(fileMetadata.getName());
-                file.setVersion(fileMetadata.getRev());
-                return saveFileMetadata(file, sequenceNumber);
-            } catch (UploadErrorException e) {
-                throw DropboxExceptionHandler.handleUploadErrorException(e, path);
-            } catch (DbxException e) {
-                throw DropboxExceptionHandler.handle(e);
-            } catch (IOException e) {
-                throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
+        WriteMode writeMode = Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION) ? WriteMode.ADD : WriteMode.OVERWRITE;
+        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data, writeMode) : singleUpload(file, data, writeMode);
+        file.copyFrom(dbxFile, copyFields);
+
+        // Adjust metadata if needed
+        if (writeMode.equals(WriteMode.OVERWRITE)) {
+            file.setId(dbxFile.getFileName());
+            file.setVersion(dbxFile.getVersion());
         }
+
+        return dbxFile.getIDTuple();
     }
 
     /*
@@ -888,7 +874,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException If an error is occurred
      */
-    private IDTuple sessionUpload(File file, InputStream data) throws OXException {
+    private DropboxFile sessionUpload(File file, InputStream data, WriteMode writeMode) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             sink = new ThresholdFileHolder();
@@ -914,9 +900,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
-            DropboxFile dbxFile = new DropboxFile(metadata, userId);
-            file.copyFrom(dbxFile, copyFields);
-            return dbxFile.getIDTuple();
+            return new DropboxFile(metadata, userId);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         } catch (IOException e) {
@@ -934,15 +918,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException if an error is occurred
      */
-    private IDTuple singleUpload(File file, InputStream data) throws OXException {
+    private DropboxFile singleUpload(File file, InputStream data, WriteMode writeMode) throws OXException {
         String name = file.getFileName();
         String fileName = name;
         String path = new StringBuilder(file.getFolderId()).append('/').append(fileName).toString();
         try {
             FileMetadata metadata = client.files().upload(path).uploadAndFinish(data);
-            DropboxFile dbxFile = new DropboxFile(metadata, userId);
-            file.copyFrom(dbxFile, copyFields);
-            return dbxFile.getIDTuple();
+            return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
             throw DropboxExceptionHandler.handleUploadErrorException(e, path);
         } catch (DbxException e) {
