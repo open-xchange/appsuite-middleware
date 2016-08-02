@@ -51,6 +51,7 @@ package com.openexchange.websockets.grizzly.osgi;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -58,6 +59,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 import com.openexchange.websockets.WebSocketListener;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
@@ -87,7 +89,8 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, WebApplicationService.class, SessiondService.class, TimerService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, WebApplicationService.class, SessiondService.class, TimerService.class, ThreadPoolService.class,
+            ContextService.class, UserService.class};
     }
 
     @Override

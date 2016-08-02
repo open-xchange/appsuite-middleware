@@ -69,6 +69,8 @@ Export-Package: com.openexchange.http.grizzly.service.comet,
  org.glassfish.grizzly.comet,
  org.glassfish.grizzly.http,
  org.glassfish.grizzly.http.server,
+ org.glassfish.grizzly.http.server.util,
  org.glassfish.grizzly.http.util,
+ org.glassfish.grizzly.servlet,
  org.glassfish.grizzly.websockets,
  org.glassfish.grizzly.websockets.frametypes

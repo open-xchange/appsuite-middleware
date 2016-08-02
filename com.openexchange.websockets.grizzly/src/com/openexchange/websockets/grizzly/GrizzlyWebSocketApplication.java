@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets.grizzly;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,7 +60,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
-import org.glassfish.grizzly.http.Cookies;
+import javax.servlet.http.HttpServletRequest;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DataFrame;
@@ -67,7 +68,20 @@ import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
+import org.glassfish.grizzly.websockets.WebSocketException;
 import org.glassfish.grizzly.websockets.WebSocketListener;
+import org.slf4j.Logger;
+import com.openexchange.ajax.SessionUtility;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.CookieHashSource;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -75,6 +89,8 @@ import com.openexchange.session.UserAndContext;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.user.UserService;
+import com.openexchange.websockets.grizzly.http.GrizzlyWebSocketHttpServletRequest;
 
 /**
  * {@link GrizzlyWebSocketApplication}
@@ -84,9 +100,12 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketApplication.class);
+
     private final ConcurrentMap<UserAndContext, ConcurrentMap<ConnectionId, SessionBoundWebSocket>> openSockets;
     private final ServiceLookup services;
     private final WebSocketListenerRegistry listenerRegistry;
+    private final CookieHashSource hashSource;
 
     /**
      * Initializes a new {@link GrizzlyWebSocketApplication}.
@@ -96,6 +115,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         this.listenerRegistry = listenerRegistry;
         this.services = services;
         openSockets = new ConcurrentHashMap<>(265, 0.9F, 1);
+        ConfigurationService configService = services.getService(ConfigurationService.class);
+        hashSource = CookieHashSource.parse(configService.getProperty(Property.COOKIE_HASH.getPropertyName()));
     }
 
     /**
@@ -200,38 +221,27 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
     @Override
     public WebSocket createSocket(ProtocolHandler handler, HttpRequestPacket requestPacket, WebSocketListener... listeners) {
-        // Parse request packet
-        Cookies cookies = new Cookies();
-        cookies.setHeaders(requestPacket.getHeaders());
+        // Parse request packet's URL parameters
         Parameters parameters = new Parameters();
         parameters.setQueryStringEncoding(Charset.forName("UTF-8"));
         parameters.setQuery(requestPacket.getQueryStringDC());
 
+        // Check for "session" parameter
         String sessionId = parameters.getParameter("session");
         if (sessionId == null) {
             throw new HandshakeException("Missing parameter 'session'");
         }
 
+        // Look-up optional connection identifier; generate a new, unique one if absent
         String conId = parameters.getParameter("connection");
         if (conId == null) {
             conId = com.openexchange.java.util.UUIDs.getUnformattedStringFromRandom();
         }
 
-        // Acquire needed service
-        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-        if (null == sessiondService) {
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketSessionToucher.class);
-            logger.warn("", ServiceExceptionCode.absentService(SessiondServiceExtended.class));
-            throw new HandshakeException("Missing parameter Sessiond service.");
-        }
+        // Get and verify session
+        Session session = checkSession(sessionId, requestPacket, parameters);
 
-        Session session = sessiondService.getSession(sessionId);
-        if (null == session) {
-            throw new HandshakeException("No such session: " + sessionId);
-        }
-
-        // TODO:
-
+        // Apply initial listeners
         List<WebSocketListener> listenersToUse = new LinkedList<>();
         if (null != listeners) {
             for (WebSocketListener listener : listeners) {
@@ -241,7 +251,96 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             }
         }
         listenersToUse.addAll(listenerRegistry.getListeners());
+
+        // Create & return new session-bound Web Socket
         return new SessionBoundWebSocket(SessionInfo.newInstance(session), ConnectionId.newInstance(conId), handler, requestPacket, listenersToUse.toArray(new WebSocketListener[listenersToUse.size()]));
+    }
+
+    private Session checkSession(String sessionId, HttpRequestPacket requestPacket, Parameters parameters) {
+        // Acquire needed service
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (null == sessiondService) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketSessionToucher.class);
+            logger.warn("", ServiceExceptionCode.absentService(SessiondServiceExtended.class));
+            throw new HandshakeException("Missing parameter Sessiond service.");
+        }
+
+        // Look-up appropriate session
+        Session session = sessiondService.getSession(sessionId);
+        if (null == session) {
+            throw new HandshakeException("No such session: " + sessionId);
+        }
+        if (!sessionId.equals(session.getSessionID())) {
+            LOG.info("Request's session identifier \"{}\" differs from the one indicated by SessionD service \"{}\".", sessionId, session.getSessionID());
+            throw new HandshakeException("Wrong session: " + sessionId);
+        }
+
+        // Check context
+        Context context = getContextFrom(session);
+        if (!context.isEnabled()) {
+            sessiondService.removeSession(sessionId);
+            LOG.info("The context {} associated with session is locked.", Integer.toString(session.getContextId()));
+            throw new HandshakeException("Context locked: " + session.getContextId());
+        }
+
+        // Check user
+        User user = getUserFrom(session, context, sessiondService);
+        if (!user.isMailEnabled()) {
+            LOG.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
+            throw new HandshakeException("Session expired: " + sessionId);
+        }
+
+        // Check cookies/secret
+        try {
+            HttpServletRequest servletRequest = new GrizzlyWebSocketHttpServletRequest(requestPacket, parameters);
+            SessionUtility.checkSecret(hashSource, servletRequest, session);
+        } catch (OXException e) {
+            throw new HandshakeException(e.getPlainLogMessage());
+        }
+
+        // Check IP address
+        try {
+            SessionUtility.checkIP(session, requestPacket.getRemoteAddress());
+        } catch (OXException e) {
+            throw new HandshakeException(e.getPlainLogMessage());
+        }
+
+        // All fine...
+        return session;
+    }
+
+    private Context getContextFrom(Session session) {
+        try {
+            return services.getService(ContextService.class).getContext(session.getContextId());
+        } catch (OXException e) {
+            throw new HandshakeException("No such context: " + session.getContextId());
+        }
+    }
+
+    private User getUserFrom(Session session, Context context, SessiondService sessiondService) {
+        String sessionId = session.getSessionID();
+        try {
+            return services.getService(UserService.class).getUser(session.getUserId(), context);
+        } catch (OXException e) {
+            if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                // An outdated session; context absent
+                sessiondService.removeSession(sessionId);
+                LOG.info("The context associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
+                throw new HandshakeException("Session expired: " + sessionId);
+            }
+            if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
+                int code = e.getCode();
+                if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
+                    // An outdated session; user absent
+                    sessiondService.removeSession(sessionId);
+                    LOG.info("The user associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
+                    throw new HandshakeException("Session expired: " + sessionId);
+                }
+            }
+            throw new WebSocketException(e);
+        } catch (UndeclaredThrowableException e) {
+            throw new WebSocketException(e);
+        }
     }
 
     @Override
