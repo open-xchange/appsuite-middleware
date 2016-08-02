@@ -110,7 +110,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
 
     abstract String getReseller(Session session) throws OXException;
 
-    abstract String getPackages(Session session) throws OXException;;
+    abstract String getPackage(Session session) throws OXException;;
 
     @Override
     public JSONObject getConfig(Session session) throws OXException {
@@ -156,10 +156,24 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
             }
 
         }
+        String reseller = null;
+        String pack = null;
+        try {
+            reseller = getReseller(session);
+        } catch (OXException e) {
+            LOG.debug("Error while retrieving the reseller for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+        }
+        try {
+            pack = getPackage(session);
+        } catch (OXException e) {
+            LOG.debug("Error while retrieving the package for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+        }
 
-        String reseller = getReseller(session);
-        String pack = getPackages(session);
-        if (pack == null) {
+        // fallback to defaults in case reseller or package is empty
+        if (Strings.isEmpty(reseller)) {
+            reseller = RESELLER_ALL;
+        }
+        if (Strings.isEmpty(pack)) {
             pack = PACKAGE_ALL;
         }
 

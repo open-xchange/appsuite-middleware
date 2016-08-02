@@ -47,49 +47,26 @@
  *
  */
 
-package com.openexchange.advertisement.services;
+package com.openexchange.ajax.advertisement.actions;
 
-import com.openexchange.advertisement.osgi.Services;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.data.ResellerAdmin;
-import com.openexchange.session.Session;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link AccessCombinationAdvertisementConfigService}
+ * {@link SetConfigResponse}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class AccessCombinationAdvertisementConfigService extends AbstractAdvertisementConfigService {
-
-    private static AccessCombinationAdvertisementConfigService instance = null;
+public class SetConfigResponse extends AbstractAJAXResponse {
 
     /**
-     * @return
+     * Initializes a new {@link SetConfigResponse}.
+     * 
+     * @param response
      */
-    public static AccessCombinationAdvertisementConfigService getInstance() {
-        if (instance == null) {
-            instance = new AccessCombinationAdvertisementConfigService();
-        }
-        return instance;
+    protected SetConfigResponse(Response response) {
+        super(response);
     }
 
-    @Override
-    String getReseller(Session session) throws OXException {
-        ResellerService resellerService = Services.getService(ResellerService.class);
-        ResellerAdmin resellerAdmin = resellerService.getReseller(session.getContextId());
-        return resellerAdmin.getName();
-    }
-
-    @Override
-    String getPackage(Session session) throws OXException {
-        UserPermissionService permissionService = Services.getService(UserPermissionService.class);
-        ContextService contextService = Services.getService(ContextService.class);
-        Context ctx = contextService.getContext(session.getContextId());
-        return permissionService.getAccessCombinationName(ctx, session.getUserId());
-    }
 }

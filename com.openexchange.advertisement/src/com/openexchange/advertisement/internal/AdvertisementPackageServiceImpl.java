@@ -61,6 +61,8 @@ import com.openexchange.advertisement.services.AccessCombinationAdvertisementCon
 import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
 import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerExceptionCodes;
 import com.openexchange.reseller.ResellerService;
@@ -129,14 +131,17 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
         try {
             List<ResellerAdmin> reseller = resellerService.getAll();
             map = new ConcurrentHashMap<>(reseller.size());
+            ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+            ConfigView view = factory.getView();
+
             for(ResellerAdmin res: reseller){
-                String strScheme = configService.getProperty(CONFIG_PREFIX+res.getName()+CONFIG_SUFFIX);
+                String strScheme = view.get(CONFIG_PREFIX + res.getName() + CONFIG_SUFFIX, String.class);
                 if(strScheme==null){
                     //fallback to reseller id
-                    strScheme = configService.getProperty(CONFIG_PREFIX+res.getId()+CONFIG_SUFFIX);
+                    strScheme = view.get(CONFIG_PREFIX + res.getId() + CONFIG_SUFFIX, String.class);
                     
                     if(strScheme==null){
-                        //fallback to gloabl
+                        //fallback to global
                         strScheme="Global";
                     }
                 }
@@ -158,6 +163,33 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
                 }
                 map.put(res.getName(), adsService);
             }
+
+            // Add OX_ALL as a default reseller
+            String oxall = "OX_ALL";
+
+            String strScheme = view.get(CONFIG_PREFIX + oxall + CONFIG_SUFFIX, String.class);
+            if (strScheme == null) {
+                //fallback to global
+                strScheme = "Global";
+            }
+
+            PackageScheme scheme = PackageScheme.valueOf(strScheme);
+            AdvertisementConfigService adsService = null;
+
+            switch (scheme) {
+                case AccessCombinations:
+                    adsService = AccessCombinationAdvertisementConfigService.getInstance();
+                    break;
+                case TaxonomyTypes:
+                    adsService = TaxonomyTypesAdvertisementConfigService.getInstance();
+                    break;
+                case Global:
+                default:
+                    adsService = GlobalAdvertisementConfigService.getInstance();
+                    break;
+            }
+            map.put(oxall, adsService);
+
         } catch (OXException e) {
             LOG.error("Error while reloading configuration: " + e.getMessage());
         }

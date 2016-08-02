@@ -72,8 +72,8 @@ import com.openexchange.server.ServiceExceptionCode;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-@Path("/preliminary/advertisement/v1")
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
+@Path("/advertisement/v1")
 public class OCPRestService {
 
     @PUT

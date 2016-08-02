@@ -55,7 +55,8 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.osgi.Services;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -96,7 +97,7 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
     }
 
     @Override
-    String getPackages(Session session) throws OXException {
+    String getPackage(Session session) throws OXException {
         ContextService ctxService = Services.getService(ContextService.class);
         Context ctx = ctxService.getContext(session.getContextId());
         Map<String, List<String>> attributes = ctx.getAttributes();
@@ -108,8 +109,9 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
             }
         }
 
-        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-        String types = configurationService.getProperty(TAXONOMY_TYPE_CONFIGURATION);
+        ConfigViewFactory configurationService = Services.getService(ConfigViewFactory.class);
+        ConfigView view = configurationService.getView();
+        String types = view.get(TAXONOMY_TYPE_CONFIGURATION, String.class);
         if (Strings.isEmpty(types)) {
             return PACKAGE_ALL;
         }

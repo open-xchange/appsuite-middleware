@@ -47,49 +47,68 @@
  *
  */
 
-package com.openexchange.advertisement.services;
+package com.openexchange.ajax.advertisement.actions;
 
-import com.openexchange.advertisement.osgi.Services;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.data.ResellerAdmin;
-import com.openexchange.session.Session;
-import com.openexchange.userconf.UserPermissionService;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link AccessCombinationAdvertisementConfigService}
+ * {@link GetConfigRequest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class AccessCombinationAdvertisementConfigService extends AbstractAdvertisementConfigService {
+public class GetConfigRequest implements AJAXRequest<GetConfigResponse> {
 
-    private static AccessCombinationAdvertisementConfigService instance = null;
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
 
-    /**
-     * @return
-     */
-    public static AccessCombinationAdvertisementConfigService getInstance() {
-        if (instance == null) {
-            instance = new AccessCombinationAdvertisementConfigService();
+    @Override
+    public String getServletPath() {
+        return "/ajax/advertisement";
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] { new URLParameter("action", "get") };
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends GetConfigResponse> getParser() {
+        return new Parser(false);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    private static final class Parser extends AbstractAJAXParser<GetConfigResponse> {
+
+        /**
+         * Initializes a new {@link Parser}.
+         * 
+         * @param failOnError
+         */
+        protected Parser(boolean failOnError) {
+            super(failOnError);
         }
-        return instance;
+
+        @Override
+        protected GetConfigResponse createResponse(Response response) throws JSONException {
+            return new GetConfigResponse(response);
+        }
     }
 
-    @Override
-    String getReseller(Session session) throws OXException {
-        ResellerService resellerService = Services.getService(ResellerService.class);
-        ResellerAdmin resellerAdmin = resellerService.getReseller(session.getContextId());
-        return resellerAdmin.getName();
-    }
-
-    @Override
-    String getPackage(Session session) throws OXException {
-        UserPermissionService permissionService = Services.getService(UserPermissionService.class);
-        ContextService contextService = Services.getService(ContextService.class);
-        Context ctx = contextService.getContext(session.getContextId());
-        return permissionService.getAccessCombinationName(ctx, session.getUserId());
-    }
 }

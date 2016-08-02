@@ -71,7 +71,7 @@ public enum AdvertisementExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No valid configurations available for user %s in context %s
      */
-    CONFIG_NOT_FOUND("No valid configurations available for user %s in context %s", MESSAGE, Category.CATEGORY_WARNING, 2),
+    CONFIG_NOT_FOUND("No valid configurations available for user %s in context %s", MESSAGE, Category.CATEGORY_ERROR, 2),
 
     ;
 

@@ -75,7 +75,7 @@ public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfi
     }
 
     @Override
-    String getPackages(Session session) throws OXException {
+    String getPackage(Session session) throws OXException {
         return PACKAGE_ALL;
     }
 
