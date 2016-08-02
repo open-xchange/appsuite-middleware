@@ -127,6 +127,12 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); i.hasNext();) {
             for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); iter.hasNext();) {
                 SessionBoundWebSocket sessionBoundSocket = iter.next();
+
+                Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
+                for (WebSocketListener listener : listeners) {
+                    listener.onClose(sessionBoundSocket, null);
+                }
+
                 sessionBoundSocket.close();
                 iter.remove();
             }

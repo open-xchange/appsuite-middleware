@@ -60,6 +60,13 @@ import com.openexchange.exception.OXException;
 public interface WebSocket {
 
     /**
+     * Gets the path that was used while this Web Socket was created; e.g. <code>"/websockets/foo/bar"</code>.
+     *
+     * @return The path
+     */
+    String getPath();
+
+    /**
      * Gets the identifier of the session currently associated with this Web Socket.
      *
      * @return The session identifier

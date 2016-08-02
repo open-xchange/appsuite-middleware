@@ -131,4 +131,13 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
         return sessionInfo.getContextId();
     }
 
+    /**
+     * Gets the path that was used while this Web Socket was created; e.g. <code>"/websockets/foo/bar"</code>.
+     *
+     * @return The path
+     */
+    public String getPath() {
+        return request.getRequestURI();
+    }
+
 }

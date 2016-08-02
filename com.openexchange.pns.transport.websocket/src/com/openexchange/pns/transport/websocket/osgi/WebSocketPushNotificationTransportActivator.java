@@ -49,26 +49,22 @@
 
 package com.openexchange.pns.transport.websocket.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import org.osgi.framework.Constants;
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
-import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
+import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.transport.websocket.WebSocketOptions;
-import com.openexchange.pns.transport.websocket.WebSocketOptionsProvider;
-import com.openexchange.pns.transport.websocket.internal.DefaultWebSocketOptionsProvider;
 import com.openexchange.pns.transport.websocket.internal.WebSocketPushNotificationTransport;
+import com.openexchange.timer.TimerService;
+import com.openexchange.websockets.WebSocketListener;
+import com.openexchange.websockets.WebSocketService;
 
 
 /**
@@ -81,9 +77,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketPushNotificationTransportActivator.class);
 
-    private static final String CONFIGFILE_WEBSOCKET_OPTIONS = "pns-websocket-options.yml";
-
-    private ServiceRegistration<WebSocketOptionsProvider> optionsProviderRegistration;
+    private List<ServiceRegistration<?>> serviceRegistrations;
     private WebSocketPushNotificationTransport webSocketTransport;
 
     /**
@@ -91,6 +85,11 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
      */
     public WebSocketPushNotificationTransportActivator() {
         super();
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
@@ -104,103 +103,71 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForFiles("pns-websocket-transport.properties");
-    }
-
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+        return Reloadables.interestsForProperties("com.openexchange.pns.transport.websocket.enabled");
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class, WebSocketService.class, TimerService.class };
     }
 
     @Override
-    protected synchronized void startBundle() throws Exception {
+    protected void startBundle() throws Exception {
         reinit(getService(ConfigurationService.class));
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
+        List<ServiceRegistration<?>> serviceRegistrations = this.serviceRegistrations;
+        if (null != serviceRegistrations) {
+            for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
+                serviceRegistration.unregister();
+            }
+            this.serviceRegistrations = null;
+        }
+
         WebSocketPushNotificationTransport webSocketTransport = this.webSocketTransport;
         if (null != webSocketTransport) {
-            webSocketTransport.close();
             this.webSocketTransport = null;
+            webSocketTransport.stop();
         }
-        ServiceRegistration<WebSocketOptionsProvider> optionsProviderRegistration = this.optionsProviderRegistration;
-        if (null != optionsProviderRegistration) {
-            optionsProviderRegistration.unregister();
-            this.optionsProviderRegistration = null;
-        }
+
         super.stopBundle();
     }
 
-    private synchronized void reinit(ConfigurationService configService) throws Exception {
-        WebSocketPushNotificationTransport webSocketTransport = this.webSocketTransport;
-        if (null != webSocketTransport) {
-            webSocketTransport.close();
-            this.webSocketTransport = null;
-        }
-
-        ServiceRegistration<WebSocketOptionsProvider> optionsProviderRegistration = this.optionsProviderRegistration;
-        if (null != optionsProviderRegistration) {
-            optionsProviderRegistration.unregister();
-            this.optionsProviderRegistration = null;
-        }
+    private synchronized void reinit(ConfigurationService configService) {
+        List<ServiceRegistration<?>> serviceRegistrations = this.serviceRegistrations;
 
         if (!configService.getBoolProperty("com.openexchange.pns.transport.websocket.enabled", false)) {
             LOG.info("Web Socket push notification transport is disabled per configuration");
+
+            if (null != serviceRegistrations) {
+                for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
+                    serviceRegistration.unregister();
+                }
+                this.serviceRegistrations = null;
+            }
+
+            WebSocketPushNotificationTransport webSocketTransport = this.webSocketTransport;
+            if (null != webSocketTransport) {
+                this.webSocketTransport = null;
+                webSocketTransport.stop();
+            }
+
             return;
         }
 
-        Object yaml = configService.getYaml(CONFIGFILE_WEBSOCKET_OPTIONS);
-        if (null != yaml && Map.class.isInstance(yaml)) {
-            Map<String, Object> map = (Map<String, Object>) yaml;
-            if (!map.isEmpty()) {
-                Map<String, WebSocketOptions> options = parseWebSocketOptions(map);
-                if (null != options && !options.isEmpty()) {
-                    Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
-                    dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
-                    optionsProviderRegistration = context.registerService(WebSocketOptionsProvider.class, new DefaultWebSocketOptionsProvider(options), dictionary);
-                }
-            }
+        if (null != serviceRegistrations) {
+            // Already registered
+            return;
         }
 
-        webSocketTransport = new WebSocketPushNotificationTransport(getService(PushSubscriptionRegistry.class), getService(PushMessageGeneratorRegistry.class), context);
-        webSocketTransport.open();
+        WebSocketPushNotificationTransport webSocketTransport = new WebSocketPushNotificationTransport(getService(PushSubscriptionRegistry.class), getService(PushMessageGeneratorRegistry.class), this);
         this.webSocketTransport = webSocketTransport;
-    }
-
-    private Map<String, WebSocketOptions> parseWebSocketOptions(Map<String, Object> yaml) throws Exception {
-        Map<String, WebSocketOptions> options = new LinkedHashMap<String, WebSocketOptions>(yaml.size());
-        for (Map.Entry<String, Object> entry : yaml.entrySet()) {
-            String client = entry.getKey();
-
-            // Check for duplicate
-            if (options.containsKey(client)) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Duplicate Web Socket options specified for client: " + client);
-            }
-
-            // Check values map
-            if (false == Map.class.isInstance(entry.getValue())) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Invalid Web Socket options configuration specified for client: " + client);
-            }
-
-            // Parse values map
-            Map<String, Object> values = (Map<String, Object>) entry.getValue();
-
-            // URL
-            String url = (String) values.get("url");
-
-            // Proceed if enabled for associated client
-            if (Strings.isNotEmpty(url)) {
-                WebSocketOptions webSocketOptions = new WebSocketOptions(url);
-                options.put(client, webSocketOptions);
-            }
-        }
-        return options;
+        serviceRegistrations = new ArrayList<>(2);
+        serviceRegistrations.add(context.registerService(PushNotificationTransport.class, webSocketTransport, null));
+        serviceRegistrations.add(context.registerService(WebSocketListener.class, webSocketTransport, null));
+        this.serviceRegistrations = serviceRegistrations;
     }
 
 }

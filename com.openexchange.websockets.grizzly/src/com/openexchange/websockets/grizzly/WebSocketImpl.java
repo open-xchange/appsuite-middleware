@@ -80,6 +80,11 @@ public class WebSocketImpl implements WebSocket {
     }
 
     @Override
+    public String getPath() {
+        return grizzlySocket.getPath();
+    }
+
+    @Override
     public WebSocketSession getWebSocketSession() {
         return grizzlySocket.getWebSocketSession();
     }
