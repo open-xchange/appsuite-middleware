@@ -97,6 +97,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
@@ -119,7 +120,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess, FileStorageIgnorableVersionFileAccess {
 
     private final DropboxAccountAccess accountAccess;
     private final int userId;
@@ -394,6 +395,26 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List, boolean)
+     */
+    @Override
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
+        return saveDocument(file, data, sequenceNumber, modifiedFields);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess#saveDocumentTryAddVersion(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List)
+     */
+    @Override
+    public IDTuple saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+        return saveDocument(file, data, sequenceNumber, modifiedFields);
     }
 
     /*
