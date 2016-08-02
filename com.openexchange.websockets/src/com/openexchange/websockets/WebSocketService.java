@@ -50,6 +50,7 @@
 package com.openexchange.websockets;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link WebSocketService} - The service for sending/receiving data to/from established Web Socket connections.
@@ -57,6 +58,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
+@SingletonService
 public interface WebSocketService {
 
     /**
