@@ -155,7 +155,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             return;
         }
 
-        // Default is DenyAll
+        // Default is "Basic-Authenticated" (as it was before)
         LOG.warn("Found no security annotation for class {}. Assuming \"Basic-Authenticated\"...", resourceInfo.getResourceClass().getName());
         basicAuth(requestContext);
     }
