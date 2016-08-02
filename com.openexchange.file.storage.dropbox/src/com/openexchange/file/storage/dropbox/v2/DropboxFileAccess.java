@@ -170,14 +170,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         // Dropbox V2 API does not support metadata fetching for a specific version, thus it is being ignored.
         // More information https://www.dropbox.com/developers/documentation/http/documentation#files-get_metadata
         try {
-            String path = toPath(folderId, id);
-            Metadata metadata = getMetadata(path);
-            if (!(metadata instanceof FileMetadata)) {
-                throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, path);
-            }
-            DropboxFile dropboxFile = new DropboxFile((FileMetadata) metadata, userId);
+            FileMetadata metadata = getFileMetadata(folderId, id);
+            DropboxFile dropboxFile = new DropboxFile(metadata, userId);
             //TODO: fetching all revisions just to get the number of versions is quite expensive;
             //      maybe we can introduce something like "-1" for "unknown number of versions"
+            String path = toPath(folderId, id);
             ListRevisionsResult revisions = client.files().listRevisions(path, 100);
             if (revisions != null) {
                 dropboxFile.setNumberOfVersions(revisions.getEntries().size());
@@ -211,6 +208,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             // Create new, empty file ("touch")
             try {
                 String path = toPath(file.getFolderId(), file.getFileName());
+                //TODO: Use session upload?
                 UploadUploader upload = client.files().upload(path);
                 FileMetadata metadata = upload.finish();
                 DropboxFile dbxFile = new DropboxFile(metadata, userId);
@@ -412,13 +410,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public void removeDocument(String folderId, long sequenceNumber) throws OXException {
         String fileId = null;
         try {
-            Metadata metadata = getMetadata(folderId);
-            // Ensure that we are emptying a folder
-            if (metadata instanceof FileMetadata) {
-                throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
-            }
-
-            // Empty the folder
+            // Empty the folder (remove only the files; leave sub-folders intact)
             ListFolderResult listFolder = client.files().listFolder(folderId);
             for (Metadata entry : listFolder.getEntries()) {
                 if (entry instanceof FileMetadata) {
