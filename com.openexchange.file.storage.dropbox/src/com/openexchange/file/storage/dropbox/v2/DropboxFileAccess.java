@@ -143,7 +143,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public boolean exists(String folderId, String id, String version) throws OXException {
-        // Dropbox V2 API does not support metadata fetching for a specific version, thus it is being ignored
+        // Dropbox V2 API does not support metadata fetching for a specific version, thus it is being ignored.
         // More information https://www.dropbox.com/developers/documentation/http/documentation#files-get_metadata
         try {
             Metadata metadata = getMetadata(toPath(folderId, id));
@@ -165,7 +165,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
-        // Dropbox V2 API does not support metadata fetching for a specific version, thus it is being ignored
+        // Dropbox V2 API does not support metadata fetching for a specific version, thus it is being ignored.
         // More information https://www.dropbox.com/developers/documentation/http/documentation#files-get_metadata
         try {
             String path = toPath(folderId, id);
@@ -381,7 +381,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 UploadBuilder uploadBuilder = client.files().uploadBuilder(path);
                 //TODO: use session if the file size is greater than 150MB
                 FileMetadata fileMetadata = uploadBuilder.withMode(WriteMode.OVERWRITE).start().uploadAndFinish(data);
-                file.setId(fileMetadata.getId());
+                file.setId(fileMetadata.getName());
                 file.setVersion(fileMetadata.getRev());
                 return saveFileMetadata(file, sequenceNumber);
             } catch (UploadErrorException e) {
