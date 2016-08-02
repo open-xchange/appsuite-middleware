@@ -127,6 +127,8 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     // 8 MB chunks
     private static final int CHUNK_SIZE = 8 * (int) Math.pow(1024, 2);
 
+    private static final Field[] copyFields = { Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED };
+
     /**
      * Initialises a new {@link DropboxFileAccess}.
      */
@@ -212,7 +214,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 UploadUploader upload = client.files().upload(path);
                 FileMetadata metadata = upload.finish();
                 DropboxFile dbxFile = new DropboxFile(metadata, userId);
-                file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                file.copyFrom(dbxFile, copyFields);
                 return dbxFile.getIDTuple();
             } catch (DbxException e) {
                 throw DropboxExceptionHandler.handle(e);
@@ -233,7 +235,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
                         Metadata metadata = client.files().move(path, toPath);
                         DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
-                        file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                        file.copyFrom(dbxFile, copyFields);
                         return dbxFile.getIDTuple();
                     } catch (RelocationErrorException e) {
                         throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId());
@@ -249,7 +251,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     try {
                         FileMetadata metadata = client.files().restore(path, file.getVersion());
                         DropboxFile dbxFile = new DropboxFile(metadata, userId);
-                        file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                        file.copyFrom(dbxFile, copyFields);
                         return dbxFile.getIDTuple();
                     } catch (RestoreErrorException e) {
                         throw DropboxExceptionHandler.handleRestoreErrorException(e, file.getFolderId(), file.getId());
@@ -293,7 +295,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
             if (update != null) {
-                update.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                update.copyFrom(dbxFile, copyFields);
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
@@ -321,7 +323,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             DropboxFile dbxFile = new DropboxFile((FileMetadata) metadata, userId);
             if (update != null) {
-                update.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                update.copyFrom(dbxFile, copyFields);
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
@@ -892,7 +894,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
             DropboxFile dbxFile = new DropboxFile(metadata, userId);
-            file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+            file.copyFrom(dbxFile, copyFields);
             return dbxFile.getIDTuple();
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
@@ -918,7 +920,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             FileMetadata metadata = client.files().upload(path).uploadAndFinish(data);
             DropboxFile dbxFile = new DropboxFile(metadata, userId);
-            file.copyFrom(dbxFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+            file.copyFrom(dbxFile, copyFields);
             return dbxFile.getIDTuple();
         } catch (UploadErrorException e) {
             throw DropboxExceptionHandler.handleUploadErrorException(e, path);
