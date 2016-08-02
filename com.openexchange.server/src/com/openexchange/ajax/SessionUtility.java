@@ -381,7 +381,14 @@ public final class SessionUtility {
         checkIP(session, req.getRemoteAddr());
     }
 
-    private static void checkIP(final Session session, final String actual) throws OXException {
+    /**
+     * Performs the IP check.
+     *
+     * @param session The session to check for
+     * @param actual The current IP for given session
+     * @throws OXException If IP check fails
+     */
+    public static void checkIP(final Session session, final String actual) throws OXException {
         checkIP(checkIP, getRanges(), session, actual, clientWhitelist);
     }
 
