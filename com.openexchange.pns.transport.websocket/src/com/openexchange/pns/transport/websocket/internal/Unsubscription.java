@@ -65,7 +65,7 @@ final class Unsubscription {
     private final String client;
     private final List<String> topics;
     private final PushSubscription subscription;
-    private final int hash;
+    private volatile Integer hash;
 
     /**
      * Initializes a new {@link Unsubscription}.
@@ -79,13 +79,6 @@ final class Unsubscription {
         this.contextId = subscription.getContextId();
         this.client = subscription.getClient();
         this.topics = subscription.getTopics();
-        int prime = 31;
-        int result = 1;
-        result = prime * result + contextId;
-        result = prime * result + userId;
-        result = prime * result + ((client == null) ? 0 : client.hashCode());
-        result = prime * result + ((topics == null) ? 0 : topics.hashCode());
-        hash = result;
     }
 
     /**
@@ -126,7 +119,18 @@ final class Unsubscription {
 
     @Override
     public int hashCode() {
-        return hash;
+        Integer tmp = hash;
+        if (null == tmp) {
+            int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            result = prime * result + ((client == null) ? 0 : client.hashCode());
+            result = prime * result + ((topics == null) ? 0 : topics.hashCode());
+            tmp = Integer.valueOf(result);
+            hash = tmp;
+        }
+        return tmp.intValue();
     }
 
     @Override
