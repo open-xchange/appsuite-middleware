@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,97 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.session;
 
-import java.util.concurrent.Future;
-import com.openexchange.exception.OXException;
-import com.openexchange.websockets.MessageHandler;
-import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+import com.openexchange.session.Session;
 
 /**
- * {@link GrizzlyWebSocketService}
+ * {@link UserAndContext} - An immutable pair of user and context identifier.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class GrizzlyWebSocketService implements WebSocketService {
-
-    private final GrizzlyWebSocketApplication localApp;
-    private final RemoteWebSocketDistributor remoteDistributor;
+public class UserAndContext {
 
     /**
-     * Initializes a new {@link GrizzlyWebSocketService}.
+     * Creates a new instance
+     *
+     * @param session The session providing user data
+     * @return The new instance
      */
-    public GrizzlyWebSocketService(GrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
+    public static UserAndContext newInstance(Session session) {
+        return newInstance(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Creates a new instance
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The new instance
+     */
+    public static UserAndContext newInstance(int userId, int contextId) {
+        return new UserAndContext(userId, contextId);
+    }
+
+    // ---------------------------------------------------------------
+
+    private final int contextId;
+    private final int userId;
+    private final int hash;
+
+    /**
+     * Initializes a new {@link UserAndContext}.
+     */
+    private UserAndContext(int userId, int contextId) {
         super();
-        this.localApp = app;
-        this.remoteDistributor = remoteDistributor;
+        this.contextId = contextId;
+        this.userId = userId;
+        int prime = 31;
+        int result = prime * 1 + contextId;
+        result = prime * result + userId;
+        this.hash = result;
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
     }
 
     @Override
-    public void sendMessage(String message, int userId, int contextId) throws OXException {
-        localApp.sendToUser(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, false);
+    public int hashCode() {
+        return hash;
     }
 
     @Override
-    public MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException {
-        Future<Void> f = localApp.sendToUserAsync(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, true);
-        return new MessageHandlerImpl<Void>(f);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof UserAndContext)) {
+            return false;
+        }
+        UserAndContext other = (UserAndContext) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        return true;
     }
 
 }

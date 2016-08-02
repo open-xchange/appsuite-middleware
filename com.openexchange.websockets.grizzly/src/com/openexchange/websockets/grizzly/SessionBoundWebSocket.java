@@ -49,12 +49,10 @@
 
 package com.openexchange.websockets.grizzly;
 
-import java.util.concurrent.atomic.AtomicReference;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.websockets.DefaultWebSocket;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocketListener;
-import com.openexchange.session.Session;
 
 /**
  * {@link SessionBoundWebSocket} - The Web Socket bound to a certain session.
@@ -64,42 +62,61 @@ import com.openexchange.session.Session;
  */
 public class SessionBoundWebSocket extends DefaultWebSocket {
 
-    private final AtomicReference<String> sessionIdReference;
+    private final SessionInfo sessionInfo;
+    private final ConnectionId connectionId;
 
     /**
      * Initializes a new {@link SessionBoundWebSocket}.
      */
-    public SessionBoundWebSocket(ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
+    public SessionBoundWebSocket(SessionInfo sessionInfo, ConnectionId connectionId, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
         super(protocolHandler, request, listeners);
-        this.sessionIdReference = new AtomicReference<String>(null);
+        this.sessionInfo = sessionInfo;
+        this.connectionId = connectionId;
+    }
+
+    /**
+     * Gets the basic information for the session currently associated with this Web Socket.
+     *
+     * @return The session information
+     */
+    public SessionInfo getSessionInfo() {
+        return sessionInfo;
+    }
+
+    /**
+     * Gets the connection identifier
+     *
+     * @return The connection identifier
+     */
+    public ConnectionId getConnectionId() {
+        return connectionId;
     }
 
     /**
      * Gets the identifier of the session currently associated with this Web Socket.
      *
-     * @return The session identifier or <code>null</code>
+     * @return The session identifier
      */
     public String getSessionId() {
-        return sessionIdReference.get();
+        return sessionInfo.getSessionId();
     }
 
     /**
-     * (Atomically) Binds the specified session to this Web Socket if not already bound to another session.
+     * Gets the user identifier
      *
-     * @param session The session to bind to
-     * @return <code>true</code> if session could be successfully bounded to this Web Socket; otherwise <code>false</code>
+     * @return The user identifier
      */
-    public boolean bindSession(Session session) {
-        String sessionID = session.getSessionID();
-        String state;
-        do {
-            state = sessionIdReference.get();
-            if (null != state) {
-                // Already set
-                return false;
-            }
-        } while (!sessionIdReference.compareAndSet(state, sessionID));
-        return true;
+    public int getUserId() {
+        return sessionInfo.getUserId();
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return sessionInfo.getContextId();
     }
 
 }

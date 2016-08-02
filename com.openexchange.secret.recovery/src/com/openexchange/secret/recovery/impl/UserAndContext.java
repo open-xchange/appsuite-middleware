@@ -47,45 +47,48 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.secret.recovery.impl;
 
-import java.util.concurrent.Future;
-import com.openexchange.exception.OXException;
-import com.openexchange.websockets.MessageHandler;
-import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link GrizzlyWebSocketService}
+ * {@link UserAndContext} - A pair of user identifier and associated context.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public class GrizzlyWebSocketService implements WebSocketService {
+class UserAndContext {
 
-    private final GrizzlyWebSocketApplication localApp;
-    private final RemoteWebSocketDistributor remoteDistributor;
+    private final int userId;
+    private final Context context;
 
     /**
-     * Initializes a new {@link GrizzlyWebSocketService}.
+     * Initializes a new {@link UserAndContext}.
+     *
+     * @param userId The user identifier
+     * @param context The associated context
      */
-    public GrizzlyWebSocketService(GrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
+    UserAndContext(int userId, Context context) {
         super();
-        this.localApp = app;
-        this.remoteDistributor = remoteDistributor;
+        this.userId = userId;
+        this.context = context;
     }
 
-    @Override
-    public void sendMessage(String message, int userId, int contextId) throws OXException {
-        localApp.sendToUser(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, false);
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
     }
 
-    @Override
-    public MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException {
-        Future<Void> f = localApp.sendToUserAsync(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, true);
-        return new MessageHandlerImpl<Void>(f);
+    /**
+     * Gets the context
+     *
+     * @return The context
+     */
+    public Context getContext() {
+        return context;
     }
 
 }

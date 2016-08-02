@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,45 +47,36 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
-
-import java.util.concurrent.Future;
-import com.openexchange.exception.OXException;
-import com.openexchange.websockets.MessageHandler;
-import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+package com.openexchange.websockets;
 
 /**
- * {@link GrizzlyWebSocketService}
+ * {@link WebSocketListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class GrizzlyWebSocketService implements WebSocketService {
-
-    private final GrizzlyWebSocketApplication localApp;
-    private final RemoteWebSocketDistributor remoteDistributor;
+public interface WebSocketListener {
 
     /**
-     * Initializes a new {@link GrizzlyWebSocketService}.
+     * Invoked when a new session-bound Web Socket gets connected
+     *
+     * @param socket The connected Web Socket
      */
-    public GrizzlyWebSocketService(GrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
-        super();
-        this.localApp = app;
-        this.remoteDistributor = remoteDistributor;
-    }
+    void onWebSocketConnect(WebSocket socket);
 
-    @Override
-    public void sendMessage(String message, int userId, int contextId) throws OXException {
-        localApp.sendToUser(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, false);
-    }
+    /**
+     * Invoked when an existing session-bound Web Socket is about to be closed
+     *
+     * @param socket The socket to close
+     */
+    void onWebSocketClose(WebSocket socket);
 
-    @Override
-    public MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException {
-        Future<Void> f = localApp.sendToUserAsync(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, true);
-        return new MessageHandlerImpl<Void>(f);
-    }
+    /**
+     * Invoked when {@link WebSocket#onMessage(String)} has been called on a  particular {@link WebSocket} instance.
+     *
+     * @param socket The {@link WebSocket} that received a message.
+     * @param text The message received.
+     */
+    void onMessage(WebSocket socket, String text);
 
 }

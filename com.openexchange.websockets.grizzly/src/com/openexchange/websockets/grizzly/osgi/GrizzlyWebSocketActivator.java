@@ -49,16 +49,25 @@
 
 package com.openexchange.websockets.grizzly.osgi;
 
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
+import com.openexchange.websockets.WebSocketListener;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketSessionToucher;
+import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor;
+import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributorFactory;
 
 /**
  * {@link GrizzlyWebSocketActivator}
@@ -80,7 +89,8 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, WebApplicationService.class, SessiondService.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, WebApplicationService.class, SessiondService.class, TimerService.class, ThreadPoolService.class,
+            ContextService.class, UserService.class};
     }
 
     @Override
@@ -90,13 +100,22 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
+        trackService(HazelcastInstance.class);
+        WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context);
+        track(WebSocketListener.class, listenerTracker);
+        openTrackers();
+
+        registerService(CustomPortableFactory.class, new PortableMessageDistributorFactory(), null);
+
         GrizzlyWebSocketApplication app = this.app;
         if (null == app) {
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
-            app = new GrizzlyWebSocketApplication();
+            app = new GrizzlyWebSocketApplication(listenerTracker, this);
             this.app = app;
-            webApplicationService.registerWebSocketApplication("", "/websockets", app, null);
-            registerService(WebSocketService.class, new GrizzlyWebSocketService(app));
+            webApplicationService.registerWebSocketApplication("", "/websockets/*", app, null);
+            registerService(WebSocketService.class, new GrizzlyWebSocketService(app, new RemoteWebSocketDistributor(this)));
+
+            PortableMessageDistributor.setGrizzlyWebSocketApplication(app);
 
             long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(getService(ConfigurationService.class));
             sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher(app), period, period);
@@ -119,10 +138,14 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
                 }
             }
 
+            PortableMessageDistributor.setGrizzlyWebSocketApplication(null);
+
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
             if (null != webApplicationService) {
                 webApplicationService.unregisterWebSocketApplication(app);
             }
+
+            app.shutDown();
         }
 
         super.stopBundle();

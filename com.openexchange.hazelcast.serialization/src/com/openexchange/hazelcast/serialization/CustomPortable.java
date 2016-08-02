@@ -158,8 +158,11 @@ public interface CustomPortable extends Portable {
      *
      * <li><code> 400</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck</li>>
      * <li><code> 401</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp</li>>
-     * 
+     *
      * <li><code> 500</code>: com.openexchange.sms.tools.internal.SMSBucket</li>>
+     *
+     * <li><code> 600</code>: com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor</li>>
+     *
      * </ul>
      *
      * @return The class ID

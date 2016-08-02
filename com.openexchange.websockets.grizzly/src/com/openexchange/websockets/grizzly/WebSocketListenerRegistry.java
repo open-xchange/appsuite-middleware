@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,43 +49,21 @@
 
 package com.openexchange.websockets.grizzly;
 
-import java.util.concurrent.Future;
-import com.openexchange.exception.OXException;
-import com.openexchange.websockets.MessageHandler;
-import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+import java.util.List;
+import com.openexchange.websockets.WebSocketListener;
 
 /**
- * {@link GrizzlyWebSocketService}
+ * {@link WebSocketListenerRegistry} - A registry for {@link WebSocketListener} instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class GrizzlyWebSocketService implements WebSocketService {
-
-    private final GrizzlyWebSocketApplication localApp;
-    private final RemoteWebSocketDistributor remoteDistributor;
+public interface WebSocketListenerRegistry {
 
     /**
-     * Initializes a new {@link GrizzlyWebSocketService}.
+     * Gets the currently registered listeners
+     *
+     * @return The listeners
      */
-    public GrizzlyWebSocketService(GrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
-        super();
-        this.localApp = app;
-        this.remoteDistributor = remoteDistributor;
-    }
-
-    @Override
-    public void sendMessage(String message, int userId, int contextId) throws OXException {
-        localApp.sendToUser(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, false);
-    }
-
-    @Override
-    public MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException {
-        Future<Void> f = localApp.sendToUserAsync(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, true);
-        return new MessageHandlerImpl<Void>(f);
-    }
-
+    List<org.glassfish.grizzly.websockets.WebSocketListener> getListeners();
 }

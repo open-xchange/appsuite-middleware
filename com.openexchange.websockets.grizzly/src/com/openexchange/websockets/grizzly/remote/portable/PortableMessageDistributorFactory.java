@@ -47,45 +47,26 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.websockets.grizzly.remote.portable;
 
-import java.util.concurrent.Future;
-import com.openexchange.exception.OXException;
-import com.openexchange.websockets.MessageHandler;
-import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link GrizzlyWebSocketService}
+ * {@link PortableMessageDistributorFactory} - The portable factory for {@link PortableMessageDistributor} type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public class GrizzlyWebSocketService implements WebSocketService {
+public class PortableMessageDistributorFactory extends AbstractCustomPortableFactory {
 
-    private final GrizzlyWebSocketApplication localApp;
-    private final RemoteWebSocketDistributor remoteDistributor;
-
-    /**
-     * Initializes a new {@link GrizzlyWebSocketService}.
-     */
-    public GrizzlyWebSocketService(GrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
-        super();
-        this.localApp = app;
-        this.remoteDistributor = remoteDistributor;
+    @Override
+    public CustomPortable create() {
+        return new PortableMessageDistributor();
     }
 
     @Override
-    public void sendMessage(String message, int userId, int contextId) throws OXException {
-        localApp.sendToUser(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, false);
-    }
-
-    @Override
-    public MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException {
-        Future<Void> f = localApp.sendToUserAsync(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, true);
-        return new MessageHandlerImpl<Void>(f);
+    public int getClassId() {
+        return PortableMessageDistributor.CLASS_ID;
     }
 
 }

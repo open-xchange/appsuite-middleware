@@ -90,10 +90,14 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
         String diagnosis = secretInconsistencyDetector.isSecretWorking(session);
 
         // Compose JSON response
-        JSONObject object = new JSONObject(2);
-        object.put("secretWorks", diagnosis == null);
-        if (diagnosis != null) {
+        JSONObject object;
+        if (diagnosis == null) {
+            // Works...
+            object = new JSONObject(2);
+            object.put("secretWorks", true);
+        } else {
             LOG.info("Secrets in session {} (user={}, context={}) seem to need migration: {}", session.getSessionID(), I(session.getUserId()), I(session.getContextId()), diagnosis);
+            object = new JSONObject(4);
             object.put("secretWorks", false);
             object.put("diagnosis", diagnosis);
         }

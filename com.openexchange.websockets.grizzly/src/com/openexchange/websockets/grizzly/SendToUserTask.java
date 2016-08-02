@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,43 +49,48 @@
 
 package com.openexchange.websockets.grizzly;
 
-import java.util.concurrent.Future;
-import com.openexchange.exception.OXException;
-import com.openexchange.websockets.MessageHandler;
-import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+import org.slf4j.Logger;
+import com.openexchange.threadpool.AbstractTask;
 
 /**
- * {@link GrizzlyWebSocketService}
+ * {@link SendToUserTask}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class GrizzlyWebSocketService implements WebSocketService {
+public class SendToUserTask extends AbstractTask<Void> {
 
-    private final GrizzlyWebSocketApplication localApp;
-    private final RemoteWebSocketDistributor remoteDistributor;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SendToUserTask.class);
+
+    private final String message;
+    private final int userId;
+    private final int contextId;
+    private final GrizzlyWebSocketApplication application;
 
     /**
-     * Initializes a new {@link GrizzlyWebSocketService}.
+     * Initializes a new {@link SendToUserTask}.
+     *
+     * @param message The text message to send
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param application The running application
      */
-    public GrizzlyWebSocketService(GrizzlyWebSocketApplication app, RemoteWebSocketDistributor remoteDistributor) {
+    public SendToUserTask(String message, int userId, int contextId, GrizzlyWebSocketApplication application) {
         super();
-        this.localApp = app;
-        this.remoteDistributor = remoteDistributor;
+        this.message = message;
+        this.userId = userId;
+        this.contextId = contextId;
+        this.application = application;
     }
 
     @Override
-    public void sendMessage(String message, int userId, int contextId) throws OXException {
-        localApp.sendToUser(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, false);
-    }
-
-    @Override
-    public MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException {
-        Future<Void> f = localApp.sendToUserAsync(message, userId, contextId);
-        remoteDistributor.sendRemote(message, userId, contextId, true);
-        return new MessageHandlerImpl<Void>(f);
+    public Void call() throws Exception {
+        try {
+            application.sendToUser(message, userId, contextId);
+        } catch (Exception e) {
+            LOG.error("Failed to send message to user {} in context {}", userId, contextId, e);
+        }
+        return null;
     }
 
 }
