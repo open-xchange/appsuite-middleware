@@ -332,7 +332,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     private static List<Event> selectAdditionalEventData(Connection connection, int contextID, List<Event> events, EventField[] fields) throws OXException, SQLException {
-        if (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS)) {
+        if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS))) {
             int[] objectIDs = getObjectIDs(events);
             if (null == fields || contains(fields, EventField.ATTENDEES)) {
                 Map<Integer, List<Attendee>> attendeesById = selectAttendees(connection, contextID, objectIDs, AttendeeField.values());
