@@ -52,6 +52,7 @@ package com.openexchange.pns.transport.gcm.internal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,11 +64,14 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import com.google.android.gcm.Constants;
 import com.google.android.gcm.Message;
+import com.google.android.gcm.Message.Priority;
 import com.google.android.gcm.MulticastResult;
+import com.google.android.gcm.Notification;
 import com.google.android.gcm.Result;
 import com.google.android.gcm.Sender;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.util.RankedService;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.DefaultPushSubscription.Builder;
@@ -278,9 +282,117 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
         return message;
     }
 
-    private Message toMessage(Map<String, Object> message) {
-        // TODO Auto-generated method stub
-        return null;
+    private Message toMessage(Map<String, Object> message) throws OXException {
+        Message.Builder builder = new Message.Builder();
+
+        Map<String, Object> source = new HashMap<>(message);
+        {
+            String sCollapseKey = (String) source.remove("collapse_key");
+            if (null != sCollapseKey) {
+                builder.collapseKey(sCollapseKey);
+            }
+        }
+
+        {
+            Boolean bContentAvailable = (Boolean) source.remove("content_available");
+            if (null != bContentAvailable) {
+                builder.contentAvailable(bContentAvailable);
+            }
+        }
+
+        {
+            Boolean bDelayWhileIdle = (Boolean) source.remove("delay_while_idle");
+            if (null != bDelayWhileIdle) {
+                builder.delayWhileIdle(bDelayWhileIdle.booleanValue());
+            }
+        }
+
+        {
+            String sIcon = (String) source.remove("icon");
+            if (Strings.isEmpty(sIcon)) {
+                throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create("Missing \"icon\" element.");
+            }
+
+            Notification.Builder notificationBuilder = new Notification.Builder(sIcon);
+
+            {
+                Integer iBadge = (Integer) source.remove("badge");
+                if (null != iBadge) {
+                    notificationBuilder.badge(iBadge.intValue());
+                }
+            }
+
+            {
+                String sBody = (String) source.remove("body");
+                if (null != sBody) {
+                    notificationBuilder.body(sBody);
+                }
+            }
+
+            {
+                String sClickAction = (String) source.remove("click_action");
+                if (null != sClickAction) {
+                    notificationBuilder.clickAction(sClickAction);
+                }
+            }
+
+            {
+                String sColor = (String) source.remove("color");
+                if (null != sColor) {
+                    notificationBuilder.color(sColor);
+                }
+            }
+
+            {
+                String sSound = (String) source.remove("sound");
+                if (null != sSound) {
+                    notificationBuilder.sound(sSound);
+                }
+            }
+
+            {
+                String sTag = (String) source.remove("tag");
+                if (null != sTag) {
+                    notificationBuilder.tag(sTag);
+                }
+            }
+
+            {
+                String sTitle = (String) source.remove("title");
+                if (null != sTitle) {
+                    notificationBuilder.title(sTitle);
+                }
+            }
+
+            builder.notification(notificationBuilder.build());
+        }
+
+        {
+            String sPriority = (String) source.remove("priority");
+            if (null != sPriority) {
+                if ("high".equalsIgnoreCase(sPriority)) {
+                    builder.priority(Priority.HIGH);
+                } else if ("normal".equalsIgnoreCase(sPriority)) {
+                    builder.priority(Priority.NORMAL);
+                }
+            }
+        }
+
+        {
+            String sRestrictedPackageName = (String) source.remove("restricted_package_name");
+            if (null != sRestrictedPackageName) {
+                builder.restrictedPackageName(sRestrictedPackageName);
+            }
+        }
+
+        {
+            Integer iTimeToLive = (Integer) source.remove("time_to_live");
+            if (null != iTimeToLive) {
+                builder.timeToLive(iTimeToLive.intValue());
+            }
+        }
+
+        return builder.build();
     }
 
     /*

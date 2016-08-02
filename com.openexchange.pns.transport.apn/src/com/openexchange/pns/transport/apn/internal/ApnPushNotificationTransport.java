@@ -51,6 +51,7 @@ package com.openexchange.pns.transport.apn.internal;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -270,7 +271,11 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
             if (object instanceof Payload) {
                 addCheckPayload((Payload) object, match, payloads);
             } else if (object instanceof Map) {
-                addCheckPayload(toPayload((Map<String, Object>) object), match, payloads);
+                try {
+                    addCheckPayload(toPayload((Map<String, Object>) object), match, payloads);
+                } catch (JSONException e) {
+                    throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());
+                }
             } else {
                 throw PushExceptionCodes.UNSUPPORTED_MESSAGE_CLASS.create(null == object ? "null" : object.getClass().getName());
             }
@@ -297,9 +302,55 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         }
     }
 
-    private Payload toPayload(Map<String, Object> message) {
-        // TODO Auto-generated method stub
-        return null;
+    private Payload toPayload(Map<String, Object> message) throws JSONException {
+        PushNotificationPayload payload = new PushNotificationPayload();
+
+        Map<String, Object> source = new HashMap<>(message);
+        {
+            String sSound = (String) source.remove("sound");
+            if (null != sSound) {
+                payload.addSound(sSound);
+            }
+        }
+
+        {
+            Integer iBadge = (Integer) source.remove("badge");
+            if (null != iBadge) {
+                payload.addBadge(iBadge.intValue());
+            }
+        }
+
+        {
+            String sAlert = (String) source.remove("alert");
+            if (null != sAlert) {
+                payload.addAlert(sAlert);
+            }
+        }
+
+        {
+            String sCategory = (String) source.remove("category");
+            if (null != sCategory) {
+                payload.addCategory(sCategory);
+            }
+        }
+
+        // Put remaining as custom dictionary
+        for (Map.Entry<String, Object> entry : source.entrySet()) {
+            Object value = entry.getValue();
+            if (null == value) {
+                LOG.warn("Ignoring usupported null value");
+            } else {
+                if (value instanceof Number) {
+                    payload.addCustomDictionary(entry.getKey(), ((Number) value).intValue());
+                } else if (value instanceof String) {
+                    payload.addCustomDictionary(entry.getKey(), value.toString());
+                } else {
+                    LOG.warn("Ignoring usupported value of type {}: {}", value.getClass().getName(), value.toString());
+                }
+            }
+        }
+
+        return payload;
     }
 
 
