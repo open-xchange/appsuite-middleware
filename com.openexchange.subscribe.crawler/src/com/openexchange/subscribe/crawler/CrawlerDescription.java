@@ -50,7 +50,7 @@
 package com.openexchange.subscribe.crawler;
 
 import java.util.List;
-import org.ho.yaml.Yaml;
+import org.yaml.snakeyaml.Yaml;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.crawler.internal.Step;
 
@@ -91,7 +91,8 @@ public class CrawlerDescription {
         if (quirkyCookieQuotes) {
             workflow.setQuirkyCookieQuotes(true);
         }
-        this.setWorkflowString(Yaml.dump(workflow));
+        Yaml yaml = new Yaml();
+        this.setWorkflowString(yaml.dump(workflow));
     }
 
 

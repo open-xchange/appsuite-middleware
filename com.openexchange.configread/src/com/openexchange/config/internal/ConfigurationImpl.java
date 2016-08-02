@@ -49,16 +49,11 @@
 
 package com.openexchange.config.internal;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,10 +71,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.ho.yaml.Yaml;
-import org.ho.yaml.exception.YamlException;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.Filter;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
@@ -91,7 +85,6 @@ import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -205,8 +198,8 @@ public final class ConfigurationImpl implements ConfigurationService {
     /** Maps property names to the file path of the .properties file containing the property. */
     private final Map<String, String> propertiesFiles;
 
-    /** Maps objects to yaml filename, with a path */
-    private final Map<File, byte[]> yamlFiles;
+    /** Maps objects to YAML file name, with a path */
+    private final Map<File, YamlRef> yamlFiles;
 
     /** Maps filenames to whole file paths for yaml lookup */
     private final Map<String, File> yamlPaths;
@@ -245,7 +238,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
-        yamlFiles = new HashMap<File, byte[]>(64);
+        yamlFiles = new HashMap<File, YamlRef>(64);
         yamlPaths = new HashMap<String, File>(64);
         dirs = new File[directories.length];
         xmlFiles = new HashMap<File, byte[]>(2048);
@@ -279,13 +272,13 @@ public final class ConfigurationImpl implements ConfigurationService {
         };
 
         final Map<String, File> yamlPaths = this.yamlPaths;
-        final Map<File, byte[]> yamlFiles = this.yamlFiles;
+        final Map<File, YamlRef> yamlFiles = this.yamlFiles;
         FileProcessor processor2 = new FileProcessor() {
 
             @Override
             public void processFile(final File file) {
                 yamlPaths.put(file.getName(), file);
-                yamlFiles.put(file, readFile(file).getBytes());
+                yamlFiles.put(file, new YamlRef(file));
             }
 
         };
@@ -304,7 +297,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
             @Override
             public void processFile(File file) {
-                byte[] hash = getHash(file);
+                byte[] hash = ConfigurationServices.getHash(file);
                 xmlFiles.put(file, hash);
             }
         };
@@ -354,7 +347,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             if (!propFile.exists() || !propFile.canRead()) {
                 return;
             }
-            Properties tmp = loadProperties(propFile);
+            Properties tmp = ConfigurationServices.loadPropertiesFrom(propFile);
             propertiesByFile.put(propFile, tmp);
 
             String propFilePath = propFile.getPath();
@@ -377,17 +370,6 @@ public final class ConfigurationImpl implements ConfigurationService {
             LOG.warn("A malformed Unicode escape sequence in .properties file \"{}\".", propFile, encodingError);
         } catch (RuntimeException e) {
             LOG.warn("An error occurred while processing .properties file \"{}\".", propFile, e);
-        }
-    }
-
-    private static Properties loadProperties(File propFile) throws IOException {
-        InputStream fis = new BufferedInputStream(new FileInputStream(propFile), 65536);
-        try {
-            Properties tmp = new Properties();
-            tmp.load(fis);
-            return tmp;
-        } finally {
-            Streams.close(fis);
         }
     }
 
@@ -749,18 +731,18 @@ public final class ConfigurationImpl implements ConfigurationService {
     String readFile(final File file) {
         Reader reader = null;
         try {
-            reader = new InputStreamReader(new FileInputStream(file));
+            reader = new FileReader(file);
 
-            final StringBuilder builder = new StringBuilder((int) file.length());
-            final int buflen = 8192;
-            final char[] cbuf = new char[buflen];
+            StringBuilder builder = new StringBuilder((int) file.length());
+            int buflen = 8192;
+            char[] cbuf = new char[buflen];
 
             for (int read; (read = reader.read(cbuf, 0, buflen)) > 0;) {
                 builder.append(cbuf, 0, read);
             }
             return builder.toString();
         } catch (final IOException x) {
-            LOG.error("Can't read file: {}", file);
+            LOG.error("Can't read file: {}", file, x);
             return null;
         } finally {
             Streams.close(reader);
@@ -776,14 +758,9 @@ public final class ConfigurationImpl implements ConfigurationService {
         boolean isPath = filename.indexOf(File.separatorChar) >= 0;
         if (isPath) {
             FileNameMatcher matcher = PATH_MATCHER;
-            for (Map.Entry<File, byte[]> entry : yamlFiles.entrySet()) {
+            for (Map.Entry<File, YamlRef> entry : yamlFiles.entrySet()) {
                 if (matcher.matches(filename, entry.getKey())) {
-                    try {
-                        return Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8));
-                    } catch (YamlException e) {
-                        // Failed to load .yml file
-                        throw new IllegalStateException("Failed to load YAML file '" + entry.getKey() + "'. Reason:" + e.getMessage(), e);
-                    }
+                    return entry.getValue().getValue();
                 }
             }
 
@@ -803,31 +780,21 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         }
 
-        try {
-            return Yaml.load(Charsets.toString(yamlFiles.get(path), Charsets.UTF_8));
-        } catch (YamlException e) {
-            // Failed to load .yml file
-            throw new IllegalStateException("Failed to load YAML file '" + path + "'. Reason:" + e.getMessage(), e);
-        }
+        return yamlFiles.get(path).getValue();
     }
 
     @Override
     public Map<String, Object> getYamlInFolder(final String folderName) {
         final Map<String, Object> retval = new HashMap<String, Object>();
-        final Iterator<Entry<File, byte[]>> iter = yamlFiles.entrySet().iterator();
+        final Iterator<Entry<File, YamlRef>> iter = yamlFiles.entrySet().iterator();
         String fldName = folderName;
         for (final File dir : dirs) {
             fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
-                final Entry<File, byte[]> entry = iter.next();
+                final Entry<File, YamlRef> entry = iter.next();
                 String pathName = entry.getKey().getPath();
                 if (pathName.startsWith(fldName)) {
-                    try {
-                        retval.put(pathName, Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8)));
-                    } catch (YamlException e) {
-                        // Failed to load .yml file
-                        throw new IllegalStateException("Failed to load YAML file '" + pathName + "'. Reason:" + e.getMessage(), e);
-                    }
+                    retval.put(pathName, entry.getValue().getValue());
                 }
             }
         }
@@ -843,7 +810,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Copy current content to get associated files on check for expired PropertyWatchers
         final Map<File, Properties> oldPropertiesByFile = new HashMap<File, Properties>(propertiesByFile);
         final Map<File, byte[]> oldXml = new HashMap<File, byte[]>(xmlFiles);
-        final Map<File, byte[]> oldYaml = new HashMap<File, byte[]>(yamlFiles);
+        final Map<File, YamlRef> oldYaml = new HashMap<File, YamlRef>(yamlFiles);
 
         // Clear maps
         properties.clear();
@@ -1102,7 +1069,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @NonNull
-    private Set<File> getChanges(Map<File, Properties> oldPropertiesByFile, Map<File, byte[]> oldXml, Map<File, byte[]> oldYaml, Set<String> namesOfChangedProperties) {
+    private Set<File> getChanges(Map<File, Properties> oldPropertiesByFile, Map<File, byte[]> oldXml, Map<File, YamlRef> oldYaml, Set<String> namesOfChangedProperties) {
         Set<File> result = new HashSet<File>(oldPropertiesByFile.size());
 
         // Check for changes in .properties files
@@ -1169,12 +1136,15 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
 
         // ... and one more time for YAMLs
-        for (Entry<File, byte[]> filenameEntry : yamlFiles.entrySet()) {
+        for (Entry<File, YamlRef> filenameEntry : yamlFiles.entrySet()) {
             File filename = filenameEntry.getKey();
-            byte[] newHash = filenameEntry.getValue();
-            byte[] oldHash = oldYaml.get(filename);
-            if (null == oldHash || !Arrays.equals(oldHash, newHash)) {
+            YamlRef newYamlRef = filenameEntry.getValue();
+            YamlRef oldYamlRef = oldYaml.get(filename);
+            if (null == oldYamlRef || !oldYamlRef.equals(newYamlRef)) {
                 result.add(filename);
+            } else {
+                // Still the same, take over YAML value if present
+                newYamlRef.setValueIfAbsent(oldYamlRef.optValue());
             }
         }
         {
@@ -1205,19 +1175,6 @@ public final class ConfigurationImpl implements ConfigurationService {
             tracked.addAll(reloadables);
         }
         return tracked;
-    }
-
-    byte[] getHash(File file) {
-        byte[] retval = null;
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-            md.update(readFile(file).getBytes());
-            retval = md.digest();
-        } catch (NoSuchAlgorithmException e) {
-            // Should not happen
-        }
-        return retval;
     }
 
 }

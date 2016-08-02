@@ -60,7 +60,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.ho.yaml.Yaml;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,6 +68,7 @@ import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -125,7 +125,7 @@ public class ServerConfigServiceImplTest {
     private static Map<String, Object> asConfigDefaults;
 
     private static Map<String, ComposedConfigProperty<String>> composedConfigPropertyMap = new HashMap<>();
-    
+
     private static Properties languageProperties;
 
     @Mock
@@ -138,8 +138,8 @@ public class ServerConfigServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        asConfigDefaults = (Map<String, Object>) Yaml.load(getClass().getResourceAsStream("as-config-defaults.yml"));
-        asConfig = (Map<String, Object>) Yaml.load(getClass().getResourceAsStream("as-config.yml"));
+        asConfigDefaults = (Map<String, Object>) ConfigurationServices.loadYamlFrom(getClass().getResourceAsStream("as-config-defaults.yml"));
+        asConfig = (Map<String, Object>) ConfigurationServices.loadYamlFrom(getClass().getResourceAsStream("as-config.yml"));
         languageProperties = new Properties();
         languageProperties.put("en_US", "English");
         languageProperties.put("fr_FR", "Francais");
@@ -302,7 +302,7 @@ public class ServerConfigServiceImplTest {
         assertEquals("Wrong footer image name", null, nmc.getFooterImage());
         assertEquals("Wrong footer text", "Footer text", nmc.getFooterText());
     }
-    
+
     @Test
     public void testCustomSingleLanguageConfiguration() throws Exception {
         ComputedServerConfigValueService languages = new Languages(serviceLookup);
