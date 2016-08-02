@@ -192,21 +192,15 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
                 throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, parentIdentifier);
             }
 
+            List<Metadata> entries = listFolder(parentIdentifier);
             List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
-            ListFolderResult listFolder;
-            String cursor = null;
-            do {
-                listFolder = (cursor != null) ? client.files().listFolderContinue(cursor) : client.files().listFolder(parentIdentifier);
-                List<Metadata> entries = listFolder.getEntries();
 
-                for (Metadata entry : entries) {
-                    if (entry instanceof FolderMetadata) {
-                        FolderMetadata folderMetadata = (FolderMetadata) entry;
-                        folders.add(new DropboxFolder(folderMetadata, userId, accountDisplayName, hasSubFolders(folderMetadata.getPathDisplay())));
-                    }
+            for (Metadata entry : entries) {
+                if (entry instanceof FolderMetadata) {
+                    FolderMetadata folderMetadata = (FolderMetadata) entry;
+                    folders.add(new DropboxFolder(folderMetadata, userId, accountDisplayName, hasSubFolders(folderMetadata.getPathDisplay())));
                 }
-                cursor = listFolder.getCursor();
-            } while (listFolder.getHasMore());
+            }
 
             return folders.toArray(new FileStorageFolder[0]);
         } catch (ListFolderContinueErrorException e) {
@@ -364,9 +358,8 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public void clearFolder(String folderId) throws OXException {
         try {
-            // TODO: Use cursor and page the list
-            ListFolderResult listFolder = client.files().listFolder(folderId);
-            for (Metadata entry : listFolder.getEntries()) {
+            List<Metadata> entries = listFolder(folderId);
+            for (Metadata entry : entries) {
                 if (entry instanceof FolderMetadata) {
                     client.files().delete(entry.getPathDisplay());
                 }
@@ -473,9 +466,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      * @throws DbxException
      */
     private boolean hasSubFolders(String folderId) throws ListFolderErrorException, DbxException {
-        // TODO: Use pagination
-        ListFolderResult listFolder = client.files().listFolder(folderId);
-        List<Metadata> entries = listFolder.getEntries();
+        List<Metadata> entries = listFolder(folderId);
         boolean hasSubFolders = false;
         for (Metadata entry : entries) {
             hasSubFolders = entry instanceof FolderMetadata;
@@ -511,5 +502,29 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
         builder.append(folder);
         return builder.toString();
+    }
+
+    /**
+     * Lists the contents of the specified folder and Returns a {@link List} with {@link Metadata}
+     * 
+     * @param folderId The folder identifier
+     * @return A {@link List} with {@link Metadata}
+     * @throws ListFolderErrorException if a list folder error is occurred
+     * @throws DbxException if a generic Dropbox error is occurred
+     */
+    private List<Metadata> listFolder(String folderId) throws ListFolderErrorException, DbxException {
+        List<Metadata> results = new ArrayList<Metadata>();
+        boolean hasMore = false;
+        ListFolderResult result = client.files().listFolder(folderId);
+        do {
+            hasMore = result.getHasMore();
+            results.addAll(result.getEntries());
+            if (hasMore) {
+                String cursor = result.getCursor();
+                result = client.files().listFolderContinue(cursor);
+            }
+        } while (hasMore);
+
+        return results;
     }
 }
