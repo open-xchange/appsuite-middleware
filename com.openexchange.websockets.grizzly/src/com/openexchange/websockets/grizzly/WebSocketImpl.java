@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.websockets.MessageHandler;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
+import com.openexchange.websockets.WebSocketSession;
 
 
 /**
@@ -76,6 +77,11 @@ public class WebSocketImpl implements WebSocket {
     public WebSocketImpl(SessionBoundWebSocket grizzlySocket) {
         super();
         this.grizzlySocket = grizzlySocket;
+    }
+
+    @Override
+    public WebSocketSession getWebSocketSession() {
+        return grizzlySocket.getWebSocketSession();
     }
 
     @Override
@@ -120,12 +126,6 @@ public class WebSocketImpl implements WebSocket {
     public MessageHandler sendMessageAsync(String message) throws OXException {
         grizzlySocket.send(message);
         return null;
-    }
-
-    @Override
-    public void onMessage(String text) {
-        // TODO Auto-generated method stub
-
     }
 
 }

@@ -49,36 +49,52 @@
 
 package com.openexchange.websockets;
 
+import java.util.Set;
+
 /**
- * {@link WebSocketListener} - A Web Socket listener for receiving various call-backs on certain Web Socket events.
- * <p>
- * Listeners simply need to be OSGi-wise registered.
+ * {@link WebSocketSession} - A session associated with a Web Socket.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface WebSocketListener {
+public interface WebSocketSession {
 
     /**
-     * Invoked when a new session-bound Web Socket gets connected
+     * Gets the object bound with the specified name in this session, or
+     * <code>null</code> if no object is bound under the name.
      *
-     * @param socket The connected Web Socket
+     * @param name The string specifying the name of the object
+     * @return The object bound to the specified name or <code>null</code>
      */
-    void onWebSocketConnect(WebSocket socket);
+    Object getAttribute(String name);
 
     /**
-     * Invoked when an existing session-bound Web Socket is about to be closed
+     * Gets the set view for the names of all the objects bound to this session.
      *
-     * @param socket The socket to close
+     * @return The set view for attribute names
      */
-    void onWebSocketClose(WebSocket socket);
+    Set<String> getAttributeNames();
 
     /**
-     * Invoked when {@link WebSocket#onMessage(String)} has been called on a  particular {@link WebSocket} instance.
+     * Binds an object to this session, using the name specified.
+     * <p>
+     * If an object of the same name is already bound to the session, the object is replaced.
+     * <p>
+     * If the value passed in is null, this has the same effect as calling <code>removeAttribute()<code>.
      *
-     * @param socket The {@link WebSocket} that received a message.
-     * @param text The message received.
+     *
+     * @param name The name to which the object is bound
+     * @param value The object to be bound
      */
-    void onMessage(WebSocket socket, String text);
+    void setAttribute(String name, Object value);
+
+    /**
+     * Removes the object bound with the specified name from this session.
+     * <p>
+     * If the session does not have an object bound with the specified name, this method does nothing.
+     *
+     * @param name The name of the object to remove from this session
+     */
+    void removeAttribute(String name);
 
 }

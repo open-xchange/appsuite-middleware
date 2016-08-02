@@ -53,6 +53,7 @@ import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.websockets.DefaultWebSocket;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocketListener;
+import com.openexchange.websockets.WebSocketSession;
 
 /**
  * {@link SessionBoundWebSocket} - The Web Socket bound to a certain session.
@@ -64,6 +65,7 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
 
     private final SessionInfo sessionInfo;
     private final ConnectionId connectionId;
+    private final WebSocketSession webSocketSession;
 
     /**
      * Initializes a new {@link SessionBoundWebSocket}.
@@ -72,6 +74,16 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
         super(protocolHandler, request, listeners);
         this.sessionInfo = sessionInfo;
         this.connectionId = connectionId;
+        webSocketSession = new WebSocketSessionImpl();
+    }
+
+    /**
+     * Gets the Web Socket session
+     *
+     * @return The Web Socket session
+     */
+    public WebSocketSession getWebSocketSession() {
+        return webSocketSession;
     }
 
     /**

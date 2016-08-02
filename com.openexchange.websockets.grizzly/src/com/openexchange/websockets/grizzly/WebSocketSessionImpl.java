@@ -47,38 +47,60 @@
  *
  */
 
-package com.openexchange.websockets;
+package com.openexchange.websockets.grizzly;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.websockets.WebSocketSession;
 
 /**
- * {@link WebSocketListener} - A Web Socket listener for receiving various call-backs on certain Web Socket events.
- * <p>
- * Listeners simply need to be OSGi-wise registered.
+ * {@link WebSocketSessionImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface WebSocketListener {
+public class WebSocketSessionImpl implements WebSocketSession {
+
+    private final ConcurrentMap<String, Object> attributes;
 
     /**
-     * Invoked when a new session-bound Web Socket gets connected
-     *
-     * @param socket The connected Web Socket
+     * Initializes a new {@link WebSocketSessionImpl}.
      */
-    void onWebSocketConnect(WebSocket socket);
+    public WebSocketSessionImpl() {
+        super();
+        attributes = new ConcurrentHashMap<>(8, 0.9F, 1);
+    }
 
-    /**
-     * Invoked when an existing session-bound Web Socket is about to be closed
-     *
-     * @param socket The socket to close
-     */
-    void onWebSocketClose(WebSocket socket);
+    @Override
+    public Object getAttribute(String name) {
+        return null == name ? null : attributes.get(name);
+    }
 
-    /**
-     * Invoked when {@link WebSocket#onMessage(String)} has been called on a  particular {@link WebSocket} instance.
-     *
-     * @param socket The {@link WebSocket} that received a message.
-     * @param text The message received.
-     */
-    void onMessage(WebSocket socket, String text);
+    @Override
+    public Set<String> getAttributeNames() {
+        return new LinkedHashSet<>(attributes.keySet());
+    }
+
+    @Override
+    public void setAttribute(String name, Object value) {
+        if (null == name) {
+            return;
+        }
+        if (null == value) {
+            attributes.remove(name);
+        } else {
+            attributes.put(name, value);
+        }
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+        if (null == name) {
+            return;
+        }
+        attributes.remove(name);
+    }
 
 }
