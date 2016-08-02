@@ -71,6 +71,7 @@ import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketException;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.CookieHashSource;
@@ -130,6 +131,10 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 iter.remove();
             }
             i.remove();
+        }
+        for (WebSocket socket : ImmutableSet.<WebSocket> copyOf(getWebSockets())) {
+            remove(socket);
+            socket.close();
         }
     }
 
