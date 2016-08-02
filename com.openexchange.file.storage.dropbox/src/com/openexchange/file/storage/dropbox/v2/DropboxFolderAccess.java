@@ -460,21 +460,19 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     /**
      * Check for sub folders
      * 
-     * @param folderId
-     * @return
-     * @throws ListFolderErrorException
-     * @throws DbxException
+     * @param folderId The folder to check for sub folders
+     * @return <code> if at least one entry of the specified folder is of type {@link FolderMetadata}; false otherwise
+     * @throws ListFolderErrorException If a list folder error is occurred
+     * @throws DbxException if a generic Dropbox error is occurred
      */
     private boolean hasSubFolders(String folderId) throws ListFolderErrorException, DbxException {
         List<Metadata> entries = listFolder(folderId);
-        boolean hasSubFolders = false;
         for (Metadata entry : entries) {
-            hasSubFolders = entry instanceof FolderMetadata;
-            if (hasSubFolders) {
-                break;
+            if (entry instanceof FolderMetadata) {
+                return true;
             }
         }
-        return hasSubFolders;
+        return false;
     }
 
     /**
