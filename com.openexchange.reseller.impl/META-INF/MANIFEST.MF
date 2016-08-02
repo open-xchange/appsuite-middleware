@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Reseller Impl
+Bundle-SymbolicName: com.openexchange.reseller.impl
+Bundle-Version: 7.8.3
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Activator: com.openexchange.reseller.osgi.Activator
+Import-Package: com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.reseller,
+ com.openexchange.reseller.data,
+ org.slf4j;version="1.7.5",
+ com.openexchange.server,
+ org.osgi.framework
+

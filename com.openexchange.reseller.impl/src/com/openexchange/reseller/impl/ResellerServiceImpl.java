@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.reseller.internal;
+package com.openexchange.reseller.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

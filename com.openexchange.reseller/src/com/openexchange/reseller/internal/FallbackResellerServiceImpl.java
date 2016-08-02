@@ -47,31 +47,38 @@
  *
  */
 
-package com.openexchange.reseller.osgi;
+package com.openexchange.reseller.internal;
 
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.internal.FallbackResellerServiceImpl;
+import com.openexchange.reseller.data.ResellerAdmin;
 
 /**
- * {@link Activator}
+ * {@link FallbackResellerServiceImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class Activator extends HousekeepingActivator {
+public class FallbackResellerServiceImpl implements ResellerService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
+    private static ResellerAdmin DEFAULT;
+    static {
+
+        DEFAULT = new ResellerAdmin(-1);
+        DEFAULT.setName("OX_ALL");
+
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        /**
-         * register {@link FallbackResellerServiceImpl} as a fallback implementation
-         */
-        registerService(ResellerService.class, new FallbackResellerServiceImpl(), Integer.MIN_VALUE);
+    public ResellerAdmin getReseller(int cid) throws OXException {
+        return DEFAULT;
+    }
+
+    @Override
+    public List<ResellerAdmin> getAll() throws OXException {
+        return Collections.singletonList(DEFAULT);
     }
 
 }

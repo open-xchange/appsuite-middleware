@@ -49,9 +49,10 @@
 
 package com.openexchange.reseller.osgi;
 
+import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.internal.FallbackResellerServiceImpl;
+import com.openexchange.reseller.impl.ResellerServiceImpl;
 
 /**
  * {@link Activator}
@@ -63,15 +64,14 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[0];
+        return new Class[] { DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        /**
-         * register {@link FallbackResellerServiceImpl} as a fallback implementation
-         */
-        registerService(ResellerService.class, new FallbackResellerServiceImpl(), Integer.MIN_VALUE);
+        Services.setServiceLookup(this);
+        registerService(ResellerService.class, ResellerServiceImpl.getInstance());
+
     }
 
 }
