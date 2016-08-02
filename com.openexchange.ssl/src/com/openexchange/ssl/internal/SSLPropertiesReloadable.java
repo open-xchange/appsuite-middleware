@@ -52,6 +52,7 @@ package com.openexchange.ssl.internal;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.ssl.config.SSLProperties;
 
 /**
  * {@link SSLPropertiesReloadable}

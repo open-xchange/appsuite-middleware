@@ -68,8 +68,8 @@ import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailConfig.ServerSource;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
+import com.openexchange.net.HostList;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.HostList;
 
 /**
  * {@link MailProperties} - Global mail properties read from properties file.

@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.ssl.internal;
+package com.openexchange.ssl.config;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
+import com.openexchange.net.HostList;
 import com.openexchange.ssl.osgi.Services;
-import com.openexchange.ssl.utils.HostList;
 
 /**
  * {@link SSLProperties}
@@ -89,33 +89,35 @@ public enum SSLProperties {
 
     static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.ssl.default.truststore.enabled";
 
-    static final String SECURE_CONNECTIONS_KEY = "com.openexchange.ssl.only";
+    static final String TRUST_LEVEL_KEY = "com.openexchange.ssl.trustlevel";
 
-    private static volatile Boolean isSecureEnabled;
+    static final String TRUST_LEVEL_DEFAULT = "none";
 
-    public static boolean isSecureEnabled() {
-        Boolean tmp = isSecureEnabled;
+    private static volatile TrustLevel trustLevel;
+
+    public static TrustLevel trustLevel() {
+        TrustLevel tmp = trustLevel;
         if (null == tmp) {
             synchronized (SSLProperties.class) {
-                tmp = isSecureEnabled;
+                tmp = trustLevel;
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.only'.");
-                        return true;
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.trustlevel'.");
+                        return TrustLevel.valueOf(TRUST_LEVEL_DEFAULT);
                     }
-                    boolean prop = service.getBoolProperty(SECURE_CONNECTIONS_KEY, true);
-                    tmp = new Boolean(prop);
-                    isSecureEnabled = tmp;
+                    String prop = service.getProperty(TRUST_LEVEL_KEY, TRUST_LEVEL_DEFAULT);
+                    tmp = TrustLevel.find(prop);
+                    trustLevel = tmp;
                 }
             }
         }
-        return tmp.booleanValue();
+        return tmp;
     }
 
     static final String PROTOCOLS_KEY = "com.openexchange.ssl.protocols";
 
-    static final String PROTOCOLS_DEFAULTS = "SSLv3, TLSv1.2";
+    static final String PROTOCOLS_DEFAULT = "SSLv3, TLSv1.2";
 
     private static volatile String[] protocols;
 
@@ -128,9 +130,9 @@ public enum SSLProperties {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
                         org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.protocols'.");
-                        return Strings.splitByComma(PROTOCOLS_DEFAULTS);
+                        return Strings.splitByComma(PROTOCOLS_DEFAULT);
                     }
-                    String prop = service.getProperty(PROTOCOLS_KEY, PROTOCOLS_DEFAULTS);
+                    String prop = service.getProperty(PROTOCOLS_KEY, PROTOCOLS_DEFAULT);
                     tmp = Strings.splitByComma(prop);
                     protocols = tmp;
                 }
@@ -141,7 +143,7 @@ public enum SSLProperties {
 
     static final String CIPHERS_KEY = "com.openexchange.ssl.ciphersuites";
 
-    static final String CIPHERS_DEFAULTS = "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA, SSL_RSA_WITH_RC4_128_SHA, TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TLS_ECDH_RSA_WITH_RC4_128_SHA, TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_RC4_128_MD5, TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
+    static final String CIPHERS_DEFAULT = "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA, SSL_RSA_WITH_RC4_128_SHA, TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TLS_ECDH_RSA_WITH_RC4_128_SHA, TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_RC4_128_MD5, TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
 
     private static volatile String[] ciphers;
 
@@ -154,9 +156,9 @@ public enum SSLProperties {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
                         org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.ciphersuites'.");
-                        return Strings.splitByComma(CIPHERS_DEFAULTS);
+                        return Strings.splitByComma(CIPHERS_DEFAULT);
                     }
-                    String prop = service.getProperty(CIPHERS_KEY, CIPHERS_DEFAULTS);
+                    String prop = service.getProperty(CIPHERS_KEY, CIPHERS_DEFAULT);
                     tmp = Strings.splitByComma(prop);
                     ciphers = tmp;
                 }
@@ -235,7 +237,7 @@ public enum SSLProperties {
 
     public static void reload() {
         whitelistedHosts = null;
-        isSecureEnabled = null;
+        trustLevel = null;
         verifyHostname = null;
         ciphers = null;
         protocols = null;

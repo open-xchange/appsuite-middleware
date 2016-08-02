@@ -47,70 +47,36 @@
  *
  */
 
-package com.openexchange.ssl.internal;
-
-import java.net.Socket;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.X509ExtendedTrustManager;
-import com.openexchange.ssl.config.SSLProperties;
+package com.openexchange.ssl.config;
 
 /**
- * {@link AbstractTrustManager}
+ * {@link TrustLevel}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
+public enum TrustLevel {
 
-    protected X509ExtendedTrustManager trustManager;
+    TRUST_ALL("all"),
 
-    public boolean isInitialized() {
-        return this.trustManager != null;
+    TRUST_NONE("none");
+
+    private String level;
+
+    TrustLevel(String level) {
+        this.level = level;
     }
 
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-        return this.trustManager.getAcceptedIssuers();
+    public String level() {
+        return level;
     }
 
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // no whitelist check possible at this point
-        this.trustManager.checkServerTrusted(chain, authType);
-    }
-
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
-        if (SSLProperties.isWhitelisted(socket.getInetAddress().getHostName())) {
-            return;
+    public static TrustLevel find(String abbr) {
+        for (TrustLevel v : values()) {
+            if (v.level().equals(abbr)) {
+                return v;
+            }
         }
-
-        this.trustManager.checkServerTrusted(chain, authType, socket);
-    }
-
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
-        if (SSLProperties.isWhitelisted(engine.getSession().getPeerHost())) {
-            return;
-        }
-        
-        this.trustManager.checkClientTrusted(chain, authType, engine);
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // do not check client
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
-        // do not check client
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
-        // do not check client
+        return null;
     }
 }

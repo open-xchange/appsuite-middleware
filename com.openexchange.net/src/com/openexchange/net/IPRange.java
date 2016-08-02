@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.ssl.utils;
+package com.openexchange.net;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +64,7 @@ import org.apache.commons.lang.math.Range;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import com.googlecode.ipv6.IPv6Address;
 import com.googlecode.ipv6.IPv6AddressRange;
-import com.openexchange.java.Autoboxing;
-import com.openexchange.java.IPAddressUtil;
+import com.openexchange.net.utils.Strings;
 import edazdarevic.commons.net.CIDRUtils;
 
 /**
@@ -84,7 +84,7 @@ public class IPRange {
      * @throws IllegalArgumentException If parsing fails
      */
     public static IPRange parseRange(final String string) {
-        if (com.openexchange.java.Strings.isEmpty(string)) {
+        if (Strings.isEmpty(string)) {
             return null;
         }
         if (string.indexOf('-') > 0) {  // Range with '-'
@@ -161,9 +161,24 @@ public class IPRange {
             value >>= 8;
         }
         Collections.reverse(retval);
-        return Autoboxing.B2b(retval);
+        return B2b(retval);
     }
 
+    private static byte[] B2b(final Collection<Byte> byteCollection) {
+        byte[] byteArray = new byte[byteCollection.size()];
+        int pos = 0;
+        for (final Byte b : byteCollection) {
+            if (null != b) {
+                byteArray[pos++] = b.byteValue();
+            }
+        }
+        if (pos != byteArray.length) {
+            final byte[] tmpArray = new byte[pos];
+            System.arraycopy(byteArray, 0, tmpArray, 0, pos);
+            byteArray = tmpArray;
+        }
+        return byteArray;
+    }
     // ---------------------------------------------------------------------------------------------------------------------------
 
     private final Map<String, Boolean> cache;

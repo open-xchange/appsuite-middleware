@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ssl.utils;
+package com.openexchange.net;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,8 +55,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.java.IPAddressUtil;
-import com.openexchange.java.Strings;
+import com.openexchange.net.utils.Strings;
 
 /**
  * 

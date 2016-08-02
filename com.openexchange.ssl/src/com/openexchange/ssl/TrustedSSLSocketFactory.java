@@ -65,9 +65,9 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import com.openexchange.ssl.config.SSLProperties;
 import com.openexchange.ssl.internal.CustomTrustManager;
 import com.openexchange.ssl.internal.DefaultTrustManager;
-import com.openexchange.ssl.internal.SSLProperties;
 
 /**
  * {@link TrustedSSLSocketFactory}
@@ -85,7 +85,7 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
     private SSLContext sslcontext;
 
     /** Holds the TrustManager array to use */
-    private static AtomicReference<TrustManager[]> TRUST_MANAGERS;
+    private static AtomicReference<TrustManager[]> TRUST_MANAGERS = new AtomicReference<>();
 
     /** Holds a SSLSocketFactory to pass all API-method-calls to */
     private SSLSocketFactory adapteeFactory = null;
@@ -97,17 +97,14 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
             this.sslcontext = SSLContext.getInstance("TLS");
             newAdapteeFactory();
         } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Unable to retrieve SSLContext.", e);
         } catch (KeyManagementException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Unable to initialize SSLContext.", e);
         }
     }
 
     private static synchronized void init() {
-        if (TRUST_MANAGERS == null) {
-            TRUST_MANAGERS = new AtomicReference<>();
+        if (TRUST_MANAGERS.get() == null) {
             TRUST_MANAGERS.compareAndSet(null, initTrustManagers());
         }
     }

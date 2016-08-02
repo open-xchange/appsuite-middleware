@@ -47,9 +47,9 @@
  *
  */
 
-package com.openexchange.mailaccount.utils;
+package com.openexchange.net;
 
-import com.openexchange.tools.HostList;
+import com.openexchange.net.HostList;
 import junit.framework.TestCase;
 
 /**

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.java;
+package com.openexchange.net;
 
 import java.util.regex.Pattern;
 

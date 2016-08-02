@@ -50,7 +50,8 @@
 package com.openexchange.ssl;
 
 import javax.net.ssl.SSLSocketFactory;
-import com.openexchange.ssl.internal.SSLProperties;
+import com.openexchange.ssl.config.SSLProperties;
+import com.openexchange.ssl.config.TrustLevel;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -69,7 +70,7 @@ public class SSLSocketFactoryProvider {
      * @return {@link TrustedSSLSocketFactory} or {@link TrustAllSSLSocketFactory} based on the configuration
      */
     public static SSLSocketFactory getDefault() {
-        if (!SSLProperties.isSecureEnabled()) {
+        if (SSLProperties.trustLevel().equals(TrustLevel.TRUST_ALL)) {
             return TrustAllSSLSocketFactory.getDefault();
         }
         return TrustedSSLSocketFactory.getDefault();

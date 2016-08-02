@@ -56,6 +56,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.ssl.config.SSLProperties;
 import com.openexchange.ssl.osgi.Services;
 
 /**
