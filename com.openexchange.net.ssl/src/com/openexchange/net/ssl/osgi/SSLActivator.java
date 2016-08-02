@@ -47,36 +47,64 @@
  *
  */
 
-package com.openexchange.ssl.config;
+package com.openexchange.net.ssl.osgi;
+
+import javax.net.ssl.HttpsURLConnection;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
+import com.openexchange.net.ssl.config.SSLProperties;
+import com.openexchange.net.ssl.internal.SSLPropertiesReloadable;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link TrustLevel}
+ * 
+ * {@link SSLActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public enum TrustLevel {
+public class SSLActivator extends HousekeepingActivator {
 
-    TRUST_ALL("all"),
-
-    TRUST_NONE("none");
-
-    private String level;
-
-    TrustLevel(String level) {
-        this.level = level;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { ConfigurationService.class };
     }
 
-    public String level() {
-        return level;
-    }
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("starting bundle: \"com.openexchange.net.ssl\"");
+            Services.setBundleContext(this.context);
 
-    public static TrustLevel find(String abbr) {
-        for (TrustLevel v : values()) {
-            if (v.level().equals(abbr)) {
-                return v;
+            ConfigurationService configService = getService(ConfigurationService.class);
+            if (configService.getBoolProperty(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getName(), SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getDefaultBoolean())) {
+                System.setProperty("javax.net.debug", "ssl:record");
+                org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("Enabeld SSL debug logging.");
             }
+
+            if (SSLProperties.isVerifyHostname()) {
+                HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
+            } else {
+                HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+            }
+
+            HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
+
+            registerService(Reloadable.class, new SSLPropertiesReloadable());
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
+            throw e;
         }
-        return null;
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("stopping bundle: \"com.openexchange.net.ssl\"");
+
+        Services.setBundleContext(null);
+        super.stopBundle();
     }
 }

@@ -25,7 +25,7 @@
  *
  */
 
-package com.openexchange.ssl.apache;
+package com.openexchange.net.ssl.apache;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -49,7 +49,7 @@ import javax.net.ssl.SSLSession;
 import javax.security.auth.x500.X500Principal;
 import org.apache.http.annotation.Immutable;
 import org.apache.http.conn.util.InetAddressUtils;
-import com.openexchange.ssl.internal.DefaultTrustManager;
+import com.openexchange.net.ssl.internal.DefaultTrustManager;
 
 /**
  * Default {@link javax.net.ssl.HostnameVerifier} implementation.

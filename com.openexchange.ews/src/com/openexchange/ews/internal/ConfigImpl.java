@@ -54,7 +54,7 @@ import javax.net.ssl.SSLSession;
 import javax.xml.ws.BindingProvider;
 import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
 import com.openexchange.ews.Config;
-import com.openexchange.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 

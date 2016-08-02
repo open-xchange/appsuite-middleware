@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CardDAV
-Bundle-SymbolicName: com.openexchange.ssl
+Bundle-SymbolicName: com.openexchange.net.ssl
 Bundle-Version: 7.8.2
-Bundle-Activator: com.openexchange.ssl.osgi.SSLActivator
+Bundle-Activator: com.openexchange.net.ssl.osgi.SSLActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.googlecode.ipv6,
@@ -35,4 +35,4 @@ Import-Package: com.googlecode.ipv6,
  org.slf4j,
  sun.security.util
 Bundle-ClassPath: .
-Export-Package: com.openexchange.ssl
+Export-Package: com.openexchange.net.ssl

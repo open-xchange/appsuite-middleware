@@ -79,8 +79,8 @@ import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.ssl.SSLSocketFactoryProvider;
 import com.openexchange.user.UserService;
 
 public class IMAPAuthentication implements AuthenticationService {

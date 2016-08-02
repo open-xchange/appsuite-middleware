@@ -67,8 +67,8 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hostname.ldap.configuration.LDAPHostnameProperties;
 import com.openexchange.hostname.ldap.configuration.Property;
 import com.openexchange.hostname.ldap.configuration.SearchScope;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.ssl.SSLSocketFactoryProvider;
 
 
 public class LDAPHostnameService implements HostnameService {

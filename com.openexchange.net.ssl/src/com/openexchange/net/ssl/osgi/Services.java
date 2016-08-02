@@ -47,32 +47,78 @@
  *
  */
 
-package com.openexchange.ssl;
+package com.openexchange.net.ssl.osgi;
 
-import javax.net.ssl.SSLSocketFactory;
-import com.openexchange.ssl.config.SSLProperties;
-import com.openexchange.ssl.config.TrustLevel;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
- * {@link SSLSocketFactoryProvider}
  * 
- * This implementation has to be placed within an exported package as it will be accessed per reflection.
+ * {@link Services}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLSocketFactoryProvider {
+public final class Services {
 
     /**
-     * Returns the configured {@link SSLSocketFactory}. This method is invoked by by reflection
-     * 
-     * @return {@link TrustedSSLSocketFactory} or {@link TrustAllSSLSocketFactory} based on the configuration
+     * Initializes a new {@link Services}.
      */
-    public static SSLSocketFactory getDefault() {
-        if (SSLProperties.trustLevel().equals(TrustLevel.TRUST_ALL)) {
-            return TrustAllSSLSocketFactory.getDefault();
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<BundleContext> REF = new AtomicReference<BundleContext>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param bundleContext The service lookup or <code>null</code>
+     */
+    public static void setBundleContext(final BundleContext bundleContext) {
+        REF.set(bundleContext);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static BundleContext getBundleContext() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final BundleContext serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl\" not started?");
         }
-        return TrustedSSLSocketFactory.getDefault();
+        ServiceReference<? extends S> serviceReference = serviceLookup.getServiceReference(clazz);
+        if (serviceReference == null) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl\" not started?");
+        }
+        return serviceLookup.getService(serviceReference);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 }

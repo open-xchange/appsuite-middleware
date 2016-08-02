@@ -24,7 +24,7 @@
  * <http://www.apache.org/>.
  *
  */
-package com.openexchange.ssl.apache;
+package com.openexchange.net.ssl.apache;
 
 import java.net.IDN;
 import java.util.Collection;

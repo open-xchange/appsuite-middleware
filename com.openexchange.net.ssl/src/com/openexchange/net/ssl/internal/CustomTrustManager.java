@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ssl.internal;
+package com.openexchange.net.ssl.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,8 +62,8 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.ssl.config.SSLProperties;
-import com.openexchange.ssl.osgi.Services;
+import com.openexchange.net.ssl.config.SSLProperties;
+import com.openexchange.net.ssl.osgi.Services;
 
 /**
  * {@link CustomTrustManager}

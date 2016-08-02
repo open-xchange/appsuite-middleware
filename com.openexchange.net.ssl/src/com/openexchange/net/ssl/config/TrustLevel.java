@@ -47,78 +47,36 @@
  *
  */
 
-package com.openexchange.ssl.osgi;
-
-import java.util.concurrent.atomic.AtomicReference;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+package com.openexchange.net.ssl.config;
 
 /**
- * 
- * {@link Services}
+ * {@link TrustLevel}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public final class Services {
+public enum TrustLevel {
 
-    /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
+    TRUST_ALL("all"),
+
+    TRUST_NONE("none");
+
+    private String level;
+
+    TrustLevel(String level) {
+        this.level = level;
     }
 
-    private static final AtomicReference<BundleContext> REF = new AtomicReference<BundleContext>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param bundleContext The service lookup or <code>null</code>
-     */
-    public static void setBundleContext(final BundleContext bundleContext) {
-        REF.set(bundleContext);
+    public String level() {
+        return level;
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static BundleContext getBundleContext() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final BundleContext serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.ssl\" not started?");
+    public static TrustLevel find(String abbr) {
+        for (TrustLevel v : values()) {
+            if (v.level().equals(abbr)) {
+                return v;
+            }
         }
-        ServiceReference<? extends S> serviceReference = serviceLookup.getServiceReference(clazz);
-        if (serviceReference == null) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.ssl\" not started?");
-        }
-        return serviceLookup.getService(serviceReference);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+        return null;
     }
 }

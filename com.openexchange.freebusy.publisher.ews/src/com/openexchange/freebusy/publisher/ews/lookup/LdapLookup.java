@@ -62,7 +62,7 @@ import com.openexchange.ews.EWSExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.publisher.ews.Tools;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
  * {@link LdapLookup}

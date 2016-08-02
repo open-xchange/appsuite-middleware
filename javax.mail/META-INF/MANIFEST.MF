@@ -6,9 +6,7 @@ Bundle-Version: 1.5.5
 Bundle-Vendor: Oracle
 Bundle-License: http://www.sun.com/cddl, https://glassfish.dev.java.net/public/CDDL+GPL.html
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.annotations,
- com.google.common.base,
- com.google.common.collect,
+Import-Package: com.openexchange.net.ssl,
  com.openexchange.tools.ssl,
  com.sun.net,
  com.sun.net.ssl,

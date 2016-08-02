@@ -64,7 +64,7 @@ import javax.mail.Store;
 import javax.mail.Transport;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.sun.mail.smtp.SMTPTransport;
 
 /**

@@ -47,70 +47,58 @@
  *
  */
 
-package com.openexchange.ssl.internal;
+package com.openexchange.net.ssl.internal;
 
-import java.net.Socket;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.SSLEngine;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
-import com.openexchange.ssl.config.SSLProperties;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.net.ssl.config.SSLProperties;
+import com.openexchange.net.ssl.osgi.Services;
 
 /**
- * {@link AbstractTrustManager}
+ * {@link DefaultTrustManager}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
+public class DefaultTrustManager extends AbstractTrustManager {
 
-    protected X509ExtendedTrustManager trustManager;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTrustManager.class);
 
-    public boolean isInitialized() {
-        return this.trustManager != null;
+    public DefaultTrustManager() {
+        this.trustManager = initDefaultTrustManager();
     }
 
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-        return this.trustManager.getAcceptedIssuers();
-    }
+    private X509ExtendedTrustManager initDefaultTrustManager() {
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
 
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // no whitelist check possible at this point
-        this.trustManager.checkServerTrusted(chain, authType);
-    }
+        boolean useDefaultTruststore = configService.getBoolProperty(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getName(), SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getDefaultBoolean());
 
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
-        if (SSLProperties.isWhitelisted(socket.getInetAddress().getHostName())) {
-            return;
+        if (useDefaultTruststore) {
+            try {
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
+
+                for (TrustManager tm : tmf.getTrustManagers()) {
+                    if (tm instanceof X509ExtendedTrustManager) {
+                        return (X509ExtendedTrustManager) tm;
+                    }
+                }
+            } catch (KeyStoreException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else {
+            LOG.info("Using default JVM truststore is disabled by configuration.");
         }
 
-        this.trustManager.checkServerTrusted(chain, authType, socket);
-    }
-
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
-        if (SSLProperties.isWhitelisted(engine.getSession().getPeerHost())) {
-            return;
-        }
-        
-        this.trustManager.checkClientTrusted(chain, authType, engine);
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // do not check client
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
-        // do not check client
-    }
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
-        // do not check client
+        return null;
     }
 }

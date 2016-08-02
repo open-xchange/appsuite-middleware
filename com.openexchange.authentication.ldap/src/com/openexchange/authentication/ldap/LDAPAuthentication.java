@@ -71,7 +71,7 @@ import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
  * This class implements the login by using an LDAP for authentication.

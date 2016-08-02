@@ -25,7 +25,7 @@
  *
  */
 
-package com.openexchange.ssl.apache;
+package com.openexchange.net.ssl.apache;
 
 import java.util.Collection;
 

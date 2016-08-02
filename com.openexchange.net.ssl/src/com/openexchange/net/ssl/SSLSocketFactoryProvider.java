@@ -47,58 +47,32 @@
  *
  */
 
-package com.openexchange.ssl.internal;
+package com.openexchange.net.ssl;
 
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509ExtendedTrustManager;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.ssl.config.SSLProperties;
-import com.openexchange.ssl.osgi.Services;
+import javax.net.ssl.SSLSocketFactory;
+import com.openexchange.net.ssl.config.SSLProperties;
+import com.openexchange.net.ssl.config.TrustLevel;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
- * {@link DefaultTrustManager}
+ * {@link SSLSocketFactoryProvider}
+ * 
+ * This implementation has to be placed within an exported package as it will be accessed per reflection.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class DefaultTrustManager extends AbstractTrustManager {
+public class SSLSocketFactoryProvider {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTrustManager.class);
-
-    public DefaultTrustManager() {
-        this.trustManager = initDefaultTrustManager();
-    }
-
-    private X509ExtendedTrustManager initDefaultTrustManager() {
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
-
-        boolean useDefaultTruststore = configService.getBoolProperty(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getName(), SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getDefaultBoolean());
-
-        if (useDefaultTruststore) {
-            try {
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                tmf.init((KeyStore) null); // Using null here initializes the TMF with the default trust store.
-
-                for (TrustManager tm : tmf.getTrustManagers()) {
-                    if (tm instanceof X509ExtendedTrustManager) {
-                        return (X509ExtendedTrustManager) tm;
-                    }
-                }
-            } catch (KeyStoreException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        } else {
-            LOG.info("Using default JVM truststore is disabled by configuration.");
+    /**
+     * Returns the configured {@link SSLSocketFactory}. This method is invoked by by reflection
+     * 
+     * @return {@link TrustedSSLSocketFactory} or {@link TrustAllSSLSocketFactory} based on the configuration
+     */
+    public static SSLSocketFactory getDefault() {
+        if (SSLProperties.trustLevel().equals(TrustLevel.TRUST_ALL)) {
+            return TrustAllSSLSocketFactory.getDefault();
         }
-
-        return null;
+        return TrustedSSLSocketFactory.getDefault();
     }
 }

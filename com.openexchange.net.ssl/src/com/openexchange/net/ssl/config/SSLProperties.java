@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.ssl.config;
+package com.openexchange.net.ssl.config;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
-import com.openexchange.ssl.osgi.Services;
+import com.openexchange.net.ssl.osgi.Services;
 
 /**
  * {@link SSLProperties}
@@ -79,17 +79,17 @@ public enum SSLProperties {
 
     static final String EMPTY_STRING = "";
 
-    static final String SECURE_CONNECTIONS_DEBUG_LOGS_KEY = "com.openexchange.ssl.debug.logs";
+    static final String SECURE_CONNECTIONS_DEBUG_LOGS_KEY = "com.openexchange.net.ssl.debug.logs";
 
-    static final String CUSTOM_TRUSTSTORE_ENABLED_KEY = "com.openexchange.ssl.custom.truststore.enabled";
+    static final String CUSTOM_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.custom.truststore.enabled";
 
-    static final String CUSTOM_TRUSTSTORE_PATH_KEY = "com.openexchange.ssl.custom.truststore.path";
+    static final String CUSTOM_TRUSTSTORE_PATH_KEY = "com.openexchange.net.ssl.custom.truststore.path";
 
-    static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.ssl.custom.truststore.password";
+    static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.custom.truststore.password";
 
-    static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.ssl.default.truststore.enabled";
+    static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.default.truststore.enabled";
 
-    static final String TRUST_LEVEL_KEY = "com.openexchange.ssl.trustlevel";
+    static final String TRUST_LEVEL_KEY = "com.openexchange.net.ssl.trustlevel";
 
     static final String TRUST_LEVEL_DEFAULT = "none";
 
@@ -103,7 +103,7 @@ public enum SSLProperties {
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.trustlevel'.");
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.trustlevel'.");
                         return TrustLevel.valueOf(TRUST_LEVEL_DEFAULT);
                     }
                     String prop = service.getProperty(TRUST_LEVEL_KEY, TRUST_LEVEL_DEFAULT);
@@ -115,7 +115,7 @@ public enum SSLProperties {
         return tmp;
     }
 
-    static final String PROTOCOLS_KEY = "com.openexchange.ssl.protocols";
+    static final String PROTOCOLS_KEY = "com.openexchange.net.ssl.protocols";
 
     static final String PROTOCOLS_DEFAULT = "SSLv3, TLSv1.2";
 
@@ -129,7 +129,7 @@ public enum SSLProperties {
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.protocols'.");
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.protocols'.");
                         return Strings.splitByComma(PROTOCOLS_DEFAULT);
                     }
                     String prop = service.getProperty(PROTOCOLS_KEY, PROTOCOLS_DEFAULT);
@@ -141,7 +141,7 @@ public enum SSLProperties {
         return tmp;
     }
 
-    static final String CIPHERS_KEY = "com.openexchange.ssl.ciphersuites";
+    static final String CIPHERS_KEY = "com.openexchange.net.ssl.ciphersuites";
 
     static final String CIPHERS_DEFAULT = "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA, SSL_RSA_WITH_RC4_128_SHA, TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TLS_ECDH_RSA_WITH_RC4_128_SHA, TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_RC4_128_MD5, TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
 
@@ -155,7 +155,7 @@ public enum SSLProperties {
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.ciphersuites'.");
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.ciphersuites'.");
                         return Strings.splitByComma(CIPHERS_DEFAULT);
                     }
                     String prop = service.getProperty(CIPHERS_KEY, CIPHERS_DEFAULT);
@@ -167,7 +167,7 @@ public enum SSLProperties {
         return tmp;
     }
 
-    static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.ssl.hostname.verification.enabled";
+    static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.net.ssl.hostname.verification.enabled";
 
     private static volatile Boolean verifyHostname;
 
@@ -179,7 +179,7 @@ public enum SSLProperties {
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.hostname.verification.enabled'.");
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.hostname.verification.enabled'.");
                         return true;
                     }
                     boolean prop = service.getBoolProperty(HOSTNAME_VERIFICATION_ENABLED_KEY, true);
@@ -191,7 +191,7 @@ public enum SSLProperties {
         return tmp.booleanValue();
     }
 
-    static final String TRUSTSTORE_WHITELIST_KEY = "com.openexchange.ssl.whitelist";
+    static final String TRUSTSTORE_WHITELIST_KEY = "com.openexchange.net.ssl.whitelist";
 
     static final String TRUSTSTORE_WHITELIST_DEFAULT = "127.0.0.1-127.255.255.255,localhost";
 
@@ -205,7 +205,7 @@ public enum SSLProperties {
                 if (null == tmp) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.ssl.whitelist'.");
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.whitelist'.");
                         return HostList.valueOf(TRUSTSTORE_WHITELIST_DEFAULT);
                     }
                     String prop = service.getProperty(TRUSTSTORE_WHITELIST_KEY, TRUSTSTORE_WHITELIST_DEFAULT);

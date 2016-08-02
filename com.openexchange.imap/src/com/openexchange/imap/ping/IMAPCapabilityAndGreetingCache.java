@@ -71,7 +71,7 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.java.BoundaryExceededException;
 import com.openexchange.java.BoundedStringBuilder;
 import com.openexchange.java.Strings;
-import com.openexchange.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
  * {@link IMAPCapabilityAndGreetingCache} - A cache for CAPABILITY and greeting from IMAP servers.

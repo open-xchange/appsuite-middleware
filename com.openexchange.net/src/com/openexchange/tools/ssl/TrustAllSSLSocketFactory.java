@@ -69,9 +69,7 @@ import javax.net.ssl.TrustManager;
  * will trust all certificates.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @deprecated use com.openexchange.ssl.TrustedSSLSocketFactory instead
  */
-@Deprecated
 public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
 
     /**
