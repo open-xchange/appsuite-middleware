@@ -80,6 +80,7 @@ import com.dropbox.core.v2.files.SearchResult;
 import com.dropbox.core.v2.files.ThumbnailErrorException;
 import com.dropbox.core.v2.files.ThumbnailFormat;
 import com.dropbox.core.v2.files.ThumbnailSize;
+import com.dropbox.core.v2.files.UploadBuilder;
 import com.dropbox.core.v2.files.UploadErrorException;
 import com.dropbox.core.v2.files.UploadSessionCursor;
 import com.dropbox.core.v2.files.UploadSessionFinishUploader;
@@ -890,7 +891,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             // Upload the remaining chunk
             long remaining = sink.getCount() - offset;
-            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()));
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), writeMode, false, file.getLastModified(), false);
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
@@ -918,7 +919,8 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         String fileName = name;
         String path = new StringBuilder(file.getFolderId()).append('/').append(fileName).toString();
         try {
-            FileMetadata metadata = client.files().upload(path).uploadAndFinish(data);
+            UploadBuilder builder = client.files().uploadBuilder(path).withMode(writeMode);
+            FileMetadata metadata = builder.uploadAndFinish(data);
             return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
             throw DropboxExceptionHandler.handleUploadErrorException(e, path);
