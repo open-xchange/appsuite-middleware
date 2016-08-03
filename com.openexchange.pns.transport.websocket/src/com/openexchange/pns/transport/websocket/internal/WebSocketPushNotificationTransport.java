@@ -211,8 +211,8 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     @Override
     public void onMessage(WebSocket socket, String text) {
-        // No client-initiated push message...
-        LOG.info("Received message: {}", text);
+        // No use for client-initiated push message...
+        LOG.debug("Received message: {}", text);
     }
 
     @Override
