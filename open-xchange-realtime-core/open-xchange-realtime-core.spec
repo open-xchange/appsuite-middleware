@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 36
+%define        ox_release 37
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -91,6 +91,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/realtime.properties
 
 %changelog
+* Wed Aug 03 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-08-03 (3476)
 * Mon Jul 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-08-01 (3465)
 * Mon Jul 11 2016 Marcus Klein <marcus.klein@open-xchange.com>
