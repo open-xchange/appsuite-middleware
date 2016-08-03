@@ -365,20 +365,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
-        long fileSize = file.getFileSize();
-
-        WriteMode writeMode = Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION) ? WriteMode.ADD : WriteMode.OVERWRITE;
-        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data, writeMode) : singleUpload(file, data, writeMode);
-        file.copyFrom(dbxFile, copyFields);
-
-        // Adjust metadata if needed
-        if (writeMode.equals(WriteMode.OVERWRITE)) {
-            file.setId(dbxFile.getFileName());
-            file.setVersion(dbxFile.getVersion());
-        }
-
-        return dbxFile.getIDTuple();
+        return saveDocument(file, data, false);
     }
 
     /*
@@ -398,7 +385,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        return saveDocument(file, data, sequenceNumber, modifiedFields);
+        return saveDocument(file, data, true);
     }
 
     /*
@@ -859,6 +846,41 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     /**
+     * Saves the specified data
+     * 
+     * @param file The {@link File} containing all metadata information
+     * @param data The actual data to save
+     * @param addVersion Flag determining whether a new version of the file will be added
+     * @return The {@link IDTuple} of the uploaded file
+     * @throws OXException If the file cannot be uploaded or any other error is occurred
+     */
+    private IDTuple saveDocument(File file, InputStream data, boolean addVersion) throws OXException {
+        String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
+        long fileSize = file.getFileSize();
+
+        WriteMode writeMode;
+        boolean autorename;
+        if (addVersion) {
+            writeMode = WriteMode.OVERWRITE;
+            autorename = false;
+        } else {
+            writeMode = Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION) ? WriteMode.ADD : WriteMode.OVERWRITE;
+            autorename = true;
+        }
+
+        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data, writeMode, autorename) : singleUpload(file, data, writeMode, autorename);
+        file.copyFrom(dbxFile, copyFields);
+
+        // Adjust metadata if needed
+        if (writeMode.equals(WriteMode.OVERWRITE)) {
+            file.setId(dbxFile.getFileName());
+            file.setVersion(dbxFile.getVersion());
+        }
+
+        return dbxFile.getIDTuple();
+    }
+
+    /**
      * Uploads the specified file in chunks
      * 
      * @param file The {@link File} to upload
@@ -866,7 +888,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException If an error is occurred
      */
-    private DropboxFile sessionUpload(File file, InputStream data, WriteMode writeMode) throws OXException {
+    private DropboxFile sessionUpload(File file, InputStream data, WriteMode writeMode, boolean autorename) throws OXException {
         ThresholdFileHolder sink = null;
         try {
             sink = new ThresholdFileHolder();
@@ -891,7 +913,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             // Upload the remaining chunk
             long remaining = sink.getCount() - offset;
-            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), writeMode, false, file.getLastModified(), false);
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), writeMode, autorename, file.getLastModified(), false);
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
 
@@ -914,12 +936,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException if an error is occurred
      */
-    private DropboxFile singleUpload(File file, InputStream data, WriteMode writeMode) throws OXException {
+    private DropboxFile singleUpload(File file, InputStream data, WriteMode writeMode, boolean autorename) throws OXException {
         String name = file.getFileName();
         String fileName = name;
         String path = new StringBuilder(file.getFolderId()).append('/').append(fileName).toString();
         try {
-            UploadBuilder builder = client.files().uploadBuilder(path).withMode(writeMode);
+            UploadBuilder builder = client.files().uploadBuilder(path).withMode(writeMode).withAutorename(autorename);
             FileMetadata metadata = builder.uploadAndFinish(data);
             return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
