@@ -673,7 +673,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final String searchTerm) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final SearchTerm<?> searchTerm) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }

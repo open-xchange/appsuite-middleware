@@ -241,8 +241,19 @@ public final class IMAPConversationWorker {
     }
 
     private static final MailFields FIELDS_FLAGS = new MailFields(MailField.FLAGS, MailField.COLOR_LABEL);
+    private static final String SEARCH_TERM_THREADING_PROPERTY = "com.openexchange.imap.threading.search.variant";
 
     private List<List<MailMessage>> doReferenceOnlyThreadSort(final String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, final String sentFullName, int lookAhead, final boolean mergeWithSent, MailField[] mailFields, final String[] headerNames, SearchTerm<?> searchTerm) throws MessagingException, OXException {
+        boolean useSearchTerm = searchTerm != null;
+        String variant = null;
+        if (useSearchTerm) {
+            ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+            variant = configurationService.getProperty(SEARCH_TERM_THREADING_PROPERTY);
+            if (variant == null) {
+                variant = "ALL";
+            }
+        }
+
         final MailFields usedFields = new MailFields(mailFields);
         usedFields.add(MailField.THREAD_LEVEL);
         usedFields.add(MailField.RECEIVED_DATE);
@@ -277,12 +288,24 @@ public final class IMAPConversationWorker {
                 if (null != list) {
 
                     // Filter for searchterm
-                    if (searchTerm != null) {
+                    if (useSearchTerm) {
                         List<List<MailMessage>> result = new ArrayList<>();
                         for (List<MailMessage> messages : list) {
                             boolean containsFlag = false;
-                            for (MailMessage message : messages) {
-                                if (searchTerm.matches(message)) {
+                            if (variant.equals("ALL")) {
+                                for (MailMessage message : messages) {
+                                    if (searchTerm.matches(message)) {
+                                        containsFlag = true;
+                                        break;
+                                    }
+                                }
+                            } else if (variant.equals("FIRST")) {
+                                if (searchTerm.matches(messages.get(0))) {
+                                    containsFlag = true;
+                                    break;
+                                }
+                            } else if (variant.equals("LAST")) {
+                                if (searchTerm.matches(messages.get(messages.size() - 1))) {
                                     containsFlag = true;
                                     break;
                                 }
@@ -407,12 +430,24 @@ public final class IMAPConversationWorker {
             conversationCache.putCachedConversations(list, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
 
             // Filter for searchterm
-            if (searchTerm != null) {
+            if (useSearchTerm) {
                 List<List<MailMessage>> result = new ArrayList<>();
                 for (List<MailMessage> messages : list) {
                     boolean containsFlag = false;
-                    for (MailMessage message : messages) {
-                        if (searchTerm.matches(message)) {
+                    if (variant.equals("ALL")) {
+                        for (MailMessage message : messages) {
+                            if (searchTerm.matches(message)) {
+                                containsFlag = true;
+                                break;
+                            }
+                        }
+                    } else if (variant.equals("FIRST")) {
+                        if (searchTerm.matches(messages.get(0))) {
+                            containsFlag = true;
+                            break;
+                        }
+                    } else if (variant.equals("LAST")) {
+                        if (searchTerm.matches(messages.get(messages.size() - 1))) {
                             containsFlag = true;
                             break;
                         }
