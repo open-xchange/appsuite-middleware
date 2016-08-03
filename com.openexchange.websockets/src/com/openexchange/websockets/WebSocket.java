@@ -67,6 +67,13 @@ public interface WebSocket {
     String getPath();
 
     /**
+     * gets this Web Socket's connection identifier.
+     *
+     * @return The connection identifier
+     */
+    ConnectionId getConnectionId();
+
+    /**
      * Gets the identifier of the session currently associated with this Web Socket.
      *
      * @return The session identifier

@@ -22,4 +22,6 @@ Import-Package:
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
+Bundle-Activator: com.openexchange.pns.subscription.storage.osgi.PushSubscriptionRegistryActivator

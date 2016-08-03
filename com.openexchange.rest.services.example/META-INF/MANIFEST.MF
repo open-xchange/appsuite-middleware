@@ -18,6 +18,7 @@ Import-Package:
  com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.rest.services,
+ com.openexchange.rest.services.annotation,
  com.openexchange.server,
  com.openexchange.sessiond,
  com.openexchange.tools.servlet,

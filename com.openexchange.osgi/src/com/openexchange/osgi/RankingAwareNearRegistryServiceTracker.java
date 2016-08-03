@@ -52,6 +52,7 @@ package com.openexchange.osgi;
 import static com.openexchange.osgi.util.RankedService.getRanking;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -138,10 +139,20 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
      */
     @Override
     public List<S> getServiceList() {
-        if (empty) {
-            return Collections.emptyList();
-        }
+        return empty ? Collections.<S>emptyList() : asList();
+    }
 
+    @Override
+    public Iterator<S> iterator() {
+        return empty ? Collections.<S> emptyIterator() : asList().iterator();
+    }
+
+    /**
+     * Gets the list view for tracked services.
+     *
+     * @return The list view
+     */
+    private List<S> asList() {
         List<RankedService<S>> snapshot = services.getSnapshot();
         List<S> ret = new ArrayList<S>(snapshot.size());
         for (RankedService<S> rs : snapshot) {
@@ -151,7 +162,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     }
 
     @Override
-    public S addingService(final ServiceReference<S> reference) {
+    public synchronized S addingService(final ServiceReference<S> reference) {
         final S service = context.getService(reference);
         final int ranking = getRanking(reference, defaultRanking);
         final RankedService<S> rankedService = new RankedService<S>(service, ranking);
@@ -165,7 +176,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     }
 
     @Override
-    public void removedService(final ServiceReference<S> reference, final S service) {
+    public synchronized void removedService(final ServiceReference<S> reference, final S service) {
         if (services.remove(new RankedService<S>(service, getRanking(reference, defaultRanking)))) {
             empty = services.isEmpty();
             onServiceRemoved(service);

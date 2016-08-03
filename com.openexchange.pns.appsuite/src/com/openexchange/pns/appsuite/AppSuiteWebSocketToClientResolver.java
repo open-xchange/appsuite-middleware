@@ -47,48 +47,36 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage.rdb;
+package com.openexchange.pns.appsuite;
 
-import java.util.List;
-import com.openexchange.pns.Hit;
-import com.openexchange.pns.PushMatch;
-
+import com.openexchange.ajax.Client;
+import com.openexchange.exception.OXException;
+import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
+import com.openexchange.websockets.WebSocket;
 
 /**
- * {@link RdbHit}
+ * {@link AppSuiteWebSocketToClientResolver}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RdbHit implements Hit {
-
-    private final String client;
-    private final String transportId;
-    private final List<PushMatch> matches;
+public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResolver {
 
     /**
-     * Initializes a new {@link RdbHit}.
+     * Initializes a new {@link AppSuiteWebSocketToClientResolver}.
      */
-    public RdbHit(String client, String transportId, List<PushMatch> matches) {
+    public AppSuiteWebSocketToClientResolver() {
         super();
-        this.client = client;
-        this.transportId = transportId;
-        this.matches = matches;
     }
 
     @Override
-    public String getClient() {
-        return client;
-    }
+    public String getClientFor(WebSocket socket) throws OXException {
+        String path = socket.getPath();
+        if (null != path && path.startsWith("/websockets/push")) { // TODO: Align to expected path
+            return Client.APPSUITE_UI.getClientId();
+        }
 
-    @Override
-    public String getTransportId() {
-        return transportId;
-    }
-
-    @Override
-    public List<PushMatch> getMatches() {
-        return matches;
+        return null;
     }
 
 }

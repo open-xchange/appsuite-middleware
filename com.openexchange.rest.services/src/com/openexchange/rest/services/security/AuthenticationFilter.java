@@ -70,7 +70,12 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.java.Strings;
+<<<<<<< HEAD
 import com.openexchange.rest.services.Role;
+=======
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
+>>>>>>> origin/develop
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 
 
@@ -130,6 +135,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+<<<<<<< HEAD
         PermitAll permitAll = getAnnotation(PermitAll.class);
         if (null != permitAll) {
             grant(requestContext);
@@ -157,6 +163,61 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
 
         // Default is "Basic-Authenticated" (as it was before)
+=======
+        // Check if all is permitted
+        {
+            PermitAll permitAll = getAnnotation(PermitAll.class);
+            if (null != permitAll) {
+                grant(requestContext);
+                return;
+            }
+        }
+
+        // Check for a certain role
+        {
+            RoleAllowed roleAllowed = getAnnotation(RoleAllowed.class);
+            if (null != roleAllowed) {
+                Role role = roleAllowed.value();
+                if (Role.BASIC_AUTHENTICATED == role) {
+                    basicAuth(requestContext);
+                    return;
+                }
+
+                // Role unknown...
+                LOG.warn("Encountered unknown role '{}' in class {}", role.getId(), resourceInfo.getResourceClass().getName());
+                deny(requestContext);
+                return;
+            }
+        }
+
+        // ... again using generic 'javax.annotation.security.RolesAllowed' annotation class
+        {
+            RolesAllowed rolesAllowed = getAnnotation(RolesAllowed.class);
+            if (null != rolesAllowed) {
+                String[] roles = rolesAllowed.value();
+                if (hasRole(Role.BASIC_AUTHENTICATED.getId(), roles)) {
+                    basicAuth(requestContext);
+                    return;
+                }
+
+                // Other roles unknown...
+                LOG.warn("Encountered unknown roles '{}' in class {}", Arrays.toString(roles), resourceInfo.getResourceClass().getName());
+                deny(requestContext);
+                return;
+            }
+        }
+
+        // Check if all is denied
+        {
+            DenyAll denyAll = getAnnotation(DenyAll.class);
+            if (null != denyAll) {
+                deny(requestContext);
+                return;
+            }
+        }
+
+        // No suitable annotation found. Fall-back to "Basic-Authenticated" (as it was before)
+>>>>>>> origin/develop
         LOG.warn("Found no security annotation for class {}. Assuming \"Basic-Authenticated\"...", resourceInfo.getResourceClass().getName());
         basicAuth(requestContext);
     }

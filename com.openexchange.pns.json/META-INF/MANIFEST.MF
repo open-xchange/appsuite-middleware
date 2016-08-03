@@ -20,3 +20,4 @@ Import-Package: com.openexchange.advertisement,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker
+Bundle-Activator: com.openexchange.pns.json.osgi.PushJsonActivator

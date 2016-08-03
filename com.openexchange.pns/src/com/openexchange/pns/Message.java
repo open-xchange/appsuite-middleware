@@ -56,12 +56,12 @@ package com.openexchange.pns;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Message {
+public interface Message<M> {
 
     /**
      * Gets the message object
      *
      * @return The message object
      */
-    Object getMessage();
+    M getMessage();
 }

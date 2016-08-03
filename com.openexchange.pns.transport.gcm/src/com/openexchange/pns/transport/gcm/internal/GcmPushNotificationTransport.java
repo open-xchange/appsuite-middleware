@@ -74,6 +74,7 @@ import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.util.RankedService;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.DefaultPushSubscription.Builder;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
@@ -97,7 +98,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GcmPushNotificationTransport.class);
 
-    private static final String ID = "gcm";
+    private static final String ID = KnownTransport.GCM.getTransportId();
 
     private static final int MULTICAST_LIMIT = 1000;
 
@@ -219,7 +220,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
                     try {
                         result = sender.sendNoRetry(getMessage(client, notification), registrationIDs);
                     } catch (IOException e) {
-                        LOG.warn("error publishing mobile notification event", e);
+                        LOG.warn("Error publishing push notification", e);
                     }
                     if (null != result) {
                         LOG.debug("{}", result);
@@ -263,7 +264,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
             throw PushExceptionCodes.NO_SUCH_GENERATOR.create(client);
         }
 
-        com.openexchange.pns.Message message = generator.generateMessageFor(ID, notification);
+        com.openexchange.pns.Message<?> message = generator.generateMessageFor(ID, notification);
         Object object = message.getMessage();
         if (object instanceof Message) {
             return checkMessage((Message) object);

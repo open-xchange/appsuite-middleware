@@ -61,7 +61,9 @@ import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.BufferingQueue;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
@@ -75,6 +77,7 @@ import com.openexchange.session.UserAndContext;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.pns.PushSubscription.Nature;
+import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketListener;
 
@@ -88,7 +91,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketPushNotificationTransport.class);
 
-    private static final String ID = "websocket";
+    private static final String ID = KnownTransport.WEB_SOCKET.getTransportId();
 
     private static volatile Long delayDuration;
 
@@ -135,6 +138,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     // ---------------------------------------------------------------------------------------------------------------
 
     private final ServiceLookup services;
+    private final ServiceListing<WebSocketToClientResolver> resolvers;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
     private final ConcurrentMap<UserAndContext, ConcurrentMap<WebSocket, String>> socketsPerUser;
@@ -145,10 +149,11 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     /**
      * Initializes a new {@link WebSocketPushNotificationTransport}.
      */
-    public WebSocketPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, ServiceLookup services) {
+    public WebSocketPushNotificationTransport(ServiceListing<WebSocketToClientResolver> resolvers, ServiceLookup services) {
         super();
-        this.generatorRegistry = generatorRegistry;
-        this.subscriptionRegistry = subscriptionRegistry;
+        this.resolvers = resolvers;
+        this.generatorRegistry = services.getService(PushMessageGeneratorRegistry.class);
+        this.subscriptionRegistry = services.getService(PushSubscriptionRegistry.class);
         this.services = services;
 
         socketsPerUser = new ConcurrentHashMap<>(256);
@@ -185,6 +190,22 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     // ---------------------------------------------------------------------------------------------------------
 
+    private String resolveToClient(WebSocket socket) {
+        String client;
+        for (WebSocketToClientResolver resolver : resolvers) {
+            try {
+                client = resolver.getClientFor(socket);
+                if (null != client) {
+                    return client;
+                }
+            } catch (OXException e) {
+                LOG.error("Failed to resolve Web Socket to a client using path {} from user {} in context {}", socket.getPath(), socket.getUserId(), socket.getContextId(), e);
+            }
+        }
+        // Not resolveable
+        return null;
+    }
+
     @Override
     public void onMessage(WebSocket socket, String text) {
         // No client-initiated push message...
@@ -192,40 +213,42 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     @Override
     public void onWebSocketConnect(WebSocket socket) {
-        String path = socket.getPath();
-        if (null != path && path.startsWith("/websockets/push")) {
-            ConcurrentMap<WebSocket, String> sockets = requireUserSockets(socket);
-            String client = "open-xchange-appsuite";
-            if (null == sockets.putIfAbsent(socket, client)) {
-                synchronized (this) {
-                    // Stopped
-                    if (stopped) {
-                        return;
-                    }
+        String client = resolveToClient(socket);
+        if (null == client) {
+            // Not resolveable to a certain client... Ignore
+            return;
+        }
+
+        ConcurrentMap<WebSocket, String> sockets = requireUserSockets(socket);
+        if (null == sockets.putIfAbsent(socket, client)) {
+            synchronized (this) {
+                // Stopped
+                if (stopped) {
+                    return;
                 }
+            }
 
-                // Create subscription instance
-                DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
-                    .client(client)
-                    .contextId(socket.getContextId())
-                    .nature(Nature.VOLATILE)
-                    .token("")
-                    .topics(Collections.singletonList("*"))
-                    .transportId(ID)
-                    .userId(socket.getUserId())
-                    .build();
+            // Create subscription instance
+            DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
+                .client(client)
+                .contextId(socket.getContextId())
+                .nature(Nature.VOLATILE)
+                .token(socket.getConnectionId().getId())
+                .topics(Collections.singletonList("*"))
+                .transportId(ID)
+                .userId(socket.getUserId())
+                .build();
 
-                // Check if there is a queued unsubscription for it
-                boolean removed = scheduledUnsubscriptions.remove(new Unsubscription(subscription));
-                if (removed) {
-                    // Already/still subscribed...
-                } else {
-                    // Subscribe...
-                    try {
-                        subscriptionRegistry.registerSubscription(subscription);
-                    } catch (OXException e) {
-                        LOG.error("Failed to add push subscription for Web Socket on path {} for client {} from user {} in context {}", path, client, socket.getUserId(), socket.getContextId(), e);
-                    }
+            // Check if there is a queued unsubscription for it
+            boolean removed = scheduledUnsubscriptions.remove(new Unsubscription(subscription));
+            if (removed) {
+                // Already/still subscribed...
+            } else {
+                // Subscribe...
+                try {
+                    subscriptionRegistry.registerSubscription(subscription);
+                } catch (OXException e) {
+                    LOG.error("Failed to add push subscription for Web Socket on path {} for client {} from user {} in context {}", socket.getPath(), client, socket.getUserId(), socket.getContextId(), e);
                 }
             }
         }
@@ -265,7 +288,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                         .client(client)
                         .contextId(socket.getContextId())
                         .nature(Nature.VOLATILE)
-                        .token("")
+                        .token(socket.getConnectionId().getId())
                         .topics(Collections.singletonList("*"))
                         .transportId(ID)
                         .userId(socket.getUserId())
@@ -365,7 +388,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
             throw PushExceptionCodes.NO_SUCH_GENERATOR.create(client);
         }
 
-        Message message = generator.generateMessageFor(ID, notification);
+        Message<?> message = generator.generateMessageFor(ID, notification);
         String textMessage = (String) message.getMessage();
 
         for (WebSocket socket : sockets) {

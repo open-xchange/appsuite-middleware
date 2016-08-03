@@ -62,6 +62,8 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.json.CapabilitiesJsonWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -72,6 +74,7 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.6.2
  */
 @Path("/preliminary/capabilities/v1/")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class CapabilitiesRESTService {
 
     private final ServiceLookup services;

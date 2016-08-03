@@ -10,6 +10,7 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
 BuildRequires: open-xchange-imap
+BuildRequires: open-xchange-rest
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
@@ -25,7 +26,9 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Dovecot Push Bundle
 Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@, open-xchange-imap >= @OXVERSION@
+Requires:      open-xchange-core >= @OXVERSION@
+Requires:      open-xchange-imap >= @OXVERSION
+Requires:      open-xchange-rest >= @OXVERSION@
 
 %description
 Open-Xchange Mail Push Bundle

@@ -57,7 +57,6 @@ import java.util.Map.Entry;
 import com.openexchange.pns.Hit;
 import com.openexchange.pns.Hits;
 import com.openexchange.pns.PushMatch;
-import com.openexchange.pns.subscription.storage.rdb.RdbHit;
 
 
 /**
@@ -94,7 +93,7 @@ public class MapBackedHits implements Hits {
 
     @Override
     public Iterator<Hit> iterator() {
-        return new RdbHitsIterator(map.entrySet().iterator());
+        return new MapBackedHitsIterator(map.entrySet().iterator());
     }
 
     @Override
@@ -104,14 +103,14 @@ public class MapBackedHits implements Hits {
 
     // --------------------------------------------------------------------------------------------
 
-    private static final class RdbHitsIterator implements Iterator<Hit> {
+    private static final class MapBackedHitsIterator implements Iterator<Hit> {
 
         private final Iterator<Entry<ClientAndTransport, List<PushMatch>>> iterator;
 
         /**
-         * Initializes a new {@link RdbHitsIterator}.
+         * Initializes a new {@link MapBackedHitsIterator}.
          */
-        RdbHitsIterator(Iterator<Map.Entry<ClientAndTransport, List<PushMatch>>> iterator) {
+        MapBackedHitsIterator(Iterator<Map.Entry<ClientAndTransport, List<PushMatch>>> iterator) {
             super();
             this.iterator = iterator;
         }
@@ -125,7 +124,7 @@ public class MapBackedHits implements Hits {
         public Hit next() {
             Map.Entry<ClientAndTransport, List<PushMatch>> entry = iterator.next();
             ClientAndTransport cat = entry.getKey();
-            return new RdbHit(cat.client, cat.transportId, entry.getValue());
+            return new MapBackedHit(cat.client, cat.transportId, entry.getValue());
         }
 
         @Override

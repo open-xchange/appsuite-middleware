@@ -47,73 +47,63 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
+package com.openexchange.pns.subscription.storage.osgi;
+
+import com.openexchange.context.ContextService;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.CompositePushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.groupware.CreatePnsSubscriptionTable;
+import com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask;
+import com.openexchange.pns.subscription.storage.groupware.PnsDeleteListener;
+import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 
 
 /**
- * {@link ConnectionId} - An identifier for a certain session-bound Web Socket connection.
+ * {@link PushSubscriptionRegistryActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class ConnectionId {
+public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
 
     /**
-     * Creates a new instance.
-     *
-     * @param id The identifier
-     * @return The new instance
+     * Initializes a new {@link PushSubscriptionRegistryActivator}.
      */
-    public static ConnectionId newInstance(String id) {
-        return new ConnectionId(id);
-    }
-
-    // ---------------------------------------------------------
-
-    private final String id;
-    private final int hash;
-
-    /**
-     * Initializes a new {@link ConnectionId}.
-     */
-    private ConnectionId(String id) {
+    public PushSubscriptionRegistryActivator() {
         super();
-        this.id = id;
-        this.hash = 31 * 1 + ((id == null) ? 0 : id.hashCode());
-    }
-
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    public String getId() {
-        return id;
     }
 
     @Override
-    public int hashCode() {
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof ConnectionId)) {
-            return false;
-        }
-        ConnectionId other = (ConnectionId) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
+    protected boolean stopOnServiceUnavailability() {
         return true;
     }
 
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class, ContextService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        // Register update task, create table job and delete listener
+        boolean registerGroupwareStuff = false;
+        if (registerGroupwareStuff) {
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(this)));
+            registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
+            registerService(DeleteListener.class, new PnsDeleteListener());
+        }
+
+        // Register service
+        PushSubscriptionRegistry persistentRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class), getService(ContextService.class));
+        PushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
+        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry));
+    }
 
 }

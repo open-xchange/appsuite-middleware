@@ -47,63 +47,30 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage.osgi;
-
-import com.openexchange.context.ContextService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.subscription.storage.CompositePushSubscriptionRegistry;
-import com.openexchange.pns.subscription.storage.groupware.CreatePnsSubscriptionTable;
-import com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask;
-import com.openexchange.pns.subscription.storage.groupware.PnsDeleteListener;
-import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushSubscriptionRegistry;
-import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
+package com.openexchange.pns;
 
 
 /**
- * {@link RdbPushSubscriptionRegistryActivator}
+ * {@link TextMessage} - A text message.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RdbPushSubscriptionRegistryActivator extends HousekeepingActivator {
+public class TextMessage implements Message<String> {
+
+    private final String text;
 
     /**
-     * Initializes a new {@link RdbPushSubscriptionRegistryActivator}.
+     * Initializes a new {@link TextMessage}.
      */
-    public RdbPushSubscriptionRegistryActivator() {
+    public TextMessage(String text) {
         super();
+        this.text = text;
     }
 
     @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        // Register update task, create table job and delete listener
-        boolean registerGroupwareStuff = false;
-        if (registerGroupwareStuff) {
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(this)));
-            registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
-            registerService(DeleteListener.class, new PnsDeleteListener());
-        }
-
-        // Register service
-        PushSubscriptionRegistry persistentRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class), getService(ContextService.class));
-        PushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
-        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry));
+    public String getMessage() {
+        return text;
     }
 
 }
