@@ -22,4 +22,5 @@ Import-Package:
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
