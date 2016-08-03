@@ -146,7 +146,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
     private synchronized void reinit(ConfigurationService configService) {
         List<ServiceRegistration<?>> serviceRegistrations = this.serviceRegistrations;
 
-        if (!configService.getBoolProperty("com.openexchange.pns.transport.websocket.enabled", false)) {
+        if (!configService.getBoolProperty("com.openexchange.pns.transport.websocket.enabled", true)) {
             LOG.info("Web Socket push notification transport is disabled per configuration");
 
             if (null != serviceRegistrations) {

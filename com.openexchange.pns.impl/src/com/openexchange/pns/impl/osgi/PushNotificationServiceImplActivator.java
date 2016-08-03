@@ -51,6 +51,7 @@ package com.openexchange.pns.impl.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
@@ -94,6 +95,7 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
 
         PushNotificationServiceImpl serviceImpl = new PushNotificationServiceImpl(getService(PushSubscriptionRegistry.class), transportTracker);
         registerService(PushNotificationService.class, serviceImpl);
+        registerService(PushMessageGeneratorRegistry.class, generatorTracker);
     }
 
 }
