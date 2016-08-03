@@ -961,6 +961,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         document.setId(FileStorageFileAccess.NEW);
         document.setFolderId(folderId.getFolderId());
         document.setObjectPermissions(null);
+        document.setFileName(sourceFile.getFileName());
 
         if (null == data) {
             /*
