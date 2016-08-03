@@ -139,4 +139,31 @@ public class WebSocketImpl implements WebSocket {
         return null;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((grizzlySocket == null) ? 0 : grizzlySocket.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof WebSocketImpl)) {
+            return false;
+        }
+        WebSocketImpl other = (WebSocketImpl) obj;
+        if (grizzlySocket == null) {
+            if (other.grizzlySocket != null) {
+                return false;
+            }
+        } else if (!grizzlySocket.equals(other.grizzlySocket)) {
+            return false;
+        }
+        return true;
+    }
+
 }

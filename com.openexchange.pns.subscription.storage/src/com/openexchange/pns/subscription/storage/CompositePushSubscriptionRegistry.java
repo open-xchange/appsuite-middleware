@@ -126,9 +126,19 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
 
     @Override
     public boolean unregisterSubscription(PushSubscription subscription) throws OXException {
-        boolean removed = persistentRegistry.unregisterSubscription(subscription);
-        removed |= volatileRegistry.unregisterSubscription(subscription);
-        return removed;
+        // Is nature given?
+        Nature nature = subscription.getNature();
+
+        if (Nature.VOLATILE == nature) {
+            return volatileRegistry.unregisterSubscription(subscription);
+        } else if (Nature.PERSISTENT == nature) {
+            return persistentRegistry.unregisterSubscription(subscription);
+        } else {
+            // Don't know better
+            boolean removed = persistentRegistry.unregisterSubscription(subscription);
+            removed |= volatileRegistry.unregisterSubscription(subscription);
+            return removed;
+        }
     }
 
     @Override

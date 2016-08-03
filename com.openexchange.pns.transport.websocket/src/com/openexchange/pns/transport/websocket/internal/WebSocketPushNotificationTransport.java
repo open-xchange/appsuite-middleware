@@ -141,6 +141,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     private final ServiceListing<WebSocketToClientResolver> resolvers;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
+    private final ConcurrentMap<WebSocket, String> socketToClientMapping;
     private final ConcurrentMap<UserAndContext, ConcurrentMap<WebSocket, String>> socketsPerUser;
     private final BufferingQueue<Unsubscription> scheduledUnsubscriptions;
     private ScheduledTimerTask scheduledTimerTask; // Accessed synchronized
@@ -155,6 +156,8 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         this.generatorRegistry = services.getService(PushMessageGeneratorRegistry.class);
         this.subscriptionRegistry = services.getService(PushSubscriptionRegistry.class);
         this.services = services;
+
+        socketToClientMapping = new ConcurrentHashMap<>(1024);
 
         socketsPerUser = new ConcurrentHashMap<>(256);
         scheduledUnsubscriptions = new BufferingQueue<>(delayDuration(services));
@@ -209,6 +212,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     @Override
     public void onMessage(WebSocket socket, String text) {
         // No client-initiated push message...
+        LOG.info("Received message: {}", text);
     }
 
     @Override
@@ -216,6 +220,11 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         String client = resolveToClient(socket);
         if (null == client) {
             // Not resolveable to a certain client... Ignore
+            return;
+        }
+
+        if (null != socketToClientMapping.putIfAbsent(socket, client)) {
+            // Already contained...
             return;
         }
 
@@ -256,46 +265,48 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     @Override
     public void onWebSocketClose(WebSocket socket) {
-        String path = socket.getPath();
-        if (null != path && path.startsWith("/websockets/push")) {
-            ConcurrentMap<WebSocket, String> sockets = optUserSockets(socket);
-            if (null != sockets && null != sockets.remove(socket)) {
-                synchronized (this) {
-                    // Stopped
-                    if (stopped) {
-                        return;
-                    }
+        String client = socketToClientMapping.remove(socket);
+        if (null == client) {
+            // Not tracked
+            return;
+        }
 
-                    // Check time task is alive
-                    ScheduledTimerTask scheduledTimerTask = this.scheduledTimerTask;
-                    if (null == scheduledTimerTask) {
-                        // Initialize timer task
-                        TimerService timerService = services.getService(TimerService.class);
-                        Runnable timerTask = new Runnable() {
-
-                            @Override
-                            public void run() {
-                                checkUnsubscription();
-                            }
-                        };
-                        long delay = timerFrequency(services); // 2sec delay
-                        this.scheduledTimerTask = timerService.scheduleWithFixedDelay(timerTask, delay, delay);
-                        LOG.info("Initialized new timer task for unsubscribing Web Socket push subscriptions");
-                    }
-
-                    String client = "open-xchange-appsuite";
-                    DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
-                        .client(client)
-                        .contextId(socket.getContextId())
-                        .nature(Nature.VOLATILE)
-                        .token(socket.getConnectionId().getId())
-                        .topics(Collections.singletonList("*"))
-                        .transportId(ID)
-                        .userId(socket.getUserId())
-                        .build();
-                    scheduledUnsubscriptions.offerOrReplace(new Unsubscription(subscription));
-                    LOG.info("Scheduled unsubscribing Web Socket push subscription for client {} from user {} in context", client, socket.getUserId(), socket.getContextId());
+        ConcurrentMap<WebSocket, String> sockets = optUserSockets(socket);
+        if (null != sockets && null != sockets.remove(socket)) {
+            synchronized (this) {
+                // Stopped
+                if (stopped) {
+                    return;
                 }
+
+                // Check time task is alive
+                ScheduledTimerTask scheduledTimerTask = this.scheduledTimerTask;
+                if (null == scheduledTimerTask) {
+                    // Initialize timer task
+                    TimerService timerService = services.getService(TimerService.class);
+                    Runnable timerTask = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            checkUnsubscription();
+                        }
+                    };
+                    long delay = timerFrequency(services); // 2sec delay
+                    this.scheduledTimerTask = timerService.scheduleWithFixedDelay(timerTask, delay, delay);
+                    LOG.info("Initialized new timer task for unsubscribing Web Socket push subscriptions");
+                }
+
+                DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
+                    .client(client)
+                    .contextId(socket.getContextId())
+                    .nature(Nature.VOLATILE)
+                    .token(socket.getConnectionId().getId())
+                    .topics(Collections.singletonList("*"))
+                    .transportId(ID)
+                    .userId(socket.getUserId())
+                    .build();
+                scheduledUnsubscriptions.offerOrReplace(new Unsubscription(subscription));
+                LOG.info("Scheduled unsubscribing Web Socket push subscription for client {} from user {} in context", client, socket.getUserId(), socket.getContextId());
             }
         }
     }

@@ -242,6 +242,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             Parameters parameters = new Parameters();
             parameters.setQueryStringEncoding(Charset.forName("UTF-8"));
             parameters.setQuery(requestPacket.getQueryStringDC());
+            parameters.handleQueryParameters();
 
             // Check for "session" parameter
             String sessionId = parameters.getParameter("session");
