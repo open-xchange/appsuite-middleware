@@ -61,7 +61,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
+import org.glassfish.grizzly.filterchain.FilterChainContext;
+import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpRequestPacket;
+import org.glassfish.grizzly.http.HttpResponsePacket;
+import org.glassfish.grizzly.http.Protocol;
 import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.HandshakeException;
@@ -233,39 +237,58 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
     @Override
     public WebSocket createSocket(ProtocolHandler handler, HttpRequestPacket requestPacket, WebSocketListener... listeners) {
-        // Parse request packet's URL parameters
-        Parameters parameters = new Parameters();
-        parameters.setQueryStringEncoding(Charset.forName("UTF-8"));
-        parameters.setQuery(requestPacket.getQueryStringDC());
+        try {
+            // Parse request packet's URL parameters
+            Parameters parameters = new Parameters();
+            parameters.setQueryStringEncoding(Charset.forName("UTF-8"));
+            parameters.setQuery(requestPacket.getQueryStringDC());
 
-        // Check for "session" parameter
-        String sessionId = parameters.getParameter("session");
-        if (sessionId == null) {
-            throw new HandshakeException("Missing parameter 'session'");
-        }
-
-        // Look-up optional connection identifier; generate a new, unique one if absent
-        String conId = parameters.getParameter("connection");
-        if (conId == null) {
-            conId = com.openexchange.java.util.UUIDs.getUnformattedStringFromRandom();
-        }
-
-        // Get and verify session
-        Session session = checkSession(sessionId, requestPacket, parameters);
-
-        // Apply initial listeners
-        List<WebSocketListener> listenersToUse = new LinkedList<>();
-        if (null != listeners) {
-            for (WebSocketListener listener : listeners) {
-                if (null != listener) {
-                    listenersToUse.add(listener);
-                }
+            // Check for "session" parameter
+            String sessionId = parameters.getParameter("session");
+            if (sessionId == null) {
+                throw new HandshakeException("Missing parameter 'session'");
             }
-        }
-        listenersToUse.addAll(listenerRegistry.getListeners());
 
-        // Create & return new session-bound Web Socket
-        return new SessionBoundWebSocket(SessionInfo.newInstance(session), ConnectionId.newInstance(conId), handler, requestPacket, listenersToUse.toArray(new WebSocketListener[listenersToUse.size()]));
+            // Look-up optional connection identifier; generate a new, unique one if absent
+            String conId = parameters.getParameter("connection");
+            if (conId == null) {
+                conId = com.openexchange.java.util.UUIDs.getUnformattedStringFromRandom();
+            }
+
+            // Get and verify session
+            Session session = checkSession(sessionId, requestPacket, parameters);
+
+            // Apply initial listeners
+            WebSocketListener[] effectiveListeners;
+            {            
+                List<WebSocketListener> listenersToUse = new LinkedList<>();
+                if (null != listeners) {
+                    for (WebSocketListener listener : listeners) {
+                        if (null != listener) {
+                            listenersToUse.add(listener);
+                        }
+                    }
+                }
+                listenersToUse.addAll(listenerRegistry.getListeners());
+                effectiveListeners = listenersToUse.toArray(new WebSocketListener[listenersToUse.size()]);
+            }
+
+            // Create & return new session-bound Web Socket
+            return new SessionBoundWebSocket(SessionInfo.newInstance(session), ConnectionId.newInstance(conId), handler, requestPacket, effectiveListeners);
+        } catch (HandshakeException e) {
+            // Handle Handshake error
+            handleHandshakeException(e, handler, requestPacket);
+            throw e;
+        }
+    }
+
+    private void handleHandshakeException(HandshakeException e, ProtocolHandler handler, HttpRequestPacket requestPacket) {
+        FilterChainContext ctx = handler.getFilterChainContext();
+        HttpResponsePacket response = requestPacket.getResponse();
+        response.setProtocol(Protocol.HTTP_1_1);
+        response.setStatus(401);
+        response.setReasonPhrase("Authorization Required");
+        ctx.write(HttpContent.builder(response).build());
     }
 
     private Session checkSession(String sessionId, HttpRequestPacket requestPacket, Parameters parameters) {
