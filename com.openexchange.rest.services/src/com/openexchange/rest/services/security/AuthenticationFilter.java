@@ -70,6 +70,7 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.services.Role;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 
 
@@ -138,7 +139,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         RolesAllowed rolesAllowed = getAnnotation(RolesAllowed.class);
         if (null != rolesAllowed) {
             String[] roles = rolesAllowed.value();
-            if (hasRole("Basic-Authenticated", roles)) {
+            if (hasRole(Role.BASIC_AUTHENTICATED.getId(), roles)) {
                 basicAuth(requestContext);
                 return;
             }
