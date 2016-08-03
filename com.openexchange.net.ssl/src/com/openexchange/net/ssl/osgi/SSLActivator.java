@@ -82,7 +82,7 @@ public class SSLActivator extends HousekeepingActivator {
             ConfigurationService configService = getService(ConfigurationService.class);
             if (configService.getBoolProperty(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getName(), SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getDefaultBoolean())) {
                 System.setProperty("javax.net.debug", "ssl:record");
-                org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("Enabeld SSL debug logging.");
+                org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("Enabled SSL debug logging.");
             }
 
             if (SSLProperties.isVerifyHostname()) {

@@ -156,24 +156,6 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
     }
 
     @Override
-    public Socket createSocket() throws IOException {
-        Socket socket = this.adapteeFactory.createSocket();
-        setProperties(socket);
-        return socket;
-    }
-
-    private void setProperties(Socket socket) {
-        if (socket instanceof SSLSocket) {
-            SSLSocket sslSocket = (SSLSocket) socket;
-            sslSocket.setEnabledProtocols(SSLProperties.supportedProtocols());
-            sslSocket.setEnabledCipherSuites(SSLProperties.supportedCipherSuites());
-            sslSocket.setUseClientMode(true);
-            sslSocket.addHandshakeCompletedListener(this);
-            socket = sslSocket;
-        }
-    }
-
-    @Override
     public String[] getDefaultCipherSuites() {
         return this.adapteeFactory.getDefaultCipherSuites();
     }
@@ -181,7 +163,13 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
     @Override
     public String[] getSupportedCipherSuites() {
         return SSLProperties.supportedCipherSuites();
-        //        return this.adapteeFactory.getSupportedCipherSuites();
+    }
+
+    @Override
+    public Socket createSocket() throws IOException {
+        Socket socket = this.adapteeFactory.createSocket();
+        setProperties(socket);
+        return socket;
     }
 
     @Override
@@ -217,6 +205,17 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
         Socket socket = this.adapteeFactory.createSocket(address, port, localHost, localPort);
         setProperties(socket);
         return socket;
+    }
+
+    private void setProperties(Socket socket) {
+        if (socket instanceof SSLSocket) {
+            SSLSocket sslSocket = (SSLSocket) socket;
+            sslSocket.setEnabledProtocols(SSLProperties.supportedProtocols());
+            sslSocket.setEnabledCipherSuites(SSLProperties.supportedCipherSuites());
+            sslSocket.setUseClientMode(true);
+            sslSocket.addHandshakeCompletedListener(this);
+            socket = sslSocket;
+        }
     }
 
     @Override

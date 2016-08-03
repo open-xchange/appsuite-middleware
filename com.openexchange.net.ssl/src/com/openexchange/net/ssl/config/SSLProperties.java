@@ -49,9 +49,12 @@
 
 package com.openexchange.net.ssl.config;
 
+import javax.net.ssl.HttpsURLConnection;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
+import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
 import com.openexchange.net.ssl.osgi.Services;
 
 /**
@@ -64,8 +67,6 @@ public enum SSLProperties {
 
     /* Enables logging SSL details. Have a look at http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/ReadDebug.html for more details. */
     SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_KEY, false),
-
-    HOSTNAME_VERIFICATION_ENABLED(SSLProperties.HOSTNAME_VERIFICATION_ENABLED_KEY, true),
 
     DEFAULT_TRUSTSTORE_ENABLED(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED_KEY, true),
 
@@ -81,13 +82,15 @@ public enum SSLProperties {
 
     static final String SECURE_CONNECTIONS_DEBUG_LOGS_KEY = "com.openexchange.net.ssl.debug.logs";
 
+    static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.default.truststore.enabled";
+
     static final String CUSTOM_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.custom.truststore.enabled";
 
     static final String CUSTOM_TRUSTSTORE_PATH_KEY = "com.openexchange.net.ssl.custom.truststore.path";
 
     static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.custom.truststore.password";
 
-    static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.default.truststore.enabled";
+    //---------- Reloadable Properties -------------//
 
     static final String TRUST_LEVEL_KEY = "com.openexchange.net.ssl.trustlevel";
 
@@ -104,7 +107,7 @@ public enum SSLProperties {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
                         org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.trustlevel'.");
-                        return TrustLevel.valueOf(TRUST_LEVEL_DEFAULT);
+                        return TrustLevel.find(TRUST_LEVEL_DEFAULT);
                     }
                     String prop = service.getProperty(TRUST_LEVEL_KEY, TRUST_LEVEL_DEFAULT);
                     tmp = TrustLevel.find(prop);
@@ -236,11 +239,21 @@ public enum SSLProperties {
     }
 
     public static void reload() {
-        whitelistedHosts = null;
         trustLevel = null;
-        verifyHostname = null;
-        ciphers = null;
         protocols = null;
+        ciphers = null;
+        whitelistedHosts = null;
+        verifyHostname = null;
+
+        reinit();
+    }
+
+    private static void reinit() {
+        if (isVerifyHostname()) {
+            HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
+        } else {
+            HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+        }
     }
 
     //***************************************/

@@ -1,0 +1,94 @@
+array:
+  - data:
+      Key: com.openexchange.net.ssl.default.truststore.enabled
+      Description: >
+        Defines if the default truststore provided by the JVM should be used. These truststore contains the Application Server’s trusted certificates, including public keys for other entities. For a trusted certificate, the server has confirmed that the public key in the certificate belongs to the certificate’s owner. Trusted certificates generally include those of certification authorities (CAs).
+        The administrator is able to ignore the provided by setting the property to 'false'. If so a custom truststore should be provided. Have a look at 'com.openexchange.net.ssl.custom.truststore.enabled' for more details.
+      Default: true
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: com.openexchange.net.ssl.custom.truststore.enabled
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.custom.truststore.enabled
+      Description: >
+        Defines if the custom truststore should be used to retrieve trusted certificates. The custom truststore should contain a list of certificates that are defined to be trusted.
+        It is possible to define only one custom truststore. But it is of course possible to enable both, default and custom truststore to enhance the trusted certificates pool.
+      Default: false
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: com.openexchange.net.ssl.custom.truststore.path, com.openexchange.net.ssl.custom.truststore.password
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.custom.truststore.path
+      Description: >
+        Defines the path (including the name of the file) to the custom truststore. 
+      Default: 
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.password
+      File: ssl.properties            
+  - data:
+      Key: com.openexchange.net.ssl.custom.truststore.password
+      Description: >
+        Defines the password to access the custom truststore.
+      Default: 
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.path
+      File: ssl.properties            
+  - data:
+      Key: com.openexchange.net.ssl.trustlevel
+      Description: >
+        Defines which level of trust should be considered for potentially secure connections (e. g. https). The default value 'none' says that no connection will be trusted. You can switch this setting to 'all' so that every connection will be trusted (which isn't suggested by Open-Xchange). 
+      Default: none
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties            
+  - data:
+      Key: com.openexchange.net.ssl.protocols
+      Description: >
+        Defines the protocols that will become supported for SSL communication. If the server does not support one of the mentioned protocols the SSL handshake will fail.  
+      Default: SSLv3, TLSv1.2
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties            
+  - data:
+      Key: com.openexchange.net.ssl.ciphersuites
+      Description: >
+        Defines the cipher suites that will become supported for SSL communication. If the server does not support one of the mentioned suites the SSL handshake will fail.  
+      Default: TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA, SSL_RSA_WITH_RC4_128_SHA, TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TLS_ECDH_RSA_WITH_RC4_128_SHA, TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_RC4_128_MD5, TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties            
+  - data:
+      Key: com.openexchange.net.ssl.whitelist
+      Description: >
+        Defines a comma separated list of hosts certificates shouldn't be checked for validity.  
+      Default: 127.0.0.1-127.255.255.255,localhost
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties            
+  - data:
+      Key: com.openexchange.net.ssl.hostname.verification.enabled
+      Description: >
+        Defines if the name of the host should be checked while SSL handshaking. If the host name verification fails a connection to the desired host cannot be established even if there is a valid certificate. A host name verifier ensures the host name in the URL to which the client connects matches the host name in the digital certificate that the server sends back as part of the SSL connection.  
+      Default: true
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties            
+      
