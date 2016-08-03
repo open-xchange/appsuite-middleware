@@ -52,6 +52,8 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -63,9 +65,14 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.SortOptions;
+import com.openexchange.chronos.SortOrder;
+import com.openexchange.chronos.UserizedEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -73,6 +80,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.resource.Resource;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -97,6 +105,14 @@ public class CalendarUtils {
         EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE,
         EventField.RECURRENCE_RULE
     );
+
+    /** The event fields that are also available if an event's classification is not {@link Classification#PUBLIC} */
+    static final EventField[] NON_CLASSIFIED_FIELDS = {
+        EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
+        EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
+        EventField.MODIFIED_BY, EventField.PUBLIC_FOLDER_ID, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE,
+        EventField.START_DATE, EventField.START_TIMEZONE, EventField.TRANSP, EventField.UID
+    };
 
     /**
      * Gets the event fields to include when querying events from the storage based on the client-requested fields defined in the
@@ -497,6 +513,127 @@ public class CalendarUtils {
         Date startDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
         Date endDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
         return startDate.before(until) && endDate.after(from);
+    }
+
+    /**
+     * "Anonymizes" an event in case it is not marked as {@link Classification#PUBLIC}, and the session's user is neither creator, nor
+     * attendee of the event.
+     * <p/>
+     * After anonymization, the event will only contain those properties defined in {@link #NON_CLASSIFIED_FIELDS}, as well as the
+     * generic summary "Private".
+     *
+     * @param userizedEvent The event to anonymize
+     * @param userID The identifier of the user requesting the event data
+     * @return The potentially anonymized event
+     */
+    static UserizedEvent anonymizeIfNeeded(UserizedEvent userizedEvent) throws OXException {
+        Event event = userizedEvent.getEvent();
+        if (null == event.getClassification() || Classification.PUBLIC.equals(event.getClassification())) {
+            return userizedEvent;
+        }
+        int userID = userizedEvent.getSession().getUserId();
+        if (event.getCreatedBy() == userID || contains(event.getAttendees(), userID)) {
+            return userizedEvent;
+        }
+        Event anonymizedEvent = new Event();
+        for (EventField field : NON_CLASSIFIED_FIELDS) {
+            Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(field);
+            if (null != mapping && mapping.isSet(event)) {
+                mapping.copy(event, anonymizedEvent);
+            }
+        }
+        anonymizedEvent.setSummary("Private"); // TODO i18n?
+        return new UserizedEvent(userizedEvent.getSession(), anonymizedEvent, userizedEvent.getFolderId(), null);
+    }
+
+    /**
+     * Gets an event comparator based on the supplied sort order of event fields.
+     *
+     * @param sortOrders The sort orders to get the comparator for
+     * @return The comparator
+     */
+    static Comparator<Event> getComparator(final SortOrder[] sortOrders) {
+        return new Comparator<Event>() {
+
+            @Override
+            public int compare(Event event1, Event event2) {
+                if (null == event1) {
+                    return null == event2 ? 0 : -1;
+                }
+                if (null == event2) {
+                    return 1;
+                }
+                if (null == sortOrders || 0 == sortOrders.length) {
+                    return 0;
+                }
+                int comparison = 0;
+                if (null != sortOrders && 0 < sortOrders.length) {
+                    for (SortOrder sortOrder : sortOrders) {
+                        try {
+                            comparison = EventMapper.getInstance().get(sortOrder.getBy()).compare(event1, event2);
+                        } catch (OXException e) {
+                            throw new RuntimeException(e);
+                        }
+                        if (0 != comparison) {
+                            return sortOrder.isDescending() ? -1 * comparison : comparison;
+                        }
+                    }
+                }
+                return comparison;
+            }
+        };
+    }
+
+    /**
+     * Gets a value indicating whether a specific event should be excluded from results based on the configured calendar parameters,
+     * e.g. because ...
+     * <ul>
+     * <li>it is not marked as {@link Classification#PUBLIC} and such events are configured to be excluded via parameters</li>
+     * <li>it's start-date is behind the range requested via parameters</li>
+     * <li>it's end-date is before the range requested via parameters</li>
+     * </ul>
+     *
+     * @param event The event to check
+     * @param parameters The calendar parameters
+     * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
+     */
+    static boolean isExcluded(Event event, CalendarParameters parameters) {
+        if ((null == event.getClassification() || false == Classification.PUBLIC.equals(event.getClassification())) &&
+            Boolean.FALSE.equals(parameters.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class))) {
+            return true;
+        }
+        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        if (null != from && from.after(event.getEndDate())) {
+            return true;
+        }
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        if (null != until && until.before(event.getStartDate())) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sorts a list of events.
+     *
+     * @param events The events to sort
+     * @param sortOptions The sort options to use
+     * @return The sorted events
+     */
+    static List<UserizedEvent> sort(List<UserizedEvent> events, SortOptions sortOptions) {
+        if (null == events || 2 > events.size() || null == sortOptions || SortOptions.EMPTY.equals(sortOptions) ||
+            null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
+            return events;
+        }
+        final Comparator<Event> eventComparator = getComparator(sortOptions.getSortOrders());
+        Collections.sort(events, new Comparator<UserizedEvent>() {
+
+            @Override
+            public int compare(UserizedEvent userizedEvent1, UserizedEvent userizedEvent2) {
+                return eventComparator.compare(userizedEvent1.getEvent(), userizedEvent2.getEvent());
+            }
+        });
+        return events;
     }
 
 }

@@ -49,15 +49,19 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.impl.CalendarUtils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.CalendarUtils.appendCommonTerms;
+import static com.openexchange.chronos.impl.CalendarUtils.find;
 import static com.openexchange.chronos.impl.CalendarUtils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getTimeZone;
 import static com.openexchange.chronos.impl.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
+import static com.openexchange.chronos.impl.CalendarUtils.isExcluded;
 import static com.openexchange.chronos.impl.CalendarUtils.isInRange;
 import static com.openexchange.chronos.impl.CalendarUtils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.impl.CalendarUtils.sort;
 import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
 import static com.openexchange.chronos.impl.Check.requireFolderPermission;
 import static com.openexchange.chronos.impl.Check.requireReadPermission;
@@ -161,7 +165,7 @@ public class CalendarReader {
             boolean hasEvents = false;
             for (int i = 0; i < events.size() && false == hasEvents; i++) {
                 Event event = events.get(i);
-                Attendee attendee = CalendarUtils.find(event.getAttendees(), userID);
+                Attendee attendee = find(event.getAttendees(), userID);
                 if (null == attendee || ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
                     continue; // skip
                 }
@@ -334,38 +338,19 @@ public class CalendarReader {
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
         Map<Integer, List<Alarm>> alarmsById = readAlarms(events, forUser);
         for (Event event : events) {
-            Attendee userAttendee = CalendarUtils.find(event.getAttendees(), forUser);
+            if (isExcluded(event, session)) {
+                continue;
+            }
+            Attendee userAttendee = find(event.getAttendees(), forUser);
+            int folderID = null != userAttendee && 0 < userAttendee.getFolderID() ? userAttendee.getFolderID() : event.getPublicFolderId();
+            UserizedEvent userizedEvent = getUserizedEvent(event, folderID, alarmsById.get(I(event.getId())));
             if (isSeriesMaster(event) && isResolveOccurrences(session)) {
-                Iterator<Event> occurrences = resolveOccurrences(event);
-                while (occurrences.hasNext()) {
-                    Event occurrence = occurrences.next();
-                    UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), occurrence);
-                    if (0 < occurrence.getPublicFolderId()) {
-                        userizedEvent.setFolderId(occurrence.getPublicFolderId());
-                    }
-                    if (null != userAttendee) {
-                        userizedEvent.setAlarms(alarmsById.get(I(event.getId())));
-                        if (0 < userAttendee.getFolderID()) {
-                            userizedEvent.setFolderId(userAttendee.getFolderID());
-                        }
-                    }
-                    userizedEvents.add(userizedEvent);
-                }
+                userizedEvents.addAll(resolveOccurrences(userizedEvent));
             } else {
-                UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
-                if (0 < event.getPublicFolderId()) {
-                    userizedEvent.setFolderId(event.getPublicFolderId());
-                }
-                if (null != userAttendee) {
-                    userizedEvent.setAlarms(alarmsById.get(I(event.getId())));
-                    if (0 < userAttendee.getFolderID()) {
-                        userizedEvent.setFolderId(userAttendee.getFolderID());
-                    }
-                }
                 userizedEvents.add(userizedEvent);
             }
         }
-        return userizedEvents;
+        return sort(userizedEvents, new SortOptions(session));
     }
 
     private UserizedEvent userize(Event event, UserizedFolder inFolder) throws OXException {
@@ -389,16 +374,35 @@ public class CalendarReader {
         Map<Integer, List<Alarm>> alarmsById = readAlarms(events, calendarUser.getId());
         for (Event event : events) {
             Check.eventIsInFolder(event, inFolder);
+            if (isExcluded(event, session)) {
+                continue;
+            }
+            UserizedEvent userizedEvent = getUserizedEvent(event, folderID, alarmsById.get(I(event.getId())));
             if (isSeriesMaster(event) && isResolveOccurrences(session)) {
-                Iterator<Event> occurrences = resolveOccurrences(event);
-                while (occurrences.hasNext()) {
-                    userizedEvents.add(new UserizedEvent(session.getSession(), occurrences.next(), folderID, alarmsById.get(I(event.getId()))));
-                }
+                userizedEvents.addAll(resolveOccurrences(userizedEvent));
             } else {
-                userizedEvents.add(new UserizedEvent(session.getSession(), event, folderID, alarmsById.get(I(event.getId()))));
+                userizedEvents.add(userizedEvent);
             }
         }
-        return userizedEvents;
+        return sort(userizedEvents, new SortOptions(session));
+    }
+
+    private List<UserizedEvent> resolveOccurrences(UserizedEvent master) throws OXException {
+        List<UserizedEvent> events = new ArrayList<UserizedEvent>();
+        Iterator<Event> occurrences = resolveOccurrences(master.getEvent());
+        while (occurrences.hasNext()) {
+            Event occurrence = occurrences.next();
+            if (isExcluded(occurrence, session)) {
+                continue;
+            }
+            events.add(getUserizedEvent(occurrence, master.getFolderId(), master.getAlarms()));
+        }
+        return events;
+    }
+
+    private UserizedEvent getUserizedEvent(Event event, int folderID, List<Alarm> alarms) throws OXException {
+        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event, folderID, alarms);
+        return anonymizeIfNeeded(userizedEvent);
     }
 
     private Iterator<Event> resolveOccurrences(Event masterEvent) {
