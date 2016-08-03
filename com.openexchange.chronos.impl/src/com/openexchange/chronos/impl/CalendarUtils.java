@@ -504,15 +504,15 @@ public class CalendarUtils {
      * Gets a value indicating whether a specific event falls (at least partly) into a time range.
      *
      * @param event The event to check
-     * @param from The lower inclusive limit of the range, i.e. the event should start on or after this date
-     * @param until The upper exclusive limit of the range, i.e. the event should end before this date
+     * @param from The lower inclusive limit of the range, i.e. the event should start on or after this date, or <code>null</code> for no limit
+     * @param until The upper exclusive limit of the range, i.e. the event should end before this date, or <code>null</code> for no limit
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates
      * @return <code>true</code> if the event falls into the time range, <code>false</code>, otherwise
      */
     static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
-        Date startDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
-        Date endDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
-        return startDate.before(until) && endDate.after(from);
+        Date startDate = event.isAllDay() ? getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
+        Date endDate = event.isAllDay() ? getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
+        return (null == until && startDate.before(until)) || (null == from || endDate.after(from));
     }
 
     /**
@@ -528,11 +528,8 @@ public class CalendarUtils {
      */
     static UserizedEvent anonymizeIfNeeded(UserizedEvent userizedEvent) throws OXException {
         Event event = userizedEvent.getEvent();
-        if (null == event.getClassification() || Classification.PUBLIC.equals(event.getClassification())) {
-            return userizedEvent;
-        }
         int userID = userizedEvent.getSession().getUserId();
-        if (event.getCreatedBy() == userID || contains(event.getAttendees(), userID)) {
+        if (false == isClassifiedFor(event, userID)) {
             return userizedEvent;
         }
         Event anonymizedEvent = new Event();
@@ -588,29 +585,44 @@ public class CalendarUtils {
      * Gets a value indicating whether a specific event should be excluded from results based on the configured calendar parameters,
      * e.g. because ...
      * <ul>
-     * <li>it is not marked as {@link Classification#PUBLIC} and such events are configured to be excluded via parameters</li>
+     * <li>it is classified as private or confidential for the accessing user and such events are configured to be excluded via parameters</li>
      * <li>it's start-date is behind the range requested via parameters</li>
      * <li>it's end-date is before the range requested via parameters</li>
      * </ul>
      *
      * @param event The event to check
-     * @param parameters The calendar parameters
+     * @param session The calendar session
      * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
      */
-    static boolean isExcluded(Event event, CalendarParameters parameters) {
-        if ((null == event.getClassification() || false == Classification.PUBLIC.equals(event.getClassification())) &&
-            Boolean.FALSE.equals(parameters.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class))) {
+    static boolean isExcluded(Event event, CalendarSession session) {
+        if (isClassifiedFor(event, session.getUser().getId()) &&
+            Boolean.FALSE.equals(session.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class))) {
             return true;
         }
-        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        if (null != from && from.after(event.getEndDate())) {
-            return true;
-        }
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        if (null != until && until.before(event.getStartDate())) {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        if (false == isInRange(event, from, until, getTimeZone(session))) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether event data is classified as confidential or private for a specific accessing user entity and
+     * therefore should be anonymized or not.
+     *
+     * @param event The event to check
+     * @param userID The identifier of the accessing user to check
+     * @return <code>true</code> if the event is classified for the supplied user, <code>false</code>, otherwise
+     */
+    static boolean isClassifiedFor(Event event, int userID) {
+        if (null == event.getClassification() || Classification.PUBLIC.equals(event.getClassification())) {
+            return false;
+        }
+        if (event.getCreatedBy() == userID || contains(event.getAttendees(), userID)) {
+            return false;
+        }
+        return true;
     }
 
     /**
