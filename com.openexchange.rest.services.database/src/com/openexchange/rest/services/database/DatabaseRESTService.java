@@ -63,6 +63,8 @@ import javax.ws.rs.core.UriInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.rest.services.database.internal.AbstractDatabaseRESTService;
 import com.openexchange.rest.services.database.internal.DatabaseEnvironment;
 import com.openexchange.rest.services.database.internal.RESTRequest;
@@ -74,6 +76,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @Path("/preliminary/database/v1")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**

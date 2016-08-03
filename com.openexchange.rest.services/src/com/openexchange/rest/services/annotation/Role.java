@@ -47,9 +47,7 @@
  *
  */
 
-package com.openexchange.rest.services;
-
-import javax.annotation.security.RolesAllowed;
+package com.openexchange.rest.services.annotation;
 
 /**
  * {@link Role}
@@ -60,9 +58,11 @@ import javax.annotation.security.RolesAllowed;
 public enum Role {
 
     /**
-     * The role identifier for {@link RolesAllowed} annotation signaling to perform basic-auth.
+     * The role identifier for {@link com.openexchange.rest.services.annotation.RoleAllowed} annotation and
+     * {@link javax.annotation.security.RolesAllowed} annotation respectively signaling to perform basic-auth.
      * <p>
-     * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
+     * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and
+     * <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
      */
     BASIC_AUTHENTICATED("Basic-Authenticated"),
 

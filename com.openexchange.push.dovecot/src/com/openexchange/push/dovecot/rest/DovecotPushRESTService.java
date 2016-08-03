@@ -38,6 +38,8 @@ import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.push.dovecot.osgi.Services;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionMatcher;
@@ -53,6 +55,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since v7.6.2
  */
 @Path("/preliminary/http-notify/v1/")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class DovecotPushRESTService {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushRESTService.class);

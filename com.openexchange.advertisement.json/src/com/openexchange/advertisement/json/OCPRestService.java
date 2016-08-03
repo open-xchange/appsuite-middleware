@@ -60,6 +60,8 @@ import org.json.JSONObject;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.json.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -69,6 +71,7 @@ import com.openexchange.server.ServiceExceptionCode;
  * @since v7.8.3
  */
 @Path("/preliminary/advertisement/v1")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class OCPRestService {
 
     @PUT
@@ -83,7 +86,7 @@ public class OCPRestService {
         ResponseBuilder builder = Response.status(200);
         return builder.build();
     }
-    
+
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/package")
@@ -96,7 +99,7 @@ public class OCPRestService {
         ResponseBuilder builder = Response.status(200);
         return builder.build();
     }
-    
+
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/reseller")
@@ -109,7 +112,7 @@ public class OCPRestService {
         ResponseBuilder builder = Response.status(200);
         return builder.build();
     }
-    
+
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/name")

@@ -10,6 +10,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -20,6 +22,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since v7.8.0
  */
 @Path("/preliminary/htmlproc/v1/")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class HtmlRESTService {
 
     private final HtmlService htmlService;

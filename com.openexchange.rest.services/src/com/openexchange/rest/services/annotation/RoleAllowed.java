@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,70 +47,26 @@
  *
  */
 
-package com.openexchange.rest.services.session;
+package com.openexchange.rest.services.annotation;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.rest.services.annotation.Role;
-import com.openexchange.rest.services.annotation.RoleAllowed;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- *
- * The {@link SessionRESTService} allows clients to retrieve session information.
+ * Specifies the {@link Role role} permitted to access certain REST end-points.
+ * <p>
+ * This annotation may be used in favor of {@link javax.annotation.security.RolesAllowed} annotation to work with enum-based constants.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v7.8.1
+ * @since v7.8.3
  */
-@Path("/preliminary/session/v1/")
-@RoleAllowed(Role.BASIC_AUTHENTICATED)
-public class SessionRESTService {
-
-    private final ServiceLookup services;
-
-    /**
-     * Initializes a new {@link SessionRESTService}.
-     */
-    public SessionRESTService(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    /**
-     * <pre>
-     * GET /preliminary/session/v1/get/{session}
-     * </pre>
-     */
-    @GET
-    @Path("/get/{session}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public JSONObject all(@PathParam("session") String session) throws OXException {
-        SessiondService sessiondService = services.getOptionalService(SessiondService.class);
-        if (null == sessiondService) {
-            throw ServiceExceptionCode.absentService(SessiondService.class);
-        }
-
-        try {
-            Session ses = sessiondService.getSession(session);
-            if(ses != null){
-                return new JSONObject(4).put("context", ses.getContextId()).put("user", ses.getUserId());
-            }
-            return new JSONObject();
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
+@Documented
+@Retention (RUNTIME)
+@Target({TYPE, METHOD})
+public @interface RoleAllowed {
+    Role value();
 }

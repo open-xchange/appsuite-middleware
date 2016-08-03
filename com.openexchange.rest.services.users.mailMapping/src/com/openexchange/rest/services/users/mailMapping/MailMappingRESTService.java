@@ -65,6 +65,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.MultipleMailResolver;
 import com.openexchange.mailmapping.ResolvedMail;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -78,6 +80,7 @@ import com.openexchange.user.UserService;
  * @since 7.8.0
  */
 @Path("/preliminary/utilities/mailResolver/v1")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class MailMappingRESTService {
 
     private final ServiceLookup services;

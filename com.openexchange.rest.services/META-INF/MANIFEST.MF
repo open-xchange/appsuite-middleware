@@ -39,6 +39,7 @@ Import-Package: com.eclipsesource.jaxrs.publisher,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy
-Export-Package: com.openexchange.rest.services
+Export-Package: com.openexchange.rest.services,
+ com.openexchange.rest.services.annotation
 Bundle-Activator: com.openexchange.rest.services.osgi.Activator
 Bundle-ClassPath: .
