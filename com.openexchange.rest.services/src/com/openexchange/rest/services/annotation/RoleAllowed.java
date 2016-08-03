@@ -60,6 +60,40 @@ import java.lang.annotation.Target;
  * Specifies the {@link Role role} permitted to access certain REST end-points.
  * <p>
  * This annotation may be used in favor of {@link javax.annotation.security.RolesAllowed} annotation to work with enum-based constants.
+ * <p>
+ * Example:
+ * <pre>
+ *
+ *   &#64;Path("/rest/v1")
+ *   &#64;DenyAll
+ *   public class MyRestEndPoint {
+ *     // By default every method provided by this end-point is not accessible; unless annotated otherwise
+ *
+ *     ...
+ *
+ *     &#64;GET
+ *     &#64;Path("/safedata")
+ *     &#64;Produces(MediaType.APPLICATION_JSON)
+ *     &#64;PermitAll
+ *     public void publiclyAccessible() {
+ *       // Everyone may access this method
+ *       ...
+ *     }
+ *
+ *     &#64;GET
+ *     &#64;Path("/unsafedata")
+ *     &#64;Produces(MediaType.APPLICATION_JSON)
+ *     &#64;RoleAllowed(Role.BASIC_AUTHENTICATED)
+ *     public void restrictedAccess() {
+ *       // This method is secured with "basic-auth"
+ *       ...
+ *     }
+ *
+ *     ...
+ *
+ *   }
+ *
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
