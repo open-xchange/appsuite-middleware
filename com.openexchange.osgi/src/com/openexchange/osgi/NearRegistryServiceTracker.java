@@ -49,6 +49,7 @@
 
 package com.openexchange.osgi;
 
+import java.util.Iterator;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -81,6 +82,11 @@ public class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implemen
     @Override
     public List<S> getServiceList() {
         return services;
+    }
+
+    @Override
+    public Iterator<S> iterator() {
+        return services.iterator();
     }
 
     @Override

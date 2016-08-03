@@ -57,7 +57,7 @@ import java.util.List;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ServiceListing<S> {
+public interface ServiceListing<S> extends Iterable<S> {
 
     /**
      * Gets the service list.
