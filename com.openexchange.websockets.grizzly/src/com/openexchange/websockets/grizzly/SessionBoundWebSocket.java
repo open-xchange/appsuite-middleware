@@ -53,6 +53,7 @@ import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.websockets.DefaultWebSocket;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocketListener;
+import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSocketSession;
 
 /**

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage.rdb;
+package com.openexchange.pns.subscription.storage;
 
 import java.util.List;
 import com.openexchange.pns.Hit;
@@ -55,21 +55,21 @@ import com.openexchange.pns.PushMatch;
 
 
 /**
- * {@link RdbHit}
+ * {@link MapBackedHit}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RdbHit implements Hit {
+public class MapBackedHit implements Hit {
 
     private final String client;
     private final String transportId;
     private final List<PushMatch> matches;
 
     /**
-     * Initializes a new {@link RdbHit}.
+     * Initializes a new {@link MapBackedHit}.
      */
-    public RdbHit(String client, String transportId, List<PushMatch> matches) {
+    public MapBackedHit(String client, String transportId, List<PushMatch> matches) {
         super();
         this.client = client;
         this.transportId = transportId;

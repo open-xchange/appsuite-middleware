@@ -90,6 +90,7 @@ public class DefaultPushSubscription implements PushSubscription {
         /** Creates a new builder */
         public Builder() {
             super();
+            nature = Nature.VOLATILE; // Volatile nature by default
         }
 
         /**
@@ -130,6 +131,9 @@ public class DefaultPushSubscription implements PushSubscription {
          */
         public Builder topics(List<String> topics) {
             if (null != topics) {
+                if (topics.isEmpty()) {
+                    throw new IllegalArgumentException("empty topics");
+                }
                 for (String topic : topics) {
                     PushNotifications.validateTopicName(topic);
                 }
@@ -150,6 +154,10 @@ public class DefaultPushSubscription implements PushSubscription {
 
         /**
          * Sets the token
+         * <p>
+         * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+         * Note: A non-empty token is required to be set in case nature is set to {@link Nature#PERSISTENT}
+         * </div>
          * @param token The token
          * @return This builder
          */
@@ -164,13 +172,13 @@ public class DefaultPushSubscription implements PushSubscription {
          * @return This builder
          */
         public Builder nature(Nature nature) {
-            this.nature = nature;
+            this.nature = null == nature ? Nature.VOLATILE : nature;
             return this;
         }
 
         /**
-         * Builds the <code>PushSubscriptionDescription</code> instance.
-         * @return The resulting <code>PushSubscriptionDescription</code> instance
+         * Builds the <code>DefaultPushSubscription</code> instance.
+         * @return The resulting <code>DefaultPushSubscription</code> instance
          */
         public DefaultPushSubscription build() {
             return new DefaultPushSubscription(this);
@@ -190,7 +198,7 @@ public class DefaultPushSubscription implements PushSubscription {
     /**
      * Initializes a new {@link DefaultPushSubscription}.
      */
-    private DefaultPushSubscription(Builder builder) {
+    DefaultPushSubscription(Builder builder) {
         super();
         this.topics = ImmutableList.copyOf(builder.topics);
         this.contextId = builder.contextId;

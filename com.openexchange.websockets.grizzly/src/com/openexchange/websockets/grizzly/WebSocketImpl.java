@@ -55,6 +55,7 @@ import org.glassfish.grizzly.GrizzlyFuture;
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.WebSocketException;
 import com.openexchange.exception.OXException;
+import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.MessageHandler;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
@@ -87,6 +88,11 @@ public class WebSocketImpl implements WebSocket {
     @Override
     public WebSocketSession getWebSocketSession() {
         return grizzlySocket.getWebSocketSession();
+    }
+
+    @Override
+    public ConnectionId getConnectionId() {
+        return grizzlySocket.getConnectionId();
     }
 
     @Override

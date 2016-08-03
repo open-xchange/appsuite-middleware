@@ -91,6 +91,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.user.UserService;
+import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.grizzly.http.GrizzlyWebSocketHttpServletRequest;
 
 /**
