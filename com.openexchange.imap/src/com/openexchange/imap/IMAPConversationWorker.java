@@ -302,12 +302,10 @@ public final class IMAPConversationWorker {
                             } else if (variant.equals("FIRST")) {
                                 if (searchTerm.matches(messages.get(0))) {
                                     containsFlag = true;
-                                    break;
                                 }
                             } else if (variant.equals("LAST")) {
                                 if (searchTerm.matches(messages.get(messages.size() - 1))) {
                                     containsFlag = true;
-                                    break;
                                 }
                             }
 
