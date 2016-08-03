@@ -61,6 +61,7 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -104,9 +105,35 @@ public class CalendarUtils {
      *
      * @param parameters The calendar parameters to get the requested fields from
      * @return The fields to use when querying events from the storage
+     * @see CalendarParameters#PARAMETER_FIELDS
      */
     static EventField[] getFields(CalendarParameters parameters) {
         return getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
+    }
+
+    /**
+     * Gets a value indicating whether a recurring event series should be resolved to individual occurrences or not, based on the value
+     * of {@link CalendarParameters#PARAMETER_RECURRENCE_MASTER} in the supplied parameters.
+     *
+     * @param parameters The calendar parameters to evaluate
+     * @return <code>true</code> if individual occurrences should be resolved, <code>false</code>, otherwise
+     * @see CalendarParameters#PARAMETER_RECURRENCE_MASTER
+     */
+    static boolean isResolveOccurrences(CalendarParameters parameters) {
+        return false == parameters.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class, Boolean.FALSE).booleanValue();
+    }
+
+    /**
+     * Gets the timezone valid for the supplied calendar session, which is either the (possibly overridden) timezone defined via
+     * {@link CalendarParameters#PARAMETER_TIMEZONE}, or as fallback, the session user's default timezone.
+     *
+     * @param session The calendar session to get the timezone for
+     * @return The timezone
+     * @see CalendarParameters#PARAMETER_TIMEZONE
+     * @see User#getTimeZone()
+     */
+    static TimeZone getTimeZone(CalendarSession session) {
+        return session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone()));
     }
 
     /**
@@ -289,8 +316,7 @@ public class CalendarUtils {
      * @return A new date instance based on the supplied date with the time fraction truncated
      */
     public static Date truncateTime(Date date, TimeZone timeZone) {
-        Calendar calendar = GregorianCalendar.getInstance(timeZone);
-        calendar.setTime(date);
+        Calendar calendar = initCalendar(timeZone, date);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -420,6 +446,57 @@ public class CalendarUtils {
             objectIDs[i] = events.get(i).getId();
         }
         return objectIDs;
+    }
+
+
+    /**
+     * Gets a value indicating whether the supplied event is considered as the <i>master</i> event of a recurring series or not, based
+     * on the properties {@link EventField#ID} and {@link EventField#RECURRENCE_ID} for equality.
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
+     */
+    static boolean isSeriesMaster(Event event) {
+        return null != event && event.getId() == event.getRecurrenceId();
+    }
+
+    /**
+     * Gets a value indicating whether the supplied event is considered as an exceptional event of a recurring series or not, based on
+     * the properties {@link EventField#ID} and {@link EventField#RECURRENCE_ID}.
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
+     */
+    static boolean isSeriesException(Event event) {
+        return null != event && 0 < event.getRecurrenceId() && event.getRecurrenceId() != event.getId();
+    }
+
+    /**
+     * Initializes a new calendar in a specific timezone and sets the initial time.
+     *
+     * @param timeZone The timezone to use for the calendar
+     * @param time The initial time to set
+     * @return A new calendar instance
+     */
+    static Calendar initCalendar(TimeZone timeZone, Date time) {
+        Calendar calendar = GregorianCalendar.getInstance(timeZone);
+        calendar.setTime(time);
+        return calendar;
+    }
+
+    /**
+     * Gets a value indicating whether a specific event falls (at least partly) into a time range.
+     *
+     * @param event The event to check
+     * @param from The lower inclusive limit of the range, i.e. the event should start on or after this date
+     * @param until The upper exclusive limit of the range, i.e. the event should end before this date
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @return <code>true</code> if the event falls into the time range, <code>false</code>, otherwise
+     */
+    static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
+        Date startDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
+        Date endDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
+        return startDate.before(until) && endDate.after(from);
     }
 
 }

@@ -81,6 +81,20 @@ public class UserizedEvent {
     }
 
     /**
+     * Initializes a new {@link UserizedEvent}.
+     *
+     * @param session The current user's session
+     * @param event The underlying event data
+     * @param folderId The folder identifier representing the view on the event.
+     * @param alarms The attendee's alarms of the event.
+     */
+    public UserizedEvent(ServerSession session, Event event, int folderId, List<Alarm> alarms) {
+        this(session, event);
+        setFolderId(folderId);
+        setAlarms(alarms);
+    }
+
+    /**
      * Gets the underlying event data.
      *
      * @return The event data

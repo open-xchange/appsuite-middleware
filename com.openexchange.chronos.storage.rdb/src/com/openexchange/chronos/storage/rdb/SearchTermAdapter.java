@@ -65,6 +65,8 @@ import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.search.CompositeSearchTerm;
@@ -205,8 +207,8 @@ public class SearchTermAdapter {
                 stringBuilder.append(operation.getSqlRepresentation());
             }
             if (Operand.Type.COLUMN.equals(operands[i].getType())) {
-                Entry<String, DbMapping<? extends Object, ?>> entry = getMapping(operands[i].getValue());
-                appendColumnOperand(entry.getValue(), entry.getKey());
+                //                Entry<String, DbMapping<? extends Object, ?>> entry = getMapping(operands[i].getValue());
+                appendColumnOperand(mapping, prefix);
             } else if (Operand.Type.CONSTANT.equals(operands[i].getType())) {
                 appendConstantOperand(operands[i].getValue(), mapping.getSqlType());
             } else {
@@ -337,6 +339,8 @@ public class SearchTermAdapter {
             parameters.add(new Timestamp(((Date) value).getTime()));
         } else if (Date.class.isInstance(value) && Types.BIGINT == sqlType) {
             parameters.add(Long.valueOf(((Date) value).getTime()));
+        } else if (ParticipationStatus.class.isInstance(value) && Types.INTEGER == sqlType) {
+            parameters.add(Event2Appointment.getConfirm((ParticipationStatus) value));
         } else {
             // default
             parameters.add(value);

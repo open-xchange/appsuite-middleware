@@ -49,11 +49,13 @@
 
 package com.openexchange.chronos.impl;
 
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.type.PublicType;
 
 /**
  * {@link CalendarService}
@@ -115,6 +117,27 @@ public class Check {
     public static void requireUpToDateTimestamp(Event event, long clientTimestampp) throws OXException {
         if (event.getLastModified().getTime() > clientTimestampp) {
             throw new OXException();
+        }
+    }
+
+    /**
+     * Checks that a specific event is actually present in the supplied folder. Based on the folder type, the event's public folder
+     * identifier or the attendee's personal calendar folder is checked.
+     *
+     * @param event The event to check
+     * @param folder The folder where the event should appear in
+     * @throws OXException If the check fails
+     */
+    public static void eventIsInFolder(Event event, UserizedFolder folder) throws OXException {
+        if (PublicType.getInstance().equals(folder.getType())) {
+            if (event.getPublicFolderId() != Integer.parseInt(folder.getID())) {
+                throw OXException.general("Event folder != requested folder"); //TODO
+            }
+        } else {
+            Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
+            if (null == userAttendee || userAttendee.getFolderID() != Integer.parseInt(folder.getID())) {
+                throw OXException.general("Event folder != requested folder"); //TODO
+            }
         }
     }
 

@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarStorageFactory;
+import com.openexchange.chronos.RecurrenceService;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
@@ -82,7 +83,7 @@ public class ChronosActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, CalendarStorageFactory.class, FolderService.class, UserService.class,
-            GroupService.class, ResourceService.class, DatabaseService.class };
+            GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class };
     }
 
     @Override

@@ -186,8 +186,20 @@ public class CalendarParameters {
      * @return The parameter value, or <code>null</code> if not set
      */
     public <T> T get(String parameter, Class<T> clazz) {
+        return get(parameter, clazz, null);
+    }
+
+    /**
+     * Gets a parameter, falling back to a custom default value if not set.
+     *
+     * @param parameter The parameter name
+     * @param clazz The value's target type
+     * @param defaultValue The default value to use as fallback if the parameter is not set
+     * @return The parameter value, or the passed default value if not set
+     */
+    public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
         Object value = parameters.get(parameter);
-        return null == value ? null : clazz.cast(value);
+        return null == value ? defaultValue : clazz.cast(value);
     }
 
     /**

@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
@@ -160,8 +159,7 @@ public class Consistency {
             if (event.containsEndDate() && null != event.getEndDate()) {
                 Date endDate = CalendarUtils.truncateTime(event.getEndDate(), TimeZone.getTimeZone("UTC"));
                 if (endDate.equals(event.getStartDate())) {
-                    Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-                    calendar.setTime(endDate);
+                    Calendar calendar = CalendarUtils.initCalendar(TimeZone.getTimeZone("UTC"), endDate);
                     calendar.add(Calendar.DAY_OF_YEAR, 1);
                     endDate = calendar.getTime();
                 }

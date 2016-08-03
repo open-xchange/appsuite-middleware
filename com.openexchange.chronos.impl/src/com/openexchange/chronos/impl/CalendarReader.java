@@ -52,7 +52,12 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.CalendarUtils.appendCommonTerms;
 import static com.openexchange.chronos.impl.CalendarUtils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getSearchTerm;
+import static com.openexchange.chronos.impl.CalendarUtils.getTimeZone;
+import static com.openexchange.chronos.impl.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
+import static com.openexchange.chronos.impl.CalendarUtils.isInRange;
+import static com.openexchange.chronos.impl.CalendarUtils.isResolveOccurrences;
+import static com.openexchange.chronos.impl.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
 import static com.openexchange.chronos.impl.Check.requireFolderPermission;
 import static com.openexchange.chronos.impl.Check.requireReadPermission;
@@ -62,13 +67,14 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarStorage;
@@ -77,6 +83,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.RecurrenceService;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.exception.OXException;
@@ -142,34 +149,31 @@ public class CalendarReader {
             .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from))
             .addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, until))
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(userID)))
-            //TODO .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.NOT_EQUALS, ParticipationStatus.DECLINED))
+        //TODO .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.NOT_EQUALS, ParticipationStatus.DECLINED))
         ;
         List<Event> events = storage.searchEvents(searchTerm, null);
-        Calendar calendar = GregorianCalendar.getInstance(timeZone);
-        calendar.setTime(from);
+        Calendar calendar = initCalendar(timeZone, from);
         Date minimumEndTime = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         Date maximumStartTime = calendar.getTime();
         while (maximumStartTime.before(until)) {
-            Boolean hasEvents = Boolean.FALSE;
-            for (Event event : events) {
+            boolean hasEvents = false;
+            for (int i = 0; i < events.size() && false == hasEvents; i++) {
+                Event event = events.get(i);
                 Attendee attendee = CalendarUtils.find(event.getAttendees(), userID);
                 if (null == attendee || ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
                     continue; // skip
                 }
-                if (event.getRecurrenceId() == event.getId()) {
-                    //TODO recurring: Services.getService(RecurrenceService.class).calculateInstances(event, start, end, -1); ...
-                    continue;
-                } else {
-                    Date startDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
-                    Date endDate = event.isAllDay() ? CalendarUtils.getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
-                    if (startDate.before(maximumStartTime) && endDate.after(minimumEndTime)) {
-                        hasEvents = Boolean.TRUE;
-                        break;
+                if (isSeriesMaster(event) && isResolveOccurrences(session)) {
+                    Iterator<Event> occurrences = resolveOccurrences(event);
+                    while (occurrences.hasNext() && hasEvents == false) {
+                        hasEvents |= isInRange(occurrences.next(), minimumEndTime, maximumStartTime, timeZone);
                     }
+                } else {
+                    hasEvents |= isInRange(event, minimumEndTime, maximumStartTime, timeZone);
                 }
             }
-            hasEventsList.add(hasEvents);
+            hasEventsList.add(Boolean.valueOf(hasEvents));
             minimumEndTime = maximumStartTime;
             calendar.add(Calendar.DAY_OF_YEAR, 1);
             maximumStartTime = calendar.getTime();
@@ -329,18 +333,36 @@ public class CalendarReader {
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
         Map<Integer, List<Alarm>> alarmsById = readAlarms(events, forUser);
         for (Event event : events) {
-            UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
-            if (0 < event.getPublicFolderId()) {
-                userizedEvent.setFolderId(event.getPublicFolderId());
-            }
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), forUser);
-            if (null != userAttendee) {
-                userizedEvent.setAlarms(alarmsById.get(I(event.getId())));
-                if (0 < userAttendee.getFolderID()) {
-                    userizedEvent.setFolderId(userAttendee.getFolderID());
+            if (isSeriesMaster(event) && isResolveOccurrences(session)) {
+                Iterator<Event> occurrences = resolveOccurrences(event);
+                while (occurrences.hasNext()) {
+                    Event occurrence = occurrences.next();
+                    UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), occurrence);
+                    if (0 < occurrence.getPublicFolderId()) {
+                        userizedEvent.setFolderId(occurrence.getPublicFolderId());
+                    }
+                    if (null != userAttendee) {
+                        userizedEvent.setAlarms(alarmsById.get(I(event.getId())));
+                        if (0 < userAttendee.getFolderID()) {
+                            userizedEvent.setFolderId(userAttendee.getFolderID());
+                        }
+                    }
+                    userizedEvents.add(userizedEvent);
                 }
+            } else {
+                UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
+                if (0 < event.getPublicFolderId()) {
+                    userizedEvent.setFolderId(event.getPublicFolderId());
+                }
+                if (null != userAttendee) {
+                    userizedEvent.setAlarms(alarmsById.get(I(event.getId())));
+                    if (0 < userAttendee.getFolderID()) {
+                        userizedEvent.setFolderId(userAttendee.getFolderID());
+                    }
+                }
+                userizedEvents.add(userizedEvent);
             }
-            userizedEvents.add(userizedEvent);
         }
         return userizedEvents;
     }
@@ -365,12 +387,26 @@ public class CalendarReader {
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
         Map<Integer, List<Alarm>> alarmsById = readAlarms(events, calendarUser.getId());
         for (Event event : events) {
-            UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
-            userizedEvent.setFolderId(folderID);
-            userizedEvent.setAlarms(alarmsById.get(I(event.getId())));
-            userizedEvents.add(userizedEvent);
+            Check.eventIsInFolder(event, inFolder);
+            if (isSeriesMaster(event) && isResolveOccurrences(session)) {
+                Iterator<Event> occurrences = resolveOccurrences(event);
+                while (occurrences.hasNext()) {
+                    userizedEvents.add(new UserizedEvent(session.getSession(), occurrences.next(), folderID, alarmsById.get(I(event.getId()))));
+                }
+            } else {
+                userizedEvents.add(new UserizedEvent(session.getSession(), event, folderID, alarmsById.get(I(event.getId()))));
+            }
         }
         return userizedEvents;
+    }
+
+    private Iterator<Event> resolveOccurrences(Event masterEvent) {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        TimeZone timeZone = getTimeZone(session);
+        Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
+        Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);
+        return Services.getService(RecurrenceService.class).calculateInstances(masterEvent, fromCalendar, untilCalendar, -1);
     }
 
     protected UserizedFolder getFolder(int folderID) throws OXException {
