@@ -364,6 +364,10 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
                 }
             }
         } catch (DeleteErrorException e) {
+            // TODO: Fail the entire operation if a subset of folders cannot be deleted? 
+            //       Retry in case of a communication error using exponential backoff?
+            //       If the problem is cause by a specific folder and retry is exceeded 
+            //       skip the troublesome folder or fail entirely?
             throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "");
         } catch (ListFolderErrorException e) {
             throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
