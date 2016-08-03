@@ -79,6 +79,8 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
+import com.openexchange.chronos.SortOptions;
+import com.openexchange.chronos.SortOrder;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.Recurrence;
@@ -94,6 +96,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.search.SearchTerm;
 
@@ -105,8 +108,6 @@ import com.openexchange.search.SearchTerm;
  * @since v7.10.0
  */
 public class RdbCalendarStorage implements CalendarStorage {
-
-    private static final EventMapper MAPPER = EventMapper.getInstance();
 
     private final Context context;
     private final DBProvider dbProvider;
@@ -127,11 +128,11 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     @Override
-    public List<Event> searchEvents(SearchTerm<?> searchTerm, EventField[] fields) throws OXException {
+    public List<Event> searchEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            List<Event> events = selectEvents(connection, false, context.getContextId(), searchTerm, fields);
+            List<Event> events = selectEvents(connection, false, context.getContextId(), searchTerm, sortOptions, fields);
             return selectAdditionalEventData(connection, context.getContextId(), events, fields);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
@@ -141,11 +142,11 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     @Override
-    public List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, EventField[] fields) throws OXException {
+    public List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectEvents(connection, true, context.getContextId(), searchTerm, fields);
+            return selectEvents(connection, true, context.getContextId(), searchTerm, sortOptions, fields);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
@@ -532,28 +533,27 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     private static int insertOrReplaceEvent(Connection connection, String tableName, boolean replace, int contextID, Event event) throws SQLException, OXException {
-        EventField[] mappedFields = MAPPER.getMappedFields();
+        EventField[] mappedFields = EventMapper.getInstance().getMappedFields();
         String sql = new StringBuilder()
-            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ').append("(cid,").append(MAPPER.getColumns(mappedFields)).append(") ")
-            .append("VALUES (?,").append(MAPPER.getParameters(mappedFields)).append(");")
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ').append("(cid,").append(EventMapper.getInstance().getColumns(mappedFields)).append(") ").append("VALUES (?,").append(EventMapper.getInstance().getParameters(mappedFields)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(event), mappedFields);
+            EventMapper.getInstance().setParameters(stmt, parameterIndex, adjustPriorSave(event), mappedFields);
             return logExecuteUpdate(stmt);
         }
     }
 
     private static int updateEvent(Connection connection, int contextID, int objectID, Event event) throws SQLException, OXException {
-        EventField[] assignedfields = MAPPER.getAssignedFields(event);
+        EventField[] assignedfields = EventMapper.getInstance().getAssignedFields(event);
         String sql = new StringBuilder()
-            .append("UPDATE prg_dates SET ").append(MAPPER.getAssignments(assignedfields)).append(' ')
+            .append("UPDATE prg_dates SET ").append(EventMapper.getInstance().getAssignments(assignedfields)).append(' ')
             .append("WHERE cid=? AND intfield01=?;")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(event), assignedfields);
+            parameterIndex = EventMapper.getInstance().setParameters(stmt, parameterIndex, adjustPriorSave(event), assignedfields);
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, objectID);
             return logExecuteUpdate(stmt);
@@ -683,7 +683,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     private static Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
-        return adjustAfterLoad(MAPPER.fromResultSet(resultSet, fields, columnLabelPrefix));
+        return adjustAfterLoad(EventMapper.getInstance().fromResultSet(resultSet, fields, columnLabelPrefix));
     }
 
     private static Map<Integer, List<Alarm>> selectAlarms(Connection connection, int contextID, int[] objectIDs, int userID) throws SQLException {
@@ -738,10 +738,10 @@ public class RdbCalendarStorage implements CalendarStorage {
         }
     }
 
-    private static List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, EventField[] fields) throws SQLException, OXException {
-        EventField[] mappedFields = MAPPER.getMappedFields(fields);
+    private static List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
+        EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
         SearchTermAdapter adapter = new SearchTermAdapter(searchTerm, null, "d.", "m.", "e.");
-        StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(MAPPER.getColumns(mappedFields, "d.")).append(' ')
+        StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(' ')
             .append("FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ");
         if (adapter.usesInternalAttendees()) {
             stringBuilder.append("LEFT JOIN ").append(deleted ? "del_dates_members" : "prg_dates_members").append(" AS m ")
@@ -751,8 +751,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             stringBuilder.append("LEFT JOIN ").append(deleted ? "deldateexternal" : "dateexternal").append(" AS e ")
                 .append("ON d.cid=e.cid AND d.intfield01=e.objectId ");
         }
-        stringBuilder.append("WHERE d.cid=? AND ").append(adapter.getClause()).append(';');
-
+        stringBuilder.append("WHERE d.cid=? AND ").append(adapter.getClause()).append(getSortOptions(sortOptions, "d.")).append(';');
         List<Event> events = new ArrayList<Event>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             stmt.setInt(1, contextID);
@@ -763,6 +762,40 @@ public class RdbCalendarStorage implements CalendarStorage {
             }
         }
         return events;
+    }
+
+    /**
+     * Gets the SQL representation of the supplied sort options, optionally prefixing any used column identifiers.
+     * 
+     * @param sortOptions The sort options to get the SQL representation for 
+     * @param prefix The prefix to use, or <code>null</code> if not needed
+     * @return The <code>ORDER BY ... LIMIT ...</code> clause, or an empty string if no sort options were specified
+     */
+    private static String getSortOptions(SortOptions sortOptions, String prefix) throws OXException {
+        if (null == sortOptions || SortOptions.EMPTY.equals(sortOptions)) {
+            return "";
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        SortOrder[] sortOrders = sortOptions.getSortOrders();
+        if (null != sortOrders && 0 < sortOrders.length) {
+            stringBuilder.append(" ORDER BY ").append(getColumnLabel(sortOrders[0].getBy(), prefix)).append(sortOrders[0].isDescending() ? " DESC" : " ASC");
+            for (int i = 1; i < sortOrders.length; i++) {
+                stringBuilder.append(", ").append(getColumnLabel(sortOrders[i].getBy(), prefix)).append(sortOrders[i].isDescending() ? " DESC" : " ASC");
+            }
+        }
+        if (0 < sortOptions.getLimit()) {
+            stringBuilder.append(" LIMIT ");
+            if (0 < sortOptions.getOffset()) {
+                stringBuilder.append(sortOptions.getOffset()).append(", ");
+            }
+            stringBuilder.append(sortOptions.getLimit());
+        }
+        return stringBuilder.toString();
+    }
+
+    private static String getColumnLabel(EventField field, String prefix) throws OXException {
+        DbMapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
+        return null != prefix ? mapping.getColumnLabel(prefix) : mapping.getColumnLabel();
     }
 
     private static int[] getObjectIDs(List<Event> events) {

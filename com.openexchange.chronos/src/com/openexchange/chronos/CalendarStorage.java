@@ -76,54 +76,27 @@ public interface CalendarStorage {
      * Searches for events.
      *
      * @param searchTerm The search term to use
+     * @param sortOptions The sort options to apply, or <code>null</code> if not specified
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The found events
      */
-    List<Event> searchEvents(SearchTerm<?> searchTerm, EventField[] fields) throws OXException;
+    List<Event> searchEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException;
 
     /**
      * Searches for previously deleted events.
      *
      * @param searchTerm The search term to use
+     * @param sortOptions The sort options to apply, or <code>null</code> if not specified
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The found events
      */
-    List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, EventField[] fields) throws OXException;
-
-    /**
-     * Loads events located in a specific folder.
-     *
-     * @param folderID The identifier of the folder to load the events from
-     * @param from The minimum (inclusive) end time of the events, or <code>null</code> for no restrictions
-     * @param until The maximum (exclusive) start time of the events, or <code>null</code> for no restrictions
-     * @param createdBy The identifier of the event's creator, or <code>-1</code> for no restrictions
-     * @param updatedSince The minimum (exclusive) last modification time of the events, or <code>null</code> for no restrictions
-     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
-     * @return The events
-     */
-    //    List<Event> loadEventsInFolder(int folderID, Date from, Date until, int createdBy, Date updatedSince, EventField[] fields) throws OXException;
-
-    /**
-     * Loads deleted events previously located in a specific folder.
-     *
-     * @param folderID The identifier of the folder to load the events from
-     * @param from The minimum (inclusive) end time of the events, or <code>null</code> for no restrictions
-     * @param until The maximum (exclusive) start time of the events, or <code>null</code> for no restrictions
-     * @param createdBy The identifier of the event's creator, or <code>-1</code> for no restrictions
-     * @param deletedSince The minimum (exclusive) last modification time of the events, or <code>null</code> for no restrictions
-     * @return The events
-     */
-    //    List<Event> loadDeletedEventsInFolder(int folderID, Date from, Date until, int createdBy, Date deletedSince) throws OXException;
-
-    //    List<Event> loadEventsOfUser(int userID, Date from, Date until, Date updatedSince, EventField[] fields) throws OXException;
-
-    //    List<Event> loadDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince) throws OXException;
+    List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException;
 
     /**
      * Generates the next object unique identifier for inserting new event data.
      * <p/>
      * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
-     * {@link DBTransactionPolicy#NO_TRANSACTIONS}.
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
      *
      * @return The next object identifier
      */
