@@ -289,30 +289,7 @@ public final class IMAPConversationWorker {
 
                     // Filter for searchterm
                     if (useSearchTerm) {
-                        List<List<MailMessage>> result = new ArrayList<>();
-                        for (List<MailMessage> messages : list) {
-                            boolean containsFlag = false;
-                            if (variant.equals("ALL")) {
-                                for (MailMessage message : messages) {
-                                    if (searchTerm.matches(message)) {
-                                        containsFlag = true;
-                                        break;
-                                    }
-                                }
-                            } else if (variant.equals("FIRST")) {
-                                if (searchTerm.matches(messages.get(0))) {
-                                    containsFlag = true;
-                                }
-                            } else if (variant.equals("LAST")) {
-                                if (searchTerm.matches(messages.get(messages.size() - 1))) {
-                                    containsFlag = true;
-                                }
-                            }
-
-                            if (containsFlag) {
-                                result.add(messages);
-                            }
-                        }
+                        List<List<MailMessage>> result = filterThreads(variant, list, searchTerm);
                         // Slice & fill with recent flags
                         if (usedFields.containsAny(FIELDS_FLAGS)) {
                             return sliceAndFill(result, fullName, indexRange, sentFullName, mergeWithSent, FIELDS_FLAGS, null, body, isRev1);
@@ -416,6 +393,11 @@ public final class IMAPConversationWorker {
         // Slice & fill
         if (body || (lookAhead > CONVERSATION_CACHE_THRESHOLD)) {
             // Body requested - Do not cache at all
+            // Filter for searchterm
+            if (useSearchTerm) {
+                fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
+                return filterThreads(variant, list, searchTerm);
+            }
             return sliceAndFill(list, fullName, indexRange, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
         }
 
@@ -429,33 +411,7 @@ public final class IMAPConversationWorker {
 
             // Filter for searchterm
             if (useSearchTerm) {
-                List<List<MailMessage>> result = new ArrayList<>();
-                for (List<MailMessage> messages : list) {
-                    boolean containsFlag = false;
-                    if (variant.equals("ALL")) {
-                        for (MailMessage message : messages) {
-                            if (searchTerm.matches(message)) {
-                                containsFlag = true;
-                                break;
-                            }
-                        }
-                    } else if (variant.equals("FIRST")) {
-                        if (searchTerm.matches(messages.get(0))) {
-                            containsFlag = true;
-                            break;
-                        }
-                    } else if (variant.equals("LAST")) {
-                        if (searchTerm.matches(messages.get(messages.size() - 1))) {
-                            containsFlag = true;
-                            break;
-                        }
-                    }
-
-                    if (containsFlag) {
-                        result.add(messages);
-                    }
-                }
-                return result;
+                return filterThreads(variant, list, searchTerm);
             }
 
             // All
@@ -530,6 +486,34 @@ public final class IMAPConversationWorker {
         }
 
         return slice;
+    }
+
+    private List<List<MailMessage>> filterThreads(String variant, List<List<MailMessage>> list, SearchTerm<?> searchTerm) throws OXException {
+        List<List<MailMessage>> result = new ArrayList<>();
+        for (List<MailMessage> messages : list) {
+            boolean containsFlag = false;
+            if (variant.equals("ALL")) {
+                for (MailMessage message : messages) {
+                    if (searchTerm.matches(message)) {
+                        containsFlag = true;
+                        break;
+                    }
+                }
+            } else if (variant.equals("FIRST")) {
+                if (searchTerm.matches(messages.get(0))) {
+                    containsFlag = true;
+                }
+            } else if (variant.equals("LAST")) {
+                if (searchTerm.matches(messages.get(messages.size() - 1))) {
+                    containsFlag = true;
+                }
+            }
+
+            if (containsFlag) {
+                result.add(messages);
+            }
+        }
+        return result;
     }
 
     private List<List<MailMessage>> sliceAndFill(List<List<MailMessage>> listOfConversations, String fullName, IndexRange indexRange, String sentFullName, boolean mergeWithSent, MailFields usedFields, String[] headerNames, boolean body, boolean isRev1) throws MessagingException, OXException {
