@@ -74,6 +74,6 @@ public interface PushMessageGenerator {
      * @return The message
      * @throws OXException If generating the message fails
      */
-    Message generateMessageFor(String transportId, PushNotification notification) throws OXException;
+    Message<?> generateMessageFor(String transportId, PushNotification notification) throws OXException;
 
 }

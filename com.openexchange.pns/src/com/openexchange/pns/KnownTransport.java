@@ -51,17 +51,58 @@ package com.openexchange.pns;
 
 
 /**
- * {@link Message} - A message for a specific transport.
+ * {@link KnownTransport} - The enumeration for known transports for the push notification service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Message<M> {
+public enum KnownTransport {
 
     /**
-     * Gets the message object
-     *
-     * @return The message object
+     * The transport by a Web Socket connection.
      */
-    M getMessage();
+    WEB_SOCKET("websocket"),
+    /**
+     * The transport by Apple Push Notification Service (APNS).
+     */
+    APNS("apn"),
+    /**
+     * The transport by Google Cloud Messaging service (GCM).
+     */
+    GCM("gcm"),
+
+    ;
+
+    private final String transportId;
+
+    private KnownTransport(String transportId) {
+        this.transportId = transportId;
+    }
+
+    /**
+     * Gets the transport identifier.
+     *
+     * @return The transport identifier
+     */
+    public String getTransportId() {
+        return transportId;
+    }
+
+    /**
+     * Gets the known transport for specified identifier.
+     *
+     * @param transportId The transport identifier
+     * @return The associated known transport or <code>null</code>
+     */
+    public static KnownTransport knownTransportFor(String transportId) {
+        if (null != transportId) {
+            for (KnownTransport knownTransport : values()) {
+                if (transportId.equals(knownTransport.transportId)) {
+                    return knownTransport;
+                }
+            }
+        }
+        return null;
+    }
+
 }

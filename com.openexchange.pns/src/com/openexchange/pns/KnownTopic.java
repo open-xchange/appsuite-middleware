@@ -49,19 +49,59 @@
 
 package com.openexchange.pns;
 
+import java.util.HashMap;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
- * {@link Message} - A message for a specific transport.
+ * {@link KnownTopic} - An enumeration for well-known topics.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Message<M> {
+public enum KnownTopic {
 
     /**
-     * Gets the message object
-     *
-     * @return The message object
+     * com/openexchange/mail/new
+     * <p>
+     * The topic for a newly arrived mail.
      */
-    M getMessage();
+    MAIL_NEW("com/openexchange/mail/new"),
+
+    ;
+
+    private final String name;
+
+    private KnownTopic(final String name) {
+        this.name = name;
+    }
+
+    /**
+     * Gets the topic name
+     *
+     * @return The topic name
+     */
+    public String getName() {
+        return name;
+    }
+
+    private static final Map<String, KnownTopic> STRING2NAME;
+    static {
+        final KnownTopic[] values = KnownTopic.values();
+        final Map<String, KnownTopic> m = new HashMap<String, KnownTopic>(values.length);
+        for (final KnownTopic name : values) {
+            m.put(name.getName(), name);
+        }
+        STRING2NAME = ImmutableMap.copyOf(m);
+    }
+
+    /**
+     * Gets the associated {@code KnownTopic} enum.
+     *
+     * @param sName The name string
+     * @return The {@code KnownTopic} enum or <code>null</code>
+     */
+    public static KnownTopic nameFor(final String sName) {
+        return null == sName ? null : STRING2NAME.get(sName);
+    }
 }

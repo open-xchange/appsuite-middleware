@@ -51,17 +51,26 @@ package com.openexchange.pns;
 
 
 /**
- * {@link Message} - A message for a specific transport.
+ * {@link TextMessage} - A text message.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Message<M> {
+public class TextMessage implements Message<String> {
+
+    private final String text;
 
     /**
-     * Gets the message object
-     *
-     * @return The message object
+     * Initializes a new {@link TextMessage}.
      */
-    M getMessage();
+    public TextMessage(String text) {
+        super();
+        this.text = text;
+    }
+
+    @Override
+    public String getMessage() {
+        return text;
+    }
+
 }

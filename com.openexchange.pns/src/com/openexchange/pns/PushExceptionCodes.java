@@ -84,25 +84,29 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
      */
     NO_SUCH_TRANSPORT("No such transport: %1$s", null, Category.CATEGORY_ERROR, 5),
     /**
+     * Unsupported transport: %1$s
+     */
+    UNSUPPORTED_TRANSPORT("Unsupported transport: %1$s", null, Category.CATEGORY_ERROR, 6),
+    /**
      * Invalid topic: %1$s
      */
-    INVALID_TOPIC("Invalid topic: %1$s", PushExceptionMessages.INVALID_TOPIC_MSG, Category.CATEGORY_USER_INPUT, 6),
+    INVALID_TOPIC("Invalid topic: %1$s", PushExceptionMessages.INVALID_TOPIC_MSG, Category.CATEGORY_USER_INPUT, 7),
     /**
      * No such generator for client: %1$s
      */
-    NO_SUCH_GENERATOR("No such generator for client: %1$s", null, Category.CATEGORY_ERROR, 7),
+    NO_SUCH_GENERATOR("No such generator for client: %1$s", null, Category.CATEGORY_ERROR, 8),
     /**
      * Unsupported message class: %1$s
      */
-    UNSUPPORTED_MESSAGE_CLASS("Unsupported message class: %1$s", null, Category.CATEGORY_ERROR, 8),
+    UNSUPPORTED_MESSAGE_CLASS("Unsupported message class: %1$s", null, Category.CATEGORY_ERROR, 9),
     /**
      * The message is too big. Allowed is %1$s, but is %2$s.
      */
-    MESSAGE_TOO_BIG("The message is too big. Allowed is %1$s, but is %2$s.", null, Category.CATEGORY_ERROR, 9),
+    MESSAGE_TOO_BIG("The message is too big. Allowed is %1$s, but is %2$s.", null, Category.CATEGORY_ERROR, 10),
     /**
      * Message generation failed: %1$s
      */
-    MESSAGE_GENERATION_FAILED("Message generation failed: %1$s", null, Category.CATEGORY_ERROR, 10),
+    MESSAGE_GENERATION_FAILED("Message generation failed: %1$s", null, Category.CATEGORY_ERROR, 11),
 
     ;
 

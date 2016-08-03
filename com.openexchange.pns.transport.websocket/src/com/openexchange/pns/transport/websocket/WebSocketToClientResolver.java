@@ -47,21 +47,26 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.transport.websocket;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.websockets.WebSocket;
 
 /**
- * {@link Message} - A message for a specific transport.
+ * {@link WebSocketToClientResolver} - Resolves an open Web Socket to a certain client.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Message<M> {
+public interface WebSocketToClientResolver {
 
     /**
-     * Gets the message object
+     * Resolves the given open Web Socket to a client identifier that is associated with it.
      *
-     * @return The message object
+     * @param socket The Web Socket to resolve for
+     * @return The client identifier or <code>null</code> if given Web Socket cannot be resolved
+     * @throws OXException If client identifier cannot be resolved
      */
-    M getMessage();
+    String getClientFor(WebSocket socket) throws OXException;
+
 }

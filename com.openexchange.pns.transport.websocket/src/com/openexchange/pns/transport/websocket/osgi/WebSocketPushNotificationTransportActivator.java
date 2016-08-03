@@ -79,6 +79,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     private List<ServiceRegistration<?>> serviceRegistrations;
     private WebSocketPushNotificationTransport webSocketTransport;
+    private WebSocketToClientResolverTracker resolverTracker;
 
     /**
      * Initializes a new {@link WebSocketPushNotificationTransportActivator}.
@@ -112,7 +113,12 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
+        WebSocketToClientResolverTracker resolverTracker = new WebSocketToClientResolverTracker(context);
+        this.resolverTracker = resolverTracker;
+        rememberTracker(resolverTracker);
+        openTrackers();
+
         reinit(getService(ConfigurationService.class));
     }
 
@@ -131,6 +137,8 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
             this.webSocketTransport = null;
             webSocketTransport.stop();
         }
+
+        this.resolverTracker = null; // Gets closed in stopBundle() method
 
         super.stopBundle();
     }
@@ -162,7 +170,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
             return;
         }
 
-        WebSocketPushNotificationTransport webSocketTransport = new WebSocketPushNotificationTransport(getService(PushSubscriptionRegistry.class), getService(PushMessageGeneratorRegistry.class), this);
+        WebSocketPushNotificationTransport webSocketTransport = new WebSocketPushNotificationTransport(resolverTracker, this);
         this.webSocketTransport = webSocketTransport;
         serviceRegistrations = new ArrayList<>(2);
         serviceRegistrations.add(context.registerService(PushNotificationTransport.class, webSocketTransport, null));

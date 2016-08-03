@@ -47,21 +47,36 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.appsuite;
 
+import com.openexchange.ajax.Client;
+import com.openexchange.exception.OXException;
+import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
+import com.openexchange.websockets.WebSocket;
 
 /**
- * {@link Message} - A message for a specific transport.
+ * {@link AppSuiteWebSocketToClientResolver}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Message<M> {
+public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResolver {
 
     /**
-     * Gets the message object
-     *
-     * @return The message object
+     * Initializes a new {@link AppSuiteWebSocketToClientResolver}.
      */
-    M getMessage();
+    public AppSuiteWebSocketToClientResolver() {
+        super();
+    }
+
+    @Override
+    public String getClientFor(WebSocket socket) throws OXException {
+        String path = socket.getPath();
+        if (null != path && path.startsWith("/websockets/push")) { // TODO: Align to expected path
+            return Client.APPSUITE_UI.getClientId();
+        }
+
+        return null;
+    }
+
 }

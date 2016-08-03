@@ -47,21 +47,38 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.appsuite.osgi;
 
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.appsuite.AppSuiteMessageGenerator;
+import com.openexchange.pns.appsuite.AppSuiteWebSocketToClientResolver;
+import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 
 /**
- * {@link Message} - A message for a specific transport.
+ * {@link AppSuitePushStuffActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Message<M> {
+public class AppSuitePushStuffActivator extends HousekeepingActivator {
 
     /**
-     * Gets the message object
-     *
-     * @return The message object
+     * Initializes a new {@link AppSuitePushStuffActivator}.
      */
-    M getMessage();
+    public AppSuitePushStuffActivator() {
+        super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {};
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(PushMessageGenerator.class, new AppSuiteMessageGenerator());
+        registerService(WebSocketToClientResolver.class, new AppSuiteWebSocketToClientResolver());
+    }
+
 }

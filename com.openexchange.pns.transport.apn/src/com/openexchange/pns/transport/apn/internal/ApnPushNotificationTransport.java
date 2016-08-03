@@ -73,6 +73,7 @@ import com.openexchange.pns.PushNotificationField;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.DefaultPushSubscription.Builder;
 import com.openexchange.pns.Message;
@@ -101,7 +102,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ApnPushNotificationTransport.class);
 
-    private static final String ID = "apn";
+    private static final String ID = KnownTransport.APNS.getTransportId();
 
     // https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/CommunicatingWIthAPS.html
     private static final int STATUS_INVALID_TOKEN_SIZE = 5;
@@ -259,7 +260,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
                 throw PushExceptionCodes.NO_SUCH_GENERATOR.create(client);
             }
 
-            Message message = generator.generateMessageFor(ID, notification);
+            Message<?> message = generator.generateMessageFor(ID, notification);
 
             List<PayloadPerDevice> payloads = clientPayloads.get(client);
             if (null == payloads) {

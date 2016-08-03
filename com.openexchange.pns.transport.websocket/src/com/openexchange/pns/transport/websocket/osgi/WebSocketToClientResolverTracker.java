@@ -47,21 +47,25 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.transport.websocket.osgi;
 
+import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 
 /**
- * {@link Message} - A message for a specific transport.
+ * {@link WebSocketToClientResolverTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Message<M> {
+public class WebSocketToClientResolverTracker extends RankingAwareNearRegistryServiceTracker<WebSocketToClientResolver> {
 
     /**
-     * Gets the message object
-     *
-     * @return The message object
+     * Initializes a new {@link WebSocketToClientResolverTracker}.
      */
-    M getMessage();
+    public WebSocketToClientResolverTracker(BundleContext context) {
+        super(context, WebSocketToClientResolver.class, 0);
+    }
+
 }
