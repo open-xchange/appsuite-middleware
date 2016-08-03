@@ -358,33 +358,41 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     @Override
     public void onConnect(WebSocket socket) {
         // Override this method to take control over socket collection
-        if (socket instanceof SessionBoundWebSocket) {
-            SessionBoundWebSocket sessionBoundSocket = (SessionBoundWebSocket) socket;
+        boolean error = true; // Pessimistic...
+        try {
+            if (socket instanceof SessionBoundWebSocket) {
+                SessionBoundWebSocket sessionBoundSocket = (SessionBoundWebSocket) socket;
 
-            UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
-            ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
-            if (sockets == null) {
-                sockets = new ConcurrentHashMap<>(8, 0.9F, 1);
-                ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, sockets);
-                if (existing != null) {
-                    sockets = existing;
-                }
-            }
-
-            if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
-                throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
-            }
-
-            synchronized (sessionBoundSocket) {
-                Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
-                for (WebSocketListener listener : listenerRegistry.getListeners()) {
-                    if (!listeners.contains(listener)) {
-                        listeners.add(listener);
+                UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
+                ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
+                if (sockets == null) {
+                    sockets = new ConcurrentHashMap<>(8, 0.9F, 1);
+                    ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, sockets);
+                    if (existing != null) {
+                        sockets = existing;
                     }
                 }
+
+                if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
+                    throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+                }
+
+                synchronized (sessionBoundSocket) {
+                    Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
+                    for (WebSocketListener listener : listenerRegistry.getListeners()) {
+                        if (!listeners.contains(listener)) {
+                            listeners.add(listener);
+                        }
+                    }
+                }
+            } else {
+                super.onConnect(socket);
             }
-        } else {
-            super.onConnect(socket);
+            error = false;
+        } finally {
+            if (error) {
+                socket.close();
+            }
         }
     }
 
