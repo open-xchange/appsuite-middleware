@@ -464,7 +464,6 @@ public class CalendarUtils {
         return objectIDs;
     }
 
-
     /**
      * Gets a value indicating whether the supplied event is considered as the <i>master</i> event of a recurring series or not, based
      * on the properties {@link EventField#ID} and {@link EventField#RECURRENCE_ID} for equality.
@@ -512,7 +511,7 @@ public class CalendarUtils {
     static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
         Date startDate = event.isAllDay() ? getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
         Date endDate = event.isAllDay() ? getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
-        return (null == until && startDate.before(until)) || (null == from || endDate.after(from));
+        return (null == until || startDate.before(until)) && (null == from || endDate.after(from));
     }
 
     /**
