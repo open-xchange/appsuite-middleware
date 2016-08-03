@@ -120,7 +120,7 @@ public enum SSLProperties {
 
     static final String PROTOCOLS_KEY = "com.openexchange.net.ssl.protocols";
 
-    static final String PROTOCOLS_DEFAULT = "SSLv3, TLSv1.2";
+    static final String PROTOCOLS_DEFAULT = "TLSv1, TLSv1.1, TLSv1.2";
 
     private static volatile String[] protocols;
 
@@ -236,6 +236,24 @@ public enum SSLProperties {
             return false;
         }
         return whitelistedHosts().contains(hostName);
+    }
+
+    /**
+     * Checks if one of the specified host names is white-listed.
+     * <p>
+     * The host names can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
+     *
+     * @param hostNames The host names as an array; either a machine name or a textual representation of its IP address
+     * @return <code>true</code> if at least one of the hosts is white-listed; otherwise <code>false</code>
+     */
+    public static boolean isWhitelisted(String... hostNames) {
+        for (String hostName : hostNames) {
+            boolean whitelisted = isWhitelisted(hostName);
+            if (whitelisted) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void reload() {

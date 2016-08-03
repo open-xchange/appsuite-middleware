@@ -52,6 +52,13 @@ package com.openexchange.net.ssl.internal;
 import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
 import com.openexchange.net.ssl.config.SSLProperties;
@@ -63,6 +70,8 @@ import com.openexchange.net.ssl.config.SSLProperties;
  * @since v7.8.3
  */
 public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractTrustManager.class);
 
     protected X509ExtendedTrustManager trustManager;
 
@@ -76,18 +85,48 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // no whitelist check possible at this point
-        this.trustManager.checkServerTrusted(chain, authType);
-    }
-
-    @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
         if (SSLProperties.isWhitelisted(socket.getInetAddress().getHostName())) {
             return;
         }
-
         this.trustManager.checkServerTrusted(chain, authType, socket);
+    }
+
+    @Override
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        Set<String> hosts = new HashSet<String>();
+        String host = getHostFromPrincipal(chain);
+        hosts.add(host);
+
+        Collection<List<?>> subjectAltNames = chain[0].getSubjectAlternativeNames();
+        if (subjectAltNames != null) {
+            for (List<?> altName : subjectAltNames) {
+                String value = (String) altName.get(1);
+                hosts.add(value);
+            }
+        }
+
+        if (SSLProperties.isWhitelisted(hosts.toArray(new String[0]))) {
+            return;
+        }
+
+        this.trustManager.checkServerTrusted(chain, authType);
+    }
+
+    private String getHostFromPrincipal(X509Certificate[] chain) {
+        X509Certificate x509Certificate = chain[0];
+        String dn = x509Certificate.getSubjectDN().getName();
+        try {
+            LdapName ln = new LdapName(dn);
+            for (Rdn rdn : ln.getRdns()) {
+                if (rdn.getType().equalsIgnoreCase("CN")) {
+                    return (String) rdn.getValue();
+                }
+            }
+        } catch (InvalidNameException e) {
+            LOG.warn("Unable to retrieve host from certificate.", e);
+        }
+        return null;
     }
 
     @Override
@@ -95,7 +134,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (SSLProperties.isWhitelisted(engine.getSession().getPeerHost())) {
             return;
         }
-        
+
         this.trustManager.checkClientTrusted(chain, authType, engine);
     }
 

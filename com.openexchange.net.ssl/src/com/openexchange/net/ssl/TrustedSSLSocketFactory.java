@@ -56,7 +56,10 @@ import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
@@ -157,12 +160,30 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
 
     @Override
     public String[] getDefaultCipherSuites() {
-        return this.adapteeFactory.getDefaultCipherSuites();
+        return merge();
     }
 
     @Override
     public String[] getSupportedCipherSuites() {
         return SSLProperties.supportedCipherSuites();
+    }
+
+    /**
+     * Merges the suites configured to be supported (by the administrator) into the supported ones (by the factory).
+     * 
+     * @return
+     */
+    private String[] merge() {
+        String[] supportedCipherSuites = this.adapteeFactory.getSupportedCipherSuites();
+        Set<String> configuredCipherSuites = new HashSet<>(Arrays.asList(SSLProperties.supportedCipherSuites()));
+
+        Set<String> suites = new HashSet<>();
+        for (String supportedCipher : supportedCipherSuites) {
+            if (configuredCipherSuites.contains(supportedCipher)) {
+                suites.add(supportedCipher);
+            }
+        }
+        return suites.toArray(new String[suites.size()]);
     }
 
     @Override
@@ -210,6 +231,8 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
     private void setProperties(Socket socket) {
         if (socket instanceof SSLSocket) {
             SSLSocket sslSocket = (SSLSocket) socket;
+            String[] supportedProtocols = sslSocket.getSupportedProtocols();
+            String[] supportedCipherSuites = sslSocket.getSupportedCipherSuites();
             sslSocket.setEnabledProtocols(SSLProperties.supportedProtocols());
             sslSocket.setEnabledCipherSuites(SSLProperties.supportedCipherSuites());
             sslSocket.setUseClientMode(true);
