@@ -57,7 +57,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -351,6 +350,9 @@ public final class DownloadUtility {
                         sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                     }
                 }
+            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
+                // Treat all SVG content as harmful
+                sContentDisposition = "attachment";
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
                  * Image content requested for download...
