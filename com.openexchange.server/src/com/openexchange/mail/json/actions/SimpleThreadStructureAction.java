@@ -349,7 +349,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     // Check if mail categories are enabled
                     MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
                     if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
-
+                        filterApplied = true;
                         if (category_filter.equals("general")) {
                             // Special case with unkeyword
                             String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
@@ -388,11 +388,11 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             long start = System.currentTimeMillis();
             int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             if (!filterApplied) {
-                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead, searchTerm.toString());
+                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead, null);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
 
-            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, headers, null, lookAhead, searchTerm.toString());
+            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, headers, null, lookAhead, searchTerm);
             boolean cached = false;
             int more = -1;
             if (mails instanceof PropertizedList) {

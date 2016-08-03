@@ -188,7 +188,7 @@ public final class IMAPConversationWorker {
      * @return The message conversations
      * @throws OXException If message conversations cannot be returned
      */
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, String[] headerNames, String searchTerm) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws OXException {
         IMAPFolder sentFolder = null;
         try {
             final String sentFullName = imapFolderStorage.getSentFolder();
@@ -594,7 +594,7 @@ public final class IMAPConversationWorker {
         imapMessageStorage.setAccountInfo2(list);
     }
 
-    private List<List<MailMessage>> doImapThreadSort(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, String sentFullName, int messageCount, int lookAhead, boolean mergeWithSent, MailField[] mailFields, String[] headerNames, String searchTerm) throws OXException, MessagingException {
+    private List<List<MailMessage>> doImapThreadSort(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, String sentFullName, int messageCount, int lookAhead, boolean mergeWithSent, MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws OXException, MessagingException {
         // Parse THREAD response to a list structure
 
         final MailFields usedFields = new MailFields(mailFields);

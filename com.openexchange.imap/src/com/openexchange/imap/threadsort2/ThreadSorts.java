@@ -52,6 +52,7 @@ package com.openexchange.imap.threadsort2;
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.java.Strings.isDigit;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -59,21 +60,25 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.mail.FetchProfile;
 import javax.mail.MessagingException;
+import javax.mail.search.SearchException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.command.MailMessageFillerIMAPCommand;
 import com.openexchange.imap.threader.references.Conversation;
+import com.openexchange.imap.util.WrappingProtocolException;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
+import com.openexchange.mail.search.SearchTerm;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
+import com.sun.mail.imap.protocol.SearchSequence;
 
 
 /**
@@ -101,7 +106,7 @@ public final class ThreadSorts {
      * @return The thread-sort string.
      * @throws MessagingException If a messaging error occurs
      */
-    public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange, final boolean uid, final String searchTerm) throws MessagingException {
+    public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange, final boolean uid, final SearchTerm<?> searchTerm) throws MessagingException {
         final org.slf4j.Logger log = LOG;
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -110,7 +115,15 @@ public final class ThreadSorts {
                 StringBuilder commandBuilder = new StringBuilder(32).append(uid ? "UID THREAD" : "THREAD").append(" REFERENCES UTF-8 ");
 
                 if (searchTerm != null) {
-                    commandBuilder.append(searchTerm);
+                    try {
+                        commandBuilder.append(new SearchSequence().generateSequence(searchTerm.getJavaMailSearchTerm(), "UTF-8"));
+                        commandBuilder.append(" ");
+                    } catch (final IOException ioex) {
+                        // should never happen
+                        throw new WrappingProtocolException("", new SearchException(ioex.toString()));
+                    } catch (MessagingException e) {
+                        throw new WrappingProtocolException("", e);
+                    }
                 }
                 commandBuilder.append(sortRange);
                 final String command = commandBuilder.toString();
@@ -167,7 +180,7 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, IMAPServerInfo serverInfo, String searchTerm, MailField... fields) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm, MailField... fields) throws OXException, MessagingException {
         if (null == fields || fields.length == 0 || (fields.length == 1 && MailField.RECEIVED_DATE.equals(fields[0]))) {
             return parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         }
@@ -194,7 +207,7 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, String searchTerm) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm) throws OXException, MessagingException {
         if (null == fetchProfile) {
             return parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         }
@@ -230,7 +243,7 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, String searchTerm) throws OXException, MessagingException {
+    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm) throws OXException, MessagingException {
         List<List<MailMessage>> conversations = parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         {
             // Turn conversations to a flat list
