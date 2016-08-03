@@ -70,12 +70,8 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.java.Strings;
-<<<<<<< HEAD
-import com.openexchange.rest.services.Role;
-=======
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
->>>>>>> origin/develop
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 
 
@@ -135,35 +131,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-<<<<<<< HEAD
-        PermitAll permitAll = getAnnotation(PermitAll.class);
-        if (null != permitAll) {
-            grant(requestContext);
-            return;
-        }
-
-        RolesAllowed rolesAllowed = getAnnotation(RolesAllowed.class);
-        if (null != rolesAllowed) {
-            String[] roles = rolesAllowed.value();
-            if (hasRole(Role.BASIC_AUTHENTICATED.getId(), roles)) {
-                basicAuth(requestContext);
-                return;
-            }
-
-            // Other roles unknown...
-            LOG.warn("Encountered unknown roles '{}' in class {}", Arrays.toString(roles), resourceInfo.getResourceClass().getName());
-            deny(requestContext);
-            return;
-        }
-
-        DenyAll denyAll = getAnnotation(DenyAll.class);
-        if (null != denyAll) {
-            deny(requestContext);
-            return;
-        }
-
-        // Default is "Basic-Authenticated" (as it was before)
-=======
         // Check if all is permitted
         {
             PermitAll permitAll = getAnnotation(PermitAll.class);
@@ -217,7 +184,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
 
         // No suitable annotation found. Fall-back to "Basic-Authenticated" (as it was before)
->>>>>>> origin/develop
         LOG.warn("Found no security annotation for class {}. Assuming \"Basic-Authenticated\"...", resourceInfo.getResourceClass().getName());
         basicAuth(requestContext);
     }
