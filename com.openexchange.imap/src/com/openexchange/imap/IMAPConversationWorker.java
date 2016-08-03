@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import static com.openexchange.imap.threader.Threadables.applyThreaderTo;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -228,7 +229,7 @@ public final class IMAPConversationWorker {
                 return doImapThreadSort(fullName, indexRange, sortField, order, sentFullName, messageCount, lookAhead, mergeWithSent, mailFields, headerNames, searchTerm);
             }
             // Use built-in algorithm
-            return doReferenceOnlyThreadSort(fullName, indexRange, sortField, order, sentFullName, lookAhead, mergeWithSent, mailFields, headerNames);
+            return doReferenceOnlyThreadSort(fullName, indexRange, sortField, order, sentFullName, lookAhead, mergeWithSent, mailFields, headerNames, searchTerm);
         } catch (final MessagingException e) {
             throw imapMessageStorage.handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
@@ -241,7 +242,7 @@ public final class IMAPConversationWorker {
 
     private static final MailFields FIELDS_FLAGS = new MailFields(MailField.FLAGS, MailField.COLOR_LABEL);
 
-    private List<List<MailMessage>> doReferenceOnlyThreadSort(final String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, final String sentFullName, int lookAhead, final boolean mergeWithSent, MailField[] mailFields, final String[] headerNames) throws MessagingException, OXException {
+    private List<List<MailMessage>> doReferenceOnlyThreadSort(final String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, final String sentFullName, int lookAhead, final boolean mergeWithSent, MailField[] mailFields, final String[] headerNames, SearchTerm<?> searchTerm) throws MessagingException, OXException {
         final MailFields usedFields = new MailFields(mailFields);
         usedFields.add(MailField.THREAD_LEVEL);
         usedFields.add(MailField.RECEIVED_DATE);
@@ -274,6 +275,30 @@ public final class IMAPConversationWorker {
                 String argsHash = ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, headerNames, total, uidNext, sentTotal, sentUidNext);
                 List<List<MailMessage>> list = conversationCache.getCachedConversations(fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
                 if (null != list) {
+
+                    // Filter for searchterm
+                    if (searchTerm != null) {
+                        List<List<MailMessage>> result = new ArrayList<>();
+                        for (List<MailMessage> messages : list) {
+                            boolean containsFlag = false;
+                            for (MailMessage message : messages) {
+                                if (searchTerm.matches(message)) {
+                                    containsFlag = true;
+                                    break;
+                                }
+                            }
+
+                            if (containsFlag) {
+                                result.add(messages);
+                            }
+                        }
+                        // Slice & fill with recent flags
+                        if (usedFields.containsAny(FIELDS_FLAGS)) {
+                            return sliceAndFill(result, fullName, indexRange, sentFullName, mergeWithSent, FIELDS_FLAGS, null, body, isRev1);
+                        }
+                        return sliceMessages(result, indexRange);
+                    }
+
                     // Slice & fill with recent flags
                     if (usedFields.containsAny(FIELDS_FLAGS)) {
                         return sliceAndFill(list, fullName, indexRange, sentFullName, mergeWithSent, FIELDS_FLAGS, null, body, isRev1);
@@ -360,6 +385,7 @@ public final class IMAPConversationWorker {
             list.add(conversation.getMessages(threadComparator));
         }
         conversations = null;
+
         // Sort root elements
         {
             MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
@@ -376,8 +402,29 @@ public final class IMAPConversationWorker {
         if (null == indexRange) {
             // Fill (except flags)
             fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
+
             // Put into cache
             conversationCache.putCachedConversations(list, fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
+
+            // Filter for searchterm
+            if (searchTerm != null) {
+                List<List<MailMessage>> result = new ArrayList<>();
+                for (List<MailMessage> messages : list) {
+                    boolean containsFlag = false;
+                    for (MailMessage message : messages) {
+                        if (searchTerm.matches(message)) {
+                            containsFlag = true;
+                            break;
+                        }
+                    }
+
+                    if (containsFlag) {
+                        result.add(messages);
+                    }
+                }
+                return result;
+            }
+
             // All
             return list;
         }
