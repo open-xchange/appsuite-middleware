@@ -51,7 +51,7 @@ package com.openexchange.pns;
 
 
 /**
- * {@link Hits}
+ * {@link Hits} -  A collection of hits while a hit is the associated of certain matches to a client and transport pair.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
