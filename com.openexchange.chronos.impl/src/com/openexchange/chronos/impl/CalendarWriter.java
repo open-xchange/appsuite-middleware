@@ -316,7 +316,7 @@ public class CalendarWriter extends CalendarReader {
         if (userizedEvent.containsAlarms() && null != userizedEvent.getAlarms() && 0 < userizedEvent.getAlarms().size()) {
             storage.insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
         }
-        return readEvent(folder, objectID, null);
+        return readEvent(folder, objectID);
     }
 
     private UserizedEvent updateEvent(UserizedFolder folder, UserizedEvent userizedEvent, long clientTimestamp) throws OXException {
@@ -369,7 +369,7 @@ public class CalendarWriter extends CalendarReader {
              * update by?
              */
         }
-        return readEvent(folder, originalEvent.getId(), null);
+        return readEvent(folder, originalEvent.getId());
     }
 
     private UserizedEvent updateAttendee(UserizedFolder folder, int objectID, Attendee attendee) throws OXException {
@@ -402,7 +402,7 @@ public class CalendarWriter extends CalendarReader {
             Consistency.setModifiedNow(event, session.getUser().getId());
             storage.updateEvent(event);
         }
-        return readEvent(folder, originalEvent.getId(), null);
+        return readEvent(folder, originalEvent.getId());
     }
 
 }

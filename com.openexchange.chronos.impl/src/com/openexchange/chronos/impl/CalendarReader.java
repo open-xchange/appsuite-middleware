@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.CalendarUtils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.CalendarUtils.appendCommonTerms;
 import static com.openexchange.chronos.impl.CalendarUtils.find;
+import static com.openexchange.chronos.impl.CalendarUtils.getFields;
 import static com.openexchange.chronos.impl.CalendarUtils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getTimeZone;
@@ -148,7 +149,8 @@ public class CalendarReader {
         this.storage = storage;
     }
 
-    public boolean[] hasEventsBetween(int userID, Date from, Date until, TimeZone timeZone) throws OXException {
+    public boolean[] hasEventsBetween(int userID, Date from, Date until) throws OXException {
+        TimeZone timeZone = getTimeZone(session);
         List<Boolean> hasEventsList = new ArrayList<Boolean>();
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from))
@@ -208,11 +210,11 @@ public class CalendarReader {
         return 0 < events.size() ? events.get(0).getId() : 0;
     }
 
-    public List<UserizedEvent> getChangeExceptions(int folderID, int objectID, EventField[] fields) throws OXException {
-        return getChangeExceptions(getFolder(folderID), objectID, fields);
+    public List<UserizedEvent> getChangeExceptions(int folderID, int objectID) throws OXException {
+        return getChangeExceptions(getFolder(folderID), objectID);
     }
 
-    public List<UserizedEvent> searchEvents(int[] folderIDs, String pattern, SortOptions sortOptions, EventField[] fields) throws OXException {
+    public List<UserizedEvent> searchEvents(int[] folderIDs, String pattern) throws OXException {
         List<UserizedFolder> folders;
         if (null == folderIDs || 0 == folderIDs.length) {
             folders = getVisibleFolders();
@@ -222,10 +224,10 @@ public class CalendarReader {
                 folders.add(getFolder(folderID));
             }
         }
-        return searchEvents(folders, pattern, sortOptions, fields);
+        return searchEvents(folders, pattern);
     }
 
-    protected List<UserizedEvent> searchEvents(List<UserizedFolder> folders, String pattern, SortOptions sortOptions, EventField[] fields) throws OXException {
+    protected List<UserizedEvent> searchEvents(List<UserizedFolder> folders, String pattern) throws OXException {
         if (null == folders || 0 == folders.size()) {
             return Collections.emptyList();
         }
@@ -245,47 +247,47 @@ public class CalendarReader {
         ;
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(parentFolderTerm).addSearchTerm(patternTerm);
-        List<Event> events = storage.searchEvents(searchTerm, sortOptions, fields);
+        List<Event> events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session));
         return userize(events, session.getUser().getId());
     }
 
-    public UserizedEvent readEvent(EventID eventID, EventField[] fields) throws OXException {
-        return readEvent(eventID.getFolderID(), eventID.getObjectID(), fields);
+    public UserizedEvent readEvent(EventID eventID) throws OXException {
+        return readEvent(eventID.getFolderID(), eventID.getObjectID());
     }
 
-    public UserizedEvent readEvent(int folderID, int objectID, EventField[] fields) throws OXException {
-        return readEvent(getFolder(folderID), objectID, fields);
+    public UserizedEvent readEvent(int folderID, int objectID) throws OXException {
+        return readEvent(getFolder(folderID), objectID);
     }
 
-    public List<UserizedEvent> readEventsInFolder(int folderID, Date from, Date until, Date updatedSince, SortOptions sortOptions, EventField[] fields) throws OXException {
-        return readEventsInFolder(getFolder(folderID), false, from, until, updatedSince, sortOptions, fields);
+    public List<UserizedEvent> readEventsInFolder(int folderID, Date updatedSince) throws OXException {
+        return readEventsInFolder(getFolder(folderID), false, updatedSince);
     }
 
-    public List<UserizedEvent> readDeletedEventsInFolder(int folderID, Date from, Date until, Date deletedSince, SortOptions sortOptions, EventField[] fields) throws OXException {
-        return readEventsInFolder(getFolder(folderID), true, from, until, deletedSince, sortOptions, fields);
+    public List<UserizedEvent> readDeletedEventsInFolder(int folderID, Date deletedSince) throws OXException {
+        return readEventsInFolder(getFolder(folderID), true, deletedSince);
     }
 
-    public List<UserizedEvent> readEventsOfUser(int userID, Date from, Date until, Date updatedSince, SortOptions sortOptions, EventField[] fields) throws OXException {
-        return readEventsOfUser(userID, false, from, until, updatedSince, sortOptions, fields);
+    public List<UserizedEvent> readEventsOfUser(int userID, Date updatedSince) throws OXException {
+        return readEventsOfUser(userID, false, updatedSince);
     }
 
-    public List<UserizedEvent> readDeletedEventsOfUser(int userID, Date from, Date until, Date deletedSince, SortOptions sortOptions, EventField[] fields) throws OXException {
-        return readEventsOfUser(userID, true, from, until, deletedSince, sortOptions, fields);
+    public List<UserizedEvent> readDeletedEventsOfUser(int userID, Date deletedSince) throws OXException {
+        return readEventsOfUser(userID, true, deletedSince);
     }
 
-    protected UserizedEvent readEvent(UserizedFolder folder, int objectID, EventField[] fields) throws OXException {
+    protected UserizedEvent readEvent(UserizedFolder folder, int objectID) throws OXException {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
-        Event event = storage.loadEvent(objectID, fields);
+        Event event = storage.loadEvent(objectID, getFields(session));
+        Check.eventIsInFolder(event, folder);
         if (session.getUser().getId() != event.getCreatedBy()) {
             requireReadPermission(folder, Permission.READ_ALL_OBJECTS);
         }
-        // TODO: check that event is actually located in the requested folder (and accessible by user)
         return userize(event, folder);
     }
 
-    protected List<UserizedEvent> getChangeExceptions(UserizedFolder folder, int objectID, EventField[] fields) throws OXException {
+    protected List<UserizedEvent> getChangeExceptions(UserizedFolder folder, int objectID) throws OXException {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
@@ -300,37 +302,51 @@ public class CalendarReader {
         /*
          * perform search & userize the results
          */
-        List<Event> events = storage.searchEvents(searchTerm, null, fields);
+        List<Event> events = storage.searchEvents(searchTerm, null, getFields(session));
         return userize(events, folder);
     }
 
-    protected List<UserizedEvent> readEventsInFolder(UserizedFolder folder, boolean deleted, Date from, Date until, Date updatedSince, SortOptions sortOptions, EventField[] fields) throws OXException {
+    protected List<UserizedEvent> readEventsInFolder(UserizedFolder folder, boolean deleted, Date updatedSince) throws OXException {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
         /*
          * construct search term
          */
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(folder));
         appendCommonTerms(searchTerm, from, until, updatedSince);
         /*
          * perform search & userize the results
          */
-        List<Event> events = deleted ? storage.searchDeletedEvents(searchTerm, sortOptions, fields) : storage.searchEvents(searchTerm, sortOptions, fields);
+        List<Event> events;
+        if (deleted) {
+            events = storage.searchDeletedEvents(searchTerm, new SortOptions(session), getFields(session));
+        } else {
+            events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session));
+        }
         return userize(events, folder);
     }
 
-    protected List<UserizedEvent> readEventsOfUser(int userID, boolean deleted, Date from, Date until, Date updatedSince, SortOptions sortOptions, EventField[] fields) throws OXException {
+    protected List<UserizedEvent> readEventsOfUser(int userID, boolean deleted, Date updatedSince) throws OXException {
         /*
          * construct search term
          */
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(userID)));
         appendCommonTerms(searchTerm, from, until, updatedSince);
         /*
          * perform search & userize the results for the current session's user
          */
-        List<Event> events = deleted ? storage.searchDeletedEvents(searchTerm, sortOptions, fields) : storage.searchEvents(searchTerm, sortOptions, fields);
+        List<Event> events;
+        if (deleted) {
+            events = storage.searchDeletedEvents(searchTerm, new SortOptions(session), getFields(session));
+        } else {
+            events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session));
+        }
         return userize(events, session.getUser().getId());
     }
 

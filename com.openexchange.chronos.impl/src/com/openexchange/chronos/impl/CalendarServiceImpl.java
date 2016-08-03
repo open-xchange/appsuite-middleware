@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.CalendarUtils.getFields;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,9 +56,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
-import com.openexchange.chronos.SortOptions;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.exception.OXException;
 
@@ -80,12 +77,12 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public boolean[] hasEventsBetween(CalendarSession session, Date from, Date until) throws OXException {
-        return new CalendarReader(session).hasEventsBetween(session.getUser().getId(), from, until, CalendarUtils.getTimeZone(session));
+        return new CalendarReader(session).hasEventsBetween(session.getUser().getId(), from, until);
     }
 
     @Override
     public List<UserizedEvent> getChangeExceptions(CalendarSession session, int folderID, int objectID) throws OXException {
-        return new CalendarReader(session).getChangeExceptions(folderID, objectID, getFields(session));
+        return new CalendarReader(session).getChangeExceptions(folderID, objectID);
     }
 
     @Override
@@ -95,65 +92,52 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<UserizedEvent> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException {
-        return new CalendarReader(session).searchEvents(folderIDs, pattern, new SortOptions(session), getFields(session));
+        return new CalendarReader(session).searchEvents(folderIDs, pattern);
     }
 
     @Override
     public UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException {
-        return new CalendarReader(session).readEvent(folderID, objectID, getFields(session));
+        return new CalendarReader(session).readEvent(folderID, objectID);
     }
 
     @Override
     public List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException {
-        EventField[] fields = getFields(session);
         List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
         CalendarReader reader = new CalendarReader(session);
         for (EventID eventID : eventIDs) {
-            events.add(reader.readEvent(eventID, fields));
+            events.add(reader.readEvent(eventID));
         }
         return events;
     }
 
     @Override
     public List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException {
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return new CalendarReader(session).readEventsInFolder(folderID, from, until, updatedSince, new SortOptions(session), getFields(session));
+        return new CalendarReader(session).readEventsInFolder(folderID, updatedSince);
     }
 
     @Override
     public List<UserizedEvent> getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException {
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), from, until, updatedSince, new SortOptions(session), getFields(session));
+        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), updatedSince);
     }
 
     @Override
     public List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, int folderID, Date deletedSince) throws OXException {
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return new CalendarReader(session).readEventsInFolder(folderID, from, until, deletedSince, new SortOptions(session), getFields(session));
+        return new CalendarReader(session).readEventsInFolder(folderID, deletedSince);
     }
 
     @Override
     public List<UserizedEvent> getDeletedEventsOfUser(CalendarSession session, Date deletedSince) throws OXException {
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return new CalendarReader(session).readDeletedEventsOfUser(session.getUser().getId(), from, until, deletedSince, new SortOptions(session), getFields(session));
+        return new CalendarReader(session).readDeletedEventsOfUser(session.getUser().getId(), deletedSince);
     }
 
     @Override
     public List<UserizedEvent> getEventsInFolder(CalendarSession session, int folderID) throws OXException {
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return new CalendarReader(session).readEventsInFolder(folderID, from, until, null, new SortOptions(session), getFields(session));
+        return new CalendarReader(session).readEventsInFolder(folderID, null);
     }
 
     @Override
     public List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException {
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), from, until, null, new SortOptions(session), getFields(session));
+        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), null);
     }
 
     @Override
