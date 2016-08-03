@@ -985,19 +985,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             if (Strings.isEmpty(pattern) || pattern.equals("*")) {
                 // Return everything
-                try {
-                    return getAllFiles(folderId, true);
-                } catch (ListFolderErrorException e) {
-                    throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
-                }
+                return getAllFiles(folderId, true);
             } else {
                 // Search
-                try {
-                    return fireSearch(folderId, pattern, includeSubfolders);
-                } catch (SearchErrorException e) {
-                    throw DropboxExceptionHandler.handleSearchErrorException(e, folderId, pattern);
-                }
+                return fireSearch(folderId, pattern, includeSubfolders);
             }
+        } catch (SearchErrorException e) {
+            throw DropboxExceptionHandler.handleSearchErrorException(e, folderId, pattern);
+        } catch (ListFolderErrorException e) {
+            throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
