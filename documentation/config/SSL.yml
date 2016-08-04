@@ -74,7 +74,7 @@ array:
   - data:
       Key: com.openexchange.net.ssl.whitelist
       Description: >
-        Defines a comma separated list of hosts certificates shouldn't be checked for validity.  
+        Defines a comma separated list of hosts certificates shouldn't be checked for validity. The list can contain wildcards and ip ranges. In addition it is possible to define a list by host name, IPv4 or IPv6 address. An incoming host name will not be checked against its IP address, for instance connecting against 'imap.gmail.com' will be possible if '*.gmail.com' is whitelisted but adding only the corresponding IP address entry '64.233.167.108' as whitelisted won't work.   
       Default: 127.0.0.1-127.255.255.255,localhost
       Version: 7.8.3
       Reloadable: true
