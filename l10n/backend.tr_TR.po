@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.tr_TR\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-04 10:40+0000\n"
+"POT-Creation-Date: 2016-08-04 07:51+0000\n"
 "PO-Revision-Date: 2015-05-29 13:25+0000\n"
 "Last-Translator: resellerclub <ameya.d@directi.com>\n"
 "Language-Team: <de@li.org>\n"
@@ -4046,6 +4046,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:70
 msgid "Password was not changed."
 msgstr "Şifre değiştirilemedi. "
+
+#. The topic(s) of interest is/are invalid
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pns/src/com/openexchange/pns/PushExceptionMessages.java:63
+msgid "One or more specified topics are invalid."
+msgstr ""
 
 #. *
 #. * User %1$s has no mail module access due to user configuration
