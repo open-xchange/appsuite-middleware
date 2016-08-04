@@ -105,6 +105,16 @@ public final class ResponseWriter {
      * A set of reserved identifiers.
      */
     private static final Set<String> RESERVED_IDENTIFIERS = ResponseFields.RESERVED_IDENTIFIERS;
+    
+    /**
+     * The empty JSON array.
+     */
+    private static final JSONArray EMPTY_ARRAY = new JSONArray(0);
+    
+    /**
+     * The empty string for the "error_desc" field, which is supposed to provide the rather technical error description.
+     */
+    private static final String EMPTY_ERROR_DESC = OXExceptionConstants.EMPTY_MSG;
 
     private static volatile Locale defaultLocale;
     /**
@@ -506,27 +516,9 @@ public final class ResponseWriter {
         }
         json.put(properties.errorKey, exception.getDisplayMessage(l));
         /*
-         * Put argument JSON array for compatibility reasons
+         * Keep "error_params" field for compatibility reasons
          */
-        {
-            Object[] args = exception.getLogArgs();
-            if ((null == args) || (0 == args.length)) {
-                args = exception.getDisplayArgs();
-            }
-            // For compatibility
-            if ((null == args) || (0 == args.length)) {
-                json.put(ERROR_PARAMS, new JSONArray(0));
-            } else {
-                JSONArray jArgs = new JSONArray(args.length);
-                for (int i = 0; i < args.length; i++) {
-                    Object obj = args[i];
-                    if (obj != null) {
-                        jArgs.put(obj instanceof Localizable ? obj.toString() : obj);
-                    }
-                }
-                json.put(ERROR_PARAMS, jArgs);
-            }
-        }
+        json.put(ERROR_PARAMS, EMPTY_ARRAY);
         /*
          * Categories
          */
@@ -544,7 +536,7 @@ public final class ResponseWriter {
             } else {
                 if (size <= 0) {
                     // Empty JSON array
-                    json.put(ERROR_CATEGORIES, new JSONArray(0));
+                    json.put(ERROR_CATEGORIES, EMPTY_ARRAY);
                 } else {
                     JSONArray jArray = new JSONArray(size);
                     for (Category category : categories) {
@@ -564,7 +556,7 @@ public final class ResponseWriter {
          */
         json.put(ERROR_CODE, exception.getErrorCode());
         json.put(ERROR_ID, exception.getExceptionId());
-        json.put(ERROR_DESC, exception.getSoleMessage());
+        json.put(ERROR_DESC, EMPTY_ERROR_DESC);
         /*
          * Problematics
          */
@@ -851,26 +843,10 @@ public final class ResponseWriter {
      */
     public static void writeException(final OXException exc, final JSONWriter writer, final Locale locale, final boolean includeStackTraceOnError) throws JSONException {
         writer.key(ERROR).value(exc.getDisplayMessage(locale));
-        /*
-         * Put argument JSON array for compatibility reasons
-         */
-        {
-            Object[] args = exc.getLogArgs();
-            if ((null == args) || (0 == args.length)) {
-                args = exc.getDisplayArgs();
-            }
-            // For compatibility
-            if ((null == args) || (0 == args.length)) {
-                writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray(0));
-            } else {
-                final JSONArray jArgs = new JSONArray(args.length);
-                for (int i = 0; i < args.length; i++) {
-                    Object obj = args[i];
-                    jArgs.put(obj instanceof Localizable ? obj.toString() : obj);
-                }
-                writer.key(ResponseFields.ERROR_PARAMS).value(jArgs);
-            }
-        }
+        
+        // Keep "error_params" field for compatibility reasons
+        writer.key(ResponseFields.ERROR_PARAMS).value(EMPTY_ARRAY);
+        
         {
             List<Category> categories = exc.getCategories();
             int size = categories.size();
@@ -906,7 +882,7 @@ public final class ResponseWriter {
         }
         writer.key(ERROR_CODE).value(exc.getErrorCode());
         writer.key(ERROR_ID).value(exc.getExceptionId());
-        writer.key(ERROR_DESC).value(exc.getSoleMessage());
+        writer.key(ERROR_DESC).value(EMPTY_ERROR_DESC);
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
         if (includeArguments()) {

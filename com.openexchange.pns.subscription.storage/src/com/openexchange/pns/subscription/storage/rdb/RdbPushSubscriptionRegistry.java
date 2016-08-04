@@ -333,11 +333,12 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         int contextId = subscription.getContextId();
         Connection con = databaseService.getWritable(contextId);
         boolean rollback = false;
+        boolean deleted = false;
         try {
             Databases.startTransaction(con);
             rollback = true;
 
-            boolean deleted = unregisterSubscription(subscription, con);
+            deleted = unregisterSubscription(subscription, con);
 
             con.commit();
             rollback = false;
@@ -350,7 +351,11 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            databaseService.backWritable(contextId, con);
+            if (deleted) {
+                databaseService.backWritable(contextId, con);
+            } else {
+                databaseService.backWritableAfterReading(contextId, con);
+            }
         }
     }
 
