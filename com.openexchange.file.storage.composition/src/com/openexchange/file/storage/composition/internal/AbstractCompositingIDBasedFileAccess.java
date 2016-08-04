@@ -1795,7 +1795,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     private static String getFileNameFrom(File file, FileStorageFileAccess fileAccess) throws OXException {
         String fileName = file.getFileName();
         if (Strings.isEmpty(fileName)) {
-            fileName = fileAccess.getFileMetadata(file.getFolderId(), file.getId(), FileStorageFileAccess.CURRENT_VERSION).getFileName();
+            FileID fileId = new FileID(file.getId());
+            fileName = fileAccess.getFileMetadata(fileId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).getFileName();
         }
         return fileName;
     }
