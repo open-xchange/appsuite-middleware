@@ -41,37 +41,4 @@
       <sha1>07cac950b5752e22fd266f5eb2365bf75c7ef22b</sha1>
       <cpe>cpe:/a:apple:imageio:3.2.1</cpe>
    </suppress>
-   <!-- Swagger is only used to generate documentation -->
-   <suppress>
-      <notes><![CDATA[
-         file name: swagger-codegen-cli-2.1.6.jar
-         ]]>
-      </notes>
-      <sha1>1b67736fdc00d4484b46656ed9f7f9ca8bca2fd0</sha1>
-      <cpe>cpe:/a:fasterxml:jackson:2.4.5</cpe>
-   </suppress>
-   <suppress>
-      <notes><![CDATA[
-         file name: swagger-codegen-cli-2.1.6.jar
-         ]]>
-      </notes>
-      <sha1>1b67736fdc00d4484b46656ed9f7f9ca8bca2fd0</sha1>
-      <cpe>cpe:/a:git:git:0.7</cpe>
-   </suppress>
-   <suppress>
-      <notes><![CDATA[
-         file name: swagger-codegen-cli-2.1.6.jar
-         ]]>
-      </notes>
-      <sha1>1b67736fdc00d4484b46656ed9f7f9ca8bca2fd0</sha1>
-      <cpe>cpe:/a:sun:javamail:1.4.3</cpe>
-   </suppress>
-   <suppress>
-      <notes><![CDATA[
-         file name: swagger-codegen-cli-2.1.6.jar
-         ]]>
-      </notes>
-      <sha1>1b67736fdc00d4484b46656ed9f7f9ca8bca2fd0</sha1>
-      <cpe>cpe:/a:apache:httpclient:4.3.3</cpe>
-   </suppress>
 </suppressions>

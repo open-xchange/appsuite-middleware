@@ -1,9 +1,0 @@
-{
-	"modelPackage": "com.openexchange.clientapi.drive.models",
-	"apiPackage": "com.openexchange.clientapi.drive",
-	"invokerPackage": "com.openexchange.clientapi.drive.invoker",
-	"groupId": "com.openexchange.clientapi.drive",
-	"artifactId": "OXDriveApi",
-	"artifactVersion": "0.0.1",
-	"serializableModel": false
-}
