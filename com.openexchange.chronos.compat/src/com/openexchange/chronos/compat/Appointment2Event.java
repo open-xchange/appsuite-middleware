@@ -56,7 +56,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.java.Strings;
 
@@ -97,15 +97,10 @@ public class Appointment2Event {
      * Gets the time transparency appropriate for the supplied "shown as" value.
      *
      * @param confirm The legacy "shown as" constant
-     * @return The time transparency, defaulting to {@value TimeTransparency#OPAQUE} if not mappable
+     * @return The time transparency, defaulting to {@value Transp#OPAQUE} if not mappable
      */
-    public static TimeTransparency getTransparency(int shownAs) {
-        switch (shownAs) {
-            case 4: // com.openexchange.groupware.container.Appointment.FREE
-                return TimeTransparency.TRANSPARENT;
-            default:
-                return TimeTransparency.OPAQUE;
-        }
+    public static Transp getTransparency(int shownAs) {
+        return ShownAsTransparency.getTransparency(shownAs);
     }
 
     /**

@@ -530,6 +530,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the event falls into the time range, <code>false</code>, otherwise
      */
     static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
+        // TODO floating events that are not "all-day"
         Date startDate = event.isAllDay() ? getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
         Date endDate = event.isAllDay() ? getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
         return (null == until || startDate.before(until)) && (null == from || endDate.after(from));

@@ -50,23 +50,25 @@
 package com.openexchange.chronos;
 
 /**
- * {@link TimeTransparency}
+ * {@link Transp}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.2.7">RFC 5545, section 3.8.2.7</a>
  */
-public enum TimeTransparency {
+public interface Transp {
+
+    /** Constant to indicate that the event blocks or is opaque on busy time searches. */
+    static final String OPAQUE = "OPAQUE";
+
+    /** Constant to indicate that the event is transparent on busy time searches. */
+    static final String TRANSPARENT = "TRANSPARENT";
 
     /**
-     * Blocks or opaque on busy time searches.
+     * Gets the value, i.e. either {@link Transp#OPAQUE} or {@link Transp#TRANSPARENT}.
+     *
+     * @return The transparency value
      */
-    OPAQUE,
+    String getValue();
 
-    /**
-     * Transparent on busy time searches.
-     */
-    TRANSPARENT,
-
-    ;
 }

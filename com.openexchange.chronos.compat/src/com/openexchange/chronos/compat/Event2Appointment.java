@@ -63,7 +63,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.java.Strings;
@@ -112,9 +112,12 @@ public class Event2Appointment {
      * @param transparency The time transparency
      * @return The legacy "shown as" constant
      */
-    public static int getShownAs(TimeTransparency transparency) {
-        switch (transparency) {
-            case TRANSPARENT:
+    public static int getShownAs(Transp transparency) {
+        if (ShownAsTransparency.class.isInstance(transparency)) {
+            return ((ShownAsTransparency) transparency).getShownAs();
+        }
+        switch (transparency.getValue()) {
+            case Transp.TRANSPARENT:
                 return 4; // com.openexchange.groupware.container.Appointment.FREE
             default:
                 return 1; // com.openexchange.groupware.container.Appointment.RESERVED

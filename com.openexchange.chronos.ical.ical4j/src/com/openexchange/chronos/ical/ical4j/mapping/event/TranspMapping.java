@@ -50,17 +50,15 @@
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
 import java.util.List;
-
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Transp;
-
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.Transp;
 
 /**
  * {@link TranspMapping}
@@ -84,7 +82,7 @@ public class TranspMapping extends ICalTextMapping<VEvent, Event> {
 
 	@Override
 	protected void setValue(Event object, String value) {
-		object.setTransp(Enums.parse(TimeTransparency.class, value, null));
+        object.setTransp(Enums.parse(TimeTransparency.class, value, null));
 	}
 
 	@Override
@@ -100,5 +98,5 @@ public class TranspMapping extends ICalTextMapping<VEvent, Event> {
 			component.getProperties().add(new Transp(value.toUpperCase()));
 		}
 	}
-	
+
 }

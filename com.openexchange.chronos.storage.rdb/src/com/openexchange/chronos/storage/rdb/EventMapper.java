@@ -66,7 +66,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.exception.OXException;
@@ -574,7 +574,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                TimeTransparency value = event.getTransp();
+                Transp value = event.getTransp();
                 return null == value ? null : I(Event2Appointment.getShownAs(value));
             }
 

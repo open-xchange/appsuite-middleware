@@ -84,7 +84,7 @@ public class Event {
     private Date endDate;
     private String endTimezone;
     private boolean allDay;
-    private TimeTransparency transp;
+    private Transp transp;
 
     private int recurrenceId;
     private String recurrenceRule;
@@ -817,7 +817,7 @@ public class Event {
      *
      * @return The time transparency
      */
-    public TimeTransparency getTransp() {
+    public Transp getTransp() {
         return transp;
     }
 
@@ -826,7 +826,7 @@ public class Event {
      *
      * @param value The time transparency to set
      */
-    public void setTransp(TimeTransparency value) {
+    public void setTransp(Transp value) {
         transp = value;
         setFields.add(EventField.TRANSP);
     }

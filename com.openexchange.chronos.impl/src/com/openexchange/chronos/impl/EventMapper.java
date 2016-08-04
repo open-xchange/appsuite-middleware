@@ -63,7 +63,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Transp;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
@@ -527,7 +527,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeAllDay();
             }
         });
-        mappings.put(EventField.TRANSP, new DefaultMapping<TimeTransparency, Event>() {
+        mappings.put(EventField.TRANSP, new DefaultMapping<Transp, Event>() {
 
             @Override
             public boolean isSet(Event object) {
@@ -535,12 +535,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, TimeTransparency value) throws OXException {
+            public void set(Event object, Transp value) throws OXException {
                 object.setTransp(value);
             }
 
             @Override
-            public TimeTransparency get(Event object) {
+            public Transp get(Event object) {
                 return object.getTransp();
             }
 
