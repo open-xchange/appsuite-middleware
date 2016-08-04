@@ -79,6 +79,10 @@ public enum WebSocketExceptionCodes implements DisplayableOXExceptionCode {
      * A JSON error occurred: %1$s
      */
     JSON_ERROR("A JSON error occurred: %1$s", null, Category.CATEGORY_ERROR, 4),
+    /**
+     * Invalid path filter expression: %1$s
+     */
+    INVALID_PATH_FILTER("Invalid path filter expression: %1$s", null, Category.CATEGORY_ERROR, 5),
 
     ;
 

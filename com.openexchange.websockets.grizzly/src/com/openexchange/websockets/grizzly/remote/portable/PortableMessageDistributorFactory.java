@@ -59,6 +59,13 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
  */
 public class PortableMessageDistributorFactory extends AbstractCustomPortableFactory {
 
+    /**
+     * Initializes a new {@link PortableMessageDistributorFactory}.
+     */
+    public PortableMessageDistributorFactory() {
+        super();
+    }
+
     @Override
     public CustomPortable create() {
         return new PortableMessageDistributor();

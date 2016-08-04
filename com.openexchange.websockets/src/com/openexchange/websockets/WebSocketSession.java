@@ -52,7 +52,7 @@ package com.openexchange.websockets;
 import java.util.Set;
 
 /**
- * {@link WebSocketSession} - A session associated with a Web Socket.
+ * {@link WebSocketSession} - A session associated with a Web Socket to store states.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
@@ -80,7 +80,7 @@ public interface WebSocketSession {
      * <p>
      * If an object of the same name is already bound to the session, the object is replaced.
      * <p>
-     * If the value passed in is null, this has the same effect as calling <code>removeAttribute()<code>.
+     * If the value passed in is <code>null</code>, this has the same effect as calling <code>removeAttribute()</code>.
      *
      *
      * @param name The name to which the object is bound

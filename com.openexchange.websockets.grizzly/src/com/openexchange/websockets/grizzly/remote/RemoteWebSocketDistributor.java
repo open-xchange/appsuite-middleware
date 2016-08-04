@@ -92,12 +92,13 @@ public class RemoteWebSocketDistributor {
      * Sends specified text message to all remotely known end-points for given user.
      *
      * @param message The text message to distribute
+     * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param async Whether to send asynchronously or blocking
      * @throws OXException If remote distribution fails
      */
-    public void sendRemote(String message, int userId, int contextId, boolean async) throws OXException {
+    public void sendRemote(String message, String pathFilter, int userId, int contextId, boolean async) throws OXException {
         HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
         if (null == hzInstance) {
             LOG.warn("Missing Hazelcast instance. Failed to remotely distribute message to user {} in context {}", userId, contextId);
@@ -114,7 +115,7 @@ public class RemoteWebSocketDistributor {
 
         if (!otherMembers.isEmpty()) {
             IExecutorService executor = hzInstance.getExecutorService("default");
-            Map<Member, Future<Void>> futureMap = executor.submitToMembers(new PortableMessageDistributor(message, userId, contextId, async), otherMembers);
+            Map<Member, Future<Void>> futureMap = executor.submitToMembers(new PortableMessageDistributor(message, pathFilter, userId, contextId, async), otherMembers);
 
             if (false == async) {
                 // Wait for completion of each submitted task

@@ -83,6 +83,76 @@ public interface WebSocketService {
      */
     MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException;
 
-    // void registerListener(int userId, int contextId) throws OXException;
+    // -------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Sends a text message to those end-points of the denoted user having its {@link WebSocket#getPath() path} starting with given filter.
+     * <p>
+     * This method blocks until all of the message has been transmitted.
+     *
+     * <pre>
+     * Examples:
+     *   Filter "/websockets/push"
+     *    matches:
+     *     "/websockets/push"
+     *    does not match:
+     *     "/websockets/push/foo"
+     *     "/websockets/pushother"
+     *     "/websockets/"
+     *
+     *   Filter "/websockets/push/*"
+     *    matches:
+     *     "/websockets/push"
+     *     "/websockets/push/foo"
+     *    does not match:
+     *     "/websockets/pushother"
+     *     "/websockets/"
+     *
+     *   Filter "*"
+     *    matches all
+     * </pre>
+     *
+     * @param message The message to be sent
+     * @param pathFilter The path to filter by (e.g. <code>"/websockets/push"</code>); if <code>null</code> it is the same behavior as {@link #sendMessage(String, int, int)}
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If there is a problem delivering the message.
+     */
+    void sendMessage(String message, String pathFilter, int userId, int contextId) throws OXException;
+
+    /**
+     * Initiates the asynchronous transmission of a text message to those end-points of the denoted user having its {@link WebSocket#getPath() path} starting with given filter.
+     * <p>
+     * This method returns before the message is transmitted.
+     *
+     * <pre>
+     * Examples:
+     *   Filter "/websockets/push"
+     *    matches:
+     *     "/websockets/push"
+     *    does not match:
+     *     "/websockets/push/foo"
+     *     "/websockets/pushother"
+     *     "/websockets/"
+     *
+     *   Filter "/websockets/push/*"
+     *    matches:
+     *     "/websockets/push"
+     *     "/websockets/push/foo"
+     *    does not match:
+     *     "/websockets/pushother"
+     *     "/websockets/"
+     *
+     *   Filter "*"
+     *    matches all
+     * </pre>
+     *
+     * @param message The message being sent.
+     * @param pathFilter The path to filter by (e.g. <code>"/websockets/push"</code>); if <code>null</code> it is the same behavior as {@link #sendMessageAsync(String, int, int)}
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The handler which will be notified of progress.
+     */
+    MessageHandler sendMessageAsync(String message, String pathFilter, int userId, int contextId) throws OXException;
 
 }

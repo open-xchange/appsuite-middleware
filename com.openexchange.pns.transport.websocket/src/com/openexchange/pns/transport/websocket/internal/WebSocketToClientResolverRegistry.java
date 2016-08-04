@@ -47,71 +47,24 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.osgi;
+package com.openexchange.pns.transport.websocket.internal;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.osgi.framework.BundleContext;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
-import com.openexchange.pns.transport.websocket.internal.WebSocketToClientResolverRegistry;
 
 /**
- * {@link WebSocketToClientResolverTracker}
+ * {@link WebSocketToClientResolverRegistry}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketToClientResolverTracker extends RankingAwareNearRegistryServiceTracker<WebSocketToClientResolver> implements WebSocketToClientResolverRegistry {
-
-    private final ConcurrentMap<String, Boolean> supportedClients;
+public interface WebSocketToClientResolverRegistry extends Iterable<WebSocketToClientResolver> {
 
     /**
-     * Initializes a new {@link WebSocketToClientResolverTracker}.
+     * Gets the set containing the identifiers of all supported clients.
+     *
+     * @return The identifiers of all supported clients
      */
-    public WebSocketToClientResolverTracker(BundleContext context) {
-        super(context, WebSocketToClientResolver.class, 0);
-        supportedClients = new ConcurrentHashMap<>(16, 0.9F, 1);
-    }
-
-    @Override
-    protected boolean onServiceAppeared(WebSocketToClientResolver resolver) {
-        List<String> toRemove = new LinkedList<>();
-        boolean invalid = true;
-        try {
-            Set<String> clients = resolver.getSupportedClients();
-            for (String clientToAdd : clients) {
-                if (null != supportedClients.putIfAbsent(clientToAdd, Boolean.TRUE)) {
-                    // There is already such a client...
-                    return false;
-                }
-            }
-            invalid = false;
-            return true;
-        } finally {
-            if (invalid) {
-                for (String clientToRemove : toRemove) {
-                    supportedClients.remove(clientToRemove);
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void onServiceRemoved(WebSocketToClientResolver resolver) {
-        Set<String> clients = resolver.getSupportedClients();
-        for (String clientToRemove : clients) {
-            supportedClients.remove(clientToRemove);
-        }
-    }
-
-    @Override
-    public Set<String> getAllSupportedClients() {
-        return Collections.unmodifiableSet(supportedClients.keySet());
-    }
+    Set<String> getAllSupportedClients();
 
 }

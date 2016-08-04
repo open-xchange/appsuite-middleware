@@ -96,6 +96,7 @@ import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.user.UserService;
 import com.openexchange.websockets.ConnectionId;
+import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.http.GrizzlyWebSocketHttpServletRequest;
 
 /**
@@ -153,11 +154,12 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * Asynchronously sends specified text message to all locally managed Web Socket connections.
      *
      * @param message The text message to send
+     * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public Future<Void> sendToUserAsync(String message, int userId, int contextId) {
-        SendToUserTask task = new SendToUserTask(message, userId, contextId, this);
+    public Future<Void> sendToUserAsync(String message, String pathFilter, int userId, int contextId) {
+        SendToUserTask task = new SendToUserTask(message, pathFilter, userId, contextId, this);
         return ThreadPools.submitElseExecute(task);
     }
 
@@ -165,14 +167,17 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * Sends specified text message to all locally managed Web Socket connections.
      *
      * @param message The text message to send
+     * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public void sendToUser(String message, int userId, int contextId) {
+    public void sendToUser(String message, String pathFilter, int userId, int contextId) {
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         if (null != userSockets) {
             for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
-                sessionBoundSocket.send(message);
+                if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
+                    sessionBoundSocket.send(message);
+                }
             }
         }
     }
@@ -261,7 +266,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
             // Apply initial listeners
             WebSocketListener[] effectiveListeners;
-            {            
+            {
                 List<WebSocketListener> listenersToUse = new LinkedList<>();
                 if (null != listeners) {
                     for (WebSocketListener listener : listeners) {
