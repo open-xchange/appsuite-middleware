@@ -461,7 +461,7 @@ public final class FolderWriter {
                     } else {
                         ja = new JSONArray();
                         for (final Permission permission : obj) {
-                            final JSONObject jo = new JSONObject();
+                            final JSONObject jo = new JSONObject(4);
                             jo.put(FolderField.BITS.getName(), Permissions.createPermissionBits(permission));
                             jo.put(FolderField.ENTITY.getName(), permission.getEntity());
                             jo.put(FolderField.GROUP.getName(), permission.isGroup());
