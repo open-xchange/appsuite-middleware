@@ -54,8 +54,10 @@ import static com.openexchange.chronos.impl.CalendarUtils.appendCommonTerms;
 import static com.openexchange.chronos.impl.CalendarUtils.find;
 import static com.openexchange.chronos.impl.CalendarUtils.getFields;
 import static com.openexchange.chronos.impl.CalendarUtils.getFolderIdTerm;
+import static com.openexchange.chronos.impl.CalendarUtils.getFrom;
 import static com.openexchange.chronos.impl.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getTimeZone;
+import static com.openexchange.chronos.impl.CalendarUtils.getUntil;
 import static com.openexchange.chronos.impl.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.impl.CalendarUtils.isExcluded;
@@ -67,19 +69,22 @@ import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
 import static com.openexchange.chronos.impl.Check.requireFolderPermission;
 import static com.openexchange.chronos.impl.Check.requireReadPermission;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
-import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarStorage;
@@ -90,6 +95,7 @@ import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceService;
 import com.openexchange.chronos.SortOptions;
+import com.openexchange.chronos.SortOrder;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.exception.OXException;
@@ -107,11 +113,11 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -149,6 +155,25 @@ public class CalendarReader {
         this.storage = storage;
     }
 
+    public long getSequenceNumber(int folderID) throws OXException {
+        UserizedFolder folder = getFolder(folderID);
+        requireCalendarContentType(folder);
+        requireFolderPermission(folder, Permission.READ_FOLDER);
+        Date lastModified = folder.getLastModifiedUTC();
+        SearchTerm<?> searchTerm = getFolderIdTerm(folder);
+        SortOptions sortOptions = new SortOptions().addOrder(SortOrder.DESC(EventField.LAST_MODIFIED)).setLimits(0, 1);
+        EventField[] fields = { EventField.LAST_MODIFIED };
+        List<Event> events = storage.searchEvents(searchTerm, sortOptions, fields);
+        if (0 < events.size() && events.get(0).getLastModified().after(lastModified)) {
+            lastModified = events.get(0).getLastModified();
+        }
+        List<Event> deletedEvents = storage.searchDeletedEvents(searchTerm, sortOptions, fields);
+        if (0 < deletedEvents.size() && deletedEvents.get(0).getLastModified().after(lastModified)) {
+            lastModified = deletedEvents.get(0).getLastModified();
+        }
+        return lastModified.getTime();
+    }
+
     public boolean[] hasEventsBetween(int userID, Date from, Date until) throws OXException {
         TimeZone timeZone = getTimeZone(session);
         List<Boolean> hasEventsList = new ArrayList<Boolean>();
@@ -171,8 +196,8 @@ public class CalendarReader {
                 if (null == attendee || ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
                     continue; // skip
                 }
-                if (isSeriesMaster(event) && isResolveOccurrences(session)) {
-                    Iterator<Event> occurrences = resolveOccurrences(event);
+                if (isSeriesMaster(event)) {
+                    Iterator<Event> occurrences = resolveOccurrences(event, minimumEndTime, maximumStartTime);
                     while (occurrences.hasNext() && hasEvents == false) {
                         hasEvents |= isInRange(occurrences.next(), minimumEndTime, maximumStartTime, timeZone);
                     }
@@ -259,12 +284,53 @@ public class CalendarReader {
         return readEvent(getFolder(folderID), objectID);
     }
 
+    public List<UserizedEvent> readEvents(List<EventID> eventIDs) throws OXException {
+        List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
+        Map<UserizedFolder, List<EventID>> idsPerFolder = getIdsPerFolder(eventIDs);
+        for (Map.Entry<UserizedFolder, List<EventID>> entry : idsPerFolder.entrySet()) {
+            events.addAll(readEventsInFolder(entry.getKey(), entry.getValue()));
+        }
+        List<UserizedEvent> orderedEvents = new ArrayList<UserizedEvent>(eventIDs.size());
+        for (EventID eventID : eventIDs) {
+            UserizedEvent event = find(events, eventID.getFolderID(), eventID.getObjectID());
+            if (null == event) {
+                throw OXException.notFound(eventID.toString()); //TODO
+            }
+            //TODO: specific occurrence?
+            orderedEvents.add(event);
+        }
+        return orderedEvents;
+    }
+
+    private List<UserizedEvent> readEventsInFolder(UserizedFolder folder, List<EventID> eventIDs) throws OXException {
+        Set<Integer> objectIDs = new HashSet<Integer>(eventIDs.size());
+        int folderID = Integer.parseInt(folder.getID());
+        for (EventID eventID : eventIDs) {
+            if (folderID == eventID.getFolderID()) {
+                objectIDs.add(I(eventID.getObjectID()));
+            }
+        }
+        return readEventsInFolder(folder, I2i(objectIDs), false, null);
+    }
+
+    private Map<UserizedFolder, List<EventID>> getIdsPerFolder(List<EventID> eventIDs) throws OXException {
+        Map<Integer, List<EventID>> idsPerFolderId = new HashMap<Integer, List<EventID>>();
+        for (EventID eventID : eventIDs) {
+            com.openexchange.tools.arrays.Collections.put(idsPerFolderId, I(eventID.getFolderID()), eventID);
+        }
+        Map<UserizedFolder, List<EventID>> idsPerFolder = new HashMap<UserizedFolder, List<EventID>>(idsPerFolderId.size());
+        for (Map.Entry<Integer, List<EventID>> entry : idsPerFolderId.entrySet()) {
+            idsPerFolder.put(getFolder(entry.getKey().intValue()), entry.getValue());
+        }
+        return idsPerFolder;
+    }
+
     public List<UserizedEvent> readEventsInFolder(int folderID, Date updatedSince) throws OXException {
-        return readEventsInFolder(getFolder(folderID), false, updatedSince);
+        return readEventsInFolder(getFolder(folderID), null, false, updatedSince);
     }
 
     public List<UserizedEvent> readDeletedEventsInFolder(int folderID, Date deletedSince) throws OXException {
-        return readEventsInFolder(getFolder(folderID), true, deletedSince);
+        return readEventsInFolder(getFolder(folderID), null, true, deletedSince);
     }
 
     public List<UserizedEvent> readEventsOfUser(int userID, Date updatedSince) throws OXException {
@@ -306,17 +372,28 @@ public class CalendarReader {
         return userize(events, folder);
     }
 
-    protected List<UserizedEvent> readEventsInFolder(UserizedFolder folder, boolean deleted, Date updatedSince) throws OXException {
+    protected List<UserizedEvent> readEventsInFolder(UserizedFolder folder, int[] objectIDs, boolean deleted, Date updatedSince) throws OXException {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
         /*
          * construct search term
          */
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(folder));
-        appendCommonTerms(searchTerm, from, until, updatedSince);
+        if (null != objectIDs) {
+            if (0 == objectIDs.length) {
+                return Collections.emptyList();
+            } else if (1 == objectIDs.length) {
+                searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, I(objectIDs[0])));
+            } else {
+                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                for (int objectID : objectIDs) {
+                    orTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, I(objectID)));
+                }
+                searchTerm.addSearchTerm(orTerm);
+            }
+        }
+        appendCommonTerms(searchTerm, getFrom(session), getUntil(session), updatedSince);
         /*
          * perform search & userize the results
          */
@@ -333,11 +410,9 @@ public class CalendarReader {
         /*
          * construct search term
          */
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(userID)));
-        appendCommonTerms(searchTerm, from, until, updatedSince);
+        appendCommonTerms(searchTerm, getFrom(session), getUntil(session), updatedSince);
         /*
          * perform search & userize the results for the current session's user
          */
@@ -380,7 +455,7 @@ public class CalendarReader {
                 objectIDs.add(I(event.getId()));
             }
         }
-        return 0 < objectIDs.size() ? storage.loadAlarms(Autoboxing.I2i(objectIDs), userID) : Collections.<Integer, List<Alarm>> emptyMap();
+        return 0 < objectIDs.size() ? storage.loadAlarms(I2i(objectIDs), userID) : Collections.<Integer, List<Alarm>> emptyMap();
     }
 
     private List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder) throws OXException {
@@ -405,7 +480,7 @@ public class CalendarReader {
 
     private List<UserizedEvent> resolveOccurrences(UserizedEvent master) throws OXException {
         List<UserizedEvent> events = new ArrayList<UserizedEvent>();
-        Iterator<Event> occurrences = resolveOccurrences(master.getEvent());
+        Iterator<Event> occurrences = resolveOccurrences(master.getEvent(), getFrom(session), getUntil(session));
         while (occurrences.hasNext()) {
             Event occurrence = occurrences.next();
             if (isExcluded(occurrence, session)) {
@@ -421,9 +496,7 @@ public class CalendarReader {
         return anonymizeIfNeeded(userizedEvent);
     }
 
-    private Iterator<Event> resolveOccurrences(Event masterEvent) {
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+    private Iterator<Event> resolveOccurrences(Event masterEvent, Date from, Date until) {
         TimeZone timeZone = getTimeZone(session);
         Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
         Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);

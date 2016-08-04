@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -150,6 +151,26 @@ public class CalendarUtils {
      */
     static TimeZone getTimeZone(CalendarSession session) {
         return session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone()));
+    }
+
+    /**
+     * Extracts the "from" date used for range-queries from the parameter {@link CalendarParameters#PARAMETER_RANGE_START}.
+     *
+     * @param parameters The calendar parameters to evaluate
+     * @return The "from" date, or <code>null</code> if not set
+     */
+    static Date getFrom(CalendarParameters parameters) {
+        return parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+    }
+
+    /**
+     * Extracts the "until" date used for range-queries from the parameter {@link CalendarParameters#PARAMETER_RANGE_END}.
+     *
+     * @param parameters The calendar parameters to evaluate
+     * @return The "until" date, or <code>null</code> if not set
+     */
+    static Date getUntil(CalendarParameters parameters) {
+        return parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
     }
 
     /**
@@ -598,9 +619,7 @@ public class CalendarUtils {
             Boolean.FALSE.equals(session.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class))) {
             return true;
         }
-        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        if (false == isInRange(event, from, until, getTimeZone(session))) {
+        if (false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
             return true;
         }
         return false;
@@ -622,6 +641,25 @@ public class CalendarUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Finds a specific event identified by its folder- and object-identifier in a collection.
+     *
+     * @param events The events to search in
+     * @param folderID The identifier of the parent folder to search
+     * @param objectID The object identifier of the event to search
+     * @return The event, or <code>null</code> if not found
+     */
+    static UserizedEvent find(Collection<UserizedEvent> events, int folderID, int objectID) {
+        if (null != events) {
+            for (UserizedEvent event : events) {
+                if (event.getFolderId() == folderID && event.getEvent().getId() == objectID) {
+                    return event;
+                }
+            }
+        }
+        return null;
     }
 
     /**

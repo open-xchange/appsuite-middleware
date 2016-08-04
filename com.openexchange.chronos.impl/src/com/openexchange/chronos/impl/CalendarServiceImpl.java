@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
@@ -86,6 +85,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    public long getSequenceNumber(CalendarSession session, int folderID) throws OXException {
+        return new CalendarReader(session).getSequenceNumber(folderID);
+    }
+
+    @Override
     public int resolveByUID(CalendarSession session, String uid) throws OXException {
         return new CalendarReader(session).resolveUid(uid);
     }
@@ -102,12 +106,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException {
-        List<UserizedEvent> events = new ArrayList<UserizedEvent>(eventIDs.size());
-        CalendarReader reader = new CalendarReader(session);
-        for (EventID eventID : eventIDs) {
-            events.add(reader.readEvent(eventID));
-        }
-        return events;
+        return new CalendarReader(session).readEvents(eventIDs);
     }
 
     @Override
