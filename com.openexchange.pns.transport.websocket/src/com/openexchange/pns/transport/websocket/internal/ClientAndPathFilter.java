@@ -47,71 +47,79 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.osgi;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.osgi.framework.BundleContext;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
-import com.openexchange.pns.transport.websocket.internal.WebSocketToClientResolverRegistry;
+package com.openexchange.pns.transport.websocket.internal;
 
 /**
- * {@link WebSocketToClientResolverTracker}
+ * {@link ClientAndPathFilter} - A pair of client identifier and path filter expression.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketToClientResolverTracker extends RankingAwareNearRegistryServiceTracker<WebSocketToClientResolver> implements WebSocketToClientResolverRegistry {
+public class ClientAndPathFilter {
 
-    private final ConcurrentMap<String, Boolean> supportedClients;
+    private final String client;
+    private final String pathFilter;
 
     /**
-     * Initializes a new {@link WebSocketToClientResolverTracker}.
+     * Initializes a new {@link ClientAndPathFilter}.
      */
-    public WebSocketToClientResolverTracker(BundleContext context) {
-        super(context, WebSocketToClientResolver.class, 0);
-        supportedClients = new ConcurrentHashMap<>(16, 0.9F, 1);
+    public ClientAndPathFilter(String client, String pathFilter) {
+        super();
+        this.client = client;
+        this.pathFilter = pathFilter;
+    }
+
+    /**
+     * Gets the client identifier
+     *
+     * @return The client identifier
+     */
+    public String getClient() {
+        return client;
+    }
+
+    /**
+     * Gets the applicable path filter expression
+     *
+     * @return The path filter expression
+     */
+    public String getPathFilter() {
+        return pathFilter;
     }
 
     @Override
-    protected boolean onServiceAppeared(WebSocketToClientResolver resolver) {
-        List<String> toRemove = new LinkedList<>();
-        boolean invalid = true;
-        try {
-            Set<String> clients = resolver.getSupportedClients();
-            for (String clientToAdd : clients) {
-                if (null != supportedClients.putIfAbsent(clientToAdd, Boolean.TRUE)) {
-                    // There is already such a client...
-                    return false;
-                }
-            }
-            invalid = false;
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((client == null) ? 0 : client.hashCode());
+        result = prime * result + ((pathFilter == null) ? 0 : pathFilter.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
-        } finally {
-            if (invalid) {
-                for (String clientToRemove : toRemove) {
-                    supportedClients.remove(clientToRemove);
-                }
+        }
+        if (!(obj instanceof ClientAndPathFilter)) {
+            return false;
+        }
+        ClientAndPathFilter other = (ClientAndPathFilter) obj;
+        if (client == null) {
+            if (other.client != null) {
+                return false;
             }
+        } else if (!client.equals(other.client)) {
+            return false;
         }
-    }
-
-    @Override
-    protected void onServiceRemoved(WebSocketToClientResolver resolver) {
-        Set<String> clients = resolver.getSupportedClients();
-        for (String clientToRemove : clients) {
-            supportedClients.remove(clientToRemove);
+        if (pathFilter == null) {
+            if (other.pathFilter != null) {
+                return false;
+            }
+        } else if (!pathFilter.equals(other.pathFilter)) {
+            return false;
         }
-    }
-
-    @Override
-    public Set<String> getAllSupportedClients() {
-        return Collections.unmodifiableSet(supportedClients.keySet());
+        return true;
     }
 
 }

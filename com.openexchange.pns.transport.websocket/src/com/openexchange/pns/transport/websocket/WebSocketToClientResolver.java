@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.transport.websocket;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.websockets.WebSocket;
 
@@ -61,6 +62,13 @@ import com.openexchange.websockets.WebSocket;
 public interface WebSocketToClientResolver {
 
     /**
+     * Gets the set containing the identifiers of all clients that are supported by this resolver
+     *
+     * @return The supported clients
+     */
+    Set<String> getSupportedClients();
+
+    /**
      * Resolves the given open Web Socket to a client identifier that is associated with it.
      *
      * @param socket The Web Socket to resolve for
@@ -68,5 +76,14 @@ public interface WebSocketToClientResolver {
      * @throws OXException If client identifier cannot be resolved
      */
     String getClientFor(WebSocket socket) throws OXException;
+
+    /**
+     * Gets the applicable path filter expression for given client identifier.
+     *
+     * @param client The client identifier
+     * @return The path filter expression or <code>null</code>
+     * @throws OXException If path filter expression cannot be returned
+     */
+    String getPathFilterFor(String client) throws OXException;
 
 }

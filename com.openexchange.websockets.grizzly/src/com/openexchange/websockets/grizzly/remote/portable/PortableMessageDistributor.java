@@ -83,11 +83,13 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
     private static final String FIELD_USER_ID = "userId";
     private static final String FIELD_CTX_ID = "contextId";
     private static final String FIELD_MESSAGE = "message";
+    private static final String FIELD_FILTER = "filter";
     private static final String FIELD_ASYNC = "async";
 
     private int userId;
     private int contextId;
     private String message;
+    private String filter;
     private boolean async;
 
     /**
@@ -101,15 +103,17 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
      * Initializes a new {@link PortableMessageDistributor}.
      *
      * @param message The text message to distribute
+     * @param filter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param async Whether to send asynchronously or blocking
      */
-    public PortableMessageDistributor(String message, int userId, int contextId, boolean async) {
+    public PortableMessageDistributor(String message, String filter, int userId, int contextId, boolean async) {
         super();
         this.userId = userId;
         this.contextId = contextId;
         this.message = message;
+        this.filter = filter;
         this.async = async;
     }
 
@@ -118,9 +122,9 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
         GrizzlyWebSocketApplication application = APPLICATION_REFERENCE.get();
         if (null != application) {
             if (async) {
-                application.sendToUserAsync(message, userId, contextId);
+                application.sendToUserAsync(message, filter, userId, contextId);
             } else {
-                application.sendToUser(message, userId, contextId);
+                application.sendToUser(message, filter, userId, contextId);
             }
         }
         return null;
@@ -136,6 +140,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
         writer.writeInt(FIELD_CTX_ID, contextId);
         writer.writeInt(FIELD_USER_ID, userId);
         writer.writeUTF(FIELD_MESSAGE, message);
+        writer.writeUTF(FIELD_FILTER, filter);
         writer.writeBoolean(FIELD_ASYNC, async);
     }
 
@@ -144,6 +149,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
         this.contextId = reader.readInt(FIELD_CTX_ID);
         this.userId = reader.readInt(FIELD_USER_ID);
         this.message = reader.readUTF(FIELD_MESSAGE);
+        this.filter = reader.readUTF(FIELD_FILTER);
         this.async = reader.readBoolean(FIELD_ASYNC);
     }
 

@@ -63,6 +63,7 @@ public class SendToUserTask extends AbstractTask<Void> {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SendToUserTask.class);
 
     private final String message;
+    private final String pathFilter;
     private final int userId;
     private final int contextId;
     private final GrizzlyWebSocketApplication application;
@@ -71,13 +72,15 @@ public class SendToUserTask extends AbstractTask<Void> {
      * Initializes a new {@link SendToUserTask}.
      *
      * @param message The text message to send
+     * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param application The running application
      */
-    public SendToUserTask(String message, int userId, int contextId, GrizzlyWebSocketApplication application) {
+    public SendToUserTask(String message, String pathFilter, int userId, int contextId, GrizzlyWebSocketApplication application) {
         super();
         this.message = message;
+        this.pathFilter = pathFilter;
         this.userId = userId;
         this.contextId = contextId;
         this.application = application;
@@ -86,7 +89,7 @@ public class SendToUserTask extends AbstractTask<Void> {
     @Override
     public Void call() throws Exception {
         try {
-            application.sendToUser(message, userId, contextId);
+            application.sendToUser(message, pathFilter, userId, contextId);
         } catch (Exception e) {
             LOG.error("Failed to send message to user {} in context {}", userId, contextId, e);
         }

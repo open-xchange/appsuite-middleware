@@ -97,11 +97,30 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     }
 
     /**
+     * Called when a service appeared, but is not yet added.
+     *
+     * @param service The appeared service
+     * @return <code>true</code> to proceed; otherwise <code>false</code> to discard the appeared service
+     */
+    protected boolean onServiceAppeared(S service) {
+        return true;
+    }
+
+    /**
      * Called when a service gets added.
      *
      * @param service The added service
      */
     protected void onServiceAdded(S service) {
+        // Nothing
+    }
+
+    /**
+     * Called when a service disappeared, but is not yet removed.
+     *
+     * @param service The disappeared service
+     */
+    protected void onServiceDisappeared(S service) {
         // Nothing
     }
 
@@ -164,8 +183,12 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     @Override
     public synchronized S addingService(final ServiceReference<S> reference) {
         final S service = context.getService(reference);
-        final int ranking = getRanking(reference, defaultRanking);
-        final RankedService<S> rankedService = new RankedService<S>(service, ranking);
+        if (false == onServiceAppeared(service)) {
+            context.ungetService(reference);
+            return null;
+        }
+
+        final RankedService<S> rankedService = new RankedService<S>(service, getRanking(reference, defaultRanking));
         if (services.addAndSort(rankedService)) { // Append
             empty = false;
             onServiceAdded(service);
@@ -177,6 +200,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
 
     @Override
     public synchronized void removedService(final ServiceReference<S> reference, final S service) {
+        onServiceDisappeared(service);
         if (services.remove(new RankedService<S>(service, getRanking(reference, defaultRanking)))) {
             empty = services.isEmpty();
             onServiceRemoved(service);

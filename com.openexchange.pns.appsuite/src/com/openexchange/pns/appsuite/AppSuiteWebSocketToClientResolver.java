@@ -49,10 +49,13 @@
 
 package com.openexchange.pns.appsuite;
 
+import java.util.Collections;
+import java.util.Set;
 import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSockets;
 
 /**
  * {@link AppSuiteWebSocketToClientResolver}
@@ -72,11 +75,27 @@ public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResol
     @Override
     public String getClientFor(WebSocket socket) throws OXException {
         String path = socket.getPath();
-        if (null != path && path.startsWith("/websockets/push")) { // TODO: Align to expected path
+
+        String appSuitePathFilter = "/websockets/push/*";
+        if (WebSockets.matches(appSuitePathFilter, path)) { // TODO: Align to expected path
             return Client.APPSUITE_UI.getClientId();
         }
 
         return null;
+    }
+
+    @Override
+    public String getPathFilterFor(String client) throws OXException {
+        if (Client.APPSUITE_UI.getClientId().equals(client)) {
+            return  "/websockets/push/*";
+        }
+
+        return null;
+    }
+
+    @Override
+    public Set<String> getSupportedClients() {
+        return Collections.singleton(Client.APPSUITE_UI.getClientId());
     }
 
 }
