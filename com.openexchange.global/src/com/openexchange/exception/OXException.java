@@ -1347,7 +1347,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /** Drops multiple subsequent white-spaces from given message */
     private static String dropSubsequentWhitespaces(String message) {
-        if (null == message) {
+        if (null == message || message.indexOf("  ") < 0) {
             return message;
         }
         return P.matcher(message).replaceAll("$1 $2");
