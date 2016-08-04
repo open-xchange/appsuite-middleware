@@ -222,8 +222,8 @@ public final class LoginCounterTool {
                 jmxLogin = cmd.getOptionValue('l');
             }
             String jmxPassword = null;
-            if (cmd.hasOption('s')) {
-                jmxPassword = cmd.getOptionValue('s');
+            if (cmd.hasOption("password")) {
+                jmxPassword = cmd.getOptionValue("password");
             }
 
             final Map<String, Object> environment;
@@ -383,7 +383,7 @@ public final class LoginCounterTool {
         opts.addOption("H", "host", true, "The optional JMX host (default:localhost)");
         opts.addOption("p", "port", true, "The optional JMX port (default:9999)");
         opts.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
-        opts.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
+        opts.addOption(new Option(null, "password", true, "The optional JMX password (if JMX has authentication enabled)"));
         opts.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
         countingOptions = opts;
     }
