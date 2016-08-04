@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors_pt_PT\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-04 11:09+0000\n"
+"POT-Creation-Date: 2016-08-04 08:07+0000\n"
 "PO-Revision-Date: 2016-06-22 15:10+0000\n"
 "Last-Translator: Anonymous Pootle User\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3839,6 +3839,11 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:70
 msgid "Password was not changed."
+msgstr ""
+
+#. The topic(s) of interest is/are invalid
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pns/src/com/openexchange/pns/PushExceptionMessages.java:63
+msgid "One or more specified topics are invalid."
 msgstr ""
 
 #. *
