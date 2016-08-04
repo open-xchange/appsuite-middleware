@@ -50,6 +50,7 @@
 package com.openexchange.advertisement.json;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -132,7 +133,7 @@ public class OCPRestService {
         return builder.build();
     }
 
-    @GET
+    @DELETE
     @Path("/config/user")
     public Response removeConfig(@QueryParam("ctxId") int ctxId, @QueryParam("userId") int userId) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
@@ -145,7 +146,7 @@ public class OCPRestService {
         return builder.build();
     }
 
-    @GET
+    @DELETE
     @Path("/config/package")
     public Response removeConfig(@QueryParam("reseller") String reseller, @QueryParam("package") String pack) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
@@ -158,7 +159,7 @@ public class OCPRestService {
         return builder.build();
     }
 
-    @GET
+    @DELETE
     @Path("/config/reseller")
     public Response removeConfig(@QueryParam("reseller") String reseller) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
@@ -171,7 +172,7 @@ public class OCPRestService {
         return builder.build();
     }
 
-    @GET
+    @DELETE
     @Path("/config/name")
     public Response removeConfigByName(@QueryParam("name") String name, @QueryParam("ctxId") int ctxId) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
