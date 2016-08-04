@@ -95,6 +95,7 @@ abstract class AbstractDropboxAccess {
      * @return true if the specified folder identifier denotes a root folder; false otherwise
      */
     boolean isRoot(String folderId) {
+        folderId = folderId == null ? "" : folderId;
         return FileStorageFolder.ROOT_FULLNAME.equals(folderId) || "/".equals(folderId);
     }
 
@@ -121,7 +122,6 @@ abstract class AbstractDropboxAccess {
      * @return The associated path
      */
     String toPath(String folderId) {
-        //TODO: Check for null?
         return isRoot(folderId) ? "/" : folderId;
     }
 
