@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.ca_ES\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-04 10:24+0000\n"
+"POT-Creation-Date: 2016-08-04 07:43+0000\n"
 "PO-Revision-Date: 2016-03-02 09:51+0000\n"
 "Last-Translator: Marcus <marcus.klein@open-xchange.com>\n"
 "Language-Team: \n"
@@ -3992,6 +3992,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:70
 msgid "Password was not changed."
 msgstr "No s'ha canviat la contrasenya."
+
+#. The topic(s) of interest is/are invalid
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pns/src/com/openexchange/pns/PushExceptionMessages.java:63
+msgid "One or more specified topics are invalid."
+msgstr ""
 
 #. *
 #. * User %1$s has no mail module access due to user configuration
