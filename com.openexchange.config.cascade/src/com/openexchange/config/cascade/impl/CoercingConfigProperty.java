@@ -111,7 +111,11 @@ public class CoercingConfigProperty<T> implements ConfigProperty<T> {
 
     @Override
     public CoercingConfigProperty<T> set(final T value) throws OXException {
-        delegate.set(value.toString()); // We assume good toString methods that allow reparsing
+        if (value != null) {
+            delegate.set(value.toString()); // We assume good toString methods that allow reparsing
+        } else {
+            delegate.set(null);
+        }
         return this;
     }
 
@@ -123,7 +127,7 @@ public class CoercingConfigProperty<T> implements ConfigProperty<T> {
 
     @Override
     public <M> ConfigProperty<M> to(final Class<M> otherType) throws OXException {
-        return new CoercingConfigProperty<M>(otherType, delegate, parser);
+        return new CoercingConfigProperty<>(otherType, delegate, parser);
     }
 
     @Override
