@@ -61,6 +61,8 @@ import com.openexchange.advertisement.services.AccessCombinationAdvertisementCon
 import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
 import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -196,8 +198,8 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
+    public Interests getInterests() {
+        return Reloadables.getInterestsForAll();
     }
 
 }
