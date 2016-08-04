@@ -766,8 +766,8 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     /**
      * Gets the SQL representation of the supplied sort options, optionally prefixing any used column identifiers.
-     * 
-     * @param sortOptions The sort options to get the SQL representation for 
+     *
+     * @param sortOptions The sort options to get the SQL representation for
      * @param prefix The prefix to use, or <code>null</code> if not needed
      * @return The <code>ORDER BY ... LIMIT ...</code> clause, or an empty string if no sort options were specified
      */
@@ -832,7 +832,8 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     /**
-     * Adjusts certain properties of an event after loading it from the database. <p/>
+     * Adjusts certain properties of an event after loading it from the database.
+     * <p/>
      * <b>Note:</b> This method requires that the properties {@link EventField#ALL_DAY}, {@link EventField#RECURRENCE_RULE},
      * {@link EventField#START_TIMEZONE}, {@link EventField#START_DATE} and {@link EventField#END_DATE} were loaded.
      *
@@ -842,25 +843,31 @@ public class RdbCalendarStorage implements CalendarStorage {
     private static Event adjustAfterLoad(Event event) {
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
             /*
-             * extract series pattern and "absolute duration" / "recurrence calculator" field
+             * drop recurrence information for change exceptions
              */
-            String value = event.getRecurrenceRule();
-            int idx = value.indexOf('~');
-            int absoluteDuration = Integer.parseInt(value.substring(0, idx));
-            String databasePattern = value.substring(idx + 1);
-            String timeZone = null != event.getStartTimezone() ? event.getStartTimezone() : "UTC";
-            boolean allDay = event.isAllDay();
-            /*
-             * convert legacy series pattern into proper recurrence rule
-             */
-            SeriesPattern seriesPattern = new SeriesPattern(databasePattern, timeZone, allDay);
-            String recurrenceRule = Recurrence.getRecurrenceRule(seriesPattern);
-            event.setRecurrenceRule(recurrenceRule);
-            /*
-             * adjust the recurrence master's actual start- and enddate
-             */
-            if (event.getId() == event.getRecurrenceId()) {
-                Period masterPeriod = Recurrence.getRecurrenceMasterPeriod(seriesPattern, absoluteDuration);
+            if (event.getId() != event.getRecurrenceId()) {
+                event.removeRecurrenceRule();
+            } else {
+                /*
+                 * extract series pattern and "absolute duration" / "recurrence calculator" field
+                 */
+                String value = event.getRecurrenceRule();
+                int idx = value.indexOf('~');
+                int absoluteDuration = Integer.parseInt(value.substring(0, idx));
+                String databasePattern = value.substring(idx + 1);
+                String timeZone = null != event.getStartTimezone() ? event.getStartTimezone() : "UTC";
+                boolean allDay = event.isAllDay();
+                /*
+                 * convert legacy series pattern into proper recurrence rule
+                 */
+                SeriesPattern seriesPattern = new SeriesPattern(databasePattern, timeZone, allDay);
+                String recurrenceRule = Recurrence.getRecurrenceRule(seriesPattern);
+                event.setRecurrenceRule(recurrenceRule);
+                /*
+                 * adjust the recurrence master's actual start- and enddate
+                 */
+                Period seriesPeriod = new Period(event);
+                Period masterPeriod = Recurrence.getRecurrenceMasterPeriod(seriesPeriod, absoluteDuration);
                 event.setStartDate(masterPeriod.getStartDate());
                 event.setEndDate(masterPeriod.getEndDate());
             }

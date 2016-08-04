@@ -114,37 +114,27 @@ public class Recurrence {
         date.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public Period getSeriesPeriod() {
-        return null;
-    }
-
     /**
      * Calculates the actual start- and end-date of the "master" recurrence for a specific series pattern, i.e. the start- and end-date of
      * a serie's first occurrence.
      *
-     * @param pattern The series pattern
+     * @param seriesPeriod The implicit series period, i.e. the period spanning from the first until the "last" occurrence
      * @param absoluteDuration The absolute duration of one occurrence in days (the legacy "recurrence calculator" value)
      * @return The actual start- and end-date of the recurrence master, wrapped into a {@link Period} structure
      */
-    public static Period getRecurrenceMasterPeriod(SeriesPattern pattern, int absoluteDuration) {
-        // TODO: garantiert falsch.
+    public static Period getRecurrenceMasterPeriod(Period seriesPeriod, int absoluteDuration) {
+        // TODO: bestimmt immer noch falsch
         Calendar calendar = GregorianCalendar.getInstance(TimeZones.UTC);
-        calendar.setTimeInMillis(pattern.getSeriesStart().longValue());
+        calendar.setTime(seriesPeriod.getStartDate());
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int date = calendar.get(Calendar.DATE);
         Date startDate = calendar.getTime();
-
-        Long seriesEnd = pattern.getSeriesEnd();
-        if (null == seriesEnd) {
-            // ja, was dann?
-        } else {
-            calendar.setTimeInMillis(seriesEnd.longValue());
-            calendar.set(year, month, date);
-            calendar.add(Calendar.DAY_OF_YEAR, absoluteDuration);
-        }
+        calendar.setTime(seriesPeriod.getEndDate());
+        calendar.set(year, month, date);
+        calendar.add(Calendar.DAY_OF_YEAR, absoluteDuration);
         Date endDate = calendar.getTime();
-        return new Period(startDate, endDate, pattern.isFullTime().booleanValue());
+        return new Period(startDate, endDate, seriesPeriod.isAllDay());
     }
 
     /**
@@ -295,14 +285,14 @@ public class Recurrence {
         RecurrenceRule recur = getRecurBuilder(Freq.YEARLY, pattern);
         if (pattern.getType() == 6) {
             addDays(pattern.getDaysOfWeek(), recur);
-            recur.setByPart(Part.BYMONTH, pattern.getMonth());
+            recur.setByPart(Part.BYMONTH, 1 + pattern.getMonth());
             int weekNo = pattern.getDayOfMonth();
             if (5 == weekNo) {
                 weekNo = -1;
             }
             recur.setByPart(Part.BYSETPOS, weekNo);
         } else if (pattern.getType() == 4) {
-            recur.setByPart(Part.BYMONTH, pattern.getMonth());
+            recur.setByPart(Part.BYMONTH, 1 + pattern.getMonth());
             recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
             return null;
