@@ -379,7 +379,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
-        return saveDocument(file, data, sequenceNumber, modifiedFields);
+        return saveDocument(file, data, !ignoreVersion);
     }
 
     /*
