@@ -52,6 +52,8 @@ package com.openexchange.file.storage.dropbox.v2;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.CreateFolderErrorException;
 import com.dropbox.core.v2.files.DeleteErrorException;
@@ -59,7 +61,6 @@ import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderContinueErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
-import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.RelocationErrorException;
@@ -84,6 +85,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DropboxFolderAccess.class);
 
     private final int userId;
     private final String accountDisplayName;
@@ -360,15 +363,13 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             List<Metadata> entries = listFolder(folderId);
             for (Metadata entry : entries) {
                 if (entry instanceof FolderMetadata) {
-                    client.files().delete(entry.getPathDisplay());
+                    try {
+                        client.files().delete(entry.getPathDisplay());
+                    } catch (DeleteErrorException e) {
+                        LOG.debug("The folder '{}' could not be deleted. Skipping.", entry.getPathDisplay(), e);
+                    }
                 }
             }
-        } catch (DeleteErrorException e) {
-            // TODO: Fail the entire operation if a subset of folders cannot be deleted? 
-            //       Retry in case of a communication error using exponential backoff?
-            //       If the problem is cause by a specific folder and retry is exceeded 
-            //       skip the troublesome folder or fail entirely?
-            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "");
         } catch (ListFolderErrorException e) {
             throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
@@ -464,7 +465,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      * Check for sub folders
      * 
      * @param folderId The folder to check for sub folders
-     * @return <code> if at least one entry of the specified folder is of type {@link FolderMetadata}; false otherwise
+     * @return <code>true</code> if at least one entry of the specified folder is of type {@link FolderMetadata}; <code>false</code> otherwise
      * @throws ListFolderErrorException If a list folder error is occurred
      * @throws DbxException if a generic Dropbox error is occurred
      */
@@ -503,29 +504,5 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
         builder.append(folder);
         return builder.toString();
-    }
-
-    /**
-     * Lists the contents of the specified folder and Returns a {@link List} with {@link Metadata}
-     * 
-     * @param folderId The folder identifier
-     * @return A {@link List} with {@link Metadata}
-     * @throws ListFolderErrorException if a list folder error is occurred
-     * @throws DbxException if a generic Dropbox error is occurred
-     */
-    private List<Metadata> listFolder(String folderId) throws ListFolderErrorException, DbxException {
-        List<Metadata> results = new ArrayList<Metadata>();
-        boolean hasMore = false;
-        ListFolderResult result = client.files().listFolder(folderId);
-        do {
-            hasMore = result.getHasMore();
-            results.addAll(result.getEntries());
-            if (hasMore) {
-                String cursor = result.getCursor();
-                result = client.files().listFolderContinue(cursor);
-            }
-        } while (hasMore);
-
-        return results;
     }
 }

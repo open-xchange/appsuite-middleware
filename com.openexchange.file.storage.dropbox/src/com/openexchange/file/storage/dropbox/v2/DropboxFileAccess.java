@@ -58,6 +58,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.dropbox.core.DbxDownloader;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.CommitInfo;
@@ -121,6 +123,8 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess, FileStorageIgnorableVersionFileAccess {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DropboxFileAccess.class);
 
     private final DropboxAccountAccess accountAccess;
     private final int userId;
@@ -395,19 +399,21 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     @Override
     public void removeDocument(String folderId, long sequenceNumber) throws OXException {
-        String fileId = null;
         try {
             // Empty the folder (remove only the files; leave sub-folders intact)
-            ListFolderResult listFolder = client.files().listFolder(folderId);
-            for (Metadata entry : listFolder.getEntries()) {
+            List<Metadata> entries = listFolder(folderId);
+
+            for (Metadata entry : entries) {
                 if (entry instanceof FileMetadata) {
-                    fileId = entry.getName();
-                    client.files().delete(entry.getPathDisplay());
+                    try {
+                        client.files().delete(entry.getPathDisplay());
+                    } catch (DeleteErrorException e) {
+                        LOG.debug("The file '{}' could not be deleted. Skipping.", entry.getPathDisplay(), e);
+                    }
                 }
             }
-        } catch (DeleteErrorException e) {
-            // TODO: Fail the entire operation if one file cannot be deleted or add a warning instead?
-            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, fileId);
+        } catch (ListFolderErrorException e) {
+            throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
@@ -433,11 +439,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (IDTuple id : ids) {
+                String path = toPath(id.getFolder(), id.getId());
                 try {
-                    client.files().delete(toPath(id.getFolder(), id.getId()));
+                    client.files().delete(path);
                 } catch (DeleteErrorException e) {
-                    //TODO: maybe log this exception for further analysis
-                    //LOG.error("{}", e.getMessage(), e);
+                    LOG.debug("The file '{}' could not be deleted. Skipping.", path, e);
                     ret.add(id);
                 }
             }

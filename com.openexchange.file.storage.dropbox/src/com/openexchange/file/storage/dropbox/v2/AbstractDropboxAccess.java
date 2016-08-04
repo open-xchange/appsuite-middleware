@@ -49,12 +49,16 @@
 
 package com.openexchange.file.storage.dropbox.v2;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.DeletedMetadata;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
+import com.dropbox.core.v2.files.ListFolderErrorException;
+import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -188,5 +192,30 @@ abstract class AbstractDropboxAccess {
             return (FolderMetadata) metadata;
         }
         throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
+    }
+    
+
+    /**
+     * Lists the contents of the specified folder and Returns a {@link List} with {@link Metadata}
+     * 
+     * @param folderId The folder identifier
+     * @return A {@link List} with {@link Metadata}
+     * @throws ListFolderErrorException if a list folder error is occurred
+     * @throws DbxException if a generic Dropbox error is occurred
+     */
+    List<Metadata> listFolder(String folderId) throws ListFolderErrorException, DbxException {
+        List<Metadata> results = new ArrayList<Metadata>();
+        boolean hasMore = false;
+        ListFolderResult result = client.files().listFolder(folderId);
+        do {
+            hasMore = result.getHasMore();
+            results.addAll(result.getEntries());
+            if (hasMore) {
+                String cursor = result.getCursor();
+                result = client.files().listFolderContinue(cursor);
+            }
+        } while (hasMore);
+
+        return results;
     }
 }
