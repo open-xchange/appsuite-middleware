@@ -86,7 +86,7 @@ public class Event {
     private boolean allDay;
     private Transp transp;
 
-    private int recurrenceId;
+    private int seriesId;
     private String recurrenceRule;
     private List<Date> changeExceptionDates;
     private List<Date> deleteExceptionDates;
@@ -849,12 +849,12 @@ public class Event {
     }
 
     /**
-     * Gets the recurrence identifier of the event.
+     * Gets the series identifier of the event.
      *
-     * @return The recurrence identifier
+     * @return The series identifier
      */
-    public int getRecurrenceId() {
-        return recurrenceId;
+    public int getSeriesId() {
+        return seriesId;
     }
 
     /**
@@ -862,26 +862,26 @@ public class Event {
      *
      * @param value The recurrence identifier to set
      */
-    public void setRecurrenceId(int value) {
-        recurrenceId = value;
-        setFields.add(EventField.RECURRENCE_ID);
+    public void setSeriesId(int value) {
+        seriesId = value;
+        setFields.add(EventField.SERIES_ID);
     }
 
     /**
-     * Removes the recurrence identifier of the event.
+     * Removes the series identifier of the event.
      */
-    public void removeRecurrenceId() {
-        recurrenceId = 0;
-        setFields.remove(EventField.RECURRENCE_ID);
+    public void removeSeriesId() {
+        seriesId = 0;
+        setFields.remove(EventField.SERIES_ID);
     }
 
     /**
-     * Gets a value indicating whether the recurrence identifier of the event has been set or not.
+     * Gets a value indicating whether the series identifier of the event has been set or not.
      *
-     * @return <code>true</code> if the recurrence identifier is set, <code>false</code>, otherwise
+     * @return <code>true</code> if the series identifier is set, <code>false</code>, otherwise
      */
-    public boolean containsRecurrenceId() {
-        return setFields.contains(EventField.RECURRENCE_ID);
+    public boolean containsSeriesId() {
+        return setFields.contains(EventField.SERIES_ID);
     }
 
     /**

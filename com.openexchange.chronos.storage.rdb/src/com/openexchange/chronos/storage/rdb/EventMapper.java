@@ -591,50 +591,28 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeStatus();
             }
         });
-        mappings.put(EventField.RECURRENCE_ID, new IntegerMapping<Event>("intfield02", "Recurrence id") {
+        mappings.put(EventField.SERIES_ID, new IntegerMapping<Event>("intfield02", "Series id") {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setRecurrenceId(null == value ? 0 : i(value));
+                event.setSeriesId(null == value ? 0 : i(value));
             }
 
             @Override
             public boolean isSet(Event event) {
-                return event.containsRecurrenceId();
+                return event.containsSeriesId();
             }
 
             @Override
             public Integer get(Event event) {
-                return I(event.getRecurrenceId());
+                return I(event.getSeriesId());
             }
 
             @Override
             public void remove(Event event) {
-                event.removeRecurrenceId();
+                event.removeSeriesId();
             }
         });
-        //        mappings.put(EventField.RECURRENCE_RULE, new VarCharMapping<Event>("field06", "Recurrence rule") {
-        //
-        //            @Override
-        //            public void set(Event event, String value) {
-        //                event.setRecurrenceRule(value);
-        //            }
-        //
-        //            @Override
-        //            public boolean isSet(Event event) {
-        //                return event.containsRecurrenceRule();
-        //            }
-        //
-        //            @Override
-        //            public String get(Event event) {
-        //                return event.getRecurrenceRule();
-        //            }
-        //
-        //            @Override
-        //            public void remove(Event event) {
-        //                event.removeRecurrenceRule();
-        //            }
-        //        });
         mappings.put(EventField.RECURRENCE_RULE, new DefaultDbMultiMapping<String, Event>(new String[] { "field06", "intfield04" }, "Recurrence rule") {
 
             @Override

@@ -138,9 +138,9 @@ public enum EventField {
      */
     TRANSP,
     /**
-     * The recurrence identifier of the event.
+     * The series identifier of the event.
      */
-    RECURRENCE_ID,
+    SERIES_ID,
     /**
      * The recurrence rule of the event.
      */

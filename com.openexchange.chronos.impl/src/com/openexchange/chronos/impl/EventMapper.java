@@ -549,26 +549,26 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeTransp();
             }
         });
-        mappings.put(EventField.RECURRENCE_ID, new DefaultMapping<Integer, Event>() {
+        mappings.put(EventField.SERIES_ID, new DefaultMapping<Integer, Event>() {
 
             @Override
             public boolean isSet(Event object) {
-                return object.containsRecurrenceId();
+                return object.containsSeriesId();
             }
 
             @Override
             public void set(Event object, Integer value) throws OXException {
-                object.setRecurrenceId(null == value ? 0 : i(value));
+                object.setSeriesId(null == value ? 0 : i(value));
             }
 
             @Override
             public Integer get(Event object) {
-                return I(object.getRecurrenceId());
+                return I(object.getSeriesId());
             }
 
             @Override
             public void remove(Event object) {
-                object.removeRecurrenceId();
+                object.removeSeriesId();
             }
         });
         mappings.put(EventField.RECURRENCE_RULE, new DefaultMapping<String, Event>() {

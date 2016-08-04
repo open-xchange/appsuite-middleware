@@ -143,7 +143,7 @@ public class EventConverter {
             case Appointment.FULL_TIME:
                 return EventField.ALL_DAY;
             case CalendarObject.RECURRENCE_ID:
-                return EventField.RECURRENCE_ID;
+                return EventField.SERIES_ID;
             case CalendarObject.RECURRENCE_TYPE:
             case CalendarObject.INTERVAL:
             case CalendarObject.DAYS:
@@ -234,7 +234,7 @@ public class EventConverter {
             event.setDescription(appointment.getNote());
         }
         if (appointment.containsRecurrenceID()) {
-            event.setRecurrenceId(appointment.getRecurrenceID());
+            event.setSeriesId(appointment.getRecurrenceID());
         }
         if (appointment.containsRecurrenceType()) {
             event.setRecurrenceRule(Appointment2Event.getRecurrenceRule(getSeriesPattern(appointment)));
@@ -347,8 +347,8 @@ public class EventConverter {
             Integer reminder = Event2Appointment.getReminder(userizedEvent.getAlarms());
             appointment.setAlarm(null == reminder ? -1 : reminder.intValue());
         }
-        if (event.containsRecurrenceId()) {
-            appointment.setRecurrenceID(event.getRecurrenceId());
+        if (event.containsSeriesId()) {
+            appointment.setRecurrenceID(event.getSeriesId());
         }
         //appointment.setRecurrencePosition(0);
         //appointment.setRecurrenceDatePosition(null);

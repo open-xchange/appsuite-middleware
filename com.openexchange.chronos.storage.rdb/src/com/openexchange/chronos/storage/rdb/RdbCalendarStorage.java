@@ -845,7 +845,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             /*
              * drop recurrence information for change exceptions
              */
-            if (event.getId() != event.getRecurrenceId()) {
+            if (event.getId() != event.getSeriesId()) {
                 event.removeRecurrenceRule();
             } else {
                 /*
@@ -897,7 +897,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             /*
              * expand recurrence master start- and enddate to cover the whole series period
              */
-            if (event.getId() == event.getRecurrenceId()) {
+            if (event.getId() == event.getSeriesId()) {
                 Period seriesPeriod = Recurrence.getImplicitSeriesPeriod(seriesPattern);
                 event.setStartDate(seriesPeriod.getStartDate());
                 event.setEndDate(seriesPeriod.getEndDate());

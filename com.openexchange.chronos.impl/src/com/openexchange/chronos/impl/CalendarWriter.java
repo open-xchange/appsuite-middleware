@@ -307,7 +307,7 @@ public class CalendarWriter extends CalendarReader {
         int objectID = storage.nextObjectID();
         event.setId(objectID);
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
-            event.setRecurrenceId(objectID);
+            event.setSeriesId(objectID);
         }
         /*
          * insert event & alarms of user

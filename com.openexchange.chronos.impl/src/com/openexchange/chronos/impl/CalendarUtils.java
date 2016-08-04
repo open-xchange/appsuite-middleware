@@ -102,7 +102,7 @@ public class CalendarUtils {
 
     /** A collection of fields that are always included when querying events from the storage */
     static final List<EventField> MANDATORY_FIELDS = Arrays.asList(
-        EventField.ID, EventField.RECURRENCE_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.CLASSIFICATION,
+        EventField.ID, EventField.SERIES_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.CLASSIFICATION,
         EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE,
         EventField.RECURRENCE_RULE
     );
@@ -111,7 +111,7 @@ public class CalendarUtils {
     static final EventField[] NON_CLASSIFIED_FIELDS = {
         EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
         EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
-        EventField.MODIFIED_BY, EventField.PUBLIC_FOLDER_ID, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE,
+        EventField.MODIFIED_BY, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE,
         EventField.START_DATE, EventField.START_TIMEZONE, EventField.TRANSP, EventField.UID
     };
 
@@ -487,24 +487,24 @@ public class CalendarUtils {
 
     /**
      * Gets a value indicating whether the supplied event is considered as the <i>master</i> event of a recurring series or not, based
-     * on the properties {@link EventField#ID} and {@link EventField#RECURRENCE_ID} for equality.
+     * on the properties {@link EventField#ID} and {@link EventField#SERIES_ID} for equality.
      *
      * @param event The event to check
      * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
      */
     static boolean isSeriesMaster(Event event) {
-        return null != event && event.getId() == event.getRecurrenceId();
+        return null != event && event.getId() == event.getSeriesId();
     }
 
     /**
      * Gets a value indicating whether the supplied event is considered as an exceptional event of a recurring series or not, based on
-     * the properties {@link EventField#ID} and {@link EventField#RECURRENCE_ID}.
+     * the properties {@link EventField#ID} and {@link EventField#SERIES_ID}.
      *
      * @param event The event to check
      * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
      */
     static boolean isSeriesException(Event event) {
-        return null != event && 0 < event.getRecurrenceId() && event.getRecurrenceId() != event.getId();
+        return null != event && 0 < event.getSeriesId() && event.getSeriesId() != event.getId();
     }
 
     /**
