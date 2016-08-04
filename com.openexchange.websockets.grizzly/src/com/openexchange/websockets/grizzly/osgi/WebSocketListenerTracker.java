@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets.grizzly.osgi;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
@@ -80,10 +81,18 @@ public class WebSocketListenerTracker implements ServiceTrackerCustomizer<WebSoc
     /**
      * Initializes a new {@link WebSocketListenerTracker}.
      */
-    public WebSocketListenerTracker(BundleContext context) {
+    public WebSocketListenerTracker(BundleContext context, WebSocketListener... initialListeners) {
         super();
         this.context = context;
-        adapters = new CopyOnWriteArrayList<>();
+        if (null != initialListeners && initialListeners.length > 0) {
+            List<org.glassfish.grizzly.websockets.WebSocketListener> initialAdapters = new ArrayList<>(initialListeners.length);
+            for (WebSocketListener listener : initialListeners) {
+                initialAdapters.add(new WebSocketListenerAdapter(listener));
+            }
+            adapters = new CopyOnWriteArrayList<>(initialAdapters);
+        } else {
+            adapters = new CopyOnWriteArrayList<>();
+        }
     }
 
     /**

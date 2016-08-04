@@ -79,6 +79,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     private GrizzlyWebSocketApplication app;
     private ScheduledTimerTask sessionToucherTask;
+    private RemoteWebSocketDistributor remoteDistributor;
 
     /**
      * Initializes a new {@link GrizzlyWebSocketActivator}.
@@ -100,9 +101,12 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        trackService(HazelcastInstance.class);
-        WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context);
+        RemoteWebSocketDistributor remoteDistributor = new RemoteWebSocketDistributor();
+        this.remoteDistributor = remoteDistributor;
+
+        WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context, remoteDistributor);
         track(WebSocketListener.class, listenerTracker);
+        track(HazelcastInstance.class, new HazelcastTracker(remoteDistributor, this, context));
         openTrackers();
 
         registerService(CustomPortableFactory.class, new PortableMessageDistributorFactory(), null);
@@ -114,7 +118,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
             listenerTracker.setApplication(app);
             this.app = app;
             webApplicationService.registerWebSocketApplication("", "/websockets/*", app, null);
-            registerService(WebSocketService.class, new GrizzlyWebSocketService(app, new RemoteWebSocketDistributor(this)));
+            registerService(WebSocketService.class, new GrizzlyWebSocketService(app, remoteDistributor));
 
             PortableMessageDistributor.setGrizzlyWebSocketApplication(app);
 
@@ -149,7 +153,25 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
             app.shutDown();
         }
 
+        RemoteWebSocketDistributor remoteDistributor = this.remoteDistributor;
+        if (null != remoteDistributor) {
+            this.remoteDistributor = null;
+            remoteDistributor.shutDown();
+        }
+
         super.stopBundle();
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        // TODO Auto-generated method stub
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        // TODO Auto-generated method stub
+        return super.removeService(clazz);
     }
 
 }

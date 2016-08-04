@@ -89,18 +89,4 @@ public interface PushNotification {
      */
     int getUserId();
 
-    /**
-     * Gets the Google-specific key to stack messages; can be <code>null</code>
-     *
-     * @return The collapse key or <code>null</code>
-     */
-    String getCollapseKey();
-
-    /**
-     * Sets the Google-specific <code>COLLAPSE_KEY</code> to stack messages belonging to the key
-     *
-     * @param collapseKey The collapse key to set
-     */
-    void setCollapseKey(String collapseKey);
-
 }
