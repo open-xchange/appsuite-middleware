@@ -15,6 +15,7 @@ array:
       Description: >
         Defines if the custom truststore should be used to retrieve trusted certificates. The custom truststore should contain a list of certificates that are defined to be trusted.
         It is possible to define only one custom truststore. But it is of course possible to enable both, default and custom truststore to enhance the trusted certificates pool.
+        If you would like to use a custom truststore it has to be in JKS format.
       Default: false
       Version: 7.8.3
       Reloadable: false
