@@ -141,7 +141,7 @@ public final class Collections {
      *
      * @param multiMap The multi-map to put the value into
      * @param key The key to add the value for
-     * @param value the value to add
+     * @param value The value to add
      * @return <code>true</code> (as specified by {@link Collection#add})
      */
     public static <K, V> boolean put(Map<K, List<V>> multiMap, K key, V value) {
@@ -151,6 +151,24 @@ public final class Collections {
             multiMap.put(key, values);
         }
         return values.add(value);
+    }
+
+    /**
+     * Puts multiple values for a specific key into a "multi-map", i.e. a map associating a key with multiple values. New lists for the
+     * key are created automatically as needed.
+     *
+     * @param multiMap The multi-map to put the value into
+     * @param key The key to add the value for
+     * @param values The values to add
+     * @return <code>true</code> (as specified by {@link Collection#add})
+     */
+    public static <K, V> boolean put(Map<K, List<V>> multiMap, K key, Collection<? extends V> values) {
+        List<V> list = multiMap.get(key);
+        if (null == list) {
+            list = new ArrayList<V>();
+            multiMap.put(key, list);
+        }
+        return list.addAll(values);
     }
 
     /**
