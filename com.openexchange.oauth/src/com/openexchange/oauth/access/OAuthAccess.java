@@ -67,6 +67,11 @@ public interface OAuthAccess {
     boolean ping() throws OXException;
 
     /**
+     * Disposes the instance
+     */
+    void dispose();
+
+    /**
      * Retrieves the client
      * 
      * @param type the client type
