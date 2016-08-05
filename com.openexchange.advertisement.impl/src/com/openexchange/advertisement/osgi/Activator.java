@@ -53,6 +53,7 @@ import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.services.AccessCombinationAdvertisementConfigService;
 import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
 import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -72,7 +73,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class, ContextService.class, ResellerService.class,
+        return new Class[] { DatabaseService.class, ContextService.class, ResellerService.class, CacheService.class,
                                 ConfigViewFactory.class, ConfigurationService.class, UserService.class, UserPermissionService.class };
     }
 

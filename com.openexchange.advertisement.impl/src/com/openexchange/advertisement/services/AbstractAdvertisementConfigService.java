@@ -64,6 +64,10 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementExceptionCodes;
 import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheElement;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -97,6 +101,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     protected static final String RESELLER_ALL = "OX_ALL";
     protected static final String PACKAGE_ALL = "OX_ALL";
     private static final String PREVIEW_CONFIG = "com.openexchange.advertisement.preview";
+    private static final String CACHING_REGION = AbstractAdvertisementConfigService.class.getSimpleName();
 
 
 
@@ -115,7 +120,85 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
 
     @Override
     public JSONObject getConfig(Session session) throws OXException {
-        
+
+        CacheService cacheService = Services.getService(CacheService.class);
+        if (cacheService == null) {
+            // get config without cache
+            JSONObject result = getConfigByUserInternal(session);
+            if (result == null) {
+                String reseller = null;
+                String pack = null;
+                try {
+                    reseller = getReseller(session);
+                } catch (OXException e) {
+                    LOG.debug("Error while retrieving the reseller for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+                }
+                try {
+                    pack = getPackage(session);
+                } catch (OXException e) {
+                    LOG.debug("Error while retrieving the package for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+                }
+                // fallback to defaults in case reseller or package is empty
+                if (Strings.isEmpty(reseller)) {
+                    reseller = RESELLER_ALL;
+                }
+                if (Strings.isEmpty(pack)) {
+                    pack = PACKAGE_ALL;
+                }
+                result = getConfigInternal(session, reseller, pack);
+            }
+            return result;
+        }
+
+        //check user cache first
+        Cache cache = cacheService.getCache(CACHING_REGION);
+        CacheKey key = cache.newCacheKey(session.getContextId(), session.getUserId());
+        CacheElement element = cache.getCacheElement(key);
+        if (element != null && element.getVal() instanceof JSONObject) {
+            return (JSONObject) element.getVal();
+        }
+
+        JSONObject result = getConfigByUserInternal(session);
+        if (result != null) {
+            cache.put(key, result, true);
+            return result;
+        }
+        //  ------
+
+        // check normal cache
+        String reseller = null;
+        String pack = null;
+        try {
+            reseller = getReseller(session);
+        } catch (OXException e) {
+            LOG.debug("Error while retrieving the reseller for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+        }
+        try {
+            pack = getPackage(session);
+        } catch (OXException e) {
+            LOG.debug("Error while retrieving the package for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+        }
+
+        // fallback to defaults in case reseller or package is empty
+        if (Strings.isEmpty(reseller)) {
+            reseller = RESELLER_ALL;
+        }
+        if (Strings.isEmpty(pack)) {
+            pack = PACKAGE_ALL;
+        }
+
+        key = cache.newCacheKey(-1, reseller, pack);
+        element = cache.getCacheElement(key);
+        if (element != null && element.getVal() instanceof JSONObject) {
+            return (JSONObject) element.getVal();
+        }
+
+        result = getConfigInternal(session, reseller, pack);
+        cache.put(key, result, true);
+        return result;
+    }
+
+    private JSONObject getConfigByUserInternal(Session session) throws OXException {
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
         String id = view.get(PREVIEW_CONFIG, String.class);
@@ -144,27 +227,10 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
             }
 
         }
-        String reseller = null;
-        String pack = null;
-        try {
-            reseller = getReseller(session);
-        } catch (OXException e) {
-            LOG.debug("Error while retrieving the reseller for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
-        }
-        try {
-            pack = getPackage(session);
-        } catch (OXException e) {
-            LOG.debug("Error while retrieving the package for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
-        }
+        return null;
+    }
 
-        // fallback to defaults in case reseller or package is empty
-        if (Strings.isEmpty(reseller)) {
-            reseller = RESELLER_ALL;
-        }
-        if (Strings.isEmpty(pack)) {
-            pack = PACKAGE_ALL;
-        }
-
+    private JSONObject getConfigInternal(Session session, String reseller, String pack) throws OXException {
         DatabaseService dbService = Services.getService(DatabaseService.class);
         Connection con = dbService.getReadOnly();
         PreparedStatement stmt = null;
@@ -275,6 +341,12 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 int resultConfigId = result.getInt(1);
                 property.set(String.valueOf(resultConfigId));
             }
+            //remove entry from cache
+            CacheService cacheService = Services.getService(CacheService.class);
+            if (cacheService != null) {
+                Cache cache = cacheService.getCache(CACHING_REGION);
+                cache.remove(cache.newCacheKey(ctxId, userId));
+            }
         } catch (SQLException e) {
             throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
         } finally {
@@ -304,7 +376,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
             stmt.setString(1, reseller);
             stmt.setString(2, pack);
             result = stmt.executeQuery();
-            
+
             if (result.next()) {
 
                 int configId = Integer.valueOf(result.getString(3));
@@ -345,6 +417,14 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 stmt.setInt(3, resultConfigId);
                 stmt.execute();
             }
+
+            //clear read cache
+            CacheService cacheService = Services.getService(CacheService.class);
+            if (cacheService != null) {
+                Cache cache = cacheService.getCache(CACHING_REGION);
+                cache.remove(cache.newCacheKey(-1, reseller, pack));
+            }
+
         } catch (SQLException e) {
             throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
         } finally {
