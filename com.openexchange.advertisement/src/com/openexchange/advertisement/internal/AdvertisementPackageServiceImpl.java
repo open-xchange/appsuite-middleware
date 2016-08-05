@@ -50,16 +50,12 @@
 package com.openexchange.advertisement.internal;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.osgi.Services;
-import com.openexchange.advertisement.services.AccessCombinationAdvertisementConfigService;
-import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
-import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
@@ -84,9 +80,13 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
 
     private ConcurrentHashMap<String, AdvertisementConfigService> map;
 
+    private AdvertisementConfigService global;
+
+
+
     /**
      * Initializes a new {@link AdvertisementPackageServiceImpl}.
-     * 
+     *
      * @param map
      */
     public AdvertisementPackageServiceImpl(ConfigurationService configService) {
@@ -106,15 +106,15 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
             reseller = admin.getName();
         } catch (OXException e) {
             if (ResellerExceptionCodes.NO_RESELLER_FOUND.equals(e) || ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.equals(e)) {
-                reseller = "OX_ALL";
+                reseller = DEFAULT_RESELLER;
             } else {
-                return GlobalAdvertisementConfigService.getInstance();
+                return global;
             }
         }
 
         AdvertisementConfigService result = map.get(reseller);
         if (result == null) {
-            result = GlobalAdvertisementConfigService.getInstance();
+            result = global;
         }
         return result;
     }
@@ -124,7 +124,7 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
         if (map == null) {
             return null;
         }
-        return GlobalAdvertisementConfigService.getInstance();
+        return global;
     }
 
     @Override
@@ -137,64 +137,70 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
             ConfigView view = factory.getView();
 
             for(ResellerAdmin res: reseller){
-                String strScheme = view.get(CONFIG_PREFIX + res.getName() + CONFIG_SUFFIX, String.class);
-                if(strScheme==null){
+                String packageScheme = view.get(CONFIG_PREFIX + res.getName() + CONFIG_SUFFIX, String.class);
+                if (packageScheme == null) {
                     //fallback to reseller id
-                    strScheme = view.get(CONFIG_PREFIX + res.getId() + CONFIG_SUFFIX, String.class);
-                    
-                    if(strScheme==null){
+                    packageScheme = view.get(CONFIG_PREFIX + res.getId() + CONFIG_SUFFIX, String.class);
+
+                    if (packageScheme == null) {
                         //fallback to global
-                        strScheme="Global";
+                        packageScheme = DEFAULT_SCHEME_ID;
                     }
                 }
-                
-                PackageScheme scheme = PackageScheme.valueOf(strScheme);
-                AdvertisementConfigService adsService = null;
-                
-                switch(scheme){
-                    case AccessCombinations:
-                        adsService = AccessCombinationAdvertisementConfigService.getInstance();
-                        break;
-                    case TaxonomyTypes:
-                        adsService = TaxonomyTypesAdvertisementConfigService.getInstance();
-                        break;
-                    case Global:
-                    default:
-                        adsService = GlobalAdvertisementConfigService.getInstance();
-                        break;
-                }
+
+                AdvertisementConfigService adsService = getConfigServiceByScheme(packageScheme);
+
                 map.put(res.getName(), adsService);
             }
 
             // Add OX_ALL as a default reseller
-            String oxall = "OX_ALL";
+            String oxall = DEFAULT_RESELLER;
 
-            String strScheme = view.get(CONFIG_PREFIX + oxall + CONFIG_SUFFIX, String.class);
-            if (strScheme == null) {
+            String packageScheme = view.get(CONFIG_PREFIX + oxall + CONFIG_SUFFIX, String.class);
+            if (packageScheme == null) {
                 //fallback to global
-                strScheme = "Global";
+                packageScheme = DEFAULT_SCHEME_ID;
             }
 
-            PackageScheme scheme = PackageScheme.valueOf(strScheme);
-            AdvertisementConfigService adsService = null;
-
-            switch (scheme) {
-                case AccessCombinations:
-                    adsService = AccessCombinationAdvertisementConfigService.getInstance();
-                    break;
-                case TaxonomyTypes:
-                    adsService = TaxonomyTypesAdvertisementConfigService.getInstance();
-                    break;
-                case Global:
-                default:
-                    adsService = GlobalAdvertisementConfigService.getInstance();
-                    break;
-            }
+            AdvertisementConfigService adsService = getConfigServiceByScheme(packageScheme);
             map.put(oxall, adsService);
 
         } catch (OXException e) {
             LOG.error("Error while reloading configuration: " + e.getMessage());
         }
+    }
+
+    private AdvertisementConfigService getConfigServiceByScheme(String scheme) {
+
+        List<AdvertisementConfigService> services = Services.getAllServices(AdvertisementConfigService.class);
+
+        if (global == null) {
+            // Init global
+            AdvertisementConfigService result = null;
+            for (AdvertisementConfigService service : services) {
+                if (service.getSchemeId().equals(DEFAULT_SCHEME_ID)) {
+                    global = service;
+                }
+                if (service.getSchemeId().equals(scheme)) {
+                    result = service;
+                }
+            }
+
+            if (result == null) {
+                return global;
+            } else {
+                return result;
+            }
+
+        } else {
+            for (AdvertisementConfigService service : services) {
+                if (service.getSchemeId().equals(scheme)) {
+                    return service;
+                }
+            }
+            return global;
+        }
+
     }
 
     @Override

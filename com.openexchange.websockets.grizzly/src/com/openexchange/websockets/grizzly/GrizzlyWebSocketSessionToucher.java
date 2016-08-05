@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets.grizzly;
 
+import java.util.List;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -87,14 +88,16 @@ public class GrizzlyWebSocketSessionToucher implements Runnable {
         }
 
         // Get a list of currently active sessions bound to a Web Socket
-        Map<String, SessionBoundWebSocket> sessions = app.getActiveSessions();
+        Map<String, List<SessionBoundWebSocket>> sessions = app.getActiveSessions();
 
         // Touch them
-        for (Map.Entry<String, SessionBoundWebSocket> sessionEntry : sessions.entrySet()) {
+        for (Map.Entry<String, List<SessionBoundWebSocket>> sessionEntry : sessions.entrySet()) {
             Session session = sessiondService.getSession(sessionEntry.getKey());
             if (null == session) {
                 // No such session
-                app.close(sessionEntry.getValue(), session);
+                for (SessionBoundWebSocket socket : sessionEntry.getValue()) {
+                    app.close(socket, session);
+                }
             }
         }
     }

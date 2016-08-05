@@ -51,6 +51,7 @@ package com.openexchange.advertisement.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.BundleContext;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.internal.AdvertisementPackageServiceImpl;
@@ -60,14 +61,10 @@ import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.session.Session;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link Activator}
@@ -79,8 +76,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {    CapabilityService.class, DatabaseService.class, ContextService.class, ResellerService.class, 
-                                ConfigViewFactory.class, ConfigurationService.class, UserService.class, UserPermissionService.class };
+        return new Class[] { AdvertisementConfigService.class, CapabilityService.class, ResellerService.class, ConfigViewFactory.class, ConfigurationService.class };
     }
 
     @Override
@@ -113,6 +109,10 @@ public class Activator extends HousekeepingActivator {
         AdvertisementPackageService packageService = new AdvertisementPackageServiceImpl(configService);
         registerService(AdvertisementPackageService.class, packageService);
         registerService(Reloadable.class, packageService);
+    }
+
+    BundleContext getBundleContext() {
+        return this.context;
     }
 
 

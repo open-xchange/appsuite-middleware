@@ -47,49 +47,42 @@
  *
  */
 
-package com.openexchange.advertisement.services;
+package com.openexchange.advertisement.osgi;
 
-import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.services.AccessCombinationAdvertisementConfigService;
+import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
+import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.data.ResellerAdmin;
-import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link AccessCombinationAdvertisementConfigService}
+ * {@link Activator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class AccessCombinationAdvertisementConfigService extends AbstractAdvertisementConfigService {
+public class Activator extends HousekeepingActivator {
 
-    private static AccessCombinationAdvertisementConfigService instance = null;
-
-    /**
-     * @return
-     */
-    public static AccessCombinationAdvertisementConfigService getInstance() {
-        if (instance == null) {
-            instance = new AccessCombinationAdvertisementConfigService();
-        }
-        return instance;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { DatabaseService.class, ContextService.class, ResellerService.class,
+                                ConfigViewFactory.class, ConfigurationService.class, UserService.class, UserPermissionService.class };
     }
 
     @Override
-    String getReseller(Session session) throws OXException {
-        ResellerService resellerService = Services.getService(ResellerService.class);
-        ResellerAdmin resellerAdmin = resellerService.getReseller(session.getContextId());
-        return resellerAdmin.getName();
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        registerService(AdvertisementConfigService.class, AccessCombinationAdvertisementConfigService.getInstance());
+        registerService(AdvertisementConfigService.class, GlobalAdvertisementConfigService.getInstance());
+        registerService(AdvertisementConfigService.class, TaxonomyTypesAdvertisementConfigService.getInstance());
     }
 
-    @Override
-    String getPackage(Session session) throws OXException {
-        UserPermissionService permissionService = Services.getService(UserPermissionService.class);
-        ContextService contextService = Services.getService(ContextService.class);
-        Context ctx = contextService.getContext(session.getContextId());
-        return permissionService.getAccessCombinationName(ctx, session.getUserId());
-    }
+
 }

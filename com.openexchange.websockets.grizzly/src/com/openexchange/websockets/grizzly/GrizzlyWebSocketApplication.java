@@ -187,13 +187,18 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      *
      * @return The session identifier listing
      */
-    public Map<String, SessionBoundWebSocket> getActiveSessions() {
-        Map<String, SessionBoundWebSocket> sessions = new HashMap<>(32, 0.9F);
+    public Map<String, List<SessionBoundWebSocket>> getActiveSessions() {
+        Map<String, List<SessionBoundWebSocket>> sessions = new HashMap<>(32, 0.9F);
         for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
             for (SessionBoundWebSocket socket : userSockets.values()) {
                 String sessionId = socket.getSessionId();
                 if (null != sessionId) {
-                    sessions.put(sessionId, socket);
+                    List<SessionBoundWebSocket> sockets = sessions.get(sessionId);
+                    if (null == sockets) {
+                        sockets = new LinkedList<>();
+                        sessions.put(sessionId, sockets);
+                    }
+                    sockets.add(socket);
                 }
             }
         }
@@ -280,7 +285,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             }
 
             // Create & return new session-bound Web Socket
-            return new SessionBoundWebSocket(SessionInfo.newInstance(session), ConnectionId.newInstance(conId), handler, requestPacket, effectiveListeners);
+            String path = requestPacket.getRequestURI();
+            return new SessionBoundWebSocket(SessionInfo.newInstance(session), ConnectionId.newInstance(conId), path, handler, requestPacket, effectiveListeners);
         } catch (HandshakeException e) {
             // Handle Handshake error
             handleHandshakeException(e, handler, requestPacket);

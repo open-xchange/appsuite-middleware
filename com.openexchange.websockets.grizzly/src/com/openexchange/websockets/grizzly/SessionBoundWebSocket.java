@@ -65,16 +65,18 @@ import com.openexchange.websockets.WebSocketSession;
 public class SessionBoundWebSocket extends DefaultWebSocket {
 
     private final SessionInfo sessionInfo;
+    private final String path;
     private final ConnectionId connectionId;
     private final WebSocketSession webSocketSession;
 
     /**
      * Initializes a new {@link SessionBoundWebSocket}.
      */
-    public SessionBoundWebSocket(SessionInfo sessionInfo, ConnectionId connectionId, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
+    public SessionBoundWebSocket(SessionInfo sessionInfo, ConnectionId connectionId, String path, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
         super(protocolHandler, request, listeners);
         this.sessionInfo = sessionInfo;
         this.connectionId = connectionId;
+        this.path = path;
         webSocketSession = new WebSocketSessionImpl();
     }
 
@@ -138,7 +140,7 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
      * @return The path
      */
     public String getPath() {
-        return request.getRequestURI();
+        return path;
     }
 
     @Override

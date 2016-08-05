@@ -63,14 +63,14 @@ public interface AdvertisementConfigService {
 
     /**
      * Checks if an advertisement configuration is available for the given user
-     * 
+     *
      * @param session The user session
      */
     public boolean isAvailable(Session session);
 
     /**
      * Retrieves the advertisment config for a given user
-     * 
+     *
      * @param session The user session
      * @return The config in json form
      * @throws OXException
@@ -80,7 +80,7 @@ public interface AdvertisementConfigService {
     /**
      * Sets an advertisement config for a given user by name. This is for testing purpose only.
      * Setting the config parameter to null will delete the current configuration for the user.
-     * 
+     *
      * @param name The login name of the user
      * @param ctxId The context id
      * @param config The advertisement config
@@ -91,7 +91,7 @@ public interface AdvertisementConfigService {
     /**
      * Sets an advertisement config for a given user. This is for testing purpose only.
      * Setting the config parameter to null will delete the current configuration for the user.
-     * 
+     *
      * @param userId
      * @param ctxId
      * @param config The advertisement config
@@ -102,7 +102,7 @@ public interface AdvertisementConfigService {
     /**
      * Sets an advertisement config for a given package of a given reseller
      * Setting the config parameter to null will delete the current configuration.
-     * 
+     *
      * @param reseller
      * @param pack
      * @param config The advertisement config
@@ -113,11 +113,18 @@ public interface AdvertisementConfigService {
     /**
      * Sets an advertisement config for a given reseller
      * Setting the config parameter to null will delete the current configuration for the reseller.
-     * 
+     *
      * @param reseller
      * @param config The advertisement config
      * @throws OXException
      */
     public void setConfig(String reseller, String config) throws OXException;
+
+    /**
+     * Retrieves the package scheme identifier for this config service.
+     *
+     * @return The package scheme identifier
+     */
+    public String getSchemeId();
 
 }
