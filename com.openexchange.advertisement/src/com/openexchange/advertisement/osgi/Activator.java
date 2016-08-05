@@ -52,12 +52,25 @@ package com.openexchange.advertisement.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.AdvertisementPackageService;
+import com.openexchange.advertisement.internal.AdvertisementPackageServiceImpl;
+import com.openexchange.advertisement.services.CreateAdvertisementTableUpdateTask;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.FailureAwareCapabilityChecker;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.reseller.ResellerService;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link Activator}
@@ -69,11 +82,13 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { AdvertisementConfigService.class, CapabilityService.class };
+        return new Class[] {    CapabilityService.class, DatabaseService.class, ContextService.class, ResellerService.class, 
+                                ConfigViewFactory.class, ConfigurationService.class, UserService.class, UserPermissionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateAdvertisementTableUpdateTask()));
         Services.setServiceLookup(this);
         final String sCapability = "ads";
         Dictionary<String, Object> properties = new Hashtable<>(2);
@@ -98,6 +113,10 @@ public class Activator extends HousekeepingActivator {
             }
         }, properties);
         getService(CapabilityService.class).declareCapability(sCapability);
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        AdvertisementPackageService packageService = new AdvertisementPackageServiceImpl(configService);
+        registerService(AdvertisementPackageService.class, packageService);
+        registerService(Reloadable.class, packageService);
     }
 
 

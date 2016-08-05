@@ -51,6 +51,7 @@ package com.openexchange.advertisement.json;
 
 import org.json.JSONObject;
 import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.json.osgi.Services;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -77,7 +78,8 @@ public class GetConfigAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
 
-        AdvertisementConfigService configService = Services.getService(AdvertisementConfigService.class);
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getScheme(session.getContextId());
         JSONObject result = configService.getConfig(session);
         return new AJAXRequestResult(result);
     }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.reseller.internal;
+package com.openexchange.reseller.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -55,10 +55,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.reseller.ResellerExceptionCodes;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.reseller.data.Restriction;
@@ -110,17 +112,21 @@ public class ResellerServiceImpl implements ResellerService {
             log.error("", e);
             throw new OXException(e);
         } finally {
-            dbService.backReadOnly(con);
-            try {
-                if (rs != null) {
+            if (rs != null) {
+                try {
                     rs.close();
+                } catch (SQLException e) {
+                    // ignore
                 }
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (SQLException e) {
-                //ignore
             }
+            if (prep != null) {
+                try {
+                    prep.close();
+                } catch (SQLException e) {
+                    // ignore
+                }
+            }
+            dbService.backReadOnly(con);
         }
     }
 
@@ -192,6 +198,47 @@ public class ResellerServiceImpl implements ResellerService {
         rs.close();
         prep.close();
         return admin;
+    }
+
+    @Override
+    public List<ResellerAdmin> getAll() throws OXException {
+        Connection con = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            try {
+                final ArrayList<ResellerAdmin> ret = new ArrayList<>();
+                con = dbService.getReadOnly();
+                String query = "SELECT * FROM subadmin;";
+                prep = con.prepareStatement(query);
+
+                rs = prep.executeQuery();
+                while (rs.next()) {
+                    ResellerAdmin newadm = new ResellerAdmin();
+                    newadm.setName(rs.getString(DATABASE_COLUMN_NAME));
+                    newadm.setId(rs.getInt("sid"));
+                    newadm.setParentId(rs.getInt("pid"));
+                    newadm.setDisplayname(rs.getString("displayName"));
+                    newadm.setPassword(rs.getString("password"));
+                    newadm.setPasswordMech(rs.getString("passwordMech"));
+                    newadm = getRestrictionDataForAdmin(newadm, con);
+
+                    ret.add(newadm);
+                }
+                return ret;
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (prep != null) {
+                    prep.close();
+                }
+                dbService.backReadOnly(con);
+            }
+        } catch (SQLException e) {
+            log.error("", e);
+            throw new OXException(e);
+        }
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.reseller;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.data.ResellerAdmin;
 
@@ -68,5 +69,14 @@ public interface ResellerService {
      * @throws OXException if it was unable to retrieve the ResellerAdmin
      */
     public ResellerAdmin getReseller(int cid) throws OXException;
+
+    /**
+     * Retrieves the ResellerAdmin for the given context
+     * 
+     * @param cid The context id
+     * @return The ResellerAdmin
+     * @throws OXException if it was unable to retrieve the ResellerAdmin
+     */
+    public List<ResellerAdmin> getAll() throws OXException;
 
 }

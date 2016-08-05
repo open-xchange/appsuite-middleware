@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets.grizzly.remote;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -59,13 +60,19 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import com.hazelcast.core.Cluster;
+import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
+import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSocketExceptionCodes;
+import com.openexchange.websockets.WebSocketListener;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor;
 
 /**
@@ -74,18 +81,72 @@ import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistri
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class RemoteWebSocketDistributor {
+public class RemoteWebSocketDistributor implements WebSocketListener {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoteWebSocketDistributor.class);
 
-    private final ServiceLookup services;
+    private final AtomicBoolean notActive;
+    private volatile HazelcastInstance hzInstance;
+    private volatile String mapName;
+    private volatile String memberUuid;
 
     /**
      * Initializes a new {@link RemoteWebSocketDistributor}.
      */
-    public RemoteWebSocketDistributor(ServiceLookup services) {
+    public RemoteWebSocketDistributor() {
         super();
-        this.services = services;
+        notActive = new AtomicBoolean();
+    }
+
+    /**
+     * Shuts-down this remote distributor.
+     */
+    public void shutDown() {
+        unsetHazelcastResources();
+        // TODO:
+    }
+
+    /**
+     * Sets the Hazelcast resources to use.
+     *
+     * @param hzInstance The Hazelcast instance
+     * @param mapName The name of the associated Hazelcast map
+     */
+    public void setHazelcastResources(HazelcastInstance hzInstance, String mapName) {
+        this.hzInstance = hzInstance;
+        this.mapName = mapName;
+        this.memberUuid = hzInstance.getCluster().getLocalMember().getUuid();
+    }
+
+    /**
+     * Unsets the previously set Hazelcast resources (if any).
+     */
+    public void unsetHazelcastResources() {
+        this.hzInstance = null;
+        this.mapName = null;
+        this.memberUuid = null;
+    }
+
+    private MultiMap<String, String> map(String mapName, HazelcastInstance hzInstance) throws OXException {
+        try {
+            return hzInstance.getMultiMap(mapName);
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleNotActiveException(e);
+            // Obviously Hazelcast is absent
+            return null;
+        } catch (HazelcastException e) {
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void handleNotActiveException(HazelcastInstanceNotActiveException e) {
+        notActive.set(true);
+    }
+
+    private String generateKey(int userId, int contextId) {
+        return new StringBuilder(16).append(userId).append('@').append(contextId).toString();
     }
 
     /**
@@ -99,19 +160,36 @@ public class RemoteWebSocketDistributor {
      * @throws OXException If remote distribution fails
      */
     public void sendRemote(String message, String pathFilter, int userId, int contextId, boolean async) throws OXException {
-        HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
+        HazelcastInstance hzInstance = this.hzInstance;
         if (null == hzInstance) {
             LOG.warn("Missing Hazelcast instance. Failed to remotely distribute message to user {} in context {}", userId, contextId);
             return;
         }
 
-        Cluster cluster = hzInstance.getCluster();
+        String mapName = this.mapName;
+        if (null == mapName) {
+            LOG.warn("Missing Hazelcast map name. Failed to remotely distribute message to user {} in context {}", userId, contextId);
+            return;
+        }
+
+        Set<String> uuids = setFor(map(mapName, hzInstance).get(generateKey(userId, contextId)));
+        if (null == uuids) {
+            // No Web Sockets available at all
+            return;
+        }
+
+        uuids.remove(memberUuid);
+        if (uuids.isEmpty()) {
+            // No user-associated Web Sockets available on remote nodes
+            return;
+        }
 
         // Get local member
+        Cluster cluster = hzInstance.getCluster();
         Member localMember = cluster.getLocalMember();
 
-        // Determine other cluster members
-        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+        // Determine other cluster members holding an open Web Socket connection for current user
+        Set<Member> otherMembers = getOtherMembers(uuids, cluster.getMembers(), localMember);
 
         if (!otherMembers.isEmpty()) {
             IExecutorService executor = hzInstance.getExecutorService("default");
@@ -159,19 +237,44 @@ public class RemoteWebSocketDistributor {
         }
     }
 
+    static Set<String> setFor(Collection<String> uuids) {
+        int size;
+        if (null == uuids || (size = uuids.size()) <= 0) {
+            return null;
+        }
+
+        if (uuids instanceof Set) {
+            return (Set<String>) uuids;
+        }
+
+        Set<String> set = new LinkedHashSet<>(size);
+        for (String uuid : uuids) {
+            set.add(uuid);
+        }
+        return set;
+    }
+
     /**
      * Gets the other cluster members
      *
+     * @param uuids The known UUIDs
      * @param allMembers All known members
      * @param localMember The local member
      * @return Other cluster members
      */
-    static Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
+    static Set<Member> getOtherMembers(Set<String> uuids, Set<Member> allMembers, Member localMember) {
         Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
         if (!otherMembers.remove(localMember)) {
             LOG.warn("Couldn't remove local member from cluster members.");
         }
-        return otherMembers;
+
+        Set<Member> applicableMembers = new LinkedHashSet<>(uuids.size());
+        for (Member otherMember : otherMembers) {
+            if (uuids.contains(otherMember.getUuid())) {
+                applicableMembers.add(otherMember);
+            }
+        }
+        return applicableMembers;
     }
 
     /**
@@ -217,6 +320,59 @@ public class RemoteWebSocketDistributor {
         public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             return result;
         }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public void onWebSocketConnect(WebSocket socket) {
+        int userId = socket.getUserId();
+        int contextId = socket.getContextId();
+        try {
+            HazelcastInstance hzInstance = this.hzInstance;
+            if (null == hzInstance) {
+                LOG.warn("Missing Hazelcast instance. Failed to add Web Socket for user {} in context {}", userId, contextId);
+                return;
+            }
+
+            String mapName = this.mapName;
+            if (null == mapName) {
+                LOG.warn("Missing Hazelcast map name. Failed to add Web Socket for user {} in context {}", userId, contextId);
+                return;
+            }
+
+            map(mapName, hzInstance).put(generateKey(userId, contextId), memberUuid);
+        } catch (Exception e) {
+            LOG.warn("Failed to add Web Socket for user {} in context {}", userId, contextId, e);
+        }
+    }
+
+    @Override
+    public void onWebSocketClose(WebSocket socket) {
+        int userId = socket.getUserId();
+        int contextId = socket.getContextId();
+        try {
+            HazelcastInstance hzInstance = this.hzInstance;
+            if (null == hzInstance) {
+                LOG.warn("Missing Hazelcast instance. Failed to remove Web Socket for user {} in context {}", userId, contextId);
+                return;
+            }
+
+            String mapName = this.mapName;
+            if (null == mapName) {
+                LOG.warn("Missing Hazelcast map name. Failed to remove Web Socket for user {} in context {}", userId, contextId);
+                return;
+            }
+
+            map(mapName, hzInstance).remove(generateKey(userId, contextId), memberUuid);
+        } catch (Exception e) {
+            LOG.warn("Failed to remove Web Socket for user {} in context {}", userId, contextId, e);
+        }
+    }
+
+    @Override
+    public void onMessage(WebSocket socket, String text) {
+        // Don't care
     }
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.reseller.internal;
+package com.openexchange.reseller;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;

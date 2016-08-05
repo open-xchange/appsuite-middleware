@@ -50,6 +50,8 @@
 package com.openexchange.advertisement.json;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
@@ -58,6 +60,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import org.json.JSONObject;
 import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.json.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.annotation.Role;
@@ -70,19 +73,20 @@ import com.openexchange.server.ServiceExceptionCode;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-@Path("/preliminary/advertisement/v1")
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
+@Path("/advertisement/v1")
 public class OCPRestService {
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/user")
     public Response putConfig(@QueryParam("ctxId") int ctxId, @QueryParam("userId") int userId, JSONObject body) throws OXException {
-        AdvertisementConfigService configService = Services.getService(AdvertisementConfigService.class);
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getScheme(ctxId);
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.putConfig(userId, ctxId, body.toString());
+        configService.setConfig(userId, ctxId, body.toString());
         ResponseBuilder builder = Response.status(200);
         return builder.build();
     }
@@ -91,11 +95,12 @@ public class OCPRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/package")
     public Response putConfig(@QueryParam("reseller") String reseller, @QueryParam("package") String pack, JSONObject body) throws OXException {
-        AdvertisementConfigService configService = Services.getService(AdvertisementConfigService.class);
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.putConfig(reseller, pack, body.toString());
+        configService.setConfig(reseller, pack, body.toString());
         ResponseBuilder builder = Response.status(200);
         return builder.build();
     }
@@ -104,11 +109,12 @@ public class OCPRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/reseller")
     public Response putConfig(@QueryParam("reseller") String reseller, JSONObject body) throws OXException {
-        AdvertisementConfigService configService = Services.getService(AdvertisementConfigService.class);
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.putConfig(reseller, body.toString());
+        configService.setConfig(reseller, body.toString());
         ResponseBuilder builder = Response.status(200);
         return builder.build();
     }
@@ -116,12 +122,65 @@ public class OCPRestService {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/name")
-    public Response putConfigByName(@QueryParam("name") String name, JSONObject body) throws OXException {
-        AdvertisementConfigService configService = Services.getService(AdvertisementConfigService.class);
+    public Response putConfigByName(@QueryParam("name") String name, @QueryParam("ctxId") int ctxId, JSONObject body) throws OXException {
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.putConfigByName(name, body.toString());
+        configService.setConfigByName(name, ctxId, body.toString());
+        ResponseBuilder builder = Response.status(200);
+        return builder.build();
+    }
+
+    @DELETE
+    @Path("/config/user")
+    public Response removeConfig(@QueryParam("ctxId") int ctxId, @QueryParam("userId") int userId) throws OXException {
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getScheme(ctxId);
+        if (configService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
+        }
+        configService.setConfig(userId, ctxId, null);
+        ResponseBuilder builder = Response.status(200);
+        return builder.build();
+    }
+
+    @DELETE
+    @Path("/config/package")
+    public Response removeConfig(@QueryParam("reseller") String reseller, @QueryParam("package") String pack) throws OXException {
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getDefaultScheme();
+        if (configService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
+        }
+        configService.setConfig(reseller, pack, null);
+        ResponseBuilder builder = Response.status(200);
+        return builder.build();
+    }
+
+    @DELETE
+    @Path("/config/reseller")
+    public Response removeConfig(@QueryParam("reseller") String reseller) throws OXException {
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getDefaultScheme();
+        if (configService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
+        }
+        configService.setConfig(reseller, null);
+        ResponseBuilder builder = Response.status(200);
+        return builder.build();
+    }
+
+    @DELETE
+    @Path("/config/name")
+    public Response removeConfigByName(@QueryParam("name") String name, @QueryParam("ctxId") int ctxId) throws OXException {
+        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
+        AdvertisementConfigService configService = packageService.getDefaultScheme();
+        if (configService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
+        }
+        configService.setConfigByName(name, ctxId, null);
         ResponseBuilder builder = Response.status(200);
         return builder.build();
     }

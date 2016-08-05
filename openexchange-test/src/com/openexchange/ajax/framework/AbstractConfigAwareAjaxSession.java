@@ -89,7 +89,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxS
         Map<String, String> map = getNeededConfigurations();
         if (!map.isEmpty()) {
             // change configuration to new values
-            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<ChangePropertiesResponse>(map, getScope());
+            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
             ChangePropertiesResponse response = client.execute(req);
             oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
         }
@@ -105,7 +105,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxS
         if (oldData != null) {
             // change back to old value if present
             Map<String, Object> map = oldData.asMap();
-            Map<String, String> newMap = new HashMap<String, String>();
+            Map<String, String> newMap = new HashMap<>();
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 try {
                     newMap.put(entry.getKey(), (String) entry.getValue());
@@ -115,7 +115,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxS
                 }
             }
             if (!map.isEmpty()) {
-                ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<ChangePropertiesResponse>(newMap, "server");
+                ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, "server", getReloadables());
                 ChangePropertiesResponse response = client.execute(req);
                 oldData = ResponseWriter.getJSON(response.getResponse());
             }
@@ -143,5 +143,16 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxS
      */
     protected String getScope() {
         return "server";
+    }
+
+    /**
+     * Retrieves the the names of the reloadable classes which should be reloaded.
+     *
+     * Can be overwritten by child implementations. Defaults to null.
+     *
+     * @return A comma separated list of reloadable class names or null.
+     */
+    protected String getReloadables() {
+        return null;
     }
 }
