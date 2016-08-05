@@ -92,6 +92,7 @@ public class RssActionTestReconfiguredPortsAndHosts {
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(Services.class);
+        Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
 
         action = new RssAction();
@@ -102,8 +103,9 @@ public class RssActionTestReconfiguredPortsAndHosts {
     // tests bug 45402: SSRF at RSS feeds
     @Test
     public void testGetAcceptedFeeds_emptyHostListAndEmptyPortConfigured_AllowAll() throws OXException, MalformedURLException {
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST)).thenReturn("");
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST)).thenReturn("");
+        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn("");
+        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn("");
+        Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
 
         urls.add(new URL("http://tollerLaden.de:80/this/is/nice"));
         urls.add(new URL("http://tollerLaden.de:88/this/is/not/nice"));
