@@ -103,7 +103,7 @@ public class RssProperties {
         }
         return tmp;
     }
-    
+
     /**
      * Checks if specified host name is black-listed.
      * <p>
@@ -244,9 +244,12 @@ public class RssProperties {
     }
 
     private static Set<String> toSet(String concatenatedSchemes) {
+        if (Strings.isEmpty(concatenatedSchemes)) {
+            return Collections.emptySet();
+        }
         String[] schemes = Strings.splitByComma(concatenatedSchemes);
         if (schemes == null || schemes.length == 0) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
         return new HashSet<String>(Arrays.asList(schemes));
     }
