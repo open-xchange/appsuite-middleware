@@ -102,6 +102,21 @@ public class RssProperties {
         }
         return tmp;
     }
+    
+    /**
+     * Checks if specified host name is black-listed.
+     * <p>
+     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
+     *
+     * @param hostName The host name; either a machine name or a textual representation of its IP address
+     * @return <code>true</code> if black-listed; otherwise <code>false</code>
+     */
+    public static boolean isBlacklisted(String hostName) {
+        if (Strings.isEmpty(hostName)) {
+            return false;
+        }
+        return blacklistedHosts().contains(hostName);
+    }
 
     private static final String PORT_WHITELIST_KEY = "com.openexchange.messaging.rss.feed.whitelist.ports";
 
@@ -166,21 +181,6 @@ public class RssProperties {
     }
 
     /**
-     * Checks if specified host name is black-listed.
-     * <p>
-     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
-     *
-     * @param hostName The host name; either a machine name or a textual representation of its IP address
-     * @return <code>true</code> if black-listed; otherwise <code>false</code>
-     */
-    public static boolean isBlacklisted(String hostName) {
-        if (Strings.isEmpty(hostName)) {
-            return false;
-        }
-        return blacklistedHosts().contains(hostName);
-    }
-
-    /**
      * Checks if specified port is allowed.
      *
      * @param port The port to check
@@ -236,6 +236,7 @@ public class RssProperties {
     }
 
     private static boolean isAllowedScheme(String scheme) {
-        return supportedSchemes().contains(scheme);
+        Set<String> supportedSchemes = supportedSchemes();
+        return supportedSchemes.isEmpty() ? true : supportedSchemes.contains(scheme);
     }
 }
