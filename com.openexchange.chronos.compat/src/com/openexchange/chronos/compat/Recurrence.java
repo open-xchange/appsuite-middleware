@@ -224,7 +224,7 @@ public class Recurrence {
             case YEARLY:
                 cObj.setRecurrenceType(CalendarObject.YEARLY);
                 List<Integer> monthList = rrule.getByPart(Part.BYMONTH);
-                if (!monthList.isEmpty()) {
+                if (null != monthList && !monthList.isEmpty()) {
                     cObj.setMonth(monthList.get(0).intValue() - 1);
                     setMonthDay(cObj, rrule, startDate);
                 } else {
