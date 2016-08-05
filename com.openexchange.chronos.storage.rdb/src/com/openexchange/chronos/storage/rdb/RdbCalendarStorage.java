@@ -336,7 +336,8 @@ public class RdbCalendarStorage implements CalendarStorage {
         if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS))) {
             int[] objectIDs = getObjectIDs(events);
             if (null == fields || contains(fields, EventField.ATTENDEES)) {
-                Map<Integer, List<Attendee>> attendeesById = selectAttendees(connection, contextID, objectIDs, AttendeeField.values());
+                AttendeeLoader attendeeLoader = new AttendeeLoader(connection, contextID);
+                Map<Integer, List<Attendee>> attendeesById = attendeeLoader.loadAttendees(objectIDs, AttendeeField.values());
                 for (Event event : events) {
                     event.setAttendees(attendeesById.get(I(event.getId())));
                 }
@@ -517,8 +518,8 @@ public class RdbCalendarStorage implements CalendarStorage {
             if (CalendarUserType.GROUP.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
                 Context context = Services.getService(ContextService.class).getContext(contextID);
                 Group group = Services.getService(GroupService.class).getGroup(context, attendee.getEntity());
-                HashSet<Integer> members = new HashSet<>(Arrays.asList(Autoboxing.i2I(group.getMember())));
-                groups.put(Autoboxing.I(group.getIdentifier()), members);
+                HashSet<Integer> members = new HashSet<Integer>(Arrays.asList(Autoboxing.i2I(group.getMember())));
+                groups.put(I(group.getIdentifier()), members);
             }
         }
         return groups;
@@ -575,83 +576,6 @@ public class RdbCalendarStorage implements CalendarStorage {
             }
         }
         return null;
-    }
-
-    private static Map<Integer, List<Attendee>> selectAttendees(Connection connection, int contextID, int objectIDs[], AttendeeField[] fields) throws SQLException, OXException {
-        Map<Integer, List<Attendee>> attendeesById = new HashMap<Integer, List<Attendee>>();
-        selectAndAddInternalUserAttendees(attendeesById, connection, contextID, objectIDs, fields);
-        selectAndAddExternalAttendees(attendeesById, connection, contextID, objectIDs, fields);
-        selectAndAddInternalNonUserAttendees(attendeesById, connection, contextID, objectIDs);
-        return attendeesById;
-    }
-
-    private static void selectAndAddInternalUserAttendees(Map<Integer, List<Attendee>> attendeesById, Connection connection, int contextID, int objectIDs[], AttendeeField[] fields) throws SQLException, OXException {
-        AttendeeField[] mappedFields = InternalAttendeeMapper.getInstance().getMappedFields(fields);
-        String sql = new StringBuilder()
-            .append("SELECT object_id,").append(InternalAttendeeMapper.getInstance().getColumns(mappedFields)).append(" FROM prg_dates_members ")
-            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");")
-        .toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, contextID);
-            for (int objectID : objectIDs) {
-                stmt.setInt(parameterIndex++, objectID);
-            }
-            try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                while (resultSet.next()) {
-                    Attendee attendee = InternalAttendeeMapper.getInstance().fromResultSet(resultSet, mappedFields);
-                    attendee.setCuType(CalendarUserType.INDIVIDUAL);
-                    put(attendeesById, I(resultSet.getInt("object_id")), attendee);
-                }
-            }
-        }
-    }
-
-    private static void selectAndAddExternalAttendees(Map<Integer, List<Attendee>> attendeesById, Connection connection, int contextID, int objectIDs[], AttendeeField[] fields) throws SQLException, OXException {
-        AttendeeField[] mappedFields = ExternalAttendeeMapper.getInstance().getMappedFields(fields);
-        String sql = new StringBuilder()
-            .append("SELECT objectId,").append(ExternalAttendeeMapper.getInstance().getColumns(mappedFields)).append(" FROM dateexternal ")
-            .append("WHERE cid=? AND objectId IN (").append(getParameters(objectIDs.length)).append(");")
-        .toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, contextID);
-            for (int objectID : objectIDs) {
-                stmt.setInt(parameterIndex++, objectID);
-            }
-            try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                while (resultSet.next()) {
-                    Attendee attendee = ExternalAttendeeMapper.getInstance().fromResultSet(resultSet, mappedFields);
-                    attendee.setCuType(CalendarUserType.INDIVIDUAL);
-                    put(attendeesById, I(resultSet.getInt("objectId")), attendee);
-                }
-            }
-        }
-    }
-
-    private static void selectAndAddInternalNonUserAttendees(Map<Integer, List<Attendee>> attendeesById, Connection connection, int contextID, int[] objectIDs) throws SQLException {
-        String sql = new StringBuilder()
-            .append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ")
-            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(") ")
-            .append("AND type IN (2,3);")
-        .toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, contextID);
-            for (int objectID : objectIDs) {
-                stmt.setInt(parameterIndex++, objectID);
-            }
-            try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                while (resultSet.next()) {
-                    Attendee attendee = new Attendee();
-                    attendee.setEntity(resultSet.getInt("id"));
-                    attendee.setCuType(Appointment2Event.getCalendarUserType(resultSet.getInt("type")));
-                    attendee.setUri(Appointment2Event.getURI(resultSet.getString("ma")));
-                    attendee.setCommonName(resultSet.getString("dn"));
-                    put(attendeesById, I(resultSet.getInt("object_id")), attendee);
-                }
-            }
-        }
     }
 
     private static Map<Integer, List<Attachment>> selectAttachments(Connection connection, int contextID, int[] objectIDs) throws SQLException {

@@ -62,6 +62,8 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link RdbCalendarStorageActivator}
@@ -83,7 +85,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, GroupService.class, ContextService.class };
+        return new Class<?>[] { DatabaseService.class, GroupService.class, ResourceService.class, UserService.class, ContextService.class };
     }
 
     @Override

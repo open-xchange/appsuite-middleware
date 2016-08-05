@@ -551,10 +551,9 @@ public class EventConverter {
         switch (attendee.getCuType()) {
             case GROUP:
                 GroupParticipant groupParticipant = new GroupParticipant(attendee.getEntity());
-                groupParticipant.setDisplayName(attendee.getCommonName());
-                groupParticipant.setEmailAddress(attendee.getEmail());
+                // display name is not expected for groups participants
+                //                groupParticipant.setDisplayName(attendee.getCommonName());
                 participants.add(groupParticipant);
-                //TODO: confirm status of group members into "users" array?
                 break;
             case INDIVIDUAL:
                 if (0 < attendee.getEntity()) {
@@ -564,12 +563,14 @@ public class EventConverter {
                     userParticipant.setDisplayName(attendee.getCommonName());
                     userParticipant.setEmailAddress(Event2Appointment.getEMailAddress(attendee.getUri()));
                     users.add(userParticipant);
-                    participants.add(userParticipant);
+                    if (null == attendee.getMember()) {
+                        participants.add(userParticipant);
+                    }
                 } else {
                     ExternalUserParticipant externalParticipant = new ExternalUserParticipant(Event2Appointment.getEMailAddress(attendee.getUri()));
                     externalParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
                     externalParticipant.setMessage(attendee.getComment());
-                    externalParticipant.setDisplayName(attendee.getCommonName());
+                    externalParticipant.setDisplayName(attendee.getCn());
                     participants.add(externalParticipant);
                     confirmations.add(externalParticipant);
                 }
@@ -578,7 +579,6 @@ public class EventConverter {
             case ROOM:
                 ResourceParticipant resourceParticipant = new ResourceParticipant(attendee.getEntity());
                 resourceParticipant.setDisplayName(attendee.getCommonName());
-                resourceParticipant.setEmailAddress(resourceParticipant.getEmailAddress());
                 participants.add(resourceParticipant);
                 break;
             case UNKNOWN:

@@ -353,7 +353,7 @@ public class CalendarReader {
         if (session.getUser().getId() != event.getCreatedBy()) {
             requireReadPermission(folder, Permission.READ_ALL_OBJECTS);
         }
-        return userize(event, folder);
+        return userize(Collections.singletonList(event), folder).get(0);
     }
 
     protected List<UserizedEvent> getChangeExceptions(UserizedFolder folder, int objectID) throws OXException {
@@ -447,10 +447,6 @@ public class CalendarReader {
         return sort(userizedEvents, new SortOptions(session));
     }
 
-    private UserizedEvent userize(Event event, UserizedFolder inFolder) throws OXException {
-        return userize(Collections.singletonList(event), inFolder).get(0);
-    }
-
     private Map<Integer, List<Alarm>> readAlarms(List<Event> events, int userID) throws OXException {
         List<Integer> objectIDs = new ArrayList<Integer>(events.size());
         for (Event event : events) {
@@ -467,7 +463,6 @@ public class CalendarReader {
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
         Map<Integer, List<Alarm>> alarmsById = readAlarms(events, calendarUser.getId());
         for (Event event : events) {
-            Check.eventIsInFolder(event, inFolder);
             if (isExcluded(event, session)) {
                 continue;
             }
