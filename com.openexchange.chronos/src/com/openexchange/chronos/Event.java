@@ -88,6 +88,7 @@ public class Event {
 
     private int seriesId;
     private String recurrenceRule;
+    private Date recurrenceId;
     private List<Date> changeExceptionDates;
     private List<Date> deleteExceptionDates;
 
@@ -858,9 +859,9 @@ public class Event {
     }
 
     /**
-     * Sets the recurrence identifier of the event.
+     * Sets the series identifier of the event.
      *
-     * @param value The recurrence identifier to set
+     * @param value The series identifier to set
      */
     public void setSeriesId(int value) {
         seriesId = value;
@@ -918,6 +919,42 @@ public class Event {
      */
     public boolean containsRecurrenceRule() {
         return setFields.contains(EventField.RECURRENCE_RULE);
+    }
+
+    /**
+     * Gets the recurrence identifier of the event.
+     *
+     * @return The recurrence identifier
+     */
+    public Date getRecurrenceId() {
+        return recurrenceId;
+    }
+
+    /**
+     * Sets the recurrence identifier of the event.
+     *
+     * @param value The recurrence identifier to set
+     */
+    public void setRecurrenceId(Date value) {
+        recurrenceId = value;
+        setFields.add(EventField.RECURRENCE_ID);
+    }
+
+    /**
+     * Removes the recurrence identifier of the event.
+     */
+    public void removeRecurrenceId() {
+        recurrenceId = null;
+        setFields.remove(EventField.RECURRENCE_ID);
+    }
+
+    /**
+     * Gets a value indicating whether the recurrence identifier of the event has been set or not.
+     *
+     * @return <code>true</code> if the recurrence identifier is set, <code>false</code>, otherwise
+     */
+    public boolean containsRecurrenceId() {
+        return setFields.contains(EventField.RECURRENCE_ID);
     }
 
     /**

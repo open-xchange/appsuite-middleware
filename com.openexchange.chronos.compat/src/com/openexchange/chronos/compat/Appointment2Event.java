@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.compat;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -231,6 +232,30 @@ public class Appointment2Event {
             return null;
         }
         return Recurrence.getRecurrenceRule(pattern);
+    }
+
+    /**
+     * Gets the recurrence identifier, i.e. the original start time of a recurrence instance, based on the supplied legacy UTC recurrence
+     * date position.
+     *
+     * @param recurrenceRule The recurrence rule
+     * @param recurrenceDatePosition The legacy recurrence date position
+     * @return The recurrence identifier
+     */
+    public static Date getRecurrenceId(String recurrenceRule, Date recurrenceDatePosition) {
+        return recurrenceDatePosition; //TODO
+    }
+
+    /**
+     * Gets the recurrence identifier, i.e. the original start time of a recurrence instance, based on the supplied legacy recurrence
+     * position number.
+     *
+     * @param recurrenceRule The recurrence rule
+     * @param recurrencePosition The legacy recurrence position
+     * @return The recurrence identifier
+     */
+    public static Date getRecurrenceId(String recurrenceRule, int recurrencePosition) {
+        return null; //TODO
     }
 
     /**

@@ -146,6 +146,10 @@ public enum EventField {
      */
     RECURRENCE_RULE,
     /**
+     * The recurrence identifier of the event.
+     */
+    RECURRENCE_ID,
+    /**
      * The change exception dates of the event.
      */
     CHANGE_EXCEPTION_DATES,

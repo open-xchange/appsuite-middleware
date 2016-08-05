@@ -305,6 +305,30 @@ public class Event2Appointment {
     }
 
     /**
+     * Gets the formerly used recurrence date position, i.e. the date where the original occurrence would have been, as UTC date with
+     * truncated time fraction.
+     *
+     * @param recurrenceId The recurrence identifier, i.e. the date where the original occurrence would have been
+     * @return The legacy recurrence date position
+     */
+    public static Date getRecurrenceDatePosition(String recurrenceRule, Date recurrenceId) {
+
+        // TODO
+        return recurrenceId;
+    }
+
+    /**
+     * Gets the 1-based numerical position within the recurring series.
+     *
+     * @param recurrenceId The recurrence identifier, i.e. the date where the original occurrence would have been
+     * @return The legacy recurrence position
+     */
+    public static int getRecurrencePosition(String recurrenceRule, Date recurrenceId) {
+
+        return 1;
+    }
+
+    /**
      * Parses a trigger duration string.
      *
      * @param duration The duration to parse

@@ -593,6 +593,28 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeRecurrenceRule();
             }
         });
+        mappings.put(EventField.RECURRENCE_ID, new DefaultMapping<Date, Event>() {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsRecurrenceId();
+            }
+
+            @Override
+            public void set(Event object, Date value) throws OXException {
+                object.setRecurrenceId(value);
+            }
+
+            @Override
+            public Date get(Event object) {
+                return object.getRecurrenceId();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeRecurrenceId();
+            }
+        });
         mappings.put(EventField.CHANGE_EXCEPTION_DATES, new DefaultMapping<List<Date>, Event>() {
 
             @Override

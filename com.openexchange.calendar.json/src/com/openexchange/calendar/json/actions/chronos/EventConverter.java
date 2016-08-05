@@ -152,6 +152,7 @@ public class EventConverter {
             case CalendarObject.UNTIL:
             case CalendarObject.RECURRENCE_COUNT:
             case Appointment.RECURRENCE_START:
+            case CalendarObject.RECURRENCE_CALCULATOR:
                 return EventField.RECURRENCE_RULE;
             case CalendarObject.DELETE_EXCEPTIONS:
                 return EventField.DELETE_EXCEPTION_DATES;
@@ -176,8 +177,8 @@ public class EventConverter {
                 return EventField.ATTACHMENTS;
             case CalendarObject.RECURRENCE_POSITION:
             case CalendarObject.RECURRENCE_DATE_POSITION:
+                return EventField.RECURRENCE_ID;
             case CalendarObject.NOTIFICATION:
-            case CalendarObject.RECURRENCE_CALCULATOR:
             default:
                 return null;
         }
@@ -236,13 +237,24 @@ public class EventConverter {
         if (appointment.containsRecurrenceID()) {
             event.setSeriesId(appointment.getRecurrenceID());
         }
+        String recurrenceRule = Appointment2Event.getRecurrenceRule(getSeriesPattern(appointment));
         if (appointment.containsRecurrenceType()) {
-            event.setRecurrenceRule(Appointment2Event.getRecurrenceRule(getSeriesPattern(appointment)));
+            event.setRecurrenceRule(recurrenceRule);
+        }
+        if (appointment.containsRecurrenceDatePosition()) {
+            //TODO
+            event.setRecurrenceId(Appointment2Event.getRecurrenceId(recurrenceRule, appointment.getRecurrenceDatePosition()));
+        }
+        if (appointment.containsRecurrencePosition()) {
+            //TODO
+            event.setRecurrenceId(Appointment2Event.getRecurrenceId(recurrenceRule, appointment.getRecurrencePosition()));
         }
         if (appointment.containsChangeExceptions()) {
+            //TODO - UTC dates -> original start time of occurrence?
             event.setChangeExceptionDates(null != appointment.getChangeException() ? Arrays.asList(appointment.getChangeException()) : null);
         }
         if (appointment.containsDeleteExceptions()) {
+            //TODO - UTC dates -> original start time of occurrence?
             event.setDeleteExceptionDates(null != appointment.getDeleteException() ? Arrays.asList(appointment.getDeleteException()) : null);
         }
         //appointment.getNotification();
@@ -350,8 +362,11 @@ public class EventConverter {
         if (event.containsSeriesId()) {
             appointment.setRecurrenceID(event.getSeriesId());
         }
-        //appointment.setRecurrencePosition(0);
-        //appointment.setRecurrenceDatePosition(null);
+        if (event.containsRecurrenceId()) {
+            //TODO
+            appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceRule(), event.getRecurrenceId()));
+            appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(event.getRecurrenceRule(), event.getRecurrenceId()));
+        }
         SeriesPattern pattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimezone(), event.isAllDay());
         if (null != pattern) {
             if (SeriesPattern.MONTHLY_2.equals(pattern.getType())) {
@@ -365,9 +380,11 @@ public class EventConverter {
                 appointment.setRecurringStart(pattern.getSeriesStart().longValue());
             }
             if (null != event.getChangeExceptionDates()) {
+                // TODO: original start date -> utc date
                 appointment.setChangeExceptions(event.getChangeExceptionDates());
             }
             if (null != event.getDeleteExceptionDates()) {
+                // TODO: original start date -> utc date
                 appointment.setDeleteExceptions(event.getDeleteExceptionDates());
             }
             if (null != pattern.getDaysOfWeek()) {

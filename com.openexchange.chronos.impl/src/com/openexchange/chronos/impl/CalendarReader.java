@@ -346,6 +346,9 @@ public class CalendarReader {
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
         Event event = storage.loadEvent(objectID, getFields(session));
+        if (null == event) {
+            throw OXException.notFound(String.valueOf(objectID));//TODO
+        }
         Check.eventIsInFolder(event, folder);
         if (session.getUser().getId() != event.getCreatedBy()) {
             requireReadPermission(folder, Permission.READ_ALL_OBJECTS);
