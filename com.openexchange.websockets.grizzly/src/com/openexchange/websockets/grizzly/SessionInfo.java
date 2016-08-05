@@ -125,4 +125,15 @@ public class SessionInfo {
         return contextId;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(64);
+        builder.append("{");
+        if (sessionId != null) {
+            builder.append("sessionId=").append(sessionId).append(", ");
+        }
+        builder.append("userId=").append(userId).append(", contextId=").append(contextId).append("}");
+        return builder.toString();
+    }
+
 }

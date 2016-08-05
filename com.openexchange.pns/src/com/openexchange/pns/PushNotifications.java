@@ -49,8 +49,8 @@
 
 package com.openexchange.pns;
 
-import java.util.Map;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 
 /**
  * {@link PushNotifications} - The utility class for push notification module.
@@ -82,21 +82,6 @@ public class PushNotifications {
             bytes = payload.getBytes();
         }
         return bytes.length;
-    }
-
-    /**
-     * Checks if specified push notification appears to be a refresh
-     *
-     * @param notification The push notification to examine
-     * @return <code>true</code> if push notification appears is a refresh; otherwise <code>false</code>
-     */
-    public static boolean isRefresh(PushNotification notification) {
-        Map<String, Object> messageData = notification.getMessageData();
-        if (null == messageData) {
-            return false;
-        }
-
-        return "refresh".equals(messageData.get(PushNotificationField.MESSAGE.getId()));
     }
 
     /**
@@ -136,8 +121,8 @@ public class PushNotifications {
      * @throws IllegalArgumentException If the topic name is invalid.
      */
     public static void validateTopicName(String topic) {
-        if (null == topic) {
-            throw new IllegalArgumentException("topic is null");
+        if (Strings.isEmpty(topic)) {
+            throw new IllegalArgumentException("topic is is null, empty or only consists of white-space characters");
         }
 
         if ("*".equals(topic)) {

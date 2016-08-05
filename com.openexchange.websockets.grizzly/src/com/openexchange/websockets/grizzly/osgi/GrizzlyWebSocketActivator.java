@@ -65,7 +65,7 @@ import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketSessionToucher;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+import com.openexchange.websockets.grizzly.remote.HzRemoteWebSocketDistributor;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributorFactory;
 
@@ -79,7 +79,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     private GrizzlyWebSocketApplication app;
     private ScheduledTimerTask sessionToucherTask;
-    private RemoteWebSocketDistributor remoteDistributor;
+    private HzRemoteWebSocketDistributor remoteDistributor;
 
     /**
      * Initializes a new {@link GrizzlyWebSocketActivator}.
@@ -101,12 +101,12 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        RemoteWebSocketDistributor remoteDistributor = new RemoteWebSocketDistributor();
+        HzRemoteWebSocketDistributor remoteDistributor = new HzRemoteWebSocketDistributor(getService(TimerService.class), getService(ConfigurationService.class));
         this.remoteDistributor = remoteDistributor;
 
         WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context, remoteDistributor);
         track(WebSocketListener.class, listenerTracker);
-        track(HazelcastInstance.class, new HazelcastTracker(remoteDistributor, this, context));
+        track(HazelcastInstance.class, new HzTracker(remoteDistributor, this, context));
         openTrackers();
 
         registerService(CustomPortableFactory.class, new PortableMessageDistributorFactory(), null);
@@ -153,7 +153,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
             app.shutDown();
         }
 
-        RemoteWebSocketDistributor remoteDistributor = this.remoteDistributor;
+        HzRemoteWebSocketDistributor remoteDistributor = this.remoteDistributor;
         if (null != remoteDistributor) {
             this.remoteDistributor = null;
             remoteDistributor.shutDown();

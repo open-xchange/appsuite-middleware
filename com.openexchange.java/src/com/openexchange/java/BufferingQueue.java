@@ -473,6 +473,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      *
      * @param e The element to add
      * @return The previous value if it was replaced, or <code>null</code> if there was no equal element in the queue before
+     * @see #transfer(Object, BufferedElement)
      */
     public E offerOrReplaceAndReset(E e) {
         return offerOrReplaceAndReset(e, defaultDelayDuration, defaultMaxDelayDuration);
@@ -486,6 +487,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
      * @param maxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
      * @return The previous value if it was replaced, or <code>null</code> if there was no equal element in the queue before
+     * @see #transfer(Object, BufferedElement)
      */
     public E offerOrReplaceAndReset(E e, long delayDuration, long maxDelayDuration) {
         BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
@@ -498,7 +500,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
                 BufferedElement<E> next = it.next();
                 if (delayedE.equals(next)) {
                     prev = next;
-                    delayedE = new BufferedElement<E>(e, prev);
+                    delayedE = transfer(e, prev);
                     delayedE.reset(); // Resets to prev
                     it.remove();
                 }
@@ -512,6 +514,17 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * Transfers the element to offer to the existing <code>BufferedElement</code> wrapper.
+     *
+     * @param toOffer The element to offer
+     * @param existing The existing <code>BufferedElement</code> wrapper
+     * @return The <code>BufferedElement</code> wrapper holding the transferred element
+     */
+    protected BufferedElement<E> transfer(E toOffer, BufferedElement<E> existing) {
+        return new BufferedElement<E>(toOffer, existing);
     }
 
     /**
@@ -942,7 +955,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
      */
-    private static class BufferedElement<T> implements Delayed {
+    protected static class BufferedElement<T> implements Delayed {
 
         private volatile long stamp;
         private final long delayDuration;
@@ -958,7 +971,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
          * @param maxDelayDuration The the maximum delay duration (in milliseconds) to apply, or <code>0</code> for no maximum
          * @throws IllegalArgumentException If <code>delayDuration</code> is greater than <code>maxDelayDuration</code>
          */
-        BufferedElement(T element, long delayDuration, long maxDelayDuration) {
+        public BufferedElement(T element, long delayDuration, long maxDelayDuration) {
             super();
             if (delayDuration > maxDelayDuration && 0 != maxDelayDuration) {
                 throw new IllegalArgumentException("delayDuration is greater than maxDelayDuration.");
@@ -977,7 +990,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
          * @param element The actual payload element
          * @param source The other element
          */
-        BufferedElement(T element, BufferedElement<T> source) {
+        public BufferedElement(T element, BufferedElement<T> source) {
             super();
             this.element = element;
             this.delayDuration = source.delayDuration;
@@ -1004,9 +1017,9 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
         }
 
         /**
-         * Get the wrapped pushMsObject.
+         * Gets the wrapped element.
          *
-         * @return the wrapped pushMsObject
+         * @return the wrapped element
          */
         public T getElement() {
             return element;
@@ -1030,9 +1043,6 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
         public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
-            }
-            if (null == obj) {
-                return false;
             }
             if (!(obj instanceof BufferedElement)) {
                 return obj.equals(element);

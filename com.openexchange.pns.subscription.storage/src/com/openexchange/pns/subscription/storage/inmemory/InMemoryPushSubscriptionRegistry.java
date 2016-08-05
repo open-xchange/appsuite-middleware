@@ -296,7 +296,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
                 iter.remove();
 
                 PushSubscription source = wrapper.getSubscription();
-                DefaultPushSubscription.Builder builder = new DefaultPushSubscription.Builder().client(source.getClient()).contextId(source.getContextId()).token(newToken).topics(source.getTopics()).transportId(source.getTransportId()).userId(source.getUserId());
+                DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder().client(source.getClient()).contextId(source.getContextId()).token(newToken).topics(source.getTopics()).transportId(source.getTransportId()).userId(source.getUserId());
 
                 if (null == toAdd) {
                     toAdd = new LinkedList<PushSubscriptionWrapper>();

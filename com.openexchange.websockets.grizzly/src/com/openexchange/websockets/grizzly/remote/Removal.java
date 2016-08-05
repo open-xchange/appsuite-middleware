@@ -47,53 +47,52 @@
  *
  */
 
-package com.openexchange.websockets;
-
+package com.openexchange.websockets.grizzly.remote;
 
 /**
- * {@link ConnectionId} - An identifier for a certain session-bound Web Socket connection.
+ * {@link Removal} - Represents a remove operation from Hazelcast multi-map.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class ConnectionId {
+public class Removal {
+
+    private final int userId;
+    private final int contextId;
+    private final String memberUuid;
+    private final String connectionId;
+    private volatile Integer hash;
 
     /**
-     * Creates a new instance.
+     * Initializes a new {@link Removal}.
      *
-     * @param id The identifier
-     * @return The new instance
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param memberUuid The member UUID
+     * @param connectionId The identifier of the Web Socket connection
      */
-    public static ConnectionId newInstance(String id) {
-        return new ConnectionId(id);
-    }
-
-    // ---------------------------------------------------------
-
-    private final String id;
-    private final int hash;
-
-    /**
-     * Initializes a new {@link ConnectionId}.
-     */
-    private ConnectionId(String id) {
+    public Removal(int userId, int contextId, String memberUuid, String connectionId) {
         super();
-        this.id = id;
-        this.hash = 31 * 1 + ((id == null) ? 0 : id.hashCode());
-    }
-
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    public String getId() {
-        return id;
+        this.userId = userId;
+        this.contextId = contextId;
+        this.memberUuid = memberUuid;
+        this.connectionId = connectionId;
     }
 
     @Override
     public int hashCode() {
-        return hash;
+        Integer tmp = hash;
+        if (null == tmp) {
+            int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            result = prime * result + ((memberUuid == null) ? 0 : memberUuid.hashCode());
+            result = prime * result + ((connectionId == null) ? 0 : connectionId.hashCode());
+            tmp = Integer.valueOf(result);
+            hash = tmp;
+        }
+        return tmp.intValue();
     }
 
     @Override
@@ -101,23 +100,67 @@ public class ConnectionId {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ConnectionId)) {
+        if (!(obj instanceof Removal)) {
             return false;
         }
-        ConnectionId other = (ConnectionId) obj;
-        if (id == null) {
-            if (other.id != null) {
+        Removal other = (Removal) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (memberUuid == null) {
+            if (other.memberUuid != null) {
                 return false;
             }
-        } else if (!id.equals(other.id)) {
+        } else if (!memberUuid.equals(other.memberUuid)) {
+            return false;
+        }
+        if (connectionId == null) {
+            if (other.connectionId != null) {
+                return false;
+            }
+        } else if (!connectionId.equals(other.connectionId)) {
             return false;
         }
         return true;
     }
 
-    @Override
-    public String toString() {
-        return id;
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Gets the member UUID
+     *
+     * @return The member UUID
+     */
+    public String getMemberUuid() {
+        return memberUuid;
+    }
+
+    /**
+     * Gets the identifier of the Web Socket connection
+     *
+     * @return The connection identifier
+     */
+    public String getConnectionId() {
+        return connectionId;
     }
 
 }

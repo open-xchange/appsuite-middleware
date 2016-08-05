@@ -102,7 +102,7 @@ public class SubscribeAction extends AbstractPushJsonAction {
             topics.add(topic);
         }
 
-        DefaultPushSubscription.Builder builder = new DefaultPushSubscription.Builder()
+        DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
             .client(client)
             .topics(topics)
             .contextId(session.getContextId())

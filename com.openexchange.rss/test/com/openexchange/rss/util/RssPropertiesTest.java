@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,77 +47,50 @@
  *
  */
 
-package com.openexchange.websockets;
+package com.openexchange.rss.util;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
- * {@link ConnectionId} - An identifier for a certain session-bound Web Socket connection.
+ * {@link RssPropertiesTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class ConnectionId {
+public class RssPropertiesTest {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param id The identifier
-     * @return The new instance
-     */
-    public static ConnectionId newInstance(String id) {
-        return new ConnectionId(id);
+    @Before
+    public void setUp() throws Exception {}
+
+    @Test
+    public void testIsDenied_everythingAllowed_returnTrue() {
+        boolean denied = RssProperties.isDenied("https", "open-xchange.com", 80);
+        
+        assertFalse(denied);
     }
 
-    // ---------------------------------------------------------
+    @Test
+    public void testIsDenied_schemeDenied_returnFalse() {
+        boolean denied = RssProperties.isDenied("rss", "open-xchange.com", 80);
 
-    private final String id;
-    private final int hash;
-
-    /**
-     * Initializes a new {@link ConnectionId}.
-     */
-    private ConnectionId(String id) {
-        super();
-        this.id = id;
-        this.hash = 31 * 1 + ((id == null) ? 0 : id.hashCode());
+        assertTrue(denied);
     }
 
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    public String getId() {
-        return id;
+    @Test
+    public void testIsDenied_hostDenied_returnFalse() {
+        boolean denied = RssProperties.isDenied("https", "localhost", 80);
+        
+        assertTrue(denied);
     }
 
-    @Override
-    public int hashCode() {
-        return hash;
+    @Test
+    public void testIsDenied_portDenied_returnFalse() {
+        boolean denied = RssProperties.isDenied("https", "open-xchange.com", 993);
+        
+        assertTrue(denied);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof ConnectionId)) {
-            return false;
-        }
-        ConnectionId other = (ConnectionId) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return id;
-    }
-
 }

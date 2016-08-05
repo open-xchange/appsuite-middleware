@@ -54,7 +54,6 @@ import java.util.Hashtable;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.internal.AdvertisementPackageServiceImpl;
-import com.openexchange.advertisement.services.CreateAdvertisementTableUpdateTask;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.FailureAwareCapabilityChecker;
@@ -64,8 +63,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.session.Session;
@@ -88,7 +85,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateAdvertisementTableUpdateTask()));
         Services.setServiceLookup(this);
         final String sCapability = "ads";
         Dictionary<String, Object> properties = new Hashtable<>(2);

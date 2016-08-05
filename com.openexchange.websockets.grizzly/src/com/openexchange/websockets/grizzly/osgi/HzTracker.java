@@ -57,26 +57,26 @@ import org.slf4j.Logger;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+import com.openexchange.websockets.grizzly.remote.HzRemoteWebSocketDistributor;
 
 /**
- * {@link HazelcastTracker}
+ * {@link HzTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class HazelcastTracker implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> {
+public class HzTracker implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastTracker.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HzTracker.class);
 
     private final BundleContext context;
-    private final RemoteWebSocketDistributor remoteDistributor;
+    private final HzRemoteWebSocketDistributor remoteDistributor;
     private final GrizzlyWebSocketActivator activator;
 
     /**
-     * Initializes a new {@link HazelcastTracker}.
+     * Initializes a new {@link HzTracker}.
      */
-    public HazelcastTracker(RemoteWebSocketDistributor remoteDistributor, GrizzlyWebSocketActivator activator, BundleContext context) {
+    public HzTracker(HzRemoteWebSocketDistributor remoteDistributor, GrizzlyWebSocketActivator activator, BundleContext context) {
         super();
         this.remoteDistributor = remoteDistributor;
         this.activator = activator;

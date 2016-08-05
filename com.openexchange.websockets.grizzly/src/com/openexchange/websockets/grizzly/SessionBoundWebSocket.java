@@ -141,4 +141,28 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
         return request.getRequestURI();
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(128);
+        builder.append("{");
+        builder.append("userId=").append(getUserId());
+        builder.append(", contextId=").append(getContextId());
+        String sessionId = getSessionId();
+        if (sessionId != null) {
+            builder.append(", sessionId=").append(sessionId);
+        }
+        if (connectionId != null) {
+            builder.append(", connectionId=").append(connectionId);
+        }
+        String path = getPath();
+        if (path != null) {
+            builder.append(", path=").append(getPath());
+        }
+        if (webSocketSession != null) {
+            builder.append(", webSocketSession=").append(webSocketSession);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
 }
