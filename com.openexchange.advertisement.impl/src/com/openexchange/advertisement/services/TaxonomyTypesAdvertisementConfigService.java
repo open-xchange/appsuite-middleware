@@ -49,34 +49,86 @@
 
 package com.openexchange.advertisement.services;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
+import com.openexchange.reseller.ResellerService;
+import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.session.Session;
 
 /**
- * {@link GlobalAdvertisementConfigService} is the default implementation of the {@link AdvertisementConfigService}.
- * 
- * It returns always the default reseller and the default package.
+ * {@link TaxonomyTypesAdvertisementConfigService} is an implementation of the {@link AdvertisementConfigService} based on taxonomy/types.
+ *
+ * It compares the taxonomy/types of the given context with a configured list of packages (com.openexchange.advertisement.taxonomy.types) and returns the first matching item.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfigService {
+public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
-    private static final GlobalAdvertisementConfigService INSTANCE = new GlobalAdvertisementConfigService();
+    private static final String TAXONOMY_TYPES = "taxonomy/types";
+    private static final String TAXONOMY_TYPE_CONFIGURATION = "com.openexchange.advertisement.taxonomy.types";
+    private static TaxonomyTypesAdvertisementConfigService instance = null;
 
-    public static GlobalAdvertisementConfigService getInstance() {
-        return INSTANCE;
+    /**
+     * @return
+     */
+    public static TaxonomyTypesAdvertisementConfigService getInstance() {
+        if (instance == null) {
+            instance = new TaxonomyTypesAdvertisementConfigService();
+        }
+        return instance;
     }
 
     @Override
     String getReseller(Session session) throws OXException {
-        return RESELLER_ALL;
+        ResellerService resellerService = Services.getService(ResellerService.class);
+        ResellerAdmin resellerAdmin = resellerService.getReseller(session.getContextId());
+        return resellerAdmin.getName();
     }
 
     @Override
     String getPackage(Session session) throws OXException {
+        ContextService ctxService = Services.getService(ContextService.class);
+        Context ctx = ctxService.getContext(session.getContextId());
+        Map<String, List<String>> attributes = ctx.getAttributes();
+        List<String> packs = new ArrayList<>();
+        if (attributes.containsKey(TAXONOMY_TYPES)) {
+            List<String> taxonomyTypes = attributes.get(TAXONOMY_TYPES);
+            for (String types : taxonomyTypes) {
+                packs.addAll(Arrays.asList(Strings.splitByComma(types)));
+            }
+        }
+
+        ConfigViewFactory configurationService = Services.getService(ConfigViewFactory.class);
+        ConfigView view = configurationService.getView();
+        String types = view.get(TAXONOMY_TYPE_CONFIGURATION, String.class);
+        if (Strings.isEmpty(types)) {
+            return PACKAGE_ALL;
+        }
+        String[] typesArray = Strings.splitByComma(types);
+
+        for (String type : typesArray) {
+            if (packs.contains(type)) {
+                return type;
+            }
+        }
+
         return PACKAGE_ALL;
+    }
+
+    @Override
+    public String getSchemeId() {
+        return "TaxonomyTypes";
     }
 
 }

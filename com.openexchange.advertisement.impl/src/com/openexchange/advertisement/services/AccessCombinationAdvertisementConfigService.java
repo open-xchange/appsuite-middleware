@@ -49,42 +49,31 @@
 
 package com.openexchange.advertisement.services;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.osgi.Services;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.Strings;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.session.Session;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link TaxonomyTypesAdvertisementConfigService} is an implementation of the {@link AdvertisementConfigService} based on taxonomy/types.
- * 
- * It compares the taxonomy/types of the given context with a configured list of packages (com.openexchange.advertisement.taxonomy.types) and returns the first matching item.
+ * {@link AccessCombinationAdvertisementConfigService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertisementConfigService {
+public class AccessCombinationAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
-    private static final String TAXONOMY_TYPES = "taxonomy/types";
-    private static final String TAXONOMY_TYPE_CONFIGURATION = "com.openexchange.advertisement.taxonomy.types";
-    private static TaxonomyTypesAdvertisementConfigService instance = null;
+    private static AccessCombinationAdvertisementConfigService instance = null;
 
     /**
      * @return
      */
-    public static TaxonomyTypesAdvertisementConfigService getInstance() {
+    public static AccessCombinationAdvertisementConfigService getInstance() {
         if (instance == null) {
-            instance = new TaxonomyTypesAdvertisementConfigService();
+            instance = new AccessCombinationAdvertisementConfigService();
         }
         return instance;
     }
@@ -98,32 +87,14 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
 
     @Override
     String getPackage(Session session) throws OXException {
-        ContextService ctxService = Services.getService(ContextService.class);
-        Context ctx = ctxService.getContext(session.getContextId());
-        Map<String, List<String>> attributes = ctx.getAttributes();
-        List<String> packs = new ArrayList<>();
-        if (attributes.containsKey(TAXONOMY_TYPES)) {
-            List<String> taxonomyTypes = attributes.get(TAXONOMY_TYPES);
-            for (String types : taxonomyTypes) {
-                packs.addAll(Arrays.asList(Strings.splitByComma(types)));
-            }
-        }
-
-        ConfigViewFactory configurationService = Services.getService(ConfigViewFactory.class);
-        ConfigView view = configurationService.getView();
-        String types = view.get(TAXONOMY_TYPE_CONFIGURATION, String.class);
-        if (Strings.isEmpty(types)) {
-            return PACKAGE_ALL;
-        }
-        String[] typesArray = Strings.splitByComma(types);
-
-        for (String type : typesArray) {
-            if (packs.contains(type)) {
-                return type;
-            }
-        }
-
-        return PACKAGE_ALL;
+        UserPermissionService permissionService = Services.getService(UserPermissionService.class);
+        ContextService contextService = Services.getService(ContextService.class);
+        Context ctx = contextService.getContext(session.getContextId());
+        return permissionService.getAccessCombinationName(ctx, session.getUserId());
     }
 
+    @Override
+    public String getSchemeId() {
+        return "AccessCombinations";
+    }
 }

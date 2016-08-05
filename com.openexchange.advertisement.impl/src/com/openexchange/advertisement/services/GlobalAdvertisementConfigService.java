@@ -47,23 +47,41 @@
  *
  */
 
-package com.openexchange.advertisement;
+package com.openexchange.advertisement.services;
 
-import com.openexchange.config.Reloadable;
+import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link AdvertisementPackageService}
+ * {@link GlobalAdvertisementConfigService} is the default implementation of the {@link AdvertisementConfigService}.
+ *
+ * It returns always the default reseller and the default package.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public interface AdvertisementPackageService extends Reloadable {
+public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
-    public static final String DEFAULT_SCHEME_ID = "Global";
-    public static final String DEFAULT_RESELLER = "OX_ALL";
+    private static final GlobalAdvertisementConfigService INSTANCE = new GlobalAdvertisementConfigService();
 
-    public AdvertisementConfigService getScheme(int contextId);
+    public static GlobalAdvertisementConfigService getInstance() {
+        return INSTANCE;
+    }
 
-    public AdvertisementConfigService getDefaultScheme();
+    @Override
+    String getReseller(Session session) throws OXException {
+        return RESELLER_ALL;
+    }
+
+    @Override
+    String getPackage(Session session) throws OXException {
+        return PACKAGE_ALL;
+    }
+
+    @Override
+    public String getSchemeId() {
+        return "Global";
+    }
 
 }
