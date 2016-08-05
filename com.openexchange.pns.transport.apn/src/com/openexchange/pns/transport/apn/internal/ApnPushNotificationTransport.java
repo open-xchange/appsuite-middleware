@@ -75,7 +75,6 @@ import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.DefaultPushSubscription.Builder;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.transport.apn.ApnOptions;
 import com.openexchange.pns.transport.apn.ApnOptionsPerClient;
@@ -423,7 +422,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         }
 
         try {
-            Builder builder = new Builder()
+            DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
                 .contextId(notification.getContextId())
                 .token(device.getToken())
                 .transportId(ID)

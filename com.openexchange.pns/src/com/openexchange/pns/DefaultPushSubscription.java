@@ -76,6 +76,15 @@ public class DefaultPushSubscription implements PushSubscription {
         return builder.build();
     }
 
+    /**
+     * Creates a new builder instance.
+     *
+     * @return The new builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
     /** The builder for a <code>DefaultPushSubscription</code> instance */
     public static class Builder {
 
@@ -88,7 +97,7 @@ public class DefaultPushSubscription implements PushSubscription {
         Nature nature;
 
         /** Creates a new builder */
-        public Builder() {
+        Builder() {
             super();
             nature = Nature.VOLATILE; // Volatile nature by default
         }

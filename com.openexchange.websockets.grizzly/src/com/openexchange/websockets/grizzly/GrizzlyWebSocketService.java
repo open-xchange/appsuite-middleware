@@ -67,6 +67,7 @@ public class GrizzlyWebSocketService implements WebSocketService {
 
     private final GrizzlyWebSocketApplication localApp;
     private final RemoteWebSocketDistributor remoteDistributor;
+    private final boolean asyncRemoteDistribution;
 
     /**
      * Initializes a new {@link GrizzlyWebSocketService}.
@@ -75,6 +76,7 @@ public class GrizzlyWebSocketService implements WebSocketService {
         super();
         this.localApp = app;
         this.remoteDistributor = remoteDistributor;
+        asyncRemoteDistribution = true;
     }
 
     @Override
@@ -96,7 +98,7 @@ public class GrizzlyWebSocketService implements WebSocketService {
         }
 
         localApp.sendToUser(message, pathFilter, userId, contextId);
-        remoteDistributor.sendRemote(message, pathFilter, userId, contextId, false);
+        remoteDistributor.sendRemote(message, pathFilter, userId, contextId, asyncRemoteDistribution);
     }
 
     @Override

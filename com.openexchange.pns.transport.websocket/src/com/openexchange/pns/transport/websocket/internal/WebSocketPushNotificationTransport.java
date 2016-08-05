@@ -220,7 +220,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
             }
 
             // Create subscription instance
-            DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
+            DefaultPushSubscription subscription = DefaultPushSubscription.builder()
                 .client(client)
                 .contextId(socket.getContextId())
                 .nature(Nature.PERSISTENT)
@@ -276,7 +276,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 LOG.info("Initialized new timer task for unsubscribing Web Socket push subscriptions");
             }
 
-            DefaultPushSubscription subscription = new DefaultPushSubscription.Builder()
+            DefaultPushSubscription subscription = DefaultPushSubscription.builder()
                 .client(client)
                 .contextId(socket.getContextId())
                 .nature(Nature.PERSISTENT)
@@ -285,7 +285,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 .transportId(ID)
                 .userId(socket.getUserId())
                 .build();
-            scheduledUnsubscriptions.offerOrReplace(new Unsubscription(subscription));
+            scheduledUnsubscriptions.offerOrReplaceAndReset(new Unsubscription(subscription));
             LOG.info("Scheduled unsubscribing Web Socket push subscription for client {} from user {} in context", client, socket.getUserId(), socket.getContextId());
         }
     }

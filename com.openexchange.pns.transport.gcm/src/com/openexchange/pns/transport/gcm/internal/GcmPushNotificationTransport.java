@@ -75,7 +75,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.osgi.util.RankedService;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.KnownTransport;
-import com.openexchange.pns.DefaultPushSubscription.Builder;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushMessageGenerator;
@@ -498,7 +497,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
 
     private void updateRegistrationIDs(PushNotification notification, String oldRegistrationID, String newRegistrationID) {
         try {
-            Builder builder = new Builder()
+            DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
                 .contextId(notification.getContextId())
                 .token(oldRegistrationID)
                 .transportId(ID)
@@ -518,7 +517,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
 
     private boolean removeRegistrations(PushNotification notification, String registrationID) {
         try {
-            Builder builder = new Builder()
+            DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
                 .contextId(notification.getContextId())
                 .token(registrationID)
                 .transportId(ID)
