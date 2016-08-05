@@ -102,6 +102,21 @@ public class RssProperties {
         }
         return tmp;
     }
+    
+    /**
+     * Checks if specified host name is black-listed.
+     * <p>
+     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
+     *
+     * @param hostName The host name; either a machine name or a textual representation of its IP address
+     * @return <code>true</code> if black-listed; otherwise <code>false</code>
+     */
+    public static boolean isBlacklisted(String hostName) {
+        if (Strings.isEmpty(hostName)) {
+            return false;
+        }
+        return blacklistedHosts().contains(hostName);
+    }
 
     /**
      * Checks if specified host name is black-listed.
