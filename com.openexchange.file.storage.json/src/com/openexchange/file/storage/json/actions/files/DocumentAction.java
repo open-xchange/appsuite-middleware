@@ -148,7 +148,11 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                     if (false == document.getFile().isAccurateSize()) {
                         size = -1;
                     }
-                    FileHolder fileHolder = new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName());
+
+                    FileHolder fileHolder = document.isRepetitive() ?
+                        new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName()) :
+                        new FileHolder(bufferedInputStreamFor(document.getData()), size, document.getMimeType(), document.getName());
+
                     if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
                         fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
                     }
