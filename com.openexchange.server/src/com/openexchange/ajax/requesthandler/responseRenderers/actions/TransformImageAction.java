@@ -278,7 +278,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
                 // Check for an animated .gif or svg image
                 if ("svg".equals(sourceFormatName) || "gif".equals(sourceFormatName) && ImageUtils.isAnimatedGif(stream)) {
-                    return fileHolder;
+                    return file;
                 }
             } finally {
                 Streams.close(stream);
