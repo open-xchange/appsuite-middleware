@@ -166,5 +166,48 @@
             <dropTable tableName="filestore2user" />
         </rollback>
     </changeSet>
+    
+    <!-- ******************************************************* -->
+    <!-- ************** Release 7.8.3 starts here ************** -->
+    <!-- ******************************************************* -->
+    
+    <changeSet id="7.8.3:advertisement_config:createForConfigDB" author="kevin.ruthmann@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="advertisement_config" />
+            </not>
+        </preConditions>
+        <comment>Creates the 'advertisement_config' table</comment>
+        <sql>
+        	CREATE TABLE advertisement_config (
+    		configId int NOT NULL AUTO_INCREMENT,
+    		config text NOT NULL,
+    		PRIMARY KEY (configId)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="advertisement_config" />
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="7.8.3:advertisement_mapping:createForConfigDB" author="kevin.ruthmann@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="advertisement_mapping" />
+            </not>
+        </preConditions>
+        <comment>Creates the 'advertisement_mapping' table</comment>
+        <sql>
+        	CREATE TABLE advertisement_mapping (
+    		reseller VARCHAR(128) NOT NULL,
+    		package VARCHAR(128) NOT NULL,
+    		configId int NOT NULL,
+    		PRIMARY KEY (reseller, package)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="advertisement_mapping" />
+        </rollback>
+    </changeSet>
 
 </databaseChangeLog>
