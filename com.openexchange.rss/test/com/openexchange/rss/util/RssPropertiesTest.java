@@ -47,39 +47,50 @@
  *
  */
 
-package com.openexchange.rss;
+package com.openexchange.rss.util;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.rss.actions.RssActionTest;
-import com.openexchange.rss.actions.RssActionTestReconfiguredHosts;
-import com.openexchange.rss.actions.RssActionTestReconfiguredPorts;
-import com.openexchange.rss.actions.RssActionTestReconfiguredPortsAndHosts;
-import com.openexchange.rss.preprocessors.PreprocessorChainingTest;
-import com.openexchange.rss.util.RssPropertiesTest;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
+
 
 /**
- * Unit tests for the bundle com.openexchange.rss
- * 
+ * {@link RssPropertiesTest}
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * @since v7.8.3
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    PreprocessorChainingTest.class,
-    RssActionTest.class,
-    RssActionTestReconfiguredHosts.class,
-    RssActionTestReconfiguredPorts.class,
-    RssActionTestReconfiguredPortsAndHosts.class,
-    RssPropertiesTest.class
-})
-public class UnitTests {
+public class RssPropertiesTest {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
+    @Before
+    public void setUp() throws Exception {}
+
+    @Test
+    public void testIsDenied_everythingAllowed_returnTrue() {
+        boolean denied = RssProperties.isDenied("https", "open-xchange.com", 80);
+        
+        assertFalse(denied);
+    }
+
+    @Test
+    public void testIsDenied_schemeDenied_returnFalse() {
+        boolean denied = RssProperties.isDenied("rss", "open-xchange.com", 80);
+
+        assertTrue(denied);
+    }
+
+    @Test
+    public void testIsDenied_hostDenied_returnFalse() {
+        boolean denied = RssProperties.isDenied("https", "localhost", 80);
+        
+        assertTrue(denied);
+    }
+
+    @Test
+    public void testIsDenied_portDenied_returnFalse() {
+        boolean denied = RssProperties.isDenied("https", "open-xchange.com", 993);
+        
+        assertTrue(denied);
     }
 }
