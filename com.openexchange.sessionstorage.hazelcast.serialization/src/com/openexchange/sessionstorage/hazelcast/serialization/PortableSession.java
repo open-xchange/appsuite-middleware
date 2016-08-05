@@ -255,7 +255,8 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 List<String> values = parseColonString(reader.readUTF(PARAMETER_REMOTE_PARAMETER_VALUES)); // Expect them, too
                 for (int i = 0, size = names.size(); i < size; i++) {
                     try {
-                        parameters.put(names.get(i), decodeSafeValue(values.get(i)));
+                        Object value = parseToSerializablePojo(decodeSafeValue(values.get(i)));
+                        parameters.put(names.get(i), value);
                     } catch (DecoderException e) {
                         // Ignore
                     }
@@ -335,35 +336,39 @@ public class PortableSession extends StoredSession implements CustomPortable {
             return Boolean.FALSE;
         }
 
-        Object obj = parseObjectFromString(value, Integer.class);
-        if (null != obj) {
-            return obj;
+        try {
+            int i = Integer.parseInt(value, 10);
+            return Integer.valueOf(i);
+        } catch (Exception e) {
+            // Ignore...
         }
 
-        obj = parseObjectFromString(value, Long.class);
-        if (null != obj) {
-            return obj;
+        try {
+            long l = Long.parseLong(value, 10);
+            return Long.valueOf(l);
+        } catch (Exception e) {
+            // Ignore...
         }
 
-        obj = parseObjectFromString(value, Float.class);
-        if (null != obj) {
-            return obj;
+        /*-
+         *
+        try {
+            float f = Float.parseFloat(value);
+            return new Float(f);
+        } catch (Exception e) {
+            // Ignore...
         }
 
-        obj = parseObjectFromString(value, Double.class);
-        if (null != obj) {
-            return obj;
+        try {
+            double d = Double.parseDouble(value);
+            return new Double(d);
+        } catch (Exception e) {
+            // Ignore...
         }
+        *
+        */
 
         return value;
-    }
-
-    private static <T> T parseObjectFromString(String s, Class<T> clazz) {
-        try {
-            return clazz.getConstructor(new Class[] { String.class }).newInstance(s);
-        } catch (Exception e) {
-            return null;
-        }
     }
 
 }
