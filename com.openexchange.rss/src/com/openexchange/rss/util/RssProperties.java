@@ -229,12 +229,9 @@ public class RssProperties {
     }
 
     private static Set<String> toSet(String concatenatedSchemes) {
-        if (Strings.isEmpty(concatenatedSchemes)) {
-            return Collections.emptySet();
-        }
         String[] schemes = Strings.splitByComma(concatenatedSchemes);
         if (schemes == null || schemes.length == 0) {
-            return Collections.emptySet();
+            return Collections.EMPTY_SET;
         }
         return new HashSet<String>(Arrays.asList(schemes));
     }
