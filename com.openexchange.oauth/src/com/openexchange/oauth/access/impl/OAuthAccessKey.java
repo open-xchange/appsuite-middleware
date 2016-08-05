@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.oauth.access;
+package com.openexchange.oauth.access.impl;
 
 /**
  * {@link OAuthAccessKey}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class OAuthAccessKey {
+final class OAuthAccessKey {
 
     private final int contextId;
     private final int userId;
@@ -66,7 +66,7 @@ public final class OAuthAccessKey {
      * @param contextId The context identifier
      * @param userId The user identifier
      */
-    public OAuthAccessKey(final int contextId, final int userId) {
+    OAuthAccessKey(final int contextId, final int userId) {
         super();
         this.contextId = contextId;
         this.userId = userId;
