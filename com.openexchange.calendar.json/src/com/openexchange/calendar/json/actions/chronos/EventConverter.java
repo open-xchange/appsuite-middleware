@@ -436,6 +436,8 @@ public class EventConverter {
         }
         if (event.containsSequence()) {
             appointment.setSequence(event.getSequence());
+        } else {
+            appointment.setSequence(0);
         }
         if (event.containsLocation()) {
             appointment.setLocation(event.getLocation());
