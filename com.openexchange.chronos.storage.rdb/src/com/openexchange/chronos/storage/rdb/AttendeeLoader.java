@@ -115,10 +115,24 @@ public class AttendeeLoader {
         knownResources = new HashMap<Integer, Resource>();
     }
 
+    /**
+     * Loads the attendees for a specific event.
+     *
+     * @param objectID The object identifier of the event to load the attendees for
+     * @param fields The attendee fields to load, or <code>null</code> to load all available fields
+     * @return The attendees
+     */
     public List<Attendee> loadAttendees(int objectID, AttendeeField[] fields) throws OXException {
         return loadAttendees(new int[] { objectID }, fields).get(I(objectID));
     }
 
+    /**
+     * Loads the attendees for multiple events.
+     *
+     * @param objectIDs The object identifiers of the events to load the attendees for
+     * @param fields The attendee fields to load, or <code>null</code> to load all available fields
+     * @return The attendee lists mapped to the corresponding event identifier
+     */
     public Map<Integer, List<Attendee>> loadAttendees(int objectIDs[], AttendeeField[] fields) throws OXException {
         Map<Integer, List<Attendee>> attendeesById = new HashMap<Integer, List<Attendee>>();
         try {
@@ -302,7 +316,10 @@ public class AttendeeLoader {
 
     private Map<Integer, List<Attendee>> selectInternalAttendeeData(int objectIDs[]) throws SQLException, OXException {
         Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
-        String sql = new StringBuilder().append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ").append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");").toString();
+        String sql = 
+            new StringBuilder().append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ")
+            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(") AND type IN (1,2,3);")
+        .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -325,7 +342,10 @@ public class AttendeeLoader {
 
     private Map<Integer, List<Attendee>> selectUserAttendeeData(int objectIDs[]) throws SQLException, OXException {
         Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
-        String sql = new StringBuilder().append("SELECT object_id,member_uid,confirm,reason,pfid FROM prg_dates_members ").append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");").toString();
+        String sql = new StringBuilder()
+            .append("SELECT object_id,member_uid,confirm,reason,pfid FROM prg_dates_members ")
+            .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");")
+        .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -349,7 +369,10 @@ public class AttendeeLoader {
 
     private Map<Integer, List<Attendee>> selectExternalAttendeeData(int objectIDs[]) throws SQLException, OXException {
         Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
-        String sql = new StringBuilder().append("SELECT objectId,mailAddress,displayName,confirm,reason FROM dateexternal ").append("WHERE cid=? AND objectId IN (").append(getParameters(objectIDs.length)).append(");").toString();
+        String sql = new StringBuilder()
+            .append("SELECT objectId,mailAddress,displayName,confirm,reason FROM dateexternal ")
+            .append("WHERE cid=? AND objectId IN (").append(getParameters(objectIDs.length)).append(");")
+        .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
