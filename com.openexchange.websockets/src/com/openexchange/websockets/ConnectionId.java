@@ -115,5 +115,9 @@ public class ConnectionId {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return id;
+    }
 
 }

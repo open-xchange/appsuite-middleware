@@ -103,4 +103,9 @@ public class WebSocketSessionImpl implements WebSocketSession {
         attributes.remove(name);
     }
 
+    @Override
+    public String toString() {
+        return attributes.toString();
+    }
+
 }

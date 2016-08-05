@@ -166,4 +166,9 @@ public class WebSocketImpl implements WebSocket {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return grizzlySocket.toString();
+    }
+
 }
