@@ -52,12 +52,17 @@ package com.openexchange.calendar.json.actions;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -83,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data. The alias \"all\" uses the predefined columnset [1, 20, 207, 206, 2].")
     }, responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public class ChangeExceptionsAction extends AppointmentAction {
+public class ChangeExceptionsAction extends ChronosAction {
 
     /**
      * Initializes a new {@link ChangeExceptionsAction}.
@@ -120,6 +125,15 @@ public class ChangeExceptionsAction extends AppointmentAction {
         final CalendarDataObject[] appointments = collection.getChangeExceptionsByRecurrence(id, _appointmentFields, session);
 
         return new AJAXRequestResult(Arrays.asList(appointments), timestamp, "appointment");
+    }
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarSession calendarSession = initSession(request);
+        int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
+        List<UserizedEvent> events = calendarService.getChangeExceptions(calendarSession, folderID, objectID);
+        return getAppointmentResultWithTimestamp(events);
     }
 
 }

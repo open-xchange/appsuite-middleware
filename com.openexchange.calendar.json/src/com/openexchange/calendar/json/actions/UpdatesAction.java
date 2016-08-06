@@ -315,7 +315,11 @@ public final class UpdatesAction extends ChronosAction {
                 deletedEvents = null;
             }
         }
-        return getAppointmentDeltaResultWithTimestamp(newAndModifiedEvents, deletedEvents);
+        AJAXRequestResult deltaResult = getAppointmentDeltaResultWithTimestamp(newAndModifiedEvents, deletedEvents);
+        if (null == deltaResult.getTimestamp() || deltaResult.getTimestamp().before(since)) {
+            deltaResult.setTimestamp(since);
+        }
+        return deltaResult;
     }
 
 }

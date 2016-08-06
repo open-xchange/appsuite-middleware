@@ -63,6 +63,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarService;
+import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -96,7 +101,7 @@ import com.openexchange.tools.iterator.SearchIterator;
     @Parameter(name = "limit", description = "limits the number of returned object to the given value.")
 }, responseDescription = "An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class NewAppointmentsSearchAction extends AppointmentAction {
+public final class NewAppointmentsSearchAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(NewAppointmentsSearchAction.class);
@@ -216,6 +221,17 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
                 searchIterator.close();
             }
         }
+    }
+
+    private static final String[] REQUIRED_PARAMETERS = { 
+        CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END
+    };
+
+    @Override
+    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        CalendarSession calendarSession = initSession(request, REQUIRED_PARAMETERS);
+        List<UserizedEvent> events = calendarService.getEventsOfUser(calendarSession);
+        return getAppointmentResultWithTimestamp(events);
     }
 
 }

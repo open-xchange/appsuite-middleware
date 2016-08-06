@@ -102,14 +102,64 @@ public abstract class ChronosAction extends AppointmentAction {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
         }
         AppointmentAJAXRequest request = AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(requestData, session);
-
-        boolean performNew = true;
+        boolean legacy;
+        switch (requestData.getAction().toLowerCase()) {
+            case "all":
+                legacy = false;
+                break;
+            case "list":
+                legacy = false;
+                break;
+            case "get":
+                legacy = false;
+                break;
+            case "updates":
+                legacy = false;
+                break;
+            case "search":
+                legacy = true;
+                break;
+            case "newappointments":
+                legacy = true;
+                break;
+            case "has":
+                legacy = true;
+                break;
+            case "resolveuid":
+                legacy = true;
+                break;
+            case "freebusy":
+                legacy = true;
+                break;
+            case "getChangeExceptions":
+                legacy = true;
+                break;
+            case "new":
+                legacy = true;
+                break;
+            case "update":
+                legacy = true;
+                break;
+            case "confirm":
+                legacy = true;
+                break;
+            case "delete":
+                legacy = true;
+                break;
+            case "copy":
+                legacy = true;
+                break;
+            default:
+                legacy = false;
+                break;
+        }
         String legacyValue = request.getParameter("legacy");
         if (null != legacyValue) {
-            performNew = false == Boolean.parseBoolean(legacyValue);
+            legacy = Boolean.parseBoolean(legacyValue);
         }
+        //        legacy = true;
         try {
-            return performNew ? perform(getService(CalendarService.class), request) : perform(request);
+            return legacy ? perform(request) : perform(getService(CalendarService.class), request);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
