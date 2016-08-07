@@ -57,6 +57,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.json.ImmutableJSONObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -65,7 +66,6 @@ import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementExceptionCodes;
 import com.openexchange.advertisement.osgi.Services;
 import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -90,6 +90,9 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
 
     private static final Logger LOG = LoggerFactory.getLogger(AdvertisementConfigService.class);
 
+    /** The cache region name */
+    public static final String CACHING_REGION = AbstractAdvertisementConfigService.class.getSimpleName();
+
     private static final String SQL_INSERT_MAPPING = "REPLACE INTO advertisement_mapping (reseller,package,configId) VALUES (?,?,?);";
     private static final String SQL_INSERT_CONFIG = "INSERT INTO advertisement_config (config) VALUES (?);";
     private static final String SQL_UPDATE_CONFIG = "UPDATE advertisement_config SET config=? where configId=?;";
@@ -101,9 +104,31 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     protected static final String RESELLER_ALL = "OX_ALL";
     protected static final String PACKAGE_ALL = "OX_ALL";
     private static final String PREVIEW_CONFIG = "com.openexchange.advertisement.preview";
-    private static final String CACHING_REGION = AbstractAdvertisementConfigService.class.getSimpleName();
 
+    /**
+     * Initializes a new {@link AbstractAdvertisementConfigService}.
+     */
+    protected AbstractAdvertisementConfigService() {
+        super();
+    }
 
+    /**
+     * Gets the reseller name associated with specified session.
+     *
+     * @param session The session
+     * @return The reseller name
+     * @throws OXException If reseller name cannot be resolved
+     */
+    protected abstract String getReseller(Session session) throws OXException;
+
+    /**
+     * Gets the package name associated with specified session.
+     *
+     * @param session The session
+     * @return The package name
+     * @throws OXException If package name cannot be resolved
+     */
+    protected abstract String getPackage(Session session) throws OXException;
 
     @Override
     public boolean isAvailable(Session session) {
@@ -114,13 +139,8 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         }
     }
 
-    abstract String getReseller(Session session) throws OXException;
-
-    abstract String getPackage(Session session) throws OXException;
-
     @Override
     public JSONObject getConfig(Session session) throws OXException {
-
         CacheService cacheService = Services.getService(CacheService.class);
         if (cacheService == null) {
             // get config without cache
@@ -131,12 +151,12 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 try {
                     reseller = getReseller(session);
                 } catch (OXException e) {
-                    LOG.debug("Error while retrieving the reseller for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+                    LOG.debug("Error while retrieving the reseller for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                 }
                 try {
                     pack = getPackage(session);
                 } catch (OXException e) {
-                    LOG.debug("Error while retrieving the package for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+                    LOG.debug("Error while retrieving the package for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                 }
                 // fallback to defaults in case reseller or package is empty
                 if (Strings.isEmpty(reseller)) {
@@ -153,14 +173,14 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         //check user cache first
         Cache cache = cacheService.getCache(CACHING_REGION);
         CacheKey key = cache.newCacheKey(session.getContextId(), session.getUserId());
-        CacheElement element = cache.getCacheElement(key);
-        if (element != null && element.getVal() instanceof JSONObject) {
-            return (JSONObject) element.getVal();
+        Object object = cache.get(key);
+        if (object instanceof JSONObject) {
+            return (JSONObject) object;
         }
 
         JSONObject result = getConfigByUserInternal(session);
         if (result != null) {
-            cache.put(key, result, true);
+            cache.put(key, ImmutableJSONObject.immutableFor(result), false);
             return result;
         }
         //  ------
@@ -171,12 +191,12 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         try {
             reseller = getReseller(session);
         } catch (OXException e) {
-            LOG.debug("Error while retrieving the reseller for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+            LOG.debug("Error while retrieving the reseller for user {} in context {}.", session.getUserId(), session.getContextId(), e);
         }
         try {
             pack = getPackage(session);
         } catch (OXException e) {
-            LOG.debug("Error while retrieving the package for user %s in context %s: %s", session.getUserId(), session.getContextId(), e.getMessage());
+            LOG.debug("Error while retrieving the package for user {} in context {}.", session.getUserId(), session.getContextId(), e);
         }
 
         // fallback to defaults in case reseller or package is empty
@@ -188,13 +208,13 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         }
 
         key = cache.newCacheKey(-1, reseller, pack);
-        element = cache.getCacheElement(key);
-        if (element != null && element.getVal() instanceof JSONObject) {
-            return (JSONObject) element.getVal();
+        object = cache.get(key);
+        if (object instanceof JSONObject) {
+            return (JSONObject) object;
         }
 
         result = getConfigInternal(session, reseller, pack);
-        cache.put(key, result, true);
+        cache.put(key, ImmutableJSONObject.immutableFor(result), false);
         return result;
     }
 
@@ -203,7 +223,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
         String id = view.get(PREVIEW_CONFIG, String.class);
         if (!Strings.isEmpty(id)) {
-            int configId = Integer.valueOf(id);
+            int configId = Integer.parseInt(id);
 
             DatabaseService dbService = Services.getService(DatabaseService.class);
             Connection con = dbService.getReadOnly();
@@ -219,7 +239,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
             } catch (SQLException e) {
                 throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
             } catch (JSONException e) {
-                LOG.warn("Invalid advertisement configuration data with id %s", configId);
+                LOG.warn("Invalid advertisement configuration data with id {}", configId);
                 // Invalid advertisement data. Fallback to reseller and package
             } finally {
                 DBUtils.closeSQLStuff(result, stmt);
@@ -279,7 +299,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     }
                     DBUtils.closeSQLStuff(result, stmt);
                 } catch (JSONException e) {
-                    LOG.error("Invalid advertisement configuration data for reseller %s and package %s", reseller, config.getPackage());
+                    LOG.error("Invalid advertisement configuration data for reseller {} and package {}", reseller, config.getPackage());
                 }
             }
             throw AdvertisementExceptionCodes.CONFIG_NOT_FOUND.create(session.getUserId(), session.getContextId());
@@ -315,7 +335,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         try {
             if (property.isDefined()) {
                 String value = property.get();
-                int configId = Integer.valueOf(value);
+                int configId = Integer.parseInt(value);
                 if (config == null) {
                     stmt = con.prepareStatement(SQL_DELETE_CONFIG);
                     stmt.setInt(1, configId);

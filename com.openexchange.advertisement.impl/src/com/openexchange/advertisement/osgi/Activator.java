@@ -49,7 +49,9 @@
 
 package com.openexchange.advertisement.osgi;
 
+import java.io.ByteArrayInputStream;
 import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.services.AbstractAdvertisementConfigService;
 import com.openexchange.advertisement.services.AccessCombinationAdvertisementConfigService;
 import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
 import com.openexchange.advertisement.services.TaxonomyTypesAdvertisementConfigService;
@@ -80,10 +82,36 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+
+        // Define cache regions
+        {
+            final String regionName = AbstractAdvertisementConfigService.CACHING_REGION;
+            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=10000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
+        }
+
         registerService(AdvertisementConfigService.class, AccessCombinationAdvertisementConfigService.getInstance());
         registerService(AdvertisementConfigService.class, GlobalAdvertisementConfigService.getInstance());
         registerService(AdvertisementConfigService.class, TaxonomyTypesAdvertisementConfigService.getInstance());
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        super.stopBundle();
+    }
 
 }

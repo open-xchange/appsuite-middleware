@@ -66,27 +66,33 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class AccessCombinationAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
-    private static AccessCombinationAdvertisementConfigService instance = null;
-
     /**
-     * @return
+     * Gets the instance of {@code AccessCombinationAdvertisementConfigService}; initializes it if necessary.
+     *
+     * @return The instance
      */
     public static AccessCombinationAdvertisementConfigService getInstance() {
-        if (instance == null) {
-            instance = new AccessCombinationAdvertisementConfigService();
-        }
-        return instance;
+        return new AccessCombinationAdvertisementConfigService();
+    }
+
+    // -------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link AccessCombinationAdvertisementConfigService}.
+     */
+    private AccessCombinationAdvertisementConfigService() {
+        super();
     }
 
     @Override
-    String getReseller(Session session) throws OXException {
+    protected String getReseller(Session session) throws OXException {
         ResellerService resellerService = Services.getService(ResellerService.class);
         ResellerAdmin resellerAdmin = resellerService.getReseller(session.getContextId());
         return resellerAdmin.getName();
     }
 
     @Override
-    String getPackage(Session session) throws OXException {
+    protected String getPackage(Session session) throws OXException {
         UserPermissionService permissionService = Services.getService(UserPermissionService.class);
         ContextService contextService = Services.getService(ContextService.class);
         Context ctx = contextService.getContext(session.getContextId());
@@ -97,4 +103,5 @@ public class AccessCombinationAdvertisementConfigService extends AbstractAdverti
     public String getSchemeId() {
         return "AccessCombinations";
     }
+
 }

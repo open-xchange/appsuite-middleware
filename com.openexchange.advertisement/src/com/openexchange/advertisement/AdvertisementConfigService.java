@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link AdvertisementConfigService}
+ * {@link AdvertisementConfigService} - The service to manage advertisement configurations for users and/or resellers.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
@@ -65,63 +65,68 @@ public interface AdvertisementConfigService {
      * Checks if an advertisement configuration is available for the given user
      *
      * @param session The user session
+     * @return <code>true</code> if such an advertisement configuration is available; otherwise <code>false</code>
      */
     public boolean isAvailable(Session session);
 
     /**
-     * Retrieves the advertisment config for a given user
+     * Retrieves the advertisement configuration for a given user
      *
      * @param session The user session
-     * @return The config in json form
-     * @throws OXException
+     * @return The JSON representation for the configuration
+     * @throws OXException If configuration cannot be returned
      */
     public JSONObject getConfig(Session session) throws OXException;
 
     /**
-     * Sets an advertisement config for a given user by name. This is for testing purpose only.
-     * Setting the config parameter to null will delete the current configuration for the user.
+     * Sets an advertisement configuration for a given user by name. This is for testing purpose only.
+     * <p>
+     * Setting the configuration parameter to null will delete the current configuration for the user.
      *
      * @param name The login name of the user
-     * @param ctxId The context id
-     * @param config The advertisement config
-     * @throws OXException
+     * @param ctxId The context identifier
+     * @param config The advertisement configuration
+     * @throws OXException If advertisement configuration cannot be set
      */
     public void setConfigByName(String name, int ctxId, String config) throws OXException;
 
     /**
-     * Sets an advertisement config for a given user. This is for testing purpose only.
-     * Setting the config parameter to null will delete the current configuration for the user.
+     * Sets an advertisement configuration for a given user. This is for testing purpose only.
+     * <p>
+     * Setting the configuration parameter to <code>null</code> will delete the current configuration for the user.
      *
-     * @param userId
-     * @param ctxId
-     * @param config The advertisement config
-     * @throws OXException
+     * @param userId The user identifier
+     * @param ctxId The context identifier
+     * @param config The advertisement configuration
+     * @throws OXException If advertisement configuration cannot be set
      */
     public void setConfig(int userId, int ctxId, String config) throws OXException;
 
     /**
-     * Sets an advertisement config for a given package of a given reseller
-     * Setting the config parameter to null will delete the current configuration.
+     * Sets an advertisement configuration for a given package of a given reseller.
+     * <p>
+     * Setting the configuration parameter to <code>null</code> will delete the current configuration.
      *
-     * @param reseller
-     * @param pack
-     * @param config The advertisement config
-     * @throws OXException
+     * @param reseller The reseller name
+     * @param pack The package name
+     * @param config The advertisement configuration
+     * @throws OXException If advertisement configuration cannot be set
      */
     public void setConfig(String reseller, String pack, String config) throws OXException;
 
     /**
-     * Sets an advertisement config for a given reseller
-     * Setting the config parameter to null will delete the current configuration for the reseller.
+     * Sets an advertisement configuration for a given reseller.
+     * <p>
+     * Setting the configuration parameter to <code>null</code> will delete the current configuration for the reseller.
      *
-     * @param reseller
-     * @param config The advertisement config
-     * @throws OXException
+     * @param reseller The reseller name
+     * @param config The advertisement configuration
+     * @throws OXException If advertisement configuration cannot be set
      */
     public void setConfig(String reseller, String config) throws OXException;
 
     /**
-     * Retrieves the package scheme identifier for this config service.
+     * Retrieves the package scheme identifier for this configuration service.
      *
      * @return The package scheme identifier
      */

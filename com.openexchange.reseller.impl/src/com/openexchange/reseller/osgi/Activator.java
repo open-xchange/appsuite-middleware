@@ -68,9 +68,13 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(ResellerService.class, ResellerServiceImpl.getInstance());
+        registerService(ResellerService.class, new ResellerServiceImpl(getService(DatabaseService.class)));
 
     }
 

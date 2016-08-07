@@ -52,7 +52,6 @@ package com.openexchange.reseller.data;
  * Interface for all Objects containing a password mechanism and a password
  *
  * @author choeger
- *
  */
 public interface PasswordMechObject {
 
@@ -63,7 +62,7 @@ public interface PasswordMechObject {
     /**
      * @return the passwordMech
      */
-    abstract String getPasswordMech();
+    String getPasswordMech();
 
     /**
      * Represents the password encryption mechanism, value is a password
@@ -73,12 +72,12 @@ public interface PasswordMechObject {
      * @param passwordMech
      *                the passwordMech to set
      */
-    abstract void setPasswordMech(final String passwordMech);
+    void setPasswordMech(final String passwordMech);
 
     /**
      * Return the password of this user object.
      *
      * @return A {@link String} containing the password
      */
-    abstract String getPassword();
+    String getPassword();
 }
