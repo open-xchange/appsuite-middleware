@@ -190,6 +190,16 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * Internal constructor.
+     *
+     * @param myHashMap The map to use
+     */
+    JSONObject(Map<String, Object> myHashMap, boolean internal) {
+        super();
+        this.myHashMap = myHashMap;
+    }
+
+    /**
      * Construct a JSONObject from a subset of another JSONObject. An array of strings is used to identify the keys that should be copied.
      * Missing keys are ignored.
      *
@@ -367,6 +377,15 @@ public class JSONObject extends AbstractJSONValue {
         if (!"{}".equals(string)) {
             parse(new UnsynchronizedStringReader(string), this);
         }
+    }
+
+    /**
+     * Gets the reference to the internal map.
+     *
+     * @return The internal map
+     */
+    Map<String, Object> getMyHashMap() {
+        return myHashMap;
     }
 
     @Override
