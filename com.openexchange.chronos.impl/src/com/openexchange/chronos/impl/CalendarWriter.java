@@ -59,6 +59,7 @@ import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Check.requireWritePermission;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
@@ -73,6 +74,7 @@ import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -235,6 +237,15 @@ public class CalendarWriter extends CalendarReader {
                      * verify existence of group attendee & resolve to members
                      */
                     Group group = getGroup(attendee.getEntity());
+                    Attendee groupAttendee = new Attendee();
+                    groupAttendee.setEntity(group.getIdentifier());
+                    groupAttendee.setCuType(CalendarUserType.GROUP);
+                    groupAttendee.setPartStat(ParticipationStatus.ACCEPTED);
+                    groupAttendee.setUri(CalendarUtils.getCalAddress(session.getContext().getContextId(), group));
+                    groupAttendee.setCn(group.getDisplayName());
+                    if (false == contains(preparedAttendees, groupAttendee)) {
+                        preparedAttendees.add(groupAttendee);
+                    }
                     for (int userID : group.getMember()) {
                         User user = getUser(userID);
                         Attendee memberAttendee = CalendarUtils.applyProperties(new Attendee(), user);
@@ -252,15 +263,17 @@ public class CalendarWriter extends CalendarReader {
                      */
                     Resource resource = getResource(attendee.getEntity());
                     Attendee resourceAttendee = new Attendee();
+                    resourceAttendee.setEntity(resource.getIdentifier());
                     resourceAttendee.setCuType(attendee.getCuType());
                     resourceAttendee.setPartStat(ParticipationStatus.ACCEPTED);
                     resourceAttendee.setUri(CalendarUtils.getCalAddress(session.getContext().getContextId(), resource));
-                    resourceAttendee.setCommonName(resource.getDisplayName());
+                    resourceAttendee.setCn(resource.getDisplayName());
                     resourceAttendee.setComment(resource.getDescription());
                     if (false == contains(preparedAttendees, resourceAttendee)) {
                         preparedAttendees.add(resourceAttendee);
                     }
                 } else {
+                    Type type = folder.getType();
                     /*
                      * verify existence of user attendee
                      */
@@ -292,9 +305,12 @@ public class CalendarWriter extends CalendarReader {
         requireWritePermission(folder, Permission.WRITE_OWN_OBJECTS);
         Event event = userizedEvent.getEvent();
         User calendarUser = getCalendarUser(folder);
-        Consistency.setCreatedNow(event, calendarUser.getId());
-        Consistency.setModifiedNow(event, session.getUser().getId());
-        Consistency.setOrganizer(event, calendarUser, getProxyUser(folder));
+        Date now = new Date();
+        event.setCreated(now);
+        event.setCreatedBy(calendarUser.getId());
+        event.setLastModified(now);
+        event.setModifiedBy(session.getUser().getId());
+        //        Consistency.setOrganizer(event, calendarUser, getProxyUser(folder));
         Consistency.setTimeZone(event, calendarUser);
         Consistency.adjustAllDayDates(event);
         event.setSequence(0);

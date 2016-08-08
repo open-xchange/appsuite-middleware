@@ -60,7 +60,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -87,18 +86,13 @@ import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
-import com.openexchange.context.ContextService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -257,7 +251,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             txPolicy.setAutoCommit(connection, false);
             updated = insertEvent(connection, context.getContextId(), event);
             if (event.containsAttendees() && null != event.getAttendees()) {
-                updated += insertAttendees(connection, context.getContextId(), event.getId(), event.getAttendees());
+                updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), event.getId(), event.getAttendees());
             }
             if (event.containsAttachments() && null != event.getAttachments()) {
                 //TODO
@@ -282,7 +276,7 @@ public class RdbCalendarStorage implements CalendarStorage {
                 //TODO: merge - loosing reminder otherwise
                 updated += deleteAttendees(connection, context.getContextId(), event.getId());
                 if (null != event.getAttendees()) {
-                    updated += insertAttendees(connection, context.getContextId(), event.getId(), event.getAttendees());
+                    updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), event.getId(), event.getAttendees());
                 }
             }
             if (event.containsAttachments()) {
@@ -432,98 +426,56 @@ public class RdbCalendarStorage implements CalendarStorage {
     }
 
     private static int insertTombstoneAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
-        int updated = 0;
-        Set<Integer> usedEntities = new HashSet<>();
-        Map<Integer, Set<Integer>> groups = loadGroups(contextID, attendees);
-        for (Attendee attendee : attendees) {
-            if (0 >= attendee.getEntity()) {
-                /*
-                 * insert additional record into deldateexternal for external users
-                 */
-                updated += insertOrReplaceDateExternal(connection, "deldateexternal", true, contextID, objectID, attendee);
-            } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
-                /*
-                 * insert additional record into del_dates_members for each internal user
-                 */
-                updated += insertOrReplaceDatesMembers(connection, "del_dates_members", true, contextID, objectID, attendee);
-            }
-            if (false == isGroupMember(attendee, groups)) {
-                /*
-                 * insert record into del_date_rights for each attendee, skipping group members
-                 */
-                int entity = determineEntity(attendee, usedEntities);
-                updated += insertOrReplaceDateRights(connection, "del_date_rights", true, contextID, objectID, entity, attendee);
-                usedEntities.add(I(entity));
-            }
-        }
-        return updated;
+        return insertOrReplaceAttendees(connection, true, true, contextID, objectID, attendees);
     }
 
-    private static int insertAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
+    private static int insertOrReplaceAttendees(Connection connection, boolean deleted, boolean replace, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
         int updated = 0;
-        Set<Integer> usedEntities = new HashSet<>();
-        Map<Integer, Set<Integer>> groups = loadGroups(contextID, attendees);
+        Set<Integer> usedEntities = new HashSet<Integer>();
         for (Attendee attendee : attendees) {
             if (0 >= attendee.getEntity()) {
                 /*
                  * insert additional record into dateExternal for external users
                  */
-                updated += insertOrReplaceDateExternal(connection, "dateexternal", false, contextID, objectID, attendee);
+                updated += insertOrReplaceDateExternal(connection, deleted ? "dateexternal" : "deldateexternal", replace, contextID, objectID, attendee);
             } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
                 /*
                  * insert additional record into prg_dates_members for each internal user
                  */
-                updated += insertOrReplaceDatesMembers(connection, "prg_dates_members", false, contextID, objectID, attendee);
+                updated += insertOrReplaceDatesMembers(connection, deleted ? "del_dates_members" : "prg_dates_members", replace, contextID, objectID, attendee);
             }
-            if (false == isGroupMember(attendee, groups)) {
+            if (null == attendee.getMember()) {
                 /*
                  * insert record into prg_date_rights for each attendee, skipping group members
                  */
                 int entity = determineEntity(attendee, usedEntities);
-                updated += insertOrReplaceDateRights(connection, "prg_date_rights", false, contextID, objectID, entity, attendee);
-                usedEntities.add(Integer.valueOf(entity));
+                updated += insertOrReplaceDateRights(connection, deleted ? "del_date_rights" : "prg_date_rights", replace, contextID, objectID, entity, attendee);
             }
         }
         return updated;
     }
 
+    /**
+     * Determines the next unique entity identifier to use when inserting an entry into the <code>prg_date_rights</code> table. For
+     * "internal" attendees, this is always the (already unique) entity identifier itself. For "external" attendees, the identifier is
+     * always negative and based on the hash code of the URI.
+     *
+     * @param attendee The attendee to determine the entity for
+     * @param usedEntities The so far used entities to avoid hash collisions
+     * @return The entity
+     */
     private static int determineEntity(Attendee attendee, Set<Integer> usedEntities) {
         if (0 < attendee.getEntity()) {
-            usedEntities.add(Integer.valueOf(attendee.getEntity()));
+            usedEntities.add((attendee.getEntity()));
             return attendee.getEntity();
         } else {
             String uri = attendee.getUri();
             int entity = -1 * Math.abs(null != uri ? uri.hashCode() : 1);
-            while (false == usedEntities.add(Integer.valueOf(entity))) {
+            while (false == usedEntities.add(I(entity))) {
                 entity--;
             }
             return entity;
         }
-    }
-
-    private static boolean isGroupMember(Attendee attendee, Map<Integer, Set<Integer>> groups) {
-        if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity() && null != groups && 0 < groups.size()) {
-            Integer id = Autoboxing.I(attendee.getEntity());
-            for (Set<Integer> members : groups.values()) {
-                if (members.contains(id)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static Map<Integer, Set<Integer>> loadGroups(int contextID, List<Attendee> attendees) throws OXException {
-        Map<Integer, Set<Integer>> groups = new HashMap<>();
-        for (Attendee attendee : attendees) {
-            if (CalendarUserType.GROUP.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
-                Context context = Services.getService(ContextService.class).getContext(contextID);
-                Group group = Services.getService(GroupService.class).getGroup(context, attendee.getEntity());
-                HashSet<Integer> members = new HashSet<Integer>(Arrays.asList(Autoboxing.i2I(group.getMember())));
-                groups.put(I(group.getIdentifier()), members);
-            }
-        }
-        return groups;
     }
 
     private static int insertTombstoneEvent(Connection connection, int contextID, Event event) throws SQLException, OXException {
@@ -828,6 +780,14 @@ public class RdbCalendarStorage implements CalendarStorage {
                 event.setStartDate(seriesPeriod.getStartDate());
                 event.setEndDate(seriesPeriod.getEndDate());
             }
+        }
+        /*
+         * truncate milliseconds from creation date to avoid bad rounding in MySQL versions >= 7.6.4.
+         * See: http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
+         * See: com.openexchange.sql.tools.SQLTools.toTimestamp(Date)
+         */
+        if (event.containsCreated() && null != event.getCreated()) {
+            event.setCreated(new Date((event.getCreated().getTime() / 1000) * 1000));
         }
         return event;
     }

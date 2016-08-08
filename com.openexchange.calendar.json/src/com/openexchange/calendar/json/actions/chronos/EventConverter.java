@@ -482,7 +482,7 @@ public class EventConverter {
             attendee.setCuType(Appointment2Event.getCalendarUserType(participant.getType()));
         }
         if (null != participant.getEmailAddress()) {
-            Appointment2Event.getURI(participant.getEmailAddress());
+            attendee.setUri(Appointment2Event.getURI(participant.getEmailAddress()));
         }
         if (null != participant.getDisplayName()) {
             attendee.setCommonName(participant.getDisplayName());

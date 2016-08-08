@@ -131,6 +131,9 @@ public class Event2Appointment {
      * @return The legacy "confirm" constant
      */
     public static int getConfirm(ParticipationStatus status) {
+        if (null == status) {
+            return 0; // com.openexchange.groupware.container.participants.ConfirmStatus.NONE
+        }
         switch (status) {
             case ACCEPTED:
                 return 1; // com.openexchange.groupware.container.participants.ConfirmStatus.ACCEPT
