@@ -52,6 +52,8 @@ package com.openexchange.advertisement.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.internal.AdvertisementPackageServiceImpl;
@@ -81,6 +83,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+
         Services.setServiceLookup(this);
         final String sCapability = "ads";
         Dictionary<String, Object> properties = new Hashtable<>(2);
@@ -106,9 +109,34 @@ public class Activator extends HousekeepingActivator {
         }, properties);
         getService(CapabilityService.class).declareCapability(sCapability);
         ConfigurationService configService = Services.getService(ConfigurationService.class);
-        AdvertisementPackageService packageService = new AdvertisementPackageServiceImpl(configService);
+        final AdvertisementPackageServiceImpl packageService = new AdvertisementPackageServiceImpl(configService);
         registerService(AdvertisementPackageService.class, packageService);
         registerService(Reloadable.class, packageService);
+        track(AdvertisementConfigService.class, new ServiceTrackerCustomizer<AdvertisementConfigService, AdvertisementConfigService>() {
+
+            @Override
+            public AdvertisementConfigService addingService(ServiceReference<AdvertisementConfigService> reference) {
+                AdvertisementConfigService service = context.getService(reference);
+                packageService.addService(service);
+                ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+                packageService.reloadConfiguration(configurationService);
+                return service;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<AdvertisementConfigService> reference, AdvertisementConfigService service) {
+                // Nothing to do
+            }
+
+            @Override
+            public void removedService(ServiceReference<AdvertisementConfigService> reference, AdvertisementConfigService service) {
+                packageService.removeService(service);
+                ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+                packageService.reloadConfiguration(configurationService);
+            }
+
+        });
+        openTrackers();
     }
 
     BundleContext getBundleContext() {

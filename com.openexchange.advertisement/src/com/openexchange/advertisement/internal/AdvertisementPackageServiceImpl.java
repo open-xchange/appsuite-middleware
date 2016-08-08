@@ -49,6 +49,7 @@
 
 package com.openexchange.advertisement.internal;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,6 +82,7 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
 
     private ConcurrentHashMap<String, AdvertisementConfigService> map;
     private volatile AdvertisementConfigService global;
+    private List<AdvertisementConfigService> services = new ArrayList<>(3);;
 
     /**
      * Initializes a new {@link AdvertisementPackageServiceImpl}.
@@ -147,8 +149,9 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
                 }
 
                 AdvertisementConfigService adsService = getConfigServiceByScheme(packageScheme);
-
-                map.put(res.getName(), adsService);
+                if (adsService != null) {
+                    map.put(res.getName(), adsService);
+                }
             }
 
             // Add OX_ALL as a default reseller
@@ -161,16 +164,24 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
             }
 
             AdvertisementConfigService adsService = getConfigServiceByScheme(packageScheme);
-            map.put(oxall, adsService);
+            if (adsService != null) {
+                map.put(oxall, adsService);
+            }
 
         } catch (OXException e) {
             LOG.error("Error while reloading configuration: " + e.getMessage());
         }
     }
 
-    private AdvertisementConfigService getConfigServiceByScheme(String scheme) {
-        List<AdvertisementConfigService> services = Services.getAllServices(AdvertisementConfigService.class);
+    public void addService(AdvertisementConfigService service) {
+        services.add(service);
+    }
 
+    public void removeService(AdvertisementConfigService service) {
+        services.remove(service);
+    }
+
+    private AdvertisementConfigService getConfigServiceByScheme(String scheme) {
         AdvertisementConfigService global = this.global;
         if (null == global) {
             // Initialize global

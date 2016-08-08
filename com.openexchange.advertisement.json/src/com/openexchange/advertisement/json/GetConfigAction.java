@@ -60,6 +60,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -80,6 +81,9 @@ public class GetConfigAction implements AJAXActionService {
 
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
         AdvertisementConfigService configService = packageService.getScheme(session.getContextId());
+        if (configService == null) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to retrieve AdvertisementConfigService");
+        }
         JSONObject result = configService.getConfig(session);
         return new AJAXRequestResult(result);
     }

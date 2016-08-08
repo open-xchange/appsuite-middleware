@@ -49,6 +49,7 @@
 
 package com.openexchange.advertisement;
 
+import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -115,15 +116,23 @@ public interface AdvertisementConfigService {
     public void setConfig(String reseller, String pack, String config) throws OXException;
 
     /**
-     * Sets an advertisement configuration for a given reseller.
+     * Sets all advertisement configurations for a given reseller.
      * <p>
+     * The configs String must contain a JSONArray of JSONObjects with the following structure:
+     * <p>
+     * {<br>
+     * "package": "package1",<br>
+     * "config": "configdata..."<br>
+     * }<br>
+     * <p>
+     * 
      * Setting the configuration parameter to <code>null</code> will delete the current configuration for the reseller.
      *
      * @param reseller The reseller name
-     * @param config The advertisement configuration
+     * @param config An array of package informations and advertisement configurations
      * @throws OXException If advertisement configuration cannot be set
      */
-    public void setConfig(String reseller, String config) throws OXException;
+    public List<ConfigResult> setConfig(String reseller, String configs) throws OXException;
 
     /**
      * Retrieves the package scheme identifier for this configuration service.

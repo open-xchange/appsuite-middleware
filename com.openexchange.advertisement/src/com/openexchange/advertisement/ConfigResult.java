@@ -46,28 +46,36 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.reseller.data;
+
+package com.openexchange.advertisement;
+
 
 /**
- * Interface for all Objects containing a password mechanism and a password
+ * {@link ConfigResult}
  *
- * @author choeger
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public interface PasswordMechObject {
+public class ConfigResult {
 
-    public static final String CRYPT_MECH = "{CRYPT}".intern();
-    public static final String SHA_MECH = "{SHA}".intern();
-    public static final String BCRYPT_MECH = "{BCRYPT}".intern();
+    private Throwable exception;
+    private String message;
 
-    /**
-     * @return the passwordMech
-     */
-    String getPasswordMech();
+    public ConfigResult(String message, Throwable exception) {
+        this.message = message;
+        this.exception = exception;
+    }
 
-    /**
-     * Return the password of this user object.
-     *
-     * @return A {@link String} containing the password
-     */
-    String getPassword();
+    public boolean hasError() {
+        return this.exception != null;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Throwable getError() {
+        return exception;
+    }
+
 }

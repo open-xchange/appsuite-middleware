@@ -89,7 +89,85 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
 
     private boolean restrictionsset = false;
 
-    public ResellerAdmin() {
+    public static class ResellerAdminFactory {
+
+        private Integer id;
+        private Integer parentId;
+        private String name;
+        private String password;
+        private String passwordMech;
+        private String displayname;
+        private Restriction[] restrictions;
+
+        public ResellerAdminFactory() {
+
+        }
+
+        public ResellerAdminFactory id(Integer id) {
+            this.id = id;
+            return this;
+        }
+
+        public ResellerAdminFactory parentId(Integer id) {
+            this.parentId = id;
+            return this;
+        }
+
+        public ResellerAdminFactory name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public ResellerAdminFactory password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public ResellerAdminFactory passwordMech(String passwordMech) {
+            this.passwordMech = passwordMech;
+            return this;
+        }
+
+        public ResellerAdminFactory displayname(String displayname) {
+            this.displayname = displayname;
+            return this;
+        }
+
+        public ResellerAdminFactory restrictions(Restriction[] restrictions) {
+            this.restrictions = restrictions;
+            return this;
+        }
+
+        public ResellerAdmin build(){
+            ResellerAdmin result = new ResellerAdmin();
+            if(id!=null){
+                result.setId(id);
+            }
+            if(parentId!=null){
+                result.setParentId(parentId);
+            }
+            if(name!=null){
+                result.setName(name);
+            }
+            if(password!=null){
+                result.setPassword(password);
+            }
+            if(passwordMech!=null){
+                result.setPasswordMech(passwordMech);
+            }
+            if(displayname!=null){
+                result.setDisplayname(displayname);
+            }
+            if (restrictions != null) {
+                result.setRestrictions(restrictions);
+            }
+
+            return result;
+        }
+
+    }
+
+    private ResellerAdmin() {
         super();
         init();
     }
@@ -97,7 +175,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     /**
      * @param id
      */
-    public ResellerAdmin(final int id) {
+    private ResellerAdmin(final int id) {
         super();
         init();
         setId(id);
@@ -106,7 +184,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     /**
      * @param name
      */
-    public ResellerAdmin(final String name) {
+    private ResellerAdmin(final String name) {
         super();
         init();
         setName(name);
@@ -118,7 +196,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
      * @param id
      * @param name
      */
-    public ResellerAdmin(Integer id, String name) {
+    private ResellerAdmin(Integer id, String name) {
         super();
         setId(id);
         setName(name);
@@ -128,7 +206,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
      * @param name
      * @param password
      */
-    public ResellerAdmin(final String name, final String password) {
+    private ResellerAdmin(final String name, final String password) {
         super();
         init();
         setName(name);
@@ -235,7 +313,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     /**
      * @param display_name the display_name to set
      */
-    public void setDisplayname(final String displayname) {
+    private void setDisplayname(final String displayname) {
         this.displaynameset = true;
         this.displayname = displayname;
     }
@@ -243,7 +321,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     /**
      * @param id the id to set
      */
-    public void setId(final Integer id) {
+    private void setId(final Integer id) {
         this.idset = true;
         this.id = id;
     }
@@ -251,7 +329,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     /**
      * @param name the name to set
      */
-    public void setName(final String name) {
+    private void setName(final String name) {
         this.nameset = true;
         this.name = name;
     }
@@ -259,16 +337,19 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     /**
      * @param password the password to set
      */
-    public void setPassword(final String password) {
+    private void setPassword(final String password) {
         this.passwordset = true;
         this.password = password;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#setPasswordMech(java.lang.String)
+    /**
+     * Represents the password encryption mechanism, value is a password
+     * mechanism. Currently supported mechanisms are "{CRYPT}" and "{SHA}".
+     *
+     * @param passwordMech
+     *            the passwordMech to set
      */
-    @Override
-    public void setPasswordMech(final String passwordMech) {
+    private void setPasswordMech(final String passwordMech) {
         this.passwordMechset = true;
         this.passwordMech = passwordMech;
     }
@@ -278,7 +359,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
      *
      * @param pid the pid to set
      */
-    public void setParentId(final Integer pid) {
+    private void setParentId(final Integer pid) {
         this.parentIdset = true;
         this.parentId = pid;
     }
@@ -293,7 +374,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     /**
      * @param restrictions the restrictions to set
      */
-    public final void setRestrictions(final Restriction[] restrictions) {
+    private final void setRestrictions(final Restriction[] restrictions) {
         this.restrictionsset = true;
         this.restrictions = restrictions;
     }
