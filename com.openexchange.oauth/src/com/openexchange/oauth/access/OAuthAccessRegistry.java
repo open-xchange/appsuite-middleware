@@ -105,4 +105,11 @@ public interface OAuthAccessRegistry {
      * @return <code>true</code> if an {@link OAuthAccess} for the specified tuple was found and purged; <code>false</code> otherwise
      */
     boolean purgeUserAccess(int contextId, int userId, String accountId);
+
+    /**
+     * Returns the service identifier of this registry
+     * 
+     * @return the service identifier of this registry
+     */
+    String getServiceId();
 }

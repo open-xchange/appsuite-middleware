@@ -51,6 +51,7 @@ package com.openexchange.oauth.access.impl;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 
@@ -62,13 +63,20 @@ import com.openexchange.oauth.access.OAuthAccessRegistry;
 public class OAuthAccessRegistryImpl implements OAuthAccessRegistry {
 
     private final ConcurrentMap<OAuthAccessKey, ConcurrentMap<String, OAuthAccess>> map;
+    private final String serviceId;
 
     /**
      * Initialises a new {@link OAuthAccessRegistryImpl}.
+     * 
+     * @param serviceId the service identifier
      */
-    public OAuthAccessRegistryImpl() {
+    public OAuthAccessRegistryImpl(String serviceId) {
         super();
+        if (Strings.isEmpty(serviceId)) {
+            throw new IllegalArgumentException("The service identifier can be neither 'null' nor empty");
+        }
         map = new ConcurrentHashMap<>();
+        this.serviceId = serviceId;
     }
 
     /*
@@ -151,4 +159,13 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry {
         return true;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccessRegistry#getServiceId()
+     */
+    @Override
+    public String getServiceId() {
+        return serviceId;
+    }
 }
