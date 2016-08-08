@@ -72,6 +72,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -191,7 +192,7 @@ public final class DropboxFileStorageService implements AccountAware, OAuthAccou
             // Acquire account manager
             FileStorageAccountManager accountManager = getAccountManager();
             OAuthAccessRegistryService registryService = DropboxServices.getService(OAuthAccessRegistryService.class);
-            OAuthAccessRegistry registry = registryService.get("com.openexchange.oauth.dropbox");
+            OAuthAccessRegistry registry = registryService.get(API.DROPBOX.getFullName());
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
                 registry.purgeUserAccess(session.getContextId(), session.getUserId());
