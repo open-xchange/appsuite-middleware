@@ -66,6 +66,13 @@ public interface OAuthAccess {
     void initialise() throws OXException;
 
     /**
+     * Revokes the OAuth Token from this {@link OAuthAccess}
+     * 
+     * @throws OXException if the token cannot be revoked
+     */
+    void revoke() throws OXException;
+
+    /**
      * Pings the account
      * 
      * @return <code>true</code>for a successful ping attempt; <code>false</code>otherwise

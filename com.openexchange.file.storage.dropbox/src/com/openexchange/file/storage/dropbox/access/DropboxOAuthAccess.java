@@ -201,4 +201,12 @@ public class DropboxOAuthAccess implements OAuthAccess {
         }
         return oauthAccountId;
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
+     */
+    @Override
+    public void revoke() throws OXException {
+        // TODO: revoke the token
+    }
 }
