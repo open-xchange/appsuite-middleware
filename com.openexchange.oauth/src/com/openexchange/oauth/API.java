@@ -88,7 +88,7 @@ public enum API {
     /**
      * XING
      */
-    XING("Xing", "com.openexchange.oauth.xing"),
+    XING("XING", "com.openexchange.oauth.xing"),
     /**
      * vkontakte
      */

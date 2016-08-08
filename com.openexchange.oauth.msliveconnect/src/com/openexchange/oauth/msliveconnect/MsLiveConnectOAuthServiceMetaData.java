@@ -71,7 +71,7 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
      * @param services the service lookup instance
      */
     public MsLiveConnectOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, "com.openexchange.oauth.msliveconnect", "Microsoft Live Connect");
+        super(services, API.MS_LIVE_CONNECT);
     }
 
     @Override
@@ -87,11 +87,6 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
     @Override
     public String getScope() {
         return "wl.offline_access wl.signin wl.basic wl.skydrive wl.skydrive_update wl.contacts_birthday wl.contacts_photos wl.contacts_skydrive wl.contacts_emails wl.photos wl.postal_addresses";
-    }
-
-    @Override
-    public API getAPI() {
-        return API.MS_LIVE_CONNECT;
     }
 
     @Override
