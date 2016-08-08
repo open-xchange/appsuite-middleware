@@ -50,10 +50,13 @@
 package com.openexchange.filestore.swift.impl.token;
 
 import java.util.Date;
+import org.apache.http.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.swift.SwiftExceptionCode;
+import com.openexchange.java.Strings;
 
 /**
  * {@link TokenParser}
@@ -63,20 +66,24 @@ import com.openexchange.filestore.swift.SwiftExceptionCode;
  */
 public interface TokenParser {
 
+    /** The logger constant */
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TokenParser.class);
+
     /**
      * Parses the token from specified JSON response.
      *
      * @param jResponse The JSON response as received from identifier end-point
+     * @param response The associated HTTP response
      * @return The parsed token
      * @throws OXException If parsing the token fails
      */
-    Token parseTokenFrom(JSONObject jResponse) throws OXException;
+    Token parseTokenFrom(JSONObject jResponse, HttpResponse response) throws OXException;
 
     /** The parser for <a href="http://developer.openstack.org/api-ref-identity-v2.html">Identity API v2</a> */
     public static final TokenParser TOKEN_PARSER_V2 = new TokenParser() {
 
         @Override
-        public Token parseTokenFrom(JSONObject jResponse) throws OXException {
+        public Token parseTokenFrom(JSONObject jResponse, HttpResponse response) throws OXException {
             if (null == jResponse) {
                 return null;
             }
@@ -97,14 +104,20 @@ public interface TokenParser {
     public static final TokenParser TOKEN_PARSER_V3 = new TokenParser() {
 
         @Override
-        public Token parseTokenFrom(JSONObject jResponse) throws OXException {
+        public Token parseTokenFrom(JSONObject jResponse, HttpResponse response) throws OXException {
             if (null == jResponse) {
                 return null;
             }
 
             try {
+                // The authentication token is provided by "X-Subject-Token" header rather than in the response body.
+                String id = response.getFirstHeader("X-Subject-Token").getValue();
+                if (Strings.isEmpty(id)) {
+                    LOGGER.warn("Missing \"X-Subject-Token\" response header!");
+                }
+
+                // Expiration date is in JSON response body
                 JSONObject jToken = jResponse.getJSONObject("token");
-                String id = jToken.getJSONObject("user").getString("id");
                 Date expires = TokenParserUtil.parseExpiryDate(jToken.getString("expires_at"));
                 return new Token(id, expires);
             } catch (JSONException e) {
