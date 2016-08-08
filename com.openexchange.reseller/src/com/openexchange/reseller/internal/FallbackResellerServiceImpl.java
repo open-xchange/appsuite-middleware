@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
-import com.openexchange.reseller.data.ResellerAdmin.ResellerAdminFactory;
 
 /**
  * {@link FallbackResellerServiceImpl}
@@ -66,7 +65,7 @@ public class FallbackResellerServiceImpl implements ResellerService {
 
     private static ResellerAdmin DEFAULT;
     static {
-        DEFAULT = new ResellerAdminFactory().name("OX_ALL").build();
+        DEFAULT = ResellerAdmin.builder().name("OX_ALL").build();
     }
 
     @Override

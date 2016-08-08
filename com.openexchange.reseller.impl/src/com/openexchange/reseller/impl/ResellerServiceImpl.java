@@ -67,7 +67,7 @@ import com.openexchange.reseller.ResellerExceptionCodes;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.reseller.data.Restriction;
-import com.openexchange.reseller.data.ResellerAdmin.ResellerAdminFactory;
+import com.openexchange.reseller.data.ResellerAdmin.ResellerAdminBuilder;
 
 /**
  * {@link ResellerServiceImpl}
@@ -111,7 +111,7 @@ public class ResellerServiceImpl implements ResellerService {
             if (!rs.next()) {
                 throw ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.create(Integer.valueOf(cid));
             }
-            return getData(new ResellerAdmin[] { new ResellerAdmin.ResellerAdminFactory().id(rs.getInt(1)).build() })[0];
+            return getData(new ResellerAdmin[] { ResellerAdmin.builder().id(rs.getInt(1)).build() })[0];
         } catch (final SQLException e) {
             LOG.error("", e);
             throw new OXException(e);
@@ -137,23 +137,24 @@ public class ResellerServiceImpl implements ResellerService {
 
                 Integer id = Integer.valueOf(rs.getInt("sid"));
                 Integer parentId = Integer.valueOf(rs.getInt("pid"));
-                ResellerAdminFactory factory = new ResellerAdmin.ResellerAdminFactory().id(id)
-                                                                               .name(rs.getString(DATABASE_COLUMN_NAME))
-                                                                               .parentId(parentId)
-                                                                               .displayname(rs.getString("displayName"))
-                                                                               .password(rs.getString("password"))
-                                                                               .passwordMech(rs.getString("passwordMech"));
+                ResellerAdminBuilder builder = ResellerAdmin.builder()
+                                                            .id(id)
+                                                            .name(rs.getString(DATABASE_COLUMN_NAME))
+                                                            .parentId(parentId)
+                                                            .displayname(rs.getString("displayName"))
+                                                            .password(rs.getString("password"))
+                                                            .passwordMech(rs.getString("passwordMech"));
 
                 rs.close();
                 prep.close();
 
                 Restriction[] restrictions = getRestrictionDataForAdmin(id, parentId, con);
 
-                if(restrictions!=null){
-                    factory.restrictions(restrictions);
+                if (restrictions != null) {
+                    builder.restrictions(restrictions);
                 }
-                
-                ret.add(factory.build());
+
+                ret.add(builder.build());
             }
             return ret.toArray(new ResellerAdmin[ret.size()]);
         } finally {
@@ -172,10 +173,7 @@ public class ResellerServiceImpl implements ResellerService {
 
             Set<Restriction> res = new HashSet<>();
             while (rs.next()) {
-                final Restriction r = new Restriction();
-                r.setId(Integer.valueOf(rs.getInt(DATABASE_COLUMN_ID)));
-                r.setName(rs.getString(DATABASE_COLUMN_NAME));
-                r.setValue(rs.getString(DATABASE_COLUMN_VALUE));
+                final Restriction r = new Restriction(Integer.valueOf(rs.getInt(DATABASE_COLUMN_ID)), rs.getString(DATABASE_COLUMN_NAME), rs.getString(DATABASE_COLUMN_VALUE));
                 if (parentId > 0 && Restriction.SUBADMIN_CAN_CREATE_SUBADMINS.equals(r.getName())) {
                     continue;
                 }
@@ -205,8 +203,8 @@ public class ResellerServiceImpl implements ResellerService {
 
             List<ResellerAdmin> ret = new LinkedList<>();
             while (rs.next()) {
-                
-                ResellerAdmin newadm = new ResellerAdmin.ResellerAdminFactory().id(Integer.valueOf(rs.getInt("sid")))
+
+                ResellerAdmin newadm = ResellerAdmin.builder().id(Integer.valueOf(rs.getInt("sid")))
                     .name(rs.getString(DATABASE_COLUMN_NAME))
                     .parentId(Integer.valueOf(rs.getInt("pid")))
                     .displayname(rs.getString("displayName"))

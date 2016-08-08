@@ -58,8 +58,8 @@ package com.openexchange.advertisement;
  */
 public class ConfigResult {
 
-    private Throwable exception;
-    private String message;
+    private final Throwable exception;
+    private final String message;
 
     public ConfigResult(String message, Throwable exception) {
         this.message = message;
