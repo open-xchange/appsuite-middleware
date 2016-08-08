@@ -7,6 +7,7 @@ Bundle-Vendor: OX Software AG
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.advertisement.osgi.Activator
 Import-Package: com.openexchange.advertisement,
+ com.openexchange.caching,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.context,

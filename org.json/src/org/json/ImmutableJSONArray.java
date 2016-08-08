@@ -47,35 +47,55 @@
  *
  */
 
-package com.openexchange.reseller.osgi;
+package org.json;
 
-import com.openexchange.database.DatabaseService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.impl.ResellerServiceImpl;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
 
 /**
- * {@link Activator}
+ * {@link ImmutableJSONArray} - An immutable {@link JSONObject}.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class Activator extends HousekeepingActivator {
+public class ImmutableJSONArray extends JSONArray {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class };
+    private static final long serialVersionUID = 1183196320780891929L;
+
+    /**
+     * Gets the immutable view for specified JSON array.
+     *
+     * @param jsonArray The JSON array
+     * @return The immutable JSON array
+     */
+    public static ImmutableJSONArray immutableFor(JSONArray jsonArray) {
+        return jsonArray instanceof ImmutableJSONArray ? (ImmutableJSONArray) jsonArray : new ImmutableJSONArray(jsonArray);
     }
 
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    // --------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link ImmutableJSONArray}.
+     *
+     * @param jsonArray The JSON array to copy from
+     */
+    private ImmutableJSONArray(JSONArray jsonArray) {
+        super(createImmutableListFrom(jsonArray.getMyArrayList()), true);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(ResellerService.class, new ResellerServiceImpl(getService(DatabaseService.class)));
-
+    /**
+     * Creates the immutable view for given list.
+     *
+     * @param list The list
+     * @return The immutable list
+     */
+    static ImmutableList<Object> createImmutableListFrom(List<Object> list) {
+        ImmutableList.Builder<Object> builder = ImmutableList.builder();
+        for (Object object : list) {
+            builder.add(ImmutableJSONValues.getImmutableValueFor(object));
+        }
+        return builder.build();
     }
+
 
 }

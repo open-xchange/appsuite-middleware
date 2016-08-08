@@ -63,19 +63,31 @@ import com.openexchange.session.Session;
  */
 public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
-    private static final GlobalAdvertisementConfigService INSTANCE = new GlobalAdvertisementConfigService();
-
+    /**
+     * Gets the instance of {@code GlobalAdvertisementConfigService}; initializes it if necessary.
+     *
+     * @return The instance
+     */
     public static GlobalAdvertisementConfigService getInstance() {
-        return INSTANCE;
+        return new GlobalAdvertisementConfigService();
+    }
+
+    // ------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link GlobalAdvertisementConfigService}.
+     */
+    private GlobalAdvertisementConfigService() {
+        super();
     }
 
     @Override
-    String getReseller(Session session) throws OXException {
+    protected String getReseller(Session session) throws OXException {
         return RESELLER_ALL;
     }
 
     @Override
-    String getPackage(Session session) throws OXException {
+    protected String getPackage(Session session) throws OXException {
         return PACKAGE_ALL;
     }
 

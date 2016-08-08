@@ -49,6 +49,7 @@
 
 package com.openexchange.advertisement.internal;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -79,10 +80,7 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
     private static final String CONFIG_SUFFIX = ".packageScheme";
 
     private ConcurrentHashMap<String, AdvertisementConfigService> map;
-
-    private AdvertisementConfigService global;
-
-
+    private volatile AdvertisementConfigService global;
 
     /**
      * Initializes a new {@link AdvertisementPackageServiceImpl}.
@@ -171,36 +169,37 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
     }
 
     private AdvertisementConfigService getConfigServiceByScheme(String scheme) {
-
         List<AdvertisementConfigService> services = Services.getAllServices(AdvertisementConfigService.class);
 
-        if (global == null) {
-            // Init global
-            AdvertisementConfigService result = null;
-            for (AdvertisementConfigService service : services) {
-                if (service.getSchemeId().equals(DEFAULT_SCHEME_ID)) {
-                    global = service;
-                }
-                if (service.getSchemeId().equals(scheme)) {
-                    result = service;
-                }
-            }
+        AdvertisementConfigService global = this.global;
+        if (null == global) {
+            // Initialize global
+            synchronized (this) {
+                global = this.global;
+                if (global == null) {
+                    AdvertisementConfigService result = null;
+                    for (Iterator<AdvertisementConfigService> iter = services.iterator(); (null == result) && (global == null) && iter.hasNext();) {
+                        AdvertisementConfigService service = iter.next();
+                        if (service.getSchemeId().equals(DEFAULT_SCHEME_ID)) {
+                            global = service;
+                            this.global = global;
+                        }
+                        if (service.getSchemeId().equals(scheme)) {
+                            result = service;
+                        }
+                    }
 
-            if (result == null) {
-                return global;
-            } else {
-                return result;
-            }
-
-        } else {
-            for (AdvertisementConfigService service : services) {
-                if (service.getSchemeId().equals(scheme)) {
-                    return service;
+                    return result == null ? global : result;
                 }
             }
-            return global;
         }
 
+        for (AdvertisementConfigService service : services) {
+            if (service.getSchemeId().equals(scheme)) {
+                return service;
+            }
+        }
+        return global;
     }
 
     @Override
