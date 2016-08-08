@@ -62,9 +62,13 @@ public class OAuthClient<T> {
      * Initialises a new {@link OAuthClient}.
      * 
      * @param client The OAuth client
+     * @throws IllegalArgumentException if the client is either '<code>null</code>' or empty.
      */
     public OAuthClient(T client) {
         super();
+        if (client == null) {
+            throw new IllegalArgumentException("The client can neither be 'null' nor empty.");
+        }
         this.client = client;
     }
 }

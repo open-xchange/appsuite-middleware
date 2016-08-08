@@ -59,6 +59,13 @@ import com.openexchange.exception.OXException;
 public interface OAuthAccess {
 
     /**
+     * Initialises the {@link OAuthAccess}
+     * 
+     * @throws OXException if the {@link OAuthAccess} cannot be initialised
+     */
+    void initialise() throws OXException;
+
+    /**
      * Pings the account
      * 
      * @return <code>true</code>for a successful ping attempt; <code>false</code>otherwise
@@ -75,7 +82,8 @@ public interface OAuthAccess {
      * Retrieves the client
      * 
      * @param type the client type
-     * @return
+     * @return The {@link OAuthClient}
+     * @throws OXException if the client cannot be initialised or returned
      */
-    <T> OAuthClient<T> getClient(Class<T> type);
+    OAuthClient<?> getClient() throws OXException;
 }
