@@ -92,13 +92,7 @@ public class ImmutableJSONArray extends JSONArray {
     static ImmutableList<Object> createImmutableListFrom(List<Object> list) {
         ImmutableList.Builder<Object> builder = ImmutableList.builder();
         for (Object object : list) {
-            if (object instanceof JSONArray) {
-                builder.add(immutableFor((JSONArray) object));
-            } else if (object instanceof JSONObject) {
-                builder.add(ImmutableJSONObject.immutableFor((JSONObject) object));
-            } else {
-                builder.add(object);
-            }
+            builder.add(ImmutableJSONValues.getImmutableValueFor(object));
         }
         return builder.build();
     }

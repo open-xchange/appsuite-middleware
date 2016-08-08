@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,52 +49,66 @@
 
 package org.json;
 
+import java.util.HashMap;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * {@link ImmutableJSONObject} - An immutable {@link JSONObject}.
+ * {@link ImmutableJSONValues} - Utility class for immutable JSON instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class ImmutableJSONObject extends JSONObject {
-
-    private static final long serialVersionUID = 7348084518800542046L;
+class ImmutableJSONValues {
 
     /**
-     * Gets the immutable view for specified JSON object.
-     *
-     * @param jsonObject The JSON object
-     * @return The immutable JSON object
+     * Initializes a new {@link ImmutableJSONValues}.
      */
-    public static ImmutableJSONObject immutableFor(JSONObject jsonObject) {
-        return jsonObject instanceof ImmutableJSONObject ? (ImmutableJSONObject) jsonObject : new ImmutableJSONObject(jsonObject);
+    private ImmutableJSONValues() {
+        super();
     }
 
-    // --------------------------------------------------------------------------------------------------
+    private static interface ImmutableValueProvider {
 
-    /**
-     * Initializes a new {@link ImmutableJSONObject}.
-     *
-     * @param jsonObject The JSON object to copy from
-     */
-    private ImmutableJSONObject(JSONObject jsonObject) {
-        super(createImmutableMapFrom(jsonObject.getMyHashMap()), true);
+        Object getValue(Object source);
+    }
+
+    private static final Map<Class<?>, ImmutableValueProvider> IMMUTABLE_PROVIDERS;
+    static {
+        Map<Class<?>, ImmutableValueProvider> m = new HashMap<>(4);
+
+        m.put(JSONArray.class, new ImmutableValueProvider() {
+
+            @Override
+            public Object getValue(Object source) {
+                return ImmutableJSONArray.immutableFor((JSONArray) source);
+            }
+        });
+
+        m.put(JSONObject.class, new ImmutableValueProvider() {
+
+            @Override
+            public Object getValue(Object source) {
+                return ImmutableJSONObject.immutableFor((JSONObject) source);
+            }
+        });
+
+        IMMUTABLE_PROVIDERS = ImmutableMap.copyOf(m);
     }
 
     /**
-     * Creates the immutable view for given map.
+     * Gets the immutable view for given value.
      *
-     * @param map The map
-     * @return The immutable map
+     * @param value The value
+     * @return The immutable value
      */
-    static ImmutableMap<String, Object> createImmutableMapFrom(Map<String, Object> map) {
-        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            builder.put(entry.getKey(), ImmutableJSONValues.getImmutableValueFor(entry.getValue()));
+    static Object getImmutableValueFor(Object value) {
+        if (null == value) {
+            return JSONObject.NULL;
         }
-        return builder.build();
+
+        ImmutableValueProvider immutableProvider = IMMUTABLE_PROVIDERS.get(value.getClass());
+        return null == immutableProvider ? value : immutableProvider.getValue(value);
     }
 
 }
