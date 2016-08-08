@@ -353,12 +353,23 @@ public class CalendarUtils {
      * @return A new date instance based on the supplied date with the time fraction truncated
      */
     public static Date truncateTime(Date date, TimeZone timeZone) {
-        Calendar calendar = initCalendar(timeZone, date);
+        return truncateTime(initCalendar(timeZone, date)).getTime();
+    }
+
+    /**
+     * Truncates the time part in the supplied calendar reference, i.e. sets the fields {@link Calendar#HOUR_OF_DAY},
+     * {@link Calendar#MINUTE}, {@link Calendar#SECOND} and {@link Calendar#MILLISECOND} to <code>0</code>.
+     *
+     * @param calendar The calendar reference to truncate the time part in
+     * @param timeZone The timezone to consider
+     * @return The calendar reference
+     */
+    public static Calendar truncateTime(Calendar calendar) {
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTime();
+        return calendar;
     }
 
     /**

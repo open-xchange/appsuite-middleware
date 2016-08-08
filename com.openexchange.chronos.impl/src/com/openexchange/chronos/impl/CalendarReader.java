@@ -175,20 +175,34 @@ public class CalendarReader {
     }
 
     public boolean[] hasEventsBetween(int userID, Date from, Date until) throws OXException {
+        /*
+         * ensure "full date" range, in user timezone
+         */
         TimeZone timeZone = getTimeZone(session);
-        List<Boolean> hasEventsList = new ArrayList<Boolean>();
+        Calendar calendar = initCalendar(timeZone, from);
+        Date rangeStart = CalendarUtils.truncateTime(calendar).getTime();
+        calendar.setTime(until);
+        CalendarUtils.truncateTime(calendar);
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date rangeEnd = calendar.getTime();
+        /*
+         * search events
+         */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, from))
-            .addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, until))
+            .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_THAN, rangeStart)).addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, rangeEnd))
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(userID)))
-        //TODO .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.NOT_EQUALS, ParticipationStatus.DECLINED))
+            //TODO .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.NOT_EQUALS, ParticipationStatus.DECLINED))
         ;
         List<Event> events = storage.searchEvents(searchTerm, null, null);
-        Calendar calendar = initCalendar(timeZone, from);
+        /*
+         * step through events day-wise & check for present events
+         */
+        List<Boolean> hasEventsList = new ArrayList<Boolean>();
+        calendar.setTime(rangeStart);
         Date minimumEndTime = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         Date maximumStartTime = calendar.getTime();
-        while (maximumStartTime.before(until)) {
+        while (maximumStartTime.before(rangeEnd)) {
             boolean hasEvents = false;
             for (int i = 0; i < events.size() && false == hasEvents; i++) {
                 Event event = events.get(i);
