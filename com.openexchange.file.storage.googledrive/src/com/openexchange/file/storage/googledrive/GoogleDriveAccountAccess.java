@@ -59,7 +59,12 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
+import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
+import com.openexchange.file.storage.googledrive.osgi.Services;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.session.Session;
 
 /**
@@ -72,7 +77,7 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private GoogleDriveAccess googleDriveAccess;
+    private OAuthAccess googleDriveAccess;
 
     /**
      * Initializes a new {@link GoogleDriveAccountAccess}.
@@ -100,7 +105,18 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
 
     @Override
     public void connect() throws OXException {
-        googleDriveAccess = GoogleDriveAccess.accessFor(account, session);
+        OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
+        OAuthAccessRegistry registry = service.get(API.GOOGLE.getFullName());
+        googleDriveAccess = registry.get(session.getContextId(), session.getUserId());
+        if (googleDriveAccess == null) {
+            GoogleDriveOAuthAccess access = new GoogleDriveOAuthAccess(account, session);
+            registry.add(session.getContextId(), session.getUserId(), access);
+            if (googleDriveAccess == null) {
+                googleDriveAccess = access;
+            }
+        } else {
+            ((GoogleDriveOAuthAccess) googleDriveAccess).ensureNotExpired(session);
+        }
     }
 
     @Override
@@ -115,7 +131,7 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
 
     @Override
     public boolean ping() throws OXException {
-        return GoogleDriveAccess.pingFor(account, session);
+        return googleDriveAccess.ping();
     }
 
     @Override
@@ -130,20 +146,18 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
-        GoogleDriveAccess googleDriveAccess = this.googleDriveAccess;
         if (null == googleDriveAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new GoogleDriveFileAccess(googleDriveAccess, account, session, this);
+        return new GoogleDriveFileAccess((GoogleDriveOAuthAccess) googleDriveAccess, account, session, this);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        GoogleDriveAccess googleDriveAccess = this.googleDriveAccess;
         if (null == googleDriveAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new GoogleDriveFolderAccess(googleDriveAccess, account, session);
+        return new GoogleDriveFolderAccess((GoogleDriveOAuthAccess) googleDriveAccess, account, session);
     }
 
     @Override
@@ -156,5 +170,4 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
     public FileStorageService getService() {
         return service;
     }
-
 }

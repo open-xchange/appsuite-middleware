@@ -72,9 +72,11 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
 import com.openexchange.file.storage.googledrive.osgi.Services;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.session.Session;
 
 /**
@@ -190,10 +192,11 @@ public final class GoogleDriveFileStorageService implements AccountAware, OAuthA
 
             // Acquire account manager
             FileStorageAccountManager accountManager = getAccountManager();
-
+            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+            OAuthAccessRegistry registry = registryService.get(API.GOOGLE.getFullName());
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
-                GoogleDriveAccess.dropFor(deleteMe, session);
+                registry.purgeUserAccess(session.getContextId(), session.getUserId());
                 LOG.info("Deleted Google Drive account with ID {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), oauthAccountId, user, cid);
             }
 
