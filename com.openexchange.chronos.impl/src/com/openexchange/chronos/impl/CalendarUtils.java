@@ -102,9 +102,9 @@ public class CalendarUtils {
 
     /** A collection of fields that are always included when querying events from the storage */
     static final List<EventField> MANDATORY_FIELDS = Arrays.asList(
-        EventField.ID, EventField.SERIES_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.CLASSIFICATION,
-        EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE,
-        EventField.RECURRENCE_RULE
+        EventField.ID, EventField.SERIES_ID, EventField.PUBLIC_FOLDER_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY,
+        EventField.CLASSIFICATION, EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE,
+        EventField.START_TIMEZONE, EventField.RECURRENCE_RULE
     );
 
     /** The event fields that are also available if an event's classification is not {@link Classification#PUBLIC} */
@@ -118,14 +118,16 @@ public class CalendarUtils {
     /**
      * Gets the event fields to include when querying events from the storage based on the client-requested fields defined in the
      * supplied calendar parameters. <p/>
-     * Specific mandatory fields are included implicitly.
+     * Specific {@link CalendarUtils#MANDATORY_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
      *
      * @param parameters The calendar parameters to get the requested fields from
+     * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
      * @return The fields to use when querying events from the storage
      * @see CalendarParameters#PARAMETER_FIELDS
+     * @see CalendarUtils#MANDATORY_FIELDS
      */
-    static EventField[] getFields(CalendarParameters parameters) {
-        return getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
+    static EventField[] getFields(CalendarParameters parameters, EventField... requiredFields) {
+        return getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), requiredFields);
     }
 
     /**
@@ -175,17 +177,22 @@ public class CalendarUtils {
 
     /**
      * Gets the event fields to include when querying events from the storage based on the supplied client-requested fields. <p/>
-     * Specific mandatory fields are included implicitly.
+     * Specific {@link CalendarUtils#MANDATORY_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
      *
      * @param requestedFields The fields requested by the client, or <code>null</code> to retrieve all fields
+     * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
      * @return The fields to use when querying events from the storage
+     * @see CalendarUtils#MANDATORY_FIELDS
      */
-    static EventField[] getFields(EventField[] requestedFields) {
+    static EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
         if (null == requestedFields) {
             return EventField.values();
         }
         Set<EventField> fields = new HashSet<EventField>();
         fields.addAll(MANDATORY_FIELDS);
+        if (null != requiredFields && 0 < requestedFields.length) {
+            fields.addAll(Arrays.asList(requiredFields));
+        }
         fields.addAll(Arrays.asList(requestedFields));
         return fields.toArray(new EventField[fields.size()]);
     }

@@ -667,7 +667,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private static List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
         SearchTermAdapter adapter = new SearchTermAdapter(searchTerm, null, "d.", "m.", "e.");
-        StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(' ')
+        StringBuilder stringBuilder = new StringBuilder().append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(' ')
             .append("FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ");
         if (adapter.usesInternalAttendees()) {
             stringBuilder.append("LEFT JOIN ").append(deleted ? "del_dates_members" : "prg_dates_members").append(" AS m ")

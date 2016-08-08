@@ -263,31 +263,11 @@ public class CalendarReader {
                 folders.add(getFolder(folderID));
             }
         }
-        return searchEvents(folders, pattern);
-    }
-
-    protected List<UserizedEvent> searchEvents(List<UserizedFolder> folders, String pattern) throws OXException {
-        if (null == folders || 0 == folders.size()) {
-            return Collections.emptyList();
-        }
-        Check.requireMinimumSearchPatternLength(pattern);
-        CompositeSearchTerm parentFolderTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>();
         for (UserizedFolder folder : folders) {
-            requireCalendarContentType(folder);
-            requireFolderPermission(folder, Permission.READ_FOLDER);
-            requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
-            parentFolderTerm.addSearchTerm(getFolderIdTerm(folder));
+            userizedEvents.addAll(searchEvents(folder, pattern));
         }
-        String wildcardPattern = pattern.startsWith("*") ? pattern : '*' + pattern;
-        wildcardPattern = wildcardPattern.endsWith("*") ? wildcardPattern : wildcardPattern + '*';
-        CompositeSearchTerm patternTerm = new CompositeSearchTerm(CompositeOperation.OR)
-            .addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, wildcardPattern))
-            .addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, wildcardPattern))
-        ;
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(parentFolderTerm).addSearchTerm(patternTerm);
-        List<Event> events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session));
-        return userize(events, session.getUser().getId());
+        return sort(userizedEvents, new SortOptions(session));
     }
 
     public UserizedEvent readEvent(EventID eventID) throws OXException {
@@ -315,6 +295,25 @@ public class CalendarReader {
             orderedEvents.add(event);
         }
         return orderedEvents;
+    }
+
+    private List<UserizedEvent> searchEvents(UserizedFolder folder, String pattern) throws OXException {
+        requireCalendarContentType(folder);
+        requireFolderPermission(folder, Permission.READ_FOLDER);
+        requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
+        Check.requireMinimumSearchPatternLength(pattern);
+        String wildcardPattern = pattern.startsWith("*") ? pattern : '*' + pattern;
+        wildcardPattern = wildcardPattern.endsWith("*") ? wildcardPattern : wildcardPattern + '*';
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getFolderIdTerm(folder))
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, wildcardPattern))
+                .addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, wildcardPattern))
+                .addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, wildcardPattern))
+            )
+        ;
+        List<Event> events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session));
+        return userize(events, folder);
     }
 
     private List<UserizedEvent> readEventsInFolder(UserizedFolder folder, List<EventID> eventIDs) throws OXException {
@@ -436,9 +435,9 @@ public class CalendarReader {
          */
         List<Event> events;
         if (deleted) {
-            events = storage.searchDeletedEvents(searchTerm, new SortOptions(session), getFields(session));
+            events = storage.searchDeletedEvents(searchTerm, new SortOptions(session), getFields(session, EventField.ATTENDEES));
         } else {
-            events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session));
+            events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session, EventField.ATTENDEES));
         }
         return userize(events, session.getUser().getId());
     }
@@ -451,7 +450,14 @@ public class CalendarReader {
                 continue;
             }
             Attendee userAttendee = find(event.getAttendees(), forUser);
-            int folderID = null != userAttendee && 0 < userAttendee.getFolderID() ? userAttendee.getFolderID() : event.getPublicFolderId();
+            int folderID;
+            if (null != userAttendee && 0 < userAttendee.getFolderID()) {
+                folderID = userAttendee.getFolderID();
+            } else if (0 < event.getPublicFolderId()) {
+                folderID = event.getPublicFolderId();
+            } else {
+                throw OXException.general("No suitable parent folder for event " + event); //TODO shouldn't happen at all?
+            }
             UserizedEvent userizedEvent = getUserizedEvent(event, folderID, alarmsById.get(I(event.getId())));
             if (isSeriesMaster(event) && isResolveOccurrences(session)) {
                 userizedEvents.addAll(resolveOccurrences(userizedEvent));

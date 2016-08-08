@@ -207,8 +207,9 @@ public class SearchTermAdapter {
                 stringBuilder.append(operation.getSqlRepresentation());
             }
             if (Operand.Type.COLUMN.equals(operands[i].getType())) {
-                //                Entry<String, DbMapping<? extends Object, ?>> entry = getMapping(operands[i].getValue());
-                appendColumnOperand(mapping, prefix);
+                //                appendColumnOperand(mapping, prefix);
+                Entry<String, DbMapping<? extends Object, ?>> entry = getMapping(operands[i].getValue());
+                appendColumnOperand(entry.getValue(), entry.getKey());
             } else if (Operand.Type.CONSTANT.equals(operands[i].getType())) {
                 appendConstantOperand(operands[i].getValue(), mapping.getSqlType());
             } else {
