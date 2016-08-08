@@ -86,4 +86,11 @@ public interface OAuthAccess {
      * @throws OXException if the client cannot be initialised or returned
      */
     OAuthClient<?> getClient() throws OXException;
+
+    /**
+     * Returns the account identifier of this {@link OAuthAccess}
+     * 
+     * @return the account identifier of this {@link OAuthAccess}
+     */
+    int getAccountId() throws OXException;
 }

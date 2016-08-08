@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.access.impl;
+package com.openexchange.oauth.access;
 
 /**
  * {@link OAuthAccessKey}

@@ -49,12 +49,33 @@
 
 package com.openexchange.oauth.access;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.java.Strings;
+
 /**
  * {@link OAuthAccessRegistry}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface OAuthAccessRegistry {
+public class OAuthAccessRegistry {
+
+    private final ConcurrentMap<OAuthAccessKey, OAuthAccess> map;
+    private final String serviceId;
+
+    /**
+     * Initialises a new {@link OAuthAccessRegistry}.
+     * 
+     * @param serviceId the service identifier
+     */
+    public OAuthAccessRegistry(String serviceId) {
+        super();
+        if (Strings.isEmpty(serviceId)) {
+            throw new IllegalArgumentException("The service identifier can be neither 'null' nor empty");
+        }
+        map = new ConcurrentHashMap<>();
+        this.serviceId = serviceId;
+    }
 
     /**
      * Adds the specified {@link OAuthAccess} to the registry
@@ -65,7 +86,10 @@ public interface OAuthAccessRegistry {
      * @param oauthAccess The {@link OAuthAccess}
      * @return The previous associated {@link OAuthAccess}, or <code>null</code> if there was none
      */
-    OAuthAccess add(int contextId, int userId, String accountId, OAuthAccess oauthAccess);
+    public OAuthAccess add(int contextId, int userId, OAuthAccess oauthAccess) {
+        OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
+        return map.putIfAbsent(key, oauthAccess);
+    }
 
     /**
      * Checks the presence of the {@link OAuthAccess} associated with the givent user/context/account tuple
@@ -75,7 +99,10 @@ public interface OAuthAccessRegistry {
      * @param accountId The account identifier
      * @return <code>true if such an {@link OAuthAccess} is present; <code>false</code> otherwise
      */
-    boolean contains(int contextId, int userId, String accountId);
+    public boolean contains(int contextId, int userId) {
+        OAuthAccess access = map.get(new OAuthAccessKey(contextId, userId));
+        return access != null;
+    }
 
     /**
      * Retrieves the {@link OAuthAccess} associated with the given user/context/account tuple
@@ -85,7 +112,9 @@ public interface OAuthAccessRegistry {
      * @param accountId The account identifier
      * @return The {@link OAuthAccess} that is associated with the tuple, or <code>null</code> if none exists
      */
-    OAuthAccess get(int contextId, int userId, String accountId);
+    public OAuthAccess get(int contextId, int userId) {
+        return map.get(new OAuthAccessKey(contextId, userId));
+    }
 
     /**
      * Removes the {@link OAuthAccess} associated with the specified user/context tuple, if no more accesses for that tuple are present
@@ -94,7 +123,14 @@ public interface OAuthAccessRegistry {
      * @param userId The user identifier
      * @return <code>true</code> if an {@link OAuthAccess} for the specified tuple was found and removed; <code>false</code> otherwise
      */
-    boolean removeIfLast(int contextId, int userId);
+    public boolean removeIfLast(int contextId, int userId) {
+        OAuthAccess access = map.remove(new OAuthAccessKey(contextId, userId));
+        if (null == access) {
+            return false;
+        }
+        access.dispose();
+        return true;
+    }
 
     /**
      * Purges the {@link OAuthAccess} associated with the specified user/context/account tuple.
@@ -104,12 +140,17 @@ public interface OAuthAccessRegistry {
      * @param accountId The account identifier
      * @return <code>true</code> if an {@link OAuthAccess} for the specified tuple was found and purged; <code>false</code> otherwise
      */
-    boolean purgeUserAccess(int contextId, int userId, String accountId);
+    public boolean purgeUserAccess(int contextId, int userId) {
+        OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
+        return map.remove(key) != null;
+    }
 
     /**
      * Returns the service identifier of this registry
      * 
      * @return the service identifier of this registry
      */
-    String getServiceId();
+    public String getServiceId() {
+        return serviceId;
+    }
 }
