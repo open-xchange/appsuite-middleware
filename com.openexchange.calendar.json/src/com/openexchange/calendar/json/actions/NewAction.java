@@ -174,7 +174,7 @@ public final class NewAction extends ChronosAction {
         }
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
 
-        UserizedEvent event = EventConverter.getEvent(appointment, request.getSession());
+        UserizedEvent event = EventConverter.getEvent(calendarSession, appointment);
         UserizedEvent createdEvent = calendarService.createEvent(calendarSession, event);
 
         return new AJAXRequestResult(new JSONObject().put(DataFields.ID, createdEvent.getEvent().getId()), createdEvent.getEvent().getLastModified(), "json");

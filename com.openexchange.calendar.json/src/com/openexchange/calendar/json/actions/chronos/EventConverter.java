@@ -57,6 +57,8 @@ import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -73,7 +75,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EventConverter}
@@ -187,11 +188,11 @@ public class EventConverter {
     /**
      * Converts the supplied appointment into a corresponding userized event.
      *
+     * @param session The calendar session
      * @param appointment The appointment to convert
-     * @param session The current user's session
      * @return The userized event
      */
-    public static UserizedEvent getEvent(Appointment appointment, ServerSession session) {
+    public static UserizedEvent getEvent(CalendarSession session, Appointment appointment) {
         Event event = new Event();
         if (appointment.containsObjectID()) {
             event.setId(appointment.getObjectID());
@@ -237,7 +238,7 @@ public class EventConverter {
         if (appointment.containsRecurrenceID()) {
             event.setSeriesId(appointment.getRecurrenceID());
         }
-        String recurrenceRule = Appointment2Event.getRecurrenceRule(getSeriesPattern(appointment));
+        String recurrenceRule = Appointment2Event.getRecurrenceRule(getSeriesPattern(session, appointment));
         if (appointment.containsRecurrenceType()) {
             event.setRecurrenceRule(recurrenceRule);
         }
@@ -286,7 +287,7 @@ public class EventConverter {
             event.setStartTimezone(appointment.getTimezone());
         }
 
-        UserizedEvent userizedEvent = new UserizedEvent(session, event);
+        UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
         if (appointment.containsAlarm()) {
             userizedEvent.setAlarms(Collections.singletonList(Appointment2Event.getAlarm(appointment.getAlarm())));
         }
@@ -333,6 +334,8 @@ public class EventConverter {
         }
         if (event.containsColor()) {
             appointment.setLabel(Event2Appointment.getColorLabel(event.getColor()));
+        } else {
+            appointment.setLabel(0);
         }
         if (event.containsAttachments()) {
             List<Attachment> attachments = event.getAttachments();
@@ -452,6 +455,8 @@ public class EventConverter {
         }
         if (event.containsAllDay()) {
             appointment.setFullTime(event.isAllDay());
+        } else {
+            appointment.setFullTime(false);
         }
         if (event.containsTransp()) {
             appointment.setShownAs(Event2Appointment.getShownAs(event.getTransp()));
@@ -522,7 +527,7 @@ public class EventConverter {
         return organizer;
     }
 
-    private static SeriesPattern getSeriesPattern(Appointment appointment) {
+    private static SeriesPattern getSeriesPattern(CalendarSession session, Appointment appointment) {
         if (0 == appointment.getRecurrenceType()) {
             return null;
         }
@@ -550,7 +555,11 @@ public class EventConverter {
             pattern.setOccurrences(appointment.getOccurrence());
         }
         pattern.setFullTime(Boolean.valueOf(appointment.getFullTime()));
-        pattern.setTz(null != appointment.getTimezone() ? TimeZone.getTimeZone(appointment.getTimezone()) : null);
+        if (null != appointment.getTimezone()) {
+            pattern.setTz(TimeZone.getTimeZone(appointment.getTimezone()));
+        } else {
+            pattern.setTz(session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone())));
+        }
         return pattern;
     }
 

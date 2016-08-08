@@ -175,7 +175,7 @@ public final class UpdateAction extends ChronosAction {
             calendarSession.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
-        UserizedEvent event = EventConverter.getEvent(appointment, request.getSession());
+        UserizedEvent event = EventConverter.getEvent(calendarSession, appointment);
         UserizedEvent updatedEvent = calendarService.updateEvent(calendarSession, folderID, event);
         return new AJAXRequestResult(new JSONObject().put(DataFields.ID, updatedEvent.getEvent().getId()), updatedEvent.getEvent().getLastModified(), "json");
     }
