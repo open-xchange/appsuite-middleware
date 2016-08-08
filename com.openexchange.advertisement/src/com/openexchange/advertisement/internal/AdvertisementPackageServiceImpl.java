@@ -174,12 +174,26 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
         }
     }
 
-    public void addService(AdvertisementConfigService service) {
-        services.add(service);
+    /**
+     * Adds newly appeared advertisement configuration and reloads this advertisement package service.
+     *
+     * @param advertisementConfig The advertisement configuration to add
+     * @param configService The configuration service to use for reload
+     */
+    public synchronized void addServiceAndReload(AdvertisementConfigService advertisementConfig, ConfigurationService configService) {
+        services.add(advertisementConfig);
+        reloadConfiguration(configService);
     }
 
-    public void removeService(AdvertisementConfigService service) {
-        services.remove(service);
+    /**
+     * Removes disappeared advertisement configuration and reloads this advertisement package service.
+     *
+     * @param advertisementConfig The advertisement configuration to remove
+     * @param configService The configuration service to use for reload
+     */
+    public synchronized void removeServiceAndReload(AdvertisementConfigService advertisementConfig, ConfigurationService configService) {
+        services.remove(advertisementConfig);
+        reloadConfiguration(configService);
     }
 
     private AdvertisementConfigService getConfigServiceByScheme(String scheme) {

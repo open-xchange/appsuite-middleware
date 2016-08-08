@@ -83,8 +83,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-
         Services.setServiceLookup(this);
+
         final String sCapability = "ads";
         Dictionary<String, Object> properties = new Hashtable<>(2);
         properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
@@ -108,18 +108,18 @@ public class Activator extends HousekeepingActivator {
             }
         }, properties);
         getService(CapabilityService.class).declareCapability(sCapability);
+
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         final AdvertisementPackageServiceImpl packageService = new AdvertisementPackageServiceImpl(configService);
         registerService(AdvertisementPackageService.class, packageService);
         registerService(Reloadable.class, packageService);
+        final BundleContext context = this.context;
         track(AdvertisementConfigService.class, new ServiceTrackerCustomizer<AdvertisementConfigService, AdvertisementConfigService>() {
 
             @Override
-            public AdvertisementConfigService addingService(ServiceReference<AdvertisementConfigService> reference) {
+            public synchronized AdvertisementConfigService addingService(ServiceReference<AdvertisementConfigService> reference) {
                 AdvertisementConfigService service = context.getService(reference);
-                packageService.addService(service);
-                ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-                packageService.reloadConfiguration(configurationService);
+                packageService.addServiceAndReload(service, Services.getService(ConfigurationService.class));
                 return service;
             }
 
@@ -129,19 +129,18 @@ public class Activator extends HousekeepingActivator {
             }
 
             @Override
-            public void removedService(ServiceReference<AdvertisementConfigService> reference, AdvertisementConfigService service) {
-                packageService.removeService(service);
-                ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-                packageService.reloadConfiguration(configurationService);
+            public synchronized void removedService(ServiceReference<AdvertisementConfigService> reference, AdvertisementConfigService service) {
+                packageService.removeServiceAndReload(service, Services.getService(ConfigurationService.class));
             }
 
         });
         openTrackers();
     }
 
-    BundleContext getBundleContext() {
-        return this.context;
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
-
 
 }
