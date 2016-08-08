@@ -80,7 +80,7 @@ public class ImmutableJSONObject extends JSONObject {
      * @param jsonObject The JSON object to copy from
      */
     private ImmutableJSONObject(JSONObject jsonObject) {
-        super(ImmutableMap.copyOf(jsonObject.getMyHashMap()), true);
+        super(createImmutableMapFrom(jsonObject.getMyHashMap()), true);
     }
 
     /**
