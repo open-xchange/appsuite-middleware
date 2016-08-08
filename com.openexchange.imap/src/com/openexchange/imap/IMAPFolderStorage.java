@@ -123,7 +123,7 @@ import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
-import com.openexchange.mail.api.IMailFolderStorageValiditySupport;
+import com.openexchange.mail.api.IMailFolderStorageStatusSupport;
 import com.openexchange.mail.api.IMailSharedFolderPathResolver;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
@@ -131,6 +131,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailFolderInfo;
+import com.openexchange.mail.dataobjects.MailFolderStatus;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -155,7 +156,7 @@ import com.sun.mail.imap.protocol.ListInfo;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver, IMailFolderStorageValiditySupport {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver, IMailFolderStorageStatusSupport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderStorage.class);
 
@@ -342,12 +343,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     @Override
-    public boolean isValiditySupported() throws OXException {
+    public boolean isStatusSupported() throws OXException {
     	return true;
     }
 
     @Override
-    public String getFolderValidity(String fullName) throws OXException {
+    public MailFolderStatus getFolderStatus(String fullName) throws OXException {
     	try {
             final String fn = (DEFAULT_FOLDER_ID.equals(fullName) ? "" : fullName);
             // Retrieve folder...
@@ -382,7 +383,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
 
-            return Long.toString(f.getUIDValidity());
+            return MailFolderStatus.builder()
+                .nextId(Long.toString(f.getUIDNext()))
+                .total(f.getMessageCount())
+                .unread(f.getUnreadMessageCount())
+                .validity(Long.toString(f.getUIDValidity()))
+                .build();
         } catch (final MessagingException e) {
             throw handleMessagingException(fullName, e);
         } catch (final RuntimeException e) {
