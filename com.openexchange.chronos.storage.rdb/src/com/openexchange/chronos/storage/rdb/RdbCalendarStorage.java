@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -581,7 +582,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private static Map<Integer, List<Attachment>> selectAttachments(Connection connection, int contextID, int[] objectIDs) throws SQLException {
         Map<Integer, List<Attachment>> attachmentsById = new HashMap<Integer, List<Attachment>>();
         String sql = new StringBuilder()
-            .append("SELECT attached,id,file_mimetype,file_size,filename,file_id FROM prg_attachment ")
+            .append("SELECT attached,id,file_mimetype,file_size,filename,file_id,creation_date FROM prg_attachment ")
             .append("WHERE cid=? AND attached IN (").append(getParameters(objectIDs.length)).append(") AND module=?;")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -596,9 +597,10 @@ public class RdbCalendarStorage implements CalendarStorage {
                     Attachment attachment = new Attachment();
                     attachment.setManagedId(String.valueOf(resultSet.getInt("id")));
                     attachment.setFormatType(resultSet.getString("file_mimetype"));
-                    attachment.setSize(Long.valueOf(resultSet.getString("file_size")));
+                    attachment.setSize(resultSet.getLong("file_size"));
                     attachment.setManagedId(resultSet.getString("filename"));
                     attachment.setContentId(resultSet.getString("file_id"));
+                    attachment.setLastModified(new Date(resultSet.getLong("creation_date")));
                     put(attachmentsById, I(resultSet.getInt("attached")), attachment);
                 }
             }

@@ -338,11 +338,19 @@ public class EventConverter {
             List<Attachment> attachments = event.getAttachments();
             if (null != attachments) {
                 appointment.setNumberOfAttachments(attachments.size());
+                Date lastModifiedOfNewestAttachment = null;
+                for (Attachment attachment : attachments) {
+                    if (null != attachment.getLastModified() &&
+                        (null == lastModifiedOfNewestAttachment || attachment.getLastModified().after(lastModifiedOfNewestAttachment))) {
+                        lastModifiedOfNewestAttachment = attachment.getLastModified();
+                    }
+                }
+                appointment.setLastModifiedOfNewestAttachment(lastModifiedOfNewestAttachment);
             } else {
                 appointment.setNumberOfAttachments(0);
+                appointment.setLastModifiedOfNewestAttachment(null);
             }
         }
-        //appointment.setLastModifiedOfNewestAttachment(null);
         if (event.containsSummary()) {
             appointment.setTitle(event.getSummary());
         }

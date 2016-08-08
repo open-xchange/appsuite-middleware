@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos;
 
+import java.util.Date;
 import com.openexchange.ajax.fileholder.IFileHolder;
 
 /**
@@ -69,6 +70,7 @@ public class Attachment {
 	private String name;
 	private String uri;
 	private String contentId;
+    private Date lastModified;
 
 	public Attachment() {
 		super();
@@ -138,12 +140,20 @@ public class Attachment {
 		this.uri = uri;
 	}
 
-	public String getContentId() {
-		return contentId;
-	}
+    public String getContentId() {
+        return contentId;
+    }
 
-	public void setContentId(String contentId) {
-		this.contentId = contentId;
-	}
+    public void setContentId(String contentId) {
+        this.contentId = contentId;
+    }
+
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
 
 }
