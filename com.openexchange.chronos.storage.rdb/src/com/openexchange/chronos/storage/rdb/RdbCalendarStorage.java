@@ -437,7 +437,7 @@ public class RdbCalendarStorage implements CalendarStorage {
                 /*
                  * insert additional record into dateExternal for external users
                  */
-                updated += insertOrReplaceDateExternal(connection, deleted ? "dateexternal" : "deldateexternal", replace, contextID, objectID, attendee);
+                updated += insertOrReplaceDateExternal(connection, deleted ? "deldateexternal" : "dateexternal", replace, contextID, objectID, attendee);
             } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
                 /*
                  * insert additional record into prg_dates_members for each internal user
@@ -782,7 +782,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             }
         }
         /*
-         * truncate milliseconds from creation date to avoid bad rounding in MySQL versions >= 7.6.4.
+         * truncate milliseconds from creation date to avoid bad rounding in MySQL versions >= 5.6.4.
          * See: http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
          * See: com.openexchange.sql.tools.SQLTools.toTimestamp(Date)
          */
