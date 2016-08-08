@@ -294,7 +294,8 @@ public class CalendarReader {
         for (EventID eventID : eventIDs) {
             UserizedEvent event = find(events, eventID.getFolderID(), eventID.getObjectID());
             if (null == event) {
-                throw OXException.notFound(eventID.toString()); //TODO
+                continue; //TODO check; see com.openexchange.ajax.appointment.NewListTest.testRemovedObjectHandling()
+                //                throw OXException.notFound(eventID.toString()); //TODO
             }
             //TODO: specific occurrence?
             orderedEvents.add(event);

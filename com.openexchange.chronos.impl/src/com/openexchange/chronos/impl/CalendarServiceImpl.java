@@ -121,7 +121,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, int folderID, Date deletedSince) throws OXException {
-        return new CalendarReader(session).readEventsInFolder(folderID, deletedSince);
+        return new CalendarReader(session).readDeletedEventsInFolder(folderID, deletedSince);
     }
 
     @Override
