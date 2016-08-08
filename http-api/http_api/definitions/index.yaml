@@ -190,6 +190,8 @@ ResolveShareReferenceElement:
   $ref: ./mail/ResolveShareReferenceElement.yaml
 ResolveShareReferenceResponse:
   $ref: ./mail/ResolveShareReferenceResponse.yaml
+ExamineResponse:
+ $ref: ./mail/ExamineResponse.yaml
 # Module: groups
 GroupData:
   $ref: ./groups/GroupData.yaml

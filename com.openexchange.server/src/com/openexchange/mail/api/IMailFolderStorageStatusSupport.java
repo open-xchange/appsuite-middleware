@@ -50,13 +50,14 @@
 package com.openexchange.mail.api;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailFolderStatus;
 
 /**
- * {@link IMailFolderStorageValiditySupport} - Extends basic folder storage by mailbox info support.
+ * {@link IMailFolderStorageStatusSupport} - Extends basic folder storage by requesting a mailbox' status.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMailFolderStorageValiditySupport extends IMailFolderStorage {
+public interface IMailFolderStorageStatusSupport extends IMailFolderStorage {
 
     /**
      * Indicates if mailbox validity is supported.
@@ -64,7 +65,7 @@ public interface IMailFolderStorageValiditySupport extends IMailFolderStorage {
      * @return <code>true</code> if supported; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    boolean isValiditySupported() throws OXException;
+    boolean isStatusSupported() throws OXException;
 
     /**
      * Gets the folder validity for specified full name.
@@ -73,6 +74,6 @@ public interface IMailFolderStorageValiditySupport extends IMailFolderStorage {
      * @return The folder validity
      * @throws OXException If an error occurs
      */
-    String getFolderValidity(String fullName) throws OXException;
+    MailFolderStatus getFolderStatus(String fullName) throws OXException;
 
 }
