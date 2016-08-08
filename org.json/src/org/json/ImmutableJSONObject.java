@@ -47,73 +47,54 @@
  *
  */
 
-package com.openexchange.reseller.osgi;
+package org.json;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link ImmutableJSONObject} - An immutable {@link JSONObject}.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class Services {
+public class ImmutableJSONObject extends JSONObject {
+
+    private static final long serialVersionUID = 7348084518800542046L;
 
     /**
-     * Initializes a new {@link Services}.
+     * Gets the immutable view for specified JSON object.
+     *
+     * @param jsonObject The JSON object
+     * @return The immutable JSON object
      */
-    private Services() {
-        super();
+    public static ImmutableJSONObject immutableFor(JSONObject jsonObject) {
+        return jsonObject instanceof ImmutableJSONObject ? (ImmutableJSONObject) jsonObject : new ImmutableJSONObject(jsonObject);
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<>();
+    // --------------------------------------------------------------------------------------------------
 
     /**
-     * Sets the service lookup.
+     * Initializes a new {@link ImmutableJSONObject}.
      *
-     * @param serviceLookup The service lookup or <code>null</code>
+     * @param jsonObject The JSON object to copy from
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
+    private ImmutableJSONObject(JSONObject jsonObject) {
+        super(createImmutableMapFrom(jsonObject.getMyHashMap()), true);
     }
 
     /**
-     * Gets the service of specified type
+     * Creates the immutable view for given map.
      *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
+     * @param map The map
+     * @return The immutable map
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.reseller\" not started?");
+    static ImmutableMap<String, Object> createImmutableMapFrom(Map<String, Object> map) {
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            builder.put(entry.getKey(), ImmutableJSONValues.getImmutableValueFor(entry.getValue()));
         }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+        return builder.build();
     }
 
 }
-

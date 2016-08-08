@@ -50,7 +50,7 @@
 package com.openexchange.config;
 
 /**
- * {@link Interests} - Signals the interests of a {@link Reloadable} instance.
+ * {@link Interests} - Signals the interests of a {@link Reloadable} instance in certain {@link #getPropertiesOfInterest() property names} and/or {@link #getConfigFileNames() configuration files}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3

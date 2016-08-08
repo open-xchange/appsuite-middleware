@@ -9,6 +9,7 @@ Bundle-Activator: com.openexchange.advertisement.json.osgi.Activator
 Import-Package: com.openexchange.advertisement,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.config,
  com.openexchange.documentation,
  com.openexchange.documentation.annotations,
  com.openexchange.exception,

@@ -225,6 +225,16 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
     }
 
     /**
+     * Internal constructor.
+     *
+     * @param myArrayList The list to use
+     */
+    JSONArray(List<Object> myArrayList, boolean internal) {
+        super();
+        this.myArrayList = myArrayList;
+    }
+
+    /**
      * Construct a JSONArray from a Collection.
      *
      * @param collection A Collection.
@@ -295,6 +305,15 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
     @Override
     public int hashCode() {
         return myArrayList.hashCode();
+    }
+
+    /**
+     * Gets the reference to the internal list.
+     *
+     * @return The internal list
+     */
+    List<Object> getMyArrayList() {
+        return myArrayList;
     }
 
     /**

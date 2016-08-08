@@ -68,7 +68,7 @@ public interface Reloadable {
     void reloadConfiguration(ConfigurationService configService);
 
     /**
-     * Gets the interests for this reloadable
+     * Gets the interests in property names and/or configuration files.
      *
      * @return The interests
      */

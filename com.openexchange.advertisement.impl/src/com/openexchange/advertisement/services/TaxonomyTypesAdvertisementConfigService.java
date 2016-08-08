@@ -77,27 +77,34 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
 
     private static final String TAXONOMY_TYPES = "taxonomy/types";
     private static final String TAXONOMY_TYPE_CONFIGURATION = "com.openexchange.advertisement.taxonomy.types";
-    private static TaxonomyTypesAdvertisementConfigService instance = null;
 
     /**
-     * @return
+     * Gets the instance of {@code TaxonomyTypesAdvertisementConfigService}.
+     *
+     * @return The instance
      */
     public static TaxonomyTypesAdvertisementConfigService getInstance() {
-        if (instance == null) {
-            instance = new TaxonomyTypesAdvertisementConfigService();
-        }
-        return instance;
+        return new TaxonomyTypesAdvertisementConfigService();
+    }
+
+    // ------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link TaxonomyTypesAdvertisementConfigService}.
+     */
+    private TaxonomyTypesAdvertisementConfigService() {
+        super();
     }
 
     @Override
-    String getReseller(Session session) throws OXException {
+    protected String getReseller(Session session) throws OXException {
         ResellerService resellerService = Services.getService(ResellerService.class);
         ResellerAdmin resellerAdmin = resellerService.getReseller(session.getContextId());
         return resellerAdmin.getName();
     }
 
     @Override
-    String getPackage(Session session) throws OXException {
+    protected String getPackage(Session session) throws OXException {
         ContextService ctxService = Services.getService(ContextService.class);
         Context ctx = ctxService.getContext(session.getContextId());
         Map<String, List<String>> attributes = ctx.getAttributes();
