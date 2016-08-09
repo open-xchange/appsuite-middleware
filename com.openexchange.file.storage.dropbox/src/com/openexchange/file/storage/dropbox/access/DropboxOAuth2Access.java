@@ -50,6 +50,8 @@
 package com.openexchange.file.storage.dropbox.access;
 
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
@@ -71,6 +73,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DropboxOAuth2Access implements OAuthAccess {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(DropboxOAuth2Access.class);
 
     private final FileStorageAccount fsAccount;
     private final Session session;
@@ -114,9 +118,8 @@ public class DropboxOAuth2Access implements OAuthAccess {
         try {
             oauthClient.client.auth().tokenRevoke();
         } catch (DbxException e) {
-            //TODO: handle exception
-            e.printStackTrace();
-            throw new OXException(e);
+            // Simply log the revoke attempt, we can't do anything about it
+            LOG.debug("{}", e.getMessage(), e);
         }
     }
 
