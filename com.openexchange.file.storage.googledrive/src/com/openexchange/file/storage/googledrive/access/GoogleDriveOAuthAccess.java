@@ -53,6 +53,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.drive.Drive;
@@ -64,6 +70,7 @@ import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -73,6 +80,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GoogleDriveOAuthAccess implements OAuthAccess {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GoogleDriveOAuthAccess.class);
 
     /** The re-check threshold in seconds (45 minutes) */
     private static final long RECHECK_THRESHOLD = 2700;
@@ -145,8 +154,23 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
      */
     @Override
     public void revoke() throws OXException {
-        // TODO Auto-generated method stub
-
+        // No Java API call
+        // More information here: https://developers.google.com/identity/protocols/OAuth2WebServer#tokenrevoke
+        try {
+            DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange OneDrive Client");
+            HttpGet request = new HttpGet("https://accounts.google.com/o/oauth2/revoke?token=" + googleAccount.getToken());
+            HttpResponse httpResponse = httpClient.execute(request);
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            if (statusCode == 200) {
+                return;
+            } else {
+                LOG.warn("The OAuth token couldn't not be revoked. Status Code: {}, {}", statusCode, httpResponse.getStatusLine().getReasonPhrase());
+            }
+        } catch (ClientProtocolException e) {
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
+        } catch (IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     /*
