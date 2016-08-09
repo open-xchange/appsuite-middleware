@@ -752,6 +752,15 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             account.setToken(encrypt(account.getToken(), session));
             account.setSecret(encrypt(account.getSecret(), session));
             /*
+             * Create UPDATE command
+             */
+            final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
+            final UPDATE update = SQLStructure.updateAccount(account, contextId, user, values);
+            /*
+             * Execute UPDATE command
+             */
+            executeUpdate(contextId, update, values);
+            /*
              * Re-authorise
              */
             OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
@@ -764,15 +773,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 // Then initialise the access with the new one
                 access.initialise();
             }
-            /*
-             * Create UPDATE command
-             */
-            final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
-            final UPDATE update = SQLStructure.updateAccount(account, contextId, user, values);
-            /*
-             * Execute UPDATE command
-             */
-            executeUpdate(contextId, update, values);
             /*
              * Return the account
              */
