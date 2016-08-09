@@ -49,10 +49,14 @@
 
 package com.openexchange.websockets.grizzly;
 
+import java.util.Map;
 import org.glassfish.grizzly.http.HttpRequestPacket;
+import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DefaultWebSocket;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocketListener;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSocketSession;
 
@@ -68,15 +72,18 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
     private final String path;
     private final ConnectionId connectionId;
     private final WebSocketSession webSocketSession;
+    private final Parameters parameters;
+    private volatile Map<String, String> paramsMap;
 
     /**
      * Initializes a new {@link SessionBoundWebSocket}.
      */
-    public SessionBoundWebSocket(SessionInfo sessionInfo, ConnectionId connectionId, String path, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
+    public SessionBoundWebSocket(SessionInfo sessionInfo, ConnectionId connectionId, String path, Parameters parameters, ProtocolHandler protocolHandler, HttpRequestPacket request, WebSocketListener... listeners) {
         super(protocolHandler, request, listeners);
         this.sessionInfo = sessionInfo;
         this.connectionId = connectionId;
         this.path = path;
+        this.parameters = parameters;
         webSocketSession = new WebSocketSessionImpl();
     }
 
@@ -141,6 +148,35 @@ public class SessionBoundWebSocket extends DefaultWebSocket {
      */
     public String getPath() {
         return path;
+    }
+
+    /**
+     * Gets the available query parameters associated while this Web Socket was created; e.g. <code>"param1=foo&amp;param2=bar"</code>.
+     *
+     * @return The parameters
+     */
+    public Map<String, String> getParameters() {
+        Map<String, String> tmp = this.paramsMap;
+        if (null == tmp) {
+            // May be concurrently initialized
+            Builder<String, String> builder = ImmutableMap.builder();
+            for (String parameterName : parameters.getParameterNames()) {
+                builder.put(parameterName, parameters.getParameter(parameterName));
+            }
+            tmp = builder.build();
+            this.paramsMap = tmp;
+        }
+        return tmp;
+    }
+
+    /**
+     * Gets the value for the denoted query parameter.
+     *
+     * @param parameterName The parameter name
+     * @return The parameters value or <code>null</code> (if no such parameter was available while this Web Socket was created)
+     */
+    public String getParameter(String parameterName) {
+        return null == parameterName ? null : parameters.getParameter(parameterName);
     }
 
     @Override

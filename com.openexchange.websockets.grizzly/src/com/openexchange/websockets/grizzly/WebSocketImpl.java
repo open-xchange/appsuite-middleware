@@ -50,6 +50,7 @@
 package com.openexchange.websockets.grizzly;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.glassfish.grizzly.GrizzlyFuture;
 import org.glassfish.grizzly.websockets.DataFrame;
@@ -83,6 +84,16 @@ public class WebSocketImpl implements WebSocket {
     @Override
     public String getPath() {
         return grizzlySocket.getPath();
+    }
+
+    @Override
+    public Map<String, String> getParameters() {
+        return grizzlySocket.getParameters();
+    }
+
+    @Override
+    public String getParameter(String parameterName) {
+        return grizzlySocket.getParameter(parameterName);
     }
 
     @Override
