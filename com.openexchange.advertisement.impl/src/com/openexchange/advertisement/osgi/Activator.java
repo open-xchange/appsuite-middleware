@@ -50,7 +50,12 @@
 package com.openexchange.advertisement.osgi;
 
 import java.io.ByteArrayInputStream;
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.RemoteAdvertisementService;
+import com.openexchange.advertisement.rmi.impl.RemoteAdvertisementServiceImpl;
 import com.openexchange.advertisement.services.AbstractAdvertisementConfigService;
 import com.openexchange.advertisement.services.AccessCombinationAdvertisementConfigService;
 import com.openexchange.advertisement.services.GlobalAdvertisementConfigService;
@@ -106,6 +111,13 @@ public class Activator extends HousekeepingActivator {
         registerService(AdvertisementConfigService.class, AccessCombinationAdvertisementConfigService.getInstance());
         registerService(AdvertisementConfigService.class, GlobalAdvertisementConfigService.getInstance());
         registerService(AdvertisementConfigService.class, TaxonomyTypesAdvertisementConfigService.getInstance());
+
+        // Register appropriate RMI stub
+        {
+            Dictionary<String, Object> props = new Hashtable<>(2);
+            props.put("RMIName", RemoteAdvertisementService.RMI_NAME);
+            registerService(Remote.class, new RemoteAdvertisementServiceImpl(), props);
+        }
     }
 
     @Override

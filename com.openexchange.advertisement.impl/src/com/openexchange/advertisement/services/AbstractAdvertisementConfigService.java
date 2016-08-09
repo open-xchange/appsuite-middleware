@@ -102,7 +102,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     public static final String CACHING_REGION = AbstractAdvertisementConfigService.class.getSimpleName();
 
     private static final String SQL_INSERT_MAPPING = "REPLACE INTO advertisement_mapping (reseller,package,configId) VALUES (?,?,?);";
-    private static final String SQL_INSERT_CONFIG = "INSERT INTO advertisement_config (config) VALUES (?);";
+    private static final String SQL_INSERT_CONFIG = "INSERT INTO advertisement_config (reseller,config) VALUES (?,?);";
     private static final String SQL_UPDATE_CONFIG = "UPDATE advertisement_config SET config=? where configId=?;";
     private static final String SQL_DELETE_CONFIG = "DELETE FROM advertisement_config where configId=?;";
     private static final String SQL_DELETE_MAPPING = "DELETE FROM advertisement_mapping where configId=?;";
@@ -120,13 +120,13 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     }
 
     /**
-     * Gets the reseller name associated with specified session.
+     * Gets the reseller name associated with specified contextId.
      *
-     * @param session The session
+     * @param contextId The context identifier
      * @return The reseller name
      * @throws OXException If reseller name cannot be resolved
      */
-    protected abstract String getReseller(Session session) throws OXException;
+    protected abstract String getReseller(int contextId) throws OXException;
 
     /**
      * Gets the package name associated with specified session.
@@ -156,7 +156,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 String reseller = null;
                 String pack = null;
                 try {
-                    reseller = getReseller(session);
+                    reseller = getReseller(session.getContextId());
                 } catch (OXException e) {
                     LOG.debug("Error while retrieving the reseller for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                 }
@@ -196,7 +196,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         String reseller = null;
         String pack = null;
         try {
-            reseller = getReseller(session);
+            reseller = getReseller(session.getContextId());
         } catch (OXException e) {
             LOG.debug("Error while retrieving the reseller for user {} in context {}.", session.getUserId(), session.getContextId(), e);
         }
@@ -332,8 +332,10 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 if (config == null) {
                     return;
                 }
+                String reseller = getReseller(ctxId);
                 stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
-                stmt.setString(1, config);
+                stmt.setString(1, reseller);
+                stmt.setString(2, config);
                 stmt.execute();
                 result = stmt.getGeneratedKeys();
                 if (!result.next()) {
@@ -410,7 +412,8 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     return Status.IGNORED;
                 }
                 stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
-                stmt.setString(1, config);
+                stmt.setString(1, reseller);
+                stmt.setString(2, config);
                 stmt.execute();
                 result = stmt.getGeneratedKeys();
                 if (!result.next()) {
