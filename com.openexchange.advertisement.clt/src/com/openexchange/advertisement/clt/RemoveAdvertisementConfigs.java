@@ -65,6 +65,8 @@ import com.openexchange.cli.AbstractRmiCLI;
 public class RemoveAdvertisementConfigs extends AbstractRmiCLI<Void> {
 
     String reseller = null;
+    boolean clean = false;
+    boolean includePreview = false;
 
     /**
      * Invokes this command-line tool
@@ -82,14 +84,15 @@ public class RemoveAdvertisementConfigs extends AbstractRmiCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption("r", "reseller", true, "Defines the reseller for which the configurations should be deleted. If missing all configurations are deleted instead.");
-
+        options.addOption("r", "reseller", true, "Defines the reseller for which the configurations should be deleted. Use 'default' for the default reseller or in case no reseller are defined. If missing all configurations are deleted instead.");
+        options.addOption("c", "clean", false, "If set the clt only removes configurations of reseller which doesn't exist any more.");
+        options.addOption("i", "inlcudePreviews", false, "If set the clt also removes preview configurations. This is only applicable in case the argument 'clean' is used.");
     }
 
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         RemoteAdvertisementService rmiService = getRmiStub(optRmiHostName, RemoteAdvertisementService.RMI_NAME);
-        rmiService.removeConfigurations(reseller);
+        rmiService.removeConfigurations(reseller, clean, includePreview);
         return null;
     }
 
@@ -101,6 +104,8 @@ public class RemoveAdvertisementConfigs extends AbstractRmiCLI<Void> {
     @Override
     protected void checkOptions(CommandLine cmd) {
         reseller = cmd.getOptionValue('r');
+        clean = cmd.hasOption('c');
+        includePreview = cmd.hasOption('i');
 
     }
 

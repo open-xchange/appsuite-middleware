@@ -104,6 +104,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     private static final String SQL_INSERT_MAPPING = "REPLACE INTO advertisement_mapping (reseller,package,configId) VALUES (?,?,?);";
     private static final String SQL_INSERT_CONFIG = "INSERT INTO advertisement_config (reseller,config) VALUES (?,?);";
     private static final String SQL_UPDATE_CONFIG = "UPDATE advertisement_config SET config=? where configId=?;";
+    private static final String SQL_UPDATE_MAPPING = "UPDATE advertisement_mapping SET configId=? where reseller=? and package=?;";
     private static final String SQL_DELETE_CONFIG = "DELETE FROM advertisement_config where configId=?;";
     private static final String SQL_DELETE_MAPPING = "DELETE FROM advertisement_mapping where configId=?;";
     private static final String SQL_SELECT_MAPPING_SIMPLE = "Select configId from advertisement_mapping where reseller=? AND package=?;";
@@ -326,7 +327,21 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     stmt = con.prepareStatement(SQL_UPDATE_CONFIG);
                     stmt.setString(1, config);
                     stmt.setInt(2, configId);
-                    stmt.execute();
+                    if (stmt.executeUpdate() == 0) {
+                        // Nothing to update. Insert new row instead.
+                        DBUtils.closeSQLStuff(stmt);
+                        String reseller = getReseller(ctxId);
+                        stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
+                        stmt.setString(1, reseller);
+                        stmt.setString(2, config);
+                        stmt.execute();
+                        result = stmt.getGeneratedKeys();
+                        if (!result.next()) {
+                            throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
+                        }
+                        int resultConfigId = result.getInt(1);
+                        property.set(String.valueOf(resultConfigId));
+                    }
                 }
             } else {
                 if (config == null) {
@@ -401,8 +416,28 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     stmt = con.prepareStatement(SQL_UPDATE_CONFIG);
                     stmt.setString(1, config);
                     stmt.setInt(2, configId);
-                    stmt.execute();
-                    status = Status.UPDATED;
+                    if (0 == stmt.executeUpdate()) {
+                        // Nothing to update. Create new one instead
+                        DBUtils.closeSQLStuff(stmt);
+                        stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
+                        stmt.setString(1, reseller);
+                        stmt.setString(2, config);
+                        stmt.execute();
+                        result = stmt.getGeneratedKeys();
+                        if (!result.next()) {
+                            throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
+                        }
+                        int resultConfigId = result.getInt(1);
+                        DBUtils.closeSQLStuff(stmt);
+                        stmt = con.prepareStatement(SQL_UPDATE_MAPPING);
+                        stmt.setInt(1, resultConfigId);
+                        stmt.setString(2, reseller);
+                        stmt.setString(3, pack);
+                        stmt.execute();
+                        status = Status.CREATED;
+                    } else {
+                        status = Status.UPDATED;
+                    }
                 }
 
             } else {

@@ -69,6 +69,6 @@ public interface RemoteAdvertisementService extends Remote {
      * @param reseller The name of the reseller
      * @throws OXException
      */
-    public void removeConfigurations(String reseller) throws OXException, RemoteException;
+    public void removeConfigurations(String reseller, boolean clean, boolean includePreview) throws OXException, RemoteException;
 
 }
