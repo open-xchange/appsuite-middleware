@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.osgi.Services;
 import com.openexchange.config.cascade.ConfigView;
@@ -60,10 +61,12 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 
 /**
  * {@link TaxonomyTypesAdvertisementConfigService} is an implementation of the {@link AdvertisementConfigService} based on taxonomy/types.
@@ -76,6 +79,7 @@ import com.openexchange.session.Session;
 public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertisementConfigService {
 
     private static final String TAXONOMY_TYPES = "taxonomy/types";
+    private static final String TAXONOMY_TYPES_CONFIG_CASCADE = "config/com.openexchange.config.cascade.types";
     private static final String TAXONOMY_TYPE_CONFIGURATION = "com.openexchange.advertisement.taxonomy.types";
 
     /**
@@ -105,10 +109,38 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
 
     @Override
     protected String getPackage(Session session) throws OXException {
+        // Retrieve possible taxonomy types
+        ConfigViewFactory configurationService = Services.getService(ConfigViewFactory.class);
+        ConfigView view = configurationService.getView();
+        String typesString = view.get(TAXONOMY_TYPE_CONFIGURATION, String.class);
+        if (Strings.isEmpty(typesString)) {
+            return PACKAGE_ALL;
+        }
+        String[] possibleTypes = Strings.splitByComma(typesString);
+
+        // check user taxonomy types
+        UserService userService = Services.getService(UserService.class);
+        User user = userService.getUser(session.getUserId(), session.getContextId());
+        Map<String, Set<String>> userAttributes = user.getAttributes();
+        List<String> packs = new ArrayList<>();
+        if (userAttributes.containsKey(TAXONOMY_TYPES_CONFIG_CASCADE)) {
+            Set<String> taxonomyTypes = userAttributes.get(TAXONOMY_TYPES_CONFIG_CASCADE);
+            for (String types : taxonomyTypes) {
+                packs.addAll(Arrays.asList(Strings.splitByComma(types)));
+            }
+        }
+        
+        for (String type : possibleTypes) {
+            if (packs.contains(type)) {
+                return type;
+            }
+        }
+        
+        //check context taxonomy types
         ContextService ctxService = Services.getService(ContextService.class);
         Context ctx = ctxService.getContext(session.getContextId());
         Map<String, List<String>> attributes = ctx.getAttributes();
-        List<String> packs = new ArrayList<>();
+        packs.clear();
         if (attributes.containsKey(TAXONOMY_TYPES)) {
             List<String> taxonomyTypes = attributes.get(TAXONOMY_TYPES);
             for (String types : taxonomyTypes) {
@@ -116,15 +148,7 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
             }
         }
 
-        ConfigViewFactory configurationService = Services.getService(ConfigViewFactory.class);
-        ConfigView view = configurationService.getView();
-        String types = view.get(TAXONOMY_TYPE_CONFIGURATION, String.class);
-        if (Strings.isEmpty(types)) {
-            return PACKAGE_ALL;
-        }
-        String[] typesArray = Strings.splitByComma(types);
-
-        for (String type : typesArray) {
+        for (String type : possibleTypes) {
             if (packs.contains(type)) {
                 return type;
             }

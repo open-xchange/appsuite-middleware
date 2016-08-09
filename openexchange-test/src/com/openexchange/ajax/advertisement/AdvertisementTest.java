@@ -92,6 +92,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
     private static final String BASIC_AUTH_PASSWORD = "secret1";
     private Context old;
     private static final String reloadables = "AdvertisementPackageServiceImpl";
+    private static final String DEFAULT = "default";
 
     @Parameter(value = 0)
     public String packageScheme;
@@ -111,7 +112,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             fail("No package scheme defined!");
         }
         Map<String, String> result = new HashMap<>();
-        result.put("com.openexchange.advertisement.OX_ALL.packageScheme", packageScheme);
+        result.put("com.openexchange.advertisement.default.packageScheme", packageScheme);
         if (packageScheme == "TaxonomyTypes") {
             result.put("com.openexchange.advertisement.taxonomy.types", taxonomyTypes);
         }
@@ -202,7 +203,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         String pack = null;
         switch (packageScheme) {
             case "Global":
-                pack = "OX_ALL";
+                pack = DEFAULT;
                 break;
             case "AccessCombinations":
             case "TaxonomyTypes":
@@ -210,7 +211,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
         }
         try{
-            SetConfigRequest set = SetConfigRequest.create("OX_ALL", pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+            SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
             SetConfigResponse setResponse = client.execute(set);
             assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
             GetConfigRequest req = new GetConfigRequest();
@@ -218,7 +219,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
             assertTrue("The server returned the wrong configuration.", response.getData().toString().equals(data));
         } finally {
-            SetConfigRequest set = SetConfigRequest.create("OX_ALL", pack, null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+            SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
             client.execute(set);
         }
     }
@@ -229,7 +230,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         String pack = null;
         switch (packageScheme) {
             case "Global":
-                pack = "OX_ALL";
+                pack = DEFAULT;
                 break;
             case "AccessCombinations":
             case "TaxonomyTypes":
@@ -237,7 +238,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
         }
         // create configuration
-        SetConfigRequest set = SetConfigRequest.create("OX_ALL", pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+        SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
         SetConfigResponse setResponse = client.execute(set);
         assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
         // Check if configuration is available
@@ -246,7 +247,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
         assertTrue("The server returned the wrong configuration.", response.getData().toString().equals(data));
         // Remove configuration again
-        set = SetConfigRequest.create("OX_ALL", pack, null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+        set = SetConfigRequest.create(DEFAULT, pack, null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
         client.execute(set);
         // Check if configuration is gone
         GetConfigResponse response2 = client.execute(req);
@@ -260,7 +261,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         String pack = null;
         switch (packageScheme) {
             case "Global":
-                pack = "OX_ALL";
+                pack = DEFAULT;
                 break;
             case "AccessCombinations":
             case "TaxonomyTypes":
@@ -268,7 +269,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
         }
         try {
-            SetConfigRequest set = SetConfigRequest.create("OX_ALL", pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+            SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, data, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
             SetConfigResponse setResponse = client.execute(set);
             assertTrue("Setting failed: " + setResponse.getErrorMessage(), !setResponse.hasError());
             GetConfigRequest req = new GetConfigRequest();
@@ -299,7 +300,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             assertTrue("The server returned the wrong configuration.", response.getData().toString().equals(data));
 
         } finally {
-            SetConfigRequest set = SetConfigRequest.create("OX_ALL", pack, null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
+            SetConfigRequest set = SetConfigRequest.create(DEFAULT, pack, null, BASIC_AUTH_LOGIN, BASIC_AUTH_PASSWORD);
             client.execute(set);
         }
     }

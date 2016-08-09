@@ -154,7 +154,7 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
                 }
             }
 
-            // Add OX_ALL as a default reseller
+            // Add 'default' as a default reseller
             String oxall = DEFAULT_RESELLER;
 
             String packageScheme = view.get(CONFIG_PREFIX + oxall + CONFIG_SUFFIX, String.class);

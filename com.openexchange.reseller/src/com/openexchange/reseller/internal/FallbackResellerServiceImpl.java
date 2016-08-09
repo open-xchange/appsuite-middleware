@@ -65,7 +65,7 @@ public class FallbackResellerServiceImpl implements ResellerService {
 
     private static ResellerAdmin DEFAULT;
     static {
-        DEFAULT = ResellerAdmin.builder().name("OX_ALL").build();
+        DEFAULT = ResellerAdmin.builder().name("default").build();
     }
 
     @Override
