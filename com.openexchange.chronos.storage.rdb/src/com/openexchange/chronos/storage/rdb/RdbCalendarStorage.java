@@ -382,7 +382,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, objectID);
             stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
-            stmt.setString(parameterIndex++, attendee.getCommonName());
+            stmt.setString(parameterIndex++, attendee.getCn());
             stmt.setInt(parameterIndex++, Event2Appointment.getConfirm(attendee.getPartStat()));
             stmt.setString(parameterIndex++, attendee.getComment());
             return logExecuteUpdate(stmt);
@@ -419,7 +419,7 @@ public class RdbCalendarStorage implements CalendarStorage {
                 stmt.setInt(parameterIndex++, entity);
                 stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), false));
                 stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
-                stmt.setString(parameterIndex++, attendee.getCommonName());
+                stmt.setString(parameterIndex++, attendee.getCn());
             }
             return logExecuteUpdate(stmt);
         }

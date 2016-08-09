@@ -346,7 +346,7 @@ public class CalendarUtils {
      */
     public static <T extends CalendarUser> T applyProperties(T calendarUser, User user) {
         calendarUser.setEntity(user.getId());
-        calendarUser.setCommonName(user.getDisplayName());
+        calendarUser.setCn(user.getDisplayName());
         calendarUser.setUri(getCalAddress(user));
         return calendarUser;
     }

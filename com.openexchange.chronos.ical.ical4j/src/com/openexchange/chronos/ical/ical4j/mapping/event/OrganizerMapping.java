@@ -102,8 +102,8 @@ public class OrganizerMapping extends AbstractICalMapping<VEvent, Event> {
 
     private static net.fortuna.ical4j.model.property.Organizer exportOrganizer(Organizer organizer, net.fortuna.ical4j.model.property.Organizer property) throws URISyntaxException {
         property.setValue(organizer.getUri());
-        if (Strings.isNotEmpty(organizer.getCommonName())) {
-            property.getParameters().replace(new Cn(organizer.getCommonName()));
+        if (Strings.isNotEmpty(organizer.getCn())) {
+            property.getParameters().replace(new Cn(organizer.getCn()));
         } else {
             property.getParameters().removeAll(Parameter.CN);
         }
@@ -127,7 +127,7 @@ public class OrganizerMapping extends AbstractICalMapping<VEvent, Event> {
             }
         }
         Parameter cnParameter = property.getParameter(Parameter.CN);
-        organizer.setCommonName(null != cnParameter ? cnParameter.getValue() : null);
+        organizer.setCn(null != cnParameter ? cnParameter.getValue() : null);
         Parameter sentByParameter = property.getParameter(Parameter.SENT_BY);
         organizer.setSentBy(null != sentByParameter ? sentByParameter.getValue() : null);
         return organizer;

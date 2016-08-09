@@ -332,7 +332,7 @@ public class AttendeeLoader {
                     attendee.setEntity(resultSet.getInt("id"));
                     attendee.setCuType(Appointment2Event.getCalendarUserType(resultSet.getInt("type")));
                     attendee.setUri(Appointment2Event.getURI(resultSet.getString("ma")));
-                    attendee.setCommonName(resultSet.getString("dn"));
+                    attendee.setCn(resultSet.getString("dn"));
                     put(attendeesByObjectId, I(resultSet.getInt("object_id")), attendee);
                 }
             }

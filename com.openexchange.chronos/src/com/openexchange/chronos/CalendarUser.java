@@ -59,7 +59,7 @@ package com.openexchange.chronos;
 public class CalendarUser {
 
     String uri;
-    String commonName;
+    String cn;
     int entity;
     String sentBy;
     String email;
@@ -87,17 +87,17 @@ public class CalendarUser {
      *
      * @return The commonName
      */
-    public String getCommonName() {
-        return commonName;
+    public String getCn() {
+        return cn;
     }
 
     /**
      * Sets the commonName
      *
-     * @param commonName The commonName to set
+     * @param cn The commonName to set
      */
-    public void setCommonName(String commonName) {
-        this.commonName = commonName;
+    public void setCn(String cn) {
+        this.cn = cn;
     }
 
     /**

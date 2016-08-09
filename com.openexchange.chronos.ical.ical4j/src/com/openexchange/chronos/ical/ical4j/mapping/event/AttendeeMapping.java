@@ -142,8 +142,8 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
 
     private static net.fortuna.ical4j.model.property.Attendee exportAttendee(Attendee attendee, net.fortuna.ical4j.model.property.Attendee property) throws URISyntaxException {
         property.setValue(attendee.getUri());
-        if (Strings.isNotEmpty(attendee.getCommonName())) {
-            property.getParameters().replace(new Cn(attendee.getCommonName()));
+        if (Strings.isNotEmpty(attendee.getCn())) {
+            property.getParameters().replace(new Cn(attendee.getCn()));
         } else {
             property.getParameters().removeAll(Parameter.CN);
         }
@@ -192,7 +192,7 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
                 attendee.setUri("mailto:" + property.getValue());
             }
         }
-        attendee.setCommonName(optParameterValue(property, Parameter.CN));
+        attendee.setCn(optParameterValue(property, Parameter.CN));
         attendee.setSentBy(optParameterValue(property, Parameter.SENT_BY));
         attendee.setPartStat(Enums.parse(ParticipationStatus.class, optParameterValue(property, Parameter.PARTSTAT), null));
         attendee.setRole(Enums.parse(ParticipantRole.class, optParameterValue(property, Parameter.ROLE), null));

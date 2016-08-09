@@ -132,7 +132,7 @@ public class Attendee extends CalendarUser {
      * @return The common name
      */
     public String getCn() {
-        return commonName;
+        return cn;
     }
 
     /**
@@ -141,7 +141,7 @@ public class Attendee extends CalendarUser {
      * @param value The common name to set
      */
     public void setCn(String value) {
-        commonName = value;
+        cn = value;
         setFields.add(AttendeeField.CN);
     }
 
@@ -149,7 +149,7 @@ public class Attendee extends CalendarUser {
      * Removes the common name of the attendee.
      */
     public void removeCn() {
-        commonName = null;
+        cn = null;
         setFields.remove(AttendeeField.CN);
     }
 

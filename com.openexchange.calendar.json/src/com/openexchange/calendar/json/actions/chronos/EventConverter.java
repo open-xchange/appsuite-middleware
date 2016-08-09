@@ -485,7 +485,7 @@ public class EventConverter {
             attendee.setUri(Appointment2Event.getURI(participant.getEmailAddress()));
         }
         if (null != participant.getDisplayName()) {
-            attendee.setCommonName(participant.getDisplayName());
+            attendee.setCn(participant.getDisplayName());
         }
         if (ConfirmableParticipant.class.isInstance(participant)) {
             int confirm = ((ConfirmableParticipant) participant).getConfirm();
@@ -579,7 +579,7 @@ public class EventConverter {
                     UserParticipant userParticipant = new UserParticipant(attendee.getEntity());
                     userParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
                     userParticipant.setConfirmMessage(attendee.getComment());
-                    userParticipant.setDisplayName(attendee.getCommonName());
+                    userParticipant.setDisplayName(attendee.getCn());
                     userParticipant.setEmailAddress(Event2Appointment.getEMailAddress(attendee.getUri()));
                     users.add(userParticipant);
                     if (null == attendee.getMember()) {
@@ -597,7 +597,7 @@ public class EventConverter {
             case RESOURCE:
             case ROOM:
                 ResourceParticipant resourceParticipant = new ResourceParticipant(attendee.getEntity());
-                resourceParticipant.setDisplayName(attendee.getCommonName());
+                resourceParticipant.setDisplayName(attendee.getCn());
                 participants.add(resourceParticipant);
                 break;
             case UNKNOWN:

@@ -74,7 +74,6 @@ import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -223,7 +222,12 @@ public class CalendarWriter extends CalendarReader {
             User user = SharedType.getInstance().equals(folder.getType()) ? getUser(folder.getCreatedBy()) : session.getUser();
             Attendee attendee = CalendarUtils.applyProperties(new Attendee(), user);
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
-            attendee.setPartStat(ParticipationStatus.ACCEPTED);
+            Attendee requestedAttendee = CalendarUtils.find(requestedAttendees, user.getId());
+            if (null != requestedAttendee) {
+                if (requestedAttendee.containsPartStat()) {
+                    attendee.setPartStat(requestedAttendee.getPartStat());
+                }
+            }
             attendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? ATTENDEE_PUBLIC_FOLDER_ID : Integer.parseInt(folder.getID()));
             preparedAttendees.add(attendee);
             if (null == requestedAttendees || 0 == requestedAttendees.size()) {
@@ -273,7 +277,6 @@ public class CalendarWriter extends CalendarReader {
                         preparedAttendees.add(resourceAttendee);
                     }
                 } else {
-                    Type type = folder.getType();
                     /*
                      * verify existence of user attendee
                      */
