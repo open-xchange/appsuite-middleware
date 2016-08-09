@@ -65,7 +65,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
-import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
+import com.openexchange.file.storage.dropbox.access.DropboxOAuth2Access;
 import com.openexchange.session.Session;
 
 /**
@@ -76,16 +76,17 @@ import com.openexchange.session.Session;
  */
 abstract class AbstractDropboxAccess {
 
-    protected final DropboxOAuthAccess dropboxOAuthAccess;
+    protected final DropboxOAuth2Access dropboxOAuthAccess;
     protected final Session session;
     protected final FileStorageAccount account;
     protected final DbxClientV2 client;
 
     /**
      * Initialises a new {@link AbstractDropboxAccess}.
-     * @throws OXException 
+     * 
+     * @throws OXException
      */
-    AbstractDropboxAccess(DropboxOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
+    AbstractDropboxAccess(DropboxOAuth2Access dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
         super();
         this.dropboxOAuthAccess = dropboxOAuthAccess;
         this.session = session;
@@ -194,7 +195,6 @@ abstract class AbstractDropboxAccess {
         }
         throw FileStorageExceptionCodes.NOT_A_FOLDER.create(DropboxConstants.ID, folderId);
     }
-    
 
     /**
      * Lists the contents of the specified folder and Returns a {@link List} with {@link Metadata}

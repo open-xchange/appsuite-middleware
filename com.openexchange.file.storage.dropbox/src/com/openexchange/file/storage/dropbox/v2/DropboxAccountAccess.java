@@ -61,7 +61,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
+import com.openexchange.file.storage.dropbox.access.DropboxOAuth2Access;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
@@ -110,7 +110,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
         OAuthAccessRegistry registry = service.get(API.DROPBOX.getFullName());
         dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId());
         if (dropboxOAuthAccess == null) {
-            DropboxOAuthAccess newInstance = new DropboxOAuthAccess(account, session);
+            DropboxOAuth2Access newInstance = new DropboxOAuth2Access(account, session);
             registry.add(session.getContextId(), session.getUserId(), newInstance);
             if (dropboxOAuthAccess == null) {
                 dropboxOAuthAccess = newInstance;
@@ -149,7 +149,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
         if (null == dropboxOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new DropboxFileAccess((DropboxOAuthAccess) dropboxOAuthAccess, account, session, this);
+        return new DropboxFileAccess((DropboxOAuth2Access) dropboxOAuthAccess, account, session, this);
     }
 
     @Override
@@ -158,7 +158,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
         if (null == dropboxOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new DropboxFolderAccess((DropboxOAuthAccess) dropboxOAuthAccess, account, session);
+        return new DropboxFolderAccess((DropboxOAuth2Access) dropboxOAuthAccess, account, session);
     }
 
     @Override

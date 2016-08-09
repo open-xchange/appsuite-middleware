@@ -106,7 +106,7 @@ import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
-import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
+import com.openexchange.file.storage.dropbox.access.DropboxOAuth2Access;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.SizeKnowingInputStream;
@@ -136,9 +136,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Initialises a new {@link DropboxFileAccess}.
-     * @throws OXException 
+     * 
+     * @throws OXException
      */
-    public DropboxFileAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) throws OXException {
+    public DropboxFileAccess(final DropboxOAuth2Access dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) throws OXException {
         super(dropboxOAuthAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();

@@ -75,7 +75,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
-import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
+import com.openexchange.file.storage.dropbox.access.DropboxOAuth2Access;
 import com.openexchange.session.Session;
 
 /**
@@ -93,9 +93,10 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /**
      * Initialises a new {@link DropboxFolderAccess}.
-     * @throws OXException 
+     * 
+     * @throws OXException
      */
-    public DropboxFolderAccess(DropboxOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
+    public DropboxFolderAccess(DropboxOAuth2Access dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
         super(dropboxOAuthAccess, account, session);
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
