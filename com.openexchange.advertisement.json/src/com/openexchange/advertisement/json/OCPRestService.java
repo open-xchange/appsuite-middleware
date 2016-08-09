@@ -49,6 +49,7 @@
 
 package com.openexchange.advertisement.json;
 
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.PUT;
@@ -57,14 +58,18 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
+import com.openexchange.advertisement.ConfigResult;
 import com.openexchange.advertisement.json.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link OCPRestService}
@@ -107,14 +112,31 @@ public class OCPRestService {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/reseller")
-    public Response putConfig(@QueryParam("reseller") String reseller, JSONObject body) throws OXException {
+    public Response putConfig(@QueryParam("reseller") String reseller, JSONArray body) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
         AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.setConfig(reseller, body.toString());
+        List<ConfigResult> results = configService.setConfig(reseller, body.toString());
+        // convert results to json
+        JSONArray resultJSON = new JSONArray(results.size());
+        for (ConfigResult result : results) {
+            JSONObject singleResult = new JSONObject();
+            try {
+                singleResult.put("status", result.getMessage());
+                if (result.hasError()) {
+                    singleResult.put("error", result.getError().getMessage());
+                }
+            } catch (JSONException e) {
+                // should never be thrown
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+            }
+            resultJSON.put(singleResult);
+        }
+
         ResponseBuilder builder = Response.status(200);
+        builder.entity(resultJSON);
         return builder.build();
     }
 
@@ -154,19 +176,6 @@ public class OCPRestService {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
         configService.setConfig(reseller, pack, null);
-        ResponseBuilder builder = Response.status(200);
-        return builder.build();
-    }
-
-    @DELETE
-    @Path("/config/reseller")
-    public Response removeConfig(@QueryParam("reseller") String reseller) throws OXException {
-        AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
-        AdvertisementConfigService configService = packageService.getDefaultScheme();
-        if (configService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
-        }
-        configService.setConfig(reseller, null);
         ResponseBuilder builder = Response.status(200);
         return builder.build();
     }

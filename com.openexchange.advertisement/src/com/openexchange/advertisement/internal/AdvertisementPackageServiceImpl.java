@@ -52,6 +52,8 @@ package com.openexchange.advertisement.internal;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
@@ -79,13 +81,14 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
     private static final String CONFIG_PREFIX = "com.openexchange.advertisement.";
     private static final String CONFIG_SUFFIX = ".packageScheme";
 
-    private ConcurrentHashMap<String, AdvertisementConfigService> map;
+    private final List<AdvertisementConfigService> services = new CopyOnWriteArrayList<>();
+    private volatile ConcurrentMap<String, AdvertisementConfigService> map;
     private volatile AdvertisementConfigService global;
 
     /**
      * Initializes a new {@link AdvertisementPackageServiceImpl}.
      *
-     * @param map
+     * @param configService The configuration service to use
      */
     public AdvertisementPackageServiceImpl(ConfigurationService configService) {
         super();
@@ -94,9 +97,11 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
 
     @Override
     public AdvertisementConfigService getScheme(int contextId) {
+        ConcurrentMap<String, AdvertisementConfigService> map = this.map;
         if (map == null) {
             return null;
         }
+
         String reseller;
         ResellerService resellerService = Services.getService(ResellerService.class);
         try {
@@ -119,22 +124,19 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
 
     @Override
     public AdvertisementConfigService getDefaultScheme() {
-        if (map == null) {
-            return null;
-        }
-        return global;
+        return map == null ? null : global;
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        ResellerService resellerService = Services.getService(ResellerService.class);
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
         try {
+            ResellerService resellerService = Services.getService(ResellerService.class);
             List<ResellerAdmin> reseller = resellerService.getAll();
-            map = new ConcurrentHashMap<>(reseller.size());
             ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
             ConfigView view = factory.getView();
 
-            for(ResellerAdmin res: reseller){
+            ConcurrentHashMap<String, AdvertisementConfigService> map = new ConcurrentHashMap<>(reseller.size());
+            for (ResellerAdmin res: reseller){
                 String packageScheme = view.get(CONFIG_PREFIX + res.getName() + CONFIG_SUFFIX, String.class);
                 if (packageScheme == null) {
                     //fallback to reseller id
@@ -147,8 +149,9 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
                 }
 
                 AdvertisementConfigService adsService = getConfigServiceByScheme(packageScheme);
-
-                map.put(res.getName(), adsService);
+                if (adsService != null) {
+                    map.put(res.getName(), adsService);
+                }
             }
 
             // Add OX_ALL as a default reseller
@@ -161,37 +164,55 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
             }
 
             AdvertisementConfigService adsService = getConfigServiceByScheme(packageScheme);
-            map.put(oxall, adsService);
+            if (adsService != null) {
+                map.put(oxall, adsService);
+            }
 
+            this.map = map;
         } catch (OXException e) {
             LOG.error("Error while reloading configuration: " + e.getMessage());
         }
     }
 
-    private AdvertisementConfigService getConfigServiceByScheme(String scheme) {
-        List<AdvertisementConfigService> services = Services.getAllServices(AdvertisementConfigService.class);
+    /**
+     * Adds newly appeared advertisement configuration and reloads this advertisement package service.
+     *
+     * @param advertisementConfig The advertisement configuration to add
+     * @param configService The configuration service to use for reload
+     */
+    public synchronized void addServiceAndReload(AdvertisementConfigService advertisementConfig, ConfigurationService configService) {
+        services.add(advertisementConfig);
+        reloadConfiguration(configService);
+    }
 
+    /**
+     * Removes disappeared advertisement configuration and reloads this advertisement package service.
+     *
+     * @param advertisementConfig The advertisement configuration to remove
+     * @param configService The configuration service to use for reload
+     */
+    public synchronized void removeServiceAndReload(AdvertisementConfigService advertisementConfig, ConfigurationService configService) {
+        services.remove(advertisementConfig);
+        reloadConfiguration(configService);
+    }
+
+    private AdvertisementConfigService getConfigServiceByScheme(String scheme) {
         AdvertisementConfigService global = this.global;
         if (null == global) {
-            // Initialize global
-            synchronized (this) {
-                global = this.global;
-                if (global == null) {
-                    AdvertisementConfigService result = null;
-                    for (Iterator<AdvertisementConfigService> iter = services.iterator(); (null == result) && (global == null) && iter.hasNext();) {
-                        AdvertisementConfigService service = iter.next();
-                        if (service.getSchemeId().equals(DEFAULT_SCHEME_ID)) {
-                            global = service;
-                            this.global = global;
-                        }
-                        if (service.getSchemeId().equals(scheme)) {
-                            result = service;
-                        }
-                    }
-
-                    return result == null ? global : result;
+            // Initialize global; may be concurrently executed. it does not harm if default scheme gets detected twice...
+            AdvertisementConfigService result = null;
+            for (Iterator<AdvertisementConfigService> iter = services.iterator(); (null == result) && (global == null) && iter.hasNext();) {
+                AdvertisementConfigService service = iter.next();
+                if (service.getSchemeId().equals(DEFAULT_SCHEME_ID)) {
+                    global = service;
+                    this.global = global;
+                }
+                if (service.getSchemeId().equals(scheme)) {
+                    result = service;
                 }
             }
+
+            return result == null ? global : result;
         }
 
         for (AdvertisementConfigService service : services) {

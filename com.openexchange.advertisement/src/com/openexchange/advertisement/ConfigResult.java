@@ -47,35 +47,35 @@
  *
  */
 
-package com.openexchange.reseller.internal;
+package com.openexchange.advertisement;
 
-import java.util.Collections;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.reseller.ResellerService;
-import com.openexchange.reseller.data.ResellerAdmin;
 
 /**
- * {@link FallbackResellerServiceImpl}
+ * {@link ConfigResult}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class FallbackResellerServiceImpl implements ResellerService {
+public class ConfigResult {
 
-    private static ResellerAdmin DEFAULT;
-    static {
-        DEFAULT = ResellerAdmin.builder().name("OX_ALL").build();
+    private final Throwable exception;
+    private final String message;
+
+    public ConfigResult(String message, Throwable exception) {
+        this.message = message;
+        this.exception = exception;
     }
 
-    @Override
-    public ResellerAdmin getReseller(int cid) throws OXException {
-        return DEFAULT;
+    public boolean hasError() {
+        return this.exception != null;
     }
 
-    @Override
-    public List<ResellerAdmin> getAll() throws OXException {
-        return Collections.singletonList(DEFAULT);
+    public String getMessage() {
+        return message;
+    }
+
+    public Throwable getError() {
+        return exception;
     }
 
 }
