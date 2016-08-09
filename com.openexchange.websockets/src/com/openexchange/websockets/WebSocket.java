@@ -121,4 +121,9 @@ public interface WebSocket {
      */
     MessageHandler sendMessageAsync(String message) throws OXException;
 
+    /**
+     * Closes this {@link WebSocket}.
+     */
+    void close();
+
 }
