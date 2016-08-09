@@ -49,8 +49,10 @@
 
 package com.openexchange.file.storage.boxcom.access;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.BoxApi;
@@ -60,11 +62,16 @@ import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.BoxConfigBuilder;
 import com.box.boxjavalibv2.authorization.OAuthAuthorization;
 import com.box.boxjavalibv2.dao.BoxOAuthToken;
+import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
+import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.boxjavalibv2.jsonparsing.BoxJSONParser;
 import com.box.boxjavalibv2.jsonparsing.BoxResourceHub;
+import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.boxcom.BoxClosure;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.boxcom.access.extended.ExtendedNonRefreshingBoxClient;
@@ -85,7 +92,7 @@ import com.openexchange.session.Session;
  */
 public class BoxOAuthAccess implements OAuthAccess {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BoxAccess.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BoxOAuthAccess.class);
 
     /** The re-check threshold in seconds (45 minutes) */
     private static final long RECHECK_THRESHOLD = 2700;
@@ -154,8 +161,30 @@ public class BoxOAuthAccess implements OAuthAccess {
      */
     @Override
     public boolean ping() throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+        BoxClosure<Boolean> closure = new BoxClosure<Boolean>() {
+
+            @Override
+            protected Boolean doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+                try {
+                    BoxClient client = (BoxClient) boxAccess.getClient().client;
+                    client.getUsersManager().getCurrentUser(new BoxDefaultRequestObject());
+                    return Boolean.TRUE;
+                } catch (final BoxRestException e) {
+                    if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
+                        return Boolean.FALSE;
+                    }
+                    throw e;
+                } catch (final BoxServerException e) {
+                    if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
+                        return Boolean.FALSE;
+                    }
+                    throw e;
+                } catch (AuthFatalFailureException e) {
+                    return Boolean.FALSE;
+                }
+            }
+        };
+        return closure.perform(null, this, session).booleanValue();
     }
 
     /*
@@ -165,8 +194,7 @@ public class BoxOAuthAccess implements OAuthAccess {
      */
     @Override
     public void dispose() {
-        // TODO Auto-generated method stub
-
+        // Nothing to do
     }
 
     /*
@@ -225,6 +253,27 @@ public class BoxOAuthAccess implements OAuthAccess {
             }
         }
         return oauthAccountId;
+    }
+
+    /**
+     * Ensures this access is not expired
+     *
+     * @param session The associated session
+     * @return The non-expired access
+     * @throws OXException If check fails
+     */
+    public BoxOAuthAccess ensureNotExpired(Session session) throws OXException {
+        long now = System.nanoTime();
+        if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+            synchronized (this) {
+                OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthInfoRef.get(), session);
+                if (newAccount != null) {
+                    boxOAuthInfoRef.set(new BoxOAuthInfo(newAccount, session));
+                    lastAccessed = System.nanoTime();
+                }
+            }
+        }
+        return this;
     }
 
     //////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////
