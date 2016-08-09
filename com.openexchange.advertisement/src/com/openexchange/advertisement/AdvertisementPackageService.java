@@ -60,7 +60,7 @@ import com.openexchange.config.Reloadable;
 public interface AdvertisementPackageService extends Reloadable {
 
     public static final String DEFAULT_SCHEME_ID = "Global";
-    public static final String DEFAULT_RESELLER = "OX_ALL";
+    public static final String DEFAULT_RESELLER = "default";
 
     public AdvertisementConfigService getScheme(int contextId);
 
