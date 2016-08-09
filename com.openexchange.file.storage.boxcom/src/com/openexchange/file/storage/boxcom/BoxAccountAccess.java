@@ -114,9 +114,8 @@ public final class BoxAccountAccess implements CapabilityAware {
                 boxAccess = access;
             }
         } else {
-            ((BoxOAuthAccess) boxAccess).ensureNotExpired(session);
+            boxAccess = boxAccess.ensureNotExpired();
         }
-        //boxAccess = BoxAccess.accessFor(account, session);
     }
 
     @Override

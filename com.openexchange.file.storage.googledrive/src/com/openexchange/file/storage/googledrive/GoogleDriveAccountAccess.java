@@ -115,7 +115,7 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
                 googleDriveAccess = access;
             }
         } else {
-            ((GoogleDriveOAuthAccess) googleDriveAccess).ensureNotExpired(session);
+            googleDriveAccess = googleDriveAccess.ensureNotExpired();
         }
     }
 

@@ -229,16 +229,13 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
         return oauthAccountId;
     }
 
-    ///////////////////////////////////////// HELPERS ///////////////////////////////////
-
-    /**
-     * Ensures this access is not expired
-     *
-     * @param session The associated session
-     * @return The non-expired access
-     * @throws OXException If check fails
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
      */
-    public GoogleDriveOAuthAccess ensureNotExpired(Session session) throws OXException {
+    @Override
+    public OAuthAccess ensureNotExpired() throws OXException {
         if (null == oauthClientRef.get()) {
             return this;
         }

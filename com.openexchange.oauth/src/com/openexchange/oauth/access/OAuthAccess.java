@@ -73,6 +73,14 @@ public interface OAuthAccess {
     void revoke() throws OXException;
 
     /**
+     * Ensures that the access is not expired
+     * 
+     * @return The non-expired access
+     * @throws OXException if the check fails
+     */
+    OAuthAccess ensureNotExpired() throws OXException;
+
+    /**
      * Pings the account
      * 
      * @return <code>true</code>for a successful ping attempt; <code>false</code>otherwise

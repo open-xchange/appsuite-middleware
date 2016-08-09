@@ -209,4 +209,13 @@ public class DropboxOAuthAccess implements OAuthAccess {
     public void revoke() throws OXException {
         // TODO: revoke the token
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
+     */
+    @Override
+    public OAuthAccess ensureNotExpired() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
