@@ -315,4 +315,12 @@ public class OneDriveOAuthAccess implements OAuthAccess {
         }
         return null;
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
+     */
+    @Override
+    public OAuthAccount getOAuthAccount() {
+        return liveconnectOAuthAccount;
+    }
 }
