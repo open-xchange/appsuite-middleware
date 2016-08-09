@@ -111,7 +111,13 @@ public class DropboxOAuth2Access implements OAuthAccess {
      */
     @Override
     public void revoke() throws OXException {
-        // TODO: revoke the token
+        try {
+            oauthClient.client.auth().tokenRevoke();
+        } catch (DbxException e) {
+            //TODO: handle exception
+            e.printStackTrace();
+            throw new OXException(e);
+        }
     }
 
     /*
