@@ -1869,19 +1869,7 @@ public class MimeMessageFiller {
          * Determine filename
          */
         String fileName = imageProvider.getFileName();
-        if (null == fileName) {
-            /*
-             * Generate dummy file name
-             */
-            final List<String> exts = MimeType2ExtMap.getFileExtensions(imageProvider.getContentType().toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder("image.");
-            if (exts == null) {
-                sb.append("dat");
-            } else {
-                sb.append(exts.get(0));
-            }
-            fileName = sb.toString();
-        } else {
+        if (null != fileName)  {
             /*
              * Encode image's file name for being mail-safe
              */
