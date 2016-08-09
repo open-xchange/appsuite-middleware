@@ -72,8 +72,10 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.boxcom.access.BoxAccess;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.session.Session;
 
 /**
@@ -191,10 +193,11 @@ public final class BoxFileStorageService implements AccountAware, OAuthAccountDe
 
             // Acquire account manager
             FileStorageAccountManager accountManager = getAccountManager();
-
+            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+            OAuthAccessRegistry registry = registryService.get(API.BOX_COM.getFullName());
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
-                BoxAccess.dropFor(deleteMe, session);
+                registry.purgeUserAccess(session.getContextId(), session.getUserId());
                 LOG.info("Deleted Box.com account with ID {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), oauthAccountId, user, cid);
             }
 

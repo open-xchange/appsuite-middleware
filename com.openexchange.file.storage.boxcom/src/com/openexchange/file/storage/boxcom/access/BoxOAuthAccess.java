@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -81,74 +81,92 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
 
 /**
- * {@link BoxAccess}
+ * {@link BoxOAuthAccess}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.6.1
  */
-public class BoxAccess {
+public class BoxOAuthAccess implements OAuthAccess {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BoxAccess.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BoxOAuthAccess.class);
 
     /** The re-check threshold in seconds (45 minutes) */
     private static final long RECHECK_THRESHOLD = 2700;
 
-    /**
-     * Drops the Box access for given Box account.
-     *
-     * @param fsAccount The Box account providing credentials and settings
-     * @param session The user session
-     */
-    public static void dropFor(final FileStorageAccount fsAccount, final Session session) {
-        BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
-        String accountId = fsAccount.getId();
-        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
-    }
+    private FileStorageAccount fsAccount;
+    private Session session;
+
+    /** The associated OAuth information */
+    private final AtomicReference<BoxOAuthInfo> boxOAuthInfoRef;
+
+    /** The last-accessed time stamp */
+    private volatile long lastAccessed;
+
+    private volatile OAuthAccount boxOAuthAccount;
 
     /**
-     * Gets the Box access for given Box account.
-     *
-     * @param fsAccount The Box account providing credentials and settings
-     * @param session The user session
-     * @return The Box access; either newly created or fetched from underlying registry
-     * @throws OXException If a Box access could not be created
+     * Initialises a new {@link BoxOAuthAccess}.
      */
-    public static BoxAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        BoxAccessRegistry registry = BoxAccessRegistry.getInstance();
-        String accountId = fsAccount.getId();
-        BoxAccess boxAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
-        if (null == boxAccess) {
-            final BoxAccess newInstance = new BoxAccess(fsAccount, session, session.getUserId(), session.getContextId());
-            boxAccess = registry.addAccess(session.getContextId(), session.getUserId(), accountId, newInstance);
-            if (null == boxAccess) {
-                boxAccess = newInstance;
+    public BoxOAuthAccess(FileStorageAccount fsAccount, Session session) throws OXException {
+        super();
+        this.fsAccount = fsAccount;
+        this.session = session;
+
+        int oauthAccountId = getAccountId();
+        // Grab Box.com OAuth account
+        OAuthService oAuthService = Services.getService(OAuthService.class);
+        boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+
+        // Assign Box.com OAuth information
+        boxOAuthInfoRef = new AtomicReference<BoxOAuthInfo>(new BoxOAuthInfo(boxOAuthAccount, session));
+        lastAccessed = System.nanoTime();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
+     */
+    @Override
+    public void initialise() throws OXException {
+        synchronized (this) {
+            OAuthAccount newAccount = recreateTokenIfExpired(true, boxOAuthInfoRef.get(), session);
+            if (newAccount != null) {
+                boxOAuthInfoRef.set(new BoxOAuthInfo(newAccount, session));
+                lastAccessed = System.nanoTime();
             }
-        } else {
-            boxAccess.ensureNotExpired(session);
         }
-        return boxAccess;
     }
 
-    /**
-     * Pings the Box account.
-     *
-     * @param fsAccount The Box account providing credentials and settings
-     * @param session The user session
-     * @return <code>true</code> for successful ping attempt; otherwise <code>false</code>
-     * @throws OXException If a Box account could not be pinged
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
      */
-    public static boolean pingFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        final BoxAccess access = accessFor(fsAccount, session);
+    @Override
+    public void revoke() throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ping()
+     */
+    @Override
+    public boolean ping() throws OXException {
         BoxClosure<Boolean> closure = new BoxClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
+            protected Boolean doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                 try {
-                    access.getBoxClient().getUsersManager().getCurrentUser(new BoxDefaultRequestObject());
+                    BoxClient client = (BoxClient) boxAccess.getClient().client;
+                    client.getUsersManager().getCurrentUser(new BoxDefaultRequestObject());
                     return Boolean.TRUE;
                 } catch (final BoxRestException e) {
                     if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
@@ -165,42 +183,53 @@ public class BoxAccess {
                 }
             }
         };
-        return closure.perform(null, access, session).booleanValue();
+        return closure.perform(null, this, session).booleanValue();
     }
 
-    // ------------------------------------------------------------------------------------------------------------------------ //
-
-    private static class BoxOAuthInfo {
-
-        /** The associated OAuth account */
-        final OAuthAccount boxOAuthAccount;
-
-        /** The client identifier */
-        final String clientId;
-
-        /** The client secret */
-        final String clientSecret;
-
-        BoxOAuthInfo(OAuthAccount boxOAuthAccount, Session session) throws OXException {
-            super();
-            this.boxOAuthAccount = boxOAuthAccount;
-            this.clientId = boxOAuthAccount.getMetaData().getAPIKey(session);
-            this.clientSecret = boxOAuthAccount.getMetaData().getAPISecret(session);
-        }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#dispose()
+     */
+    @Override
+    public void dispose() {
+        // Nothing to do
     }
 
-    /** The associated OAuth information */
-    private final AtomicReference<BoxOAuthInfo> boxOAuthInfoRef;
-
-    /** The last-accessed time stamp */
-    private volatile long lastAccessed;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
+     */
+    @Override
+    public OAuthClient<?> getClient() throws OXException {
+        // TODO: Don't create a new client on every get; cache it
+        BoxOAuthInfo boxOAuthInfo = boxOAuthInfoRef.get();
+        BoxClient boxClient = new NonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
+        applyOAuthToken(boxOAuthInfo, boxClient);
+        return new OAuthClient<BoxClient>(boxClient);
+    }
 
     /**
-     * Initializes a new {@link BoxAccess}.
+     * Gets the extended box client
+     *
+     * @return The extended box client
      */
-    private BoxAccess(FileStorageAccount fsAccount, Session session, int userId, int contextId) throws OXException {
-        super();
+    public OAuthClient<?> getExtendedClient() {
+        // TODO: Don't create a new client on every get; cache it
+        BoxOAuthInfo boxOAuthInfo = boxOAuthInfoRef.get();
+        ExtendedNonRefreshingBoxClient boxClient = new ExtendedNonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
+        applyOAuthToken(boxOAuthInfo, boxClient);
+        return new OAuthClient<ExtendedNonRefreshingBoxClient>(boxClient);
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
+     */
+    @Override
+    public int getAccountId() throws OXException {
         // Get OAuth account identifier from messaging account's configuration
         int oauthAccountId;
         {
@@ -222,30 +251,30 @@ public class BoxAccess {
                 }
             }
         }
+        return oauthAccountId;
+    }
 
-        // Grab Box.com OAuth account
-        OAuthAccount boxOAuthAccount;
-        {
-            OAuthService oAuthService = Services.getService(OAuthService.class);
-            boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, userId, contextId);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
+     */
+    @Override
+    public OAuthAccess ensureNotExpired() throws OXException {
+        long now = System.nanoTime();
+        if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+            synchronized (this) {
+                OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthInfoRef.get(), session);
+                if (newAccount != null) {
+                    boxOAuthInfoRef.set(new BoxOAuthInfo(newAccount, session));
+                    lastAccessed = System.nanoTime();
+                }
+            }
         }
-
-        // Assign Box.com OAuth information
-        boxOAuthInfoRef = new AtomicReference<BoxAccess.BoxOAuthInfo>(new BoxOAuthInfo(boxOAuthAccount, session));
-        lastAccessed = System.nanoTime();
+        return this;
     }
 
-    private BoxClient createBoxClient(BoxOAuthInfo boxOAuthInfo) {
-        BoxClient boxClient = new NonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
-        applyOAuthToken(boxOAuthInfo, boxClient);
-        return boxClient;
-    }
-
-    private ExtendedNonRefreshingBoxClient createExtendedBoxClient(BoxOAuthInfo boxOAuthInfo) {
-        ExtendedNonRefreshingBoxClient boxClient = new ExtendedNonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
-        applyOAuthToken(boxOAuthInfo, boxClient);
-        return boxClient;
-    }
+    //////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////
 
     /**
      * Apply access token and refresh token from OAuth account
@@ -262,6 +291,15 @@ public class BoxAccess {
         ((OAuthAuthorization) boxClient.getAuth()).setOAuthData(new BoxOAuthToken(tokenSpec));
     }
 
+    /**
+     * Re-creates the OAuth token if it is expired
+     * 
+     * @param considerExpired flag to consider the token as expired
+     * @param boxOAuthInfo The {@link BoxOAuthInfo}
+     * @param session The user's {@link Session}
+     * @return the {@link OAuthAccount} with the updated token
+     * @throws OXException if the token cannot be recreated
+     */
     private OAuthAccount recreateTokenIfExpired(boolean considerExpired, BoxOAuthInfo boxOAuthInfo, Session session) throws OXException {
         // Create Scribe Box.com OAuth service
         OAuthAccount boxOAuthAccount = boxOAuthInfo.boxOAuthAccount;
@@ -299,65 +337,34 @@ public class BoxAccess {
     }
 
     /**
-     * Ensures this access is not expired
-     *
-     * @param session The associated session
-     * @return The non-expired access
-     * @throws OXException If check fails
+     * {@link BoxOAuthInfo}
      */
-    private BoxAccess ensureNotExpired(Session session) throws OXException {
-        long now = System.nanoTime();
-        if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
-            synchronized (this) {
-                OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthInfoRef.get(), session);
-                if (newAccount != null) {
-                    boxOAuthInfoRef.set(new BoxOAuthInfo(newAccount, session));
-                    lastAccessed = System.nanoTime();
-                }
-            }
-        }
-        return this;
-    }
+    private static class BoxOAuthInfo {
 
-    /**
-     * Re-initialises this Box access
-     *
-     * @param session The session
-     * @throws OXException If operation fails
-     */
-    public void reinit(Session session) throws OXException {
-        synchronized (this) {
-            OAuthAccount newAccount = recreateTokenIfExpired(true, boxOAuthInfoRef.get(), session);
-            if (newAccount != null) {
-                boxOAuthInfoRef.set(new BoxOAuthInfo(newAccount, session));
-                lastAccessed = System.nanoTime();
-            }
+        /** The associated OAuth account */
+        final OAuthAccount boxOAuthAccount;
+
+        /** The client identifier */
+        final String clientId;
+
+        /** The client secret */
+        final String clientSecret;
+
+        BoxOAuthInfo(OAuthAccount boxOAuthAccount, Session session) throws OXException {
+            super();
+            this.boxOAuthAccount = boxOAuthAccount;
+            this.clientId = boxOAuthAccount.getMetaData().getAPIKey(session);
+            this.clientSecret = boxOAuthAccount.getMetaData().getAPISecret(session);
         }
     }
 
-    /**
-     * Gets the current Box client instance
-     *
-     * @return The box client
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
      */
-    public BoxClient getBoxClient() {
-        return createBoxClient(boxOAuthInfoRef.get());
+    @Override
+    public OAuthAccount getOAuthAccount() {
+        return boxOAuthAccount;
     }
-
-    /**
-     * Gets the extended box client
-     *
-     * @return The extended box client
-     */
-    public ExtendedNonRefreshingBoxClient getExtendedBoxClient() {
-        return createExtendedBoxClient(boxOAuthInfoRef.get());
-    }
-
-    /**
-     * Disposes this access instance.
-     */
-    public void dispose() {
-        // Nothing to do
-    }
-
 }

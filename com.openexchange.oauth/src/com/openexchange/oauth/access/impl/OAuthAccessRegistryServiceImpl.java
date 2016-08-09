@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,53 @@
  *
  */
 
-package com.openexchange.oauth.xing;
+package com.openexchange.oauth.access.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import org.scribe.builder.api.Api;
-import org.scribe.builder.api.XingApi;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.oauth.OAuthToken;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 
 /**
- * {@link XingOAuthServiceMetaData}
+ * {@link OAuthAccessRegistryServiceImpl}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public class OAuthAccessRegistryServiceImpl implements OAuthAccessRegistryService {
+    
+    private final ConcurrentMap<String, OAuthAccessRegistry> map;
 
     /**
-     * Initializes a new {@link XingOAuthServiceMetaData}.
-     *
-     * @param services The service look-up
-     * @throws IllegalStateException If either API key or secret is missing
+     * Initialises a new {@link OAuthAccessRegistryServiceImpl}.
      */
-    public XingOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.XING, true, true);
+    public OAuthAccessRegistryServiceImpl() {
+        super();
+        map = new ConcurrentHashMap<>();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccessRegistryService#get(java.lang.String)
+     */
     @Override
-    public Class<? extends Api> getScribeService() {
-        return XingApi.class;
+    public OAuthAccessRegistry get(String serviceId) throws OXException {
+        OAuthAccessRegistry oAuthAccessRegistry = map.get(serviceId);
+        if (oAuthAccessRegistry == null) {
+            // TODO: Define exception codes
+            throw new OXException(1337, "An OAuthRegistry with identifier '%s' does not exist.", serviceId);
+        }
+        return oAuthAccessRegistry;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccessRegistryService#add(java.lang.String, com.openexchange.oauth.access.OAuthAccessRegistry)
+     */
     @Override
-    protected String getPropertyId() {
-        return "xing";
-    }
-
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        Collection<OAuthPropertyID> col = new ArrayList<OAuthPropertyID>(2);
-        col.add(OAuthPropertyID.consumerKey);
-        col.add(OAuthPropertyID.consumerSecret);
-        return col;
-    }
-
-    @Override
-    public String processAuthorizationURL(final String authUrl) {
-        return authUrl;
-    }
-
-    @Override
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
-        // no-op
-    }
-
-    @Override
-    public String getRegisterToken(String authUrl) {
-        return null;
-    }
-
-    @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
-        return null;
+    public void add(String serviceId, OAuthAccessRegistry accessRegistry) throws OXException {
+        map.putIfAbsent(serviceId, accessRegistry);
     }
 }

@@ -71,12 +71,7 @@ public final class VkontakteOAuthServiceMetaData extends AbstractScribeAwareOAut
      * @param configService The configuration service
      */
     public VkontakteOAuthServiceMetaData(ServiceLookup services) {
-        super(services, "com.openexchange.oauth.vkontakte", "Vkontakte.ru");
-    }
-
-    @Override
-    public API getAPI() {
-        return API.VKONTAKTE;
+        super(services, API.VKONTAKTE);
     }
 
     @Override

@@ -56,62 +56,94 @@ public enum API {
     /**
      * Twitter
      */
-    TWITTER,
+    TWITTER("Twitter", "com.openexchange.oauth.twitter"),
     /**
      * LinkedIn
      */
-    LINKEDIN,
+    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin"),
     /**
      * Other/unknown
      */
-    OTHER,
+    OTHER("Other", "com.openexchange.oauth.other"),
     /**
      * MSN
      */
-    MSN,
+    MSN("MSN", "com.openexchange.oauth.msn"),
     /**
      * Yahoo
      */
-    YAHOO,
+    YAHOO("Yahoo", "com.openexchange.oauth.yahoo"),
     /**
      * Tumblr
      */
-    TUMBLR,
+    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr"),
     /**
      * Flickr
      */
-    FLICKR,
+    FLICKR("Flickr", "com.openexchange.oauth.flickr"),
     /**
      * Dropbox
      */
-    DROPBOX,
+    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox"),
     /**
      * XING
      */
-    XING,
+    XING("XING", "com.openexchange.oauth.xing"),
     /**
      * vkontakte
      */
-    VKONTAKTE,
+    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte"),
     /**
      * Google
      */
-    GOOGLE,
+    GOOGLE("Google", "com.openexchange.oauth.google"),
     /**
      * Box.com
      */
-    BOX_COM,
+    BOX_COM("Box.com", "com.openexchange.oauth.boxcom"),
     /**
      * Microsoft Live Connect
      */
-    MS_LIVE_CONNECT,
+    MS_LIVE_CONNECT("Microsoft Live Connect", "com.openexchange.oauth.msliveconnect"),
     /**
      * Copy.com
      */
-    COPY_COM,
+    COPY_COM("Copy.com", "com.openexchange.oauth.copycom"),
     /**
      * SurDoc
      */
-    SURDOC,
+    SURDOC("SurDoc", "com.openexchange.oauth.surdoc"),
     ;
+
+    private final String shortName;
+    private final String fullName;
+
+    /**
+     * Initialises a new {@link API}.
+     * 
+     * @param shortName The short name of the API
+     * @param fullName The full name of the API
+     */
+    private API(String shortName, String fullName) {
+        this.shortName = shortName;
+        this.fullName = fullName;
+    }
+
+    /**
+     * Gets the shortName
+     *
+     * @return The shortName
+     */
+    public String getShortName() {
+        return shortName;
+    }
+
+    /**
+     * Gets the fullName
+     *
+     * @return The fullName
+     */
+    public String getFullName() {
+        return fullName;
+    }
 }

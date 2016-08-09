@@ -77,15 +77,18 @@ public abstract class AbstractDropboxAccess {
     protected final DropboxAPI<WebAuthSession> dropboxAPI;
 
     /**
-     * Initializes a new {@link AbstractDropboxAccess}.
+     * Initialises a new {@link AbstractDropboxAccess}.
+     * 
+     * @throws OXException
      */
-    protected AbstractDropboxAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session) {
+    @SuppressWarnings("unchecked")
+    protected AbstractDropboxAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session) throws OXException {
         super();
         this.dropboxOAuthAccess = dropboxOAuthAccess;
         this.account = account;
         this.session = session;
         // Other fields
-        this.dropboxAPI = dropboxOAuthAccess.getDropboxAPI();
+        this.dropboxAPI = (DropboxAPI<WebAuthSession>) dropboxOAuthAccess.getClient().client;
     }
 
     /**

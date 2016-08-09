@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,74 @@
  *
  */
 
-package com.openexchange.oauth.xing;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import org.scribe.builder.api.Api;
-import org.scribe.builder.api.XingApi;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.oauth.OAuthToken;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.oauth.access;
 
 /**
- * {@link XingOAuthServiceMetaData}
+ * {@link OAuthAccessKey}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+final class OAuthAccessKey {
+
+    private final int contextId;
+    private final int userId;
+    private final int hash;
 
     /**
-     * Initializes a new {@link XingOAuthServiceMetaData}.
-     *
-     * @param services The service look-up
-     * @throws IllegalStateException If either API key or secret is missing
+     * Initialises a new {@link OAuthAccessKey}.
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
      */
-    public XingOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.XING, true, true);
+    OAuthAccessKey(final int contextId, final int userId) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+
+        // Pre-build hash code
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+        hash = result;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
     @Override
-    public Class<? extends Api> getScribeService() {
-        return XingApi.class;
+    public int hashCode() {
+        return hash;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
-    protected String getPropertyId() {
-        return "xing";
-    }
-
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        Collection<OAuthPropertyID> col = new ArrayList<OAuthPropertyID>(2);
-        col.add(OAuthPropertyID.consumerKey);
-        col.add(OAuthPropertyID.consumerSecret);
-        return col;
-    }
-
-    @Override
-    public String processAuthorizationURL(final String authUrl) {
-        return authUrl;
-    }
-
-    @Override
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
-        // no-op
-    }
-
-    @Override
-    public String getRegisterToken(String authUrl) {
-        return null;
-    }
-
-    @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
-        return null;
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final OAuthAccessKey other = (OAuthAccessKey) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (hash != other.hash) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        return true;
     }
 }

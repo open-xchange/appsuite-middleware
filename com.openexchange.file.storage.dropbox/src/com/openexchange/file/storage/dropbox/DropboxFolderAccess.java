@@ -84,8 +84,9 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
      * @param account The associated account
      * @param session The session
      * @param accountAccess The account access
+     * @throws OXException 
      */
-    public DropboxFolderAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session) {
+    public DropboxFolderAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session) throws OXException {
         super(dropboxOAuthAccess, account, session);
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();

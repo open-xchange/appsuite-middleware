@@ -59,8 +59,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.onedrive.access.OneDriveEventHandler;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -82,8 +85,7 @@ public final class OneDriveActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class,
-            MimeTypeMap.class, TimerService.class, OAuthService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, OAuthAccessRegistryService.class };
     }
 
     @Override
@@ -106,6 +108,9 @@ public final class OneDriveActivator extends HousekeepingActivator {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new OneDriveEventHandler(), serviceProperties);
+
+            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+            registryService.add(API.MS_LIVE_CONNECT.getFullName(), new OAuthAccessRegistry(API.MS_LIVE_CONNECT.getFullName()));
         } catch (final Exception e) {
             logger.error("", e);
             throw e;

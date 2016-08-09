@@ -93,7 +93,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
-import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
+import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpCopy;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
 import com.openexchange.file.storage.onedrive.rest.Image;
@@ -128,7 +128,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
      * @param session The session The account access
      * @param accountAccess The account access
      */
-    public OneDriveFileAccess(OneDriveAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess) {
+    public OneDriveFileAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess) {
         super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
         this.userId = session.getUserId();
@@ -463,12 +463,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                      * update additionally changed metadata as needed
                      */
                     JSONObject updatedMetadata = new JSONObject(2);
-                    if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) &&
-                        null != file.getFileName() && false == file.getFileName().equals(uploadResponse.getString("name"))) {
+                    if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && null != file.getFileName() && false == file.getFileName().equals(uploadResponse.getString("name"))) {
                         updatedMetadata.put("name", file.getFileName());
                     }
-                    if ((null == modifiedFields || modifiedFields.contains(Field.DESCRIPTION)) &&
-                        (null != file.getDescription() || null == file.getDescription() && uploadResponse.hasAndNotNull("description"))) {
+                    if ((null == modifiedFields || modifiedFields.contains(Field.DESCRIPTION)) && (null != file.getDescription() || null == file.getDescription() && uploadResponse.hasAndNotNull("description"))) {
                         updatedMetadata.put("description", file.getDescription());
                     }
                     if (0 < updatedMetadata.length()) {
@@ -821,7 +819,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
      *
      * @param folderId The identifier of the folder to check
      * @param parentFolderId The identifier of the parent folder, or <code>null</code> to fall back to the root folder
-     * @return <code>true</code> if the folder  is a subfolder (at any level) of the parent folder, <code>false</code>, otherwise
+     * @return <code>true</code> if the folder is a subfolder (at any level) of the parent folder, <code>false</code>, otherwise
      */
     private boolean isSubfolderOf(String folderId, String parentFolderId) throws OXException, IOException {
         String rootId = FileStorageFolder.ROOT_FULLNAME;

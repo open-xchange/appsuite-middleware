@@ -62,66 +62,102 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
 
 /**
- * {@link GoogleDriveAccess} - Initializes and provides Google Drive access.
+ * {@link GoogleDriveOAuthAccess} - Initialises and provides Google Drive access.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class GoogleDriveAccess {
+public class GoogleDriveOAuthAccess implements OAuthAccess {
 
     /** The re-check threshold in seconds (45 minutes) */
     private static final long RECHECK_THRESHOLD = 2700;
 
-    /**
-     * Drops the Google Drive access for given Google Drive account.
-     *
-     * @param fsAccount The Google Drive account providing credentials and settings
-     * @param session The user session
-     */
-    public static void dropFor(FileStorageAccount fsAccount, Session session) {
-        GoogleDriveAccessRegistry registry = GoogleDriveAccessRegistry.getInstance();
-        String accountId = fsAccount.getId();
-        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
-    }
+    /** The Google Drive API client. */
+    private final AtomicReference<OAuthClient<Drive>> oauthClientRef;
+
+    /** The Google OAuth account */
+    private volatile OAuthAccount googleAccount;
+
+    /** The last-accessed time stamp */
+    private volatile long lastAccessed;
+
+    private FileStorageAccount fsAccount;
+
+    private Session session;
 
     /**
-     * Gets the Google Drive access for given Google Drive account.
-     *
-     * @param fsAccount The Google Drive account providing credentials and settings
-     * @param session The user session
-     * @return The Google Drive access; either newly created or fetched from underlying registry
-     * @throws OXException If a Google Drive access could not be created
+     * Initialises a new {@link GoogleDriveOAuthAccess}.
      */
-    public static GoogleDriveAccess accessFor(FileStorageAccount fsAccount, Session session) throws OXException {
-        GoogleDriveAccessRegistry registry = GoogleDriveAccessRegistry.getInstance();
-        String accountId = fsAccount.getId();
-        GoogleDriveAccess googleDriveAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
-        if (null == googleDriveAccess) {
-            final GoogleDriveAccess newInstance = new GoogleDriveAccess(fsAccount, session);
-            googleDriveAccess = registry.addAccess(session.getContextId(), session.getUserId(), accountId, newInstance);
-            if (null == googleDriveAccess) {
-                googleDriveAccess = newInstance;
+    public GoogleDriveOAuthAccess(FileStorageAccount fsAccount, Session session) throws OXException {
+        super();
+        this.fsAccount = fsAccount;
+        this.session = session;
+
+        int oauthAccountId = getAccountId();
+        // Grab Google OAuth account
+        OAuthAccount googleAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, session, false);
+        this.googleAccount = googleAccount;
+
+        // Establish Drive reference
+        oauthClientRef = new AtomicReference<OAuthClient<Drive>>();
+        lastAccessed = System.nanoTime();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
+     */
+    @Override
+    public void initialise() throws OXException {
+        synchronized (this) {
+            OAuthClient<Drive> oAuthClient = oauthClientRef.get();
+            if (null == oAuthClient) {
+                OAuthAccount oauthAccount = googleAccount;
+                {
+                    OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, session);
+                    if (null != newAccount) {
+                        oauthAccount = newAccount;
+                        this.googleAccount = newAccount;
+                    }
+                }
+
+                // Generate appropriate credentials for it
+                GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, session);
+
+                // Establish Drive instance
+                oAuthClient = new OAuthClient<>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build());
+                oauthClientRef.set(oAuthClient);
+                lastAccessed = System.nanoTime();
             }
-        } else {
-            googleDriveAccess.ensureNotExpired(session);
         }
-        return googleDriveAccess;
     }
 
-    /**
-     * Pings the Google Drive account.
-     *
-     * @param fsAccount The Google Drive account providing credentials and settings
-     * @param session The user session
-     * @return <code>true</code> on successful ping attempt; otherwise <code>false</code>
-     * @throws OXException If Google Drive account could not be pinged
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
      */
-    public static boolean pingFor(FileStorageAccount fsAccount, Session session) throws OXException {
-        GoogleDriveAccess googleDriveAccess = accessFor(fsAccount, session);
+    @Override
+    public void revoke() throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ping()
+     */
+    @Override
+    public boolean ping() throws OXException {
         try {
-            Drive drive = googleDriveAccess.getDrive(session);
+            Drive drive = oauthClientRef.get().client;
             drive.about().get().execute();
             return true;
         } catch (final HttpResponseException e) {
@@ -136,27 +172,39 @@ public final class GoogleDriveAccess {
         }
     }
 
-    // -------------------------------------------------------------------------------------------------------------------- //
-
-    /** The Google Drive API client. */
-    private final AtomicReference<Drive> driveRef;
-
-    /** The Google OAuth account */
-    private volatile OAuthAccount googleAccount;
-
-    /** The last-accessed time stamp */
-    private volatile long lastAccessed;
-
-    /**
-     * Initialises a new {@link GoogleDriveAccess}.
-     *
-     * @param fsAccount The Google Drive account providing credentials and settings
-     * @param session The session
-     * @throws OXException
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#dispose()
      */
-    private GoogleDriveAccess(FileStorageAccount fsAccount, Session session) throws OXException {
-        super();
+    @Override
+    public void dispose() {
+        // TODO Auto-generated method stub
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
+     */
+    @Override
+    public OAuthClient<?> getClient() throws OXException {
+        OAuthClient<Drive> oAuthClient = oauthClientRef.get();
+        if (oAuthClient == null) {
+            initialise();
+            oAuthClient = oauthClientRef.get();
+        }
+        return oAuthClient;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
+     */
+    @Override
+    public int getAccountId() throws OXException {
         // Get OAuth account identifier
         final int oauthAccountId;
         {
@@ -178,25 +226,17 @@ public final class GoogleDriveAccess {
                 }
             }
         }
-
-        // Grab Google OAuth account
-        OAuthAccount googleAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, session, false);
-        this.googleAccount = googleAccount;
-
-        // Establish Drive reference
-        driveRef = new AtomicReference<Drive>();
-        lastAccessed = System.nanoTime();
+        return oauthAccountId;
     }
 
-    /**
-     * Ensures this access is not expired
-     *
-     * @param session The associated session
-     * @return The non-expired access
-     * @throws OXException If check fails
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
      */
-    private GoogleDriveAccess ensureNotExpired(Session session) throws OXException {
-        if (null == driveRef.get()) {
+    @Override
+    public OAuthAccess ensureNotExpired() throws OXException {
+        if (null == oauthClientRef.get()) {
             return this;
         }
 
@@ -213,8 +253,8 @@ public final class GoogleDriveAccess {
                         GoogleCredential credentials = GoogleApiClients.getCredentials(newAccount, session);
 
                         // Establish Drive instance
-                        Drive drive = new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
-                        driveRef.set(drive);
+                        OAuthClient<Drive> oauthClient = new OAuthClient<>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build());
+                        oauthClientRef.set(oauthClient);
                         lastAccessed = System.nanoTime();
                     }
                 }
@@ -223,45 +263,13 @@ public final class GoogleDriveAccess {
         return this;
     }
 
-    /**
-     * Gets the Drive reference
-     *
-     * @return The Drive reference
-     * @throws OXException If Drive reference cannot be returned
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
      */
-    public Drive getDrive(Session session) throws OXException {
-        Drive drive = driveRef.get();
-        if (null == drive) {
-            synchronized (this) {
-                drive = driveRef.get();
-                if (null == drive) {
-                    OAuthAccount oauthAccount = googleAccount;
-                    {
-                        OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, session);
-                        if (null != newAccount) {
-                            oauthAccount = newAccount;
-                            this.googleAccount = newAccount;
-                        }
-                    }
-
-                    // Generate appropriate credentials for it
-                    GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, session);
-
-                    // Establish Drive instance
-                    drive = new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
-                    driveRef.set(drive);
-                    lastAccessed = System.nanoTime();
-                }
-            }
-        }
-        return drive;
+    @Override
+    public OAuthAccount getOAuthAccount() {
+        return googleAccount;
     }
-
-    /**
-     * Disposes this access
-     */
-    public void dispose() {
-        // Nothing to do
-    }
-
 }

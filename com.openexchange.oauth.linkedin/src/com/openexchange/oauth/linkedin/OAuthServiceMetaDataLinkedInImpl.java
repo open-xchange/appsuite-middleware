@@ -67,12 +67,7 @@ import com.openexchange.server.ServiceLookup;
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
-        super(services, "com.openexchange.oauth.linkedin", "LinkedIn");
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "LinkedIn";
+        super(services, API.LINKEDIN);
     }
 
     @Override
@@ -103,11 +98,6 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthSe
     @Override
     public String getScope() {
         return "r_basicprofile,r_emailaddress";
-    }
-
-    @Override
-    public API getAPI() {
-        return API.LINKEDIN;
     }
 
     @Override
