@@ -171,7 +171,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT db_schema, MIN(cid) FROM context_server2db_pool WHERE server_id=1 AND write_db_pool_id=1996 GROUP BY db_schema");
+            stmt = con.prepareStatement("SELECT db_schema, MIN(cid) FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? GROUP BY db_schema");
             stmt.setInt(1, serverId);
             stmt.setInt(2, poolId);
             result = stmt.executeQuery();
