@@ -160,8 +160,7 @@ public class OneDriveOAuthAccess implements OAuthAccess {
      */
     @Override
     public void revoke() throws OXException {
-        // TODO Auto-generated method stub
-
+        // No revoke call
     }
 
     /*
@@ -203,8 +202,7 @@ public class OneDriveOAuthAccess implements OAuthAccess {
      */
     @Override
     public void dispose() {
-        // TODO Auto-generated method stub
-
+        // Nothing to dispose
     }
 
     /*
@@ -316,7 +314,9 @@ public class OneDriveOAuthAccess implements OAuthAccess {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
      */
     @Override
