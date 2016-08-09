@@ -56,14 +56,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.json.ImmutableJSONObject;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementExceptionCodes;
+import com.openexchange.advertisement.ConfigResult;
 import com.openexchange.advertisement.osgi.Services;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -88,21 +92,24 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractAdvertisementConfigService implements AdvertisementConfigService {
 
+    private enum Status {
+        CREATED, UPDATED, DELETED, IGNORED, ERROR
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(AdvertisementConfigService.class);
 
     /** The cache region name */
     public static final String CACHING_REGION = AbstractAdvertisementConfigService.class.getSimpleName();
 
     private static final String SQL_INSERT_MAPPING = "REPLACE INTO advertisement_mapping (reseller,package,configId) VALUES (?,?,?);";
-    private static final String SQL_INSERT_CONFIG = "INSERT INTO advertisement_config (config) VALUES (?);";
+    private static final String SQL_INSERT_CONFIG = "INSERT INTO advertisement_config (reseller,config) VALUES (?,?);";
     private static final String SQL_UPDATE_CONFIG = "UPDATE advertisement_config SET config=? where configId=?;";
     private static final String SQL_DELETE_CONFIG = "DELETE FROM advertisement_config where configId=?;";
     private static final String SQL_DELETE_MAPPING = "DELETE FROM advertisement_mapping where configId=?;";
-    private static final String SQL_SELECT_MAPPING_SIMPLE = "Select * from advertisement_mapping where reseller=? AND package=?;";
-    private static final String SQL_SELECT_MAPPING = "Select * from advertisement_mapping where ";
-    private static final String SQL_SELECT_CONFIG = "Select * from advertisement_config where configId=?;";
-    protected static final String RESELLER_ALL = "OX_ALL";
-    protected static final String PACKAGE_ALL = "OX_ALL";
+    private static final String SQL_SELECT_MAPPING_SIMPLE = "Select configId from advertisement_mapping where reseller=? AND package=?;";
+    private static final String SQL_SELECT_CONFIG = "Select config from advertisement_config where configId=?;";
+    protected static final String RESELLER_ALL = "default";
+    protected static final String PACKAGE_ALL = "default";
     private static final String PREVIEW_CONFIG = "com.openexchange.advertisement.preview";
 
     /**
@@ -113,13 +120,13 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     }
 
     /**
-     * Gets the reseller name associated with specified session.
+     * Gets the reseller name associated with specified contextId.
      *
-     * @param session The session
+     * @param contextId The context identifier
      * @return The reseller name
      * @throws OXException If reseller name cannot be resolved
      */
-    protected abstract String getReseller(Session session) throws OXException;
+    protected abstract String getReseller(int contextId) throws OXException;
 
     /**
      * Gets the package name associated with specified session.
@@ -149,7 +156,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 String reseller = null;
                 String pack = null;
                 try {
-                    reseller = getReseller(session);
+                    reseller = getReseller(session.getContextId());
                 } catch (OXException e) {
                     LOG.debug("Error while retrieving the reseller for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                 }
@@ -189,7 +196,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         String reseller = null;
         String pack = null;
         try {
-            reseller = getReseller(session);
+            reseller = getReseller(session.getContextId());
         } catch (OXException e) {
             LOG.debug("Error while retrieving the reseller for user {} in context {}.", session.getUserId(), session.getContextId(), e);
         }
@@ -234,7 +241,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 stmt.setInt(1, configId);
                 result = stmt.executeQuery();
                 if (result.next()) {
-                    return new JSONObject(result.getString(2));
+                    return new JSONObject(result.getString(1));
                 }
             } catch (SQLException e) {
                 throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
@@ -255,55 +262,29 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         Connection con = dbService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet result = null;
-        StringBuilder sql = new StringBuilder(SQL_SELECT_MAPPING);
+        StringBuilder sql = new StringBuilder(SQL_SELECT_MAPPING_SIMPLE);
         try {
-
-            if (!reseller.equals(RESELLER_ALL)) {
-                sql.append("(reseller=? OR reseller=?)");
-            } else {
-                sql.append("(reseller=?)");
-            }
-
-            sql.append(" AND ");
-
-            if (!pack.equals(PACKAGE_ALL)) {
-                sql.append("(package=? OR package=?);");
-            } else {
-                sql.append("(package=?);");
-            }
             int x = 1;
             stmt = con.prepareStatement(sql.toString());
             stmt.setString(x++, reseller);
-            if (!reseller.equals(RESELLER_ALL)) {
-                stmt.setString(x++, RESELLER_ALL);
-            }
             stmt.setString(x++, pack);
-            if (!pack.equals(PACKAGE_ALL)) {
-                stmt.setString(x++, PACKAGE_ALL);
-            }
             result = stmt.executeQuery();
-            List<AdvertisementConfig> list = new ArrayList<>(4);
-            while (result.next()) {
-                list.add(new AdvertisementConfig(result.getString(1), result.getString(2), result.getString(3)));
-            }
-            Collections.sort(list);
-            DBUtils.closeSQLStuff(result, stmt);
-            for (AdvertisementConfig config : list) {
+            if (result.next()) {
                 try {
-                    int configId = Integer.valueOf(config.getConfigId());
+                    int configId = result.getInt(1);
+                    DBUtils.closeSQLStuff(result, stmt);
                     stmt = con.prepareStatement(SQL_SELECT_CONFIG);
                     stmt.setInt(1, configId);
                     result = stmt.executeQuery();
                     if (result.next()) {
-                        return new JSONObject(result.getString(2));
+                        return new JSONObject(result.getString(1));
                     }
-                    DBUtils.closeSQLStuff(result, stmt);
                 } catch (JSONException e) {
-                    LOG.error("Invalid advertisement configuration data for reseller {} and package {}", reseller, config.getPackage());
+                    LOG.error("Invalid advertisement configuration data for reseller {} and package {}", reseller, pack);
                 }
             }
-            throw AdvertisementExceptionCodes.CONFIG_NOT_FOUND.create(session.getUserId(), session.getContextId());
 
+            throw AdvertisementExceptionCodes.CONFIG_NOT_FOUND.create(session.getUserId(), session.getContextId());
         } catch (SQLException e) {
             throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
         } finally {
@@ -351,8 +332,10 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 if (config == null) {
                     return;
                 }
+                String reseller = getReseller(ctxId);
                 stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
-                stmt.setString(1, config);
+                stmt.setString(1, reseller);
+                stmt.setString(2, config);
                 stmt.execute();
                 result = stmt.getGeneratedKeys();
                 if (!result.next()) {
@@ -377,7 +360,11 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
 
     @Override
     public void setConfig(String reseller, String pack, String config) throws OXException {
+        setConfigInternal(reseller, pack, config);
+    }
 
+    private Status setConfigInternal(String reseller, String pack, String config) throws OXException {
+        Status status = Status.IGNORED;
         if (Strings.isEmpty(reseller)) {
             reseller = RESELLER_ALL;
         }
@@ -399,7 +386,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
 
             if (result.next()) {
 
-                int configId = Integer.valueOf(result.getString(3));
+                int configId = Integer.valueOf(result.getString(1));
                 DBUtils.closeSQLStuff(result, stmt);
                 if (config == null) {
                     stmt = con.prepareStatement(SQL_DELETE_CONFIG);
@@ -409,21 +396,24 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     stmt = con.prepareStatement(SQL_DELETE_MAPPING);
                     stmt.setInt(1, configId);
                     stmt.execute();
+                    status = Status.DELETED;
                 } else {
                     stmt = con.prepareStatement(SQL_UPDATE_CONFIG);
                     stmt.setString(1, config);
                     stmt.setInt(2, configId);
                     stmt.execute();
+                    status = Status.UPDATED;
                 }
 
             } else {
                 DBUtils.closeSQLStuff(result, stmt);
                 if (config == null) {
                     readOnly = true;
-                    return;
+                    return Status.IGNORED;
                 }
                 stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
-                stmt.setString(1, config);
+                stmt.setString(1, reseller);
+                stmt.setString(2, config);
                 stmt.execute();
                 result = stmt.getGeneratedKeys();
                 if (!result.next()) {
@@ -436,6 +426,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 stmt.setString(2, pack);
                 stmt.setInt(3, resultConfigId);
                 stmt.execute();
+                status = Status.CREATED;
             }
 
             //clear read cache
@@ -455,56 +446,45 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 dbService.backWritable(con);
             }
         }
-
+        return status;
     }
 
     @Override
-    public void setConfig(String reseller, String config) throws OXException {
-        setConfig(reseller, null, config);
+    public List<ConfigResult> setConfig(String reseller, String configs) throws OXException {
+        Map<String, String> data;
+        //Parse configs String
+        try {
+            JSONArray array = new JSONArray(configs);
+            if (array.isEmpty()) {
+                return Collections.emptyList();
+            }
+            data = new HashMap<>(array.length());
+
+            for (Object value : array.asList()) {
+                if (!(value instanceof HashMap)) {
+                    throw new JSONException("Child is not a JSONObject.");
+                }
+                @SuppressWarnings("unchecked") 
+                HashMap<String, String> obj = (HashMap<String, String>) value;
+                String pack = obj.get("package");
+                String config = obj.get("config") == JSONObject.NULL ? null : (String) obj.get("config");
+                data.put(pack, config);
+            }
+        } catch (JSONException e) {
+            throw AdvertisementExceptionCodes.PARSING_ERROR.create(e.getMessage());
+        }
+        
+        
+        List<ConfigResult> resultList = new ArrayList<>();
+        for (String pack : data.keySet()) {
+            try {
+                Status status = setConfigInternal(reseller, pack, data.get(pack));
+                resultList.add(new ConfigResult(status.name(), null));
+            } catch (OXException e) {
+                resultList.add(new ConfigResult(Status.ERROR.name(), e));
+            }
+        }
+
+        return resultList;
     }
-
-    private class AdvertisementConfig implements Comparable<AdvertisementConfig> {
-
-        String reseller;
-        String pack;
-        String configId;
-
-        public AdvertisementConfig(String reseller, String pack, String configId) {
-            this.reseller = reseller;
-            this.pack = pack;
-            this.configId = configId;
-        }
-
-        public Object getPackage() {
-            return pack;
-        }
-
-        public String getConfigId() {
-            return configId;
-        }
-
-        @Override
-        public int compareTo(AdvertisementConfig o) {
-
-            if (!this.reseller.equals(RESELLER_ALL) && o.reseller.equals(RESELLER_ALL)) {
-                return -1;
-            }
-
-            if (this.reseller.equals(RESELLER_ALL) && !o.reseller.equals(RESELLER_ALL)) {
-                return 1;
-            }
-
-            if (!this.pack.equals(PACKAGE_ALL) && o.pack.equals(PACKAGE_ALL)) {
-                return -1;
-            }
-
-            if (this.pack.equals(PACKAGE_ALL) && !o.pack.equals(PACKAGE_ALL)) {
-                return 1;
-            }
-
-            return 0;
-        }
-
-    }
-
 }

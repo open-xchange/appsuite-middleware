@@ -92,7 +92,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
      * Initializes a new {@link DropboxOAuthServiceMetaData}.
      */
     public DropboxOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, "com.openexchange.oauth.dropbox", "Dropbox");
+        super(services, API.DROPBOX);
     }
 
     @Override
@@ -103,11 +103,6 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
         return Collections.emptyList();
-    }
-
-    @Override
-    public API getAPI() {
-        return API.DROPBOX;
     }
 
     @Override

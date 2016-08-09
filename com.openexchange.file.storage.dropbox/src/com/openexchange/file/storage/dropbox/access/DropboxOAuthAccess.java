@@ -57,8 +57,6 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.WebAuthSession;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.v2.DbxClientV2;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -69,61 +67,43 @@ import com.openexchange.file.storage.dropbox.Utils;
 import com.openexchange.file.storage.dropbox.auth.TrustAllWebAuthSession;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
 
 /**
- * {@link DropboxOAuthAccess} - Initializes and provides Dropbox OAuth access.
+ * {@link DropboxOAuthAccess}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DropboxOAuthAccess {
+public class DropboxOAuthAccess implements OAuthAccess {
+
+    private OAuthClient<DropboxAPI<WebAuthSession>> oauthClient;
+    private FileStorageAccount fsAccount;
+    private Session session;
+    private volatile OAuthAccount dropboxOAuthAccount;
 
     /**
-     * Drops the Dropbox OAuth access for given Dropbox account.
-     *
-     * @param fsAccount The Dropbox account providing credentials and settings
-     * @param session The user session
+     * Initialises a new {@link DropboxOAuthAccess}.
+     * 
+     * @throws OXException if the {@link OAuthAccess} cannot be initialised
      */
-    public static void dropFor(final FileStorageAccount fsAccount, final Session session) {
-        DropboxOAuthAccessRegistry registry = DropboxOAuthAccessRegistry.getInstance();
-        String accountId = fsAccount.getId();
-        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
+    public DropboxOAuthAccess(FileStorageAccount fsAccount, Session session) throws OXException {
+        super();
+        this.fsAccount = fsAccount;
+        this.session = session;
+        initialise();
     }
 
-    /**
-     * Gets the Dropbox OAuth access for given Dropbox account.
-     *
-     * @param fsAccount The Dropbox account providing credentials and settings
-     * @param session The user session
-     * @return The Dropbox OAuth access; either newly created or fetched from underlying registry
-     * @throws OXException If a Dropbox session could not be created
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ping()
      */
-    public static DropboxOAuthAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        DropboxOAuthAccessRegistry registry = DropboxOAuthAccessRegistry.getInstance();
-        String accountId = fsAccount.getId();
-        DropboxOAuthAccess dropboxOAuthAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
-        if (null == dropboxOAuthAccess) {
-            final DropboxOAuthAccess newInstance = new DropboxOAuthAccess(fsAccount, session, session.getUserId(), session.getContextId());
-            dropboxOAuthAccess = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
-            if (null == dropboxOAuthAccess) {
-                dropboxOAuthAccess = newInstance;
-            }
-        }
-        return dropboxOAuthAccess;
-    }
-
-    /**
-     * Pings the Dropbox account.
-     *
-     * @param fsAccount The Dropbox account providing credentials and settings
-     * @param session The user session
-     * @return <code>true</code> for successful ping attempt; otherwise <code>false</code>
-     * @throws OXException If a Dropbox account could not be pinged
-     */
-    public static boolean pingFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        DropboxOAuthAccess access = accessFor(fsAccount, session);
+    @Override
+    public boolean ping() throws OXException {
         try {
-            access.dropboxApi.accountInfo();
+            oauthClient.client.accountInfo();
             return true;
         } catch (DropboxException e) {
             if (DropboxServerException.class.isInstance(e)) {
@@ -137,31 +117,66 @@ public final class DropboxOAuthAccess {
         }
     }
 
-    // ----------------------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * The Web-authenticating session.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#dispose()
      */
-    private WebAuthSession webAuthSession;
+    @Override
+    public void dispose() {
+        // So far nothing known to me that needs to be disposed        
+    }
 
-    /**
-     * The Dropbox API reference.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getClient(java.lang.Class)
      */
-    private DropboxAPI<WebAuthSession> dropboxApi;
+    @Override
+    public OAuthClient<?> getClient() throws OXException {
+        if (oauthClient == null) {
+            initialise();
+        }
+        return oauthClient;
+    }
 
-    /**
-     * The Dropbox v2 API reference.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
      */
-    private DbxClientV2 client;
+    @Override
+    public void initialise() throws OXException {
+        final int oauthAccountId = getAccountId();
 
-    /**
-     * Initialises a new {@link DropboxOAuthAccess}.
-     *
-     * @param fsAccount The Dropbox account providing credentials and settings
-     * @throws OXException
+        final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
+        try {
+            dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+            /*-
+             * Retrieve information about the user's Dropbox account.
+             *
+             * See: https://www.dropbox.com/developers/reference/api#account-info
+             */
+            final AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
+            WebAuthSession webAuthSession = new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX);
+            DropboxAPI<WebAuthSession> dropboxApi = new DropboxAPI<WebAuthSession>(webAuthSession);
+            // Re-auth specific stuff
+            final AccessTokenPair reAuthTokens = new AccessTokenPair(dropboxOAuthAccount.getToken(), dropboxOAuthAccount.getSecret());
+            dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
+
+            oauthClient = new OAuthClient<DropboxAPI<WebAuthSession>>(dropboxApi);
+        } catch (RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
      */
-    private DropboxOAuthAccess(final FileStorageAccount fsAccount, final Session session, final int user, final int contextId) throws OXException {
-        super();
+    @Override
+    public int getAccountId() throws OXException {
         /*
          * Get OAuth account identifier from messaging account's configuration
          */
@@ -185,54 +200,37 @@ public final class DropboxOAuthAccess {
                 }
             }
         }
-        final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
-        try {
-            final OAuthAccount oauthAccount = oAuthService.getAccount(oauthAccountId, session, user, contextId);
-            /*-
-             * Retrieve information about the user's Dropbox account.
-             *
-             * See: https://www.dropbox.com/developers/documentation/http/documentation#users-get_current_account
-             */
-            //////////////// OAuth 1.0 /////////////////
-            final AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
-            webAuthSession = new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX);
-            dropboxApi = new DropboxAPI<WebAuthSession>(webAuthSession);
-            // Re-auth specific stuff
-            final AccessTokenPair reAuthTokens = new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret());
-            dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
-
-            /////////////// OAuth 2.0 /////////////////
-            DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());
-            client = new DbxClientV2(config, oauthAccount.getToken());
-        } catch (RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        return oauthAccountId;
     }
 
-    /**
-     * Gets the DropboxAPI reference
-     *
-     * @return The DropboxAPI reference
-     * @deprecated Use {@link #getDropboxClient()} instead
-     */
-    public DropboxAPI<WebAuthSession> getDropboxAPI() {
-        return dropboxApi;
-    }
-
-    /**
-     * Returns the Dropbox v2 API client
+    /*
+     * (non-Javadoc)
      * 
-     * @return the Dropbox v2 API client
+     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
      */
-    public DbxClientV2 getDropboxClient() {
-        return client;
+    @Override
+    public void revoke() throws OXException {
+        // TODO: revoke the token
     }
 
-    /**
-     * Disposes this Dropbox OAuth access.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
      */
-    public void dispose() {
-        // So far nothing known to me that needs to be disposed
+    @Override
+    public OAuthAccess ensureNotExpired() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
+     */
+    @Override
+    public OAuthAccount getOAuthAccount() {
+        return dropboxOAuthAccount;
+    }
 }

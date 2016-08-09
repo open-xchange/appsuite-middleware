@@ -47,32 +47,28 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.advertisement;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IMailFolderStorageValiditySupport} - Extends basic folder storage by mailbox info support.
+ * {@link RemoteAdvertisementService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public interface IMailFolderStorageValiditySupport extends IMailFolderStorage {
+public interface RemoteAdvertisementService extends Remote {
+
+    public static final String RMI_NAME = RemoteAdvertisementService.class.getSimpleName();
 
     /**
-     * Indicates if mailbox validity is supported.
-     *
-     * @return <code>true</code> if supported; otherwise <code>false</code>
-     * @throws OXException If check fails
+     * Removes all configurations and mapping for the given reseller. If the given reseller is null, all configurations and mapping are deleted instead.
+     * 
+     * @param reseller The name of the reseller
+     * @throws OXException
      */
-    boolean isValiditySupported() throws OXException;
-
-    /**
-     * Gets the folder validity for specified full name.
-     *
-     * @param fullName the folder full name
-     * @return The folder validity
-     * @throws OXException If an error occurs
-     */
-    String getFolderValidity(String fullName) throws OXException;
+    public void removeConfigurations(String reseller) throws OXException, RemoteException;
 
 }

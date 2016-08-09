@@ -18,5 +18,6 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.tools.session,
  org.json,
  org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.advertisement

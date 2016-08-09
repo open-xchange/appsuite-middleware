@@ -1215,6 +1215,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         if (isAnyPluginLoaded()) {
+            PluginException pe = null;
             PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
                 for (OXContextPluginInterface contextInterface : pluginInterfaces.getContextPlugins().getServiceList()) {
@@ -1222,17 +1223,21 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         ret = contextInterface.postCreate(ret, admin_user, createaccess, auth);
                     } catch (PluginException e) {
                         LOGGER.error("", e);
-                        // callPluginMethod delete may fail here for what ever reason.
-                        // this must not prevent us from cleaning up the rest
-                        try {
-                            contextInterface.delete(ctx, auth);
-                        } catch (Exception e1) {
-                            LOGGER.error("", e);
-                        }
-                        oxcox.delete(ret);
-                        throw StorageException.wrapForRMI(e);
+                        pe = e;
                     }
                 }
+            }
+            if (null != pe) {
+                // cleanup
+                for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                    try {
+                        oxContextPlugin.delete(ctx, auth);
+                    } catch (final PluginException e) {
+                        LOGGER.error("", e);
+                    }
+                }
+                oxcox.delete(ret);
+                throw StorageException.wrapForRMI(pe);
             }
         }
 

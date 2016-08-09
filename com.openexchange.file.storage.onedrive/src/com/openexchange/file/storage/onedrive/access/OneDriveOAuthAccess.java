@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,8 +54,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -81,68 +79,98 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
- * {@link OneDriveAccess}
+ * {@link OneDriveOAuthAccess}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OneDriveAccess {
+public class OneDriveOAuthAccess implements OAuthAccess {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OneDriveAccess.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OneDriveOAuthAccess.class);
 
     /** The re-check threshold in seconds (45 minutes) */
     private static final long RECHECK_THRESHOLD = 2700;
 
-    /**
-     * Drops the Microsoft OneDrive access for given Microsoft OneDrive account.
-     *
-     * @param fsAccount The Microsoft OneDrive account providing credentials and settings
-     * @param session The user session
-     */
-    public static void dropFor(final FileStorageAccount fsAccount, final Session session) {
-        OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
-        String accountId = fsAccount.getId();
-        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
-    }
+    private FileStorageAccount fsAccount;
+    private Session session;
+
+    /** The associated OAuth account */
+    private volatile OAuthAccount liveconnectOAuthAccount;
+
+    /** The last-accessed time stamp */
+    private volatile long lastAccessed;
+
+    /** The access token */
+    private volatile String accessToken;
+
+    /** The HTTP client */
+    private final OAuthClient<DefaultHttpClient> oauthClient;
 
     /**
-     * Gets the Microsoft OneDrive access for given Microsoft OneDrive account.
-     *
-     * @param fsAccount The Microsoft OneDrive account providing credentials and settings
-     * @param session The user session
-     * @return The Microsoft OneDrive access; either newly created or fetched from underlying registry
-     * @throws OXException If a Microsoft OneDrive access could not be created
+     * Initialises a new {@link OneDriveOAuthAccess}.
      */
-    public static OneDriveAccess accessFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        OneDriveAccessRegistry registry = OneDriveAccessRegistry.getInstance();
-        String accountId = fsAccount.getId();
-        OneDriveAccess oneDriveAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
-        if (null == oneDriveAccess) {
-            final OneDriveAccess newInstance = new OneDriveAccess(fsAccount, session, session.getUserId(), session.getContextId());
-            oneDriveAccess = registry.addAccess(session.getContextId(), session.getUserId(), accountId, newInstance);
-            if (null == oneDriveAccess) {
-                oneDriveAccess = newInstance;
-            }
-        } else {
-            oneDriveAccess.ensureNotExpired(session);
+    public OneDriveOAuthAccess(FileStorageAccount fsAccount, Session session) throws OXException {
+        super();
+        this.fsAccount = fsAccount;
+        this.session = session;
+
+        int oauthAccountId = getAccountId();
+        // Grab Live Connect OAuth account
+        OAuthAccount liveconnectOAuthAccount;
+        {
+            OAuthService oAuthService = Services.getService(OAuthService.class);
+            liveconnectOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
         }
-        return oneDriveAccess;
+
+        // Assign Live Connect account
+        this.liveconnectOAuthAccount = liveconnectOAuthAccount;
+
+        // Initialize rest
+        accessToken = liveconnectOAuthAccount.getToken();
+        oauthClient = new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"));
+        lastAccessed = System.nanoTime();
     }
 
-    /**
-     * Pings the Microsoft OneDrive account.
-     *
-     * @param fsAccount The Microsoft OneDrive account providing credentials and settings
-     * @param session The user session
-     * @return <code>true</code> on successful ping attempt; otherwise <code>false</code>
-     * @throws OXException If a Microsoft OneDrive account could not be pinged
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
      */
-    public static boolean pingFor(final FileStorageAccount fsAccount, final Session session) throws OXException {
-        final OneDriveAccess oneDriveAccess = accessFor(fsAccount, session);
+    @Override
+    public void initialise() throws OXException {
+        synchronized (this) {
+            OAuthAccount newAccount = recreateTokenIfExpired(true, liveconnectOAuthAccount, session);
+            if (newAccount != null) {
+                this.liveconnectOAuthAccount = newAccount;
+                accessToken = liveconnectOAuthAccount.getToken();
+                lastAccessed = System.nanoTime();
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
+     */
+    @Override
+    public void revoke() throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ping()
+     */
+    @Override
+    public boolean ping() throws OXException {
         OneDriveClosure<Boolean> closure = new OneDriveClosure<Boolean>() {
 
             @Override
@@ -150,7 +178,7 @@ public class OneDriveAccess {
                 HttpGet request = null;
                 try {
                     List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-                    qparams.add(new BasicNameValuePair("access_token", oneDriveAccess.getAccessToken()));
+                    qparams.add(new BasicNameValuePair("access_token", liveconnectOAuthAccount.getToken()));
                     request = new HttpGet(AbstractOneDriveResourceAccess.buildUri("/me/skydrive", qparams));
                     HttpResponse httpResponse = httpClient.execute(request);
                     int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -165,35 +193,37 @@ public class OneDriveAccess {
                 }
             }
         };
-        return closure.perform(null, oneDriveAccess.httpClient, session).booleanValue();
+        return closure.perform(null, oauthClient.client, session).booleanValue();
     }
 
-    // ------------------------------------------------------------------------------------------------------------------------ //
-
-    /** The associated OAuth account */
-    private volatile OAuthAccount liveconnectOAuthAccount;
-
-    /** The last-accessed time stamp */
-    private volatile long lastAccessed;
-
-    /** The access token */
-    private volatile String accessToken;
-
-    /** The HTTP client */
-    private final DefaultHttpClient httpClient;
-
-    /** The cache for known identifiers */
-    private final ConcurrentMap<String, Object> knownIds;
-
-    /**
-     * Initializes a new {@link OneDriveAccess}.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#dispose()
      */
-    private OneDriveAccess(FileStorageAccount fsAccount, Session session, int userId, int contextId) throws OXException {
-        super();
+    @Override
+    public void dispose() {
+        // TODO Auto-generated method stub
 
-        // Initialize map
-        knownIds = new ConcurrentHashMap<String, Object>(256, 0.9f, 1);
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
+     */
+    @Override
+    public OAuthClient<?> getClient() throws OXException {
+        return oauthClient;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
+     */
+    @Override
+    public int getAccountId() throws OXException {
         // Get OAuth account identifier from messaging account's configuration
         int oauthAccountId;
         {
@@ -215,27 +245,42 @@ public class OneDriveAccess {
                 }
             }
         }
+        return oauthAccountId;
+    }
 
-        // Grab Live Connect OAuth account
-        OAuthAccount liveconnectOAuthAccount;
-        {
-            OAuthService oAuthService = Services.getService(OAuthService.class);
-            liveconnectOAuthAccount = oAuthService.getAccount(oauthAccountId, session, userId, contextId);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
+     */
+    @Override
+    public OAuthAccess ensureNotExpired() throws OXException {
+        long now = System.nanoTime();
+        if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+            synchronized (this) {
+                now = System.nanoTime();
+                if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+                    OAuthAccount newAccount = recreateTokenIfExpired(false, liveconnectOAuthAccount, session);
+                    if (newAccount != null) {
+                        this.liveconnectOAuthAccount = newAccount;
+                        accessToken = liveconnectOAuthAccount.getToken();
+                        lastAccessed = System.nanoTime();
+                    }
+                }
+            }
         }
-
-        // Assign Live Connect account
-        this.liveconnectOAuthAccount = liveconnectOAuthAccount;
-
-        // Initialize rest
-        accessToken = liveconnectOAuthAccount.getToken();
-        httpClient = createClient();
-        lastAccessed = System.nanoTime();
+        return this;
     }
 
-    private DefaultHttpClient createClient() {
-        return HttpClients.getHttpClient("Open-Xchange OneDrive Client");
-    }
-
+    /**
+     * Re-creates the token if expired
+     * 
+     * @param considerExpired
+     * @param liveconnectOAuthAccount
+     * @param session
+     * @return
+     * @throws OXException
+     */
     private OAuthAccount recreateTokenIfExpired(boolean considerExpired, OAuthAccount liveconnectOAuthAccount, Session session) throws OXException {
         // Create Scribe Microsoft OneDrive OAuth service
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
@@ -271,80 +316,11 @@ public class OneDriveAccess {
         return null;
     }
 
-    /**
-     * Ensures this access is not expired
-     *
-     * @param session The associated session
-     * @return The non-expired access
-     * @throws OXException If check fails
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
      */
-    private OneDriveAccess ensureNotExpired(Session session) throws OXException {
-        long now = System.nanoTime();
-        if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
-            synchronized (this) {
-                now = System.nanoTime();
-                if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
-                    OAuthAccount newAccount = recreateTokenIfExpired(false, liveconnectOAuthAccount, session);
-                    if (newAccount != null) {
-                        this.liveconnectOAuthAccount = newAccount;
-                        accessToken = liveconnectOAuthAccount.getToken();
-                        lastAccessed = System.nanoTime();
-                    }
-                }
-            }
-        }
-        return this;
+    @Override
+    public OAuthAccount getOAuthAccount() {
+        return liveconnectOAuthAccount;
     }
-
-    /**
-     * Re-initializes this Microsoft OneDrive access
-     *
-     * @param session The session
-     * @throws OXException If operation fails
-     */
-    public void reinit(Session session) throws OXException {
-        synchronized (this) {
-            OAuthAccount newAccount = recreateTokenIfExpired(true, liveconnectOAuthAccount, session);
-            if (newAccount != null) {
-                this.liveconnectOAuthAccount = newAccount;
-                accessToken = liveconnectOAuthAccount.getToken();
-                lastAccessed = System.nanoTime();
-            }
-        }
-    }
-
-    /**
-     * Gets the cache for known identifiers.
-     *
-     * @return The cache for known identifiers
-     */
-    public ConcurrentMap<String, Object> getKnownIds() {
-        return knownIds;
-    }
-
-    /**
-     * Gets the current HTTP client instance
-     *
-     * @return The HTTP client
-     */
-    public DefaultHttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * Gets the access token
-     *
-     * @return The access token
-     */
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    /**
-     * Disposes this access instance.
-     */
-    public void dispose() {
-        // Nothing to do
-    }
-
 }

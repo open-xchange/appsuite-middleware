@@ -67,6 +67,7 @@ import com.openexchange.reseller.ResellerExceptionCodes;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
 import com.openexchange.reseller.data.Restriction;
+import com.openexchange.reseller.data.ResellerAdmin.ResellerAdminBuilder;
 
 /**
  * {@link ResellerServiceImpl}
@@ -110,7 +111,7 @@ public class ResellerServiceImpl implements ResellerService {
             if (!rs.next()) {
                 throw ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.create(Integer.valueOf(cid));
             }
-            return getData(new ResellerAdmin[] { new ResellerAdmin(rs.getInt(1)) })[0];
+            return getData(new ResellerAdmin[] { ResellerAdmin.builder().id(rs.getInt(1)).build() })[0];
         } catch (final SQLException e) {
             LOG.error("", e);
             throw new OXException(e);
@@ -134,20 +135,26 @@ public class ResellerServiceImpl implements ResellerService {
                     throw ResellerExceptionCodes.NO_RESELLER_FOUND.create(adm.getId());
                 }
 
-                ResellerAdmin newadm = new ResellerAdmin(adm.getId(), adm.getName());
-                newadm.setName(rs.getString(DATABASE_COLUMN_NAME));
-                newadm.setId(Integer.valueOf(rs.getInt("sid")));
-                newadm.setParentId(Integer.valueOf(rs.getInt("pid")));
-                newadm.setDisplayname(rs.getString("displayName"));
-                newadm.setPassword(rs.getString("password"));
-                newadm.setPasswordMech(rs.getString("passwordMech"));
+                Integer id = Integer.valueOf(rs.getInt("sid"));
+                Integer parentId = Integer.valueOf(rs.getInt("pid"));
+                ResellerAdminBuilder builder = ResellerAdmin.builder()
+                                                            .id(id)
+                                                            .name(rs.getString(DATABASE_COLUMN_NAME))
+                                                            .parentId(parentId)
+                                                            .displayname(rs.getString("displayName"))
+                                                            .password(rs.getString("password"))
+                                                            .passwordMech(rs.getString("passwordMech"));
 
                 rs.close();
                 prep.close();
 
-                newadm = getRestrictionDataForAdmin(newadm, con);
+                Restriction[] restrictions = getRestrictionDataForAdmin(id, parentId, con);
 
-                ret.add(newadm);
+                if (restrictions != null) {
+                    builder.restrictions(restrictions);
+                }
+
+                ret.add(builder.build());
             }
             return ret.toArray(new ResellerAdmin[ret.size()]);
         } finally {
@@ -156,21 +163,18 @@ public class ResellerServiceImpl implements ResellerService {
         }
     }
 
-    private ResellerAdmin getRestrictionDataForAdmin(final ResellerAdmin admin, final Connection con) throws SQLException {
+    private Restriction[] getRestrictionDataForAdmin(Integer id, Integer parentId, final Connection con) throws SQLException {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
             prep = con.prepareStatement("SELECT subadmin_restrictions.rid,sid,name,value FROM subadmin_restrictions INNER JOIN restrictions ON subadmin_restrictions.rid=restrictions.rid WHERE sid=?");
-            prep.setInt(1, admin.getParentId().intValue() > 0 ? admin.getParentId().intValue() : admin.getId().intValue());
+            prep.setInt(1, parentId > 0 ? parentId : id);
             rs = prep.executeQuery();
 
             Set<Restriction> res = new HashSet<>();
             while (rs.next()) {
-                final Restriction r = new Restriction();
-                r.setId(Integer.valueOf(rs.getInt(DATABASE_COLUMN_ID)));
-                r.setName(rs.getString(DATABASE_COLUMN_NAME));
-                r.setValue(rs.getString(DATABASE_COLUMN_VALUE));
-                if (admin.getParentId().intValue() > 0 && Restriction.SUBADMIN_CAN_CREATE_SUBADMINS.equals(r.getName())) {
+                final Restriction r = new Restriction(Integer.valueOf(rs.getInt(DATABASE_COLUMN_ID)), rs.getString(DATABASE_COLUMN_NAME), rs.getString(DATABASE_COLUMN_VALUE));
+                if (parentId > 0 && Restriction.SUBADMIN_CAN_CREATE_SUBADMINS.equals(r.getName())) {
                     continue;
                 }
                 res.add(r);
@@ -178,10 +182,10 @@ public class ResellerServiceImpl implements ResellerService {
 
             int size = res.size();
             if (size > 0) {
-                admin.setRestrictions(res.toArray(new Restriction[size]));
+                return res.toArray(new Restriction[size]);
             }
 
-            return admin;
+            return null;
         } finally {
             Databases.closeSQLStuff(rs, prep);
         }
@@ -199,14 +203,14 @@ public class ResellerServiceImpl implements ResellerService {
 
             List<ResellerAdmin> ret = new LinkedList<>();
             while (rs.next()) {
-                ResellerAdmin newadm = new ResellerAdmin();
-                newadm.setName(rs.getString(DATABASE_COLUMN_NAME));
-                newadm.setId(Integer.valueOf(rs.getInt("sid")));
-                newadm.setParentId(Integer.valueOf(rs.getInt("pid")));
-                newadm.setDisplayname(rs.getString("displayName"));
-                newadm.setPassword(rs.getString("password"));
-                newadm.setPasswordMech(rs.getString("passwordMech"));
-                newadm = getRestrictionDataForAdmin(newadm, con);
+
+                ResellerAdmin newadm = ResellerAdmin.builder().id(Integer.valueOf(rs.getInt("sid")))
+                    .name(rs.getString(DATABASE_COLUMN_NAME))
+                    .parentId(Integer.valueOf(rs.getInt("pid")))
+                    .displayname(rs.getString("displayName"))
+                    .password(rs.getString("password"))
+                    .passwordMech(rs.getString("passwordMech"))
+                    .build();
                 ret.add(newadm);
             }
             return ret;

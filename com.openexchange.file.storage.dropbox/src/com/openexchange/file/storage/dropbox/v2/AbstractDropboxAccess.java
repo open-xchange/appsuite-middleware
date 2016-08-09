@@ -83,13 +83,14 @@ abstract class AbstractDropboxAccess {
 
     /**
      * Initialises a new {@link AbstractDropboxAccess}.
+     * @throws OXException 
      */
-    AbstractDropboxAccess(DropboxOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session) {
+    AbstractDropboxAccess(DropboxOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
         super();
         this.dropboxOAuthAccess = dropboxOAuthAccess;
         this.session = session;
         this.account = account;
-        this.client = dropboxOAuthAccess.getDropboxClient();
+        this.client = (DbxClientV2) dropboxOAuthAccess.getClient().client;
     }
 
     /**

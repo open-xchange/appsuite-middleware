@@ -82,7 +82,7 @@ public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfi
     }
 
     @Override
-    protected String getReseller(Session session) throws OXException {
+    protected String getReseller(int contextId) throws OXException {
         return RESELLER_ALL;
     }
 

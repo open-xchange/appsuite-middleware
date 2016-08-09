@@ -82,21 +82,20 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      * @param id The service identifier
      * @param displayName The display name
      */
-    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, String id, String displayName) {
-        this(services, id, displayName, false, true);
+    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api) {
+        this(services, api, false, true);
     }
 
     /**
      * Initialises a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
      * 
      * @param services The {@link ServiceLookup} instance
-     * @param id The service identifier
-     * @param displayName The display name
+     * @param api The {@link API}
      * @param needsRequestToken Whether it needs a request token
      * @param registerTokenBasedDeferrer Whether to register the token based deferrer
      */
-    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, String id, String displayName, boolean needsRequestToken, boolean registerTokenBasedDeferrer) {
-        super(services, id, displayName);
+    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, boolean needsRequestToken, boolean registerTokenBasedDeferrer) {
+        super(services, api);
         this.needsRequestToken = needsRequestToken;
         this.registerTokenBasedDeferrer = registerTokenBasedDeferrer;
     }

@@ -6,7 +6,8 @@ Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.reseller.osgi.Activator
-Import-Package: com.openexchange.exception,
+Import-Package: com.google.common.collect;version="19.0.0",
+ com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.osgi,
  org.osgi.framework

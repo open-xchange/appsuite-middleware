@@ -70,6 +70,7 @@ Import-Package: com.openexchange.ajax,
  org.scribe.services,
  org.scribe.utils,
  org.slf4j
-Export-Package: com.openexchange.oauth
+Export-Package: com.openexchange.oauth,
+ com.openexchange.oauth.access
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.oauth.osgi.Activator

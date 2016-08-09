@@ -730,7 +730,7 @@ public class SwiftClient {
             response = httpClient.execute(post);
 
             int status = response.getStatusLine().getStatusCode();
-            if (HttpServletResponse.SC_OK != status) {
+            if (HttpServletResponse.SC_OK != status && HttpServletResponse.SC_CREATED != status) {
                 throw SwiftExceptionCode.AUTH_FAILED.create();
             }
 

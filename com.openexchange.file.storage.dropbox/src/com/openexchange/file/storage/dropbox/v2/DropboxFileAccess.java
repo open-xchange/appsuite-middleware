@@ -136,8 +136,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Initialises a new {@link DropboxFileAccess}.
+     * @throws OXException 
      */
-    public DropboxFileAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) {
+    public DropboxFileAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) throws OXException {
         super(dropboxOAuthAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();

@@ -85,9 +85,9 @@ public class AccessCombinationAdvertisementConfigService extends AbstractAdverti
     }
 
     @Override
-    protected String getReseller(Session session) throws OXException {
+    protected String getReseller(int contextId) throws OXException {
         ResellerService resellerService = Services.getService(ResellerService.class);
-        ResellerAdmin resellerAdmin = resellerService.getReseller(session.getContextId());
+        ResellerAdmin resellerAdmin = resellerService.getReseller(contextId);
         return resellerAdmin.getName();
     }
 

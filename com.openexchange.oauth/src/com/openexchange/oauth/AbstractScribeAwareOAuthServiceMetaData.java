@@ -72,19 +72,22 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
 
     private static final String PROP_PREFIX = "com.openexchange.oauth";
 
+    private API api;
+
     /**
      * Initializes a new {@link AbstractScribeAwareOAuthServiceMetaData}.
      *
      * @param services the service lookup instance
-     * @param id The OAuth identifier
+     * @param api The {@link API}
      * @param displayName The display name
      */
-    public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, String id, String displayName) {
+    public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, API api) {
         super();
         this.services = services;
+        this.api = api;
 
-        setId(id);
-        setDisplayName(displayName);
+        setId(api.getFullName());
+        setDisplayName(api.getShortName());
 
         // Common properties for all OAuthServiceMetaData implementations.
         propertyNames = new ArrayList<OAuthPropertyID>();
@@ -133,6 +136,11 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
     @Override
     public Interests getInterests() {
         return Reloadables.interestsForProperties(getConfigurationPropertyNames());
+    }
+
+    @Override
+    public API getAPI() {
+        return api;
     }
 
     /**

@@ -49,11 +49,7 @@
 
 package com.openexchange.advertisement.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -104,33 +100,6 @@ public class Services {
             throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.advertisement\" not started?");
         }
         return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * Retrieves all services registered under the given class
-     *
-     * @param clazz The class to retrieve
-     * @return A list of services
-     */
-    @SuppressWarnings("unchecked")
-    public static <S> List<S> getAllServices(final Class<S> clazz) {
-        final Activator serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.advertisement\" not started?");
-        }
-
-        ServiceReference<?>[] refs;
-        try {
-            refs = serviceLookup.getBundleContext().getAllServiceReferences(clazz.getName(), null);
-            List<S> result = new ArrayList<>(refs.length);
-            for (ServiceReference<?> reference : refs) {
-                result.add((S) serviceLookup.getBundleContext().getService(reference));
-            }
-            return result;
-        } catch (InvalidSyntaxException e) {
-            // Since filter is null this should never be thrown
-            return null;
-        }
     }
 
     /**

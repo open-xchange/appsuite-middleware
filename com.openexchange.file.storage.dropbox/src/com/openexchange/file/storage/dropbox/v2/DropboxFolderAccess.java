@@ -93,8 +93,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     /**
      * Initialises a new {@link DropboxFolderAccess}.
+     * @throws OXException 
      */
-    public DropboxFolderAccess(DropboxOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session) {
+    public DropboxFolderAccess(DropboxOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
         super(dropboxOAuthAccess, account, session);
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();

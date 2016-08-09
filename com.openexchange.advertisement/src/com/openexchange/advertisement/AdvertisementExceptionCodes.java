@@ -73,6 +73,11 @@ public enum AdvertisementExceptionCodes implements DisplayableOXExceptionCode {
      */
     CONFIG_NOT_FOUND("No valid configurations available for user %s in context %s", MESSAGE, Category.CATEGORY_ERROR, 2),
 
+    /**
+     * Unable to parse JSON configuration body.
+     */
+    PARSING_ERROR("Unable to parse JSON configuration body: %s", MESSAGE, Category.CATEGORY_ERROR, 3)
+
     ;
 
     public static final String PREFIX = "ADVERTISEMENT";

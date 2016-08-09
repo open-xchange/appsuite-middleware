@@ -59,11 +59,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorageValiditySupport;
+import com.openexchange.mail.api.IMailFolderStorageStatusSupport;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.dataobjects.MailFolderStatus;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
@@ -109,18 +110,23 @@ public class ExamineAction extends AbstractMailAction {
             }
 
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (!IMailFolderStorageValiditySupport.class.isInstance(folderStorage)) {
+            if (!IMailFolderStorageStatusSupport.class.isInstance(folderStorage)) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }
 
-            IMailFolderStorageValiditySupport validityFolderStorage = (IMailFolderStorageValiditySupport) folderStorage;
-            if (!validityFolderStorage.isValiditySupported()) {
+            IMailFolderStorageStatusSupport validityFolderStorage = (IMailFolderStorageStatusSupport) folderStorage;
+            if (!validityFolderStorage.isStatusSupported()) {
                 throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
             }
 
-            String validity = validityFolderStorage.getFolderValidity(fullnameArgument.getFullname());
-            AJAXRequestResult result = new AJAXRequestResult(new JSONObject(2).put("validity", validity), "json");
-            return result;
+            MailFolderStatus status = validityFolderStorage.getFolderStatus(fullnameArgument.getFullname());
+            JSONObject jStatus = new JSONObject(6)
+                .put("validity", status.getValidity())
+                .put("total", status.getTotal())
+                .put("unread", status.getUnread())
+                .put("next", status.getNextId());
+
+            return new AJAXRequestResult(jStatus, "json");
         } finally {
             if (mailAccess != null) {
                 mailAccess.close();

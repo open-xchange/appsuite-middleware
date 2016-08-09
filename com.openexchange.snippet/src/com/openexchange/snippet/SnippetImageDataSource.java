@@ -240,14 +240,7 @@ public class SnippetImageDataSource implements ImageDataSource {
         if (null != str) {
             try {
                 ContentType ct = new ContentType(str);
-                String fileName = ct.getNameParameter();
-                if (null != fileName) {
-                    return fileName;
-                }
-
-                String ext = MimeType2ExtMap.getFileExtension(ct.getBaseType());
-                String prim = ct.getPrimaryType();
-                return ("application".equalsIgnoreCase(prim) ? "file." : prim + ".") + ext;
+                return ct.getNameParameter();
             } catch (OXException e) {
                 // Invalid Content-Disposition
             }

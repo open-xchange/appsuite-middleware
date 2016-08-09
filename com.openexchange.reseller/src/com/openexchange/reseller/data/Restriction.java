@@ -50,8 +50,10 @@
 package com.openexchange.reseller.data;
 
 /**
- * @author choeger
+ * {@link Restriction} - A restriction associated with a reseller administrator.
  *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
 public class Restriction implements Cloneable {
 
@@ -109,61 +111,32 @@ public class Restriction implements Cloneable {
     /**
      * All currently existing restrictions <b>except</b> the BY_MODULEACCESS restrictions
      */
-    public static final String[] ALL_RESTRICTIONS = new String[] {
-        MAX_CONTEXT_PER_SUBADMIN,
-        MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
-        MAX_OVERALL_USER_PER_SUBADMIN,
-        MAX_USER_PER_CONTEXT,
-        SUBADMIN_CAN_CREATE_SUBADMINS,
-        MAX_SUBADMIN_PER_SUBADMIN
+    public static final String[] getAllRestrictions() {
+        return new String[] {
+            MAX_CONTEXT_PER_SUBADMIN,
+            MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
+            MAX_OVERALL_USER_PER_SUBADMIN,
+            MAX_USER_PER_CONTEXT,
+            SUBADMIN_CAN_CREATE_SUBADMINS,
+            MAX_SUBADMIN_PER_SUBADMIN
         };
+    }
 
-    private Integer id;
+    // -----------------------------------------------------------------------------------------
 
-    private String name;
-
-    private String value;
+    private final Integer id;
+    private final String name;
+    private final String value;
 
     /**
+     * Initializes a new {@link Restriction}.
      *
+     * @param id The identifier
+     * @param name The name
+     * @param value The value
      */
-    public Restriction() {
+    public Restriction(Integer id, String name, String value) {
         super();
-        init();
-    }
-
-    /**
-     * Initializes a new {@link Restriction}.
-     * @param id
-     * @param name
-     */
-    public Restriction(final Integer id, final String name) {
-        super();
-        init();
-        this.id = id;
-        this.name = name;
-    }
-
-    /**
-     * @param name
-     * @param value
-     */
-    public Restriction(final String name, final String value) {
-        super();
-        init();
-        this.name = name;
-        this.value = value;
-    }
-
-    /**
-     * Initializes a new {@link Restriction}.
-     * @param id
-     * @param name
-     * @param value
-     */
-    public Restriction(final Integer id, final String name, final String value) {
-        super();
-        init();
         this.id = id;
         this.name = name;
         this.value = value;
@@ -177,13 +150,10 @@ public class Restriction implements Cloneable {
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj)) {
+        if (!(obj instanceof Restriction)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Restriction other = (Restriction) obj;
+        Restriction other = (Restriction) obj;
         if (name == null) {
             if (other.name != null) {
                 return false;
@@ -220,54 +190,24 @@ public class Restriction implements Cloneable {
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
+        int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
 
-    /**
-     * @param id the id to set
-     */
-    public final void setId(final Integer id) {
-        this.id = id;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public final void setName(final String name) {
-        this.name = name;
-    }
-
-
-    /**
-     * @param value the value to set
-     */
-    public final void setValue(final String value) {
-        this.value = value;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Restriction [id=" + id + ", name=" + name + ", value=" + value + "]";
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#clone()
-     */
     @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
-
-    private void init() {
-        value = null;
-        id = null;
-        name = null;
+    public Restriction clone() {
+        try {
+            return (Restriction) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
+        }
     }
 
 }
