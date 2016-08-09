@@ -47,53 +47,28 @@
  *
  */
 
-package com.openexchange.advertisement.services;
+package com.openexchange.advertisement;
 
-import com.openexchange.advertisement.AdvertisementConfigService;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link GlobalAdvertisementConfigService} is the default implementation of the {@link AdvertisementConfigService}.
- *
- * It returns always the default reseller and the default package.
+ * {@link RemoteAdvertisementService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class GlobalAdvertisementConfigService extends AbstractAdvertisementConfigService {
+public interface RemoteAdvertisementService extends Remote {
+
+    public static final String RMI_NAME = RemoteAdvertisementService.class.getSimpleName();
 
     /**
-     * Gets the instance of {@code GlobalAdvertisementConfigService}; initializes it if necessary.
-     *
-     * @return The instance
+     * Removes all configurations and mapping for the given reseller. If the given reseller is null, all configurations and mapping are deleted instead.
+     * 
+     * @param reseller The name of the reseller
+     * @throws OXException
      */
-    public static GlobalAdvertisementConfigService getInstance() {
-        return new GlobalAdvertisementConfigService();
-    }
-
-    // ------------------------------------------------------------------------------------
-
-    /**
-     * Initializes a new {@link GlobalAdvertisementConfigService}.
-     */
-    private GlobalAdvertisementConfigService() {
-        super();
-    }
-
-    @Override
-    protected String getReseller(int contextId) throws OXException {
-        return RESELLER_ALL;
-    }
-
-    @Override
-    protected String getPackage(Session session) throws OXException {
-        return PACKAGE_ALL;
-    }
-
-    @Override
-    public String getSchemeId() {
-        return "Global";
-    }
+    public void removeConfigurations(String reseller) throws OXException, RemoteException;
 
 }
