@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -65,6 +66,21 @@ public interface WebSocket {
      * @return The path
      */
     String getPath();
+
+    /**
+     * Gets the immutable map view for the available query parameters while this Web Socket was created; e.g. <code>"param1=foo&amp;param2=bar"</code>.
+     *
+     * @return The parameters (as immutable map)
+     */
+    Map<String, String> getParameters();
+
+    /**
+     * Gets the value for the denoted query parameter.
+     *
+     * @param parameterName The parameter name
+     * @return The parameters value or <code>null</code> (if no such parameter was available while this Web Socket was created)
+     */
+    String getParameter(String parameterName);
 
     /**
      * gets this Web Socket's connection identifier.

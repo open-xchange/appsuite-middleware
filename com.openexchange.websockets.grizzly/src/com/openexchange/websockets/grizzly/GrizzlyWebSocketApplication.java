@@ -286,7 +286,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
             // Create & return new session-bound Web Socket
             String path = requestPacket.getRequestURI();
-            return new SessionBoundWebSocket(SessionInfo.newInstance(session), ConnectionId.newInstance(conId), path, handler, requestPacket, effectiveListeners);
+            return new SessionBoundWebSocket(SessionInfo.newInstance(session), ConnectionId.newInstance(conId), path, parameters, handler, requestPacket, effectiveListeners);
         } catch (HandshakeException e) {
             // Handle Handshake error
             handleHandshakeException(e, handler, requestPacket);
