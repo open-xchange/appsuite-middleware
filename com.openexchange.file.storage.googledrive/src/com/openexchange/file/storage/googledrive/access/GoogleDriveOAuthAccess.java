@@ -262,4 +262,14 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
         }
         return this;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
+     */
+    @Override
+    public OAuthAccount getOAuthAccount() {
+        return googleAccount;
+    }
 }

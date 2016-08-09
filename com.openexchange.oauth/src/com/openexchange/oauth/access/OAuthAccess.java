@@ -50,6 +50,7 @@
 package com.openexchange.oauth.access;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthAccount;
 
 /**
  * {@link OAuthAccess}
@@ -79,6 +80,13 @@ public interface OAuthAccess {
      * @throws OXException if the check fails
      */
     OAuthAccess ensureNotExpired() throws OXException;
+
+    /**
+     * Returns the {@link OAuthAccount} that is bound with this {@link OAuthAccess}
+     * 
+     * @return The {@link OAuthAccount}
+     */
+    OAuthAccount getOAuthAccount();
 
     /**
      * Pings the account

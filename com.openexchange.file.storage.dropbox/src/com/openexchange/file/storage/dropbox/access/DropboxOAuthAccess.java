@@ -81,6 +81,7 @@ public class DropboxOAuthAccess implements OAuthAccess {
     private OAuthClient<DropboxAPI<WebAuthSession>> oauthClient;
     private FileStorageAccount fsAccount;
     private Session session;
+    private volatile OAuthAccount dropboxOAuthAccount;
 
     /**
      * Initialises a new {@link DropboxOAuthAccess}.
@@ -150,7 +151,7 @@ public class DropboxOAuthAccess implements OAuthAccess {
 
         final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
-            final OAuthAccount oauthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+            dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
             /*-
              * Retrieve information about the user's Dropbox account.
              *
@@ -160,7 +161,7 @@ public class DropboxOAuthAccess implements OAuthAccess {
             WebAuthSession webAuthSession = new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX);
             DropboxAPI<WebAuthSession> dropboxApi = new DropboxAPI<WebAuthSession>(webAuthSession);
             // Re-auth specific stuff
-            final AccessTokenPair reAuthTokens = new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret());
+            final AccessTokenPair reAuthTokens = new AccessTokenPair(dropboxOAuthAccount.getToken(), dropboxOAuthAccount.getSecret());
             dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
 
             oauthClient = new OAuthClient<DropboxAPI<WebAuthSession>>(dropboxApi);
@@ -217,5 +218,13 @@ public class DropboxOAuthAccess implements OAuthAccess {
     public OAuthAccess ensureNotExpired() throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
+     */
+    @Override
+    public OAuthAccount getOAuthAccount() {
+        return dropboxOAuthAccount;
     }
 }

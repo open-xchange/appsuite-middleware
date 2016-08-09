@@ -106,6 +106,8 @@ public class BoxOAuthAccess implements OAuthAccess {
     /** The last-accessed time stamp */
     private volatile long lastAccessed;
 
+    private volatile OAuthAccount boxOAuthAccount;
+
     /**
      * Initialises a new {@link BoxOAuthAccess}.
      */
@@ -116,11 +118,8 @@ public class BoxOAuthAccess implements OAuthAccess {
 
         int oauthAccountId = getAccountId();
         // Grab Box.com OAuth account
-        OAuthAccount boxOAuthAccount;
-        {
-            OAuthService oAuthService = Services.getService(OAuthService.class);
-            boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
-        }
+        OAuthService oAuthService = Services.getService(OAuthService.class);
+        boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
 
         // Assign Box.com OAuth information
         boxOAuthInfoRef = new AtomicReference<BoxOAuthInfo>(new BoxOAuthInfo(boxOAuthAccount, session));
@@ -357,5 +356,15 @@ public class BoxOAuthAccess implements OAuthAccess {
             this.clientId = boxOAuthAccount.getMetaData().getAPIKey(session);
             this.clientSecret = boxOAuthAccount.getMetaData().getAPISecret(session);
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
+     */
+    @Override
+    public OAuthAccount getOAuthAccount() {
+        return boxOAuthAccount;
     }
 }
