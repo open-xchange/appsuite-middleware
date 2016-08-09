@@ -164,7 +164,7 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
             if (statusCode == 200) {
                 return;
             } else {
-                LOG.warn("The OAuth token couldn't not be revoked. Status Code: {}, {}", statusCode, httpResponse.getStatusLine().getReasonPhrase());
+                LOG.warn("The Dropbox OAuth token couldn't not be revoked for user '{}' in context '{}'. Status Code: {}, {}", session.getUserId(), session.getContextId(), statusCode, httpResponse.getStatusLine().getReasonPhrase());
             }
         } catch (ClientProtocolException e) {
             throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
