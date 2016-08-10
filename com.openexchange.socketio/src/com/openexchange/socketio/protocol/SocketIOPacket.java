@@ -20,6 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package com.openexchange.socketio.protocol;
 
 import com.openexchange.socketio.server.SocketIOProtocolException;
@@ -27,10 +28,9 @@ import com.openexchange.socketio.server.SocketIOProtocolException;
 /**
  * @author Alexander Sova (bird@codeminders.com)
  */
-public abstract class SocketIOPacket
-{
-    public enum Type
-    {
+public abstract class SocketIOPacket {
+
+    public enum Type {
         CONNECT(0),
         DISCONNECT(1),
         EVENT(2),
@@ -41,87 +41,83 @@ public abstract class SocketIOPacket
 
         private int value;
 
-        Type(int value)
-        {
+        Type(int value) {
             this.value = value;
         }
 
-        public int value()
-        {
+        public int value() {
             return value;
         }
 
-        public static Type fromInt(int i) throws SocketIOProtocolException
-        {
-            switch (i)
-            {
-                case 0: return CONNECT;
-                case 1: return DISCONNECT;
-                case 2: return EVENT;
-                case 3: return ACK;
-                case 4: return ERROR;
-                case 5: return BINARY_EVENT;
-                case 6: return BINARY_ACK;
+        public static Type fromInt(int i) throws SocketIOProtocolException {
+            switch (i) {
+                case 0:
+                    return CONNECT;
+                case 1:
+                    return DISCONNECT;
+                case 2:
+                    return EVENT;
+                case 3:
+                    return ACK;
+                case 4:
+                    return ERROR;
+                case 5:
+                    return BINARY_EVENT;
+                case 6:
+                    return BINARY_ACK;
                 default:
                     throw new SocketIOProtocolException("Unexpected packet type: " + i);
             }
         }
     }
 
-    private final int    id;
-    private final Type   type;
+    // ------------------------------------------------------------------------------------------------
+
+    private final int id;
+    private final Type type;
     private final String namespace;
 
-    public Type getType()
-    {
+    protected SocketIOPacket(Type type) {
+        this(type, SocketIOProtocol.DEFAULT_NAMESPACE);
+    }
+
+    protected SocketIOPacket(Type type, String namespace) {
+        this(type, -1, namespace);
+    }
+
+    protected SocketIOPacket(Type type, int id, String namespace) {
+        this.type = type;
+        this.namespace = namespace;
+        this.id = id;
+    }
+
+    public Type getType() {
         return type;
     }
 
-    public String getNamespace()
-    {
+    public String getNamespace() {
         return namespace;
     }
 
-    public int getId()
-    {
+    public int getId() {
         return id;
     }
 
     protected abstract String encodeArgs() throws SocketIOProtocolException;
 
-    protected String encodeAttachments()
-    {
+    protected String encodeAttachments() {
         return "";
     }
 
-    private String encodePacketId()
-    {
-        if(id < 0) {
+    private String encodePacketId() {
+        if (id < 0) {
             return "";
         }
 
         return String.valueOf(id);
     }
 
-    protected SocketIOPacket(Type type)
-    {
-        this(type, SocketIOProtocol.DEFAULT_NAMESPACE);
-    }
-
-    protected SocketIOPacket(Type type, String namespace)
-    {
-        this(type, -1, namespace);
-    }
-
-    protected SocketIOPacket(Type type, int id, String namespace)
-    {
-        this.type = type;
-        this.namespace = namespace;
-        this.id = id;
-    }
-
-    public String encode() throws SocketIOProtocolException
-    {
+    public String encode() throws SocketIOProtocolException {
         String str = String.valueOf(type.value());
 
         String tail = encodePacketId() + encodeArgs();

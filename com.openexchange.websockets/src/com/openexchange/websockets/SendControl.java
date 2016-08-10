@@ -50,12 +50,12 @@
 package com.openexchange.websockets;
 
 /**
- * {@link MessageHandler} - Receives call-backs for message transmission results.
+ * {@link SendControl} - Receives call-backs for message transmission results.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface MessageHandler {
+public interface SendControl {
 
     /**
      * Checks if message transmission completed; either successfully or due to a failure.

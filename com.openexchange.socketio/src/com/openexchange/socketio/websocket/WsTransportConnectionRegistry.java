@@ -127,6 +127,7 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
         }
 
         connection.onWebSocketConnect(socket);
+        socket.setMessageTranscoder(connection);
     }
 
     @Override
@@ -148,27 +149,12 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
         }
 
         connection.onWebSocketClose(socket);
+        socket.setMessageTranscoder(null);
     }
 
     @Override
     public void onMessage(WebSocket socket, String text) {
-        if (!isAppropriateWebSocket(socket)) {
-            return;
-        }
-
-        String sessionId = socket.getParameter(EngineIOProtocol.SESSION_ID);
-        if (null == sessionId) {
-            LOGGER.warn("Missing {} parameter for socket.io Web Socket.", EngineIOProtocol.SESSION_ID);
-            return;
-        }
-
-        WsTransportConnection connection = registeredConnections.get(sessionId);
-        if (null == connection) {
-            LOGGER.warn("No such socket.io session: {}", sessionId);
-            return;
-        }
-
-        connection.onMessage(socket, text);
+        // Don't care
     }
 
 }

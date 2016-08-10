@@ -47,51 +47,36 @@
  *
  */
 
-package com.openexchange.pns.appsuite;
+package com.openexchange.websockets.grizzly;
 
-import java.util.Collections;
-import java.util.Set;
-import com.openexchange.ajax.Client;
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
-import com.openexchange.websockets.WebSocket;
+import java.util.concurrent.Future;
+import com.openexchange.websockets.SendControl;
+
 
 /**
- * {@link AppSuiteWebSocketToClientResolver}
+ * {@link SendControlImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResolver {
+public class SendControlImpl<V> implements SendControl {
+
+    private final Future<V> future;
 
     /**
-     * Initializes a new {@link AppSuiteWebSocketToClientResolver}.
+     * Initializes a new {@link SendControlImpl}.
+     *
+     * @param future The backing {@link Future} instance
      */
-    public AppSuiteWebSocketToClientResolver() {
+    public SendControlImpl(Future<V> future) {
         super();
+        this.future = future;
+
     }
 
     @Override
-    public String getClientFor(WebSocket socket) throws OXException {
-        if ("socket.io".equals(socket.getMessageTranscoderScheme())) { // TODO: Align to expected path
-            return Client.APPSUITE_UI.getClientId();
-        }
-
-        return null;
-    }
-
-    @Override
-    public String getPathFilterFor(String client) throws OXException {
-        if (Client.APPSUITE_UI.getClientId().equals(client)) {
-            return  "/socket.io/*";
-        }
-
-        return null;
-    }
-
-    @Override
-    public Set<String> getSupportedClients() {
-        return Collections.singleton(Client.APPSUITE_UI.getClientId());
+    public boolean isDone() {
+        return future.isDone();
     }
 
 }

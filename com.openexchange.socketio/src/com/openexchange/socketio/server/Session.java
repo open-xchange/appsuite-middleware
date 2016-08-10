@@ -46,14 +46,18 @@ import com.openexchange.socketio.protocol.SocketIOPacket;
 import com.openexchange.socketio.protocol.SocketIOProtocol;
 import com.openexchange.timer.ScheduledTimerTask;
 
-//TODO: this class is not thread-safe at all
-
 /**
- * SocketIO session.
- * <p>
- * This implementation is not thread-safe.
+ * A SocketIO session.
+ * <ul>
+ * <li>Provides access to the active connection</li>
+ * <li>Holds open sockets (using the active connection) per different namespace</li>
+ * <li>Managed connection life-cycle (connect, close, ...)</li>
+ * <li>Stores arbitrary attributes</li>
+ * </ul>
+ *
  *
  * @author Alexander Sova (bird@codeminders.com)
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Session implements DisconnectListener {
 
@@ -79,6 +83,12 @@ public class Session implements DisconnectListener {
     private final AtomicInteger packetId = new AtomicInteger(0); // packet id. used for requesting ACK
     private final Map<Integer, ACKListener> ack_listeners = new LinkedHashMap<>(); // packetid, listener
 
+    /**
+     * Initializes a new {@link Session}.
+     *
+     * @param socketIOManager The session manager
+     * @param sessionId The session identifier
+     */
     Session(SocketIOManager socketIOManager, String sessionId) {
         super();
         assert (socketIOManager != null);
@@ -86,6 +96,12 @@ public class Session implements DisconnectListener {
         this.sessionId = sessionId;
     }
 
+    /**
+     * Creates a new socket and associates it to specified namespace.
+     *
+     * @param ns The identifier of the namespace to which the new socket is supposed to be bound
+     * @return The new socket
+     */
     public Socket createSocket(String ns) {
         Namespace namespace = socketIOManager.getNamespace(ns);
         if (namespace == null) {
@@ -100,26 +116,56 @@ public class Session implements DisconnectListener {
         return socket;
     }
 
+    /**
+     * Associates an attribute with this session
+     *
+     * @param key The attribute name
+     * @param val The attribute value
+     */
     public void setAttribute(String key, Object val) {
         attributes.put(key, val);
     }
 
+    /**
+     * Gets the attribute associated with given name.
+     *
+     * @param key The attribute name
+     * @return The attribute value or <code>null</code> (if there is no such attribute)
+     */
     public Object getAttribute(String key) {
         return attributes.get(key);
     }
 
+    /**
+     * Gets the session identifier.
+     *
+     * @return The session identifier
+     */
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * Gets the current state of the active connection.
+     *
+     * @return The connection state
+     */
     public synchronized ConnectionState getConnectionState() {
         return state;
     }
 
+    /**
+     * Gets the active connection, which is set during connect.
+     *
+     * @return The active connection
+     */
     public synchronized TransportConnection getConnection() {
         return activeConnection;
     }
 
+    /**
+     * Resets this session's timeout.
+     */
     public synchronized void resetTimeout() {
         clearTimeout();
 
@@ -141,6 +187,11 @@ public class Session implements DisconnectListener {
         }, timeout, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Clears the timeout.
+     * <p>
+     * Stops the background timer task.
+     */
     public synchronized void clearTimeout() {
         ScheduledTimerTask timeoutTask = this.timeoutTask;
         if (timeoutTask != null) {
@@ -149,10 +200,20 @@ public class Session implements DisconnectListener {
         }
     }
 
+    /**
+     * Sets the timeout for this session. <code>0</code> (zero) is infinite.
+     *
+     * @param timeout The timeout (in milliseconds)
+     */
     public synchronized void setTimeout(long timeout) {
         this.timeout = timeout;
     }
 
+    /**
+     * Gets the timeout for this session.
+     *
+     * @return The timeout (in milliseconds); <code>0</code> (zero) is infinite
+     */
     public synchronized long getTimeout() {
         return timeout;
     }
@@ -176,6 +237,12 @@ public class Session implements DisconnectListener {
         }
     }
 
+    /**
+     * The call-back when a new connection is established.
+     *
+     * @param connection The new connection to associate with his session
+     * @throws SocketIOException If a Socket.IO violation occurs; e.g. already connected
+     */
     public synchronized void onConnect(TransportConnection connection) throws SocketIOException {
         if (null == connection) {
             throw new AssertionError("connection is null");
@@ -199,18 +266,20 @@ public class Session implements DisconnectListener {
     }
 
     /**
-     * Optional. if transport knows detailed error message it could be set before calling onShutdown()
+     * Optional. If transport knows detailed error message, it could be set before calling onShutdown()
      *
-     * @param message detailed explanation of the disconnect reason
+     * @param message The detailed explanation of the disconnect reason
      */
     public synchronized void setDisconnectMessage(String message) {
         this.disconnectMessage = message;
     }
 
     /**
-     * Calling this method will change activeConnection status to CLOSING
+     * Calling this method will close the active connection.
+     * <p>
+     * Setting its state to <code>CLOSING</code>.
      *
-     * @param reason session disconnect reason
+     * @param reason The session disconnect reason
      */
     public synchronized void setDisconnectReason(DisconnectReason reason) {
         this.state = ConnectionState.CLOSING;
@@ -261,6 +330,12 @@ public class Session implements DisconnectListener {
         }
     }
 
+    /**
+     * Handles an incoming packet.
+     *
+     * @param packet The packet
+     * @param connection The connection that received the packet
+     */
     public synchronized void onPacket(EngineIOPacket packet, TransportConnection connection) {
         switch (packet.getType()) {
             case OPEN:
@@ -426,6 +501,11 @@ public class Session implements DisconnectListener {
         connection.abort(); //this call should trigger onShutdown() eventually
     }
 
+    /**
+     * Yields the next packet identifier.
+     *
+     * @return The next packet identifier
+     */
     public int getNewPacketId() {
         return packetId.getAndIncrement();
     }
