@@ -50,8 +50,13 @@
 package com.openexchange.xing.access.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
 import com.openexchange.xing.User;
 import com.openexchange.xing.XingAPI;
@@ -69,7 +74,7 @@ import com.openexchange.xing.session.WebAuthSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class XingOAuthAccessImpl implements XingOAuthAccess {
+public final class XingOAuthAccessImpl implements XingOAuthAccess, OAuthAccess {
 
     /**
      * Gets the XING OAuth access for given XING OAuth account.
@@ -80,22 +85,22 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
      * @throws OXException If a XING session could not be created
      */
     public static XingOAuthAccessImpl accessFor(final OAuthAccount oauthAccount, final Session session) throws OXException {
-        final XingOAuthAccessRegistry registry = XingOAuthAccessRegistry.getInstance();
-        final int accountId = oauthAccount.getId();
-        XingOAuthAccessImpl xingOAuthAccess = registry.getAccess(accountId, session.getUserId(), session.getContextId());
-        if (null == xingOAuthAccess) {
+        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+        OAuthAccessRegistry registry = registryService.get(API.XING.getFullName());
+        OAuthAccess oAuthAccess = registry.get(session.getContextId(), session.getUserId());
+        if (oAuthAccess == null) {
             synchronized (XingOAuthAccessImpl.class) {
-                xingOAuthAccess = registry.getAccess(accountId, session.getUserId(), session.getContextId());
-                if (null == xingOAuthAccess) {
+                oAuthAccess = registry.get(session.getContextId(), session.getUserId());
+                if (null == oAuthAccess) {
                     // Create & connect
                     final XingOAuthAccessImpl newInstance = new XingOAuthAccessImpl(session, oauthAccount);
                     // Add to registry & return
-                    registry.addAccess(newInstance, accountId, session.getUserId(), session.getContextId());
-                    xingOAuthAccess = newInstance;
+                    registry.add(session.getContextId(), session.getUserId(), newInstance);
+                    oAuthAccess = newInstance;
                 }
             }
         }
-        return xingOAuthAccess;
+        return (XingOAuthAccessImpl) oAuthAccess;
     }
 
     /**
@@ -223,5 +228,82 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
     @Override
     public String getXingUserName() {
         return xingUserName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
+     */
+    @Override
+    public void initialise() throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
+     */
+    @Override
+    public void revoke() throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
+     */
+    @Override
+    public OAuthAccess ensureNotExpired() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
+     */
+    @Override
+    public OAuthAccount getOAuthAccount() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ping()
+     */
+    @Override
+    public boolean ping() throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
+     */
+    @Override
+    public OAuthClient<?> getClient() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
+     */
+    @Override
+    public int getAccountId() throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
     }
 }
