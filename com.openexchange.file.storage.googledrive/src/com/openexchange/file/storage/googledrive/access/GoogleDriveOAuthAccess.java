@@ -51,10 +51,6 @@ package com.openexchange.file.storage.googledrive.access;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -69,7 +65,6 @@ import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
-import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -147,23 +142,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
      */
     @Override
     public void revoke() throws OXException {
-        // No Java API call
-        // More information here: https://developers.google.com/identity/protocols/OAuth2WebServer#tokenrevoke
-        try {
-            DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange OneDrive Client");
-            HttpGet request = new HttpGet("https://accounts.google.com/o/oauth2/revoke?token=" + getOAuthAccount().getToken());
-            HttpResponse httpResponse = httpClient.execute(request);
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (statusCode == 200) {
-                return;
-            } else {
-                LOG.warn("The Dropbox OAuth token couldn't not be revoked for user '{}' in context '{}'. Status Code: {}, {}", session.getUserId(), session.getContextId(), statusCode, httpResponse.getStatusLine().getReasonPhrase());
-            }
-        } catch (ClientProtocolException e) {
-            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+        // No revoke
     }
 
     /*
