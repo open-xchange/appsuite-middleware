@@ -49,11 +49,16 @@
 
 package com.openexchange.file.storage.boxcom.access;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.BoxApi;
 import org.scribe.model.Token;
@@ -83,6 +88,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -92,7 +98,7 @@ import com.openexchange.session.Session;
  */
 public class BoxOAuthAccess implements OAuthAccess {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BoxOAuthAccess.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BoxOAuthAccess.class);
 
     /** The re-check threshold in seconds (45 minutes) */
     private static final long RECHECK_THRESHOLD = 2700;
@@ -149,7 +155,25 @@ public class BoxOAuthAccess implements OAuthAccess {
      */
     @Override
     public void revoke() throws OXException {
-        // TODO Auto-generated method stub
+        // No Java API call
+        // More information here: https://docs.box.com/reference#revoke
+        try {
+            DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange OneDrive Client");
+            // TODO: include the client id as a property in the boxcomoauth.properties
+            HttpGet request = new HttpGet("https://api.box.com/oauth2/revoke?client_id=" + boxOAuthAccount.getMetaData().getId() + "&client_secret" + boxOAuthAccount.getMetaData().getAPISecret(session) + "&token=" + boxOAuthAccount.getToken());
+
+            HttpResponse httpResponse = httpClient.execute(request);
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            if (statusCode == 200) {
+                return;
+            } else {
+                LOG.warn("The box.com OAuth token couldn't not be revoked for user '{}' in context '{}'. Status Code: {}, {}", session.getUserId(), session.getContextId(), statusCode, httpResponse.getStatusLine().getReasonPhrase());
+            }
+        } catch (ClientProtocolException e) {
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
+        } catch (IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
 
     }
 
@@ -318,7 +342,7 @@ public class BoxOAuthAccess implements OAuthAccess {
                 throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, boxOAuthAccount.getDisplayName(), boxOAuthAccount.getId());
             }
             if (Strings.isEmpty(accessToken.getSecret())) {
-                LOGGER.warn("Received invalid request_token from Box.com: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
+                LOG.warn("Received invalid request_token from Box.com: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
             } else {
                 refreshToken = accessToken.getSecret();
             }

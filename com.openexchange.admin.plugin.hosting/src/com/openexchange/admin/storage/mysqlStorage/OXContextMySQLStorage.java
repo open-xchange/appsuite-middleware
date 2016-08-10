@@ -1092,8 +1092,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             storeId = OXUtilStorageInterface.getInstance().findFilestoreForContext().getId();
             ctx.setFilestoreId(storeId);
         } else {
-            if (!OXToolStorageInterface.getInstance().existsStore(i(storeId))) {
-                throw new StorageException("Filestore with identifier " + storeId + " does not exist.");
+            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore fs = oxu.getFilestoreBasic(i(storeId));
+            if (fs.getMaxContexts().intValue() <= 0) {
+                // Must not be used for a context association
+                throw new StorageException("Filestore " + storeId + " must not be used.");
             }
         }
 
@@ -1123,6 +1126,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     db = getNextDBHandleByWeight(configCon);
                 } else {
                     db = OXToolStorageInterface.getInstance().loadDatabaseById(i(dbId));
+                    if (db.getMaxUnits().intValue() <= 0) {
+                        // Must not be used for a context association
+                        throw new StorageException("Database " + dbId + " must not be used.");
+                    }
                 }
             } catch (SQLException e) {
                 throw new StorageException(e.getMessage(), e);
