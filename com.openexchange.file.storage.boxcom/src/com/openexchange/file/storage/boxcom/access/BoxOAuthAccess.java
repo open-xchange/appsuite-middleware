@@ -217,7 +217,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         BoxOAuthInfo boxOAuthInfo = boxOAuthInfoRef.get();
         BoxClient boxClient = new NonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
         applyOAuthToken(boxOAuthInfo, boxClient);
-        return new OAuthClient<BoxClient>(boxClient);
+        return new OAuthClient<BoxClient>(boxClient, getOAuthAccount().getToken());
     }
 
     /**
@@ -230,7 +230,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         BoxOAuthInfo boxOAuthInfo = boxOAuthInfoRef.get();
         ExtendedNonRefreshingBoxClient boxClient = new ExtendedNonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
         applyOAuthToken(boxOAuthInfo, boxClient);
-        return new OAuthClient<ExtendedNonRefreshingBoxClient>(boxClient);
+        return new OAuthClient<ExtendedNonRefreshingBoxClient>(boxClient, getOAuthAccount().getToken());
     }
 
     /*

@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.access;
 
+import com.openexchange.java.Strings;
+
 /**
  * {@link OAuthClient}
  *
@@ -58,17 +60,24 @@ public class OAuthClient<T> {
 
     public final T client;
 
+    public final String token;
+
     /**
      * Initialises a new {@link OAuthClient}.
      * 
      * @param client The OAuth client
-     * @throws IllegalArgumentException if the client is either '<code>null</code>' or empty.
+     * @param token The OAuth token
+     * @throws IllegalArgumentException if the client is '<code>null</code>' or if the token is either '<code>null</code>' or empty.
      */
-    public OAuthClient(T client) {
+    public OAuthClient(T client, String token) {
         super();
         if (client == null) {
-            throw new IllegalArgumentException("The client can neither be 'null' nor empty.");
+            throw new IllegalArgumentException("The client can not be 'null'");
         }
+        if (Strings.isEmpty(token)) {
+            throw new IllegalArgumentException("The OAuth token can neither be 'null' nor empty.");
+        }
+        this.token = token;
         this.client = client;
     }
 }

@@ -133,7 +133,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
                 GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, session);
 
                 // Establish Drive instance
-                oAuthClient = new OAuthClient<>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build());
+                oAuthClient = new OAuthClient<>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build(), getOAuthAccount().getToken());
                 oauthClientRef.set(oAuthClient);
                 lastAccessed = System.nanoTime();
             }
@@ -240,7 +240,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
                         GoogleCredential credentials = GoogleApiClients.getCredentials(newAccount, session);
 
                         // Establish Drive instance
-                        OAuthClient<Drive> oauthClient = new OAuthClient<>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build());
+                        OAuthClient<Drive> oauthClient = new OAuthClient<>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build(), getOAuthAccount().getToken());
                         oauthClientRef.set(oauthClient);
                         lastAccessed = System.nanoTime();
                     }

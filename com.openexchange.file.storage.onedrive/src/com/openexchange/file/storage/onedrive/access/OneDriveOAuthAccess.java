@@ -126,7 +126,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
         // Initialize rest
         accessToken = liveconnectOAuthAccount.getToken();
-        oauthClient = new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"));
+        oauthClient = new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken());
         lastAccessed = System.nanoTime();
     }
 
