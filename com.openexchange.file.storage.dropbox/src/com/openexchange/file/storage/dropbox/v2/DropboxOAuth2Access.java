@@ -78,7 +78,6 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
 
     private final FileStorageAccount fsAccount;
     private final Session session;
-    private OAuthClient<DbxClientV2> oauthClient;
 
     /**
      * Initialises a new {@link DropboxOAuth2Access}.
@@ -101,7 +100,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
         try {
             final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
             DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());
-            oauthClient = new OAuthClient<>(new DbxClientV2(config, oauthAccount.getToken()));
+            setOAuthClient(new OAuthClient<DbxClientV2>(new DbxClientV2(config, oauthAccount.getToken()), oauthAccount.getToken()));
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -115,7 +114,8 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
     @Override
     public void revoke() throws OXException {
         try {
-            oauthClient.client.auth().tokenRevoke();
+            DbxClientV2 client = (DbxClientV2) getClient().client;
+            client.auth().tokenRevoke();
         } catch (DbxException e) {
             // Simply log the revoke attempt, we can't do anything about it
             LOG.debug("{}", e.getMessage(), e);
@@ -140,21 +140,12 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
     @Override
     public boolean ping() throws OXException {
         try {
-            oauthClient.client.users().getCurrentAccount();
+            DbxClientV2 client = (DbxClientV2) getClient().client;
+            client.users().getCurrentAccount();
             return true;
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e);
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
-     */
-    @Override
-    public OAuthClient<?> getClient() throws OXException {
-        return oauthClient;
     }
 
     /*
