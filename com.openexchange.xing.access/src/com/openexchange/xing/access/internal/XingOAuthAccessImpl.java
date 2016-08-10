@@ -86,11 +86,6 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      */
     private String xingUserName;
 
-    /**
-     * The XING API reference.
-     */
-    private XingAPI<WebAuthSession> xingApi;
-
     private final Session session;
 
     /**
@@ -125,9 +120,10 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      *
      * @return The XING API reference
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public XingAPI<WebAuthSession> getXingAPI() {
-        return xingApi;
+    public XingAPI<WebAuthSession> getXingAPI() throws OXException {
+        return (XingAPI<WebAuthSession>) getClient().client;
     }
 
     /**
@@ -192,7 +188,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     @Override
     public boolean ping() throws OXException {
         try {
-            xingApi.userInfo();
+            getXingAPI().userInfo();
             return true;
         } catch (XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
