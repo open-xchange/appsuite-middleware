@@ -6,6 +6,7 @@ Bundle-Version: 7.10.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.storage,
  com.openexchange.config,
  com.openexchange.database,
  com.openexchange.database.provider,
