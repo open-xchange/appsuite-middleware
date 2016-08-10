@@ -112,6 +112,8 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      * @param secret
      * @throws OXException
      */
+    // FIXME: This constructor is only being used for tests. Clean-up and introduce a new way of testing the XING
+    //        functionality.
     public XingOAuthAccessImpl(final Session session, final String token, final String secret) throws OXException {
         super();
         this.session = session;
