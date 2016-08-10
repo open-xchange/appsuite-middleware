@@ -62,6 +62,17 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface WebSocketService {
 
     /**
+     * Checks if the Web Socket associated with specified connection identifier exists; either locally or on any remote cluster member.
+     *
+     * @param connectionId The connection identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if such a Web Socket exists; otherwise <code>false</code>
+     * @throws OXException If existence check fails
+     */
+    boolean exists(ConnectionId connectionId, int userId, int contextId) throws OXException;
+
+    /**
      * Sends a text message to denoted user's remote end-points, blocking until all of the message has been transmitted.
      *
      * @param message The message to be sent

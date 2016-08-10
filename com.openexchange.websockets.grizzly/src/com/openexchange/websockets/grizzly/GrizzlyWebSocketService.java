@@ -51,6 +51,7 @@ package com.openexchange.websockets.grizzly;
 
 import java.util.concurrent.Future;
 import com.openexchange.exception.OXException;
+import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.SendControl;
 import com.openexchange.websockets.WebSocketExceptionCodes;
 import com.openexchange.websockets.WebSocketService;
@@ -77,6 +78,15 @@ public class GrizzlyWebSocketService implements WebSocketService {
         this.localApp = app;
         this.remoteDistributor = remoteDistributor;
         asyncRemoteDistribution = true;
+    }
+
+    @Override
+    public boolean exists(ConnectionId connectionId, int userId, int contextId) throws OXException {
+        if (localApp.exists(connectionId, userId, contextId)) {
+            return true;
+        }
+
+        return remoteDistributor.existsRemote(connectionId, userId, contextId);
     }
 
     @Override

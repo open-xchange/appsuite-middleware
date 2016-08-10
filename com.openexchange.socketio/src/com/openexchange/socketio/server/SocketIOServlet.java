@@ -57,6 +57,15 @@ public abstract class SocketIOServlet extends SessionServlet {
     }
 
     /**
+     * Gets the Socket.IO manager
+     *
+     * @return The Socket.IO manager
+     */
+    public SocketIOManager getSocketIOManager() {
+        return socketIOManager;
+    }
+
+    /**
      * Initializes and retrieves the given Namespace by its pathname identifier {@code id}.
      *
      * If the namespace was already initialized it returns it right away.

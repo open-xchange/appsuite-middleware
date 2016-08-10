@@ -77,6 +77,8 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
 
     private static final String TRANSPORT_ID_WEB_SOCKET = KnownTransport.WEB_SOCKET.getTransportId();
 
+    private static final String DEFAULT_NAMESPACE = "/";
+
     private static interface MessageGenerator {
 
         /**
@@ -132,7 +134,7 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
         }
 
         try {
-            return new TextMessage(new JSONObject(2).put("name", topic).put("args", new JSONArray(messageGenerator.generateMessageFor(notification))).toString());
+            return new TextMessage(new JSONObject(3).put("name", topic).put("args", new JSONArray(messageGenerator.generateMessageFor(notification))).put("namespace", DEFAULT_NAMESPACE).toString());
         } catch (JSONException e) {
             throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

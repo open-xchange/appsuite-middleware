@@ -76,6 +76,7 @@ import com.openexchange.java.BufferingQueue;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
 import com.openexchange.websockets.WebSocketListener;
@@ -224,6 +225,21 @@ public class HzRemoteWebSocketDistributor implements WebSocketListener, RemoteWe
 
     private String generateKey(int userId, int contextId, String memberUuid) {
         return new StringBuilder(48).append(userId).append('@').append(contextId).append(':').append(memberUuid).toString();
+    }
+
+    @Override
+    public boolean existsRemote(ConnectionId connectionId, int userId, int contextId) {
+        try {
+            // Get the Hazelcast map reference
+            MultiMap<String, String> hzMap = map(mapName, hzInstance);
+
+            // Grab known connection identifiers
+            Collection<String> connectionIds = hzMap.get(generateKey(userId, contextId, memberUuid));
+            return (null == connectionIds || connectionIds.isEmpty()) ? false : connectionIds.contains(connectionId.getId());
+        } catch (Exception e) {
+            LOG.warn("Failed to remotely check Web Socket existence", e);
+        }
+        return false;
     }
 
     @Override
