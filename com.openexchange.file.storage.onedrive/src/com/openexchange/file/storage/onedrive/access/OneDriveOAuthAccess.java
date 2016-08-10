@@ -74,6 +74,7 @@ import com.openexchange.file.storage.onedrive.OneDriveClosure;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -89,7 +90,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OneDriveOAuthAccess implements OAuthAccess {
+public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OneDriveOAuthAccess.class);
 
@@ -98,9 +99,6 @@ public class OneDriveOAuthAccess implements OAuthAccess {
 
     private FileStorageAccount fsAccount;
     private Session session;
-
-    /** The associated OAuth account */
-    private volatile OAuthAccount liveconnectOAuthAccount;
 
     /** The last-accessed time stamp */
     private volatile long lastAccessed;
@@ -128,7 +126,7 @@ public class OneDriveOAuthAccess implements OAuthAccess {
         }
 
         // Assign Live Connect account
-        this.liveconnectOAuthAccount = liveconnectOAuthAccount;
+        setOAuthAccount(liveconnectOAuthAccount);
 
         // Initialize rest
         accessToken = liveconnectOAuthAccount.getToken();
@@ -144,10 +142,10 @@ public class OneDriveOAuthAccess implements OAuthAccess {
     @Override
     public void initialise() throws OXException {
         synchronized (this) {
-            OAuthAccount newAccount = recreateTokenIfExpired(true, liveconnectOAuthAccount, session);
+            OAuthAccount newAccount = recreateTokenIfExpired(true, getOAuthAccount(), session);
             if (newAccount != null) {
-                this.liveconnectOAuthAccount = newAccount;
-                accessToken = liveconnectOAuthAccount.getToken();
+                setOAuthAccount(newAccount);
+                accessToken = getOAuthAccount().getToken();
                 lastAccessed = System.nanoTime();
             }
         }
@@ -177,7 +175,7 @@ public class OneDriveOAuthAccess implements OAuthAccess {
                 HttpGet request = null;
                 try {
                     List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-                    qparams.add(new BasicNameValuePair("access_token", liveconnectOAuthAccount.getToken()));
+                    qparams.add(new BasicNameValuePair("access_token", getOAuthAccount().getToken()));
                     request = new HttpGet(AbstractOneDriveResourceAccess.buildUri("/me/skydrive", qparams));
                     HttpResponse httpResponse = httpClient.execute(request);
                     int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -198,16 +196,6 @@ public class OneDriveOAuthAccess implements OAuthAccess {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.access.OAuthAccess#dispose()
-     */
-    @Override
-    public void dispose() {
-        // Nothing to dispose
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.access.OAuthAccess#getClient()
      */
     @Override
@@ -222,28 +210,11 @@ public class OneDriveOAuthAccess implements OAuthAccess {
      */
     @Override
     public int getAccountId() throws OXException {
-        // Get OAuth account identifier from messaging account's configuration
-        int oauthAccountId;
-        {
-            Map<String, Object> configuration = fsAccount.getConfiguration();
-            if (null == configuration) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(OneDriveConstants.ID, fsAccount.getId());
-            }
-            Object accountId = configuration.get("account");
-            if (null == accountId) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(OneDriveConstants.ID, fsAccount.getId());
-            }
-            if (accountId instanceof Integer) {
-                oauthAccountId = ((Integer) accountId).intValue();
-            } else {
-                try {
-                    oauthAccountId = Integer.parseInt(accountId.toString());
-                } catch (NumberFormatException e) {
-                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, OneDriveConstants.ID, fsAccount.getId());
-                }
-            }
+        try {
+            return getAccountId(fsAccount.getConfiguration());
+        } catch (IllegalArgumentException e) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create(OneDriveConstants.ID, fsAccount.getId());
         }
-        return oauthAccountId;
     }
 
     /*
@@ -258,10 +229,10 @@ public class OneDriveOAuthAccess implements OAuthAccess {
             synchronized (this) {
                 now = System.nanoTime();
                 if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
-                    OAuthAccount newAccount = recreateTokenIfExpired(false, liveconnectOAuthAccount, session);
+                    OAuthAccount newAccount = recreateTokenIfExpired(false, getOAuthAccount(), session);
                     if (newAccount != null) {
-                        this.liveconnectOAuthAccount = newAccount;
-                        accessToken = liveconnectOAuthAccount.getToken();
+                        setOAuthAccount(newAccount);
+                        accessToken = getOAuthAccount().getToken();
                         lastAccessed = System.nanoTime();
                     }
                 }
@@ -312,15 +283,5 @@ public class OneDriveOAuthAccess implements OAuthAccess {
             return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
         }
         return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
-     */
-    @Override
-    public OAuthAccount getOAuthAccount() {
-        return liveconnectOAuthAccount;
     }
 }

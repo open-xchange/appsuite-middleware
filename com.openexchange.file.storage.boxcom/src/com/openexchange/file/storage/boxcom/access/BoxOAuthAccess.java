@@ -81,6 +81,7 @@ import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.boxcom.access.extended.ExtendedNonRefreshingBoxClient;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -96,7 +97,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BoxOAuthAccess implements OAuthAccess {
+public class BoxOAuthAccess extends AbstractOAuthAccess {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BoxOAuthAccess.class);
 
@@ -112,8 +113,6 @@ public class BoxOAuthAccess implements OAuthAccess {
     /** The last-accessed time stamp */
     private volatile long lastAccessed;
 
-    private volatile OAuthAccount boxOAuthAccount;
-
     /**
      * Initialises a new {@link BoxOAuthAccess}.
      */
@@ -125,7 +124,8 @@ public class BoxOAuthAccess implements OAuthAccess {
         int oauthAccountId = getAccountId();
         // Grab Box.com OAuth account
         OAuthService oAuthService = Services.getService(OAuthService.class);
-        boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+        OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+        setOAuthAccount(boxOAuthAccount);
 
         // Assign Box.com OAuth information
         boxOAuthInfoRef = new AtomicReference<BoxOAuthInfo>(new BoxOAuthInfo(boxOAuthAccount, session));
@@ -160,7 +160,7 @@ public class BoxOAuthAccess implements OAuthAccess {
         try {
             DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange OneDrive Client");
             // TODO: include the client id as a property in the boxcomoauth.properties
-            HttpGet request = new HttpGet("https://api.box.com/oauth2/revoke?client_id=" + boxOAuthAccount.getMetaData().getId() + "&client_secret" + boxOAuthAccount.getMetaData().getAPISecret(session) + "&token=" + boxOAuthAccount.getToken());
+            HttpGet request = new HttpGet("https://api.box.com/oauth2/revoke?client_id=" + getOAuthAccount().getMetaData().getId() + "&client_secret" + getOAuthAccount().getMetaData().getAPISecret(session) + "&token=" + getOAuthAccount().getToken());
 
             HttpResponse httpResponse = httpClient.execute(request);
             int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -213,16 +213,6 @@ public class BoxOAuthAccess implements OAuthAccess {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.access.OAuthAccess#dispose()
-     */
-    @Override
-    public void dispose() {
-        // Nothing to do
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.access.OAuthAccess#getClient()
      */
     @Override
@@ -254,28 +244,11 @@ public class BoxOAuthAccess implements OAuthAccess {
      */
     @Override
     public int getAccountId() throws OXException {
-        // Get OAuth account identifier from messaging account's configuration
-        int oauthAccountId;
-        {
-            Map<String, Object> configuration = fsAccount.getConfiguration();
-            if (null == configuration) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(BoxConstants.ID, fsAccount.getId());
-            }
-            Object accountId = configuration.get("account");
-            if (null == accountId) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(BoxConstants.ID, fsAccount.getId());
-            }
-            if (accountId instanceof Integer) {
-                oauthAccountId = ((Integer) accountId).intValue();
-            } else {
-                try {
-                    oauthAccountId = Strings.parseInt(accountId.toString());
-                } catch (NumberFormatException e) {
-                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, BoxConstants.ID, fsAccount.getId());
-                }
-            }
+        try {
+            return getAccountId(fsAccount.getConfiguration());
+        } catch (IllegalArgumentException e) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create(BoxConstants.ID, fsAccount.getId());
         }
-        return oauthAccountId;
     }
 
     /*
@@ -380,15 +353,5 @@ public class BoxOAuthAccess implements OAuthAccess {
             this.clientId = boxOAuthAccount.getMetaData().getAPIKey(session);
             this.clientSecret = boxOAuthAccount.getMetaData().getAPISecret(session);
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
-     */
-    @Override
-    public OAuthAccount getOAuthAccount() {
-        return boxOAuthAccount;
     }
 }
