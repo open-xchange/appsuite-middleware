@@ -49,6 +49,7 @@
 
 package com.openexchange.xing.access;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.session.WebAuthSession;
 
@@ -65,7 +66,7 @@ public interface XingOAuthAccess {
      *
      * @return The XING API reference
      */
-    XingAPI<WebAuthSession> getXingAPI();
+    XingAPI<WebAuthSession> getXingAPI() throws OXException;
 
     /**
      * Disposes this XING OAuth access.

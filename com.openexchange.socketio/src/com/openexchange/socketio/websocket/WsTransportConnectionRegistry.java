@@ -53,6 +53,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import com.openexchange.socketio.protocol.EngineIOProtocol;
+import com.openexchange.socketio.server.Session;
+import com.openexchange.socketio.server.SocketIOManager;
+import com.openexchange.socketio.server.TransportConnection;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketListener;
 
@@ -68,6 +71,8 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(WsTransportConnectionRegistry.class);
 
     private final ConcurrentMap<String, WsTransportConnection> registeredConnections;
+    private volatile WsTransport transport;
+    private volatile SocketIOManager socketIOManager;
 
     /**
      * Initializes a new {@link WsTransportConnectionRegistry}.
@@ -77,9 +82,22 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
         registeredConnections = new ConcurrentHashMap<>(512, 0.9F, 1);
     }
 
-    private boolean isAppropriateWebSocket(WebSocket socket) {
-        String path = socket.getPath();
-        return (null != path && path.startsWith("/socket.io"));
+    /**
+     * Sets the Socket.IO manager.
+     *
+     * @param socketIOManager The Socket.IO manager
+     */
+    public void setSocketIOManager(SocketIOManager socketIOManager) {
+        this.socketIOManager = socketIOManager;
+    }
+
+    /**
+     * Sets the Web Socket transport
+     *
+     * @param transport The Web Socket transport
+     */
+    public void setTransport(WsTransport transport) {
+        this.transport = transport;
     }
 
     /**
@@ -108,6 +126,13 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
         return null != registeredConnections.remove(connection.getSession().getSessionId());
     }
 
+    // ------------------------------------------------------ WebSocketListener stuff ---------------------------------------
+
+    private boolean isAppropriateWebSocket(WebSocket socket) {
+        String path = socket.getPath();
+        return (null != path && path.startsWith("/socket.io"));
+    }
+
     @Override
     public void onWebSocketConnect(WebSocket socket) {
         if (!isAppropriateWebSocket(socket)) {
@@ -116,16 +141,77 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
 
         String sessionId = socket.getParameter(EngineIOProtocol.SESSION_ID);
         if (null == sessionId) {
-            LOGGER.warn("Missing {} parameter for socket.io Web Socket.", EngineIOProtocol.SESSION_ID);
+            // Start Socket.IO from scratch
+            String sTransport = socket.getParameter(EngineIOProtocol.TRANSPORT);
+            if (!"websocket".equals(sTransport)) {
+                LOGGER.warn("Unsupported transport via WS: {}", sTransport);
+                return;
+            }
+
+            // Not registered, yet
+            SocketIOManager socketIOManager = this.socketIOManager;
+            if (null == socketIOManager) {
+                LOGGER.warn("Not initialized, yet", sessionId);
+                return;
+            }
+
+            WsTransport transport = this.transport;
+            if (null == transport) {
+                LOGGER.warn("Not initialized, yet", sessionId);
+                return;
+            }
+
+            WsTransportConnection connection = (WsTransportConnection) transport.getConnection(null, socketIOManager);
+            connection.onWebSocketConnect(socket);
+            socket.setMessageTranscoder(connection);
             return;
         }
 
+        // "sid" parameter is available. Check if there is already a registered connection for it.
         WsTransportConnection connection = registeredConnections.get(sessionId);
-        if (null == connection) {
+        if (null != connection) {
+            connection.onWebSocketConnect(socket);
+            socket.setMessageTranscoder(connection);
+            return;
+        }
+
+        // Not registered, yet
+        SocketIOManager socketIOManager = this.socketIOManager;
+        if (null == socketIOManager) {
+            LOGGER.warn("Not initialized, yet", sessionId);
+            return;
+        }
+
+        // Grab associated session (if any)
+        Session session = socketIOManager.getSession(sessionId);
+        if (null == session) {
             LOGGER.warn("No such socket.io session: {}", sessionId);
             return;
         }
 
+        // Upgrade connection (if appropriate)
+        TransportConnection activeConnection = session.getConnection();
+        if (activeConnection instanceof WsTransportConnection) {
+            connection = (WsTransportConnection) activeConnection;
+            connection.onWebSocketConnect(socket);
+            socket.setMessageTranscoder(connection);
+            return;
+        }
+
+        String sTransport = socket.getParameter(EngineIOProtocol.TRANSPORT);
+        if (!"websocket".equals(sTransport)) {
+            LOGGER.warn("Unsupported transport via WS: {}", sTransport);
+            return;
+        }
+
+        // The new connection considered for an upgrade
+        WsTransport transport = this.transport;
+        if (null == transport) {
+            LOGGER.warn("Not initialized, yet", sessionId);
+            return;
+        }
+
+        connection = (WsTransportConnection) transport.createConnection(session);
         connection.onWebSocketConnect(socket);
         socket.setMessageTranscoder(connection);
     }

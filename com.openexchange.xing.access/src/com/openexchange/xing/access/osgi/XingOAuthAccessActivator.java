@@ -60,6 +60,9 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -70,7 +73,6 @@ import com.openexchange.xing.access.XingOAuthAccessProvider;
 import com.openexchange.xing.access.internal.Services;
 import com.openexchange.xing.access.internal.XingEventHandler;
 import com.openexchange.xing.access.internal.XingOAuthAccessImpl;
-
 
 /**
  * {@link XingOAuthAccessActivator}
@@ -90,7 +92,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, OAuthService.class };
+        return new Class<?>[] { SessiondService.class, OAuthService.class, OAuthAccessRegistryService.class };
     }
 
     @Override
@@ -101,6 +103,12 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
         registerService(EventHandler.class, new XingEventHandler(), serviceProperties);
+
+        /*
+         * Register the access registry
+         */
+        OAuthAccessRegistryService oAuthAccessRegistryService = Services.getService(OAuthAccessRegistryService.class);
+        oAuthAccessRegistryService.add(API.XING.getFullName(), new OAuthAccessRegistry(API.XING.getFullName()));
 
         // Registerer
         track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
@@ -124,7 +132,23 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
             public XingOAuthAccess accessFor(final int oauthAccountId, final Session session) throws OXException {
                 final OAuthService oAuthService = getService(OAuthService.class);
                 final OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
-                return XingOAuthAccessImpl.accessFor(oAuthAccount, session);
+                
+                OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+                OAuthAccessRegistry registry = registryService.get(API.XING.getFullName());
+                OAuthAccess oAuthAccess = registry.get(session.getContextId(), session.getUserId());
+                if (oAuthAccess == null) {
+                    synchronized (XingOAuthAccessImpl.class) {
+                        oAuthAccess = registry.get(session.getContextId(), session.getUserId());
+                        if (null == oAuthAccess) {
+                            // Create & connect
+                            final XingOAuthAccessImpl newInstance = new XingOAuthAccessImpl(session, oAuthAccount);
+                            // Add to registry & return
+                            registry.add(session.getContextId(), session.getUserId(), newInstance);
+                            oAuthAccess = newInstance;
+                        }
+                    }
+                }
+                return (XingOAuthAccessImpl) oAuthAccess;
             }
 
             @Override
@@ -142,7 +166,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
 
             @Override
             public XingOAuthAccess accessFor(String token, String secret, Session session) throws OXException {
-                return XingOAuthAccessImpl.accessFor(session, token, secret);
+                return new XingOAuthAccessImpl(session, token, secret);
             }
         };
         providerRegistration = context.registerService(XingOAuthAccessProvider.class, provider, null);

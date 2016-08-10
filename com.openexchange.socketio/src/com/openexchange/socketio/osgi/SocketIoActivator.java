@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.socketio.websocket.WsSocketIOServlet;
+import com.openexchange.socketio.websocket.WsTransport;
 import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
 import com.openexchange.timer.TimerService;
 import com.openexchange.websockets.WebSocketListener;
@@ -89,11 +90,13 @@ public class SocketIoActivator extends HousekeepingActivator {
         WsTransportConnectionRegistry connectionRegistry = new WsTransportConnectionRegistry();
         registerService(WebSocketListener.class, connectionRegistry);
 
+        WsTransport transport = new WsTransport(connectionRegistry);
+        connectionRegistry.setTransport(transport);
         TimerService timerService = getService(TimerService.class);
 
         Dictionary<String, String> initParams = new Hashtable<>(2);
         initParams.put("allowAllOrigins", "true");
-        getService(HttpService.class).registerServlet("/socket.io", new WsSocketIOServlet(connectionRegistry, timerService), initParams, null);
+        getService(HttpService.class).registerServlet("/socket.io", new WsSocketIOServlet(transport, timerService), initParams, null);
     }
 
     @Override

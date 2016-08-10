@@ -117,6 +117,6 @@ public final class PushNotificationTransportTracker implements ServiceTrackerCus
             return null;
         }
         PushNotificationTransport transport = transportMap.get(transportId);
-        return transport.servesClient(client) ? transport : null;
+        return null == transport ? null : (transport.servesClient(client) ? transport : null);
     }
 }

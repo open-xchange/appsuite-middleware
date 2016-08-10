@@ -69,7 +69,7 @@ public interface PushNotification {
     /**
      * Gets the topic of this notification
      * <p>
-     * The topic is a slash-delimited string; e.g. <code>"com/open-xchange/mail/new"</code>
+     * The topic is a slash-delimited string; e.g. <code>"ox:mail:new"</code>
      *
      * @return The topic
      */

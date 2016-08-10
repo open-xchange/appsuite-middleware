@@ -104,8 +104,8 @@ public interface PushSubscription {
      * More precisely, the string value of each topic must conform to the following grammar:
      *
      * <pre>
-     *  topic-description := '*' | topic ( '/*' )?
-     *  topic := token ( '/' token )*
+     *  topic-description := '*' | topic ( ':*' )?
+     *  topic := token ( ':' token )*
      * </pre>
      *
      * @return The topics

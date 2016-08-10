@@ -258,7 +258,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                     } catch (IllegalArgumentException e) {
                         throw PushExceptionCodes.INVALID_TOPIC.create(e, topic);
                     }
-                    if (topic.endsWith("/*")) {
+                    if (topic.endsWith(":*")) {
                         // Wild-card topic: we remove the *
                         if (null == prefixes) {
                             prefixes = new LinkedList<>();

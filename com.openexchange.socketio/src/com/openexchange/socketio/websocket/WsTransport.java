@@ -32,6 +32,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.socketio.protocol.EngineIOProtocol;
+import com.openexchange.socketio.server.Session;
 import com.openexchange.socketio.server.SocketIOManager;
 import com.openexchange.socketio.server.TransportConnection;
 import com.openexchange.socketio.server.TransportType;
@@ -48,6 +50,15 @@ public final class WsTransport extends AbstractTransport {
     public WsTransport(WsTransportConnectionRegistry connectionRegistry) {
         super();
         this.connectionRegistry = connectionRegistry;
+    }
+
+    /**
+     * Gets the connection registry
+     *
+     * @return The connection registry
+     */
+    public WsTransportConnectionRegistry getConnectionRegistry() {
+        return connectionRegistry;
     }
 
     @Override
@@ -67,17 +78,34 @@ public final class WsTransport extends AbstractTransport {
             return;
         }
 
-        final TransportConnection connection = getConnection(request, sessionManager);
+        final TransportConnection connection = getConnection(request.getParameter(EngineIOProtocol.SESSION_ID), sessionManager);
 
         // a bit hacky but safe since we know the type of TransportConnection here
         ((AbstractTransportConnection) connection).setRequest(request);
     }
 
     @Override
+    public TransportConnection getConnection(String sessionId, SocketIOManager sessionManager) {
+        return super.getConnection(sessionId, sessionManager);
+    }
+
+    @Override
+    public TransportConnection createConnection(Session session) {
+        return super.createConnection(session);
+    }
+
+    @Override
     public TransportConnection createConnection() {
-        WsTransportConnection connection = new WsTransportConnection(this);
+        return new WsTransportConnection(this);
+    }
+
+    /**
+     * Registers specified connection.
+     *
+     * @param connection The connection
+     */
+    public void register(WsTransportConnection connection) {
         connectionRegistry.addWsTransportConnection(connection);
-        return connection;
     }
 
     /**

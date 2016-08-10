@@ -59,10 +59,10 @@ import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.DefaultWebSocket;
+import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocketException;
 import org.glassfish.grizzly.websockets.WebSocketListener;
-import org.glassfish.grizzly.websockets.frametypes.TextFrameType;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.exception.OXException;
@@ -225,7 +225,36 @@ public class SessionBoundWebSocket extends DefaultWebSocket implements WebSocket
     }
 
     @Override
+    public void onConnect() {
+        try {
+            super.onConnect();
+        } catch (HandshakeException e) {
+            throw e;
+        } catch (Exception e) {
+            HandshakeException hndshkExc = new HandshakeException(e.getMessage());
+            hndshkExc.initCause(e);
+            throw hndshkExc;
+        }
+    }
+
+    // ---------------------------------------------------------- Outbound ---------------------------------------------------------------
+
+    @Override
     public void sendMessage(String message) throws OXException {
+        MessageTranscoder transcoder = this.transcoder;
+
+        String transcoded = null == transcoder ? message : transcoder.onOutboundMessage(this, message);
+        if (null != transcoded) {
+            blockingSend(transcoded);
+        }
+    }
+
+    @Override
+    public void sendMessageRaw(String message) throws OXException {
+        blockingSend(message);
+    }
+
+    private void blockingSend(String message) throws OXException {
         GrizzlyFuture<DataFrame> grizzlyFuture = send(message);
         try {
             grizzlyFuture.get();
@@ -249,6 +278,13 @@ public class SessionBoundWebSocket extends DefaultWebSocket implements WebSocket
 
     @Override
     public SendControl sendMessageAsync(String message) throws OXException {
+        MessageTranscoder transcoder = this.transcoder;
+
+        String transcoded = null == transcoder ? message : transcoder.onOutboundMessage(this, message);
+        if (null == transcoded) {
+            return new SendControlImpl<>(new GetFuture<Void>(null));
+        }
+
         GrizzlyFuture<DataFrame> f = send(message);
         return new SendControlImpl<>(f);
     }
@@ -268,25 +304,6 @@ public class SessionBoundWebSocket extends DefaultWebSocket implements WebSocket
     @Override
     public void onMessage(byte[] data) {
         super.onMessage(data);
-    }
-
-    // ---------------------------------------------------------- Outbound ---------------------------------------------------------------
-
-    @Override
-    public GrizzlyFuture<DataFrame> send(String data) {
-        MessageTranscoder transcoder = this.transcoder;
-
-        String transcoded = null == transcoder ? data : transcoder.onOutboundMessage(this, data);
-        if (null != transcoded) {
-            return super.send(transcoded);
-        }
-
-        return new GetFuture<DataFrame>(new DataFrame(new TextFrameType(), data, false));
-    }
-
-    @Override
-    public GrizzlyFuture<DataFrame> send(byte[] data) {
-        return super.send(data);
     }
 
     @Override

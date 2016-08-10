@@ -129,7 +129,7 @@ public class PushNotifications {
             return;
         }
 
-        if (topic.endsWith("/*")) {
+        if (topic.endsWith(":*")) {
             topic = topic.substring(0, topic.length() - 2);
         }
 
@@ -139,13 +139,13 @@ public class PushNotifications {
         }
         for (int i = 0; i < length; i++) {
             char ch = topic.charAt(i);
-            if (ch == '/') {
+            if (ch == ':') {
                 // Can't start or end with a '/' but anywhere else is okay
                 if (i == 0 || (i == length - 1)) {
                     throw new IllegalArgumentException("invalid topic: " + topic);
                 }
                 // Can't have "//" as that implies empty token
-                if (topic.charAt(i - 1) == '/') {
+                if (topic.charAt(i - 1) == ':') {
                     throw new IllegalArgumentException("invalid topic: " + topic);
                 }
                 continue;

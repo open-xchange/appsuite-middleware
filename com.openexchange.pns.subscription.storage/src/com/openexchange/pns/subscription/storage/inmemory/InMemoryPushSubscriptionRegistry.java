@@ -174,7 +174,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
                 } catch (IllegalArgumentException e) {
                     throw PushExceptionCodes.INVALID_TOPIC.create(e, topic);
                 }
-                if (topic.endsWith("/*")) {
+                if (topic.endsWith(":*")) {
                     // Wild-card topic: we remove the /*
                     String prefix = topic.substring(0, topic.length() - 2);
                     List<PushSubscriptionWrapper> list = matchingPrefixTopic.get(prefix);

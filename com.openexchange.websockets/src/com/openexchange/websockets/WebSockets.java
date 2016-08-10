@@ -207,7 +207,7 @@ public class WebSockets {
                     return false;
                 }
                 // Can't have "//"
-                if (pathFilter.charAt(i - 1) == '/') {
+                if (i > 0 && pathFilter.charAt(i - 1) == '/') {
                     return false;
                 }
                 continue;
@@ -221,7 +221,7 @@ public class WebSockets {
             if (('0' <= ch) && (ch <= '9')) {
                 continue;
             }
-            if ((ch == '_') || (ch == '-')) {
+            if ((ch == '_') || (ch == '-') || (ch == '.')) {
                 continue;
             }
             return false;
