@@ -76,7 +76,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      */
     @Override
     public void dispose() {
-        // So far nothing known to me that needs to be disposed        
+        // So far nothing known that needs to be disposed        
     }
 
     /*
