@@ -96,15 +96,6 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
     private FileStorageAccount fsAccount;
     private Session session;
 
-    /** The last-accessed time stamp */
-    private volatile long lastAccessed;
-
-    /** The access token */
-    private volatile String accessToken;
-
-    /** The HTTP client */
-    private final OAuthClient<DefaultHttpClient> oauthClient;
-
     /**
      * Initialises a new {@link OneDriveOAuthAccess}.
      */
@@ -124,10 +115,8 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         // Assign Live Connect account
         setOAuthAccount(liveconnectOAuthAccount);
 
-        // Initialize rest
-        accessToken = liveconnectOAuthAccount.getToken();
-        oauthClient = new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken());
-        lastAccessed = System.nanoTime();
+        // Initialise client
+        setOAuthClient(new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken()));
     }
 
     /*
@@ -141,8 +130,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             OAuthAccount newAccount = recreateTokenIfExpired(true, getOAuthAccount(), session);
             if (newAccount != null) {
                 setOAuthAccount(newAccount);
-                accessToken = getOAuthAccount().getToken();
-                lastAccessed = System.nanoTime();
+                setOAuthClient(new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken()));
             }
         }
     }
@@ -186,17 +174,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
                 }
             }
         };
-        return closure.perform(null, oauthClient.client, session).booleanValue();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
-     */
-    @Override
-    public OAuthClient<?> getClient() throws OXException {
-        return oauthClient;
+        return closure.perform(null, (DefaultHttpClient) getClient().client, session).booleanValue();
     }
 
     /*
@@ -223,12 +201,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         if (isExpired()) {
             synchronized (this) {
                 if (isExpired()) {
-                    OAuthAccount newAccount = recreateTokenIfExpired(false, getOAuthAccount(), session);
-                    if (newAccount != null) {
-                        setOAuthAccount(newAccount);
-                        accessToken = getOAuthAccount().getToken();
-                        lastAccessed = System.nanoTime();
-                    }
+                    initialise();
                 }
             }
         }

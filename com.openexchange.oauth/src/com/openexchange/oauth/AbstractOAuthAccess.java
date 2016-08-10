@@ -110,7 +110,11 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      */
     @Override
     public OAuthClient<?> getClient() throws OXException {
-        return oauthClientRef.get();
+        OAuthClient<?> client = oauthClientRef.get();
+        if (client == null) {
+            initialise();
+        }
+        return client;
     }
 
     /**

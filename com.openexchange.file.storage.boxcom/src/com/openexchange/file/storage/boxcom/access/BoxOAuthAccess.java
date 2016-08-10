@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
@@ -103,12 +102,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
     private FileStorageAccount fsAccount;
     private Session session;
 
-    /** The associated OAuth information */
-    private final AtomicReference<BoxOAuthInfo> boxOAuthInfoRef;
-
-    /** The last-accessed time stamp */
-    private volatile long lastAccessed;
-
     /**
      * Initialises a new {@link BoxOAuthAccess}.
      */
@@ -123,9 +116,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
         setOAuthAccount(boxOAuthAccount);
 
-        // Assign Box.com OAuth information
-        boxOAuthInfoRef = new AtomicReference<BoxOAuthInfo>(new BoxOAuthInfo(boxOAuthAccount, session));
-        lastAccessed = System.nanoTime();
+        createOAuthClient();
     }
 
     /*
@@ -136,10 +127,9 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
     @Override
     public void initialise() throws OXException {
         synchronized (this) {
-            OAuthAccount newAccount = recreateTokenIfExpired(true, boxOAuthInfoRef.get(), session);
+            OAuthAccount newAccount = recreateTokenIfExpired(true);
             if (newAccount != null) {
-                boxOAuthInfoRef.set(new BoxOAuthInfo(newAccount, session));
-                lastAccessed = System.nanoTime();
+                createOAuthClient();
             }
         }
     }
@@ -154,7 +144,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         // No Java API call
         // More information here: https://docs.box.com/reference#revoke
         try {
-            DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange OneDrive Client");
+            DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange box.com Client");
             // TODO: include the client id as a property in the boxcomoauth.properties
             HttpGet request = new HttpGet("https://api.box.com/oauth2/revoke?client_id=" + getOAuthAccount().getMetaData().getId() + "&client_secret" + getOAuthAccount().getMetaData().getAPISecret(session) + "&token=" + getOAuthAccount().getToken());
 
@@ -206,30 +196,17 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         return closure.perform(null, this, session).booleanValue();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
-     */
-    @Override
-    public OAuthClient<?> getClient() throws OXException {
-        // TODO: Don't create a new client on every get; cache it
-        BoxOAuthInfo boxOAuthInfo = boxOAuthInfoRef.get();
-        BoxClient boxClient = new NonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
-        applyOAuthToken(boxOAuthInfo, boxClient);
-        return new OAuthClient<BoxClient>(boxClient, getOAuthAccount().getToken());
-    }
-
     /**
      * Gets the extended box client
      *
      * @return The extended box client
+     * @throws OXException
      */
-    public OAuthClient<?> getExtendedClient() {
+    public OAuthClient<?> getExtendedClient() throws OXException {
         // TODO: Don't create a new client on every get; cache it
-        BoxOAuthInfo boxOAuthInfo = boxOAuthInfoRef.get();
-        ExtendedNonRefreshingBoxClient boxClient = new ExtendedNonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
-        applyOAuthToken(boxOAuthInfo, boxClient);
+        OAuthAccount account = getOAuthAccount();
+        ExtendedNonRefreshingBoxClient boxClient = new ExtendedNonRefreshingBoxClient(account.getMetaData().getAPIKey(session), account.getMetaData().getAPISecret(session), new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
+        applyOAuthToken(boxClient);
         return new OAuthClient<ExtendedNonRefreshingBoxClient>(boxClient, getOAuthAccount().getToken());
     }
 
@@ -256,10 +233,9 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
     public OAuthAccess ensureNotExpired() throws OXException {
         if (isExpired()) {
             synchronized (this) {
-                OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthInfoRef.get(), session);
+                OAuthAccount newAccount = recreateTokenIfExpired(false);
                 if (newAccount != null) {
-                    boxOAuthInfoRef.set(new BoxOAuthInfo(newAccount, session));
-                    lastAccessed = System.nanoTime();
+                    createOAuthClient();
                 }
             }
         }
@@ -273,9 +249,9 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
      *
      * @param boxOAuthInfo
      */
-    private void applyOAuthToken(BoxOAuthInfo boxOAuthInfo, BoxClient boxClient) {
+    private void applyOAuthToken(BoxClient boxClient) {
         Map<String, Object> tokenSpec = new HashMap<String, Object>(6);
-        OAuthAccount boxOAuthAccount = boxOAuthInfo.boxOAuthAccount;
+        OAuthAccount boxOAuthAccount = getOAuthAccount();
         tokenSpec.put(BoxOAuthToken.FIELD_ACCESS_TOKEN, boxOAuthAccount.getToken());
         tokenSpec.put(BoxOAuthToken.FIELD_REFRESH_TOKEN, boxOAuthAccount.getSecret());
         tokenSpec.put(BoxOAuthToken.FIELD_TOKEN_TYPE, "bearer");
@@ -287,14 +263,12 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
      * Re-creates the OAuth token if it is expired
      * 
      * @param considerExpired flag to consider the token as expired
-     * @param boxOAuthInfo The {@link BoxOAuthInfo}
-     * @param session The user's {@link Session}
      * @return the {@link OAuthAccount} with the updated token
      * @throws OXException if the token cannot be recreated
      */
-    private OAuthAccount recreateTokenIfExpired(boolean considerExpired, BoxOAuthInfo boxOAuthInfo, Session session) throws OXException {
+    private OAuthAccount recreateTokenIfExpired(boolean considerExpired) throws OXException {
         // Create Scribe Box.com OAuth service
-        OAuthAccount boxOAuthAccount = boxOAuthInfo.boxOAuthAccount;
+        OAuthAccount boxOAuthAccount = getOAuthAccount();
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(BoxApi.class);
         serviceBuilder.apiKey(boxOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(boxOAuthAccount.getMetaData().getAPISecret(session));
         BoxApi.BoxApiService scribeOAuthService = (BoxApi.BoxApiService) serviceBuilder.build();
@@ -328,25 +302,10 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         return null;
     }
 
-    /**
-     * {@link BoxOAuthInfo}
-     */
-    private static class BoxOAuthInfo {
-
-        /** The associated OAuth account */
-        final OAuthAccount boxOAuthAccount;
-
-        /** The client identifier */
-        final String clientId;
-
-        /** The client secret */
-        final String clientSecret;
-
-        BoxOAuthInfo(OAuthAccount boxOAuthAccount, Session session) throws OXException {
-            super();
-            this.boxOAuthAccount = boxOAuthAccount;
-            this.clientId = boxOAuthAccount.getMetaData().getAPIKey(session);
-            this.clientSecret = boxOAuthAccount.getMetaData().getAPISecret(session);
-        }
+    private OAuthClient<BoxClient> createOAuthClient() throws OXException {
+        OAuthAccount account = getOAuthAccount();
+        BoxClient boxClient = new NonRefreshingBoxClient(account.getMetaData().getAPIKey(session), account.getMetaData().getAPISecret(session), new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
+        applyOAuthToken(boxClient);
+        return new OAuthClient<BoxClient>(boxClient, getOAuthAccount().getToken());
     }
 }
