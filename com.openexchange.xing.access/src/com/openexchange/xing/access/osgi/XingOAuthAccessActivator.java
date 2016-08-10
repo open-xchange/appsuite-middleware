@@ -90,7 +90,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, OAuthService.class, OAuthAccessRegistryService.class };
+        return new Class<?>[] { SessiondService.class, OAuthService.class };
     }
 
     @Override
@@ -98,7 +98,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
         Services.setServices(this);
 
         // Event handler
-        final Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
+        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
         registerService(EventHandler.class, new XingEventHandler(), serviceProperties);
 
