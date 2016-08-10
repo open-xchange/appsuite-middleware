@@ -50,6 +50,7 @@
 package com.openexchange.xing.access.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
@@ -96,7 +97,10 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      * @throws OXException If connect attempt fails
      */
     public XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
-        this(session, oauthAccount.getToken(), oauthAccount.getSecret());
+        super();
+        this.session = session;
+        setOAuthAccount(oauthAccount);
+        init(oauthAccount.getToken(), oauthAccount.getSecret());
     }
 
     /**
@@ -155,7 +159,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     public void initialise() throws OXException {
         OAuthService oAuthService = Services.getService(OAuthService.class);
         OAuthAccount oAuthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
-
+        
         init(oAuthAccount.getToken(), oAuthAccount.getSecret());
     }
 
