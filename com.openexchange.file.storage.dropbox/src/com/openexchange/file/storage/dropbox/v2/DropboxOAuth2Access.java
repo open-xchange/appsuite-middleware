@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.dropbox.v2;
 
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.dropbox.core.DbxException;
@@ -61,6 +60,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.OAuthAccess;
@@ -72,14 +72,13 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxOAuth2Access implements OAuthAccess {
-    
+public class DropboxOAuth2Access extends AbstractOAuthAccess {
+
     private static final Logger LOG = LoggerFactory.getLogger(DropboxOAuth2Access.class);
 
     private final FileStorageAccount fsAccount;
     private final Session session;
     private OAuthClient<DbxClientV2> oauthClient;
-    private volatile OAuthAccount dropboxOAuthAccount;
 
     /**
      * Initialises a new {@link DropboxOAuth2Access}.
@@ -130,18 +129,7 @@ public class DropboxOAuth2Access implements OAuthAccess {
      */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
-        // nothing yet
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
-     */
-    @Override
-    public OAuthAccount getOAuthAccount() {
-        return dropboxOAuthAccount;
+        throw new UnsupportedOperationException("The Dropbox OAuth token never expires.");
     }
 
     /*
@@ -162,17 +150,6 @@ public class DropboxOAuth2Access implements OAuthAccess {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.access.OAuthAccess#dispose()
-     */
-    @Override
-    public void dispose() {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.access.OAuthAccess#getClient()
      */
     @Override
@@ -187,29 +164,10 @@ public class DropboxOAuth2Access implements OAuthAccess {
      */
     @Override
     public int getAccountId() throws OXException {
-        /*
-         * Get OAuth account identifier from messaging account's configuration
-         */
-        final int oauthAccountId;
-        {
-            final Map<String, Object> configuration = fsAccount.getConfiguration();
-            if (null == configuration) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
-            }
-            final Object accountId = configuration.get("account");
-            if (null == accountId) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
-            }
-            if (accountId instanceof Integer) {
-                oauthAccountId = ((Integer) accountId).intValue();
-            } else {
-                try {
-                    oauthAccountId = Integer.parseInt(accountId.toString());
-                } catch (final NumberFormatException e) {
-                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, DropboxConstants.ID, fsAccount.getId());
-                }
-            }
+        try {
+            return getAccountId(fsAccount.getConfiguration());
+        } catch (IllegalArgumentException e) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
         }
-        return oauthAccountId;
     }
 }

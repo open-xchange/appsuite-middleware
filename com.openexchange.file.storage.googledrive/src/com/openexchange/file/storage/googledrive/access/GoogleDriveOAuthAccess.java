@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.googledrive.access;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.http.HttpResponse;
@@ -67,6 +66,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.google.api.client.GoogleApiClients;
+import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
@@ -79,7 +79,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GoogleDriveOAuthAccess implements OAuthAccess {
+public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleDriveOAuthAccess.class);
 
@@ -88,9 +88,6 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
 
     /** The Google Drive API client. */
     private final AtomicReference<OAuthClient<Drive>> oauthClientRef;
-
-    /** The Google OAuth account */
-    private volatile OAuthAccount googleAccount;
 
     /** The last-accessed time stamp */
     private volatile long lastAccessed;
@@ -110,7 +107,7 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
         int oauthAccountId = getAccountId();
         // Grab Google OAuth account
         OAuthAccount googleAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, session, false);
-        this.googleAccount = googleAccount;
+        setOAuthAccount(googleAccount);
 
         // Establish Drive reference
         oauthClientRef = new AtomicReference<OAuthClient<Drive>>();
@@ -127,12 +124,12 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
         synchronized (this) {
             OAuthClient<Drive> oAuthClient = oauthClientRef.get();
             if (null == oAuthClient) {
-                OAuthAccount oauthAccount = googleAccount;
+                OAuthAccount oauthAccount = getOAuthAccount();
                 {
                     OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, session);
                     if (null != newAccount) {
                         oauthAccount = newAccount;
-                        this.googleAccount = newAccount;
+                        setOAuthAccount(newAccount);
                     }
                 }
 
@@ -158,7 +155,7 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
         // More information here: https://developers.google.com/identity/protocols/OAuth2WebServer#tokenrevoke
         try {
             DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange OneDrive Client");
-            HttpGet request = new HttpGet("https://accounts.google.com/o/oauth2/revoke?token=" + googleAccount.getToken());
+            HttpGet request = new HttpGet("https://accounts.google.com/o/oauth2/revoke?token=" + getOAuthAccount().getToken());
             HttpResponse httpResponse = httpClient.execute(request);
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 200) {
@@ -199,17 +196,6 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.access.OAuthAccess#dispose()
-     */
-    @Override
-    public void dispose() {
-        // Nothing to dispose
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.access.OAuthAccess#getClient()
      */
     @Override
@@ -229,28 +215,11 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
      */
     @Override
     public int getAccountId() throws OXException {
-        // Get OAuth account identifier
-        final int oauthAccountId;
-        {
-            final Map<String, Object> configuration = fsAccount.getConfiguration();
-            if (null == configuration) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(GoogleDriveConstants.ID, fsAccount.getId());
-            }
-            final Object accountId = configuration.get("account");
-            if (null == accountId) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(GoogleDriveConstants.ID, fsAccount.getId());
-            }
-            if (accountId instanceof Integer) {
-                oauthAccountId = ((Integer) accountId).intValue();
-            } else {
-                try {
-                    oauthAccountId = Integer.parseInt(accountId.toString());
-                } catch (final NumberFormatException e) {
-                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, GoogleDriveConstants.ID, fsAccount.getId());
-                }
-            }
+        try {
+            return getAccountId(fsAccount.getConfiguration());
+        } catch (IllegalArgumentException e) {
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create(GoogleDriveConstants.ID, fsAccount.getId());
         }
-        return oauthAccountId;
     }
 
     /*
@@ -269,9 +238,9 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
             synchronized (this) {
                 now = System.nanoTime();
                 if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
-                    OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(googleAccount, session);
+                    OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(getOAuthAccount(), session);
                     if (newAccount != null) {
-                        this.googleAccount = newAccount;
+                        setOAuthAccount(newAccount);
 
                         // Generate appropriate credentials for it
                         GoogleCredential credentials = GoogleApiClients.getCredentials(newAccount, session);
@@ -285,15 +254,5 @@ public class GoogleDriveOAuthAccess implements OAuthAccess {
             }
         }
         return this;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
-     */
-    @Override
-    public OAuthAccount getOAuthAccount() {
-        return googleAccount;
     }
 }
