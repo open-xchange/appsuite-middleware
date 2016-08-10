@@ -216,8 +216,7 @@ public class DropboxOAuthAccess implements OAuthAccess {
      */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("The Dropbox OAuth token never expires.");
     }
 
     /* (non-Javadoc)
