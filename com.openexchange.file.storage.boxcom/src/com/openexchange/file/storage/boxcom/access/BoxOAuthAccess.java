@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -100,9 +99,6 @@ import com.openexchange.session.Session;
 public class BoxOAuthAccess extends AbstractOAuthAccess {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BoxOAuthAccess.class);
-
-    /** The re-check threshold in seconds (45 minutes) */
-    private static final long RECHECK_THRESHOLD = 2700;
 
     private FileStorageAccount fsAccount;
     private Session session;
@@ -221,7 +217,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         BoxOAuthInfo boxOAuthInfo = boxOAuthInfoRef.get();
         BoxClient boxClient = new NonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
         applyOAuthToken(boxOAuthInfo, boxClient);
-        return new OAuthClient<BoxClient>(boxClient);
+        return new OAuthClient<BoxClient>(boxClient, getOAuthAccount().getToken());
     }
 
     /**
@@ -234,7 +230,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         BoxOAuthInfo boxOAuthInfo = boxOAuthInfoRef.get();
         ExtendedNonRefreshingBoxClient boxClient = new ExtendedNonRefreshingBoxClient(boxOAuthInfo.clientId, boxOAuthInfo.clientSecret, new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
         applyOAuthToken(boxOAuthInfo, boxClient);
-        return new OAuthClient<ExtendedNonRefreshingBoxClient>(boxClient);
+        return new OAuthClient<ExtendedNonRefreshingBoxClient>(boxClient, getOAuthAccount().getToken());
     }
 
     /*
@@ -258,8 +254,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
      */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
-        long now = System.nanoTime();
-        if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+        if (isExpired()) {
             synchronized (this) {
                 OAuthAccount newAccount = recreateTokenIfExpired(false, boxOAuthInfoRef.get(), session);
                 if (newAccount != null) {

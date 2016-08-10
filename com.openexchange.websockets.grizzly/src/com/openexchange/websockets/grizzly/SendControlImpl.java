@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,36 @@
  *
  */
 
-package com.openexchange.oauth.access;
+package com.openexchange.websockets.grizzly;
 
-import com.openexchange.java.Strings;
+import java.util.concurrent.Future;
+import com.openexchange.websockets.SendControl;
+
 
 /**
- * {@link OAuthClient}
+ * {@link SendControlImpl}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class OAuthClient<T> {
+public class SendControlImpl<V> implements SendControl {
 
-    public final T client;
-
-    public final String token;
+    private final Future<V> future;
 
     /**
-     * Initialises a new {@link OAuthClient}.
-     * 
-     * @param client The OAuth client
-     * @param token The OAuth token
-     * @throws IllegalArgumentException if the client is '<code>null</code>' or if the token is either '<code>null</code>' or empty.
+     * Initializes a new {@link SendControlImpl}.
+     *
+     * @param future The backing {@link Future} instance
      */
-    public OAuthClient(T client, String token) {
+    public SendControlImpl(Future<V> future) {
         super();
-        if (client == null) {
-            throw new IllegalArgumentException("The client can not be 'null'");
-        }
-        if (Strings.isEmpty(token)) {
-            throw new IllegalArgumentException("The OAuth token can neither be 'null' nor empty.");
-        }
-        this.token = token;
-        this.client = client;
+        this.future = future;
+
     }
+
+    @Override
+    public boolean isDone() {
+        return future.isDone();
+    }
+
 }

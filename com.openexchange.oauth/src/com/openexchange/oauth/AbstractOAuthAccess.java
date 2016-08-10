@@ -50,7 +50,11 @@
 package com.openexchange.oauth;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthClient;
 
 /**
  * {@link AbstractOAuthAccess}
@@ -59,8 +63,17 @@ import com.openexchange.oauth.access.OAuthAccess;
  */
 public abstract class AbstractOAuthAccess implements OAuthAccess {
 
+    /** The re-check threshold in seconds (45 minutes) */
+    private static final long RECHECK_THRESHOLD = 2700;
+
     /** The {@link OAuthAccount} */
     private volatile OAuthAccount oauthAccount;
+
+    /** The associated OAuth client */
+    private AtomicReference<OAuthClient<?>> oauthClientRef;
+
+    /** The last-accessed time stamp */
+    private volatile long lastAccessed;
 
     /**
      * Initialises a new {@link AbstractOAuthAccess}.
@@ -76,7 +89,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      */
     @Override
     public void dispose() {
-        // So far nothing known to me that needs to be disposed        
+        // So far nothing known that needs to be disposed        
     }
 
     /*
@@ -87,6 +100,36 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     @Override
     public OAuthAccount getOAuthAccount() {
         return oauthAccount;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
+     */
+    @Override
+    public OAuthClient<?> getClient() throws OXException {
+        return oauthClientRef.get();
+    }
+
+    /**
+     * Verifies whether the OAuth token and the associated {@link OAuthClient} are expired.
+     * 
+     * @return <code>true</code> if expired; false otherwise
+     */
+    protected boolean isExpired() {
+        long now = System.nanoTime();
+        return TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD;
+    }
+
+    /**
+     * Sets the {@link OAuthClient}. Updates the last accessed timestamp
+     * 
+     * @param client The {@link OAuthClient} to set
+     */
+    protected void setOAuthClient(OAuthClient<?> client) {
+        lastAccessed = System.nanoTime();
+        oauthClientRef.set(client);
     }
 
     /**

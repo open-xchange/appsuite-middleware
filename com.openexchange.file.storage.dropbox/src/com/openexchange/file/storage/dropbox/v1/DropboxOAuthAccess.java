@@ -81,7 +81,6 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
     private OAuthClient<DropboxAPI<WebAuthSession>> oauthClient;
     private FileStorageAccount fsAccount;
     private Session session;
-    private volatile OAuthAccount dropboxOAuthAccount;
 
     /**
      * Initialises a new {@link DropboxOAuthAccess}.
@@ -141,7 +140,8 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
 
         final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
-            dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+            OAuthAccount dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+            setOAuthAccount(dropboxOAuthAccount);
             /*-
              * Retrieve information about the user's Dropbox account.
              *
@@ -153,8 +153,8 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
             // Re-auth specific stuff
             final AccessTokenPair reAuthTokens = new AccessTokenPair(dropboxOAuthAccount.getToken(), dropboxOAuthAccount.getSecret());
             dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
-
-            oauthClient = new OAuthClient<DropboxAPI<WebAuthSession>>(dropboxApi);
+            
+            oauthClient = new OAuthClient<DropboxAPI<WebAuthSession>>(dropboxApi, dropboxOAuthAccount.getToken());
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

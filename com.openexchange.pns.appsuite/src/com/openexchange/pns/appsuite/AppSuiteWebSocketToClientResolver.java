@@ -55,7 +55,6 @@ import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 import com.openexchange.websockets.WebSocket;
-import com.openexchange.websockets.WebSockets;
 
 /**
  * {@link AppSuiteWebSocketToClientResolver}
@@ -74,10 +73,7 @@ public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResol
 
     @Override
     public String getClientFor(WebSocket socket) throws OXException {
-        String path = socket.getPath();
-
-        String appSuitePathFilter = "/websockets/push/*";
-        if (WebSockets.matches(appSuitePathFilter, path)) { // TODO: Align to expected path
+        if ("socket.io".equals(socket.getMessageTranscoderScheme())) { // TODO: Align to expected path
             return Client.APPSUITE_UI.getClientId();
         }
 
@@ -87,7 +83,7 @@ public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResol
     @Override
     public String getPathFilterFor(String client) throws OXException {
         if (Client.APPSUITE_UI.getClientId().equals(client)) {
-            return  "/websockets/push/*";
+            return  "/socket.io/*";
         }
 
         return null;

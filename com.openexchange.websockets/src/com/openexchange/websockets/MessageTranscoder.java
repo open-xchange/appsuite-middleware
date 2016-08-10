@@ -47,36 +47,40 @@
  *
  */
 
-package com.openexchange.websockets.grizzly;
-
-import java.util.concurrent.Future;
-import com.openexchange.websockets.MessageHandler;
+package com.openexchange.websockets;
 
 
 /**
- * {@link MessageHandlerImpl}
+ * {@link MessageTranscoder} - Transcodes inbound/outbound Web Socket messages.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class MessageHandlerImpl<V> implements MessageHandler {
-
-    private final Future<V> future;
+public interface MessageTranscoder {
 
     /**
-     * Initializes a new {@link MessageHandlerImpl}.
+     * Gets the identifier for this transcoder.
      *
-     * @param future The backing {@link Future} instance
+     * @return The identifier
      */
-    public MessageHandlerImpl(Future<V> future) {
-        super();
-        this.future = future;
+    String getId();
 
-    }
+    /**
+     * Invoked when a message has arrived on the {@link WebSocket} instance associated with this transcoder.
+     *
+     * @param socket The Web Socket that received the message
+     * @param message The message received.
+     * @return The transcoded message to forward to listeners or <code>null</code> to forward nothing
+     */
+    String onInboundMessage(WebSocket socket, String message);
 
-    @Override
-    public boolean isDone() {
-        return future.isDone();
-    }
+    /**
+     * Invoked when a message is supposed to be sent on the {@link WebSocket} instance associated with this transcoder.
+     *
+     * @param socket The Web Socket that is supposed to send the message
+     * @param message The message to send.
+     * @return The transcoded message to send to remote end-point or <code>null</code> to send nothing
+     */
+    String onOutboundMessage(WebSocket socket, String message);
 
 }

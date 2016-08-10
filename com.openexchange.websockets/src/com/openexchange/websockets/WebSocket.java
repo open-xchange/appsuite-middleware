@@ -118,6 +118,22 @@ public interface WebSocket {
     WebSocketSession getWebSocketSession();
 
     /**
+     * Applies a certain message transcoder to this Web Socket.
+     * <p>
+     * Every inbound and outbound messages are routed through that transcoder.
+     *
+     * @param transcoder The transcode to set
+     */
+    void setMessageTranscoder(MessageTranscoder transcoder);
+
+    /**
+     * Gets the scheme identifier for the currently active message transcoder.
+     *
+     * @return The scheme identifier or <code>null</code> if no trancoder is in place
+     */
+    String getMessageTranscoderScheme();
+
+    /**
      * Sends a message to the remote end-point, blocking until all of the message has been transmitted.
      *
      * @param message The message to be sent
@@ -135,7 +151,7 @@ public interface WebSocket {
      * @param handler the handler which will be notified of progress.
      * @throws IllegalArgumentException if the text or the handler is {@code null}.
      */
-    MessageHandler sendMessageAsync(String message) throws OXException;
+    SendControl sendMessageAsync(String message) throws OXException;
 
     /**
      * Closes this {@link WebSocket}.

@@ -29,30 +29,38 @@ import com.openexchange.socketio.common.SocketIOException;
 import com.openexchange.socketio.protocol.BinaryPacket;
 import com.openexchange.socketio.protocol.EngineIOPacket;
 import com.openexchange.socketio.protocol.EngineIOProtocol;
+import com.openexchange.socketio.protocol.EventPacket;
 import com.openexchange.socketio.protocol.SocketIOPacket;
+import com.openexchange.socketio.protocol.SocketIOProtocol;
 import com.openexchange.socketio.server.Config;
 import com.openexchange.socketio.server.Session;
 import com.openexchange.socketio.server.SocketIOClosedException;
 import com.openexchange.socketio.server.SocketIOProtocolException;
 import com.openexchange.socketio.server.transport.AbstractTransportConnection;
+import com.openexchange.websockets.MessageTranscoder;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WsTransportConnection extends AbstractTransportConnection implements WebSocketListener {
+public final class WsTransportConnection extends AbstractTransportConnection implements WebSocketListener, MessageTranscoder {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(WsTransportConnection.class);
 
     private final WsTransport wsTransport;
-    private volatile WebSocket remote_endpoint;
+    private volatile WebSocket remoteEndpoint;
     private volatile String sessionId;
 
     public WsTransportConnection(WsTransport transport) {
@@ -60,22 +68,11 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
         wsTransport = transport;
     }
 
-    @Override
-    public void setSession(Session session) {
-        super.setSession(session);
-        sessionId = null == session ? null : session.getSessionId();
-    }
-
-    @Override
-    protected void init() {
-        getSession().setTimeout(getConfig().getTimeout(Config.DEFAULT_PING_TIMEOUT));
-
-        LOGGER.debug("{} WebSocket configuration: timeout={}", getConfig().getNamespace(), getSession().getTimeout());
-    }
+    // ---------------------------------------------- WebSocketListener stuff ------------------------------------------------------
 
     @Override
     public void onWebSocketConnect(WebSocket socket) {
-        remote_endpoint = socket;
+        remoteEndpoint = socket;
         Session session = getSession();
         if (session.getConnectionState() == ConnectionState.CONNECTING) {
             try {
@@ -95,26 +92,108 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
 
     @Override
     public void onWebSocketClose(WebSocket socket) {
-        //If close is unexpected then try to guess the reason based on closeCode, otherwise the reason is already set
-        if(getSession().getConnectionState() != ConnectionState.CLOSING) {
-            getSession().setDisconnectReason(fromCloseCode(false));
+        // If close is unexpected then try to guess the reason based on closeCode, otherwise the reason is already set
+        Session session = getSession();
+        if (session.getConnectionState() != ConnectionState.CLOSING) {
+            session.setDisconnectReason(fromCloseCode(false));
         }
 
-        getSession().setDisconnectMessage("Closing");
-        getSession().onShutdown();
+        session.setDisconnectMessage("Closing");
+        session.onShutdown();
     }
 
     @Override
     public void onMessage(WebSocket socket, String text) {
-        LOGGER.debug("Session[{}]: text received: {}", getSession().getSessionId(), text);
+        Session session = getSession();
+        LOGGER.debug("Session[{}]: text received: {}", session.getSessionId(), text);
 
-        getSession().resetTimeout();
+        session.resetTimeout();
 
         try {
-            getSession().onPacket(EngineIOProtocol.decode(text), this);
+            session.onPacket(EngineIOProtocol.decode(text), this);
         } catch (SocketIOProtocolException e) {
             LOGGER.warn("Invalid packet received", e);
         }
+    }
+
+    // ---------------------------------------------- MessageTranscoder stuff ------------------------------------------------------
+
+    @Override
+    public String onInboundMessage(WebSocket socket, String message) {
+        Session session = getSession();
+        LOGGER.debug("Session[{}]: text received: {}", session.getSessionId(), message);
+
+        session.resetTimeout();
+
+        String retval = null;
+        try {
+            EngineIOPacket packet = EngineIOProtocol.decode(message);
+            if (EngineIOPacket.Type.MESSAGE == packet.getType()) {
+                SocketIOPacket socketIOPacket = SocketIOProtocol.decode(packet.getTextData());
+                if (SocketIOPacket.Type.EVENT == socketIOPacket.getType()) {
+                    EventPacket eventPacket = (EventPacket) socketIOPacket;
+                    String name = eventPacket.getName();
+                    Object[] args = eventPacket.getArgs();
+                    try {
+                        retval = new JSONObject(2).put("name", name).put("args", new JSONArray(Arrays.asList(args))).toString();
+                    } catch (JSONException e) {
+                        LOGGER.warn("Invalid event packet received", e);
+                    }
+                }
+            }
+
+            // Trigger common handling
+            session.onPacket(packet, this);
+        } catch (SocketIOProtocolException e) {
+            LOGGER.warn("Invalid packet received", e);
+        }
+
+        return retval;
+    }
+
+    @Override
+    public String onOutboundMessage(WebSocket socket, String message) {
+        String name;
+        Object[] args;
+
+        try {
+            JSONObject jEvent = new JSONObject(message);
+            name = jEvent.getString("name");
+            List<Object> list = jEvent.getJSONArray("args").asList();
+            args = list.toArray(new Object[list.size()]);
+        } catch (JSONException e) {
+            LOGGER.warn("Invalid message to send", e);
+            return message;
+        }
+
+        try {
+            getSession().getConnection().emit(SocketIOProtocol.DEFAULT_NAMESPACE, name, args);
+            return null;
+        } catch (SocketIOException e) {
+            LOGGER.error("Failed to emit message", e);
+        }
+        return message;
+    }
+
+    // ---------------------------------------------- TransportConnection stuff ------------------------------------------------------
+
+    @Override
+    public String getId() {
+        return "socket.io";
+    }
+
+    @Override
+    public void setSession(Session session) {
+        super.setSession(session);
+        sessionId = null == session ? null : session.getSessionId();
+    }
+
+    @Override
+    protected void init() {
+        Session session = getSession();
+        session.setTimeout(getConfig().getTimeout(Config.DEFAULT_PING_TIMEOUT));
+
+        LOGGER.debug("{} WebSocket configuration: timeout={}", getConfig().getNamespace(), session.getTimeout());
     }
 
     @Override
@@ -126,10 +205,10 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
     public void abort() {
         getSession().clearTimeout();
 
-        WebSocket remote_endpoint = this.remote_endpoint;
-        if (remote_endpoint != null) {
-            this.remote_endpoint = null;
-            disconnectEndpoint(remote_endpoint);
+        WebSocket remoteEndpoint = this.remoteEndpoint;
+        if (remoteEndpoint != null) {
+            this.remoteEndpoint = null;
+            disconnectEndpoint(remoteEndpoint);
         }
     }
 
@@ -151,24 +230,24 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
                 } catch (IOException e) {
                     LOGGER.error("Cannot load binary object to send it to the socket", e);
                 }
-                //sendBinary(os.toByteArray());
+                // TODO: sendBinary(os.toByteArray());
             }
         }
     }
 
     protected void sendString(String data) throws SocketIOException {
-        WebSocket remote_endpoint = this.remote_endpoint;
-        if (null == remote_endpoint) {
+        WebSocket remoteEndpoint = this.remoteEndpoint;
+        if (null == remoteEndpoint) {
             throw new SocketIOClosedException();
         }
 
         LOGGER.debug("Session[{}]: send text: {}", getSession().getSessionId(), data);
 
         try {
-            remote_endpoint.sendMessage(data);
+            remoteEndpoint.sendMessage(data);
         } catch (Exception e) {
-            disconnectEndpoint(remote_endpoint);
-            this.remote_endpoint = null;
+            disconnectEndpoint(remoteEndpoint);
+            this.remoteEndpoint = null;
             throw new SocketIOException(e);
         }
     }

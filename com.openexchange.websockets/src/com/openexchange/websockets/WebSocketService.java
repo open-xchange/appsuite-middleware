@@ -81,7 +81,7 @@ public interface WebSocketService {
      * @param contextId The context identifier
      * @return The handler which will be notified of progress.
      */
-    MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException;
+    SendControl sendMessageAsync(String message, int userId, int contextId) throws OXException;
 
     // -------------------------------------------------------------------------------------------------------------
 
@@ -153,6 +153,6 @@ public interface WebSocketService {
      * @param contextId The context identifier
      * @return The handler which will be notified of progress.
      */
-    MessageHandler sendMessageAsync(String message, String pathFilter, int userId, int contextId) throws OXException;
+    SendControl sendMessageAsync(String message, String pathFilter, int userId, int contextId) throws OXException;
 
 }

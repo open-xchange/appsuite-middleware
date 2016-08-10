@@ -51,7 +51,7 @@ package com.openexchange.websockets.grizzly;
 
 import java.util.concurrent.Future;
 import com.openexchange.exception.OXException;
-import com.openexchange.websockets.MessageHandler;
+import com.openexchange.websockets.SendControl;
 import com.openexchange.websockets.WebSocketExceptionCodes;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.WebSockets;
@@ -85,7 +85,7 @@ public class GrizzlyWebSocketService implements WebSocketService {
     }
 
     @Override
-    public MessageHandler sendMessageAsync(String message, int userId, int contextId) throws OXException {
+    public SendControl sendMessageAsync(String message, int userId, int contextId) throws OXException {
         return sendMessageAsync(message, null, userId, contextId);
     }
 
@@ -102,13 +102,13 @@ public class GrizzlyWebSocketService implements WebSocketService {
     }
 
     @Override
-    public MessageHandler sendMessageAsync(String message, String pathFilter, int userId, int contextId) throws OXException {
+    public SendControl sendMessageAsync(String message, String pathFilter, int userId, int contextId) throws OXException {
         if (false == WebSockets.validatePath(pathFilter)) {
             throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
         }
 
         Future<Void> f = localApp.sendToUserAsync(message, pathFilter, userId, contextId);
         remoteDistributor.sendRemote(message, pathFilter, userId, contextId, true);
-        return new MessageHandlerImpl<Void>(f);
+        return new SendControlImpl<Void>(f);
     }
 }

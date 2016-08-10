@@ -174,17 +174,17 @@ public final class SocketIOProtocol {
     public static SocketIOPacket createEventPacket(int packet_id, String ns, String name, Object[] args) {
         if (hasBinary(args)) {
             return new BinaryEventPacket(packet_id, ns, name, args);
-        } else {
-            return new PlainEventPacket(packet_id, ns, name, args);
         }
+
+        return new PlainEventPacket(packet_id, ns, name, args);
     }
 
     public static SocketIOPacket createACKPacket(int id, String ns, Object[] args) {
         if (hasBinary(args)) {
             return new BinaryACKPacket(id, ns, args);
-        } else {
-            return new PlainACKPacket(id, ns, args);
         }
+
+        return new PlainACKPacket(id, ns, args);
     }
 
     public static SocketIOPacket createDisconnectPacket(String ns) {

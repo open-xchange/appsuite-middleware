@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
@@ -94,9 +93,6 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OneDriveOAuthAccess.class);
 
-    /** The re-check threshold in seconds (45 minutes) */
-    private static final long RECHECK_THRESHOLD = 2700;
-
     private FileStorageAccount fsAccount;
     private Session session;
 
@@ -130,7 +126,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
         // Initialize rest
         accessToken = liveconnectOAuthAccount.getToken();
-        oauthClient = new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"));
+        oauthClient = new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken());
         lastAccessed = System.nanoTime();
     }
 
@@ -224,11 +220,9 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
      */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
-        long now = System.nanoTime();
-        if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+        if (isExpired()) {
             synchronized (this) {
-                now = System.nanoTime();
-                if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+                if (isExpired()) {
                     OAuthAccount newAccount = recreateTokenIfExpired(false, getOAuthAccount(), session);
                     if (newAccount != null) {
                         setOAuthAccount(newAccount);

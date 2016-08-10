@@ -32,6 +32,8 @@ import com.openexchange.socketio.common.DisconnectReason;
 import com.openexchange.socketio.common.SocketIOException;
 
 /**
+ * A socket is the session to namespace association.
+ *
  * @author Alexander Sova (bird@codeminders.com)
  */
 public class Socket implements Outbound, DisconnectListener, EventListener {
@@ -39,21 +41,32 @@ public class Socket implements Outbound, DisconnectListener, EventListener {
     private final Queue<DisconnectListener> disconnectListeners = new ConcurrentLinkedQueue<>();
     private final Map<String, EventListener> eventListeners = new LinkedHashMap<>();
 
-    private final Session session; // Socket is Session + Namespace
+    private final Session session;
     private final Namespace namespace;
 
+    /**
+     * Initializes a new {@link Socket}.
+     *
+     * @param session The Socket.IO session
+     * @param namespace The associated namespace
+     */
     public Socket(Session session, Namespace namespace) {
         super();
         this.session = session;
         this.namespace = namespace;
     }
 
+    /**
+     * Gets the associated namespace.
+     *
+     * @return The namespace
+     */
     public String getNamespace() {
         return namespace.getId();
     }
 
     /**
-     * Set listener for a named event. Only one listener per event is allowed.
+     * Sets listener for a named event. Only one listener per event is allowed.
      *
      * @param eventName event name
      * @param listener event listener
@@ -87,6 +100,11 @@ public class Socket implements Outbound, DisconnectListener, EventListener {
         disconnectListeners.add(listener);
     }
 
+    /**
+     * Gets the Socket.IO session.
+     *
+     * @return The session
+     */
     public Session getSession() {
         return session;
     }

@@ -98,21 +98,21 @@ public class WebSocketListenerAdapter implements org.glassfish.grizzly.websocket
     @Override
     public void onClose(WebSocket socket, DataFrame frame) {
         if (socket instanceof SessionBoundWebSocket) {
-            webSocketListener.onWebSocketClose(new WebSocketImpl((SessionBoundWebSocket) socket));
+            webSocketListener.onWebSocketClose((SessionBoundWebSocket) socket);
         }
     }
 
     @Override
     public void onConnect(WebSocket socket) {
         if (socket instanceof SessionBoundWebSocket) {
-            webSocketListener.onWebSocketConnect(new WebSocketImpl((SessionBoundWebSocket) socket));
+            webSocketListener.onWebSocketConnect((SessionBoundWebSocket) socket);
         }
     }
 
     @Override
     public void onMessage(WebSocket socket, String text) {
         if (socket instanceof SessionBoundWebSocket) {
-            webSocketListener.onMessage(new WebSocketImpl((SessionBoundWebSocket) socket), text);
+            webSocketListener.onMessage((SessionBoundWebSocket) socket, text);
         }
     }
 

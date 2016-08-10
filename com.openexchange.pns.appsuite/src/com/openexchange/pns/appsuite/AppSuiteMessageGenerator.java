@@ -49,8 +49,12 @@
 
 package com.openexchange.pns.appsuite;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
@@ -79,10 +83,10 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
          * Generates the message.
          *
          * @param notification The notification from which to create the message
-         * @return The message
+         * @return The arguments
          * @throws OXException If generating the message fails
          */
-        String generateMessageFor(PushNotification notification) throws OXException;
+        Collection<Object> generateMessageFor(PushNotification notification) throws OXException;
 
     }
 
@@ -100,10 +104,10 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
         generators.put(KnownTopic.MAIL_NEW.getName(), new MessageGenerator() {
 
             @Override
-            public String generateMessageFor(PushNotification notification) throws OXException {
+            public Collection<Object> generateMessageFor(PushNotification notification) throws OXException {
                 Map<String, Object> messageData = notification.getMessageData();
                 // Socket.io compatible text message?
-                return "";
+                return messageData.values();
             }
         });
 
@@ -127,7 +131,11 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
             throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create("Unhandled topic " + topic);
         }
 
-        return new TextMessage(messageGenerator.generateMessageFor(notification));
+        try {
+            return new TextMessage(new JSONObject(2).put("name", topic).put("args", new JSONArray(messageGenerator.generateMessageFor(notification))).toString());
+        } catch (JSONException e) {
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
 }
