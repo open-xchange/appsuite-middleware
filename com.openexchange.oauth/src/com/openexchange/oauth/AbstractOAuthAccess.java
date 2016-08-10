@@ -80,6 +80,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      */
     public AbstractOAuthAccess() {
         super();
+        oauthClientRef = new AtomicReference<OAuthClient<?>>();
     }
 
     /*
