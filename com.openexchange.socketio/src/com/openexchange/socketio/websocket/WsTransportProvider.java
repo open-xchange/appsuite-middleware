@@ -30,19 +30,19 @@ import com.openexchange.socketio.server.transport.AbstractTransportProvider;
  */
 public class WsTransportProvider extends AbstractTransportProvider {
 
-    private final WsTransportConnectionRegistry connectionRegistry;
+    private final WsTransport transport;
 
     /**
      * Initializes a new {@link WsTransportProvider}.
      */
-    public WsTransportProvider(WsTransportConnectionRegistry connectionRegistry) {
+    public WsTransportProvider(WsTransport transport) {
         super();
-        this.connectionRegistry = connectionRegistry;
+        this.transport = transport;
     }
 
     @Override
     protected Transport createWebSocketTransport() {
-        return new WsTransport(connectionRegistry);
+        return transport;
     }
 
 }

@@ -23,6 +23,7 @@
 package com.openexchange.socketio.websocket;
 
 import com.google.common.io.ByteStreams;
+import com.openexchange.java.Strings;
 import com.openexchange.socketio.common.ConnectionState;
 import com.openexchange.socketio.common.DisconnectReason;
 import com.openexchange.socketio.common.SocketIOException;
@@ -61,8 +62,12 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
 
     private final WsTransport wsTransport;
     private volatile WebSocket remoteEndpoint;
-    private volatile String sessionId;
 
+    /**
+     * Initializes a new {@link WsTransportConnection}.
+     *
+     * @param transport
+     */
     public WsTransportConnection(WsTransport transport) {
         super(transport);
         wsTransport = transport;
@@ -134,8 +139,12 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
                     EventPacket eventPacket = (EventPacket) socketIOPacket;
                     String name = eventPacket.getName();
                     Object[] args = eventPacket.getArgs();
+                    String namespace = eventPacket.getNamespace();
+                    if (Strings.isEmpty(namespace)) {
+                        namespace = SocketIOProtocol.DEFAULT_NAMESPACE;
+                    }
                     try {
-                        retval = new JSONObject(2).put("name", name).put("args", new JSONArray(Arrays.asList(args))).toString();
+                        retval = new JSONObject(3).put("name", name).put("args", new JSONArray(Arrays.asList(args))).put("namespace", namespace).toString();
                     } catch (JSONException e) {
                         LOGGER.warn("Invalid event packet received", e);
                     }
@@ -153,6 +162,7 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
 
     @Override
     public String onOutboundMessage(WebSocket socket, String message) {
+        String ns = SocketIOProtocol.DEFAULT_NAMESPACE;
         String name;
         Object[] args;
 
@@ -161,16 +171,17 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
             name = jEvent.getString("name");
             List<Object> list = jEvent.getJSONArray("args").asList();
             args = list.toArray(new Object[list.size()]);
+            ns = jEvent.optString("namespace", SocketIOProtocol.DEFAULT_NAMESPACE);
         } catch (JSONException e) {
-            LOGGER.warn("Invalid message to send", e);
+            LOGGER.warn("Invalid message to send: {}", message, e);
             return message;
         }
 
         try {
-            getSession().getConnection().emit(SocketIOProtocol.DEFAULT_NAMESPACE, name, args);
+            getSession().getConnection().emit(ns, name, args);
             return null;
         } catch (SocketIOException e) {
-            LOGGER.error("Failed to emit message", e);
+            LOGGER.error("Failed to emit message: {}", message, e);
         }
         return message;
     }
@@ -185,7 +196,7 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
     @Override
     public void setSession(Session session) {
         super.setSession(session);
-        sessionId = null == session ? null : session.getSessionId();
+        wsTransport.register(this);
     }
 
     @Override
@@ -244,7 +255,7 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
         LOGGER.debug("Session[{}]: send text: {}", getSession().getSessionId(), data);
 
         try {
-            remoteEndpoint.sendMessage(data);
+            remoteEndpoint.sendMessageRaw(data);
         } catch (Exception e) {
             disconnectEndpoint(remoteEndpoint);
             this.remoteEndpoint = null;

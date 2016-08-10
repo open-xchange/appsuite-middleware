@@ -25,8 +25,6 @@ package com.openexchange.socketio.server.transport;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.socketio.protocol.EngineIOProtocol;
 import com.openexchange.socketio.server.Config;
 import com.openexchange.socketio.server.ServletBasedConfig;
 import com.openexchange.socketio.server.Session;
@@ -63,18 +61,16 @@ public abstract class AbstractTransport implements Transport {
         return config;
     }
 
-    protected final TransportConnection createConnection(Session session) {
+    protected TransportConnection createConnection(Session session) {
         TransportConnection connection = createConnection();
         connection.setSession(session);
         connection.init(getConfig());
         return connection;
     }
 
-    protected TransportConnection getConnection(HttpServletRequest request, SocketIOManager sessionManager) {
-        String sessionId = request.getParameter(EngineIOProtocol.SESSION_ID);
+    protected TransportConnection getConnection(String sessionId, SocketIOManager sessionManager) {
         Session session = null;
-
-        if(sessionId != null && sessionId.length() > 0) {
+        if (sessionId != null && sessionId.length() > 0) {
             session = sessionManager.getSession(sessionId);
         }
 

@@ -176,10 +176,27 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         if (null != userSockets) {
             for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
                 if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
-                    sessionBoundSocket.send(message);
+                    try {
+                        sessionBoundSocket.sendMessage(message);
+                    } catch (OXException e) {
+                        LOG.error("Failed to send message to Web Socket: {}", sessionBoundSocket, e);
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Checks if the Web Socket associated with specified connection identifier exists.
+     *
+     * @param connectionId The connection identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if such a Web Socket exists; otherwise <code>false</code>
+     */
+    public boolean exists(ConnectionId connectionId, int userId, int contextId) {
+        ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
+        return null == userSockets ? false : userSockets.containsKey(connectionId);
     }
 
     /**
@@ -261,13 +278,22 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             }
 
             // Look-up optional connection identifier; generate a new, unique one if absent
-            String conId = parameters.getParameter("connection");
-            if (conId == null) {
-                conId = com.openexchange.java.util.UUIDs.getUnformattedStringFromRandom();
+            ConnectionId connectionId;
+            {
+                String sConId = parameters.getParameter("connection");
+                if (sConId == null) {
+                    sConId = com.openexchange.java.util.UUIDs.getUnformattedStringFromRandom();
+                }
+                connectionId = ConnectionId.newInstance(sConId);
             }
 
             // Get and verify session
             Session session = checkSession(sessionId, requestPacket, parameters);
+
+            // Check if such a Web Socket already exists
+            if (exists(connectionId, session.getUserId(), session.getContextId())) {
+                throw new HandshakeException("Such a Web Socket connection already exists: " + connectionId);
+            }
 
             // Apply initial listeners
             WebSocketListener[] effectiveListeners;
@@ -286,7 +312,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
             // Create & return new session-bound Web Socket
             String path = requestPacket.getRequestURI();
-            return new SessionBoundWebSocket(SessionInfo.newInstance(session), ConnectionId.newInstance(conId), path, parameters, handler, requestPacket, effectiveListeners);
+            return new SessionBoundWebSocket(SessionInfo.newInstance(session), connectionId, path, parameters, handler, requestPacket, effectiveListeners);
         } catch (HandshakeException e) {
             // Handle Handshake error
             handleHandshakeException(e, handler, requestPacket);

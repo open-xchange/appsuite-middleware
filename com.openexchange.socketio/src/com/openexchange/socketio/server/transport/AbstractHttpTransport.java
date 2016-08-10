@@ -47,7 +47,7 @@ public abstract class AbstractHttpTransport extends AbstractTransport {
     public void handle(HttpServletRequest request, HttpServletResponse response, SocketIOManager socketIOManager) throws IOException {
         LOGGER.debug("Handling {} request by {}", request.getMethod(), getClass().getName());
 
-        TransportConnection connection = getConnection(request, socketIOManager);
+        TransportConnection connection = getConnection(request.getParameter(EngineIOProtocol.SESSION_ID), socketIOManager);
         Session session = connection.getSession();
 
         if (session.getConnectionState() == ConnectionState.CONNECTING) {
@@ -59,6 +59,7 @@ public abstract class AbstractHttpTransport extends AbstractTransport {
 
             connection.send(EngineIOProtocol.createHandshakePacket(session.getSessionId(), upgrades.toArray(new String[upgrades.size()]), getConfig().getPingInterval(Config.DEFAULT_PING_INTERVAL), getConfig().getTimeout(Config.DEFAULT_PING_TIMEOUT)));
 
+            // response.addCookie(new Cookie("io", session.getSessionId()));
             connection.handle(request, response); // called to send the handshake packet
             session.onConnect(connection);
         } else if (session.getConnectionState() == ConnectionState.CONNECTED) {

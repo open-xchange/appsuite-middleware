@@ -91,4 +91,21 @@ public class MapBackedHit implements Hit {
         return matches;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(64);
+        builder.append("{");
+        if (client != null) {
+            builder.append("client=").append(client).append(", ");
+        }
+        if (transportId != null) {
+            builder.append("transportId=").append(transportId).append(", ");
+        }
+        if (matches != null) {
+            builder.append("matches=").append(matches);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
 }

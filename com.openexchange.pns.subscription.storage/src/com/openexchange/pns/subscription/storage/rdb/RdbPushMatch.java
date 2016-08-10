@@ -130,4 +130,27 @@ public class RdbPushMatch implements PushMatch {
         return topic;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(128);
+        builder.append("{contextId=").append(contextId).append(", userId=").append(userId).append(", ");
+        if (client != null) {
+            builder.append("client=").append(client).append(", ");
+        }
+        if (transportId != null) {
+            builder.append("transportId=").append(transportId).append(", ");
+        }
+        if (token != null) {
+            builder.append("token=").append(token).append(", ");
+        }
+        if (topic != null) {
+            builder.append("topic=").append(topic).append(", ");
+        }
+        if (lastModified != null) {
+            builder.append("lastModified=").append(lastModified);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
 }

@@ -111,4 +111,19 @@ public final class ClientAndTransport {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32);
+        builder.append("{");
+        if (client != null) {
+            builder.append("client=").append(client).append(", ");
+        }
+        if (transportId != null) {
+            builder.append("transportId=").append(transportId);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
 }

@@ -101,6 +101,11 @@ public class MapBackedHits implements Hits {
         return map.isEmpty();
     }
 
+    @Override
+    public String toString() {
+        return map.toString();
+    }
+
     // --------------------------------------------------------------------------------------------
 
     private static final class MapBackedHitsIterator implements Iterator<Hit> {

@@ -38,21 +38,22 @@ public class WsSocketIOServlet extends SocketIOServlet {
 
     private static final long serialVersionUID = 4367242338228401621L;
 
-    private final WsTransportConnectionRegistry connectionRegistry;
+    private final WsTransport transport;
 
     /**
      * Initializes a new {@link WsSocketIOServlet}.
      */
-    public WsSocketIOServlet(WsTransportConnectionRegistry connectionRegistry, TimerService timerService) {
+    public WsSocketIOServlet(WsTransport transport, TimerService timerService) {
         super(timerService);
-        this.connectionRegistry = connectionRegistry;
+        this.transport = transport;
     }
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
-        TransportProvider transportProvider = new WsTransportProvider(connectionRegistry);
+        transport.getConnectionRegistry().setSocketIOManager(getSocketIOManager());
+        TransportProvider transportProvider = new WsTransportProvider(transport);
         transportProvider.init(config, getServletContext());
         setTransportProvider(transportProvider);
     }

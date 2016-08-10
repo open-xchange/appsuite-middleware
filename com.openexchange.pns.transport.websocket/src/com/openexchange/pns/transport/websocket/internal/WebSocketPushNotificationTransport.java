@@ -80,6 +80,7 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.pns.PushSubscription.Nature;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
+import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketListener;
 import com.openexchange.websockets.WebSocketService;
@@ -196,7 +197,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     @Override
     public void onMessage(WebSocket socket, String text) {
-        // No use for client-initiated push message...
+        // No use for client-initiated push message here...
         LOG.debug("Received message: {}", text);
     }
 
@@ -239,7 +240,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 try {
                     subscriptionRegistry.registerSubscription(subscription);
                 } catch (OXException e) {
-                    LOG.error("Failed to add push subscription for Web Socket on path {} for client {} from user {} in context {}", socket.getPath(), client, socket.getUserId(), socket.getContextId(), e);
+                    LOG.error("Failed to add push subscription for Web Socket {} for client {} from user {} in context {}", socket.getConnectionId(), client, socket.getUserId(), socket.getContextId(), e);
                 }
             }
         }
@@ -286,7 +287,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 .userId(socket.getUserId())
                 .build();
             scheduledUnsubscriptions.offerOrReplaceAndReset(new Unsubscription(subscription));
-            LOG.info("Scheduled unsubscribing Web Socket push subscription for client {} from user {} in context", client, socket.getUserId(), socket.getContextId());
+            LOG.info("Scheduled unsubscribing Web Socket {} subscription for client {} from user {} in context", socket.getConnectionId(), client, socket.getUserId(), socket.getContextId());
         }
     }
 
@@ -303,9 +304,9 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
             for (Unsubscription unsubscription; (unsubscription = scheduledUnsubscriptions.poll()) != null;) {
                 try {
                     subscriptionRegistry.unregisterSubscription(unsubscription.getSubscription());
-                    LOG.info("Unsubscribed Web Socket push for client {} from user {} in context", unsubscription.getClient(), unsubscription.getUserId(), unsubscription.getContextId());
+                    LOG.info("Unsubscribed Web Socket {} for client {} from user {} in context", unsubscription.getSubscription().getToken(), unsubscription.getClient(), unsubscription.getUserId(), unsubscription.getContextId());
                 } catch (OXException e) {
-                    LOG.info("Failed to unsubscribe Web Socket push for client {} from user {} in context", unsubscription.getClient(), unsubscription.getUserId(), unsubscription.getContextId(), e);
+                    LOG.error("Failed to unsubscribe Web Socket {} for client {} from user {} in context", unsubscription.getSubscription().getToken(), unsubscription.getClient(), unsubscription.getUserId(), unsubscription.getContextId(), e);
                 }
             }
 
@@ -404,16 +405,44 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
         // Only one match is needed as there is no difference per match
         for (PushMatch match : matches) {
-            UserAndContext uac = UserAndContext.newInstance(match.getUserId(), match.getContextId());
-            List<PushMatch> matchList = byUser.get(uac);
-            if (null == matchList) {
-                matchList = new LinkedList<>();
-                byUser.put(uac, matchList);
+            // TODO: Re-think how to cleanse orphaned subscriptions...
+            if (false && notExists(match)) {
+                try {
+                    DefaultPushSubscription subscription = DefaultPushSubscription.builder()
+                        .client(match.getClient())
+                        .contextId(match.getContextId())
+                        .nature(Nature.PERSISTENT)
+                        .token(match.getToken())
+                        .topics(Collections.singletonList("*"))
+                        .transportId(ID)
+                        .userId(match.getUserId())
+                        .build();
+
+                    subscriptionRegistry.unregisterSubscription(subscription);
+                } catch (Exception e) {
+                    LOG.error("Failed to unsubscribe Web Socket {} for client {} from user {} in context", match.getToken(), match.getClient(), match.getUserId(), match.getContextId(), e);
+                }
+            } else {
+                UserAndContext uac = UserAndContext.newInstance(match.getUserId(), match.getContextId());
+                List<PushMatch> matchList = byUser.get(uac);
+                if (null == matchList) {
+                    matchList = new LinkedList<>();
+                    byUser.put(uac, matchList);
+                }
+                matchList.add(match);
             }
-            matchList.add(match);
         }
 
         return byUser;
+    }
+
+    private boolean notExists(PushMatch match) {
+        try {
+            return !webSocketService.exists(ConnectionId.newInstance(match.getToken()), match.getUserId(), match.getContextId());
+        } catch (Exception e) {
+            LOG.error("Failed to check existence for Web Socket {} for client {} from user {} in context {}. Assuming as existent...", match.getToken(), match.getClient(), match.getUserId(), match.getContextId(), e);
+            return false;
+        }
     }
 
 }

@@ -62,11 +62,11 @@ import com.google.common.collect.ImmutableMap;
 public enum KnownTopic {
 
     /**
-     * com/openexchange/mail/new
+     * <code>ox:mail:new</code>
      * <p>
      * The topic for a newly arrived mail.
      */
-    MAIL_NEW("com/openexchange/mail/new"),
+    MAIL_NEW("ox:mail:new"),
 
     ;
 
