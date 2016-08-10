@@ -60,6 +60,8 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -101,6 +103,12 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
         registerService(EventHandler.class, new XingEventHandler(), serviceProperties);
+        
+        /*
+         * Register the access registry
+         */
+        OAuthAccessRegistryService oAuthAccessRegistryService = Services.getService(OAuthAccessRegistryService.class);
+        oAuthAccessRegistryService.add(API.XING.getFullName(), new OAuthAccessRegistry(API.XING.getFullName()));
 
         // Registerer
         track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
