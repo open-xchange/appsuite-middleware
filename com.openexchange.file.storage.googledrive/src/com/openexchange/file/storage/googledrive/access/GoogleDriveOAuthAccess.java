@@ -192,6 +192,21 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
+     */
+    @Override
+    public OAuthClient<?> getClient() throws OXException {
+        OAuthClient<Drive> oAuthClient = oauthClientRef.get();
+        if (oAuthClient == null) {
+            initialise();
+            oAuthClient = oauthClientRef.get();
+        }
+        return oAuthClient;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
      */
     @Override

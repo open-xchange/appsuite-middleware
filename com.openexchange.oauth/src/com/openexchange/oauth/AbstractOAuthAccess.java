@@ -77,12 +77,9 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
 
     /**
      * Initialises a new {@link AbstractOAuthAccess}.
-     * 
-     * @throws OXException if the {@link OAuthAccess} cannot be initialised
      */
-    public AbstractOAuthAccess() throws OXException {
+    public AbstractOAuthAccess() {
         super();
-        initialise();
     }
 
     /*
@@ -112,9 +109,6 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      */
     @Override
     public OAuthClient<?> getClient() throws OXException {
-        if (oauthClientRef.get() == null) {
-            initialise();
-        }
         return oauthClientRef.get();
     }
 

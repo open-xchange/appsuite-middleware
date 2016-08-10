@@ -78,6 +78,7 @@ import com.openexchange.session.Session;
  */
 public class DropboxOAuthAccess extends AbstractOAuthAccess {
 
+    private OAuthClient<DropboxAPI<WebAuthSession>> oauthClient;
     private FileStorageAccount fsAccount;
     private Session session;
 
@@ -90,6 +91,7 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
         super();
         this.fsAccount = fsAccount;
         this.session = session;
+        initialise();
     }
 
     /*
@@ -97,12 +99,10 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
      * 
      * @see com.openexchange.oauth.access.OAuthAccess#ping()
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean ping() throws OXException {
         try {
-            DropboxAPI<WebAuthSession> client = (DropboxAPI<WebAuthSession>) getClient().client;
-            client.accountInfo();
+            oauthClient.client.accountInfo();
             return true;
         } catch (DropboxException e) {
             if (DropboxServerException.class.isInstance(e)) {
@@ -114,6 +114,19 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
             }
             throw Utils.handle(e, null);
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getClient(java.lang.Class)
+     */
+    @Override
+    public OAuthClient<?> getClient() throws OXException {
+        if (oauthClient == null) {
+            initialise();
+        }
+        return oauthClient;
     }
 
     /*
@@ -140,8 +153,8 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
             // Re-auth specific stuff
             final AccessTokenPair reAuthTokens = new AccessTokenPair(dropboxOAuthAccount.getToken(), dropboxOAuthAccount.getSecret());
             dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
-
-            setOAuthClient(new OAuthClient<DropboxAPI<WebAuthSession>>(dropboxApi, dropboxOAuthAccount.getToken()));
+            
+            oauthClient = new OAuthClient<DropboxAPI<WebAuthSession>>(dropboxApi, dropboxOAuthAccount.getToken());
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
