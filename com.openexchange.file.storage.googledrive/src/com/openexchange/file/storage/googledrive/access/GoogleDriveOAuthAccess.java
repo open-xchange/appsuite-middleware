@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.googledrive.access;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -82,9 +81,6 @@ import com.openexchange.session.Session;
 public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleDriveOAuthAccess.class);
-
-    /** The re-check threshold in seconds (45 minutes) */
-    private static final long RECHECK_THRESHOLD = 2700;
 
     /** The Google Drive API client. */
     private final AtomicReference<OAuthClient<Drive>> oauthClientRef;
@@ -233,11 +229,9 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             return this;
         }
 
-        long now = System.nanoTime();
-        if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+        if (isExpired()) {
             synchronized (this) {
-                now = System.nanoTime();
-                if (TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD) {
+                if (isExpired()) {
                     OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(getOAuthAccount(), session);
                     if (newAccount != null) {
                         setOAuthAccount(newAccount);
