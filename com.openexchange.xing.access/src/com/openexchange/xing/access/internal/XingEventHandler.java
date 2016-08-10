@@ -51,9 +51,6 @@ package com.openexchange.xing.access.internal;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
@@ -84,9 +81,7 @@ public final class XingEventHandler implements EventHandler {
                 if (null != contextId) {
                     Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                     if (null != userId) {
-                        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(API.XING.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
+                        if (XingOAuthAccessRegistry.getInstance().removeAccessWhenNoActiveSession(userId, contextId)) {
                             LOG.debug("XING session removed for user {} in context {}", userId, contextId);
                         }
                     }
