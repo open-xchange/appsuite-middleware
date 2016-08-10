@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -66,6 +67,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -702,6 +704,30 @@ public class CalendarUtils {
             }
         });
         return events;
+    }
+
+    /**
+     * Filters a list of attendees based on their calendaruser type, and whether they represent "internal" attendees or not.
+     *
+     * @param attendees The attendees to filter
+     * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
+     *            or <code>null</code> to not filter by internal/external
+     * @param cuType The {@link CalendarUserType} to consider, or <code>null</code> to not filter by calender user type
+     * @return The filtered attendees
+     */
+    static List<Attendee> filter(List<Attendee> attendees, Boolean internal, CalendarUserType cuType) {
+        if (null == attendees) {
+            return null;
+        }
+        List<Attendee> filteredAttendees = new ArrayList<Attendee>(attendees.size());
+        for (Attendee attendee : attendees) {
+            if (null == cuType || cuType.equals(attendee.getCuType())) {
+                if (null == internal || internal.equals(Boolean.valueOf(0 < attendee.getEntity()))) {
+                    filteredAttendees.add(attendee);
+                }
+            }
+        }
+        return filteredAttendees;
     }
 
 }

@@ -47,34 +47,74 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.storage;
 
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.provider.DBProvider;
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.SortOptions;
 import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.search.SearchTerm;
 
 /**
- * {@link CalendarStorage}
+ * {@link EventStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorageFactory implements CalendarStorageFactory {
+public interface EventStorage {
 
-    @Override
-    public CalendarStorage create(Context context) throws OXException {
-        return create(context, new DatabaseServiceDBProvider(Services.getService(DatabaseService.class)), DBTransactionPolicy.NORMAL_TRANSACTIONS);
-    }
+    /**
+     * Loads a specific event.
+     *
+     * @param objectID The object identifier of the event to load
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The event
+     */
+    Event loadEvent(int objectID, EventField[] fields) throws OXException;
 
-    @Override
-    public CalendarStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
-        return new RdbCalendarStorage(context, dbProvider, txPolicy);
-    }
+    /**
+     * Searches for events.
+     *
+     * @param searchTerm The search term to use
+     * @param sortOptions The sort options to apply, or <code>null</code> if not specified
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The found events
+     */
+    List<Event> searchEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException;
+
+    /**
+     * Searches for previously deleted events.
+     *
+     * @param searchTerm The search term to use
+     * @param sortOptions The sort options to apply, or <code>null</code> if not specified
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The found events
+     */
+    List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException;
+
+    /**
+     * Generates the next object unique identifier for inserting new event data.
+     * <p/>
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
+     *
+     * @return The next object identifier
+     */
+    int nextObjectID() throws OXException;
+
+    /**
+     * Inserts a new event into the database.
+     *
+     * @param event The event to insert
+     */
+    void insertEvent(Event event) throws OXException;
+
+    void updateEvent(Event event) throws OXException;
+
+    void deleteEvent(int objectID) throws OXException;
+
+    void insertTombstoneEvent(Event event) throws OXException;
 
 }

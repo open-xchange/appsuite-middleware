@@ -75,13 +75,25 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public boolean[] hasEventsBetween(CalendarSession session, Date from, Date until) throws OXException {
-        return new CalendarReader(session).hasEventsBetween(session.getUser().getId(), from, until);
+    public boolean[] hasEventsBetween(final CalendarSession session, final Date from, final Date until) throws OXException {
+        return new ReadOperation<boolean[]>(session) {
+
+            @Override
+            protected boolean[] execute(CalendarReader reader) throws OXException {
+                return reader.hasEventsBetween(session.getUser().getId(), from, until);
+            }
+        }.execute();
     }
 
     @Override
-    public List<UserizedEvent> getChangeExceptions(CalendarSession session, int folderID, int objectID) throws OXException {
-        return new CalendarReader(session).getChangeExceptions(folderID, objectID);
+    public List<UserizedEvent> getChangeExceptions(CalendarSession session, final int folderID, final int objectID) throws OXException {
+        return new ReadOperation<List<UserizedEvent>>(session) {
+
+            @Override
+            protected List<UserizedEvent> execute(CalendarReader reader) throws OXException {
+                return reader.getChangeExceptions(folderID, objectID);
+            }
+        }.execute();
     }
 
     @Override
@@ -95,53 +107,101 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<UserizedEvent> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException {
-        return new CalendarReader(session).searchEvents(folderIDs, pattern);
+    public List<UserizedEvent> searchEvents(CalendarSession session, final int[] folderIDs, final String pattern) throws OXException {
+        return new ReadOperation<List<UserizedEvent>>(session) {
+
+            @Override
+            protected List<UserizedEvent> execute(CalendarReader reader) throws OXException {
+                return reader.searchEvents(folderIDs, pattern);
+            }
+        }.execute();
     }
 
     @Override
-    public UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException {
+    public UserizedEvent getEvent(CalendarSession session, final int folderID, final int objectID) throws OXException {
         return new CalendarReader(session).readEvent(folderID, objectID);
     }
 
     @Override
-    public List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException {
-        return new CalendarReader(session).readEvents(eventIDs);
+    public List<UserizedEvent> getEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
+        return new ReadOperation<List<UserizedEvent>>(session) {
+
+            @Override
+            protected List<UserizedEvent> execute(CalendarReader reader) throws OXException {
+                return reader.readEvents(eventIDs);
+            }
+        }.execute();
     }
 
     @Override
-    public List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException {
-        return new CalendarReader(session).readEventsInFolder(folderID, updatedSince);
+    public List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, final int folderID, final Date updatedSince) throws OXException {
+        return new ReadOperation<List<UserizedEvent>>(session) {
+
+            @Override
+            protected List<UserizedEvent> execute(CalendarReader reader) throws OXException {
+                return reader.readEventsInFolder(folderID, updatedSince);
+            }
+        }.execute();
     }
 
     @Override
-    public List<UserizedEvent> getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException {
-        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), updatedSince);
+    public List<UserizedEvent> getUpdatedEventsOfUser(final CalendarSession session, final Date updatedSince) throws OXException {
+        return new ReadOperation<List<UserizedEvent>>(session) {
+
+            @Override
+            protected List<UserizedEvent> execute(CalendarReader reader) throws OXException {
+                return reader.readEventsOfUser(session.getUser().getId(), updatedSince);
+            }
+        }.execute();
     }
 
     @Override
-    public List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, int folderID, Date deletedSince) throws OXException {
-        return new CalendarReader(session).readDeletedEventsInFolder(folderID, deletedSince);
+    public List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, final int folderID, final Date deletedSince) throws OXException {
+        return new ReadOperation<List<UserizedEvent>>(session) {
+
+            @Override
+            protected List<UserizedEvent> execute(CalendarReader reader) throws OXException {
+                return reader.readDeletedEventsInFolder(folderID, deletedSince);
+            }
+        }.execute();
     }
 
     @Override
-    public List<UserizedEvent> getDeletedEventsOfUser(CalendarSession session, Date deletedSince) throws OXException {
-        return new CalendarReader(session).readDeletedEventsOfUser(session.getUser().getId(), deletedSince);
+    public List<UserizedEvent> getDeletedEventsOfUser(final CalendarSession session, final Date deletedSince) throws OXException {
+        return new ReadOperation<List<UserizedEvent>>(session) {
+
+            @Override
+            protected List<UserizedEvent> execute(CalendarReader reader) throws OXException {
+                return reader.readDeletedEventsOfUser(session.getUser().getId(), deletedSince);
+            }
+        }.execute();
     }
 
     @Override
-    public List<UserizedEvent> getEventsInFolder(CalendarSession session, int folderID) throws OXException {
-        return new CalendarReader(session).readEventsInFolder(folderID, null);
+    public List<UserizedEvent> getEventsInFolder(CalendarSession session, final int folderID) throws OXException {
+        return new ReadOperation<List<UserizedEvent>>(session) {
+
+            @Override
+            protected List<UserizedEvent> execute(CalendarReader reader) throws OXException {
+                return reader.readEventsInFolder(folderID, null);
+            }
+        }.execute();
     }
 
     @Override
-    public List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException {
-        return new CalendarReader(session).readEventsOfUser(session.getUser().getId(), null);
+    public List<UserizedEvent> getEventsOfUser(final CalendarSession session) throws OXException {
+        return new ReadOperation<List<UserizedEvent>>(session) {
+
+            @Override
+            protected List<UserizedEvent> execute(CalendarReader reader) throws OXException {
+                return reader.readEventsOfUser(session.getUser().getId(), null);
+            }
+        }.execute();
     }
 
     @Override
     public UserizedEvent createEvent(CalendarSession session, final UserizedEvent event) throws OXException {
-        return new StorageOperation<UserizedEvent>(session) {
+        return new WriteOperation<UserizedEvent>(session) {
 
             @Override
             protected UserizedEvent execute(CalendarWriter writer) throws OXException {
@@ -154,7 +214,7 @@ public class CalendarServiceImpl implements CalendarService {
     public UserizedEvent updateEvent(CalendarSession session, final int folderID, final UserizedEvent event) throws OXException {
         Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-        return new StorageOperation<UserizedEvent>(session) {
+        return new WriteOperation<UserizedEvent>(session) {
 
             @Override
             protected UserizedEvent execute(CalendarWriter writer) throws OXException {
@@ -165,7 +225,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public UserizedEvent updateAttendee(CalendarSession session, final int folderID, final int objectID, final Attendee attendee) throws OXException {
-        return new StorageOperation<UserizedEvent>(session) {
+        return new WriteOperation<UserizedEvent>(session) {
 
             @Override
             protected UserizedEvent execute(CalendarWriter writer) throws OXException {
@@ -178,7 +238,7 @@ public class CalendarServiceImpl implements CalendarService {
     public void deleteEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
         Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-        new StorageOperation<Void>(session) {
+        new WriteOperation<Void>(session) {
 
             @Override
             protected Void execute(CalendarWriter writer) throws OXException {

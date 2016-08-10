@@ -55,6 +55,7 @@ import static com.openexchange.chronos.impl.CalendarUtils.find;
 import static com.openexchange.chronos.impl.CalendarUtils.getFields;
 import static com.openexchange.chronos.impl.CalendarUtils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getFrom;
+import static com.openexchange.chronos.impl.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.impl.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getTimeZone;
 import static com.openexchange.chronos.impl.CalendarUtils.getUntil;
@@ -70,6 +71,7 @@ import static com.openexchange.chronos.impl.Check.requireFolderPermission;
 import static com.openexchange.chronos.impl.Check.requireReadPermission;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -83,12 +85,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
-import com.openexchange.chronos.CalendarStorage;
-import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
@@ -98,6 +99,8 @@ import com.openexchange.chronos.SortOptions;
 import com.openexchange.chronos.SortOrder;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -163,15 +166,34 @@ public class CalendarReader {
         SearchTerm<?> searchTerm = getFolderIdTerm(folder);
         SortOptions sortOptions = new SortOptions().addOrder(SortOrder.DESC(EventField.LAST_MODIFIED)).setLimits(0, 1);
         EventField[] fields = { EventField.LAST_MODIFIED };
-        List<Event> events = storage.searchEvents(searchTerm, sortOptions, fields);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, sortOptions, fields);
         if (0 < events.size() && events.get(0).getLastModified().after(lastModified)) {
             lastModified = events.get(0).getLastModified();
         }
-        List<Event> deletedEvents = storage.searchDeletedEvents(searchTerm, sortOptions, fields);
+        List<Event> deletedEvents = storage.getEventStorage().searchDeletedEvents(searchTerm, sortOptions, fields);
         if (0 < deletedEvents.size() && deletedEvents.get(0).getLastModified().after(lastModified)) {
             lastModified = deletedEvents.get(0).getLastModified();
         }
         return lastModified.getTime();
+    }
+
+    private List<Event> readAdditionalEventData(List<Event> events, EventField[] fields) throws OXException {
+        if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS))) {
+            int[] objectIDs = getObjectIDs(events);
+            if (null == fields || contains(fields, EventField.ATTENDEES)) {
+                Map<Integer, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(getObjectIDs(events));
+                for (Event event : events) {
+                    event.setAttendees(attendeesById.get(I(event.getId())));
+                }
+            }
+            if (null == fields || contains(fields, EventField.ATTACHMENTS)) {
+                Map<Integer, List<Attachment>> attachmentsById = storage.getAttachmentStorage().loadAttachments(objectIDs);
+                for (Event event : events) {
+                    event.setAttachments(attachmentsById.get(I(event.getId())));
+                }
+            }
+        }
+        return events;
     }
 
     public boolean[] hasEventsBetween(int userID, Date from, Date until) throws OXException {
@@ -189,11 +211,13 @@ public class CalendarReader {
          * search events
          */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_THAN, rangeStart)).addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, rangeEnd))
+            .addSearchTerm(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_THAN, rangeStart))
+            .addSearchTerm(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, rangeEnd))
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(userID)))
             //TODO .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.NOT_EQUALS, ParticipationStatus.DECLINED))
         ;
-        List<Event> events = storage.searchEvents(searchTerm, null, null);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, null);
+        readAdditionalEventData(events, new EventField[] { EventField.ATTENDEES });
         /*
          * step through events day-wise & check for present events
          */
@@ -245,7 +269,7 @@ public class CalendarReader {
         /*
          * search for an event matching the UID
          */
-        List<Event> events = storage.searchEvents(searchTerm, null, new EventField[] { EventField.ID });
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
         return 0 < events.size() ? events.get(0).getId() : 0;
     }
 
@@ -312,7 +336,9 @@ public class CalendarReader {
                 .addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, wildcardPattern))
             )
         ;
-        List<Event> events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session));
+        EventField[] fields = getFields(session);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
+        readAdditionalEventData(events, fields);
         return userize(events, folder);
     }
 
@@ -359,10 +385,11 @@ public class CalendarReader {
         requireCalendarContentType(folder);
         requireFolderPermission(folder, Permission.READ_FOLDER);
         requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
-        Event event = storage.loadEvent(objectID, getFields(session));
+        Event event = storage.getEventStorage().loadEvent(objectID, getFields(session));
         if (null == event) {
             throw OXException.notFound(String.valueOf(objectID));//TODO
         }
+        readAdditionalEventData(Collections.singletonList(event), getFields(session));
         Check.eventIsInFolder(event, folder);
         if (session.getUser().getId() != event.getCreatedBy()) {
             requireReadPermission(folder, Permission.READ_ALL_OBJECTS);
@@ -385,7 +412,8 @@ public class CalendarReader {
         /*
          * perform search & userize the results
          */
-        List<Event> events = storage.searchEvents(searchTerm, null, getFields(session));
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, getFields(session));
+        readAdditionalEventData(events, getFields(session));
         return userize(events, folder);
     }
 
@@ -416,10 +444,11 @@ public class CalendarReader {
          */
         List<Event> events;
         if (deleted) {
-            events = storage.searchDeletedEvents(searchTerm, new SortOptions(session), getFields(session));
+            events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), getFields(session));
         } else {
-            events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session));
+            events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
         }
+        readAdditionalEventData(events, getFields(session));
         return userize(events, folder);
     }
 
@@ -433,12 +462,14 @@ public class CalendarReader {
         /*
          * perform search & userize the results for the current session's user
          */
+        EventField[] fields = getFields(session, EventField.ATTENDEES);
         List<Event> events;
         if (deleted) {
-            events = storage.searchDeletedEvents(searchTerm, new SortOptions(session), getFields(session, EventField.ATTENDEES));
+            events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SortOptions(session), fields);
         } else {
-            events = storage.searchEvents(searchTerm, new SortOptions(session), getFields(session, EventField.ATTENDEES));
+            events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
         }
+        readAdditionalEventData(events, fields);
         return userize(events, session.getUser().getId());
     }
 
@@ -475,7 +506,7 @@ public class CalendarReader {
                 objectIDs.add(I(event.getId()));
             }
         }
-        return 0 < objectIDs.size() ? storage.loadAlarms(I2i(objectIDs), userID) : Collections.<Integer, List<Alarm>> emptyMap();
+        return 0 < objectIDs.size() ? storage.getAlarmStorage().loadAlarms(I2i(objectIDs), userID) : Collections.<Integer, List<Alarm>> emptyMap();
     }
 
     private List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder) throws OXException {

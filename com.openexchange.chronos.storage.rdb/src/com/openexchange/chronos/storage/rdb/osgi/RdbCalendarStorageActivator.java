@@ -51,7 +51,7 @@ package com.openexchange.chronos.storage.rdb.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.CalendarStorageFactory;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.tables.AlarmTableUpdateTask;
 import com.openexchange.chronos.storage.rdb.tables.CreateAlarmTable;

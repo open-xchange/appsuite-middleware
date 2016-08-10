@@ -47,65 +47,35 @@
  *
  */
 
-package com.openexchange.chronos.impl.osgi;
+package com.openexchange.chronos.storage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.CalendarService;
-import com.openexchange.chronos.RecurrenceService;
-import com.openexchange.chronos.impl.CalendarServiceImpl;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.group.GroupService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
+import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ChronosActivator}
+ * {@link CalendarStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ChronosActivator extends HousekeepingActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ChronosActivator.class);
+public interface CalendarStorage {
 
     /**
-     * Initializes a new {@link ChronosActivator}.
+     * Generates the next object unique identifier for inserting new event data.
+     * <p/>
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
+     *
+     * @return The next object identifier
      */
-    public ChronosActivator() {
-        super();
-    }
+    int nextObjectID() throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CalendarStorageFactory.class, FolderService.class, UserService.class,
-            GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class };
-    }
+    EventStorage getEventStorage();
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: \"com.openexchange.chronos.impl\"");
-            Services.setServiceLookup(this);
-            /*
-             * register services
-             */
-            registerService(CalendarService.class, new CalendarServiceImpl());
-        } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.chronos.impl\"", e);
-            throw e;
-        }
-    }
+    AlarmStorage getAlarmStorage();
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.chronos.impl\"");
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
+    AttachmentStorage getAttachmentStorage();
+
+    AttendeeStorage getAttendeeStorage();
 
 }

@@ -49,84 +49,85 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.arrays.Collections.put;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.chronos.storage.AlarmStorage;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.storage.AttachmentStorage;
-import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.impl.IDGenerator;
 
 /**
  * {@link CalendarStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
-
-    private final RdbEventStorage eventStorage;
-    private final RdbAttendeeStorage attendeeStorage;
-    private final RdbAlarmStorage alarmStorage;
-    private final RdbAttachmentStorage attachmentStorage;
+public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorage {
 
     /**
-     * Initializes a new {@link RdbCalendarStorage}.
+     * Initializes a new {@link RdbAttachmentStorage}.
      *
      * @param context The context
      * @param dbProvider The database provider to use
      * @param The transaction policy
      */
-    public RdbCalendarStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbAttachmentStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
-        eventStorage = new RdbEventStorage(context, dbProvider, txPolicy);
-        attendeeStorage = new RdbAttendeeStorage(context, dbProvider, txPolicy);
-        alarmStorage = new RdbAlarmStorage(context, dbProvider, txPolicy);
-        attachmentStorage = new RdbAttachmentStorage(context, dbProvider, txPolicy);
     }
 
     @Override
-    public int nextObjectID() throws OXException {
+    public Map<Integer, List<Attachment>> loadAttachments(int[] objectIDs) throws OXException {
         Connection connection = null;
         try {
-            connection = dbProvider.getWriteConnection(context);
-            if (connection.getAutoCommit()) {
-                throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
-            }
-            return IDGenerator.getId(context, Types.APPOINTMENT, connection);
+            connection = dbProvider.getReadConnection(context);
+            return selectAttachments(connection, context.getContextId(), objectIDs);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
-            release(connection, 1);
+            dbProvider.releaseReadConnection(context, connection);
         }
     }
 
-    @Override
-    public EventStorage getEventStorage() {
-        return eventStorage;
-    }
-
-    @Override
-    public AlarmStorage getAlarmStorage() {
-        return alarmStorage;
-    }
-
-    @Override
-    public AttachmentStorage getAttachmentStorage() {
-        return attachmentStorage;
-    }
-
-    @Override
-    public AttendeeStorage getAttendeeStorage() {
-        return attendeeStorage;
+    private static Map<Integer, List<Attachment>> selectAttachments(Connection connection, int contextID, int[] objectIDs) throws SQLException {
+        Map<Integer, List<Attachment>> attachmentsById = new HashMap<Integer, List<Attachment>>();
+        String sql = new StringBuilder()
+            .append("SELECT attached,id,file_mimetype,file_size,filename,file_id,creation_date FROM prg_attachment ")
+            .append("WHERE cid=? AND attached IN (").append(getParameters(objectIDs.length)).append(") AND module=?;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (int objectID : objectIDs) {
+                stmt.setInt(parameterIndex++, objectID);
+            }
+            stmt.setInt(parameterIndex++, com.openexchange.groupware.Types.APPOINTMENT);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    Attachment attachment = new Attachment();
+                    attachment.setManagedId(String.valueOf(resultSet.getInt("id")));
+                    attachment.setFormatType(resultSet.getString("file_mimetype"));
+                    attachment.setSize(resultSet.getLong("file_size"));
+                    attachment.setManagedId(resultSet.getString("filename"));
+                    attachment.setContentId(resultSet.getString("file_id"));
+                    attachment.setLastModified(new Date(resultSet.getLong("creation_date")));
+                    put(attachmentsById, I(resultSet.getInt("attached")), attachment);
+                }
+            }
+        }
+        return attachmentsById;
     }
 
 }

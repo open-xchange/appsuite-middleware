@@ -47,65 +47,31 @@
  *
  */
 
-package com.openexchange.chronos.impl.osgi;
+package com.openexchange.chronos.storage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.CalendarService;
-import com.openexchange.chronos.RecurrenceService;
-import com.openexchange.chronos.impl.CalendarServiceImpl;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.group.GroupService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ChronosActivator}
+ * {@link AlarmStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ChronosActivator extends HousekeepingActivator {
+public interface AlarmStorage {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChronosActivator.class);
+    void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
 
-    /**
-     * Initializes a new {@link ChronosActivator}.
-     */
-    public ChronosActivator() {
-        super();
-    }
+    List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CalendarStorageFactory.class, FolderService.class, UserService.class,
-            GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class };
-    }
+    Map<Integer, List<Alarm>> loadAlarms(int[] objectIDs, int userID) throws OXException;
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: \"com.openexchange.chronos.impl\"");
-            Services.setServiceLookup(this);
-            /*
-             * register services
-             */
-            registerService(CalendarService.class, new CalendarServiceImpl());
-        } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.chronos.impl\"", e);
-            throw e;
-        }
-    }
+    void deleteAlarms(int objectID, int userID) throws OXException;
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.chronos.impl\"");
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
+    void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
+
+    void deleteAlarms(int objectID) throws OXException;
 
 }

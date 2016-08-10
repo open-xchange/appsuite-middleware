@@ -50,34 +50,31 @@
 package com.openexchange.chronos.impl;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import com.openexchange.chronos.CalendarSession;
-import com.openexchange.chronos.CalendarStorage;
-import com.openexchange.chronos.CalendarStorageFactory;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link StorageOperation}
+ * {@link ReadOperation}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class StorageOperation<T> {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StorageOperation.class);
+public abstract class ReadOperation<T> {
 
     private final CalendarSession session;
 
     /**
-     * Initializes a new {@link StorageOperation}.
+     * Initializes a new {@link ReadOperation}.
      *
      * @param session The server session
      */
-    public StorageOperation(CalendarSession session) {
+    public ReadOperation(CalendarSession session) {
         super();
         this.session = session;
     }
@@ -88,31 +85,17 @@ public abstract class StorageOperation<T> {
      * @return The result
      */
     public T execute() throws OXException {
-        boolean committed = false;
         DatabaseService dbService = Services.getService(DatabaseService.class);
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
-        Connection writeConnection = null;
+        Connection readConnection = null;
         try {
-            writeConnection = dbService.getWritable(session.getContext());
-            writeConnection.setAutoCommit(false);
-            SimpleDBProvider dbProvider = new SimpleDBProvider(writeConnection, writeConnection);
+            readConnection = dbService.getReadOnly(session.getContext());
+            SimpleDBProvider dbProvider = new SimpleDBProvider(readConnection, null);
             CalendarStorage storage = storageFactory.create(session.getContext(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-            T result = execute(new CalendarWriter(session, storage));
-            writeConnection.commit();
-            committed = true;
-            return result;
-        } catch (SQLException e) {
-            throw new OXException(e);
+            return execute(new CalendarReader(session, storage));
         } finally {
-            if (null != writeConnection) {
-                if (false == committed) {
-                    rollback(writeConnection);
-                    autocommit(writeConnection);
-                    dbService.backWritable(session.getContext(), writeConnection);
-                } else {
-                    autocommit(writeConnection);
-                    dbService.backWritableAfterReading(session.getContext(), writeConnection);
-                }
+            if (null != readConnection) {
+                dbService.backReadOnly(session.getContext(), readConnection);
             }
         }
     }
@@ -120,32 +103,10 @@ public abstract class StorageOperation<T> {
     /**
      * Executes the storage operation.
      *
-     * @param writer The calendar writer to use
+     * @param writer The calendar reader to use
      * @return The result
      */
-    protected abstract T execute(CalendarWriter writer) throws OXException;
-
-    private static void rollback(Connection connection) {
-        if (null != connection) {
-            try {
-                connection.rollback();
-            } catch (SQLException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    private static void autocommit(Connection connection) {
-        if (null != connection) {
-            try {
-                if (false == connection.isClosed()) {
-                    connection.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                LOG.error("", e);
-            }
-        }
-    }
+    protected abstract T execute(CalendarReader writer) throws OXException;
 
 }
 

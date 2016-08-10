@@ -50,83 +50,101 @@
 package com.openexchange.chronos.storage.rdb;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.chronos.storage.AlarmStorage;
-import com.openexchange.chronos.storage.AttachmentStorage;
-import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.impl.IDGenerator;
 
 /**
  * {@link CalendarStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
+public abstract class RdbStorage {
 
-    private final RdbEventStorage eventStorage;
-    private final RdbAttendeeStorage attendeeStorage;
-    private final RdbAlarmStorage alarmStorage;
-    private final RdbAttachmentStorage attachmentStorage;
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbStorage.class);
+
+    protected final Context context;
+    protected final DBProvider dbProvider;
+    protected final DBTransactionPolicy txPolicy;
 
     /**
-     * Initializes a new {@link RdbCalendarStorage}.
+     * Initializes a new {@link RdbStorage}.
      *
      * @param context The context
      * @param dbProvider The database provider to use
      * @param The transaction policy
      */
-    public RdbCalendarStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, dbProvider, txPolicy);
-        eventStorage = new RdbEventStorage(context, dbProvider, txPolicy);
-        attendeeStorage = new RdbAttendeeStorage(context, dbProvider, txPolicy);
-        alarmStorage = new RdbAlarmStorage(context, dbProvider, txPolicy);
-        attachmentStorage = new RdbAttachmentStorage(context, dbProvider, txPolicy);
+    protected RdbStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+        super();
+        this.context = context;
+        this.dbProvider = dbProvider;
+        this.txPolicy = txPolicy;
     }
 
-    @Override
-    public int nextObjectID() throws OXException {
-        Connection connection = null;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            if (connection.getAutoCommit()) {
-                throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
+    /**
+     * Safely releases a write connection obeying the configured transaction policy, rolling back automatically if not committed before.
+     *
+     * @param connection The write connection to release
+     * @param updated The number of actually updated rows to
+     */
+    protected void release(Connection connection, int updated) throws OXException {
+        if (null != connection) {
+            try {
+                if (false == connection.getAutoCommit()) {
+                    txPolicy.rollback(connection);
+                }
+                txPolicy.setAutoCommit(connection, true);
+            } catch (SQLException e) {
+                throw EventExceptionCode.MYSQL.create(e);
+            } finally {
+                if (0 < updated) {
+                    dbProvider.releaseWriteConnection(context, connection);
+                } else {
+                    dbProvider.releaseWriteConnectionAfterReading(context, connection);
+                }
             }
-            return IDGenerator.getId(context, Types.APPOINTMENT, connection);
-        } catch (SQLException e) {
-            throw EventExceptionCode.MYSQL.create(e);
-        } finally {
-            release(connection, 1);
         }
     }
 
-    @Override
-    public EventStorage getEventStorage() {
-        return eventStorage;
+    /**
+     * Logs & executes a prepared statement's SQL query.
+     *
+     * @param stmt The statement to execute the SQL query from
+     * @return The result set
+     */
+    protected static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeQuery();
+        } else {
+            long start = System.currentTimeMillis();
+            ResultSet resultSet = stmt.executeQuery();
+            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
+            return resultSet;
+        }
     }
 
-    @Override
-    public AlarmStorage getAlarmStorage() {
-        return alarmStorage;
-    }
-
-    @Override
-    public AttachmentStorage getAttachmentStorage() {
-        return attachmentStorage;
-    }
-
-    @Override
-    public AttendeeStorage getAttendeeStorage() {
-        return attendeeStorage;
+    /**
+     * Logs & executes a prepared statement's SQL update.
+     *
+     * @param stmt The statement to execute the SQL update from
+     * @return The number of affected rows
+     */
+    protected static int logExecuteUpdate(PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeUpdate();
+        } else {
+            long start = System.currentTimeMillis();
+            int rowCount = stmt.executeUpdate();
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
+            return rowCount;
+        }
     }
 
 }
