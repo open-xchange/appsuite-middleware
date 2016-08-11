@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -145,6 +146,14 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         return tmp.longValue();
     }
 
+    /**
+     * Cleans statically initialized values.
+     */
+    public static void cleanseInits() {
+        delayDuration = null;
+        timerFrequency = null;
+    }
+
     // ---------------------------------------------------------------------------------------------------------------
 
     private final ServiceLookup services;
@@ -174,6 +183,15 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
      */
     public void stop() {
         synchronized (this) {
+            for (Iterator<Unsubscription> it = scheduledUnsubscriptions.iterator(); it.hasNext();) {
+                Unsubscription unsubscription = it.next();
+                try {
+                    subscriptionRegistry.unregisterSubscription(unsubscription.getSubscription());
+                    LOG.info("Unsubscribed Web Socket {} for client {} from user {} in context {}", unsubscription.getSubscription().getToken(), unsubscription.getClient(), I(unsubscription.getUserId()), I(unsubscription.getContextId()));
+                } catch (OXException e) {
+                    LOG.error("Failed to unsubscribe Web Socket {} for client {} from user {} in context {}", unsubscription.getSubscription().getToken(), unsubscription.getClient(), I(unsubscription.getUserId()), I(unsubscription.getContextId()), e);
+                }
+            }
             scheduledUnsubscriptions.clear();
             cancelTimerTask();
             stopped = true;

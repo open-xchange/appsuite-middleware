@@ -147,33 +147,28 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     private synchronized void reinit(ConfigurationService configService) {
         List<ServiceRegistration<?>> serviceRegistrations = this.serviceRegistrations;
+        if (null != serviceRegistrations) {
+            for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
+                serviceRegistration.unregister();
+            }
+            this.serviceRegistrations = null;
+        }
+
+        WebSocketPushNotificationTransport webSocketTransport = this.webSocketTransport;
+        if (null != webSocketTransport) {
+            this.webSocketTransport = null;
+            webSocketTransport.stop();
+        }
 
         if (!configService.getBoolProperty("com.openexchange.pns.transport.websocket.enabled", true)) {
             LOG.info("Web Socket push notification transport is disabled per configuration");
-
-            if (null != serviceRegistrations) {
-                for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
-                    serviceRegistration.unregister();
-                }
-                this.serviceRegistrations = null;
-            }
-
-            WebSocketPushNotificationTransport webSocketTransport = this.webSocketTransport;
-            if (null != webSocketTransport) {
-                this.webSocketTransport = null;
-                webSocketTransport.stop();
-            }
-
             return;
         }
 
-        if (null != serviceRegistrations) {
-            // Already registered
-            return;
-        }
-
-        WebSocketPushNotificationTransport webSocketTransport = new WebSocketPushNotificationTransport(resolverTracker, this);
+        WebSocketPushNotificationTransport.cleanseInits();
+        webSocketTransport = new WebSocketPushNotificationTransport(resolverTracker, this);
         this.webSocketTransport = webSocketTransport;
+
         serviceRegistrations = new ArrayList<>(4);
         serviceRegistrations.add(context.registerService(PushNotificationTransport.class, webSocketTransport, null));
         serviceRegistrations.add(context.registerService(WebSocketListener.class, webSocketTransport, null));
