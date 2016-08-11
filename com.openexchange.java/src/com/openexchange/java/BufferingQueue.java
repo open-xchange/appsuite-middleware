@@ -225,10 +225,10 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @throws NullPointerException if the specified element is null
      */
     public boolean offer(E e, long delayDuration, long maxDelayDuration) {
-        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
         ReentrantLock lock = this.lock;
         lock.lock();
         try {
+            BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
             q.offer(delayedE);
             if (q.peek() == delayedE) {
                 leader = null;
@@ -273,10 +273,10 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @throws NullPointerException if the specified element is <code>null</code>
      */
     public boolean offerIfAbsent(E e, long delayDuration, long maxDelayDuration) {
-        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
         ReentrantLock lock = this.lock;
         lock.lock();
         try {
+            BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
             if (contains(delayedE)) {
                 return false;
             }
@@ -314,11 +314,11 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @throws NullPointerException if the specified element is <code>null</code>
      */
     public boolean offerIfAbsentElseReset(E e, long delayDuration, long maxDelayDuration) {
-        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
         ReentrantLock lock = this.lock;
         lock.lock();
         try {
             // Check if already contained
+            BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
             {
                 BufferedElement<E> prev = null;
                 for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
@@ -873,7 +873,14 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
         ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.remove(o);
+            for (Iterator<BufferedElement<E>> it = q.iterator(); it.hasNext();) {
+                BufferedElement<E> next = it.next();
+                if (o.equals(next.getElement())) {
+                    it.remove();
+                    return true;
+                }
+            }
+            return false;
         } finally {
             lock.unlock();
         }
