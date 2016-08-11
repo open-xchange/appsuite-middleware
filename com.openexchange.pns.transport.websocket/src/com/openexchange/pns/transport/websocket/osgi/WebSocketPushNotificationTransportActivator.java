@@ -105,7 +105,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForProperties("com.openexchange.pns.transport.websocket.enabled");
+        return Reloadables.interestsForProperties("com.openexchange.pns.transport.websocket.enabled", "com.openexchange.pns.transport.websocket.delayDuration", "com.openexchange.pns.transport.websocket.timerFrequency");
     }
 
     @Override
