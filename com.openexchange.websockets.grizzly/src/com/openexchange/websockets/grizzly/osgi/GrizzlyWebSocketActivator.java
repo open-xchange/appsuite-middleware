@@ -104,7 +104,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         HzRemoteWebSocketDistributor remoteDistributor = new HzRemoteWebSocketDistributor(getService(TimerService.class), getService(ConfigurationService.class));
         this.remoteDistributor = remoteDistributor;
 
-        WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context, remoteDistributor);
+        WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context);
         track(WebSocketListener.class, listenerTracker);
         track(HazelcastInstance.class, new HzTracker(remoteDistributor, this, context));
         openTrackers();
@@ -114,7 +114,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         GrizzlyWebSocketApplication app = this.app;
         if (null == app) {
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
-            app = new GrizzlyWebSocketApplication(listenerTracker, this);
+            app = new GrizzlyWebSocketApplication(listenerTracker, remoteDistributor, this);
             listenerTracker.setApplication(app);
             webApplicationService.registerWebSocketApplication("", "/*", app, null);
             registerService(WebSocketService.class, new GrizzlyWebSocketService(app, remoteDistributor));

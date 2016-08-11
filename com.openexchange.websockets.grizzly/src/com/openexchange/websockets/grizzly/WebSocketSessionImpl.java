@@ -74,8 +74,12 @@ public class WebSocketSessionImpl implements WebSocketSession {
     }
 
     @Override
-    public Object getAttribute(String name) {
-        return null == name ? null : attributes.get(name);
+    public <V> V getAttribute(String name) {
+        try {
+            return (V) (null == name ? null : attributes.get(name));
+        } catch (ClassCastException e) {
+            return null;
+        }
     }
 
     @Override

@@ -66,7 +66,7 @@ public interface WebSocketSession {
      * @param name The string specifying the name of the object
      * @return The object bound to the specified name or <code>null</code>
      */
-    Object getAttribute(String name);
+    <V> V getAttribute(String name);
 
     /**
      * Gets the set view for the names of all the objects bound to this session.

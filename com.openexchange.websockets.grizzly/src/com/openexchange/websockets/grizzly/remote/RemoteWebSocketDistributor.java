@@ -49,7 +49,7 @@
 
 package com.openexchange.websockets.grizzly.remote;
 
-import com.openexchange.websockets.ConnectionId;
+import com.openexchange.websockets.WebSocket;
 
 /**
  * {@link RemoteWebSocketDistributor} - Sends text messages to remote nodes having an open Web Socket connection for associated user.
@@ -71,13 +71,26 @@ public interface RemoteWebSocketDistributor  {
     void sendRemote(String message, String pathFilter, int userId, int contextId, boolean async);
 
     /**
-     * Checks if the Web Socket associated with specified connection identifier exists on a remote node.
+     * Checks if there is any Web Socket connection associated with specified user on a remote cluster member.
      *
-     * @param connectionId The connection identifier
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> if such a Web Socket exists; otherwise <code>false</code>
      */
-    boolean existsRemote(ConnectionId connectionId, int userId, int contextId);
+    boolean existsAnyRemote(int userId, int contextId);
+
+    /**
+     * Call-back for a connected Web Socket.
+     *
+     * @param socket The Web Socket
+     */
+    void onWebSocketConnect(WebSocket socket);
+
+    /**
+     * Call-back for a closed Web Socket.
+     *
+     * @param socket The Web Socket
+     */
+    void onWebSocketClose(WebSocket socket);
 
 }

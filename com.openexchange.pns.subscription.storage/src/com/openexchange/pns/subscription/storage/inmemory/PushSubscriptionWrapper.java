@@ -59,6 +59,8 @@ import com.openexchange.pns.PushSubscription;
  */
 public class PushSubscriptionWrapper {
 
+    private final int userId;
+    private final int contextId;
     private final String token;
     private final String transportId;
     private final PushSubscription subscription;
@@ -74,6 +76,8 @@ public class PushSubscriptionWrapper {
             throw new IllegalArgumentException("Subscription is null");
         }
         this.subscription = subscription;
+        this.userId = subscription.getUserId();
+        this.contextId = subscription.getContextId();
         this.token = subscription.getToken();
         this.transportId = subscription.getTransportId();
     }
@@ -81,14 +85,29 @@ public class PushSubscriptionWrapper {
     /**
      * Initializes a new {@link PushSubscriptionWrapper}.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param token The token
      * @param transportId The transport identifier
      */
-    public PushSubscriptionWrapper(String token, String transportId) {
+    public PushSubscriptionWrapper(int userId, int contextId, String token, String transportId) {
         super();
+        this.userId = userId;
+        this.contextId = contextId;
         this.token = token;
         this.transportId = transportId;
         this.subscription = null;
+    }
+
+    /**
+     * Checks if this wrapper's subscription matches given token and transport.
+     *
+     * @param token The token
+     * @param transportId The transport identifier
+     * @return <code>true</code> if this wrapper's subscription matches; otherwise <code>false</code>
+     */
+    public boolean matches(String token, String transportId) {
+        return this.token.equals(token) && this.transportId.equals(transportId);
     }
 
     /**
@@ -113,8 +132,10 @@ public class PushSubscriptionWrapper {
 
     @Override
     public int hashCode() {
-        int prime = 31;
+        final int prime = 31;
         int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
         result = prime * result + ((token == null) ? 0 : token.hashCode());
         result = prime * result + ((transportId == null) ? 0 : transportId.hashCode());
         return result;
@@ -129,6 +150,12 @@ public class PushSubscriptionWrapper {
             return false;
         }
         PushSubscriptionWrapper other = (PushSubscriptionWrapper) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
         if (token == null) {
             if (other.token != null) {
                 return false;

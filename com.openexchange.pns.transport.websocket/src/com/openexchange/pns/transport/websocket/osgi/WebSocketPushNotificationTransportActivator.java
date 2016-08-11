@@ -172,7 +172,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
         WebSocketPushNotificationTransport webSocketTransport = new WebSocketPushNotificationTransport(resolverTracker, this);
         this.webSocketTransport = webSocketTransport;
-        serviceRegistrations = new ArrayList<>(2);
+        serviceRegistrations = new ArrayList<>(4);
         serviceRegistrations.add(context.registerService(PushNotificationTransport.class, webSocketTransport, null));
         serviceRegistrations.add(context.registerService(WebSocketListener.class, webSocketTransport, null));
         this.serviceRegistrations = serviceRegistrations;

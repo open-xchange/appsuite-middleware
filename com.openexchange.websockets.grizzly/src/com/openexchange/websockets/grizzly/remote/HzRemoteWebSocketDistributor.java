@@ -76,10 +76,8 @@ import com.openexchange.java.BufferingQueue;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
-import com.openexchange.websockets.WebSocketListener;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor;
 
 /**
@@ -88,7 +86,7 @@ import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistri
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class HzRemoteWebSocketDistributor implements WebSocketListener, RemoteWebSocketDistributor {
+public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HzRemoteWebSocketDistributor.class);
 
@@ -228,16 +226,16 @@ public class HzRemoteWebSocketDistributor implements WebSocketListener, RemoteWe
     }
 
     @Override
-    public boolean existsRemote(ConnectionId connectionId, int userId, int contextId) {
+    public boolean existsAnyRemote(int userId, int contextId) {
         try {
             // Get the Hazelcast map reference
             MultiMap<String, String> hzMap = map(mapName, hzInstance);
 
             // Grab known connection identifiers
             Collection<String> connectionIds = hzMap.get(generateKey(userId, contextId, memberUuid));
-            return (null == connectionIds || connectionIds.isEmpty()) ? false : connectionIds.contains(connectionId.getId());
+            return (null != connectionIds && !connectionIds.isEmpty());
         } catch (Exception e) {
-            LOG.warn("Failed to remotely check Web Socket existence", e);
+            LOG.warn("Failed to remotely check any open Web Socket for user {} in context {}", userId, contextId, e);
         }
         return false;
     }
@@ -447,19 +445,24 @@ public class HzRemoteWebSocketDistributor implements WebSocketListener, RemoteWe
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Call-back for a connected Web Socket.
+     *
+     * @param socket The Web Socket
+     */
     @Override
     public void onWebSocketConnect(WebSocket socket) {
         addToHzMultiMap(socket.getUserId(), socket.getContextId(), socket.getConnectionId().getId());
     }
 
+    /**
+     * Call-back for a closed Web Socket.
+     *
+     * @param socket The Web Socket
+     */
     @Override
     public void onWebSocketClose(WebSocket socket) {
         removeFromHzMultiMap(socket.getUserId(), socket.getContextId(), socket.getConnectionId().getId());
-    }
-
-    @Override
-    public void onMessage(WebSocket socket, String text) {
-        // Don't care
     }
 
 }

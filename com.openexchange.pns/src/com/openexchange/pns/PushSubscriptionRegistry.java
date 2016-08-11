@@ -52,23 +52,12 @@ package com.openexchange.pns;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link PushSubscriptionRegistry}
+ * {@link PushSubscriptionRegistry} - A registry for retrieving and managing push subscriptions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushSubscriptionRegistry {
-
-    /**
-     * Gets all subscriptions interested in specified topic belonging to given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param topic The topic
-     * @return All subscriptions for specified affiliation mapped to the associated transport
-     * @throws OXException If interested subscriptions cannot be returned
-     */
-    Hits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException;
+public interface PushSubscriptionRegistry extends PushSubscriptionProvider {
 
     /**
      * Registers specified subscription.
