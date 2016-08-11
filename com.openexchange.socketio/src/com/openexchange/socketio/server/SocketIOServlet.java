@@ -117,6 +117,14 @@ public abstract class SocketIOServlet extends SessionServlet {
     }
 
     @Override
+    protected void doService(HttpServletRequest req, HttpServletResponse resp, boolean checkRateLimit) throws ServletException, IOException {
+        if (resp.isCommitted()) {
+            return;
+        }
+        super.doService(req, resp, checkRateLimit);
+    }
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getPathInfo();
         if (path.startsWith("/")) {
