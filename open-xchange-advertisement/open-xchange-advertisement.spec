@@ -14,6 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 BuildRequires: open-xchange-core >= @OXVERSION@
+BuildRequires: open-xchange-rest >= @OXVERSION@
 Version:       @OXVERSION@
 %define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -25,6 +26,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open Xchange Advertisement
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
+Requires:      open-xchange-rest >= @OXVERSION@
 
 %description
 This package offers the possibility to manage configurations for advertisements.

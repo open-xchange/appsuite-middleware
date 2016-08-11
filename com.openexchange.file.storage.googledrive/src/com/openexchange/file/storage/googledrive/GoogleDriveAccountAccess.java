@@ -146,18 +146,20 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
-        if (null == googleDriveAccess) {
+        GoogleDriveOAuthAccess googleDriveOAuthAccess = (GoogleDriveOAuthAccess) googleDriveAccess;
+        if (null == googleDriveOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new GoogleDriveFileAccess((GoogleDriveOAuthAccess) googleDriveAccess, account, session, this);
+        return new GoogleDriveFileAccess(googleDriveOAuthAccess, account, session, this);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        if (null == googleDriveAccess) {
+        GoogleDriveOAuthAccess googleDriveOAuthAccess = (GoogleDriveOAuthAccess) googleDriveAccess;
+        if (null == googleDriveOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new GoogleDriveFolderAccess((GoogleDriveOAuthAccess) googleDriveAccess, account, session);
+        return new GoogleDriveFolderAccess(googleDriveOAuthAccess, account, session);
     }
 
     @Override
