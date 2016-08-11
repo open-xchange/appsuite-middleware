@@ -131,12 +131,21 @@ public final class UserImageDataSource implements ImageDataSource {
         DataProperties properties = new DataProperties(5);
         properties.put(DataProperties.PROPERTY_FOLDER_ID, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
         properties.put(DataProperties.PROPERTY_ID, String.valueOf(userID));
+
         if (null == imageBytes) {
-            LOG.warn("Requested a non-existing image in user contact: user-id={} context={} session-user={}\nReturning an empty image as fallback.", userID, session.getContextId(), session.getUserId());
+            LOG.warn("Requested a non-existing image in user contact: user-id={} context={} session-user={}. Returning an empty image as fallback.", userID, session.getContextId(), session.getUserId());
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
             return new SimpleData<D>((D)new UnsynchronizedByteArrayInputStream(new byte[0]), properties);
         }
+
+        if (com.openexchange.ajax.helper.ImageUtils.isSvg(imageBytes)) {
+            LOG.warn("Detected a possibly harmful SVG image in user contact: user-id={} context={} session-user={}. Returning an empty image as fallback.", userID, session.getContextId(), session.getUserId());
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            return new SimpleData<D>((D)new UnsynchronizedByteArrayInputStream(new byte[0]), properties);
+        }
+
         properties.put(DataProperties.PROPERTY_CONTENT_TYPE, user.getImageContentType());
         properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
         properties.put(DataProperties.PROPERTY_NAME, user.getImageContentType().replace('/', '.'));
