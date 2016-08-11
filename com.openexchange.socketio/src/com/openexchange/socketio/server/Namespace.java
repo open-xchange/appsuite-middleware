@@ -23,11 +23,14 @@
 
 package com.openexchange.socketio.server;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.socketio.common.DisconnectReason;
+import com.openexchange.socketio.common.MultipleSocketIOException;
 import com.openexchange.socketio.common.SocketIOException;
 
 /**
@@ -54,14 +57,21 @@ public class Namespace implements Outbound, ConnectionListener, DisconnectListen
     }
 
     @Override
-    public void emit(String name, Object... args) {
+    public void emit(String name, Object... args) throws SocketIOException {
+        List<SocketIOException> exceptions = null;
         for (Socket s : sockets) {
             try {
                 s.emit(name, args);
             } catch (SocketIOException e) {
-                // ignore for now
-                // TODO: add getLastError method?
+                if (null == exceptions) {
+                    exceptions = new LinkedList<>();
+                }
+                exceptions.add(e);
             }
+        }
+
+        if (null != exceptions) {
+            throw MultipleSocketIOException.chainedSocketIOExceptionFor(exceptions);
         }
     }
 
