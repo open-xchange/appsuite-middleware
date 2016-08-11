@@ -84,7 +84,6 @@ final class DropboxExceptionHandler {
      * @param e The {@link Exception} to handle
      * @return An {@link OXException}
      */
-    //TODO: Complete exception handling
     static final OXException handle(Exception e) {
         // It's an OXException, so return it
         if (OXException.class.isInstance(e)) {
