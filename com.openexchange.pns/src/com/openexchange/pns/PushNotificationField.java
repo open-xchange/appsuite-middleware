@@ -63,6 +63,8 @@ public enum PushNotificationField {
     MESSAGE("message"),
     /** The folder identifier; type is <code>java.lang.String</code> */
     FOLDER("folder"),
+    /** A listing of arguments; type is <code>java.util.List</code> */
+    ARGS("args"),
 
     // -------------------------------- Mail-related fields --------------------------------
     /** The subject of a mail; type is <code>java.lang.String</code> */
