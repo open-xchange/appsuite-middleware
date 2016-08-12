@@ -127,6 +127,22 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
 		return setFields.toArray(newArray(setFields.size()));
 	}
 
+    @Override
+    public void copy(O from, O to, E... fields) throws OXException {
+        if (null == from) {
+            throw new IllegalArgumentException("from");
+        }
+        if (null == to) {
+            throw new IllegalArgumentException("to");
+        }
+        for (E field : fields) {
+            Mapping<? extends Object, O> mapping = get(field);
+            if (mapping.isSet(from)) {
+                mapping.copy(from, to);
+            }
+        }
+    }
+
 	/**
 	 * Gets the mappings for all possible values of the underlying enum.
 	 *

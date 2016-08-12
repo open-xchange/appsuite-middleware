@@ -107,4 +107,13 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
 	 */
 	E[] getAssignedFields(O object);
 
+    /**
+     * Copies data from on object to another. Only <i>set</i> fields are transferred.
+     * 
+     * @param from The source object
+     * @param to The destination object
+     * @param fields The fields to copy
+     */
+    void copy(O from, O to, E... fields) throws OXException;
+
 }
