@@ -205,13 +205,30 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     /**
      * Checks if there is any open Web Socket associated with specified user.
      *
+     * @param pathFilter The path filter expression or <code>null</code>
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> if any open Web Socket exists for given user; otherwise <code>false</code>
      */
-    public boolean existsAny(int userId, int contextId) {
+    public boolean existsAny(String pathFilter, int userId, int contextId) {
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
-        return null != userSockets && !userSockets.isEmpty();
+        if (null == userSockets || userSockets.isEmpty()) {
+            // No socket at all
+            return false;
+        }
+
+        if (null == pathFilter) {
+            // No filter given
+            return true;
+        }
+
+        // Check if any satisfies given filter
+        for (SessionBoundWebSocket SessionBoundSocket : userSockets.values()) {
+            if (WebSockets.matches(pathFilter, SessionBoundSocket)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

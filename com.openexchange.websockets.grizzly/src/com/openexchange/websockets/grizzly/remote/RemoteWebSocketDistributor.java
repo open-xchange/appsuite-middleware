@@ -71,13 +71,14 @@ public interface RemoteWebSocketDistributor  {
     void sendRemote(String message, String pathFilter, int userId, int contextId, boolean async);
 
     /**
-     * Checks if there is any Web Socket connection associated with specified user on a remote cluster member.
+     * Checks if there is any filter-satisfying Web Socket connection associated with specified user on a remote cluster member.
      *
+     * @param pathFilter The path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return <code>true</code> if such a Web Socket exists; otherwise <code>false</code>
+     * @return <code>true</code> if such a filter-satisfying Web Socket exists; otherwise <code>false</code>
      */
-    boolean existsAnyRemote(int userId, int contextId);
+    boolean existsAnyRemote(String pathFilter, int userId, int contextId);
 
     /**
      * Call-back for a connected Web Socket.

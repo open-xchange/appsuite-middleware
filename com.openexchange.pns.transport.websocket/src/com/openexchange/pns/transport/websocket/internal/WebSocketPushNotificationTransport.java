@@ -112,7 +112,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
             synchronized (WebSocketPushNotificationTransport.class) {
                 tmp = delayDuration;
                 if (null == tmp) {
-                    int defaultValue = 5000;
+                    int defaultValue = 10000; // 10 seconds
                     ConfigurationService service = services.getOptionalService(ConfigurationService.class);
                     if (null == service) {
                         return defaultValue;
@@ -133,7 +133,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
             synchronized (WebSocketPushNotificationTransport.class) {
                 tmp = timerFrequency;
                 if (null == tmp) {
-                    int defaultValue = 2000;
+                    int defaultValue = 2000; // 2 seconds
                     ConfigurationService service = services.getOptionalService(ConfigurationService.class);
                     if (null == service) {
                         return defaultValue;
@@ -223,6 +223,20 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         return null;
     }
 
+    private String resolveToPathFilter(String client) {
+        for (WebSocketToClientResolver resolver : resolvers) {
+            try {
+                String pathFilter = resolver.getPathFilterFor(client);
+                if (pathFilter != null) {
+                    return pathFilter;
+                }
+            } catch (OXException e) {
+                LOG.error("Failed to resolve client {} to applicable path filter.", client, e);
+            }
+        }
+        return null;
+    }
+
     /**
      * Creates the subscription's token for specified arguments; e.g.
      * <pre>"ws::17-1337::open-xchange-appsuite"</pre>
@@ -256,7 +270,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         final int userId = socket.getUserId();
         final int contextId = socket.getContextId();
 
-        // Initialize one-shot task
+        // Initialize immediate one-shot task
         ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
         Task<Void> task = new AbstractTask<Void>() {
 
@@ -322,7 +336,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         final int userId = socket.getUserId();
         final int contextId = socket.getContextId();
 
-        // Initialize one-shot task
+        // Initialize delayed one-shot task
         TimerService timerService = services.getService(TimerService.class);
         Runnable timerTask = new Runnable() {
 
@@ -350,16 +364,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 return;
             }
 
-            try {
-                if (webSocketService.exists(userId, contextId)) {
-                    return;
-                }
-            } catch (OXException e) {
-                LOG.error("Failed to check for any open Web Socket for user {} in context {}. Assuming there is any...", I(userId), I(contextId), e);
-                return;
-            }
-
-            // Check time task is alive
+            // Check if timer task is alive...
             ScheduledTimerTask scheduledTimerTask = this.scheduledTimerTask;
             if (null == scheduledTimerTask) {
                 // Initialize timer task
@@ -368,7 +373,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
                     @Override
                     public void run() {
-                        checkUnsubscription();
+                        checkUnsubscriptions();
                     }
                 };
                 long delay = timerFrequency(services); // 2sec delay
@@ -376,6 +381,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 LOG.info("Initialized new timer task for unsubscribing Web Socket push subscriptions");
             }
 
+            // ... and schedule to unsubscribe
             DefaultPushSubscription subscription = DefaultPushSubscription.builder()
                 .client(client)
                 .contextId(contextId)
@@ -393,25 +399,69 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     /**
      * Checks for an available unsubscriptions.
      */
-    protected void checkUnsubscription() {
+    protected void checkUnsubscriptions() {
         synchronized (this) {
             // Stopped
             if (stopped) {
                 return;
             }
 
-            for (Unsubscription unsubscription; (unsubscription = scheduledUnsubscriptions.poll()) != null;) {
-                try {
-                    subscriptionRegistry.unregisterSubscription(unsubscription.getSubscription());
-                    LOG.info("Unsubscribed Web Socket {} for client {} from user {} in context {}", unsubscription.getSubscription().getToken(), unsubscription.getClient(), I(unsubscription.getUserId()), I(unsubscription.getContextId()));
-                } catch (OXException e) {
-                    LOG.error("Failed to unsubscribe Web Socket {} for client {} from user {} in context {}", unsubscription.getSubscription().getToken(), unsubscription.getClient(), I(unsubscription.getUserId()), I(unsubscription.getContextId()), e);
-                }
+            Unsubscription unsubscription = scheduledUnsubscriptions.poll();
+            if (null == unsubscription) {
+                // No elapsed elements available
+                return;
             }
+
+            // Remember already checked unsubscriptions
+            Map<Unsubscription, Boolean> checkedOnes = new HashMap<>();
+
+            // Poll elapsed unsubscriptions...
+            boolean first = true;
+            do {
+                if (first) {
+                    first = false;
+                    handleUnsubscription(unsubscription, null, checkedOnes);
+                } else {
+                    Boolean exists = checkedOnes.get(unsubscription);
+                    if (null == exists || !exists.booleanValue()) {
+                        handleUnsubscription(unsubscription, exists, checkedOnes);
+                    }
+                }
+
+                // Poll next
+                unsubscription = scheduledUnsubscriptions.poll();
+            } while (unsubscription != null);
 
             if (scheduledUnsubscriptions.isEmpty()) {
                 // No more planned rescheduling operations
                 cancelTimerTask();
+            }
+        }
+    }
+
+    private void handleUnsubscription(Unsubscription unsubscription, Boolean exists, Map<Unsubscription, Boolean> checkedOnes) {
+        int userId = unsubscription.getUserId();
+        int contextId = unsubscription.getContextId();
+
+        Boolean doesExist = exists;
+        if (null == doesExist) {
+            String pathFilter = resolveToPathFilter(unsubscription.getClient());
+            try {
+                doesExist = Boolean.valueOf(webSocketService.exists(pathFilter, userId, contextId));
+                checkedOnes.put(unsubscription, doesExist);
+            } catch (OXException e) {
+                LOG.error("Failed to check for any open filter-satisfying Web Socket using filter \"{}\" for user {} in context {}. Assuming there is any...", null == pathFilter ? "<none>" : pathFilter, I(userId), I(contextId), e);
+                doesExist = Boolean.TRUE;
+            }
+        }
+
+        if (!doesExist.booleanValue()) {
+            // There is no other such Web Socket open on this or remote cluster member. Proceed with revoking the registration
+            try {
+                subscriptionRegistry.unregisterSubscription(unsubscription.getSubscription());
+                LOG.info("Unsubscribed Web Socket {} for client {} from user {} in context {}", unsubscription.getSubscription().getToken(), unsubscription.getClient(), I(userId), I(contextId));
+            } catch (OXException e) {
+                LOG.error("Failed to unsubscribe Web Socket {} for client {} from user {} in context {}", unsubscription.getSubscription().getToken(), unsubscription.getClient(), I(userId), I(contextId), e);
             }
         }
     }

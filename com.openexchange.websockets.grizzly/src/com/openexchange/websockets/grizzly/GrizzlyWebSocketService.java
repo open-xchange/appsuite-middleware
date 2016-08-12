@@ -81,11 +81,20 @@ public class GrizzlyWebSocketService implements WebSocketService {
 
     @Override
     public boolean exists(int userId, int contextId) throws OXException {
-        if (localApp.existsAny(userId, contextId)) {
+        if (localApp.existsAny(null, userId, contextId)) {
             return true;
         }
 
-        return remoteDistributor.existsAnyRemote(userId, contextId);
+        return remoteDistributor.existsAnyRemote(null, userId, contextId);
+    }
+
+    @Override
+    public boolean exists(String pathFilter, int userId, int contextId) {
+        if (localApp.existsAny(pathFilter, userId, contextId)) {
+            return true;
+        }
+
+        return remoteDistributor.existsAnyRemote(pathFilter, userId, contextId);
     }
 
     @Override
