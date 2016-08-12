@@ -68,6 +68,7 @@ import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -164,19 +165,19 @@ public final class UpdateAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+        EventID eventID = new EventID(request.checkInt(AJAXServlet.PARAMETER_INFOLDER), request.checkInt(AJAXServlet.PARAMETER_ID));
         JSONObject jsonObject = request.getData();
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setContext(request.getSession().getContext());
         new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
         convertExternalToInternalUsersIfPossible(appointment, request.getSession().getContext(), LOG);
-        int folderID = request.checkInt(AJAXServlet.PARAMETER_INFOLDER);
         CalendarSession calendarSession = initSession(request, REQUIRED_PARAMETERS);
         if (appointment.containsNotification()) {
             calendarSession.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
         UserizedEvent event = EventConverter.getEvent(calendarSession, appointment);
-        UserizedEvent updatedEvent = calendarService.updateEvent(calendarSession, folderID, event);
+        UserizedEvent updatedEvent = calendarService.updateEvent(calendarSession, eventID, event);
         return new AJAXRequestResult(new JSONObject().put(DataFields.ID, updatedEvent.getEvent().getId()), updatedEvent.getEvent().getLastModified(), "json");
     }
 

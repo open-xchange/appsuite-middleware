@@ -117,31 +117,31 @@ public abstract class ChronosAction extends AppointmentAction {
                 legacy = false;
                 break;
             case "search":
-                legacy = true;
+                legacy = false;
                 break;
             case "newappointments":
-                legacy = true;
+                legacy = false;
                 break;
             case "has":
-                legacy = true;
+                legacy = false;
                 break;
             case "resolveuid":
-                legacy = true;
+                legacy = false;
+                break;
+            case "getchangeexceptions":
+                legacy = false;
                 break;
             case "freebusy":
-                legacy = true;
-                break;
-            case "getChangeExceptions":
                 legacy = true;
                 break;
             case "new":
                 legacy = true;
                 break;
             case "update":
-                legacy = true;
+                legacy = false;
                 break;
             case "confirm":
-                legacy = true;
+                legacy = false;
                 break;
             case "delete":
                 legacy = true;

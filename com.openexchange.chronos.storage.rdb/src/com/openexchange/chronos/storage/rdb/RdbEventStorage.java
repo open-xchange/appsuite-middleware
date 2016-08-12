@@ -389,12 +389,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      *
      * @param event The event to adjust
      * @return The (possibly adjusted) event reference
+     * @throws OXException
      */
-    private static Event adjustPriorSave(Event event) {
+    private static Event adjustPriorSave(Event event) throws OXException {
         /*
          * convert recurrence rule extract series pattern and "absolute duration" / "recurrence calculator" field
          */
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+            String recurrenceRule = event.getRecurrenceRule();
             long absoluteDuration = new Period(event).getTotalDays();
             TimeZone timeZone = event.containsStartTimezone() && null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : null;
             Calendar calendar = null != timeZone ? GregorianCalendar.getInstance(timeZone) : GregorianCalendar.getInstance();
@@ -406,7 +408,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
              * expand recurrence master start- and enddate to cover the whole series period
              */
             if (event.getId() == event.getSeriesId()) {
-                Period seriesPeriod = Recurrence.getImplicitSeriesPeriod(seriesPattern);
+                Period masterPeriod = new Period(event);
+                TimeZone tz = TimeZone.getTimeZone(event.isAllDay() || null == event.getStartTimezone() ? "UTC" : event.getStartTimezone());
+                Period seriesPeriod = Recurrence.getImplicitSeriesPeriod(masterPeriod, tz, recurrenceRule);
                 event.setStartDate(seriesPeriod.getStartDate());
                 event.setEndDate(seriesPeriod.getEndDate());
             }

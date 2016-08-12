@@ -59,10 +59,12 @@ import static com.openexchange.chronos.impl.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.impl.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getTimeZone;
 import static com.openexchange.chronos.impl.CalendarUtils.getUntil;
+import static com.openexchange.chronos.impl.CalendarUtils.i;
 import static com.openexchange.chronos.impl.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.impl.CalendarUtils.isExcluded;
 import static com.openexchange.chronos.impl.CalendarUtils.isInRange;
+import static com.openexchange.chronos.impl.CalendarUtils.isIncludePrivate;
 import static com.openexchange.chronos.impl.CalendarUtils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.CalendarUtils.sort;
@@ -177,7 +179,7 @@ public class CalendarReader {
         return lastModified.getTime();
     }
 
-    private List<Event> readAdditionalEventData(List<Event> events, EventField[] fields) throws OXException {
+    protected List<Event> readAdditionalEventData(List<Event> events, EventField[] fields) throws OXException {
         if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS))) {
             int[] objectIDs = getObjectIDs(events);
             if (null == fields || contains(fields, EventField.ATTENDEES)) {
@@ -198,10 +200,9 @@ public class CalendarReader {
 
     public boolean[] hasEventsBetween(int userID, Date from, Date until) throws OXException {
         /*
-         * ensure "full date" range, in user timezone
+         * interpret range as "utc" dates
          */
-        TimeZone timeZone = getTimeZone(session);
-        Calendar calendar = initCalendar(timeZone, from);
+        Calendar calendar = initCalendar(TimeZone.getTimeZone("UTC"), from);
         Date rangeStart = CalendarUtils.truncateTime(calendar).getTime();
         calendar.setTime(until);
         CalendarUtils.truncateTime(calendar);
@@ -222,6 +223,8 @@ public class CalendarReader {
          * step through events day-wise & check for present events
          */
         List<Boolean> hasEventsList = new ArrayList<Boolean>();
+        TimeZone timeZone = getTimeZone(session);
+        calendar = initCalendar(timeZone, from);
         calendar.setTime(rangeStart);
         Date minimumEndTime = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, 1);
@@ -339,12 +342,12 @@ public class CalendarReader {
         EventField[] fields = getFields(session);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
         readAdditionalEventData(events, fields);
-        return userize(events, folder);
+        return userize(events, folder, isIncludePrivate(session));
     }
 
     private List<UserizedEvent> readEventsInFolder(UserizedFolder folder, List<EventID> eventIDs) throws OXException {
         Set<Integer> objectIDs = new HashSet<Integer>(eventIDs.size());
-        int folderID = Integer.parseInt(folder.getID());
+        int folderID = i(folder);
         for (EventID eventID : eventIDs) {
             if (folderID == eventID.getFolderID()) {
                 objectIDs.add(I(eventID.getObjectID()));
@@ -394,7 +397,7 @@ public class CalendarReader {
         if (session.getUser().getId() != event.getCreatedBy()) {
             requireReadPermission(folder, Permission.READ_ALL_OBJECTS);
         }
-        return userize(Collections.singletonList(event), folder).get(0);
+        return userize(Collections.singletonList(event), folder, true).get(0);
     }
 
     protected List<UserizedEvent> getChangeExceptions(UserizedFolder folder, int objectID) throws OXException {
@@ -414,7 +417,7 @@ public class CalendarReader {
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, getFields(session));
         readAdditionalEventData(events, getFields(session));
-        return userize(events, folder);
+        return userize(events, folder, true);
     }
 
     protected List<UserizedEvent> readEventsInFolder(UserizedFolder folder, int[] objectIDs, boolean deleted, Date updatedSince) throws OXException {
@@ -449,7 +452,7 @@ public class CalendarReader {
             events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), getFields(session));
         }
         readAdditionalEventData(events, getFields(session));
-        return userize(events, folder);
+        return userize(events, folder, true);
     }
 
     protected List<UserizedEvent> readEventsOfUser(int userID, boolean deleted, Date updatedSince) throws OXException {
@@ -470,14 +473,14 @@ public class CalendarReader {
             events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions(session), fields);
         }
         readAdditionalEventData(events, fields);
-        return userize(events, session.getUser().getId());
+        return userize(events, session.getUser().getId(), isIncludePrivate(session));
     }
 
-    private List<UserizedEvent> userize(List<Event> events, int forUser) throws OXException {
+    private List<UserizedEvent> userize(List<Event> events, int forUser, boolean includePrivate) throws OXException {
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
         Map<Integer, List<Alarm>> alarmsById = readAlarms(events, forUser);
         for (Event event : events) {
-            if (isExcluded(event, session)) {
+            if (isExcluded(event, session, includePrivate)) {
                 continue;
             }
             Attendee userAttendee = find(event.getAttendees(), forUser);
@@ -509,13 +512,13 @@ public class CalendarReader {
         return 0 < objectIDs.size() ? storage.getAlarmStorage().loadAlarms(I2i(objectIDs), userID) : Collections.<Integer, List<Alarm>> emptyMap();
     }
 
-    private List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder) throws OXException {
+    private List<UserizedEvent> userize(List<Event> events, UserizedFolder inFolder, boolean includePrivate) throws OXException {
         User calendarUser = getCalendarUser(inFolder);
-        int folderID = Integer.parseInt(inFolder.getID());
+        int folderID = i(inFolder);
         List<UserizedEvent> userizedEvents = new ArrayList<UserizedEvent>(events.size());
         Map<Integer, List<Alarm>> alarmsById = readAlarms(events, calendarUser.getId());
         for (Event event : events) {
-            if (isExcluded(event, session)) {
+            if (isExcluded(event, session, includePrivate)) {
                 continue;
             }
             UserizedEvent userizedEvent = getUserizedEvent(event, folderID, alarmsById.get(I(event.getId())));
@@ -533,7 +536,7 @@ public class CalendarReader {
         Iterator<Event> occurrences = resolveOccurrences(master.getEvent(), getFrom(session), getUntil(session));
         while (occurrences.hasNext()) {
             Event occurrence = occurrences.next();
-            if (isExcluded(occurrence, session)) {
+            if (isExcluded(occurrence, session, true)) {
                 continue;
             }
             events.add(getUserizedEvent(occurrence, master.getFolderId(), master.getAlarms()));
@@ -541,7 +544,7 @@ public class CalendarReader {
         return events;
     }
 
-    private UserizedEvent getUserizedEvent(Event event, int folderID, List<Alarm> alarms) throws OXException {
+    protected UserizedEvent getUserizedEvent(Event event, int folderID, List<Alarm> alarms) throws OXException {
         UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event, folderID, alarms);
         return anonymizeIfNeeded(userizedEvent);
     }

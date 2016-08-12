@@ -62,8 +62,20 @@ import com.openexchange.exception.OXException;
  */
 public interface AttendeeStorage {
 
+    List<Attendee> loadAttendees(int objectID) throws OXException;
+
     Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs) throws OXException;
 
+    void deleteAttendees(int objectID) throws OXException;
+
     void deleteAttendees(int objectID, List<Attendee> attendees) throws OXException;
+
+    void insertAttendees(int objectID, List<Attendee> attendees) throws OXException;
+
+    void updateAttendees(int objectID, List<Attendee> attendees) throws OXException;
+
+    void updateAttendee(int objectID, Attendee attendee) throws OXException;
+
+    void insertTombstoneAttendees(int objectID, List<Attendee> attendees) throws OXException;
 
 }

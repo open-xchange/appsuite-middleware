@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -541,6 +542,20 @@ public class CalendarUtils {
     }
 
     /**
+     * Parses a folder's numerical folder identifier.
+     *
+     * @param folder The folder to get the identifier for
+     * @return The folder identifier
+     */
+    static int i(UserizedFolder folder) throws OXException {
+        try {
+            return Integer.parseInt(folder.getID());
+        } catch (NumberFormatException e) {
+            throw OXException.general("unsupported folder id: " + folder.getID());//TODO
+        }
+    }
+
+    /**
      * Gets a value indicating whether a specific event falls (at least partly) into a time range.
      *
      * @param event The event to check
@@ -626,24 +641,28 @@ public class CalendarUtils {
      * Gets a value indicating whether a specific event should be excluded from results based on the configured calendar parameters,
      * e.g. because ...
      * <ul>
-     * <li>it is classified as private or confidential for the accessing user and such events are configured to be excluded via parameters</li>
+     * <li>it is classified as private or confidential for the accessing user and such events are configured to be excluded</li>
      * <li>it's start-date is behind the range requested via parameters</li>
      * <li>it's end-date is before the range requested via parameters</li>
      * </ul>
      *
      * @param event The event to check
      * @param session The calendar session
+     * @param includePrivate <code>true</code> to include private or confidential events in non-private folders, <code>false</code>, otherwise
      * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
      */
-    static boolean isExcluded(Event event, CalendarSession session) {
-        if (isClassifiedFor(event, session.getUser().getId()) &&
-            Boolean.FALSE.equals(session.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class))) {
+    static boolean isExcluded(Event event, CalendarSession session, boolean includePrivate) {
+        if (false == includePrivate && isClassifiedFor(event, session.getUser().getId())) {
             return true;
         }
         if (false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
             return true;
         }
         return false;
+    }
+
+    static boolean isIncludePrivate(CalendarParameters parameters) {
+        return parameters.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     /**
@@ -728,6 +747,25 @@ public class CalendarUtils {
             }
         }
         return filteredAttendees;
+    }
+
+    /**
+     * Gets the entity identifiers of all attendees representing internal users.
+     *
+     * @param attendees The attendees to extract the user identifiers for
+     * @return The user identifiers, or an empty array if there are none
+     */
+    static int[] getUserIDs(List<Attendee> attendees) {
+        if (null == attendees || 0 == attendees.size()) {
+            return new int[0];
+        }
+        List<Integer> userIDs = new ArrayList<Integer>(attendees.size());
+        for (Attendee attendee : attendees) {
+            if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
+                userIDs.add(I(attendee.getEntity()));
+            }
+        }
+        return I2i(userIDs);
     }
 
 }

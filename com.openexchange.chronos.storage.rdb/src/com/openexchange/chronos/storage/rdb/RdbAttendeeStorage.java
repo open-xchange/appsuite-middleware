@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,71 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
+    public void insertAttendees(int objectID, List<Attendee> attendees) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), objectID, attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void updateAttendee(int objectID, Attendee attendee) throws OXException {
+        updateAttendees(objectID, Collections.singletonList(attendee));
+    }
+
+    @Override
+    public void updateAttendees(int objectID, List<Attendee> attendees) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += updateAttendees(connection, context.getContextId(), objectID, attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void insertTombstoneAttendees(int objectID, List<Attendee> attendees) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += insertTombstoneAttendees(connection, context.getContextId(), objectID, attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public List<Attendee> loadAttendees(int objectID) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            AttendeeLoader attendeeLoader = new AttendeeLoader(connection, context.getContextId());
+            return attendeeLoader.loadAttendees(objectID, AttendeeField.values());
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public Map<Integer, List<Attendee>> loadAttendees(int[] objectIDs) throws OXException {
         Connection connection = null;
         try {
@@ -108,6 +174,22 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             updated = deleteAttendees(connection, context.getContextId(), objectID, attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void deleteAttendees(int objectID) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAttendees(connection, context.getContextId(), objectID);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
@@ -143,7 +225,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_dates_members WHERE cid=? AND object_id=? AND member_uid=?;")) {
                         stmt.setInt(1, contextID);
                         stmt.setInt(2, objectID);
-                        stmt.setInt(2, attendee.getEntity());
+                        stmt.setInt(3, attendee.getEntity());
                         updated += logExecuteUpdate(stmt);
                     }
                 }
@@ -157,6 +239,44 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         stmt.setInt(3, attendee.getEntity());
                         updated += logExecuteUpdate(stmt);
                     }
+                }
+            }
+        }
+        return updated;
+    }
+
+    private static int updateAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
+        int updated = 0;
+        for (Attendee attendee : attendees) {
+            if (0 >= attendee.getEntity()) {
+                /*
+                 * update records in dateExternal for external users
+                 */
+                ExternalAttendeeMapper mapper = ExternalAttendeeMapper.getInstance();
+                AttendeeField[] fields = mapper.getMappedFields(mapper.getAssignedFields(attendee));
+                String sql = new StringBuilder().append("UPDATE dateExternal SET ").append(mapper.getAssignments(fields)).append(" WHERE cid=? AND objectId=? AND mailAddress=?;").toString();
+                try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                    int parameterIndex = 1;
+                    parameterIndex = mapper.setParameters(stmt, parameterIndex, attendee, fields);
+                    stmt.setInt(parameterIndex++, contextID);
+                    stmt.setInt(parameterIndex++, objectID);
+                    stmt.setString(parameterIndex++, Event2Appointment.getEMailAddress(attendee.getUri()));
+                    updated += logExecuteUpdate(stmt);
+                }
+            } else if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
+                /*
+                 * update record in prg_dates_members for internal users
+                 */
+                InternalAttendeeMapper mapper = InternalAttendeeMapper.getInstance();
+                AttendeeField[] fields = mapper.getMappedFields(mapper.getAssignedFields(attendee));
+                String sql = new StringBuilder().append("UPDATE prg_dates_members SET ").append(mapper.getAssignments(fields)).append(" WHERE cid=? AND object_id=? AND member_uid=?;").toString();
+                try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                    int parameterIndex = 1;
+                    parameterIndex = mapper.setParameters(stmt, parameterIndex, attendee, fields);
+                    stmt.setInt(parameterIndex++, contextID);
+                    stmt.setInt(parameterIndex++, objectID);
+                    stmt.setInt(parameterIndex++, attendee.getEntity());
+                    updated += logExecuteUpdate(stmt);
                 }
             }
         }
@@ -184,7 +304,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private static int insertOrReplaceDateExternal(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException {
-        String sql = new StringBuilder().append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(" (cid,objectId,mailAddress,displayName,confirm,reason) VALUES (?,?,?,?,?,?);").toString();
+        String sql = new StringBuilder()
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
+            .append(" (cid,objectId,mailAddress,displayName,confirm,reason) VALUES (?,?,?,?,?,?);")
+        .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -198,7 +321,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private static int insertOrReplaceDatesMembers(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException {
-        String sql = new StringBuilder().append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(" (object_id,member_uid,confirm,reason,pfid,reminder,cid) VALUES (?,?,?,?,?,?,?);").toString();
+        String sql = new StringBuilder()
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
+            .append(" (object_id,member_uid,confirm,reason,pfid,reminder,cid) VALUES (?,?,?,?,?,?,?);")
+        .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, objectID);
@@ -213,7 +339,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private static int insertOrReplaceDateRights(Connection connection, String tableName, boolean replace, int contextID, int objectID, int entity, Attendee attendee) throws SQLException {
-        String sql = new StringBuilder().append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(" (object_id,cid,id,type,ma,dn) VALUES (?,?,?,?,?,?);").toString();
+        String sql = new StringBuilder()
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
+            .append(" (object_id,cid,id,type,ma,dn) VALUES (?,?,?,?,?,?);")
+        .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, objectID);

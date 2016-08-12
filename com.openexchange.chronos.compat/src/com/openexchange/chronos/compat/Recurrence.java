@@ -70,6 +70,7 @@ import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Period;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -141,14 +142,95 @@ public class Recurrence {
      * Calculates the implicit start- and end-date of a recurring event series, i.e. the period spanning from the first until the "last"
      * occurrence.
      *
-     * @param pattern The series pattern
+     * @param masterPeriod The actual start- and end-date of the recurrence master, wrapped into a {@link Period} structure
+     * @param timeZone The timezone to consider (should be <code>UTC</code> for "all-day" event series)
+     * @param recurrenceRule The recurrence rule
      * @return The implicit period of a recurring event series
      */
-    public static Period getImplicitSeriesPeriod(SeriesPattern pattern) {
-        // TODO: garantiert auch falsch.
-        Date startDate = pattern.getSeriesStartCalendar().getTime();
-        Date endDate = pattern.getSeriesEndCalendar().getTime();
-        return new Period(startDate, endDate, pattern.isFullTime().booleanValue());
+    public static Period getImplicitSeriesPeriod(Period masterPeriod, TimeZone timeZone, String recurrenceRule) throws OXException {
+
+        // TEST:
+        {
+            try {
+                RecurrenceRule rule = new RecurrenceRule("FREQ=DAILY;UNTIL=20070401T060000Z");
+
+                TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
+
+                Calendar cal = Calendar.getInstance(tz);
+                cal.set(2007, 2, 10, 8, 0, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+                long start = cal.getTimeInMillis();
+
+                RecurrenceRuleIterator iterator = rule.iterator(start, tz);
+                while (iterator.hasNext()) {
+                    DateTime dateTime = iterator.nextDateTime();
+                    System.out.println(new Date(dateTime.getTimestamp()));
+                }
+
+            } catch (InvalidRecurrenceRuleException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+
+        /*
+         * remember time fraction of actual start- and end-date
+         */
+        Calendar calendar = GregorianCalendar.getInstance(timeZone);
+        calendar.setTime(masterPeriod.getStartDate());
+        int startHour = calendar.get(Calendar.HOUR_OF_DAY);
+        int startMinute = calendar.get(Calendar.MINUTE);
+        int startSecond = calendar.get(Calendar.SECOND);
+        calendar.setTime(masterPeriod.getEndDate());
+        int endHour = calendar.get(Calendar.HOUR_OF_DAY);
+        int endMinute = calendar.get(Calendar.MINUTE);
+        int endSecond = calendar.get(Calendar.SECOND);
+
+        RecurrenceRule rule;
+        try {
+            rule = new RecurrenceRule(recurrenceRule);
+        } catch (InvalidRecurrenceRuleException e) {
+            throw OXException.general("", e);
+        }
+        // TODO what if masterPeriod.getStartDate() is *no" occurrence? (series start != start of first occurrence)  ???
+        // rule.iterator(masterPeriod.getStartDate().getTime(), timeZone).nextMillis() returns masterPeriod.getStartDate().getTime() then???
+
+        long millis = masterPeriod.getStartDate().getTime();
+        RecurrenceRuleIterator iterator;
+        if (rule.hasPart(Part.BYDAY) || rule.hasPart(Part.BYMONTH) || rule.hasPart(Part.BYMONTHDAY) || rule.hasPart(Part.BYWEEKNO) || rule.hasPart(Part.BYYEARDAY)) {
+            // keine ahnung ???
+            calendar.setTime(masterPeriod.getStartDate());
+            calendar.add(Calendar.DAY_OF_YEAR, -500);
+            iterator = rule.iterator(calendar.getTimeInMillis(), timeZone);
+            while (iterator.hasNext()) {
+                long nextMillis = iterator.nextMillis();
+                if (nextMillis >= millis) {
+                    millis = nextMillis;
+                    break;
+                }
+            }
+            iterator = rule.iterator(masterPeriod.getStartDate().getTime(), timeZone);
+            iterator.nextMillis();
+        } else {
+            iterator = rule.iterator(millis, timeZone);
+            millis = iterator.nextMillis();
+        }
+        calendar.setTimeInMillis(millis);
+        calendar.set(Calendar.HOUR_OF_DAY, startHour);
+        calendar.set(Calendar.MINUTE, startMinute);
+        calendar.set(Calendar.SECOND, startSecond);
+        Date startDate = calendar.getTime();
+
+        for (int i = 2; i < 1000 && iterator.hasNext(); millis = iterator.nextMillis(), i++)
+            ;
+        calendar.setTimeInMillis(millis);
+        calendar.set(Calendar.HOUR_OF_DAY, endHour);
+        calendar.set(Calendar.MINUTE, endMinute);
+        calendar.set(Calendar.SECOND, endSecond);
+        calendar.add(Calendar.DAY_OF_YEAR, (int) masterPeriod.getTotalDays());
+        Date endDate = calendar.getTime();
+        return new Period(startDate, endDate, masterPeriod.isAllDay());
     }
 
     /**
@@ -225,7 +307,7 @@ public class Recurrence {
                 cObj.setRecurrenceType(CalendarObject.YEARLY);
                 List<Integer> monthList = rrule.getByPart(Part.BYMONTH);
                 if (null != monthList && !monthList.isEmpty()) {
-                    cObj.setMonth(monthList.get(0).intValue() - 1);
+                    cObj.setMonth(monthList.get(0).intValue());
                     setMonthDay(cObj, rrule, startDate);
                 } else {
                     cObj.setMonth(startDate.get(Calendar.MONTH));
@@ -285,14 +367,14 @@ public class Recurrence {
         RecurrenceRule recur = getRecurBuilder(Freq.YEARLY, pattern);
         if (pattern.getType() == 6) {
             addDays(pattern.getDaysOfWeek(), recur);
-            recur.setByPart(Part.BYMONTH, 1 + pattern.getMonth());
+            recur.setByPart(Part.BYMONTH, pattern.getMonth());
             int weekNo = pattern.getDayOfMonth();
             if (5 == weekNo) {
                 weekNo = -1;
             }
             recur.setByPart(Part.BYSETPOS, weekNo);
         } else if (pattern.getType() == 4) {
-            recur.setByPart(Part.BYMONTH, 1 + pattern.getMonth());
+            recur.setByPart(Part.BYMONTH, pattern.getMonth()); //TODO +1 or not? " ... The value is a list of non-zero integers. ..."
             recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
             return null;
@@ -351,11 +433,14 @@ public class Recurrence {
          * iCal wants a correct inclusive until value. With time zone and time. So extract time from the start date.
          */
         Calendar effectiveUntilCalendar = Calendar.getInstance(pattern.getTimeZone());
-        Calendar seriesStart = pattern.getSeriesStartCalendar();
+//        Calendar seriesStart = pattern.getSeriesStartCalendar();
+        Calendar seriesStart = Calendar.getInstance(pattern.getTimeZone());
+        seriesStart.setTimeInMillis(pattern.getSeriesStart().longValue());
         effectiveUntilCalendar.set(utcUntilCalendar.get(Calendar.YEAR), utcUntilCalendar.get(Calendar.MONTH), utcUntilCalendar.get(Calendar.DAY_OF_MONTH), seriesStart.get(Calendar.HOUR_OF_DAY), seriesStart.get(Calendar.MINUTE), seriesStart.get(Calendar.SECOND));
         /*
          * finally, build an ical4j date-time
          */
+//        DateTime dt = new DateTime(pattern.getTimeZone(), effectiveUntilCalendar.getTimeInMillis());
         DateTime dt = new DateTime(effectiveUntilCalendar.getTimeInMillis());
         return dt;
     }
@@ -559,6 +644,8 @@ public class Recurrence {
             pattern.setOccurrences(occurrences);
         } else if (cdao.containsUntil() && cdao.getUntil() != null) {
             pattern.setSeriesEnd(cdao.getUntil().getTime());
+        } else {
+            //            pattern.setSeriesEnd(calculateUntilForUnlimited(cdao, rrule).getTime());
         }
         return pattern;
     }

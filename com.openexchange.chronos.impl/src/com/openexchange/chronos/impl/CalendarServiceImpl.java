@@ -211,14 +211,14 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UserizedEvent updateEvent(CalendarSession session, final int folderID, final UserizedEvent event) throws OXException {
+    public UserizedEvent updateEvent(CalendarSession session, final EventID eventID, final UserizedEvent event) throws OXException {
         Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
         return new WriteOperation<UserizedEvent>(session) {
 
             @Override
             protected UserizedEvent execute(CalendarWriter writer) throws OXException {
-                return writer.updateEvent(folderID, event, clientTimestamp);
+                return writer.updateEvent(eventID, event, clientTimestamp);
             }
         }.execute();
     }

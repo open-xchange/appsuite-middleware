@@ -47,33 +47,67 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.impl;
 
 import java.util.List;
-import java.util.Map;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * {@link AlarmStorage}
+ * {@link CalendarConfig}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface AlarmStorage {
+public class CalendarConfig {
 
-    void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarConfig.class);
 
-    List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
+    private final Context context;
 
-    Map<Integer, List<Alarm>> loadAlarms(int[] objectIDs, int userID) throws OXException;
+    /**
+     * Initializes a new {@link CalendarConfig}
+     *
+     * @param context The groupware context
+     */
+    public CalendarConfig(Context context) {
+        super();
+        this.context = context;
+    }
 
-    void deleteAlarms(int objectID, int userID) throws OXException;
+    /**
+     * Gets the initial participation status to use for new events in a specific folder.
+     *
+     * @param folderType The folder type where the new event is located in
+     * @param userID The identifier of the user to get the participation status for
+     * @return The initial participation status, or {@link ParticipationStatus#NEEDS_ACTION} if not defined
+     */
+    public ParticipationStatus getInitialPartStat(Type folderType, int userID) throws OXException {
+        Integer defaultStatus;
+        if (PublicType.getInstance().equals(folderType)) {
+            defaultStatus = ServerUserSetting.getInstance().getDefaultStatusPublic(context.getContextId(), userID);
+        } else {
+            defaultStatus = ServerUserSetting.getInstance().getDefaultStatusPrivate(context.getContextId(), userID);
+        }
+        return null != defaultStatus ? Appointment2Event.getParticipationStatus(defaultStatus.intValue()) : ParticipationStatus.NEEDS_ACTION;
+    }
 
-    void deleteAlarms(int objectID, int[] userIDs) throws OXException;
+    public int getDefaultFolderID(int userID) throws OXException {
+        //TODO: via higher level service?
+        return new OXFolderAccess(context).getDefaultFolderID(userID, FolderObject.CALENDAR);
+    }
 
-    void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
+    public List<Alarm> getDefaultAlarms(Type folderType, int userID, boolean allDay) throws OXException {
 
-    void deleteAlarms(int objectID) throws OXException;
+        return null;
+    }
 
 }

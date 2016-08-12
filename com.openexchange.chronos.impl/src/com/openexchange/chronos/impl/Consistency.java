@@ -154,28 +154,41 @@ public class Consistency {
         //TODO: non-floating all-day events (with timezone specified?)
         if (event.isAllDay()) {
             if (event.containsStartDate() && null != event.getStartDate()) {
-                event.setStartDate(CalendarUtils.truncateTime(event.getStartDate(), TimeZone.getTimeZone("UTC")));
+                Date truncatedDate = CalendarUtils.truncateTime(event.getStartDate(), TimeZone.getTimeZone("UTC"));
+                if (false == truncatedDate.equals(event.getStartDate())) {
+                    event.setStartDate(truncatedDate);
+                }
             }
             if (event.containsEndDate() && null != event.getEndDate()) {
-                Date endDate = CalendarUtils.truncateTime(event.getEndDate(), TimeZone.getTimeZone("UTC"));
-                if (endDate.equals(event.getStartDate())) {
-                    Calendar calendar = CalendarUtils.initCalendar(TimeZone.getTimeZone("UTC"), endDate);
+                Date truncatedDate = CalendarUtils.truncateTime(event.getEndDate(), TimeZone.getTimeZone("UTC"));
+                if (truncatedDate.equals(event.getStartDate())) {
+                    Calendar calendar = CalendarUtils.initCalendar(TimeZone.getTimeZone("UTC"), truncatedDate);
                     calendar.add(Calendar.DAY_OF_YEAR, 1);
-                    endDate = calendar.getTime();
+                    truncatedDate = calendar.getTime();
                 }
-                event.setEndDate(endDate);
+                if (false == truncatedDate.equals(event.getEndDate())) {
+                    event.setEndDate(truncatedDate);
+                }
             }
         }
     }
 
-    public static void setModifiedNow(Event event, int modifiedBy) {
-        event.setLastModified(new Date());
+    public static void setModified(Date lastModified, Event event, int modifiedBy) {
+        event.setLastModified(lastModified);
         event.setModifiedBy(modifiedBy);
     }
 
-    public static void setCreatedNow(Event event, int createdBy) {
-        event.setCreated(new Date());
+    public static void setCreated(Date created, Event event, int createdBy) {
+        event.setCreated(created);
         event.setCreatedBy(createdBy);
+    }
+
+    public static void setModifiedNow(Event event, int modifiedBy) {
+        setModified(new Date(), event, modifiedBy);
+    }
+
+    public static void setCreatedNow(Event event, int createdBy) {
+        setCreated(new Date(), event, createdBy);
     }
 
     private Consistency() {

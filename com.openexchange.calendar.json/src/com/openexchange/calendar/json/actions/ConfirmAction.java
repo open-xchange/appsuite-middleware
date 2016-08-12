@@ -168,7 +168,7 @@ public final class ConfirmAction extends ChronosAction {
         ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jsonObject);
         Attendee attendee = EventConverter.getAttendee(participant);
         if ((0 == participant.getType() || Participant.USER == participant.getType()) && 0 == participant.getIdentifier()) {
-            attendee.setEntity(request.getSession().getUserId());
+            attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : calendarSession.getUser().getId());
         }
         UserizedEvent updatedEvent = calendarService.updateAttendee(calendarSession, folderID, objectID, attendee);
         return new AJAXRequestResult(new JSONObject(0), updatedEvent.getEvent().getLastModified(), "json");

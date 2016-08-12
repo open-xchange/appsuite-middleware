@@ -532,9 +532,18 @@ public class EventConverter {
             return null;
         }
         SeriesPattern pattern = new SeriesPattern();
-        pattern.setType(appointment.getRecurrenceType());
+        if (SeriesPattern.YEARLY_1.intValue() == appointment.getRecurrenceType() && appointment.containsDays()) {
+            pattern.setType(SeriesPattern.YEARLY_2);
+        } else if (SeriesPattern.MONTHLY_1.intValue() == appointment.getRecurrenceType() && appointment.containsDays()) {
+            pattern.setType(SeriesPattern.MONTHLY_2);
+        } else {
+            pattern.setType(appointment.getRecurrenceType());
+        }
         if (appointment.containsRecurringStart()) {
             pattern.setSeriesStart(Long.valueOf(appointment.getRecurringStart()));
+        } else if (null != appointment.getStartDate()) {
+            //TODO: check - assume appointment start date
+            pattern.setSeriesStart(Long.valueOf(appointment.getStartDate().getTime()));
         }
         if (appointment.containsDays()) {
             pattern.setDaysOfWeek(appointment.getDays());

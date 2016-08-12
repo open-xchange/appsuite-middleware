@@ -134,6 +134,13 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
+    public void deleteAlarms(int objectID, int[] userIDs) throws OXException {
+        for (int userID : userIDs) {
+            deleteAlarms(objectID, userID);
+        }
+    }
+
+    @Override
     public void deleteAlarms(int objectID) throws OXException {
         int updated = 0;
         Connection connection = null;
