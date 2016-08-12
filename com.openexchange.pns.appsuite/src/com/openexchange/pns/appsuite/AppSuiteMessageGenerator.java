@@ -68,7 +68,7 @@ import com.openexchange.pns.TextMessage;
 
 
 /**
- * {@link AppSuiteMessageGenerator} - The message generator for App Suite.
+ * {@link AppSuiteMessageGenerator} - The message generator for App Suite UI.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
@@ -79,22 +79,22 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
 
     private static final String DEFAULT_NAMESPACE = "/";
 
-    private static interface MessageGenerator {
+    private static interface ArgsGenerator {
 
         /**
-         * Generates the message.
+         * Provides the JSON-compatible arguments to append to a Socket.IO message.
          *
-         * @param notification The notification from which to create the message
+         * @param notification The notification from which to create the arguments
          * @return The arguments
-         * @throws OXException If generating the message fails
+         * @throws OXException If generating the arguments fails
          */
-        Collection<Object> generateMessageFor(PushNotification notification) throws OXException;
+        Collection<Object> generateArgsFrom(PushNotification notification) throws OXException;
 
     }
 
     // ------------------------------------------------------------------------------------------------------------------------
 
-    private final Map<String, MessageGenerator> generators;
+    private final Map<String, ArgsGenerator> generators;
 
     /**
      * Initializes a new {@link AppSuiteMessageGenerator}.
@@ -102,11 +102,11 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
     public AppSuiteMessageGenerator() {
         super();
 
-        Map<String, MessageGenerator> generators = new HashMap<>(16);
-        generators.put(KnownTopic.MAIL_NEW.getName(), new MessageGenerator() {
+        Map<String, ArgsGenerator> generators = new HashMap<>(16);
+        generators.put(KnownTopic.MAIL_NEW.getName(), new ArgsGenerator() {
 
             @Override
-            public Collection<Object> generateMessageFor(PushNotification notification) throws OXException {
+            public Collection<Object> generateArgsFrom(PushNotification notification) throws OXException {
                 Map<String, Object> messageData = notification.getMessageData();
                 // Socket.io compatible text message?
                 return messageData.values();
@@ -128,13 +128,13 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
         }
 
         String topic = notification.getTopic();
-        MessageGenerator messageGenerator = generators.get(topic);
-        if (null == generators) {
+        ArgsGenerator argsGenerator = generators.get(topic);
+        if (null == argsGenerator) {
             throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create("Unhandled topic " + topic);
         }
 
         try {
-            return new TextMessage(new JSONObject(3).put("name", topic).put("args", new JSONArray(messageGenerator.generateMessageFor(notification))).put("namespace", DEFAULT_NAMESPACE).toString());
+            return new TextMessage(new JSONObject(3).put("name", topic).put("args", new JSONArray(argsGenerator.generateArgsFrom(notification))).put("namespace", DEFAULT_NAMESPACE).toString());
         } catch (JSONException e) {
             throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

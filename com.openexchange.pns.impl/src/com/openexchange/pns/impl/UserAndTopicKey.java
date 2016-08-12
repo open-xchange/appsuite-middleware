@@ -47,48 +47,72 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.impl;
 
+import com.openexchange.pns.PushNotification;
 
 /**
- * {@link PushNotificationField} - The well-known fields for a push notification.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * Simple key that combines user and topic.
  */
-public enum PushNotificationField {
+class UserAndTopicKey {
 
-    // -------------------------------- Generic fields --------------------------------
-    /** The key providing the actual message to display; type is <code>java.lang.String</code> */
-    MESSAGE("message"),
-    /** The folder identifier; type is <code>java.lang.String</code> */
-    FOLDER("folder"),
+    final int userId;
+    final int contextId;
+    final String topic;
+    private final int hash;
 
-    // -------------------------------- Mail-related fields --------------------------------
-    /** The subject of a mail; type is <code>java.lang.String</code> */
-    MAIL_SUBJECT("subject"),
-    /** The sender of a mail; type is <code>java.lang.String</code> */
-    MAIL_SENDER("sender"),
-    /** The unread count; type is <code>java.lang.Integer</code> */
-    MAIL_UNREAD("unread"),
-    /** The key providing the mail path; type is <code>java.lang.String</code> */
-    MAIL_PATH("cid"),
-
-    ;
-
-    private final String id;
-
-    private PushNotificationField(String id) {
-        this.id = id;
+    /**
+     * Initializes a new {@link UserAndTopicKey}.
+     */
+    UserAndTopicKey(PushNotification notification) {
+        this(notification.getTopic(), notification.getUserId(), notification.getContextId());
     }
 
     /**
-     * Gets the identifier
-     *
-     * @return The identifier
+     * Initializes a new {@link UserAndTopicKey}.
      */
-    public String getId() {
-        return id;
+    UserAndTopicKey(String topic, int userId, int contextId) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+        this.topic = topic;
+
+        int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
+        this.hash = result;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof UserAndTopicKey)) {
+            return false;
+        }
+        UserAndTopicKey other = (UserAndTopicKey) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (topic == null) {
+            if (other.topic != null) {
+                return false;
+            }
+        } else if (!topic.equals(other.topic)) {
+            return false;
+        }
+        return true;
     }
 
 }

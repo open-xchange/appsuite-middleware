@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.impl.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
@@ -56,6 +57,7 @@ import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.impl.PushNotificationServiceImpl;
+import com.openexchange.timer.TimerService;
 
 
 /**
@@ -65,6 +67,8 @@ import com.openexchange.pns.impl.PushNotificationServiceImpl;
  * @since v7.8.3
  */
 public class PushNotificationServiceImplActivator extends HousekeepingActivator {
+
+    private PushNotificationServiceImpl serviceImpl;
 
     /**
      * Initializes a new {@link PushNotificationServiceImplActivator}.
@@ -80,11 +84,11 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { PushSubscriptionRegistry.class };
+        return new Class<?>[] { PushSubscriptionRegistry.class, ConfigurationService.class, TimerService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         PushNotificationTransportTracker transportTracker = new PushNotificationTransportTracker(context);
         track(PushNotificationTransport.class, transportTracker);
 
@@ -93,9 +97,24 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
 
         openTrackers();
 
-        PushNotificationServiceImpl serviceImpl = new PushNotificationServiceImpl(getService(PushSubscriptionRegistry.class), transportTracker);
+        PushSubscriptionRegistry registry = getService(PushSubscriptionRegistry.class);
+        ConfigurationService configService = getService(ConfigurationService.class);
+        TimerService timerService = getService(TimerService.class);
+
+        PushNotificationServiceImpl serviceImpl = new PushNotificationServiceImpl(registry, configService, timerService, transportTracker);
+        this.serviceImpl = serviceImpl;
         registerService(PushNotificationService.class, serviceImpl);
         registerService(PushMessageGeneratorRegistry.class, generatorTracker);
+    }
+
+    @Override
+    protected synchronized void stopBundle() throws Exception {
+        PushNotificationServiceImpl serviceImpl = this.serviceImpl;
+        if (null != serviceImpl) {
+            this.serviceImpl = null;
+            serviceImpl.stop();
+        }
+        super.stopBundle();
     }
 
 }

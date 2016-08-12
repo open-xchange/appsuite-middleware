@@ -16,6 +16,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.osgi.annotation,
  com.openexchange.pns,
  com.openexchange.server,
+ com.openexchange.timer,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
