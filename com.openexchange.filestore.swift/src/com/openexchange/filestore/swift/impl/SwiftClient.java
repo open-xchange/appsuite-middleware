@@ -730,12 +730,12 @@ public class SwiftClient {
             response = httpClient.execute(post);
 
             int status = response.getStatusLine().getStatusCode();
-            if (HttpServletResponse.SC_OK != status && HttpServletResponse.SC_CREATED != status) {
-                throw SwiftExceptionCode.AUTH_FAILED.create();
+            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
+                JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
+                return authValue.getType().getParser().parseTokenFrom(jResponse);
             }
 
-            JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
-            return authValue.getType().getParser().parseTokenFrom(jResponse);
+            throw SwiftExceptionCode.AUTH_FAILED.create();
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (JSONException e) {
