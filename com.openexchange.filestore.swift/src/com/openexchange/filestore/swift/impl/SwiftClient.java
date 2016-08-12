@@ -719,7 +719,7 @@ public class SwiftClient {
                 String identityEndPoint = authValue.getIdentityUrl();
                 JSONObject jAuthData = new JSONObject(2);
                 switch (authValue.getType()) {
-                    case PASSWORD_V2:
+                    case PASSWORD_V2: {
                         if (Strings.isEmpty(identityEndPoint)) {
                             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("identityUrl");
                         }
@@ -732,9 +732,15 @@ public class SwiftClient {
                         post = new HttpPost(identityEndPoint);
                         jAuthData = new JSONObject(4).put("tenantName", tenantName).put("passwordCredentials", new JSONObject(3).put("username", userName).put("password", authValue.getValue()));
                         break;
-                    case PASSWORD_V3:
+                    }
+                    case PASSWORD_V3: {
                         if (Strings.isEmpty(identityEndPoint)) {
                             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("identityUrl");
+                        }
+
+                        String tenantName = authValue.getTenantName();
+                        if (Strings.isEmpty(tenantName)) {
+                            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("tenantName");
                         }
 
                         String domain = authValue.getDomain();
@@ -743,10 +749,18 @@ public class SwiftClient {
                         }
 
                         post = new HttpPost(identityEndPoint);
+
+                        // Create the "identity" object
                         JSONObject jUser = new JSONObject(4).put("name", userName).put("domain", new JSONObject(2).put("id", domain)).put("password", authValue.getValue());
                         JSONObject jIdentity = new JSONObject(4).put("methods", new JSONArray(1).put("password")).put("password", new JSONObject(2).put("user", jUser));
-                        jAuthData = new JSONObject(2).put("identity", jIdentity);
+
+                        // Create the "scope" object
+                        JSONObject jProject = new JSONObject(4).put("name", tenantName).put("domain", new JSONObject(2).put("id", "default"));
+                        JSONObject jScope = new JSONObject(2).put("project", jProject);
+
+                        jAuthData = new JSONObject(4).put("identity", jIdentity).put("scope", jScope);
                         break;
+                    }
                     case RACKSPACE_API_KEY:
                         post = new HttpPost(Strings.isEmpty(identityEndPoint) ? "https://identity.api.rackspacecloud.com/v2.0/tokens" : identityEndPoint);
                         jAuthData = new JSONObject(2).put("RAX-KSKEY:apiKeyCredentials", new JSONObject(3).put("username", userName).put("apiKey", authValue.getValue()));
