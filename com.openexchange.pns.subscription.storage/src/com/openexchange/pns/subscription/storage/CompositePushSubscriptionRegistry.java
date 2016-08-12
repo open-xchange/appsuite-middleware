@@ -57,11 +57,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.pns.Hits;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.PushSubscription.Nature;
+import com.openexchange.pns.PushSubscriptionProvider;
 
 
 /**
@@ -75,14 +77,16 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     private final List<PushSubscriptionRegistry> registries;
     private final PushSubscriptionRegistry persistentRegistry;
     private final PushSubscriptionRegistry volatileRegistry;
+    private final ServiceListing<PushSubscriptionProvider> providers;
 
     /**
      * Initializes a new {@link CompositePushSubscriptionRegistry}.
      */
-    public CompositePushSubscriptionRegistry(PushSubscriptionRegistry persistentRegistry, PushSubscriptionRegistry volatileRegistry) {
+    public CompositePushSubscriptionRegistry(PushSubscriptionRegistry persistentRegistry, PushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers) {
         super();
         this.persistentRegistry = persistentRegistry;
         this.volatileRegistry = volatileRegistry;
+        this.providers = providers;
         this.registries = new CopyOnWriteArrayList<PushSubscriptionRegistry>(Arrays.<PushSubscriptionRegistry> asList(persistentRegistry, volatileRegistry));
     }
 
@@ -112,7 +116,27 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
             }
         }
 
-        return new MapBackedHits(null == map ? Collections.<ClientAndTransport, List<PushMatch>> emptyMap() : map);
+        // Build hits from queried registries
+        MapBackedHits hits = new MapBackedHits(null == map ? Collections.<ClientAndTransport, List<PushMatch>> emptyMap() : map);
+
+        // Check for more hits from providers
+        LinkedList<Hits> moreHits = null;
+        for (PushSubscriptionProvider provider : providers) {
+            Hits currentHits = provider.getInterestedSubscriptions(userId, contextId, topic);
+            if (false == currentHits.isEmpty()) {
+                if (null == moreHits) {
+                    moreHits = new LinkedList<>();
+                }
+                moreHits.add(currentHits);
+            }
+        }
+
+        if (null == moreHits) {
+            return hits;
+        }
+
+        moreHits.addFirst(hits);
+        return new IteratorBackedHits(moreHits);
     }
 
     @Override

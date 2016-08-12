@@ -47,111 +47,56 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.internal;
+package com.openexchange.pns.subscription.storage;
 
-import com.openexchange.pns.PushSubscription;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import com.google.common.collect.Iterators;
+import com.openexchange.pns.Hit;
+import com.openexchange.pns.Hits;
+
 
 /**
- * {@link Unsubscription} - An unsubscription from a Web Socket transport.
+ * {@link IteratorBackedHits}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-final class Unsubscription {
+public class IteratorBackedHits implements Hits {
 
-    private final int userId;
-    private final int contextId;
-    private final String client;
-    private final PushSubscription subscription;
-    private volatile Integer hash;
+    private final List<Hits> hits;
 
     /**
-     * Initializes a new {@link Unsubscription}.
-     *
-     * @param subscription The subscription to unsubscribe
+     * Initializes a new {@link IteratorBackedHits}.
      */
-    public Unsubscription(PushSubscription subscription) {
+    public IteratorBackedHits(List<Hits> hits) {
         super();
-        this.subscription = subscription;
-        this.userId = subscription.getUserId();
-        this.contextId = subscription.getContextId();
-        this.client = subscription.getClient();
-    }
-
-    /**
-     * Gets the subscription
-     *
-     * @return The subscription
-     */
-    public PushSubscription getSubscription() {
-        return subscription;
-    }
-
-    /**
-     * Gets the client
-     *
-     * @return The client
-     */
-    public String getClient() {
-        return client;
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
+        this.hits = hits;
     }
 
     @Override
-    public int hashCode() {
-        Integer tmp = hash;
-        if (null == tmp) {
-            int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            result = prime * result + ((client == null) ? 0 : client.hashCode());
-            tmp = Integer.valueOf(result);
-            hash = tmp;
+    public Iterator<Hit> iterator() {
+        int size = hits.size();
+        if (size == 0) {
+            return Collections.emptyIterator();
         }
-        return tmp.intValue();
+
+        if (size == 1) {
+            return Iterators.unmodifiableIterator(hits.get(0).iterator());
+        }
+
+        List<Iterator<Hit>> iters = new ArrayList<>(size);
+        for (Hits hits : hits) {
+            iters.add(hits.iterator());
+        }
+        return Iterators.unmodifiableIterator(Iterators.concat(iters.iterator()));
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof Unsubscription)) {
-            return false;
-        }
-        Unsubscription other = (Unsubscription) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        if (client == null) {
-            if (other.client != null) {
-                return false;
-            }
-        } else if (!client.equals(other.client)) {
-            return false;
-        }
-        return true;
+    public boolean isEmpty() {
+        return false;
     }
 
 }

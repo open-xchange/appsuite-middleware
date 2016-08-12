@@ -57,116 +57,84 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * {@link BufferingQueue}
- * <p/>
- * Wraps an event queue as a buffer for elements that should be available in the queue after a defined timespan. Offering the same
+ * {@link UnsychronizedBufferingQueue} - The unsychronized view for a {@link BufferingQueue}.
+ * <p>
+ * Wraps an event queue as a buffer for elements that should be available in the queue after a defined time span. Offering the same
  * elements again optionally resets the buffering time via {@link #offerIfAbsentElseReset(BufferedElement)}, up to a defined maximum
  * duration, or may replace the existing element via {@link #offerOrReplace(BufferedElement)}.
- * <p/>
+ * <p>
  * Useful to construct send- or receive-buffers capable of eliminating or stalling multiple duplicate elements before they get available
  * for consumers.
  *
  * @param <E> the type of elements held in this collection
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
+ * @since v7.8.3
  */
-public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue<E> {
-
-    /** The lock instance */
-    transient final ReentrantLock lock = new ReentrantLock();
+public class UnsychronizedBufferingQueue<E> extends AbstractQueue<E> {
 
     /** The backing priority queue */
     final PriorityQueue<BufferedElement<E>> q = new PriorityQueue<BufferedElement<E>>();
-
-    /**
-     * Thread designated to wait for the element at the head of
-     * the queue.  This variant of the Leader-Follower pattern
-     * (http://www.cs.wustl.edu/~schmidt/POSA/POSA2/) serves to
-     * minimize unnecessary timed waiting.  When a thread becomes
-     * the leader, it waits only for the next delay to elapse, but
-     * other threads await indefinitely.  The leader thread must
-     * signal some other thread before returning from take() or
-     * poll(...), unless some other thread becomes leader in the
-     * interim.  Whenever the head of the queue is replaced with
-     * an element with an earlier expiration time, the leader
-     * field is invalidated by being reset to null, and some
-     * waiting thread, but not necessarily the current leader, is
-     * signalled.  So waiting threads must be prepared to acquire
-     * and lose leadership while waiting.
-     */
-    private Thread leader = null;
-
-    /**
-     * Condition signalled when a newer element becomes available
-     * at the head of the queue or a new thread may need to
-     * become leader.
-     */
-    private final Condition available = lock.newCondition();
 
     private final long defaultDelayDuration;
     private final long defaultMaxDelayDuration;
 
     /**
-     * Creates a new {@link BufferingQueue} that is initially empty, without specific default buffer durations, i.e. each added element
+     * Creates a new {@link UnsychronizedBufferingQueue} that is initially empty, without specific default buffer durations, i.e. each added element
      * is available immediately after adding.
      */
-    public BufferingQueue() {
+    public UnsychronizedBufferingQueue() {
         this(0L, 0L);
     }
 
     /**
-     * Creates a new {@link BufferingQueue} that is initially empty, using the supplied duration as default for newly added elements.
+     * Creates a new {@link UnsychronizedBufferingQueue} that is initially empty, using the supplied duration as default for newly added elements.
      *
      * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
      */
-    public BufferingQueue(long defaultDelayDuration) {
+    public UnsychronizedBufferingQueue(long defaultDelayDuration) {
         this(defaultDelayDuration, 0L);
     }
 
     /**
-     * Creates a new {@link BufferingQueue} that is initially empty, using the supplied durations as default for newly added elements.
+     * Creates a new {@link UnsychronizedBufferingQueue} that is initially empty, using the supplied durations as default for newly added elements.
      *
      * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
      * @param defaultMaxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
      */
-    public BufferingQueue(long defaultDelayDuration, long defaultMaxDelayDuration) {
+    public UnsychronizedBufferingQueue(long defaultDelayDuration, long defaultMaxDelayDuration) {
         super();
         this.defaultDelayDuration = defaultDelayDuration;
         this.defaultMaxDelayDuration = defaultMaxDelayDuration;
     }
 
     /**
-     * Creates a {@link BufferingQueue} initially containing the elements of the given collection, without specific default durations.
+     * Creates a {@link UnsychronizedBufferingQueue} initially containing the elements of the given collection, without specific default durations.
      *
      * @param c the collection of elements to initially contain
      * @throws NullPointerException if the specified collection or any of its elements are null
      */
-    public BufferingQueue(Collection<? extends E> c) {
+    public UnsychronizedBufferingQueue(Collection<? extends E> c) {
         this(c, 0L);
     }
 
     /**
-     * Creates a {@link BufferingQueue} initially containing the elements of the given collection, using the supplied duration as
+     * Creates a {@link UnsychronizedBufferingQueue} initially containing the elements of the given collection, using the supplied duration as
      * default for newly added elements.
      *
      * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
      * @param c the collection of elements to initially contain
      * @throws NullPointerException if the specified collection or any of its elements are null
      */
-    public BufferingQueue(Collection<? extends E> c, long defaultDelayDuration) {
+    public UnsychronizedBufferingQueue(Collection<? extends E> c, long defaultDelayDuration) {
         this(c, defaultDelayDuration, 0L);
     }
 
     /**
-     * Creates a {@link BufferingQueue} initially containing the elements of the given collection, using the supplied durations as
+     * Creates a {@link UnsychronizedBufferingQueue} initially containing the elements of the given collection, using the supplied durations as
      * default for newly added elements.
      *
      * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
@@ -174,7 +142,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @param c the collection of elements to initially contain
      * @throws NullPointerException if the specified collection or any of its elements are null
      */
-    public BufferingQueue(Collection<? extends E> c, long defaultDelayDuration, long defaultMaxDelayDuration) {
+    public UnsychronizedBufferingQueue(Collection<? extends E> c, long defaultDelayDuration, long defaultMaxDelayDuration) {
         this(defaultDelayDuration, defaultMaxDelayDuration);
         this.addAll(c);
     }
@@ -225,19 +193,9 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @throws NullPointerException if the specified element is null
      */
     public boolean offer(E e, long delayDuration, long maxDelayDuration) {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
-            q.offer(delayedE);
-            if (q.peek() == delayedE) {
-                leader = null;
-                available.signal();
-            }
-            return true;
-        } finally {
-            lock.unlock();
-        }
+        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+        q.offer(delayedE);
+        return true;
     }
 
     /**
@@ -273,22 +231,12 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @throws NullPointerException if the specified element is <code>null</code>
      */
     public boolean offerIfAbsent(E e, long delayDuration, long maxDelayDuration) {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
-            if (contains(delayedE)) {
-                return false;
-            }
-            q.offer(delayedE);
-            if (q.peek() == delayedE) {
-                leader = null;
-                available.signal();
-            }
-            return true;
-        } finally {
-            lock.unlock();
+        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+        if (contains(delayedE)) {
+            return false;
         }
+        q.offer(delayedE);
+        return true;
     }
 
     /**
@@ -314,35 +262,25 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @throws NullPointerException if the specified element is <code>null</code>
      */
     public boolean offerIfAbsentElseReset(E e, long delayDuration, long maxDelayDuration) {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            // Check if already contained
-            BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
-            {
-                BufferedElement<E> prev = null;
-                for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
-                    BufferedElement<E> next = it.next();
-                    if (delayedE.equals(next)) {
-                        prev = next;
-                        it.remove();
-                    }
-                }
-                if (null != prev) {
-                    prev.reset();
-                    q.offer(prev);
-                    return false;
+        // Check if already contained
+        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+        {
+            BufferedElement<E> prev = null;
+            for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
+                BufferedElement<E> next = it.next();
+                if (delayedE.equals(next)) {
+                    prev = next;
+                    it.remove();
                 }
             }
-            q.offer(delayedE);
-            if (q.peek() == delayedE) {
-                leader = null;
-                available.signal();
+            if (null != prev) {
+                prev.reset();
+                q.offer(prev);
+                return false;
             }
-            return true;
-        } finally {
-            lock.unlock();
         }
+        q.offer(delayedE);
+        return true;
     }
 
     /**
@@ -368,49 +306,37 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @throws NullPointerException if the specified element is <code>null</code>
      */
     public boolean offerIfAbsentElseReset(Collection<? extends E> c, long delayDuration, long maxDelayDuration) {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            /*
-             * reset already contained elements, remember elements to add
-             */
-            List<E> elementsToAdd = new ArrayList<E>(c);
-            Iterator<BufferedElement<E>> iterator = q.iterator();
-            while (iterator.hasNext()) {
-                BufferedElement<E> bufferedElement = iterator.next();
-                Iterator<E> elementsIterator = elementsToAdd.iterator();
-                while (elementsIterator.hasNext()) {
-                    E element = elementsIterator.next();
-                    if (bufferedElement.equals(element)) {
-                        bufferedElement.reset();
-                        elementsIterator.remove();
-                        break;
-                    }
+        /*
+         * reset already contained elements, remember elements to add
+         */
+        List<E> elementsToAdd = new ArrayList<E>(c);
+        Iterator<BufferedElement<E>> iterator = q.iterator();
+        while (iterator.hasNext()) {
+            BufferedElement<E> bufferedElement = iterator.next();
+            Iterator<E> elementsIterator = elementsToAdd.iterator();
+            while (elementsIterator.hasNext()) {
+                E element = elementsIterator.next();
+                if (bufferedElement.equals(element)) {
+                    bufferedElement.reset();
+                    elementsIterator.remove();
+                    break;
                 }
             }
-            if (elementsToAdd.isEmpty()) {
-                /*
-                 * all already contained
-                 */
-                return false;
-            }
-            /*
-             * add not contained elements, signal as needed
-             */
-            boolean signal = false;
-            for (E e : elementsToAdd) {
-                BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
-                q.offer(delayedE);
-                signal |= q.peek() == delayedE;
-            }
-            if (signal) {
-                leader = null;
-                available.signal();
-            }
-            return true;
-        } finally {
-            lock.unlock();
         }
+        if (elementsToAdd.isEmpty()) {
+            /*
+             * all already contained
+             */
+            return false;
+        }
+        /*
+         * add not contained elements, signal as needed
+         */
+        for (E e : elementsToAdd) {
+            BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+            q.offer(delayedE);
+        }
+        return true;
     }
 
     /**
@@ -444,27 +370,17 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      */
     public E offerOrReplace(E e, long delayDuration, long maxDelayDuration) {
         BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            // Check if already contained
-            BufferedElement<E> prev = null;
-            for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
-                BufferedElement<E> next = it.next();
-                if (delayedE.equals(next)) {
-                    prev = next;
-                    it.remove();
-                }
+        // Check if already contained
+        BufferedElement<E> prev = null;
+        for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
+            BufferedElement<E> next = it.next();
+            if (delayedE.equals(next)) {
+                prev = next;
+                it.remove();
             }
-            q.offer(delayedE);
-            if (q.peek() == delayedE) {
-                leader = null;
-                available.signal();
-            }
-            return null == prev ? null : prev.getElement();
-        } finally {
-            lock.unlock();
         }
+        q.offer(delayedE);
+        return null == prev ? null : prev.getElement();
     }
 
     /**
@@ -491,29 +407,19 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      */
     public E offerOrReplaceAndReset(E e, long delayDuration, long maxDelayDuration) {
         BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            // Check if already contained
-            BufferedElement<E> prev = null;
-            for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
-                BufferedElement<E> next = it.next();
-                if (delayedE.equals(next)) {
-                    prev = next;
-                    delayedE = transfer(e, prev);
-                    delayedE.reset(); // Resets to prev
-                    it.remove();
-                }
+        // Check if already contained
+        BufferedElement<E> prev = null;
+        for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
+            BufferedElement<E> next = it.next();
+            if (delayedE.equals(next)) {
+                prev = next;
+                delayedE = transfer(e, prev);
+                delayedE.reset(); // Resets to prev
+                it.remove();
             }
-            q.offer(delayedE);
-            if (q.peek() == delayedE) {
-                leader = null;
-                available.signal();
-            }
-            return null == prev ? null : prev.getElement();
-        } finally {
-            lock.unlock();
         }
+        q.offer(delayedE);
+        return null == prev ? null : prev.getElement();
     }
 
     /**
@@ -528,33 +434,6 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
     }
 
     /**
-     * Inserts the specified element into this delay queue. As the queue is
-     * unbounded this method will never block.
-     *
-     * @param e the element to add
-     * @throws NullPointerException {@inheritDoc}
-     */
-    @Override
-    public void put(E e) {
-        offer(e);
-    }
-
-    /**
-     * Inserts the specified element into this delay queue. As the queue is
-     * unbounded this method will never block.
-     *
-     * @param e the element to add
-     * @param timeout This parameter is ignored as the method never blocks
-     * @param unit This parameter is ignored as the method never blocks
-     * @return <tt>true</tt>
-     * @throws NullPointerException {@inheritDoc}
-     */
-    @Override
-    public boolean offer(E e, long timeout, TimeUnit unit) {
-        return offer(e);
-    }
-
-    /**
      * Retrieves and removes the head of this queue, or returns <tt>null</tt>
      * if this queue has no elements with an expired delay.
      *
@@ -563,113 +442,8 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      */
     @Override
     public E poll() {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            BufferedElement<E> first = q.peek();
-            return first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0 ? null : q.poll().getElement();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Retrieves and removes the head of this queue, waiting if necessary
-     * until an element with an expired delay is available on this queue.
-     *
-     * @return the head of this queue
-     * @throws InterruptedException {@inheritDoc}
-     */
-    @Override
-    public E take() throws InterruptedException {
-        ReentrantLock lock = this.lock;
-        lock.lockInterruptibly();
-        try {
-            for (;;) {
-                BufferedElement<E> first = q.peek();
-                if (first == null) {
-                    available.await();
-                } else {
-                    long delay = first.getDelay(TimeUnit.NANOSECONDS);
-                    if (delay <= 0) {
-                        return q.poll().getElement();
-                    } else if (leader != null) {
-                        available.await();
-                    } else {
-                        Thread thisThread = Thread.currentThread();
-                        leader = thisThread;
-                        try {
-                            available.awaitNanos(delay);
-                        } finally {
-                            if (leader == thisThread) {
-                                leader = null;
-                            }
-                        }
-                    }
-                }
-            }
-        } finally {
-            if (leader == null && q.peek() != null) {
-                available.signal();
-            }
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Retrieves and removes the head of this queue, waiting if necessary
-     * until an element with an expired delay is available on this queue,
-     * or the specified wait time expires.
-     *
-     * @return the head of this queue, or <tt>null</tt> if the
-     *         specified waiting time elapses before an element with
-     *         an expired delay becomes available
-     * @throws InterruptedException {@inheritDoc}
-     */
-    @Override
-    public E poll(long timeout, TimeUnit unit) throws InterruptedException {
-        long nanos = unit.toNanos(timeout);
-        ReentrantLock lock = this.lock;
-        lock.lockInterruptibly();
-        try {
-            for (;;) {
-                BufferedElement<E> first = q.peek();
-                if (first == null) {
-                    if (nanos <= 0) {
-                        return null;
-                    } else {
-                        nanos = available.awaitNanos(nanos);
-                    }
-                } else {
-                    long delay = first.getDelay(TimeUnit.NANOSECONDS);
-                    if (delay <= 0) {
-                        return q.poll().getElement();
-                    }
-                    if (nanos <= 0) {
-                        return null;
-                    }
-                    if (nanos < delay || leader != null) {
-                        nanos = available.awaitNanos(nanos);
-                    } else {
-                        Thread thisThread = Thread.currentThread();
-                        leader = thisThread;
-                        try {
-                            long timeLeft = available.awaitNanos(delay);
-                            nanos -= delay - timeLeft;
-                        } finally {
-                            if (leader == thisThread) {
-                                leader = null;
-                            }
-                        }
-                    }
-                }
-            }
-        } finally {
-            if (leader == null && q.peek() != null) {
-                available.signal();
-            }
-            lock.unlock();
-        }
+        BufferedElement<E> first = q.peek();
+        return first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0 ? null : q.poll().getElement();
     }
 
     /**
@@ -684,25 +458,13 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      */
     @Override
     public E peek() {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            BufferedElement<E> delayedE = q.peek();
-            return null != delayedE ? delayedE.getElement() : null;
-        } finally {
-            lock.unlock();
-        }
+        BufferedElement<E> delayedE = q.peek();
+        return null != delayedE ? delayedE.getElement() : null;
     }
 
     @Override
     public int size() {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            return q.size();
-        } finally {
-            lock.unlock();
-        }
+        return q.size();
     }
 
     /**
@@ -711,7 +473,6 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
-    @Override
     public int drainTo(Collection<? super E> c) {
         return drainTo(c, Integer.MAX_VALUE);
     }
@@ -722,7 +483,6 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * @throws NullPointerException          {@inheritDoc}
      * @throws IllegalArgumentException      {@inheritDoc}
      */
-    @Override
     public int drainTo(Collection<? super E> c, int maxElements) {
         if (c == null) {
             throw new NullPointerException();
@@ -733,22 +493,16 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
         if (maxElements <= 0) {
             return 0;
         }
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            int n = 0;
-            while (n < maxElements) {
-                BufferedElement<E> first = q.peek();
-                if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
-                    break;
-                }
-                c.add(q.poll().getElement());
-                ++n;
+        int n = 0;
+        while (n < maxElements) {
+            BufferedElement<E> first = q.peek();
+            if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
+                break;
             }
-            return n;
-        } finally {
-            lock.unlock();
+            c.add(q.poll().getElement());
+            ++n;
         }
+        return n;
     }
 
     /**
@@ -759,24 +513,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      */
     @Override
     public void clear() {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            q.clear();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Always returns <tt>Integer.MAX_VALUE</tt> because
-     * a <tt>DelayQueue</tt> is not capacity constrained.
-     *
-     * @return <tt>Integer.MAX_VALUE</tt>
-     */
-    @Override
-    public int remainingCapacity() {
-        return Integer.MAX_VALUE;
+        q.clear();
     }
 
     /**
@@ -794,18 +531,12 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      */
     @Override
     public Object[] toArray() {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            Object[] delayedArray = q.toArray();
-            Object[] array = new Object[delayedArray.length];
-            for (int i = 0; i < delayedArray.length; i++) {
-                array[i] = ((BufferedElement<E>) delayedArray[i]).getElement();
-            }
-            return array;
-        } finally {
-            lock.unlock();
+        Object[] delayedArray = q.toArray();
+        Object[] array = new Object[delayedArray.length];
+        for (int i = 0; i < delayedArray.length; i++) {
+            array[i] = ((BufferedElement<E>) delayedArray[i]).getElement();
         }
+        return array;
     }
 
     /**
@@ -846,22 +577,16 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      */
     @Override
     public <T> T[] toArray(T[] a) {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            Object[] elements = this.toArray();
-            int size = elements.length;
-            if (a.length < size) {
-                return (T[]) Arrays.copyOf(elements, size, a.getClass());
-            }
-            System.arraycopy(elements, 0, a, 0, size);
-            if (a.length > size) {
-                a[size] = null;
-            }
-            return a;
-        } finally {
-            lock.unlock();
+        Object[] elements = this.toArray();
+        int size = elements.length;
+        if (a.length < size) {
+            return (T[]) Arrays.copyOf(elements, size, a.getClass());
         }
+        System.arraycopy(elements, 0, a, 0, size);
+        if (a.length > size) {
+            a[size] = null;
+        }
+        return a;
     }
 
     /**
@@ -870,20 +595,14 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      */
     @Override
     public boolean remove(Object o) {
-        ReentrantLock lock = this.lock;
-        lock.lock();
-        try {
-            for (Iterator<BufferedElement<E>> it = q.iterator(); it.hasNext();) {
-                BufferedElement<E> next = it.next();
-                if (o.equals(next.getElement())) {
-                    it.remove();
-                    return true;
-                }
+        for (Iterator<BufferedElement<E>> it = q.iterator(); it.hasNext();) {
+            BufferedElement<E> next = it.next();
+            if (o.equals(next.getElement())) {
+                it.remove();
+                return true;
             }
-            return false;
-        } finally {
-            lock.unlock();
         }
+        return false;
     }
 
     /**
@@ -942,16 +661,11 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
             lastRet = -1;
             // Traverse underlying queue to find == element,
             // not just a .equals element.
-            lock.lock();
-            try {
-                for (Iterator<BufferedElement<E>> it = q.iterator(); it.hasNext(); ) {
-                    if (it.next() == x) {
-                        it.remove();
-                        return;
-                    }
+            for (Iterator<BufferedElement<E>> it = q.iterator(); it.hasNext(); ) {
+                if (it.next() == x) {
+                    it.remove();
+                    return;
                 }
-            } finally {
-                lock.unlock();
             }
         }
     }

@@ -141,7 +141,7 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
 
         String sessionId = socket.getParameter(EngineIOProtocol.SESSION_ID);
         if (null == sessionId) {
-            // Start Socket.IO from scratch
+            // Start Socket.IO fresh hand-shake
             String sTransport = socket.getParameter(EngineIOProtocol.TRANSPORT);
             if (!"websocket".equals(sTransport)) {
                 LOGGER.warn("Unsupported transport via WS: {}", sTransport);
@@ -162,16 +162,14 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
             }
 
             WsTransportConnection connection = (WsTransportConnection) transport.getConnection(null, socketIOManager);
-            connection.onWebSocketConnect(socket);
-            socket.setMessageTranscoder(connection);
+            applyToConnection(connection, socket);
             return;
         }
 
         // "sid" parameter is available. Check if there is already a registered connection for it.
         WsTransportConnection connection = registeredConnections.get(sessionId);
         if (null != connection) {
-            connection.onWebSocketConnect(socket);
-            socket.setMessageTranscoder(connection);
+            applyToConnection(connection, socket);
             return;
         }
 
@@ -193,8 +191,7 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
         TransportConnection activeConnection = session.getConnection();
         if (activeConnection instanceof WsTransportConnection) {
             connection = (WsTransportConnection) activeConnection;
-            connection.onWebSocketConnect(socket);
-            socket.setMessageTranscoder(connection);
+            applyToConnection(connection, socket);
             return;
         }
 
@@ -212,6 +209,10 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
         }
 
         connection = (WsTransportConnection) transport.createConnection(session);
+        applyToConnection(connection, socket);
+    }
+
+    private void applyToConnection(WsTransportConnection connection, WebSocket socket) {
         connection.onWebSocketConnect(socket);
         socket.setMessageTranscoder(connection);
     }

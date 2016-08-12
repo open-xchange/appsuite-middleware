@@ -62,15 +62,27 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface WebSocketService {
 
     /**
-     * Checks if the Web Socket associated with specified connection identifier exists; either locally or on any remote cluster member.
+     * Checks if there is any open Web Socket connection associated with specified user; either locally or on any remote cluster member.
      *
-     * @param connectionId The connection identifier
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return <code>true</code> if such a Web Socket exists; otherwise <code>false</code>
-     * @throws OXException If existence check fails
+     * @return <code>true</code> if there is an open Web Socket; otherwise <code>false</code>
+     * @throws OXException If availability check fails
      */
-    boolean exists(ConnectionId connectionId, int userId, int contextId) throws OXException;
+    boolean exists(int userId, int contextId) throws OXException;
+
+    /**
+     * Checks if there is any filter-satisfying Web Socket connection associated with specified user on a remote cluster member.
+     *
+     * @param pathFilter The path to filter by (e.g. <code>"/websockets/push"</code>) or <code>null</code> to not filter at all
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if such a filter-satisfying Web Socket exists; otherwise <code>false</code>
+     * @throws OXException If availability check fails
+     */
+    boolean exists(String pathFilter, int userId, int contextId) throws OXException;
+
+    // --------------------------------------------------------------------------------------------------------------
 
     /**
      * Sends a text message to denoted user's remote end-points, blocking until all of the message has been transmitted.

@@ -61,6 +61,8 @@ public enum PushNotificationField {
     // -------------------------------- Generic fields --------------------------------
     /** The key providing the actual message to display; type is <code>java.lang.String</code> */
     MESSAGE("message"),
+    /** The folder identifier; type is <code>java.lang.String</code> */
+    FOLDER("folder"),
 
     // -------------------------------- Mail-related fields --------------------------------
     /** The subject of a mail; type is <code>java.lang.String</code> */

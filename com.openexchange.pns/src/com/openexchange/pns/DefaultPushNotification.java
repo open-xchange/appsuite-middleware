@@ -187,4 +187,46 @@ public class DefaultPushNotification implements PushNotification {
         return userId;
     }
 
+    @Override
+    public int hashCode() {
+        int prime = 31;
+        int result = prime * 1 + contextId;
+        result = prime * result + userId;
+        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
+        result = prime * result + ((messageData == null) ? 0 : messageData.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PushNotification)) {
+            return false;
+        }
+        PushNotification other = (PushNotification) obj;
+        if (contextId != other.getContextId()) {
+            return false;
+        }
+        if (userId != other.getUserId()) {
+            return false;
+        }
+        if (topic == null) {
+            if (other.getTopic() != null) {
+                return false;
+            }
+        } else if (!topic.equals(other.getTopic())) {
+            return false;
+        }
+        if (messageData == null) {
+            if (other.getMessageData() != null) {
+                return false;
+            }
+        } else if (!messageData.equals(other.getMessageData())) {
+            return false;
+        }
+        return true;
+    }
+
 }

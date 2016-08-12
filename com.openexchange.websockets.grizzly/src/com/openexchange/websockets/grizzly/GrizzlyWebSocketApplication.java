@@ -98,6 +98,7 @@ import com.openexchange.user.UserService;
 import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.http.GrizzlyWebSocketHttpServletRequest;
+import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
 
 /**
  * {@link GrizzlyWebSocketApplication}
@@ -113,13 +114,15 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     private final ServiceLookup services;
     private final WebSocketListenerRegistry listenerRegistry;
     private final CookieHashSource hashSource;
+    private final RemoteWebSocketDistributor remoteDistributor;
 
     /**
      * Initializes a new {@link GrizzlyWebSocketApplication}.
      */
-    public GrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, ServiceLookup services) {
+    public GrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
         super();
         this.listenerRegistry = listenerRegistry;
+        this.remoteDistributor = remoteDistributor;
         this.services = services;
         openSockets = new ConcurrentHashMap<>(265, 0.9F, 1);
         ConfigurationService configService = services.getService(ConfigurationService.class);
@@ -197,6 +200,35 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     public boolean exists(ConnectionId connectionId, int userId, int contextId) {
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         return null == userSockets ? false : userSockets.containsKey(connectionId);
+    }
+
+    /**
+     * Checks if there is any open Web Socket associated with specified user.
+     *
+     * @param pathFilter The path filter expression or <code>null</code>
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if any open Web Socket exists for given user; otherwise <code>false</code>
+     */
+    public boolean existsAny(String pathFilter, int userId, int contextId) {
+        ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
+        if (null == userSockets || userSockets.isEmpty()) {
+            // No socket at all
+            return false;
+        }
+
+        if (null == pathFilter) {
+            // No filter given
+            return true;
+        }
+
+        // Check if any satisfies given filter
+        for (SessionBoundWebSocket SessionBoundSocket : userSockets.values()) {
+            if (WebSockets.matches(pathFilter, SessionBoundSocket)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -446,6 +478,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                         }
                     }
                 }
+
+                remoteDistributor.onWebSocketConnect(sessionBoundSocket);
             } else {
                 super.onConnect(socket);
             }
@@ -468,6 +502,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             if (sockets != null) {
                 sockets.remove(sessionBoundSocket.getConnectionId());
             }
+
+            remoteDistributor.onWebSocketClose(sessionBoundSocket);
 
             socket.close();
         } else {

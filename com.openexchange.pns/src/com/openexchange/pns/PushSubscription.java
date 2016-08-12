@@ -59,12 +59,18 @@ import java.util.List;
  */
 public interface PushSubscription {
 
-    /** A subscription's nature */
+    /**
+     * A subscription's nature; either:
+     * <ul>
+     * <li>Volatile nature. Not stored, but only held node-local in memory.</li>
+     * <li>Persistent nature. Permanently stored.</li>
+     * </ul>
+     */
     public static enum Nature {
         /**
-         * Volatile nature. Not stored, but only held in memory.
+         * Volatile nature. Not stored, but only held node-local in memory.
          * <p>
-         * If JVM shuts-down volatile subscriptions are gone.
+         * If JVM shuts-down, volatile subscriptions are gone.
          */
         VOLATILE,
         /**
@@ -99,14 +105,13 @@ public interface PushSubscription {
     /**
      * Gets the topics of interest.
      * <p>
-     * The returned listing describes the topics in which this subscription
-     * is interested. For each topic an asterisk ('*') may be used as a trailing wild-card.
+     * The returned listing describes the topics in which this subscription is interested.
+     * For each topic (a colon-separated string) an asterisk ('*') may be used as a trailing wild-card.
      * More precisely, the string value of each topic must conform to the following grammar:
      *
      * <pre>
      *  topic-description := '*' | topic ( ':*' )?
-     *  topic := token ( ':' token )*
-     * </pre>
+     *  topic := token ( ':' token )*</pre>
      *
      * @return The topics
      */
@@ -127,7 +132,7 @@ public interface PushSubscription {
     String getToken();
 
     /**
-     * Checks if this subscription is of {@link Nature#PERSISTENT persistent} or {@link Nature#PERSISTENT volatile} nature
+     * Gets this subscription's nature; either {@link Nature#PERSISTENT persistent} or {@link Nature#VOLATILE volatile} nature
      *
      * @return The nature
      */

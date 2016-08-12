@@ -47,55 +47,25 @@
  *
  */
 
-package com.openexchange.pns.appsuite;
+package com.openexchange.pns.subscription.storage.osgi;
 
-import java.util.Collections;
-import java.util.Set;
-import com.openexchange.ajax.Client;
-import com.openexchange.exception.OXException;
-import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
-import com.openexchange.websockets.WebSocket;
-import com.openexchange.websockets.WebSockets;
+import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.pns.PushSubscriptionProvider;
 
 /**
- * {@link AppSuiteWebSocketToClientResolver}
+ * {@link PushSubscriptionProviderTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResolver {
-
-    /** The path filter expression for App Suite UI: <code>"/socket.io/*"</code> */
-    private static final String PATH_FILTER_APPSUITE_UI = "/socket.io/*";
+public class PushSubscriptionProviderTracker extends RankingAwareNearRegistryServiceTracker<PushSubscriptionProvider> {
 
     /**
-     * Initializes a new {@link AppSuiteWebSocketToClientResolver}.
+     * Initializes a new {@link PushSubscriptionProviderTracker}.
      */
-    public AppSuiteWebSocketToClientResolver() {
-        super();
-    }
-
-    @Override
-    public String getClientFor(WebSocket socket) throws OXException {
-        if (WebSockets.matches(PATH_FILTER_APPSUITE_UI, socket)) {
-            return Client.APPSUITE_UI.getClientId();
-        }
-
-        return null;
-    }
-
-    @Override
-    public String getPathFilterFor(String client) throws OXException {
-        if (Client.APPSUITE_UI.getClientId().equals(client)) {
-            return  PATH_FILTER_APPSUITE_UI;
-        }
-
-        return null;
-    }
-
-    @Override
-    public Set<String> getSupportedClients() {
-        return Collections.singleton(Client.APPSUITE_UI.getClientId());
+    public PushSubscriptionProviderTracker(BundleContext context) {
+        super(context, PushSubscriptionProvider.class, 0);
     }
 
 }

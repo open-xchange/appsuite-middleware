@@ -47,55 +47,27 @@
  *
  */
 
-package com.openexchange.pns.appsuite;
+package com.openexchange.pns;
 
-import java.util.Collections;
-import java.util.Set;
-import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
-import com.openexchange.websockets.WebSocket;
-import com.openexchange.websockets.WebSockets;
 
 /**
- * {@link AppSuiteWebSocketToClientResolver}
+ * {@link PushSubscriptionProvider} - Provides subscriptions not held in storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResolver {
-
-    /** The path filter expression for App Suite UI: <code>"/socket.io/*"</code> */
-    private static final String PATH_FILTER_APPSUITE_UI = "/socket.io/*";
+public interface PushSubscriptionProvider {
 
     /**
-     * Initializes a new {@link AppSuiteWebSocketToClientResolver}.
+     * Gets all subscriptions interested in specified topic belonging to given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param topic The topic
+     * @return All matching subscriptions for specified topic
+     * @throws OXException If interested subscriptions cannot be returned
      */
-    public AppSuiteWebSocketToClientResolver() {
-        super();
-    }
-
-    @Override
-    public String getClientFor(WebSocket socket) throws OXException {
-        if (WebSockets.matches(PATH_FILTER_APPSUITE_UI, socket)) {
-            return Client.APPSUITE_UI.getClientId();
-        }
-
-        return null;
-    }
-
-    @Override
-    public String getPathFilterFor(String client) throws OXException {
-        if (Client.APPSUITE_UI.getClientId().equals(client)) {
-            return  PATH_FILTER_APPSUITE_UI;
-        }
-
-        return null;
-    }
-
-    @Override
-    public Set<String> getSupportedClients() {
-        return Collections.singleton(Client.APPSUITE_UI.getClientId());
-    }
+    Hits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException;
 
 }

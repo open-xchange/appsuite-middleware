@@ -47,111 +47,71 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.internal;
+package com.openexchange.socketio.common;
 
-import com.openexchange.pns.PushSubscription;
+import java.util.Iterator;
+import java.util.List;
 
 /**
- * {@link Unsubscription} - An unsubscription from a Web Socket transport.
+ * {@link MultipleSocketIOException} - An exception wrapping/chaining multiple collected Socket.IO exceptions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-final class Unsubscription {
+public class MultipleSocketIOException extends SocketIOException {
 
-    private final int userId;
-    private final int contextId;
-    private final String client;
-    private final PushSubscription subscription;
-    private volatile Integer hash;
+    private static final long serialVersionUID = 2989162173768482334L;
 
     /**
-     * Initializes a new {@link Unsubscription}.
+     * Gets the chained Socket.IO exception for specified collected ones.
      *
-     * @param subscription The subscription to unsubscribe
+     * @param exceptions The collected Socket.IO exceptions
+     * @return The chained exception
      */
-    public Unsubscription(PushSubscription subscription) {
-        super();
-        this.subscription = subscription;
-        this.userId = subscription.getUserId();
-        this.contextId = subscription.getContextId();
-        this.client = subscription.getClient();
+    public static SocketIOException chainedSocketIOExceptionFor(List<SocketIOException> exceptions) {
+        int size;
+        if (null == exceptions || (size = exceptions.size()) == 0) {
+            throw new IllegalArgumentException("Socket.IO exceptions must not be null or empty");
+        }
+
+        return 1 == size ? exceptions.get(0) : new MultipleSocketIOException(exceptions);
+    }
+
+    // -----------------------------------------------------------------------------------------------
+
+    private final List<SocketIOException> exceptions;
+
+    /**
+     * Initializes a new {@link MultipleSocketIOException}.
+     *
+     * @param exceptions The collected Socket.IO exceptions
+     */
+    private MultipleSocketIOException(List<SocketIOException> exceptions) {
+        super("Socket.IO errors occurred", createSocketIOExceptionChain(null, exceptions.iterator()));
+        this.exceptions = exceptions;
+    }
+
+    private static SocketIOException createSocketIOExceptionChain(SocketIOException root, Iterator<SocketIOException> exceptions) {
+        if (!exceptions.hasNext()) {
+            return root;
+        }
+
+        SocketIOException socketIoError = exceptions.next();
+        if (null == root) {
+            root = socketIoError;
+        } else {
+            root.initCause(socketIoError);
+        }
+        createSocketIOExceptionChain(socketIoError, exceptions);
+        return root;
     }
 
     /**
-     * Gets the subscription
+     * Gets the collected exceptions
      *
-     * @return The subscription
+     * @return The exceptions
      */
-    public PushSubscription getSubscription() {
-        return subscription;
-    }
-
-    /**
-     * Gets the client
-     *
-     * @return The client
-     */
-    public String getClient() {
-        return client;
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
-    }
-
-    @Override
-    public int hashCode() {
-        Integer tmp = hash;
-        if (null == tmp) {
-            int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            result = prime * result + ((client == null) ? 0 : client.hashCode());
-            tmp = Integer.valueOf(result);
-            hash = tmp;
-        }
-        return tmp.intValue();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof Unsubscription)) {
-            return false;
-        }
-        Unsubscription other = (Unsubscription) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        if (client == null) {
-            if (other.client != null) {
-                return false;
-            }
-        } else if (!client.equals(other.client)) {
-            return false;
-        }
-        return true;
+    public List<SocketIOException> getExceptions() {
+        return exceptions;
     }
 
 }

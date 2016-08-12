@@ -49,13 +49,14 @@
 
 package com.openexchange.pns.subscription.storage.inmemory;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.PushExceptionCodes;
@@ -75,30 +76,30 @@ import com.openexchange.pns.subscription.storage.MapBackedHits;
 public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
     /** The subscriptions in this list match all events. */
-    private final List<PushSubscriptionWrapper> matchingAllSubscriptions;
+    private final Set<PushSubscriptionWrapper> matchingAllSubscriptions;
 
     /**
      * This is a map for exact topic matches. The key is the topic,
      * the value is a list of subscriptions.
      */
-    private final Map<String, List<PushSubscriptionWrapper>> matchingTopic;
+    private final Map<String, Set<PushSubscriptionWrapper>> matchingTopic;
 
     /**
      * This is a map for wild-card topics. The key is the prefix of the topic,
      * the value is a list of subscriptions
      */
-    private final Map<String, List<PushSubscriptionWrapper>> matchingPrefixTopic;
+    private final Map<String, Set<PushSubscriptionWrapper>> matchingPrefixTopic;
 
     public InMemoryPushSubscriptionRegistry() {
         super();
         // Start with empty collections
-        this.matchingAllSubscriptions = new CopyOnWriteArrayList<PushSubscriptionWrapper>();
-        this.matchingTopic = new ConcurrentHashMap<String, List<PushSubscriptionWrapper>>();
-        this.matchingPrefixTopic = new ConcurrentHashMap<String, List<PushSubscriptionWrapper>>();
+        this.matchingAllSubscriptions = new LinkedHashSet<>(); // protected by synchronized
+        this.matchingTopic = new HashMap<String, Set<PushSubscriptionWrapper>>(); // protected by synchronized
+        this.matchingPrefixTopic = new HashMap<String, Set<PushSubscriptionWrapper>>(); // protected by synchronized
     }
 
     @Override
-    public MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+    public synchronized MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
         Map<ClientAndTransport, List<PushMatch>> map = null;
 
         // Add subscriptions matching everything
@@ -109,7 +110,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
             int pos = topic.lastIndexOf('/');
             while (pos > 0) {
                 String prefix = topic.substring(0, pos);
-                List<PushSubscriptionWrapper> wrappers = matchingPrefixTopic.get(prefix);
+                Set<PushSubscriptionWrapper> wrappers = matchingPrefixTopic.get(prefix);
                 if (null != wrappers) {
                     map = checkAndAddMatches(userId, contextId, wrappers, prefix + "/*", map);
                 }
@@ -119,7 +120,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
 
         // Add the subscriptions for matching topic names
         {
-            List<PushSubscriptionWrapper> wrappers = matchingTopic.get(topic);
+            Set<PushSubscriptionWrapper> wrappers = matchingTopic.get(topic);
             if (null != wrappers) {
                 map = checkAndAddMatches(userId, contextId, wrappers, topic, map);
             }
@@ -128,7 +129,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
         return null == map ? MapBackedHits.EMPTY : new MapBackedHits(map);
     }
 
-    private Map<ClientAndTransport, List<PushMatch>> checkAndAddMatches(int userId, int contextId, List<PushSubscriptionWrapper> wrappers, String matchingTopic, Map<ClientAndTransport, List<PushMatch>> map) {
+    private Map<ClientAndTransport, List<PushMatch>> checkAndAddMatches(int userId, int contextId, Set<PushSubscriptionWrapper> wrappers, String matchingTopic, Map<ClientAndTransport, List<PushMatch>> map) {
         if (null == wrappers) {
             return map;
         }
@@ -177,18 +178,18 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
                 if (topic.endsWith(":*")) {
                     // Wild-card topic: we remove the /*
                     String prefix = topic.substring(0, topic.length() - 2);
-                    List<PushSubscriptionWrapper> list = matchingPrefixTopic.get(prefix);
+                    Set<PushSubscriptionWrapper> list = matchingPrefixTopic.get(prefix);
                     if (null == list) {
-                        List<PushSubscriptionWrapper> newList = new CopyOnWriteArrayList<>();
+                        Set<PushSubscriptionWrapper> newList = new LinkedHashSet<>();
                         matchingPrefixTopic.put(prefix, newList);
                         list = newList;
                     }
                     list.add(new PushSubscriptionWrapper(subscription));
                 } else {
                     // Exact match
-                    List<PushSubscriptionWrapper> list = matchingTopic.get(topic);
+                    Set<PushSubscriptionWrapper> list = matchingTopic.get(topic);
                     if (null == list) {
-                        List<PushSubscriptionWrapper> newList = new CopyOnWriteArrayList<>();
+                        Set<PushSubscriptionWrapper> newList = new LinkedHashSet<>();
                         matchingTopic.put(topic, newList);
                         list = newList;
                     }
@@ -207,8 +208,8 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
         PushSubscriptionWrapper toRemove = new PushSubscriptionWrapper(subscription);
         boolean removed = matchingAllSubscriptions.remove(toRemove);
 
-        for (Iterator<List<PushSubscriptionWrapper>> it = matchingPrefixTopic.values().iterator(); it.hasNext();) {
-            List<PushSubscriptionWrapper> wrappers = it.next();
+        for (Iterator<Set<PushSubscriptionWrapper>> it = matchingPrefixTopic.values().iterator(); it.hasNext();) {
+            Set<PushSubscriptionWrapper> wrappers = it.next();
             if (wrappers.remove(toRemove)) {
                 removed = true;
                 if (wrappers.isEmpty()) {
@@ -217,8 +218,8 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
             }
         }
 
-        for (Iterator<List<PushSubscriptionWrapper>> it = matchingTopic.values().iterator(); it.hasNext();) {
-            List<PushSubscriptionWrapper> wrappers = it.next();
+        for (Iterator<Set<PushSubscriptionWrapper>> it = matchingTopic.values().iterator(); it.hasNext();) {
+            Set<PushSubscriptionWrapper> wrappers = it.next();
             if (wrappers.remove(toRemove)) {
                 removed = true;
                 if (wrappers.isEmpty()) {
@@ -236,30 +237,41 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
             return 0;
         }
 
-        PushSubscriptionWrapper toRemove = new PushSubscriptionWrapper(token, transportId);
         int numRemoved = 0;
 
-        if (matchingAllSubscriptions.remove(toRemove)) {
-            numRemoved++;
-        }
-
-        for (Iterator<List<PushSubscriptionWrapper>> it = matchingPrefixTopic.values().iterator(); it.hasNext();) {
-            List<PushSubscriptionWrapper> wrappers = it.next();
-            if (wrappers.remove(toRemove)) {
+        for (Iterator<PushSubscriptionWrapper> it = matchingAllSubscriptions.iterator(); it.hasNext();) {
+            PushSubscriptionWrapper wrapper = it.next();
+            if (wrapper.matches(token, transportId)) {
+                it.remove();
                 numRemoved++;
-                if (wrappers.isEmpty()) {
-                    it.remove();
-                }
             }
         }
 
-        for (Iterator<List<PushSubscriptionWrapper>> it = matchingTopic.values().iterator(); it.hasNext();) {
-            List<PushSubscriptionWrapper> wrappers = it.next();
-            if (wrappers.remove(toRemove)) {
-                numRemoved++;
-                if (wrappers.isEmpty()) {
+        for (Iterator<Set<PushSubscriptionWrapper>> iter = matchingPrefixTopic.values().iterator(); iter.hasNext();) {
+            Set<PushSubscriptionWrapper> wrappers = iter.next();
+            for (Iterator<PushSubscriptionWrapper> it = wrappers.iterator(); it.hasNext();) {
+                PushSubscriptionWrapper wrapper = it.next();
+                if (wrapper.matches(token, transportId)) {
                     it.remove();
+                    numRemoved++;
                 }
+            }
+            if (wrappers.isEmpty()) {
+                iter.remove();
+            }
+        }
+
+        for (Iterator<Set<PushSubscriptionWrapper>> iter = matchingTopic.values().iterator(); iter.hasNext();) {
+            Set<PushSubscriptionWrapper> wrappers = iter.next();
+            for (Iterator<PushSubscriptionWrapper> it = wrappers.iterator(); it.hasNext();) {
+                PushSubscriptionWrapper wrapper = it.next();
+                if (wrapper.matches(token, transportId)) {
+                    it.remove();
+                    numRemoved++;
+                }
+            }
+            if (wrappers.isEmpty()) {
+                iter.remove();
             }
         }
 
@@ -276,18 +288,18 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
 
         boolean updated = updateTokenUsing(toLookUp, newToken, matchingAllSubscriptions);
 
-        for (List<PushSubscriptionWrapper> wrappers : matchingPrefixTopic.values()) {
+        for (Set<PushSubscriptionWrapper> wrappers : matchingPrefixTopic.values()) {
             updated |= updateTokenUsing(toLookUp, newToken, wrappers);
         }
 
-        for (List<PushSubscriptionWrapper> wrappers : matchingTopic.values()) {
+        for (Set<PushSubscriptionWrapper> wrappers : matchingTopic.values()) {
             updated |= updateTokenUsing(toLookUp, newToken, wrappers);
         }
 
         return updated;
     }
 
-    private boolean updateTokenUsing(PushSubscriptionWrapper toLookUp, String newToken, List<PushSubscriptionWrapper> wrappers) {
+    private boolean updateTokenUsing(PushSubscriptionWrapper toLookUp, String newToken, Set<PushSubscriptionWrapper> wrappers) {
         List<PushSubscriptionWrapper> toAdd = null;
 
         for (Iterator<PushSubscriptionWrapper> iter = wrappers.iterator(); iter.hasNext();) {
@@ -296,7 +308,14 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
                 iter.remove();
 
                 PushSubscription source = wrapper.getSubscription();
-                DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder().client(source.getClient()).contextId(source.getContextId()).token(newToken).topics(source.getTopics()).transportId(source.getTransportId()).userId(source.getUserId());
+                DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
+                                                            .client(source.getClient())
+                                                            .contextId(source.getContextId())
+                                                            .nature(source.getNature())
+                                                            .token(newToken)
+                                                            .topics(source.getTopics())
+                                                            .transportId(source.getTransportId())
+                                                            .userId(source.getUserId());
 
                 if (null == toAdd) {
                     toAdd = new LinkedList<PushSubscriptionWrapper>();

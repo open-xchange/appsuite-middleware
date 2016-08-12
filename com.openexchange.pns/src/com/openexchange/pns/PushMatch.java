@@ -79,7 +79,8 @@ public interface PushMatch {
     String getClient();
 
     /**
-     * Gets the topic of this match.
+     * Gets the topic (colon-separated string) of this match; e.g.
+     * <pre>"ox:mail:new"</pre>
      *
      * @return The topic
      */

@@ -92,6 +92,11 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        // Track subscription providers
+        PushSubscriptionProviderTracker providerTracker = new PushSubscriptionProviderTracker(context);
+        rememberTracker(providerTracker);
+        openTrackers();
+
         // Register update task, create table job and delete listener
         boolean registerGroupwareStuff = false;
         if (registerGroupwareStuff) {
@@ -103,7 +108,7 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         // Register service
         PushSubscriptionRegistry persistentRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class), getService(ContextService.class));
         PushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
-        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry));
+        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry, providerTracker));
     }
 
 }

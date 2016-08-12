@@ -62,6 +62,7 @@ import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.websocket.internal.WebSocketPushNotificationTransport;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.websockets.WebSocketListener;
 import com.openexchange.websockets.WebSocketService;
@@ -104,12 +105,13 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForProperties("com.openexchange.pns.transport.websocket.enabled");
+        return Reloadables.interestsForProperties("com.openexchange.pns.transport.websocket.enabled", "com.openexchange.pns.transport.websocket.delayDuration", "com.openexchange.pns.transport.websocket.timerFrequency");
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class, WebSocketService.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class,
+            WebSocketService.class, TimerService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -145,34 +147,29 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     private synchronized void reinit(ConfigurationService configService) {
         List<ServiceRegistration<?>> serviceRegistrations = this.serviceRegistrations;
+        if (null != serviceRegistrations) {
+            for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
+                serviceRegistration.unregister();
+            }
+            this.serviceRegistrations = null;
+        }
+
+        WebSocketPushNotificationTransport webSocketTransport = this.webSocketTransport;
+        if (null != webSocketTransport) {
+            this.webSocketTransport = null;
+            webSocketTransport.stop();
+        }
 
         if (!configService.getBoolProperty("com.openexchange.pns.transport.websocket.enabled", true)) {
             LOG.info("Web Socket push notification transport is disabled per configuration");
-
-            if (null != serviceRegistrations) {
-                for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
-                    serviceRegistration.unregister();
-                }
-                this.serviceRegistrations = null;
-            }
-
-            WebSocketPushNotificationTransport webSocketTransport = this.webSocketTransport;
-            if (null != webSocketTransport) {
-                this.webSocketTransport = null;
-                webSocketTransport.stop();
-            }
-
             return;
         }
 
-        if (null != serviceRegistrations) {
-            // Already registered
-            return;
-        }
-
-        WebSocketPushNotificationTransport webSocketTransport = new WebSocketPushNotificationTransport(resolverTracker, this);
+        WebSocketPushNotificationTransport.cleanseInits();
+        webSocketTransport = new WebSocketPushNotificationTransport(resolverTracker, this);
         this.webSocketTransport = webSocketTransport;
-        serviceRegistrations = new ArrayList<>(2);
+
+        serviceRegistrations = new ArrayList<>(4);
         serviceRegistrations.add(context.registerService(PushNotificationTransport.class, webSocketTransport, null));
         serviceRegistrations.add(context.registerService(WebSocketListener.class, webSocketTransport, null));
         this.serviceRegistrations = serviceRegistrations;

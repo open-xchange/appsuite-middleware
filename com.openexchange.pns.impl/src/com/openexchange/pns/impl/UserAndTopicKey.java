@@ -47,86 +47,47 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.internal;
+package com.openexchange.pns.impl;
 
-import com.openexchange.pns.PushSubscription;
+import com.openexchange.pns.PushNotification;
 
 /**
- * {@link Unsubscription} - An unsubscription from a Web Socket transport.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * Simple key that combines user and topic.
  */
-final class Unsubscription {
+class UserAndTopicKey {
 
-    private final int userId;
-    private final int contextId;
-    private final String client;
-    private final PushSubscription subscription;
-    private volatile Integer hash;
+    final int userId;
+    final int contextId;
+    final String topic;
+    private final int hash;
 
     /**
-     * Initializes a new {@link Unsubscription}.
-     *
-     * @param subscription The subscription to unsubscribe
+     * Initializes a new {@link UserAndTopicKey}.
      */
-    public Unsubscription(PushSubscription subscription) {
+    UserAndTopicKey(PushNotification notification) {
+        this(notification.getTopic(), notification.getUserId(), notification.getContextId());
+    }
+
+    /**
+     * Initializes a new {@link UserAndTopicKey}.
+     */
+    UserAndTopicKey(String topic, int userId, int contextId) {
         super();
-        this.subscription = subscription;
-        this.userId = subscription.getUserId();
-        this.contextId = subscription.getContextId();
-        this.client = subscription.getClient();
-    }
+        this.contextId = contextId;
+        this.userId = userId;
+        this.topic = topic;
 
-    /**
-     * Gets the subscription
-     *
-     * @return The subscription
-     */
-    public PushSubscription getSubscription() {
-        return subscription;
-    }
-
-    /**
-     * Gets the client
-     *
-     * @return The client
-     */
-    public String getClient() {
-        return client;
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
+        int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
+        this.hash = result;
     }
 
     @Override
     public int hashCode() {
-        Integer tmp = hash;
-        if (null == tmp) {
-            int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            result = prime * result + ((client == null) ? 0 : client.hashCode());
-            tmp = Integer.valueOf(result);
-            hash = tmp;
-        }
-        return tmp.intValue();
+        return hash;
     }
 
     @Override
@@ -134,21 +95,21 @@ final class Unsubscription {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Unsubscription)) {
+        if (!(obj instanceof UserAndTopicKey)) {
             return false;
         }
-        Unsubscription other = (Unsubscription) obj;
+        UserAndTopicKey other = (UserAndTopicKey) obj;
         if (contextId != other.contextId) {
             return false;
         }
         if (userId != other.userId) {
             return false;
         }
-        if (client == null) {
-            if (other.client != null) {
+        if (topic == null) {
+            if (other.topic != null) {
                 return false;
             }
-        } else if (!client.equals(other.client)) {
+        } else if (!topic.equals(other.topic)) {
             return false;
         }
         return true;

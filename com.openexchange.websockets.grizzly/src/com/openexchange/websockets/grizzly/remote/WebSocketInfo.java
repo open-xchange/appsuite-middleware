@@ -47,86 +47,101 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.internal;
-
-import com.openexchange.pns.PushSubscription;
+package com.openexchange.websockets.grizzly.remote;
 
 /**
- * {@link Unsubscription} - An unsubscription from a Web Socket transport.
+ * {@link WebSocketInfo}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-final class Unsubscription {
-
-    private final int userId;
-    private final int contextId;
-    private final String client;
-    private final PushSubscription subscription;
-    private volatile Integer hash;
+public class WebSocketInfo {
 
     /**
-     * Initializes a new {@link Unsubscription}.
+     * Parses the Web Socket information from specified string.
      *
-     * @param subscription The subscription to unsubscribe
+     * @param socketInfo The socket information as string
+     * @return The parsed socket information
      */
-    public Unsubscription(PushSubscription subscription) {
+    public static WebSocketInfo parseFrom(String socketInfo) {
+        if (null == socketInfo) {
+            return null;
+        }
+
+        int pos = socketInfo.lastIndexOf(':');
+        if (pos <= 0) {
+            throw new IllegalArgumentException("Illegal socket info: " + socketInfo);
+        }
+
+        return new WebSocketInfo(socketInfo.substring(0, pos), ++pos == socketInfo.length() ? null : socketInfo.substring(pos));
+    }
+
+    /**
+     * Parses the Web Socket path information from specified string.
+     *
+     * @param socketInfo The socket information as string
+     * @return The parsed path
+     */
+    public static String parsePathFrom(String socketInfo) {
+        if (null == socketInfo) {
+            return null;
+        }
+
+        int pos = socketInfo.lastIndexOf(':');
+        if (pos <= 0) {
+            throw new IllegalArgumentException("Illegal socket info: " + socketInfo);
+        }
+
+        return ++pos == socketInfo.length() ? null : socketInfo.substring(pos);
+    }
+
+    // ------------------------------------------------------------------------------------
+
+    private final String connectionId;
+    private final String path;
+
+    private int hash;
+
+    /**
+     * Initializes a new {@link WebSocketInfo}.
+     *
+     * @param connectionId The connection identifier
+     * @param path The path
+     */
+    public WebSocketInfo(String connectionId, String path) {
         super();
-        this.subscription = subscription;
-        this.userId = subscription.getUserId();
-        this.contextId = subscription.getContextId();
-        this.client = subscription.getClient();
+        this.connectionId = connectionId;
+        this.path = path;
     }
 
     /**
-     * Gets the subscription
+     * Gets the connection identifier
      *
-     * @return The subscription
+     * @return The connection identifier
      */
-    public PushSubscription getSubscription() {
-        return subscription;
+    public String getConnectionId() {
+        return connectionId;
     }
 
     /**
-     * Gets the client
+     * Gets the path
      *
-     * @return The client
+     * @return The path
      */
-    public String getClient() {
-        return client;
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
+    public String getPath() {
+        return path;
     }
 
     @Override
     public int hashCode() {
-        Integer tmp = hash;
-        if (null == tmp) {
+        // No need to be thread-safe. Each thread then computes itself in worst case
+        int h = hash;
+        if (h == 0 && (null != connectionId || null != path)) {
             int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            result = prime * result + ((client == null) ? 0 : client.hashCode());
-            tmp = Integer.valueOf(result);
-            hash = tmp;
+            h = prime * 1 + ((connectionId == null) ? 0 : connectionId.hashCode());
+            h = prime * h + ((path == null) ? 0 : path.hashCode());
         }
-        return tmp.intValue();
+        return h;
     }
 
     @Override
@@ -134,24 +149,26 @@ final class Unsubscription {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Unsubscription)) {
+        if (!(obj instanceof WebSocketInfo)) {
             return false;
         }
-        Unsubscription other = (Unsubscription) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        if (client == null) {
-            if (other.client != null) {
+        WebSocketInfo other = (WebSocketInfo) obj;
+        if (connectionId == null) {
+            if (other.connectionId != null) {
                 return false;
             }
-        } else if (!client.equals(other.client)) {
+        } else if (!connectionId.equals(other.connectionId)) {
+            return false;
+        }
+        if (path == null) {
+            if (other.path != null) {
+                return false;
+            }
+        } else if (!path.equals(other.path)) {
             return false;
         }
         return true;
     }
+
 
 }

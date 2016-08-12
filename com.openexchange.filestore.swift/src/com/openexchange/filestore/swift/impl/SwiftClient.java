@@ -63,6 +63,7 @@ import java.util.concurrent.locks.LockSupport;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -729,13 +730,16 @@ public class SwiftClient {
 
             response = httpClient.execute(post);
 
-            int status = response.getStatusLine().getStatusCode();
-            if (HttpServletResponse.SC_OK != status && HttpServletResponse.SC_CREATED != status) {
-                throw SwiftExceptionCode.AUTH_FAILED.create();
+            StatusLine statusLine = response.getStatusLine();
+            int status = statusLine.getStatusCode();
+            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
+                JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
+                return authValue.getType().getParser().parseTokenFrom(jResponse);
             }
 
-            JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
-            return authValue.getType().getParser().parseTokenFrom(jResponse);
+            String reasonPhrase = statusLine.getReasonPhrase();
+            LOG.warn("Authentication failed with status code {} ({})", Integer.valueOf(status), null == reasonPhrase ? "<no-reason>" : reasonPhrase);
+            throw SwiftExceptionCode.AUTH_FAILED.create();
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (JSONException e) {
