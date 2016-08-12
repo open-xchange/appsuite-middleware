@@ -764,7 +764,7 @@ public class SwiftClient {
             int status = statusLine.getStatusCode();
             if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
                 JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
-                return authValue.getType().getParser().parseTokenFrom(jResponse);
+                return authValue.getType().getParser().parseTokenFrom(jResponse, response);
             }
 
             String reasonPhrase = statusLine.getReasonPhrase();
