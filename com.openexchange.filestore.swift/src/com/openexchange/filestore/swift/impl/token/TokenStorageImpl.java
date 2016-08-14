@@ -208,10 +208,10 @@ public class TokenStorageImpl implements TokenStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT 1 FROM swift_token WHERE id=?");
+            stmt = con.prepareStatement("SELECT expires FROM swift_token WHERE id=?");
             stmt.setString(1, filestoreId + ".lock");
             rs = stmt.executeQuery();
-            return rs.next();
+            return rs.next() && ((System.currentTimeMillis() - rs.getLong(1)) <= LOCK_TIMEOUT);
         } catch (SQLException e) {
             throw SwiftExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
