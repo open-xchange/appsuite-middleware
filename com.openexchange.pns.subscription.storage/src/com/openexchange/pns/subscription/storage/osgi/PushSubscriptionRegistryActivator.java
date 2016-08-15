@@ -98,7 +98,7 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         openTrackers();
 
         // Register update task, create table job and delete listener
-        boolean registerGroupwareStuff = false;
+        boolean registerGroupwareStuff = true;
         if (registerGroupwareStuff) {
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(this)));
             registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
