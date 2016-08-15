@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-pkgname=open-xchange-websockets
+pkgname=open-xchange-websockets-grizzly
 installroot=$(CURDIR)/debian/$(pkgname)
 
 configure: configure-stamp

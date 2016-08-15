@@ -1,6 +1,6 @@
 %define __jar_repack %{nil}
 
-Name:          open-xchange-websockets
+Name:          open-xchange-websockets-grizzly
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
@@ -9,6 +9,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
+BuildRequires: open-xchange-grizzly
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
@@ -25,6 +26,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Enhances Open-Xchange Server by Web Sockets
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
+Requires:      open-xchange-grizzly >= @OXVERSION@
 
 %description
 Enhances Open-Xchange Server by Web Sockets
