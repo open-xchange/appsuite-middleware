@@ -236,6 +236,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
                         Boolean production = getBooleanOption("production", Boolean.TRUE, values);
                         ApnOptions apnOptions = createOptions(keystoreName, password, production.booleanValue());
                         options.put(client, apnOptions);
+                        LOG.info("Parsed APNS options for client {}.", client);
                     }
                 }
             } else {

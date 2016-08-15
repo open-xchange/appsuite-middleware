@@ -57,9 +57,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushExceptionCodes;
@@ -98,13 +98,16 @@ public class GcmPushNotificationTransportActivator extends HousekeepingActivator
         try {
             reinit(configService);
         } catch (Exception e) {
-            LOG.error("Failed to re-initialize APN transport", e);
+            LOG.error("Failed to re-initialize GCM transport", e);
         }
     }
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForFiles("pns-gcm-transport.properties");
+        return DefaultInterests.builder()
+            .configFileNames(CONFIGFILE_GCM_OPTIONS)
+            .propertiesOfInterest("com.openexchange.pns.transport.gcm.enabled")
+            .build();
     }
 
     @Override
@@ -180,27 +183,51 @@ public class GcmPushNotificationTransportActivator extends HousekeepingActivator
 
             // Check for duplicate
             if (options.containsKey(client)) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Duplicate APN options specified for client: " + client);
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Duplicate GCM options specified for client: " + client);
             }
 
             // Check values map
             if (false == Map.class.isInstance(entry.getValue())) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Invalid APN options configuration specified for client: " + client);
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Invalid GCM options configuration specified for client: " + client);
             }
 
             // Parse values map
             Map<String, Object> values = (Map<String, Object>) entry.getValue();
 
-            // Key
-            String key = (String) values.get("key");
-
-            // Proceed if enabled for associated client
-            if (Strings.isNotEmpty(key)) {
-                GcmOptions gcmOptions = new GcmOptions(key);
-                options.put(client, gcmOptions);
+            // Enabled?
+            Boolean enabled = getBooleanOption("enabled", Boolean.TRUE, values);
+            if (enabled.booleanValue()) {
+                // Key
+                String key = getStringOption("key", values);
+                if (null == key) {
+                    LOG.info("Missing \"key\" GCM option for client {}. Ignoring that client's configuration.", client);
+                } else {
+                    GcmOptions gcmOptions = new GcmOptions(key);
+                    options.put(client, gcmOptions);
+                    LOG.info("Parsed GCM options for client {}.", client);
+                }
+            } else {
+                LOG.info("GCM options for client {} is disabled.", client);
             }
         }
         return options;
+    }
+
+    private Boolean getBooleanOption(String name, Boolean def, Map<String, Object> values) {
+        Object object = values.get(name);
+        if (object instanceof Boolean) {
+            return (Boolean) object;
+        }
+        return null == object ? def : Boolean.valueOf(object.toString());
+    }
+
+    private String getStringOption(String name, Map<String, Object> values) {
+        Object object = values.get(name);
+        if (null == object) {
+            return null;
+        }
+        String str = object.toString();
+        return Strings.isEmpty(str) ? null : str.trim();
     }
 
 }
