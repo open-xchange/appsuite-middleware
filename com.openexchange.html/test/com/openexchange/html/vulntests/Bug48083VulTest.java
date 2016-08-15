@@ -47,32 +47,31 @@
  *
  */
 
-package com.openexchange.html.bugtests;
+package com.openexchange.html.vulntests;
 
-import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.AssertionHelper;
 
 /**
- * {@link Bug28094Test}
+ * {@link Bug48083VulTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Bug28094Test extends AbstractSanitizing {
+public class Bug48083VulTest extends AbstractSanitizing {
+
+    public Bug48083VulTest() {
+        super();
+    }
+
     @Test
-    public void testInsecureHref() {
-        String content = "<a href=\"http://www.raumausstatter-innung-schwalm-eder.de/"
-            + "index.php?eID=tx_cms_showpic&amp;file=uploads%2Fpics%2F13-06-Raumausstatter-JHV.jpg"
-            + "&amp;width=500m&amp;height=500&amp;bodyTag=%3Cbody%20bgColor%3D%22%23ffffff%22%3E"
-            + "&amp;wrap=%3Ca%20href%3D%22javascript%3Aclose%28%29%3B%22%3E%20%7C%20%3C%2Fa%3E"
-            + "&amp;md5=a0a07697cb8be1898b5e9ec79d249de2\">"
-            + "<span style='mso-fareast-font-family:\"Times New Roman\";color:windowtext;mso-fareast-language:DE;mso-no-proof:yes;text-decoration:none;text-underline:none'>"
-            + "<img border=0 width=144 height=76 id=\"Bild_x0020_9\" src=\"cid:image004.jpg@01CE6E59.FDD59220\" alt=\"http://www.raumausstatter-innung-schwalm-eder.de/typo3temp/pics/3794d580f5.jpg\">"
-            + "</span>"
-            + "</a>";
+    public void testBug47781() {
+        String content = "<!DOCTYPE html>\n" + 
+            "<html>\n" + 
+            "%3Ciframe src=\"https://html5sec.org/xss.html\"/>\n" + 
+            "%3Cscript%3E\n" + 
+            "</html>";
 
-        String test = getHtmlService().sanitize(content, null, true, null, null);
-
-        Assert.assertTrue("Unexpected value: " + test, test.indexOf("href=\"") < 0);
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "script", "iframe");
     }
 }
