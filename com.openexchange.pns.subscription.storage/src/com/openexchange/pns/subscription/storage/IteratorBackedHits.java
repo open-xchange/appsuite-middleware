@@ -78,17 +78,18 @@ public class IteratorBackedHits implements Hits {
 
     @Override
     public Iterator<Hit> iterator() {
-        int size = hits.size();
+        List<Hits> thisHits = this.hits;
+        int size = thisHits.size();
         if (size == 0) {
             return Collections.emptyIterator();
         }
 
         if (size == 1) {
-            return Iterators.unmodifiableIterator(hits.get(0).iterator());
+            return Iterators.unmodifiableIterator(thisHits.get(0).iterator());
         }
 
         List<Iterator<Hit>> iters = new ArrayList<>(size);
-        for (Hits hts : this.hits) {
+        for (Hits hts : thisHits) {
             iters.add(hts.iterator());
         }
         return Iterators.unmodifiableIterator(Iterators.concat(iters.iterator()));
