@@ -88,8 +88,8 @@ public class IteratorBackedHits implements Hits {
         }
 
         List<Iterator<Hit>> iters = new ArrayList<>(size);
-        for (Hits hits : hits) {
-            iters.add(hits.iterator());
+        for (Hits hts : this.hits) {
+            iters.add(hts.iterator());
         }
         return Iterators.unmodifiableIterator(Iterators.concat(iters.iterator()));
     }
