@@ -711,6 +711,19 @@ public class SwiftClient {
     }
 
     private Token doAcquireNewToken() throws OXException {
+        return doAcquireNewToken(userName, authValue, httpClient).getToken();
+    }
+
+    /**
+     * Acquires a new token according to specified arguments.
+     *
+     * @param userName The associated user name
+     * @param authValue The auth value to use
+     * @param httpClient The optional HTTP client
+     * @return The newly acquired token
+     * @throws OXException If token cannot be acquired
+     */
+    public static TokenAndResponse doAcquireNewToken(String userName, AuthInfo authValue, HttpClient httpClient) throws OXException {
         // Get a new one
         HttpPost post = null;
         HttpResponse response = null;
@@ -778,7 +791,7 @@ public class SwiftClient {
             int status = statusLine.getStatusCode();
             if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
                 JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
-                return authValue.getType().getParser().parseTokenFrom(jResponse, response);
+                return new TokenAndResponse(authValue.getType().getParser().parseTokenFrom(jResponse, response), jResponse);
             }
 
             String reasonPhrase = statusLine.getReasonPhrase();
