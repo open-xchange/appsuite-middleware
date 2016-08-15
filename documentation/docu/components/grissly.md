@@ -137,6 +137,7 @@ Configure virtual host for non-secure connections, paste into ``/etc/apache/site
       ProxyPass /realtime balancer://oxcluster/realtime
       ProxyPass /servlet balancer://oxcluster/servlet
       ProxyPass /webservices balancer://oxcluster/webservices
+      ProxyPass /socket.io balancer://oxcluster/socket.io
       
       RewriteEngine On
       RewriteCond %{HTTP_USER_AGENT}      Calendar           [OR]
@@ -185,6 +186,7 @@ Configure virtual host for secure connections, paste into ``/etc/apache/sites-av
       ProxyPass /realtime balancer://oxcluster_tls/realtime
       ProxyPass /servlet balancer://oxcluster_tls/servlet
       ProxyPass /webservices balancer://oxcluster_tls/webservices
+      ProxyPass /socket.io balancer://oxcluster_tls/socket.io
       
       <Directory /var/www/html/appsuite>
         Options None +SymLinksIfOwnerMatch
