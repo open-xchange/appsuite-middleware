@@ -103,7 +103,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-themes-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-unifiedmail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-upsell-multiple"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-websockets"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-websockets-grizzly"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-xing-json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange"/>
 </provider>
