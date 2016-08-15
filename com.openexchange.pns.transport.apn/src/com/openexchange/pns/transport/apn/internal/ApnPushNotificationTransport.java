@@ -375,7 +375,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
      * Queries the feedback service and processes the received results, removing reported tokens from the subscription store if needed.
      */
     public void queryFeedbackService() {
-        LOG.info("Querying APN feedback service for 'apn'...");
+        LOG.info("Querying APNS feedback service for 'apn'...");
         long start = System.currentTimeMillis();
 
         Map<String, ApnOptions> options = getAllHighestRankedApnOptions();
@@ -398,7 +398,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
             }
         }
 
-        LOG.info("Finished processing APN feedback for 'apn' after {} ms.", (System.currentTimeMillis() - start));
+        LOG.info("Finished processing APNS feedback after {} ms.", (System.currentTimeMillis() - start));
     }
 
     private int removeSubscriptions(Device device) {

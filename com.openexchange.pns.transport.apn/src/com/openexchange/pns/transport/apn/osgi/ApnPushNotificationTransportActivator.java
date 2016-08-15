@@ -62,9 +62,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,6 +75,7 @@ import com.openexchange.pns.transport.apn.ApnOptions;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
 import com.openexchange.pns.transport.apn.internal.ApnPushNotificationTransport;
 import com.openexchange.pns.transport.apn.internal.DefaultApnOptionsProvider;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
 
@@ -89,10 +90,11 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ApnPushNotificationTransportActivator.class);
 
-    private static final String CONFIGFILE_APN_OPTIONS = "pns-apn-options.yml";
+    private static final String CONFIGFILE_APNS_OPTIONS = "pns-apns-options.yml";
 
     private ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration;
     private ApnPushNotificationTransport apnTransport;
+    private ScheduledTimerTask feedbackQueryTask;
 
     /**
      * Initializes a new {@link ApnPushNotificationTransportActivator}.
@@ -106,13 +108,16 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
         try {
             reinit(configService);
         } catch (Exception e) {
-            LOG.error("Failed to re-initialize APN transport", e);
+            LOG.error("Failed to re-initialize APNS transport", e);
         }
     }
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForFiles("pns-apn-transport.properties");
+        return DefaultInterests.builder()
+            .configFileNames(CONFIGFILE_APNS_OPTIONS)
+            .propertiesOfInterest("com.openexchange.pns.transport.apn.ios.enabled", "com.openexchange.pns.transport.apn.ios.feedbackQueryInterval")
+            .build();
     }
 
     @Override
@@ -142,6 +147,11 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
             optionsProviderRegistration.unregister();
             this.optionsProviderRegistration = null;
         }
+        ScheduledTimerTask feedbackQueryTask = this.feedbackQueryTask;
+        if (null != feedbackQueryTask) {
+            feedbackQueryTask.cancel();
+            this.feedbackQueryTask = null;
+        }
         super.stopBundle();
     }
 
@@ -158,12 +168,18 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
             this.optionsProviderRegistration = null;
         }
 
+        ScheduledTimerTask feedbackQueryTask = this.feedbackQueryTask;
+        if (null != feedbackQueryTask) {
+            feedbackQueryTask.cancel();
+            this.feedbackQueryTask = null;
+        }
+
         if (!configService.getBoolProperty("com.openexchange.pns.transport.apn.ios.enabled", false)) {
-            LOG.info("APN push notification transport is disabled per configuration");
+            LOG.info("APNS push notification transport is disabled per configuration");
             return;
         }
 
-        Object yaml = configService.getYaml(CONFIGFILE_APN_OPTIONS);
+        Object yaml = configService.getYaml(CONFIGFILE_APNS_OPTIONS);
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;
             if (!map.isEmpty()) {
@@ -191,44 +207,74 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
             // Check for duplicate
             if (options.containsKey(client)) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Duplicate APN options specified for client: " + client);
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Duplicate APNS options specified for client: " + client);
             }
 
             // Check values map
             if (false == Map.class.isInstance(entry.getValue())) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Invalid APN options configuration specified for client: " + client);
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Invalid APNS options configuration specified for client: " + client);
             }
 
             // Parse values map
             Map<String, Object> values = (Map<String, Object>) entry.getValue();
 
-            // Keystore name
-            String keystoreName = (String) values.get("keystore");
+            // Enabled?
+            Boolean enabled = getBooleanOption("enabled", Boolean.TRUE, values);
+            if (enabled.booleanValue()) {
+                // Keystore name
+                String keystoreName = getStringOption("keystore", values);
+                if (null == keystoreName) {
+                    LOG.info("Missing \"keystore\" APNS option for client {}. Ignoring that client's configuration.", client);
+                }
 
-            // Proceed if enabled for associated client
-            if (Strings.isNotEmpty(keystoreName)) {
-                String password = (String) values.get("password");
-                Boolean production = (Boolean) values.get("production");
-                ApnOptions apnOptions = createOptions(keystoreName, password, production);
-                options.put(client, apnOptions);
+                // Proceed if enabled for associated client
+                if (Strings.isNotEmpty(keystoreName)) {
+                    String password = getStringOption("password", values);
+                    if (null == password) {
+                        LOG.info("Missing \"password\" APNS option for client {}. Ignoring that client's configuration.", client);
+                    } else {
+                        Boolean production = getBooleanOption("production", Boolean.TRUE, values);
+                        ApnOptions apnOptions = createOptions(keystoreName, password, production.booleanValue());
+                        options.put(client, apnOptions);
+                    }
+                }
+            } else {
+                LOG.info("APNS options for client {} is disabled.", client);
             }
         }
         return options;
+    }
+
+    private Boolean getBooleanOption(String name, Boolean def, Map<String, Object> values) {
+        Object object = values.get(name);
+        if (object instanceof Boolean) {
+            return (Boolean) object;
+        }
+        return null == object ? def : Boolean.valueOf(object.toString());
+    }
+
+    private String getStringOption(String name, Map<String, Object> values) {
+        Object object = values.get(name);
+        if (null == object) {
+            return null;
+        }
+        String str = object.toString();
+        return Strings.isEmpty(str) ? null : str.trim();
     }
 
     private void setupFeedbackQueries(ApnPushNotificationTransport apnTransport, String feedbackQueryInterval) {
         if (Strings.isNotEmpty(feedbackQueryInterval)) {
             long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval.trim()).longValue();
             if (60 * 1000 > interval) {
-                LOG.warn("Ignoring too small value '{}' for APN feedback query interval.", feedbackQueryInterval);
+                LOG.warn("Ignoring too small value '{}' for APNS feedback query interval.", feedbackQueryInterval);
                 return;
             }
 
             TimerService timerService = getService(TimerService.class);
             long shiftMillis = TimeUnit.MILLISECONDS.convert((long)(Math.random() * interval), TimeUnit.MILLISECONDS);
             long initialDelay = interval + shiftMillis;
-            timerService.scheduleWithFixedDelay(createQueryFeedbackTask(apnTransport), initialDelay, interval);
-            LOG.info("Starting APN feedback query interval in {}ms (checking every {}ms)", Long.valueOf(initialDelay), Long.valueOf(interval));
+            feedbackQueryTask = timerService.scheduleWithFixedDelay(createQueryFeedbackTask(apnTransport), initialDelay, interval);
+            LOG.info("Starting APNS feedback query interval in {}ms (checking every {}ms)", Long.valueOf(initialDelay), Long.valueOf(interval));
         }
     }
 
