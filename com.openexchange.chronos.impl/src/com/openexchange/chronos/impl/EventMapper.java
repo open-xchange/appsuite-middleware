@@ -79,6 +79,15 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
     private static final EventMapper INSTANCE = new EventMapper();
 
+    /** The event fields that are preserved for reference in "tombstone" events */
+    private static final EventField[] TOMBSTONE_FIELDS = {
+        EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
+        EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
+        EventField.MODIFIED_BY, EventField.PUBLIC_FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE,
+        EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.TRANSP, EventField.UID,
+        EventField.SEQUENCE
+    };
+
     /**
      * Gets the event mapper instance.
      *
@@ -93,6 +102,55 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
      */
     private EventMapper() {
         super();
+    }
+
+    /**
+     * Copies data from one event to another. Only <i>set</i> fields are transferred.
+     *
+     * @param from The source event
+     * @param to The destination event
+     * @param fields The fields to copy
+     */
+    @Override
+    public void copy(Event from, Event to, EventField... fields) throws OXException {
+        for (EventField field : fields) {
+            Mapping<? extends Object, Event> mapping = get(field);
+            if (mapping.isSet(from)) {
+                mapping.copy(from, to);
+            }
+        }
+    }
+
+    /**
+     * Copies data from one event to another. Only <i>set</i> fields of the source event are transferred, unless they're not already
+     * <i>set</i> in the target event.
+     *
+     * @param from The source event
+     * @param to The destination event
+     * @param fields The fields to copy
+     */
+    public void copyIfNotSet(Event from, Event to, EventField... fields) throws OXException {
+        for (EventField field : fields) {
+            Mapping<? extends Object, Event> mapping = get(field);
+            if (mapping.isSet(from) && false == mapping.isSet(to)) {
+                mapping.copy(from, to);
+            }
+        }
+    }
+
+    /**
+     * Generates a tombstone event object based on the supplied event, as used to track the deletion in the storage.
+     *
+     * @param event The event to create the tombstone for
+     * @param lastModified The last modification time to take over
+     * @param modifiedBy The identifier of the modifying user to take user
+     * @return The tombstone event
+     */
+    public Event getTombstone(Event event, Date lastModified, int modifiedBy) throws OXException {
+        Event tombstone = new Event();
+        copy(event, tombstone, TOMBSTONE_FIELDS);
+        Consistency.setModified(lastModified, tombstone, modifiedBy);
+        return tombstone;
     }
 
     @Override

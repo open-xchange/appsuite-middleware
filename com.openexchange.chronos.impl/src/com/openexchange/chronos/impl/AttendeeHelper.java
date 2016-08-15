@@ -91,7 +91,6 @@ public class AttendeeHelper {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeHelper.class);
     private static final int ATTENDEE_PUBLIC_FOLDER_ID = -2;
-    private static final AttendeeMapper MAPPER = AttendeeMapper.getInstance();
 
     private final CalendarSession session;
     private final UserizedFolder folder;
@@ -163,11 +162,10 @@ public class AttendeeHelper {
          * apply updated attendee data
          */
         for (Attendee[] updatedAttendee : attendeeDiff.getUpdatedAttendees()) {
-            //TODO better use clone / deep-copy of original?
-            Attendee originalAttendee = updatedAttendee[0];
-            Attendee requestedAttendee = updatedAttendee[1];
-            MAPPER.copy(requestedAttendee, originalAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
-            attendeesToUpdate.add(originalAttendee);
+            Attendee attendeeUpdate = new Attendee();
+            AttendeeMapper.getInstance().copy(updatedAttendee[0], attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+            AttendeeMapper.getInstance().copy(updatedAttendee[1], attendeeUpdate, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            attendeesToUpdate.add(attendeeUpdate);
         }
         /*
          * prepare & add all new attendees
@@ -267,7 +265,7 @@ public class AttendeeHelper {
          * take over additional properties as requested
          */
         if (null != requestedAttendee) {
-            MAPPER.copy(requestedAttendee, groupAttendee, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(requestedAttendee, groupAttendee, AttendeeField.ROLE);
         }
         return groupAttendee;
     }
@@ -287,7 +285,7 @@ public class AttendeeHelper {
          * take over additional properties as requested
          */
         if (null != requestedAttendee) {
-            MAPPER.copy(requestedAttendee, resourceAttendee, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(requestedAttendee, resourceAttendee, AttendeeField.ROLE);
         }
         return resourceAttendee;
     }
@@ -304,7 +302,7 @@ public class AttendeeHelper {
          * take over additional properties as requested
          */
         if (null != requestedAttendee) {
-            MAPPER.copy(requestedAttendee, userAttendee, AttendeeField.RSVP, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(requestedAttendee, userAttendee, AttendeeField.RSVP, AttendeeField.ROLE);
         }
         return userAttendee;
     }
@@ -326,7 +324,7 @@ public class AttendeeHelper {
          */
         Attendee requestedAttendee = find(requestedAttendees, defaultAttendee);
         if (null != requestedAttendee) {
-            MAPPER.copy(requestedAttendee, defaultAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(requestedAttendee, defaultAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
         }
         return defaultAttendee;
     }

@@ -143,6 +143,11 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
+    public void insertTombstoneAttendee(int objectID, Attendee attendee) throws OXException {
+        insertTombstoneAttendees(objectID, Collections.singletonList(attendee));
+    }
+
+    @Override
     public List<Attendee> loadAttendees(int objectID) throws OXException {
         Connection connection = null;
         try {
@@ -254,7 +259,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                  */
                 ExternalAttendeeMapper mapper = ExternalAttendeeMapper.getInstance();
                 AttendeeField[] fields = mapper.getMappedFields(mapper.getAssignedFields(attendee));
-                String sql = new StringBuilder().append("UPDATE dateExternal SET ").append(mapper.getAssignments(fields)).append(" WHERE cid=? AND objectId=? AND mailAddress=?;").toString();
+                String sql = new StringBuilder()
+                    .append("UPDATE dateExternal SET ").append(mapper.getAssignments(fields))
+                    .append(" WHERE cid=? AND objectId=? AND mailAddress=?;")
+                .toString();
                 try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                     int parameterIndex = 1;
                     parameterIndex = mapper.setParameters(stmt, parameterIndex, attendee, fields);
@@ -269,7 +277,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                  */
                 InternalAttendeeMapper mapper = InternalAttendeeMapper.getInstance();
                 AttendeeField[] fields = mapper.getMappedFields(mapper.getAssignedFields(attendee));
-                String sql = new StringBuilder().append("UPDATE prg_dates_members SET ").append(mapper.getAssignments(fields)).append(" WHERE cid=? AND object_id=? AND member_uid=?;").toString();
+                String sql = new StringBuilder()
+                    .append("UPDATE prg_dates_members SET ").append(mapper.getAssignments(fields))
+                    .append(" WHERE cid=? AND object_id=? AND member_uid=?;")
+                .toString();
                 try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                     int parameterIndex = 1;
                     parameterIndex = mapper.setParameters(stmt, parameterIndex, attendee, fields);

@@ -78,4 +78,6 @@ public interface AttendeeStorage {
 
     void insertTombstoneAttendees(int objectID, List<Attendee> attendees) throws OXException;
 
+    void insertTombstoneAttendee(int objectID, Attendee attendee) throws OXException;
+
 }

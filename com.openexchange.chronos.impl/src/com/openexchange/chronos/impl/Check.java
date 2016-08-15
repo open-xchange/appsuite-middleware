@@ -53,6 +53,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -64,6 +65,34 @@ import com.openexchange.folderstorage.type.PublicType;
  * @since v7.10.0
  */
 public class Check {
+
+    /**
+     * Checks that the required permissions are fulfilled in a specific userized folder.
+     *
+     * @param folder The folder to check the permissions for
+     * @param requiredFolderPermission The required folder permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @param requiredReadPermission The required read object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @param requiredWritePermission The required write object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @param requiredDeletePermission The required delete object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     */
+    public static void requireCalendarPermission(UserizedFolder folder, int requiredFolderPermission, int requiredReadPermission, int requiredWritePermission, int requiredDeletePermission) throws OXException {
+        if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
+            throw new OXException();
+        }
+        Permission ownPermission = folder.getOwnPermission();
+        if (ownPermission.getFolderPermission() < requiredFolderPermission) {
+            throw new OXException();
+        }
+        if (ownPermission.getReadPermission() < requiredReadPermission) {
+            throw new OXException();
+        }
+        if (ownPermission.getWritePermission() < requiredWritePermission) {
+            throw new OXException();
+        }
+        if (ownPermission.getDeletePermission() < requiredDeletePermission) {
+            throw new OXException();
+        }
+    }
 
     public static void requireCalendarContentType(UserizedFolder folder) throws OXException {
         if (false == CalendarContentType.class.isInstance(folder.getContentType())) {

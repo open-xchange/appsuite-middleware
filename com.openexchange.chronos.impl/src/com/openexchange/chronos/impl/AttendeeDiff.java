@@ -68,6 +68,12 @@ public class AttendeeDiff {
     private final List<Attendee> addedAttendees;
     private final List<Attendee[]> updatedAttendees;
 
+    /**
+     * Initializes a new {@link AttendeeDiff}.
+     *
+     * @param originalAttendees The attendees of the original event, or <code>null</code> for new events
+     * @param newAttendees The attendees of the updated event, or <code>null</code> for event deletions
+     */
     public AttendeeDiff(List<Attendee> originalAttendees, List<Attendee> newAttendees) throws OXException {
         super();
         if (null == originalAttendees || 0 == originalAttendees.size()) {
@@ -105,22 +111,43 @@ public class AttendeeDiff {
         }
     }
 
+    /**
+     * Gets a list of removed attendees, i.e. attendees that are no longer present in the updated list of attendees.
+     *
+     * @return The removed attendees
+     */
+    public List<Attendee> getRemovedAttendees() {
+        return removedAttendees;
+    }
+
+    /**
+     * Gets a list of updated attendees, i.e. attendees that were not present in the original list of attendees.
+     *
+     * @return The added attendees
+     */
+    public List<Attendee> getAddedAttendees() {
+        return addedAttendees;
+    }
+
+    /**
+     * Gets a list of updated attendees, i.e. attendees that are considered as modified between the original and updated lists of
+     * attendees.
+     *
+     * @return The updated attendees
+     */
+    public List<Attendee[]> getUpdatedAttendees() {
+        return updatedAttendees;
+    }
+
     private boolean isUpdated(Attendee originalAttendee, Attendee newAttendee) throws OXException {
         Attendee deltaAttendee = AttendeeMapper.getInstance().getDifferences(originalAttendee, newAttendee);
         AttendeeField[] updatedFields = AttendeeMapper.getInstance().getAssignedFields(deltaAttendee);
         return 0 < updatedFields.length;
     }
 
-    public List<Attendee> getRemovedAttendees() {
-        return removedAttendees;
-    }
-
-    public List<Attendee> getAddedAttendees() {
-        return addedAttendees;
-    }
-
-    public List<Attendee[]> getUpdatedAttendees() {
-        return updatedAttendees;
+    @Override
+    public String toString() {
+        return "AttendeeDiff [" + removedAttendees.size() + " removed, " + addedAttendees.size() + " added, " + updatedAttendees.size() + " updated]";
     }
 
 }

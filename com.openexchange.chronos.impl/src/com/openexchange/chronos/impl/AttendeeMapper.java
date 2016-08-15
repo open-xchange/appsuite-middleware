@@ -51,7 +51,9 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
@@ -72,6 +74,12 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
 
     private static final AttendeeMapper INSTANCE = new AttendeeMapper();
 
+    /** The attendee fields that are preserved for reference in "tombstone" attendees */
+    private static final AttendeeField[] TOMBSTONE_FIELDS = {
+        AttendeeField.CU_TYPE, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.PARTSTAT,
+        AttendeeField.URI
+    };
+
     /**
      * Gets the Attendee mapper instance.
      *
@@ -86,6 +94,52 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
      */
     private AttendeeMapper() {
         super();
+    }
+
+    /**
+     * Generates tombstone attendee objects based on the supplied attendees, as used to track the deletion in the storage.
+     *
+     * @param attendees The attendees to create the tombstones for
+     * @return The tombstone attendees
+     */
+    public List<Attendee> getTombstones(List<Attendee> attendees) throws OXException {
+        if (null == attendees) {
+            return null;
+        }
+        List<Attendee> tombstoneAttendees = new ArrayList<Attendee>(attendees.size());
+        for (Attendee attendee : attendees) {
+            tombstoneAttendees.add(getTombstone(attendee));
+        }
+        return tombstoneAttendees;
+    }
+
+    /**
+     * Generates a tombstone attendee object based on the supplied attendee, as used to track the deletion in the storage.
+     *
+     * @param attendee The attendee to create the tombstone for
+     * @return The tombstone attendee
+     */
+    public Attendee getTombstone(Attendee attendee) throws OXException {
+        Attendee tombstone = new Attendee();
+        copy(attendee, tombstone, TOMBSTONE_FIELDS);
+        return tombstone;
+    }
+
+    /**
+     * Copies data from one attendee to another. Only <i>set</i> fields are transferred.
+     *
+     * @param from The source attendee
+     * @param to The destination attendee
+     * @param fields The fields to copy
+     */
+    @Override
+    public void copy(Attendee from, Attendee to, AttendeeField... fields) throws OXException {
+        for (AttendeeField field : fields) {
+            Mapping<? extends Object, Attendee> mapping = get(field);
+            if (mapping.isSet(from)) {
+                mapping.copy(from, to);
+            }
+        }
     }
 
     @Override
