@@ -57,6 +57,7 @@ import com.openexchange.contact.vcard.storage.VCardStorageExceptionCodes;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -95,14 +96,22 @@ public class DefaultVCardStorageService implements VCardStorageService {
      */
     @Override
     public InputStream getVCard(String identifier, int contextId) throws OXException {
-        if (Strings.isEmpty(identifier)) {
-            LOG.warn("Identifier to get VCard for is null. Cannot return VCard.");
-            return null;
-        }
+        try {
+            if (Strings.isEmpty(identifier)) {
+                LOG.warn("Identifier to get VCard for is null. Cannot return VCard.");
+                return null;
+            }
 
-        QuotaFileStorage fileStorage = getFileStorage(contextId);
-        InputStream vCard = fileStorage.getFile(identifier);
-        return vCard;
+            QuotaFileStorage fileStorage = getFileStorage(contextId);
+            InputStream vCard = fileStorage.getFile(identifier);
+            return vCard;
+        } catch (OXException e) {
+            if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                LOG.error(e.getMessage());
+                return null;
+            }
+            throw e;
+        }
     }
 
     /**
