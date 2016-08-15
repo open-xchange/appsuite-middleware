@@ -9,7 +9,6 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-BuildRequires: open-xchange-websockets
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
@@ -26,7 +25,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Web Socket backed transport for Push Notification Service
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-websockets >= @OXVERSION@
 
 %description
 The Web Socket backed transport for Push Notification Service
