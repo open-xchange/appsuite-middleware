@@ -95,6 +95,14 @@ public enum SwiftExceptionCode implements DisplayableOXExceptionCode {
      * Unable to authenticate user with provided credentials.
      */
     AUTH_FAILED("Unable to authenticate user with provided credentials", Category.CATEGORY_CONFIGURATION, 8),
+    /**
+     * Authentication token not accepted by by Swift end-point: %1$s
+     */
+    UNAUTHORIZED("Authentication token not accepted by by Swift end-point: %1$s", Category.CATEGORY_PERMISSION_DENIED, 9),
+    /**
+     * Authentication token not accepted by by Swift end-point.
+     */
+    UNAUTHORIZED_SIMPLE("Authentication token not accepted by by Swift end-point.", Category.CATEGORY_PERMISSION_DENIED, 9),
     ;
 
     private static final String PREFIX = "SWIFT";

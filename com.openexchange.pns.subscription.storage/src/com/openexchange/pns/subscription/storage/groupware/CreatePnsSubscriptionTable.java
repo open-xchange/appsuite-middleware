@@ -58,18 +58,6 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public final class CreatePnsSubscriptionTable extends AbstractCreateTableImpl {
 
-    public static void main(String[] args) {
-        System.out.println(getTableSubscription());
-
-        System.out.println("--------------------");
-
-        System.out.println(getTableTopicWildcard());
-
-        System.out.println("--------------------");
-
-        System.out.println(getTableTopicExact());
-    }
-
     /**
      * Gets the <code>CREATE TABLE</code> statement for <code>pns_subscription</code> table.
      *

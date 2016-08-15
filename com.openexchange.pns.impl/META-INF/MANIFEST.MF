@@ -5,8 +5,10 @@ Bundle-SymbolicName: com.openexchange.pns.impl
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
+Import-Package: com.google.common.collect,
+ com.openexchange.config,
  com.openexchange.config.cascade,
+ com.openexchange.event,
  com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.java,
@@ -15,9 +17,11 @@ Import-Package: com.openexchange.config,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.pns,
+ com.openexchange.push,
  com.openexchange.server,
  com.openexchange.timer,
  org.osgi.framework,
+ org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.pns.impl.osgi.PushNotificationServiceImplActivator

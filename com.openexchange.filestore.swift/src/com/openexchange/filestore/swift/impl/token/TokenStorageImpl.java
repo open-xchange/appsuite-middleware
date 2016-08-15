@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -75,6 +76,13 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.8.1
  */
 public class TokenStorageImpl implements TokenStorage {
+
+    /**
+     * The lock timeout in milliseconds.
+     * <p>
+     * A lock is considered as expired if hold longer than 20 seconds.
+     */
+    private static final long LOCK_TIMEOUT = TimeUnit.SECONDS.toMillis(20L);
 
     private final ServiceLookup services;
 
@@ -109,14 +117,15 @@ public class TokenStorageImpl implements TokenStorage {
             stmt = con.prepareStatement("INSERT INTO swift_token (id, token, expires) VALUES (?, ?, ?)");
             stmt.setString(1, filestoreId + ".lock");
             stmt.setString(2, "LOCKED");
-            stmt.setLong(3, 0L);
+            stmt.setLong(3, System.currentTimeMillis());
             try {
                 stmt.executeUpdate();
                 return true;
             } catch (SQLException e) {
                 if (Databases.isPrimaryKeyConflictInMySQL(e)) {
-                    // Already locked
-                    return false;
+                    // Already locked...
+                    Databases.closeSQLStuff(stmt);
+                    return replaceLockIfExpired(filestoreId, con);
                 }
                 throw e;
             }
@@ -124,6 +133,39 @@ public class TokenStorageImpl implements TokenStorage {
             throw SwiftExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    private boolean replaceLockIfExpired(String filestoreId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT expires FROM swift_token WHERE id=?");
+            stmt.setString(1, filestoreId + ".lock");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return false;
+            }
+
+            long currentExpiration = rs.getLong(1);
+            if (System.currentTimeMillis() - currentExpiration <= LOCK_TIMEOUT) {
+                return false;
+            }
+
+            // Expired...
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+            rs = null;
+
+            stmt = con.prepareStatement("UPDATE swift_token SET expires=? WHERE id=? AND expires=?");
+            stmt.setLong(1, System.currentTimeMillis());
+            stmt.setString(2, filestoreId + ".lock");
+            stmt.setLong(3, currentExpiration);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw SwiftExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -166,10 +208,10 @@ public class TokenStorageImpl implements TokenStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT 1 FROM swift_token WHERE id=?");
+            stmt = con.prepareStatement("SELECT expires FROM swift_token WHERE id=?");
             stmt.setString(1, filestoreId + ".lock");
             rs = stmt.executeQuery();
-            return rs.next();
+            return rs.next() && ((System.currentTimeMillis() - rs.getLong(1)) <= LOCK_TIMEOUT);
         } catch (SQLException e) {
             throw SwiftExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {

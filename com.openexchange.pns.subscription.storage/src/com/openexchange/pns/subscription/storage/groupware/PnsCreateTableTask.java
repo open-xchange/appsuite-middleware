@@ -92,7 +92,7 @@ public class PnsCreateTableTask extends UpdateTaskAdapter {
         Connection writeCon = dbService.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
         try {
-            if (!tableExists(writeCon, "pns_subscriptions")) {
+            if (!tableExists(writeCon, "pns_subscription")) {
                 stmt = writeCon.prepareStatement(CreatePnsSubscriptionTable.getTableSubscription());
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);

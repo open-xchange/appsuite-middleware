@@ -49,6 +49,10 @@
 
 package com.openexchange.pns.impl.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGenerator;
@@ -57,6 +61,8 @@ import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.impl.PushNotificationServiceImpl;
+import com.openexchange.pns.impl.event.PushEventHandler;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.timer.TimerService;
 
 
@@ -105,6 +111,12 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
         this.serviceImpl = serviceImpl;
         registerService(PushNotificationService.class, serviceImpl);
         registerService(PushMessageGeneratorRegistry.class, generatorTracker);
+
+        {
+            Dictionary<String, Object> props = new Hashtable<>(2);
+            props.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC);
+            registerService(EventHandler.class, new PushEventHandler(serviceImpl), props);
+        }
     }
 
     @Override

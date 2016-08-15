@@ -103,7 +103,7 @@ public final class PnsDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(userId > 0 ? "SELECT id FROM pns_subscriptions WHERE cid=? AND user = ?" : "SELECT id FROM pns_subscriptions WHERE cid=?");
+            stmt = con.prepareStatement(userId > 0 ? "SELECT id FROM pns_subscription WHERE cid=? AND user = ?" : "SELECT id FROM pns_subscription WHERE cid=?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             if (userId > 0) {

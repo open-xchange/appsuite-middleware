@@ -49,6 +49,7 @@
 
 package com.openexchange.push;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -72,6 +73,15 @@ public class Container<E> implements List<E> {
     public Container() {
         super();
         list = new LinkedList<E>();
+    }
+
+    /**
+     * Gets the list view for this container.
+     *
+     * @return The list
+     */
+    public List<E> getList() {
+        return new ArrayList<>(list);
     }
 
     @Override
