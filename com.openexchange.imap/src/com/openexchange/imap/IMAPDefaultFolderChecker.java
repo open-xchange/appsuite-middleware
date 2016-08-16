@@ -991,7 +991,7 @@ public class IMAPDefaultFolderChecker {
                     LOG.warn("Detected multiple existing IMAP folders with name equal ignore-case to \"{}\" for account {} (user={}, context={})", f.getName(), Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                 }
                 try {
-                    createIfNonExisting(f, type, sep, namespace, index);
+                    createIfNonExisting(f, type, sep, namespace, index, specialUseInfo);
                     checkSpecialUse = false;
                     modified.setValue(true);
                 } catch (MessagingException e) {
@@ -1106,7 +1106,7 @@ public class IMAPDefaultFolderChecker {
      * @param index The index
      * @throws MessagingException If create attempt fails
      */
-    protected void createIfNonExisting(IMAPFolder f, int type, char sep, String namespace, int index) throws MessagingException {
+    protected void createIfNonExisting(IMAPFolder f, int type, char sep, String namespace, int index, TIntObjectMap<String> specialUseInfo) throws MessagingException {
         if (!f.exists()) {
             try {
                 IMAPCommandsCollection.createFolder(f, sep, type, false);
