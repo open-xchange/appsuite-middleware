@@ -69,9 +69,11 @@ import static com.openexchange.chronos.impl.CalendarUtils.isIncludePrivate;
 import static com.openexchange.chronos.impl.CalendarUtils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.CalendarUtils.sort;
-import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
-import static com.openexchange.chronos.impl.Check.requireFolderPermission;
-import static com.openexchange.chronos.impl.Check.requireReadPermission;
+import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
+import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
+import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.tools.arrays.Arrays.contains;
@@ -108,7 +110,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -163,8 +164,7 @@ public class CalendarReader {
 
     public long getSequenceNumber(int folderID) throws OXException {
         UserizedFolder folder = getFolder(folderID);
-        requireCalendarContentType(folder);
-        requireFolderPermission(folder, Permission.READ_FOLDER);
+        requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         Date lastModified = folder.getLastModifiedUTC();
         SearchTerm<?> searchTerm = getFolderIdTerm(folder);
         SortOptions sortOptions = new SortOptions().addOrder(SortOrder.DESC(EventField.LAST_MODIFIED)).setLimits(0, 1);
@@ -326,9 +326,7 @@ public class CalendarReader {
     }
 
     private List<UserizedEvent> searchEvents(UserizedFolder folder, String pattern) throws OXException {
-        requireCalendarContentType(folder);
-        requireFolderPermission(folder, Permission.READ_FOLDER);
-        requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
+        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         Check.requireMinimumSearchPatternLength(pattern);
         String wildcardPattern = pattern.startsWith("*") ? pattern : '*' + pattern;
         wildcardPattern = wildcardPattern.endsWith("*") ? wildcardPattern : wildcardPattern + '*';
@@ -386,25 +384,22 @@ public class CalendarReader {
     }
 
     protected UserizedEvent readEvent(UserizedFolder folder, int objectID) throws OXException {
-        requireCalendarContentType(folder);
-        requireFolderPermission(folder, Permission.READ_FOLDER);
-        requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
         Event event = storage.getEventStorage().loadEvent(objectID, getFields(session));
         if (null == event) {
             throw OXException.notFound(String.valueOf(objectID));//TODO
         }
-        readAdditionalEventData(Collections.singletonList(event), getFields(session));
-        Check.eventIsInFolder(event, folder);
         if (session.getUser().getId() != event.getCreatedBy()) {
-            requireReadPermission(folder, Permission.READ_ALL_OBJECTS);
+            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         }
+        readAdditionalEventData(Collections.singletonList(event), getFields(session, EventField.ATTENDEES));
+        Check.eventIsInFolder(event, folder);
         return userize(Collections.singletonList(event), folder, true).get(0);
     }
 
     protected List<UserizedEvent> getChangeExceptions(UserizedFolder folder, int objectID) throws OXException {
-        requireCalendarContentType(folder);
-        requireFolderPermission(folder, Permission.READ_FOLDER);
-        requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
+        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
          */
@@ -422,9 +417,7 @@ public class CalendarReader {
     }
 
     protected List<UserizedEvent> readEventsInFolder(UserizedFolder folder, int[] objectIDs, boolean deleted, Date updatedSince) throws OXException {
-        requireCalendarContentType(folder);
-        requireFolderPermission(folder, Permission.READ_FOLDER);
-        requireReadPermission(folder, Permission.READ_OWN_OBJECTS);
+        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
          */

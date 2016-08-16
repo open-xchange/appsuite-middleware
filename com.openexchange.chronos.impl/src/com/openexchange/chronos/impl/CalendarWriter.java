@@ -57,9 +57,9 @@ import static com.openexchange.chronos.impl.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.impl.CalendarUtils.i;
 import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.impl.CalendarUtils.isOrganizer;
-import static com.openexchange.chronos.impl.Check.requireCalendarContentType;
+import static com.openexchange.chronos.impl.CalendarUtils.isSeriesException;
+import static com.openexchange.chronos.impl.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Check.requireDeletePermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
@@ -70,7 +70,6 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -137,56 +136,46 @@ public class CalendarWriter extends CalendarReader {
     }
 
     protected void deleteEvent(UserizedFolder folder, int objectID, long clientTimestamp) throws OXException {
-        requireCalendarContentType(folder);
-        requireDeletePermission(folder, DELETE_OWN_OBJECTS);
         Event originalEvent = storage.getEventStorage().loadEvent(objectID, null);
         if (null == originalEvent) {
             throw OXException.notFound(String.valueOf(objectID));//TODO
         }
-        List<Attendee> originalAttendees = new ArrayList<Attendee>();
-        requireUpToDateTimestamp(originalEvent, clientTimestamp);
         if (session.getUser().getId() != originalEvent.getCreatedBy()) {
-            requireDeletePermission(folder, DELETE_ALL_OBJECTS);
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
         }
+        requireUpToDateTimestamp(originalEvent, clientTimestamp);
         Date now = new Date();
         User calendarUser = getCalendarUser(folder);
-        if (isOrganizer(originalEvent, calendarUser.getId())) {
+        List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
+        List<Attendee> userAttendees = filter(originalAttendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
+        if (isOrganizer(originalEvent, calendarUser.getId()) || 1 == userAttendees.size() && calendarUser.getId() == userAttendees.get(0).getEntity()) {
             /*
-             * deletion by organizer
+             * deletion by organizer / last user attendee
              */
             storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
             storage.getAttendeeStorage().insertTombstoneAttendees(objectID, AttendeeMapper.getInstance().getTombstones(originalAttendees));
             storage.getAlarmStorage().deleteAlarms(objectID);
             storage.getEventStorage().deleteEvent(objectID);
             storage.getAttendeeStorage().deleteAttendees(objectID);
-
-        } else if (CalendarUtils.contains(originalAttendees, calendarUser.getId())) {
+        } else if (contains(userAttendees, calendarUser.getId())) {
             /*
-             * deletion as attendee
+             * deletion as one of the user attendees
              */
-            if (1 == originalEvent.getAttendees().size()) {
-                Event tombstoneEvent = EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId());
-                storage.getAttendeeStorage().insertTombstoneAttendees(objectID, AttendeeMapper.getInstance().getTombstones(originalAttendees));
-                storage.getEventStorage().insertTombstoneEvent(tombstoneEvent);
-                storage.getAlarmStorage().deleteAlarms(objectID);
-                storage.getEventStorage().deleteEvent(objectID);
-                storage.getAttendeeStorage().deleteAttendees(objectID);
-            } else {
-                Attendee originalAttendee = CalendarUtils.find(originalAttendees, calendarUser.getId());
-                storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
-                storage.getAttendeeStorage().insertTombstoneAttendee(objectID, originalAttendee);
-                storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
-                storage.getAttendeeStorage().deleteAttendees(objectID);
-                Event eventUpdate = new Event();
-                eventUpdate.setId(objectID);
-                Consistency.setModified(now, eventUpdate, calendarUser.getId());
-                storage.getEventStorage().updateEvent(eventUpdate);
-            }
+            Attendee originalAttendee = find(originalAttendees, calendarUser.getId());
+            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
+            storage.getAttendeeStorage().insertTombstoneAttendee(objectID, originalAttendee);
+            storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
+            Event eventUpdate = new Event();
+            eventUpdate.setId(objectID);
+            Consistency.setModified(now, eventUpdate, calendarUser.getId());
+            storage.getEventStorage().updateEvent(eventUpdate);
         } else {
             /*
              * deletion as ?
              */
-
+            throw OXException.general("unsupported deletion");
         }
     }
 
@@ -367,6 +356,12 @@ public class CalendarWriter extends CalendarReader {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, DELETE_OWN_OBJECTS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
+        }
+        /*
+         * check for move attempt of recurring appointment
+         */
+        if (isSeriesMaster(event) || isSeriesException(event)) {
+            throw OXException.general("moving recurring appointments not allowed");
         }
         int objectID = event.getId();
         Date now = new Date();

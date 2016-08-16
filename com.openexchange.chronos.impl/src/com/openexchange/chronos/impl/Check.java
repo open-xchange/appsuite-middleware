@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.impl.CalendarUtils.i;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.Event;
@@ -94,36 +95,6 @@ public class Check {
         }
     }
 
-    public static void requireCalendarContentType(UserizedFolder folder) throws OXException {
-        if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
-            throw new OXException();
-        }
-    }
-
-    public static void requireFolderPermission(UserizedFolder folder, int requiredPermission) throws OXException {
-        if (folder.getOwnPermission().getFolderPermission() < requiredPermission) {
-            throw new OXException();
-        }
-    }
-
-    public static void requireReadPermission(UserizedFolder folder, int requiredPermission) throws OXException {
-        if (folder.getOwnPermission().getReadPermission() < requiredPermission) {
-            throw new OXException();
-        }
-    }
-
-    public static void requireWritePermission(UserizedFolder folder, int requiredPermission) throws OXException {
-        if (folder.getOwnPermission().getWritePermission() < requiredPermission) {
-            throw new OXException();
-        }
-    }
-
-    public static void requireDeletePermission(UserizedFolder folder, int requiredPermission) throws OXException {
-        if (folder.getOwnPermission().getDeletePermission() < requiredPermission) {
-            throw new OXException();
-        }
-    }
-
     public static void allowedOrganizerSchedulingObjectChange(Event originalEvent, Event udpatedEvent) throws OXException {
 
     }
@@ -159,12 +130,12 @@ public class Check {
      */
     public static void eventIsInFolder(Event event, UserizedFolder folder) throws OXException {
         if (PublicType.getInstance().equals(folder.getType())) {
-            if (event.getPublicFolderId() != Integer.parseInt(folder.getID())) {
+            if (event.getPublicFolderId() != i(folder)) {
                 throw OXException.general("Event folder != requested folder"); //TODO
             }
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
-            if (null == userAttendee || userAttendee.getFolderID() != Integer.parseInt(folder.getID())) {
+            if (null == userAttendee || userAttendee.getFolderID() != i(folder)) {
                 throw OXException.general("Event folder != requested folder"); //TODO
             }
         }

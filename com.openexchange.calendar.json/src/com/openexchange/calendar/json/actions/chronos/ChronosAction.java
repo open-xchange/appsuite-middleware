@@ -87,6 +87,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class ChronosAction extends AppointmentAction {
 
+    private final EventConverter eventConverter;
+
     /**
      * Initializes a new {@link ChronosAction}.
      *
@@ -94,6 +96,16 @@ public abstract class ChronosAction extends AppointmentAction {
      */
     protected ChronosAction(ServiceLookup services) {
         super(services);
+        this.eventConverter = new EventConverter(services);
+    }
+
+    /**
+     * Gets the event converter.
+     *
+     * @return The event converter
+     */
+    protected EventConverter getEventConverter() {
+        return eventConverter;
     }
 
     @Override

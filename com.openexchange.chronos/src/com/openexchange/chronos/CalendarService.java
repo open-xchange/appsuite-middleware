@@ -83,6 +83,8 @@ public interface CalendarService {
 
     UserizedEvent updateEvent(CalendarSession session, EventID eventID, UserizedEvent event) throws OXException;
 
+    //    UserizedEvent moveEvent(CalendarSession session, EventID eventID, int targetFolderID) throws OXException;
+
     UserizedEvent updateAttendee(CalendarSession session, int folderID, int objectID, Attendee attendee) throws OXException;
 
     void deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;

@@ -58,14 +58,17 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarParameters;
+import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.SeriesPattern;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -75,6 +78,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link EventConverter}
@@ -83,6 +87,18 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
  * @since v7.10.0
  */
 public class EventConverter {
+
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link EventConverter}.
+     *
+     * @param services A service lookup reference
+     */
+    public EventConverter(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     /**
      * Gets the event fields for the supplied column identifiers.
@@ -190,9 +206,10 @@ public class EventConverter {
      *
      * @param session The calendar session
      * @param appointment The appointment to convert
+     * @param originalEventID The identifier of the original event in case of update operations, or <code>null</code> if unknwon
      * @return The userized event
      */
-    public static UserizedEvent getEvent(CalendarSession session, Appointment appointment) {
+    public UserizedEvent getEvent(CalendarSession session, Appointment appointment, EventID originalEventID) throws OXException {
         Event event = new Event();
         if (appointment.containsObjectID()) {
             event.setId(appointment.getObjectID());
@@ -238,9 +255,15 @@ public class EventConverter {
         if (appointment.containsRecurrenceID()) {
             event.setSeriesId(appointment.getRecurrenceID());
         }
-        String recurrenceRule = Appointment2Event.getRecurrenceRule(getSeriesPattern(session, appointment));
+        String recurrenceRule = null;
         if (appointment.containsRecurrenceType()) {
-            event.setRecurrenceRule(recurrenceRule);
+            if (0 == appointment.getRecurrenceType()) {
+                event.setRecurrenceRule(null);
+            } else {
+                SeriesPattern originalPattern = null != originalEventID ? loadSeriesPattern(session, originalEventID) : null;
+                recurrenceRule = Appointment2Event.getRecurrenceRule(getSeriesPattern(session, appointment, originalPattern));
+                event.setRecurrenceRule(recurrenceRule);
+            }
         }
         if (appointment.containsRecurrenceDatePosition()) {
             //TODO
@@ -300,6 +323,7 @@ public class EventConverter {
     /**
      * Converts the supplied userized event into a corresponding appointment.
      *
+     * @param session The calendar session
      * @param userizedEvent The userized event to convert
      * @return The appointment
      */
@@ -527,22 +551,45 @@ public class EventConverter {
         return organizer;
     }
 
-    private static SeriesPattern getSeriesPattern(CalendarSession session, Appointment appointment) {
-        if (0 == appointment.getRecurrenceType()) {
-            return null;
-        }
+    /**
+     * Extracts the series pattern from the supplied appointment data, optionally merging with the previous series pattern in case of
+     * update operations.
+     *
+     * @param appointment The appointment to extract the series pattern from
+     * @param originalPattern The original pattern, or <code>null</code> if not available
+     * @return The series pattern, or <code>null</code> if not set
+     */
+    private static SeriesPattern getSeriesPattern(CalendarSession session, Appointment appointment, SeriesPattern originalPattern) {
+        /*
+         * prepare series pattern & take over original pattern data if available
+         */
         SeriesPattern pattern = new SeriesPattern();
-        if (SeriesPattern.YEARLY_1.intValue() == appointment.getRecurrenceType() && appointment.containsDays()) {
-            pattern.setType(SeriesPattern.YEARLY_2);
-        } else if (SeriesPattern.MONTHLY_1.intValue() == appointment.getRecurrenceType() && appointment.containsDays()) {
-            pattern.setType(SeriesPattern.MONTHLY_2);
-        } else {
-            pattern.setType(appointment.getRecurrenceType());
+        if (null != originalPattern) {
+            pattern.setDayOfMonth(originalPattern.getDayOfMonth());
+            pattern.setDaysOfWeek(originalPattern.getDaysOfWeek());
+            pattern.setFullTime(originalPattern.isFullTime());
+            pattern.setInterval(originalPattern.getInterval());
+            pattern.setMonth(originalPattern.getMonth());
+            pattern.setOccurrences(originalPattern.getOccurrences());
+            pattern.setSeriesEnd(originalPattern.getSeriesEnd());
+            pattern.setSeriesStart(originalPattern.getSeriesStart());
+            pattern.setType(originalPattern.getType());
+            pattern.setTz(originalPattern.getTimeZone());
+        }
+        if (appointment.containsRecurrenceType()) {
+            if (0 == appointment.getRecurrenceType()) {
+                return null;
+            } else if (SeriesPattern.YEARLY_1.intValue() == appointment.getRecurrenceType() && appointment.containsDays()) {
+                pattern.setType(SeriesPattern.YEARLY_2);
+            } else if (SeriesPattern.MONTHLY_1.intValue() == appointment.getRecurrenceType() && appointment.containsDays()) {
+                pattern.setType(SeriesPattern.MONTHLY_2);
+            } else {
+                pattern.setType(appointment.getRecurrenceType());
+            }
         }
         if (appointment.containsRecurringStart()) {
             pattern.setSeriesStart(Long.valueOf(appointment.getRecurringStart()));
-        } else if (null != appointment.getStartDate()) {
-            //TODO: check - assume appointment start date
+        } else if (null == pattern.getSeriesStart() && null != appointment.getStartDate()) {
             pattern.setSeriesStart(Long.valueOf(appointment.getStartDate().getTime()));
         }
         if (appointment.containsDays()) {
@@ -563,10 +610,14 @@ public class EventConverter {
         if (appointment.containsOccurrence()) {
             pattern.setOccurrences(appointment.getOccurrence());
         }
-        pattern.setFullTime(Boolean.valueOf(appointment.getFullTime()));
-        if (null != appointment.getTimezone()) {
+        if (appointment.containsFullTime()) {
+            pattern.setFullTime(Boolean.valueOf(appointment.getFullTime()));
+        } else if (null == pattern.isFullTime()) {
+            pattern.setFullTime(Boolean.FALSE);
+        }
+        if (appointment.containsTimezone()) {
             pattern.setTz(TimeZone.getTimeZone(appointment.getTimezone()));
-        } else {
+        } else if (null == pattern.getTimeZone()) {
             pattern.setTz(session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone())));
         }
         return pattern;
@@ -613,6 +664,41 @@ public class EventConverter {
                 break;
             default:
                 break;
+        }
+    }
+
+    /**
+     * Loads an event and extract the event's series pattern.
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event to get the pattern for
+     * @return The series pattern, or <code>null</code> if not set
+     */
+    private SeriesPattern loadSeriesPattern(CalendarSession session, EventID eventID) throws OXException {
+        EventField [] recurrenceFields = {
+            EventField.RECURRENCE_RULE, EventField.ALL_DAY, EventField.START_DATE, EventField.START_TIMEZONE,
+            EventField.END_DATE, EventField.END_TIMEZONE
+        };
+        Event event = getEvent(session, eventID, recurrenceFields);
+        return Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimezone(), event.isAllDay());
+    }
+
+    /**
+     * Gets a specific event.
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event to get
+     * @param fields The event fields to retrieve
+     * @return The event
+     */
+    private Event getEvent(CalendarSession session, EventID eventID, EventField... fields) throws OXException {
+        EventField[] oldFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        try {
+            session.set(CalendarParameters.PARAMETER_FIELDS, fields);
+            UserizedEvent event = services.getService(CalendarService.class).getEvent(session, eventID.getFolderID(), eventID.getObjectID());
+            return null != event ? event.getEvent() : null;
+        } finally {
+            session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
         }
     }
 

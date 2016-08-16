@@ -64,7 +64,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
-import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
@@ -176,7 +175,8 @@ public final class UpdateAction extends ChronosAction {
             calendarSession.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
-        UserizedEvent event = EventConverter.getEvent(calendarSession, appointment);
+
+        UserizedEvent event = getEventConverter().getEvent(calendarSession, appointment, eventID);
         UserizedEvent updatedEvent = calendarService.updateEvent(calendarSession, eventID, event);
         return new AJAXRequestResult(new JSONObject().put(DataFields.ID, updatedEvent.getEvent().getId()), updatedEvent.getEvent().getLastModified(), "json");
     }
