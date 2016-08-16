@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.CalendarUtils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.CalendarUtils.appendCommonTerms;
 import static com.openexchange.chronos.impl.CalendarUtils.find;
+import static com.openexchange.chronos.impl.CalendarUtils.getCalendarUser;
 import static com.openexchange.chronos.impl.CalendarUtils.getFields;
 import static com.openexchange.chronos.impl.CalendarUtils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.CalendarUtils.getFrom;
@@ -575,28 +576,6 @@ public class CalendarReader {
             }
         }
         return visibleFolders;
-    }
-
-    /**
-     * Gets the actual target calendar user for a specific folder. This is either the current session's user for "private" or "public"
-     * folders, or the folder owner for "shared" calendar folders.
-     *
-     * @param folder The folder to get the calendar user for
-     * @return The calendar user
-     */
-    protected User getCalendarUser(UserizedFolder folder) throws OXException {
-        return SharedType.getInstance().equals(folder.getType()) ? getUser(folder.getCreatedBy()) : session.getUser();
-    }
-
-    /**
-     * Gets the "acting" calendar user for a specific folder, i.e. the proxy user who is acting on behalf of the calendar owner, which is
-     * the current session's user in case the folder is a "shared" calendar, otherwise <code>null</code> for "private" or "public" folders.
-     *
-     * @param folder The folder to determine the proxy user for
-     * @return The proxy calendar user, or <code>null</code> if the current session's user is acting on behalf of it's own
-     */
-    protected User getProxyUser(UserizedFolder folder) throws OXException {
-        return SharedType.getInstance().equals(folder.getType()) ? getUser(folder.getCreatedBy()) : session.getUser();
     }
 
     protected User getUser(int userID) throws OXException {

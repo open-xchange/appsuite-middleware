@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.CalendarUtils.contains;
 import static com.openexchange.chronos.impl.CalendarUtils.filter;
 import static com.openexchange.chronos.impl.CalendarUtils.find;
+import static com.openexchange.chronos.impl.CalendarUtils.getCalendarUser;
 import static com.openexchange.chronos.impl.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.impl.CalendarUtils.i;
 import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
