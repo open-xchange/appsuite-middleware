@@ -99,12 +99,12 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
      * @param alreadyCheckedParents The set of already checked parents
      * @throws OXException If checking parental visibility permissions fails
      */
-    public void checkParentPermissions(final int parent, final OCLPermission[] newPerms, final OCLPermission[] oldPerms, final long lastModified, TIntSet alreadyCheckedParents) throws OXException {
+    public void checkParentPermissions(final int parent, final OCLPermission[] newPerms, final OCLPermission[] oldPerms, final long lastModified, TIntObjectMap<TIntSet> alreadyCheckedParents) throws OXException {
         try {
-            TIntObjectMap<ToDoPermission> map = new TIntObjectHashMap<ToDoPermission>();
+            TIntObjectMap<ToDoPermission> map = new TIntObjectHashMap<>();
             for (int i = 0, k = newPerms.length; k-- > 0; i++) {
                 OCLPermission assignedPerm = newPerms[i];
-                if (assignedPerm.isFolderVisible() && !isFolderVisible(assignedPerm.getEntity(), oldPerms) && alreadyCheckedParents.add(parent)) {
+                if (assignedPerm.isFolderVisible() && !isFolderVisible(assignedPerm.getEntity(), oldPerms) && alreadyCheckedParents.get(assignedPerm.getEntity()).add(parent)) {
                     /*
                      * Grant system-permission for this entity to parent folders
                      */
@@ -178,7 +178,7 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
         return false;
     }
 
-    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> map, TIntSet alreadyCheckedParents) throws OXException, OXException, SQLException {
+    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> map, TIntObjectMap<TIntSet> alreadyCheckedParents) throws OXException, OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * We reached a context-created folder
@@ -207,7 +207,7 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
         /*
          * Recursive call with parent's parent
          */
-        if (alreadyCheckedParents.add(parentFolder.getParentFolderID())) {
+        if (alreadyCheckedParents.get(entity).add(parentFolder.getParentFolderID())) {
             ensureParentVisibility(parentFolder.getParentFolderID(), entity, isGroup, map, alreadyCheckedParents);
         }
     }

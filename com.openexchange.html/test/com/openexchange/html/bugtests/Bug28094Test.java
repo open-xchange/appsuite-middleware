@@ -73,6 +73,6 @@ public class Bug28094Test extends AbstractSanitizing {
 
         String test = getHtmlService().sanitize(content, null, true, null, null);
 
-        Assert.assertTrue("Unexpected Value.", test.indexOf("href=\"") >= 0);
+        Assert.assertTrue("Unexpected value: " + test, test.indexOf("href=\"") < 0);
     }
 }

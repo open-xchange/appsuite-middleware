@@ -51,7 +51,7 @@ package com.openexchange.pns.transport.apn;
 
 
 /**
- * {@link ApnOptionsPerClient} - A pair of client identifier and associated APN options.
+ * {@link ApnOptionsPerClient} - A pair of client identifier and associated APNS options.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
@@ -65,7 +65,7 @@ public class ApnOptionsPerClient {
      * Initializes a new {@link ApnOptionsPerClient}.
      *
      * @param client The client
-     * @param options The associated APN options
+     * @param options The associated APNS options
      */
     public ApnOptionsPerClient(String client, ApnOptions options) {
         super();

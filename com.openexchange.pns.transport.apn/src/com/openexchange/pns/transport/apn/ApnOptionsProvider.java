@@ -59,9 +59,9 @@ import java.util.Collection;
 public interface ApnOptionsProvider {
 
     /**
-     * Gets the APN options containing the push certificate for specified client.
+     * Gets the APNS options containing the push certificate for specified client.
      *
-     * @return The APN options or <code>null</code>
+     * @return The APNS options or <code>null</code>
      */
     ApnOptions getOptions(String client);
 

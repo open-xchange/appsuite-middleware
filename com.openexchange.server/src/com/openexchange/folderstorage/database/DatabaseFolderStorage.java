@@ -104,6 +104,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -176,7 +177,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage {
+public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
 
@@ -2325,6 +2326,21 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 }
             }
         }
+    }
+
+    @Override
+    public void cleanLocksFor(Folder folder, int[] userIds, final StorageParameters storageParameters) throws OXException {
+        final ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
+        try {
+            final Connection con = provider.getConnection();
+            final OXFolderManager folderManager = OXFolderManager.getInstance(storageParameters.getSession(), con, con);
+
+            FolderObject fo = new FolderObject(Integer.valueOf(folder.getID()));
+            folderManager.cleanLocksForFolder(fo, userIds);
+        } finally {
+            provider.close();
+        }
+
     }
 
 }
