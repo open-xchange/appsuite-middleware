@@ -53,11 +53,16 @@ import java.util.Collections;
 import java.util.List;
 import javax.mail.MessagingException;
 import org.slf4j.Logger;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+import gnu.trove.map.TIntObjectMap;
 
 /**
  * {@link SpecialUseDefaultFolderChecker} - The IMAP default folder checker.
@@ -68,6 +73,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
 
     /** The logger constant */
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SpecialUseDefaultFolderChecker.class);
+    private static final String SET_SPECIAL_USE_PROPERTY = "com.openexchange.imap.setSpecialUseFlags";
 
     // -------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -95,16 +101,26 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
     }
 
     @Override
-    protected void createIfNonExisting(IMAPFolder f, int type, char sep, String namespace, int index) throws MessagingException {
+    protected void createIfNonExisting(IMAPFolder f, int type, char sep, String namespace, int index, TIntObjectMap<String> specialUseInfo) throws MessagingException {
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        boolean setSpecialUseFlags = false;
+        try {
+            ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+            setSpecialUseFlags = view.opt(SET_SPECIAL_USE_PROPERTY, Boolean.class, false);
+        } catch (OXException e1) {
+            LOG.error(e1.getMessage());
+            // continue with default value
+        }
+
         if (!f.exists()) {
             try {
-                if (hasCreateSpecialUse) {
+                if (hasCreateSpecialUse && setSpecialUseFlags && specialUseInfo.get(index) == null) {
                     // E.g. CREATE MyDrafts (USE (\Drafts))
                     List<String> specialUses = index <= StorageUtility.INDEX_TRASH ? Collections.singletonList(SPECIAL_USES[index]) : null;
                     IMAPCommandsCollection.createFolder(f, sep, type, false, specialUses);
                 } else {
                     IMAPCommandsCollection.createFolder(f, sep, type, false);
-                    if (hasMetadata && index <= StorageUtility.INDEX_TRASH) {
+                    if (hasMetadata && setSpecialUseFlags && index <= StorageUtility.INDEX_TRASH && specialUseInfo.get(index) == null) {
                         // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
                         String flag = SPECIAL_USES[index];
                         try {
@@ -120,7 +136,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                 throw e;
             }
         } else {
-            if (hasMetadata && index <= StorageUtility.INDEX_TRASH) {
+            if (hasMetadata && setSpecialUseFlags && index <= StorageUtility.INDEX_TRASH) {
                 // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
                 String flag = SPECIAL_USES[index];
                 try {
