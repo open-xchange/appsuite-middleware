@@ -143,7 +143,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
      *
      * @param event The event to create the tombstone for
      * @param lastModified The last modification time to take over
-     * @param modifiedBy The identifier of the modifying user to take user
+     * @param modifiedBy The identifier of the modifying user to take over
      * @return The tombstone event
      */
     public Event getTombstone(Event event, Date lastModified, int modifiedBy) throws OXException {
