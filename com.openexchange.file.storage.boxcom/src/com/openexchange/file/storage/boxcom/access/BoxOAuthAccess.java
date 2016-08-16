@@ -302,10 +302,11 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         return null;
     }
 
-    private OAuthClient<BoxClient> createOAuthClient() throws OXException {
+    private void createOAuthClient() throws OXException {
         OAuthAccount account = getOAuthAccount();
         BoxClient boxClient = new NonRefreshingBoxClient(account.getMetaData().getAPIKey(session), account.getMetaData().getAPISecret(session), new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
         applyOAuthToken(boxClient);
-        return new OAuthClient<BoxClient>(boxClient, getOAuthAccount().getToken());
+        OAuthClient<BoxClient> oAuthClient = new OAuthClient<BoxClient>(boxClient, getOAuthAccount().getToken());
+        setOAuthClient(oAuthClient);
     }
 }
