@@ -64,6 +64,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.UserizedEvent;
@@ -206,6 +207,8 @@ public final class SearchAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
         CalendarSession calendarSession = initSession(request);
+        calendarSession.set(CalendarParameters.PARAMETER_RANGE_START, null);
+        calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, null);
         JSONObject jsonObject = request.getData();
         int[] folderIDs = jsonObject.has(AJAXServlet.PARAMETER_INFOLDER) ? new int[] { jsonObject.getInt(AJAXServlet.PARAMETER_INFOLDER) } : null;
         String pattern = jsonObject.optString(SearchFields.PATTERN);

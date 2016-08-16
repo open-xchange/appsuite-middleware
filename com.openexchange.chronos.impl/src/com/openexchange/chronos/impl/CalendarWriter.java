@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.impl.CalendarUtils.filter;
 import static com.openexchange.chronos.impl.CalendarUtils.find;
 import static com.openexchange.chronos.impl.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.impl.CalendarUtils.i;
@@ -76,6 +77,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
@@ -259,10 +261,7 @@ public class CalendarWriter extends CalendarReader {
             } else {
                 requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
             }
-            if (PublicType.getInstance().equals(folder.getType()) && false == PublicType.getInstance().equals(targetFolder.getType()) ||
-                PublicType.getInstance().equals(targetFolder.getType()) && false == PublicType.getInstance().equals(folder.getType())) {
-                throw OXException.general("unsupported move");
-            }
+
             User targetCalendarUser = getCalendarUser(targetFolder);
             if (PublicType.getInstance().equals(folder.getType()) && PublicType.getInstance().equals(targetFolder.getType())) {
                 /*
@@ -274,34 +273,16 @@ public class CalendarWriter extends CalendarReader {
                 Consistency.setModified(now, eventUpdate, calendarUser.getId());
                 storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
                 storage.getEventStorage().updateEvent(eventUpdate);
-            } else if (calendarUser.getId() == targetCalendarUser.getId()) {
-                /*
-                 * move from one personal folder to another, update attendee's folder
-                 */
-                List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
-                Attendee originalAttendee = find(originalAttendees, calendarUser.getId());
-                if (null == originalAttendee) {
-                    throw OXException.notFound(calendarUser.toString());
-                }
-                storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
-                storage.getAttendeeStorage().insertTombstoneAttendee(objectID, AttendeeMapper.getInstance().getTombstone(originalAttendee));
-                Attendee attendeeUpdate = new Attendee();
-                AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-                attendeeUpdate.setFolderID(i(targetFolder));
-                storage.getAttendeeStorage().updateAttendee(objectID, attendeeUpdate);
-            } else {
-                /*
-                 * move from one personal folder to another user's personal folder, add or adjust corresponding default attendee
-                 */
-                List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
-                //                Attendee attendee = find(originalAttendees, calendarUser.getId());
-                //                if (null == attendee) {
-                //                    throw OXException.notFound(calendarUser.toString());
-                //                }
-//                storage.getAttendeeStorage().insertTombstoneAttendees(objectID, Collections.singletonList(getTombstone(attendee)));
-//                storage.getAttendeeStorage().deleteAttendees(objectID, Collections.singletonList(attendee));
-                Attendee originalAttendee = find(originalAttendees, targetCalendarUser.getId());
-                if (null != originalAttendee) {
+            } else if (false == PublicType.getInstance().equals(folder.getType()) && false == PublicType.getInstance().equals(targetFolder.getType())) {
+                if (calendarUser.getId() == targetCalendarUser.getId()) {
+                    /*
+                     * move from one personal folder to another, update attendee's folder
+                     */
+                    List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
+                    Attendee originalAttendee = find(originalAttendees, calendarUser.getId());
+                    if (null == originalAttendee) {
+                        throw OXException.notFound(calendarUser.toString());
+                    }
                     storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
                     storage.getAttendeeStorage().insertTombstoneAttendee(objectID, AttendeeMapper.getInstance().getTombstone(originalAttendee));
                     Attendee attendeeUpdate = new Attendee();
@@ -309,9 +290,76 @@ public class CalendarWriter extends CalendarReader {
                     attendeeUpdate.setFolderID(i(targetFolder));
                     storage.getAttendeeStorage().updateAttendee(objectID, attendeeUpdate);
                 } else {
-                    originalAttendee = new AttendeeHelper(session, targetFolder, null, null).getAttendeesToInsert().get(0);
-                    storage.getAttendeeStorage().insertAttendees(objectID, Collections.singletonList(originalAttendee));
+                    /*
+                     * move from one personal folder to another user's personal folder, add or adjust corresponding default attendee
+                     */
+                    List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
+                    //                Attendee attendee = find(originalAttendees, calendarUser.getId());
+                    //                if (null == attendee) {
+                    //                    throw OXException.notFound(calendarUser.toString());
+                    //                }
+                    //                    storage.getAttendeeStorage().insertTombstoneAttendees(objectID, Collections.singletonList(getTombstone(attendee)));
+                    //                    storage.getAttendeeStorage().deleteAttendees(objectID, Collections.singletonList(attendee));
+                    Attendee originalAttendee = find(originalAttendees, targetCalendarUser.getId());
+                    if (null != originalAttendee) {
+                        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
+                        storage.getAttendeeStorage().insertTombstoneAttendee(objectID, AttendeeMapper.getInstance().getTombstone(originalAttendee));
+                        Attendee attendeeUpdate = new Attendee();
+                        AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+                        attendeeUpdate.setFolderID(i(targetFolder));
+                        storage.getAttendeeStorage().updateAttendee(objectID, attendeeUpdate);
+                    } else {
+                        originalAttendee = new AttendeeHelper(session, targetFolder, null, null).getAttendeesToInsert().get(0);
+                        storage.getAttendeeStorage().insertAttendees(objectID, Collections.singletonList(originalAttendee));
+                    }
                 }
+            } else if (PublicType.getInstance().equals(folder.getType()) && false == PublicType.getInstance().equals(targetFolder.getType())) {
+                /*
+                 * move from public to personal folder, take over default personal folders for user attendees
+                 */
+                if (0 < originalEvent.getSeriesId()) {
+                    throw OXException.general("can't move recurring events to/from public folder");//TODO
+                }
+                List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
+                for (Attendee originalAttendee : filter(originalAttendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+                    Attendee attendeeUpdate = new Attendee();
+                    AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+                    if (targetCalendarUser.getId() == originalAttendee.getEntity()) {
+                        attendeeUpdate.setFolderID(i(targetFolder));
+                    } else {
+                        attendeeUpdate.setFolderID(AttendeeHelper.getDefaultFolderID(session.getContext(), getUser(originalAttendee.getEntity())));
+                    }
+                    storage.getAttendeeStorage().updateAttendee(objectID, attendeeUpdate);
+                }
+                Event eventUpdate = new Event();
+                eventUpdate.setId(objectID);
+                eventUpdate.setPublicFolderId(0);
+                Consistency.setModified(now, eventUpdate, calendarUser.getId());
+                storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
+                storage.getEventStorage().updateEvent(eventUpdate);
+            } else if (false == PublicType.getInstance().equals(folder.getType()) && PublicType.getInstance().equals(targetFolder.getType())) {
+                /*
+                 * move from personal to public folder, take over common public folder identifier for user attendees
+                 */
+                if (0 < originalEvent.getSeriesId()) {
+                    throw OXException.general("can't move recurring events to/from public folder");
+                }
+                List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
+                for (Attendee originalAttendee : filter(originalAttendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+                    storage.getAttendeeStorage().insertTombstoneAttendee(objectID, AttendeeMapper.getInstance().getTombstone(originalAttendee));
+                    Attendee attendeeUpdate = new Attendee();
+                    AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+                    attendeeUpdate.setFolderID(AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID);
+                    storage.getAttendeeStorage().updateAttendee(objectID, attendeeUpdate);
+                }
+                storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
+                Event eventUpdate = new Event();
+                eventUpdate.setId(objectID);
+                eventUpdate.setPublicFolderId(i(targetFolder));
+                Consistency.setModified(now, eventUpdate, calendarUser.getId());
+                storage.getEventStorage().updateEvent(eventUpdate);
+            } else {
+                throw OXException.general("unsupported move");
             }
             /*
              * take over new parent folder

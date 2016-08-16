@@ -135,7 +135,7 @@ public abstract class ChronosAction extends AppointmentAction {
                 legacy = true;
                 break;
             case "new":
-                legacy = true;
+                legacy = false;
                 break;
             case "update":
                 legacy = false;
@@ -147,7 +147,7 @@ public abstract class ChronosAction extends AppointmentAction {
                 legacy = true;
                 break;
             case "copy":
-                legacy = true;
+                legacy = false;
                 break;
             default:
                 legacy = false;
@@ -244,11 +244,11 @@ public abstract class ChronosAction extends AppointmentAction {
         }
         Date start = request.optDate(AJAXServlet.PARAMETER_START);
         if (null != start) {
-            session.set(CalendarParameters.PARAMETER_RANGE_START, request.applyTimeZone2Date(start.getTime()));
+            session.set(CalendarParameters.PARAMETER_RANGE_START, Long.MIN_VALUE == start.getTime() ? start : request.applyTimeZone2Date(start.getTime()));
         }
         Date end = request.optDate(AJAXServlet.PARAMETER_END);
         if (null != end) {
-            session.set(CalendarParameters.PARAMETER_RANGE_END, request.applyTimeZone2Date(end.getTime()));
+            session.set(CalendarParameters.PARAMETER_RANGE_END, Long.MAX_VALUE == end.getTime() ? end : request.applyTimeZone2Date(end.getTime()));
         }
         EventField orderBy = EventConverter.getField(request.optInt(AJAXServlet.PARAMETER_SORT));
         session.set(CalendarParameters.PARAMETER_ORDER_BY, null == orderBy ? EventField.START_DATE : orderBy);

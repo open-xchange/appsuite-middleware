@@ -74,6 +74,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.resource.Resource;
@@ -89,8 +90,11 @@ import com.openexchange.user.UserService;
  */
 public class AttendeeHelper {
 
+    /** The constant used to indicate a common "public" parent folder for internal user attendees */
+    static final int ATTENDEE_PUBLIC_FOLDER_ID = -2;
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeHelper.class);
-    private static final int ATTENDEE_PUBLIC_FOLDER_ID = -2;
+
 
     private final CalendarSession session;
     private final UserizedFolder folder;
@@ -148,6 +152,23 @@ public class AttendeeHelper {
         return attendeesToUpdate;
     }
 
+    private void processNewEvent(List<Attendee> requestedAttendees) throws OXException {
+        /*
+         * always add attendee for default calendar user in folder
+         */
+        Attendee defaultAttendee = getDefaultAttendee(folder, requestedAttendees);
+        attendeesToInsert.add(defaultAttendee);
+        if (null == requestedAttendees || 0 == requestedAttendees.size()) {
+            return;// no further attendees
+        }
+        /*
+         * prepare & add all further attendees
+         */
+        List<Attendee> attendeeList = new ArrayList<Attendee>();
+        attendeeList.add(defaultAttendee);
+        attendeesToInsert.addAll(prepareNewAttendees(attendeeList, requestedAttendees));
+    }
+
     private void processUpdatedEvent(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
         AttendeeDiff attendeeDiff = new AttendeeDiff(originalAttendees, updatedAttendees);
         List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
@@ -155,6 +176,11 @@ public class AttendeeHelper {
          * delete removed attendees
          */
         for (Attendee removedAttendee : attendeeDiff.getRemovedAttendees()) {
+            if (false == PublicType.getInstance().equals(folder.getType()) && removedAttendee.getEntity() == folder.getCreatedBy()) {
+                // preserve calendar user in personal folders
+                LOG.info("Implicitly preserving default calendar user {} in personal folder {}.", I(removedAttendee.getEntity()), folder);
+                continue;
+            }
             attendeeList.remove(removedAttendee);
             attendeesToDelete.add(removedAttendee);
         }
@@ -234,23 +260,6 @@ public class AttendeeHelper {
         return attendees;
     }
 
-    private void processNewEvent(List<Attendee> requestedAttendees) throws OXException {
-        /*
-         * always add attendee for default calendar user in folder
-         */
-        Attendee defaultAttendee = getDefaultAttendee(folder, requestedAttendees);
-        attendeesToInsert.add(defaultAttendee);
-        if (null == requestedAttendees || 0 == requestedAttendees.size()) {
-            return;// no further attendees
-        }
-        /*
-         * prepare & add all further attendees
-         */
-        List<Attendee> attendeeList = new ArrayList<Attendee>();
-        attendeeList.add(defaultAttendee);
-        attendeesToInsert.addAll(prepareNewAttendees(attendeeList, requestedAttendees));
-    }
-
     private Attendee getAttendeeForInsert(Group group, Attendee requestedAttendee) throws OXException {
         /*
          * prepare group attendee & apply default properties
@@ -296,7 +305,7 @@ public class AttendeeHelper {
          */
         Attendee userAttendee = applyProperties(new Attendee(), user);
         userAttendee.setCuType(CalendarUserType.INDIVIDUAL);
-        userAttendee.setFolderID(PublicType.getInstance().equals(folderType) ? ATTENDEE_PUBLIC_FOLDER_ID : getDefaultFolderID(user));
+        userAttendee.setFolderID(PublicType.getInstance().equals(folderType) ? ATTENDEE_PUBLIC_FOLDER_ID : getDefaultFolderID(session.getContext(), user));
         userAttendee.setPartStat(getInitialPartStat(session.getContext().getContextId(), user.getId(), folderType));
         /*
          * take over additional properties as requested
@@ -371,9 +380,9 @@ public class AttendeeHelper {
         return Services.getService(ResourceService.class).getResource(resourceID, session.getContext());
     }
 
-    protected int getDefaultFolderID(User user) throws OXException {
+    static int getDefaultFolderID(Context context, User user) throws OXException {
         //TODO: via higher level service?
-        return new OXFolderAccess(session.getContext()).getDefaultFolderID(user.getId(), FolderObject.CALENDAR);
+        return new OXFolderAccess(context).getDefaultFolderID(user.getId(), FolderObject.CALENDAR);
     }
 
 }
