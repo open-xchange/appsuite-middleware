@@ -74,13 +74,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -136,16 +134,25 @@ public class CalendarWriter extends CalendarReader {
     }
 
     protected void deleteEvent(UserizedFolder folder, int objectID, long clientTimestamp) throws OXException {
+        /*
+         * load original event data
+         */
         Event originalEvent = storage.getEventStorage().loadEvent(objectID, null);
         if (null == originalEvent) {
             throw OXException.notFound(String.valueOf(objectID));//TODO
         }
+        /*
+         * check current session user's permissions
+         */
         if (session.getUser().getId() != originalEvent.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
         }
         requireUpToDateTimestamp(originalEvent, clientTimestamp);
+        /*
+         * determine deletion mode
+         */
         Date now = new Date();
         User calendarUser = getCalendarUser(folder);
         List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
@@ -163,7 +170,7 @@ public class CalendarWriter extends CalendarReader {
             /*
              * deletion as one of the user attendees
              */
-            Attendee originalAttendee = find(originalAttendees, calendarUser.getId());
+            Attendee originalAttendee = find(userAttendees, calendarUser.getId());
             storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
             storage.getAttendeeStorage().insertTombstoneAttendee(objectID, originalAttendee);
             storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
@@ -239,111 +246,88 @@ public class CalendarWriter extends CalendarReader {
 
         User calendarUser = getCalendarUser(folder);
         Date now = new Date();
-        Event event = userizedEvent.getEvent();
 
+        /*
+         * perform move operation & take over new parent folder
+         */
         if (userizedEvent.containsFolderId() && 0 < userizedEvent.getFolderId() && i(folder) != userizedEvent.getFolderId()) {
-            /*
-             * perform move operation & take over new parent folder
-             */
             UserizedFolder targetFolder = getFolder(userizedEvent.getFolderId());
             moveEvent(originalEvent, folder, targetFolder);
             folder = targetFolder;
         }
-        if (isOrganizer(originalEvent, calendarUser.getId())) {
-            /*
-             * no organizer or update by (or on behalf of) organizer
-             */
-            if (event.containsAttendees()) {
-                /*
-                 * process any attendee updates
-                 */
-                List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
-                AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees, event.getAttendees());
-                List<Attendee> attendeesToDelete = attendeeHelper.getAttendeesToDelete();
-                if (null != attendeesToDelete && 0 < attendeesToDelete.size()) {
-                    if (CalendarUtils.contains(attendeesToDelete, calendarUser.getId())) {
-                        throw OXException.general("cannot remove calendar user");
-                    }
-                    /*
-                     * insert tombstone entries
-                     */
-                    storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
-                    storage.getAttendeeStorage().insertTombstoneAttendees(objectID, AttendeeMapper.getInstance().getTombstones(attendeesToDelete));
-                    /*
-                     * remove attendee data
-                     */
-                    storage.getAttendeeStorage().deleteAttendees(objectID, attendeesToDelete);
-                    storage.getAlarmStorage().deleteAlarms(objectID, getUserIDs(attendeesToDelete));
-                }
-                List<Attendee> attendeesToUpdate = attendeeHelper.getAttendeesToUpdate();
-                if (null != attendeesToUpdate && 0 < attendeesToUpdate.size()) {
-                    storage.getAttendeeStorage().updateAttendees(objectID, attendeesToUpdate);
-                }
-                List<Attendee> attendeesToInsert = attendeeHelper.getAttendeesToInsert();
-                if (null != attendeesToInsert && 0 < attendeesToInsert.size()) {
-                    storage.getAttendeeStorage().insertAttendees(objectID, attendeesToInsert);
-                }
+        /*
+         * update alarms for calendar user
+         */
+        if (userizedEvent.containsAlarms()) {
+            if (null == userizedEvent.getAlarms()) {
+                storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
+            } else {
+                storage.getAlarmStorage().updateAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
             }
-            /*
-             * update event data
-             */
-            Event eventUpdate = EventMapper.getInstance().getDifferences(originalEvent, event);
-            for (EventField field : EventMapper.getInstance().getAssignedFields(eventUpdate)) {
-                switch (field) {
-                    case ALL_DAY:
-                        /*
-                         * adjust start- and enddate, too, if required
-                         */
-                        EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE);
-                        Consistency.adjustAllDayDates(eventUpdate);
-                        break;
-                    case RECURRENCE_RULE:
-                        /*
-                         * ensure all necessary recurrence related data is present in passed event update
-                         */
-                        EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
-                        break;
-                    case UID:
-                    case CREATED:
-                    case CREATED_BY:
-                    case SEQUENCE:
-                    case SERIES_ID:
-                        throw OXException.general("not allowed change");
-                    default:
-                        break;
-                }
-            }
-            eventUpdate.setId(objectID);
-            Consistency.setModified(now, eventUpdate, calendarUser.getId());
-            eventUpdate.setSequence(originalEvent.getSequence() + 1);
-            storage.getEventStorage().updateEvent(eventUpdate);
-            /*
-             * update alarms for calendar user
-             */
-            if (userizedEvent.containsAlarms()) {
-                List<Alarm> alarms = userizedEvent.getAlarms();
-                if (null == alarms) {
-                    storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
-                } else {
-                    storage.getAlarmStorage().updateAlarms(objectID, calendarUser.getId(), alarms);
-                }
-            }
-        } else if (isAttendee(originalEvent, calendarUser.getId())) {
-            /*
-             * update by attendee
-             */
-            //TODO: allowed attendee changes
-            throw new OXException();
-        } else if (isAttendee(event, calendarUser.getId())) {
-            /*
-             * party crasher?
-             */
-
-        } else {
-            /*
-             * update by?
-             */
         }
+        /*
+         * process any attendee updates
+         */
+        if (userizedEvent.getEvent().containsAttendees()) {
+            List<Attendee> originalAttendees = storage.getAttendeeStorage().loadAttendees(objectID);
+            List<Attendee> updatedAttendees = userizedEvent.getEvent().getAttendees();
+            AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees, updatedAttendees);
+            /*
+             * perform attendee deletions
+             */
+            List<Attendee> attendeesToDelete = attendeeHelper.getAttendeesToDelete();
+            if (0 < attendeesToDelete.size()) {
+                if (isOrganizer(originalEvent, calendarUser.getId())) {
+                    if (contains(attendeesToDelete, calendarUser.getId())) {
+                        throw OXException.general("cannot remove organizer");
+                    }
+                } else if (isAttendee(originalEvent, calendarUser.getId())) {
+                    if (1 < attendeesToDelete.size() || calendarUser.getId() != attendeesToDelete.get(0).getEntity()) {
+                        //                        throw OXException.general("not allowed attendee change");
+                    }
+                } else {
+                    //                  throw OXException.general("not allowed attendee change");
+                }
+                storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
+                storage.getAttendeeStorage().insertTombstoneAttendees(objectID, AttendeeMapper.getInstance().getTombstones(attendeesToDelete));
+                storage.getAttendeeStorage().deleteAttendees(objectID, attendeesToDelete);
+                storage.getAlarmStorage().deleteAlarms(objectID, getUserIDs(attendeesToDelete));
+            }
+            /*
+             * perform attendee updates
+             */
+            List<Attendee> attendeesToUpdate = attendeeHelper.getAttendeesToUpdate();
+            if (0 < attendeesToUpdate.size()) {
+                if (isOrganizer(originalEvent, calendarUser.getId())) {
+                    // okay
+                } else if (isAttendee(originalEvent, calendarUser.getId())) {
+                    if (1 < attendeesToUpdate.size() || calendarUser.getId() != attendeesToUpdate.get(0).getEntity()) {
+                        //                        throw OXException.general("not allowed attendee change");
+                    }
+                } else {
+                    //                    throw OXException.general("not allowed attendee change");
+                }
+                storage.getAttendeeStorage().updateAttendees(objectID, attendeeHelper.getAttendeesToUpdate());
+            }
+            /*
+             * add new attendees
+             */
+            if (0 < attendeeHelper.getAttendeesToInsert().size()) {
+                if (false == isOrganizer(originalEvent, calendarUser.getId())) {
+                    //                    throw OXException.general("not allowed attendee change");
+                }
+                storage.getAttendeeStorage().insertAttendees(objectID, attendeeHelper.getAttendeesToInsert());
+            }
+        }
+        /*
+         * update event data
+         */
+        Event eventUpdate = Consistency.prepareEventUpdate(originalEvent, userizedEvent.getEvent());
+        eventUpdate.setId(objectID);
+        Consistency.setModified(now, eventUpdate, calendarUser.getId());
+        eventUpdate.setSequence(originalEvent.getSequence() + 1);
+        storage.getEventStorage().updateEvent(eventUpdate);
+
         return readEvent(folder, objectID);
     }
 

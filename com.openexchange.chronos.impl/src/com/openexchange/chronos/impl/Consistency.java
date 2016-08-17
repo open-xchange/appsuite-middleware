@@ -58,8 +58,10 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 
 /**
@@ -189,6 +191,73 @@ public class Consistency {
 
     public static void setCreatedNow(Event event, int createdBy) {
         setCreated(new Date(), event, createdBy);
+    }
+
+    public static Event prepareEventUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+        Event eventUpdate = EventMapper.getInstance().getDifferences(originalEvent, updatedEvent);
+        for (EventField field : EventMapper.getInstance().getAssignedFields(eventUpdate)) {
+            switch (field) {
+                case ALL_DAY:
+                    /*
+                     * adjust start- and enddate, too, if required
+                     */
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE);
+                    Consistency.adjustAllDayDates(eventUpdate);
+                    break;
+                case RECURRENCE_RULE:
+                    /*
+                     * ensure all necessary recurrence related data is present in passed event update
+                     */
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                    break;
+                case START_DATE:
+                    /*
+                     * verify start date
+                     */
+                    if (null == eventUpdate.getStartDate()) {
+                        throw OXException.general("start date is required");
+                    }
+                    if (eventUpdate.containsEndDate() && null != eventUpdate.getEndDate()) {
+                        if (eventUpdate.getEndDate().before(eventUpdate.getStartDate())) {
+                            throw OXException.general("start date after end date");
+                        }
+                    } else if (null != originalEvent.getEndDate() && originalEvent.getEndDate().before(eventUpdate.getStartDate())) {
+                        throw OXException.general("start date after end date");
+                    }
+                    break;
+                case END_DATE:
+                    /*
+                     * verify end date
+                     */
+                    if (null == eventUpdate.getEndDate()) {
+                        if (eventUpdate.containsStartDate() && null != eventUpdate.getStartDate()) {
+                            eventUpdate.setEndDate(eventUpdate.getStartDate());
+                        } else {
+                            eventUpdate.setEndDate(originalEvent.getStartDate());
+                        }
+                    } else {
+                        if (eventUpdate.containsStartDate() && null != eventUpdate.getStartDate()) {
+                            if (eventUpdate.getStartDate().after(eventUpdate.getEndDate())) {
+                                throw OXException.general("end date before start date");
+                            }
+                        } else if (null != originalEvent.getStartDate() && originalEvent.getStartDate().after(eventUpdate.getEndDate())) {
+                            throw OXException.general("end date before start date");
+                        }
+                    }
+                    break;
+                case UID:
+                case CREATED:
+                case CREATED_BY:
+                case SEQUENCE:
+                case SERIES_ID:
+                case PUBLIC_FOLDER_ID:
+                    throw OXException.general("not allowed change");
+                default:
+                    break;
+            }
+        }
+        EventMapper.getInstance().copy(originalEvent, eventUpdate, EventField.ID);
+        return eventUpdate;
     }
 
     private Consistency() {
