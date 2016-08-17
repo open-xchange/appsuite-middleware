@@ -1,5 +1,5 @@
 #!/bin/bash
-# postinst script for open-xchange-cluster-upgrade-from-76x
+# postinst script for open-xchange-cluster-upgrade-from-780-782
 #
 # see: dh_installdeb(1)
 
