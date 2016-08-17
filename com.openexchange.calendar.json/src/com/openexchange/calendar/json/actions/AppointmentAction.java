@@ -301,7 +301,7 @@ public abstract class AppointmentAction implements AJAXActionService {
      * @param cdao The {@link CalendarDataObject}
      * @throws OXException if the object count cannot be incremented
      */
-    void countObjectUse(Session session, CalendarDataObject cdao) throws OXException {
+    protected void countObjectUse(Session session, CalendarDataObject cdao) throws OXException {
         if (null == cdao) {
             return;
         }
