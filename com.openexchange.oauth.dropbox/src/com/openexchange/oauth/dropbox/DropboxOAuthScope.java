@@ -47,41 +47,50 @@
  *
  */
 
-package com.openexchange.oauth.dropbox.osgi;
+package com.openexchange.oauth.dropbox;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.dropbox.DropboxOAuthScope;
-import com.openexchange.oauth.dropbox.DropboxOAuthServiceMetaData;
-import com.openexchange.oauth.scope.OAuthScopeRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OAuthScope;
 
 /**
- * {@link DropboxOAuthActivator}
+ * {@link DropboxOAuthScope}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DropboxOAuthActivator extends HousekeepingActivator {
+public enum DropboxOAuthScope implements OAuthScope {
+    drive("", Module.drive);
 
-    public DropboxOAuthActivator() {
-        super();
+    private String mapping;
+    private Module module;
+
+    /**
+     * Initialises a new {@link DropboxOAuthScope}.
+     * 
+     * @param mapping The OAuth mapping
+     * @param module The {@link Module}
+     */
+    private DropboxOAuthScope(String mapping, Module module) {
+        this.mapping = mapping;
+        this.module = module;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, OAuthScopeRegistry.class };
+    public String getMapping() {
+        return mapping;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(this);
-        registerService(OAuthServiceMetaData.class, service);
-        registerService(Reloadable.class, service);
-
-        // Register the scope
-        OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
-        scopeRegistry.registerScope(service.getAPI(), DropboxOAuthScope.drive);
+    public Module getModule() {
+        return module;
     }
-
 }

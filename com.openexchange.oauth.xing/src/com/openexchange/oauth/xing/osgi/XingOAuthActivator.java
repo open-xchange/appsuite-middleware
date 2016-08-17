@@ -59,12 +59,13 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
+import com.openexchange.oauth.xing.XingOAuthScope;
 import com.openexchange.oauth.xing.XingOAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-
 
 /**
  * {@link XingOAuthActivator}
@@ -79,7 +80,7 @@ public final class XingOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class };
     }
 
     @Override
@@ -92,6 +93,7 @@ public final class XingOAuthActivator extends HousekeepingActivator {
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "xing");
             registerService(CapabilityChecker.class, new CapabilityChecker() {
+
                 @Override
                 public boolean isEnabled(String capability, Session ses) throws OXException {
                     if ("xing".equals(capability)) {
@@ -108,6 +110,10 @@ public final class XingOAuthActivator extends HousekeepingActivator {
             }, properties);
 
             getService(CapabilityService.class).declareCapability("xing");
+
+            // Register the scope
+            OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
+            scopeRegistry.registerScopes(xingService.getAPI(), XingOAuthScope.values());
         } catch (final Exception e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(XingOAuthActivator.class);
             log.warn("Could not start-up XING OAuth service", e);

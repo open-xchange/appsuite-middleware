@@ -75,7 +75,7 @@ public interface OAuthScopeRegistry {
      * @param api The OAuth {@link API}
      * @param scopes The {@link OAuthScope}s to register
      */
-    void registrerScopes(API api, OAuthScope... scopes);
+    void registerScopes(API api, OAuthScope... scopes);
 
     /**
      * Unregisters the {@link OAuthScope} that is associated with the specified {@link Module} and OAuth {@link API}
