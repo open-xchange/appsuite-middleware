@@ -1,6 +1,6 @@
 %define __jar_repack %{nil}
 
-Name:           open-xchange-cluster-upgrade-to-783
+Name:           open-xchange-cluster-upgrade-from-780-782
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700

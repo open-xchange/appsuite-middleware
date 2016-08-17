@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-pkgname=open-xchange-cluster-upgrade-from-76x
+pkgname=open-xchange-cluster-upgrade-from-780-782
 installroot=$(CURDIR)/debian/$(pkgname)
 
 configure: configure-stamp

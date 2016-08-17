@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>open-xchange-cluster-upgrade-to-783</name>
+	<name>open-xchange-cluster-upgrade-from-780-782</name>
 	<comment></comment>
 	<projects>
-		<project>com.openexchange.contact.storage.ldap</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
