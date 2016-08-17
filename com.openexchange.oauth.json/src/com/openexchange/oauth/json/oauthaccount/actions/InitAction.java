@@ -145,6 +145,10 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             if (isEmpty(displayName)) {
                 throw OAuthExceptionCodes.MISSING_DISPLAY_NAME.create();
             }
+            final String scope = request.getParameter(AccountField.SCOPE.getName());
+            if (isEmpty(scope)) {
+                throw OAuthExceptionCodes.MISSING_SCOPE.create();
+            }
             /*
              * Generate UUID
              */
@@ -166,6 +170,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
                 callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
                 callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
                 callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
+                callbackUrlBuilder.append('&').append(AccountField.SCOPE.getName()).append('=').append(scope);
                 final String cb = request.getParameter("cb");
                 if (!isEmpty(cb)) {
                 	callbackUrlBuilder.append("&callback=").append(cb);
@@ -181,7 +186,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             /*
              * Create a container to set some state information: Request token's secret, call-back URL, whatever
              */
-            final Map<String, Object> oauthState = new HashMap<String, Object>();
+            final Map<String, Object> oauthState = new HashMap<>();
             if (interaction instanceof Parameterizable) {
                 final Parameterizable params = (Parameterizable) interaction;
                 for (final String key : params.getParamterNames()) {
@@ -283,7 +288,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
          */
-        final Map<String, Object> oauthState = new HashMap<String, Object>();
+        final Map<String, Object> oauthState = new HashMap<>();
         if (interaction instanceof Parameterizable) {
             final Parameterizable params = (Parameterizable) interaction;
             for (final String key : params.getParamterNames()) {

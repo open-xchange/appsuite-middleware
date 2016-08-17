@@ -49,11 +49,13 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -88,6 +90,12 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
         if (serviceId == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
         }
+
+        final String scope = request.getParameter(AccountField.SCOPE.getName());
+        if (isEmpty(scope)) {
+            throw OAuthExceptionCodes.MISSING_SCOPE.create();
+        }
+
         final OAuthService oAuthService = getOAuthService();
 
         OAuthServiceMetaData service = oAuthService.getMetaDataRegistry().getService(serviceId, session.getUserId(), session.getContextId());

@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
@@ -102,6 +103,10 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
             if (serviceId == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(AccountField.SERVICE_ID.getName());
+            }
+            final String scope = request.getParameter(AccountField.SCOPE.getName());
+            if (isEmpty(scope)) {
+                throw OAuthExceptionCodes.MISSING_SCOPE.create();
             }
 
             // Get service meta data

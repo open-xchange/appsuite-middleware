@@ -250,6 +250,11 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
      */
     OAUTH_PROBLEM_ACCESS_DENIED("The OAuth provider refused to permit this Consumer to access the protected resources.", CATEGORY_PERMISSION_DENIED, 39, null),
 
+    /**
+     * Please provide at least one scope.
+     */
+    MISSING_SCOPE("Please provide at least one scope.", CATEGORY_USER_INPUT, 40, OAuthExceptionMessages.MISSING_SCOPE_MSG),
+
     ;
 
     private final Category category;
