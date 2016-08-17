@@ -668,7 +668,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
                     }
                 }
             } catch (IOException e) {
-                LOG.debug(e.getMessage());
+                LOG.debug(e.getMessage(), e);
                 // fallback to image transformation
             }
             /*
