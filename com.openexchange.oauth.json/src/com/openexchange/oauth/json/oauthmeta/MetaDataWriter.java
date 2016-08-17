@@ -78,6 +78,7 @@ public class MetaDataWriter {
         final JSONObject metaDataJSON = new JSONObject();
         metaDataJSON.put(MetaDataField.ID.getName(), metaData.getId());
         metaDataJSON.put(MetaDataField.DISPLAY_NAME.getName(), metaData.getDisplayName());
+        metaDataJSON.put(MetaDataField.AVAILABLE_SCOPE.getName(), metaData.getScope());
         return metaDataJSON;
     }
 

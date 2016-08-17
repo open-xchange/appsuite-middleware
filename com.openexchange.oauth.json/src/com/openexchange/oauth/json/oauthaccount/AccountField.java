@@ -87,10 +87,9 @@ public enum AccountField {
      */
     INTERACTION_TYPE("type"),
     /**
-     * The oauth scope
+     * The oauth scopes of the account
      */
     SCOPE("scope"),
-
     ;
 
     private final String name;
