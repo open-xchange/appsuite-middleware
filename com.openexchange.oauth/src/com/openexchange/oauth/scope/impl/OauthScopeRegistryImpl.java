@@ -61,19 +61,19 @@ import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
 
 /**
- * {@link OauthScopeRegistryImpl}
+ * {@link OAuthScopeRegistryImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OauthScopeRegistryImpl implements OAuthScopeRegistry {
+public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     // TODO: Consider whether the map and the sets need to be concurrent
     private final Map<API, Set<OAuthScope>> registry;
 
     /**
-     * Initialises a new {@link OauthScopeRegistryImpl}.
+     * Initialises a new {@link OAuthScopeRegistryImpl}.
      */
-    public OauthScopeRegistryImpl() {
+    public OAuthScopeRegistryImpl() {
         super();
         registry = new HashMap<>();
     }
